@@ -1,2 +1,20 @@
-# Auto detect text files and perform LF normalization
+# すべてテキストとして扱う
 * text=auto
+
+# C#
+*.cs     text working-tree-encoding=UTF-8 eol=lf
+*.shader text working-tree-encoding=UTF-8 eol=lf
+*.hlsl   text working-tree-encoding=UTF-8 eol=lf
+
+# Unity系
+*.meta   text eol=lf
+*.unity  text eol=lf
+*.prefab text eol=lf
+*.mat    text eol=lf
+*.asset  text eol=lf
+
+# バイナリ
+*.png  binary
+*.jpg  binary
+*.fbx  binary
+*.dll  binary
