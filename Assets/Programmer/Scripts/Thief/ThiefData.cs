@@ -6,32 +6,26 @@
  * 2026-04-17 | 初回作成
  * 
  */
-
-// 泥棒の定数値管理用クラス
 using System;
-using Unity.Mathematics;
 using UnityEngine;
 
+// 泥棒の定数値管理用クラス
 [Serializable]
 public class ThiefData
 {
-    [Header("このパラメーターを使用するウェーブ番号の範囲")]
-    [Tooltip("このパラメーターを使用するウェーブ番号の最小値"), Min(1)]
-    public int minWaveNumber;
-    [Tooltip("このパラメーターを使用するウェーブ番号の最大値"), Min(1)]
-    public int maxWaveNumber;
+    [Header("種類名")]
+    [Tooltip("泥棒の種類名")]
+    public string typeName;
 
-    [Header("耐久値の範囲")]
-    [Tooltip("耐久値の最小値"), Min(1)]
-    public int minDurability;
-    [Tooltip("耐久値の最大値"), Min(1)]
-    public int maxDurability;
+    [Header("次の部屋探索に切り替える探索度の閾値")]
+    [Tooltip("次の部屋探索に切り替える探索度の閾値"), Range(0, 100)]
+    public int nextRoomSearchThreshold;
 
-    [Header("移動速度の範囲")]
-    [Tooltip("移動速度の最小値"), Min(0.0f)]
-    public float minSpeed;
-    [Tooltip("移動速度の最大値"), Min(0.0f)]
-    public float maxSpeed;
+    [Header("耐久値")]
+    public int durability;
+
+    [Header("移動速度")]
+    public float speed;
 }
 
 // ScriptableObjectとして定義することで、Unityエディタ上でデータを管理できるようにする
