@@ -27,8 +27,8 @@ public class WaveData
     public ThiefData[] thiefDataArray;
 }
 
-[CreateAssetMenu(fileName = "WaveDataSO", menuName = "ScriptableObjects/WaveDataSO", order = 1)]
-public class WaveDataSO : ScriptableObject
+[CreateAssetMenu(fileName = "StageDataSO", menuName = "ScriptableObjects/StageDataSO", order = 1)]
+public class StageDataSO : ScriptableObject
 {
     [Serializable]
     public struct StageData
