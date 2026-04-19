@@ -22,10 +22,19 @@ public class ThiefData
     public int nextRoomSearchThreshold;
 
     [Header("耐久値")]
+    [Tooltip("泥棒の耐久値"), Min(1)]
     public int durability;
 
     [Header("移動速度")]
+    [Tooltip("泥棒の移動速度"), Min(0)]
     public float speed;
+
+    [Header("視界の半径")]
+    [Tooltip("泥棒の視界の半径"), Min(0)]
+    public float viewDistance;
+    [Header("視界の角度")]
+    [Tooltip("泥棒の視界の角度"), Range(0, 360)]
+    public float viewAngle;
 }
 
 // ScriptableObjectとして定義することで、Unityエディタ上でデータを管理できるようにする
@@ -33,5 +42,5 @@ public class ThiefData
 public class ThiefDataSO : ScriptableObject
 {
     // 泥棒のデータ
-    public ThiefData[] thiefData; 
+    public ThiefData[] thiefData;
 }
