@@ -24,6 +24,12 @@ public class VisionSensor : MonoBehaviour
     [Tooltip("障害物のレイヤー")]
     public LayerMask obstacleLayer;
 
+    // 視界の半径と角度を設定するメソッド
+    public void Setting(float viewDistance, float viewAngle)
+    {
+        this.viewDistance = viewDistance;
+        this.viewAngle = viewAngle;
+    }
 
     // 視界内のターゲットをスキャンしてリストで返す
     public List<VisionTarget> Scan()

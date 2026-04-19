@@ -30,8 +30,5 @@ public class VisionTarget : MonoBehaviour
     public TargetType targetType;
 
     // Exitの場合隣の部屋を示す変数
-    // public RoomNode connectedRoom;
-
-    // Trap / Treasureの場合
-    public bool isDangerous; // 危険なターゲットかどうか
+    public RoomNode connectedRoom;
 }
