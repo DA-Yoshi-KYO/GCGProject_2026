@@ -22,23 +22,19 @@ public static class SceneSetLoader
         var guids = AssetDatabase.FindAssets("t:Scene", new[] { "Assets/Programmer/Scenes/InGame" });
 
         List<string> paths = new List<string>();    // シーンのパスを格納するリスト
-        for (int i = 0; i < guids.Length ; i++)
+        for (int i = 0; i < guids.Length; i++)
         {
             paths.Add(AssetDatabase.GUIDToAssetPath(guids[i])); // GUIDからシーンのパスを取得してリストに追加
 
             // メインシーンを先に開く
-            if (paths[i].Contains("MainScene"))
-            {
-                EditorSceneManager.OpenScene(paths[i]);
-                paths.Remove(paths[i]);
-            }   
+            if (paths[i].Contains("MainScene")) EditorSceneManager.OpenScene(paths[i]);
         }
 
         // メインシーン以外のシーンをアドティブモードで開く
         foreach (var path in paths)
         {
-            Debug.Log(path);
-            EditorSceneManager.OpenScene(path, OpenSceneMode.Additive);
+            if (path.Contains("MainScene")) continue; // メインシーンはすでに開いているのでスキップ
+            else EditorSceneManager.OpenScene(path, OpenSceneMode.Additive);
         }
     }
 
@@ -60,18 +56,14 @@ public static class SceneSetLoader
             paths.Add(AssetDatabase.GUIDToAssetPath(guids[i])); // GUIDからシーンのパスを取得してリストに追加
 
             // メインシーンを先に開く
-            if (paths[i].Contains("MainScene"))
-            {
-                EditorSceneManager.OpenScene(paths[i]);
-                paths.Remove(paths[i]);
-            }   
+            if (paths[i].Contains("MainScene")) EditorSceneManager.OpenScene(paths[i]);
         }
 
         // メインシーン以外のシーンをアドティブモードで開く
         foreach (var path in paths)
         {
-            Debug.Log(path);
-            EditorSceneManager.OpenScene(path, OpenSceneMode.Additive);
+            if (path.Contains("MainScene")) continue; // メインシーンはすでに開いているのでスキップ
+            else EditorSceneManager.OpenScene(path, OpenSceneMode.Additive);
         }
     }
 }
