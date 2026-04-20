@@ -17,4 +17,10 @@ public class RoomNode : MonoBehaviour
 
     [Tooltip("部屋に設置されているオブジェクトリスト")]
     public List<VisionTarget> roomObjects;
+
+    [Tooltip("部屋の移動ポイントリスト")]
+    public List<ThiefTarget> movePoints;
+
+    [Tooltip("移動ポイントの回り方")]
+    public bool isRight;// trueなら右回り、falseなら左回り
 }

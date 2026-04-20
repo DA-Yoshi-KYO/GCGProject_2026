@@ -31,7 +31,7 @@ public class ThiefAI : MonoBehaviour
     [Tooltip("部屋に関する記憶")]
     private Dictionary<RoomNode, RoomMemory> roomMemories;
     [Tooltip("探索対象")]
-    private VisionTarget currentTarget;
+    private ThiefTarget currentTarget;
 
     [Tooltip("泥棒の耐久力")]
     private int durability;
@@ -59,7 +59,7 @@ public class ThiefAI : MonoBehaviour
         durability = 4;
 
         // 初期移動速度
-        speed = 1f;
+        speed = 3f;
     }
 
     // 泥棒の耐久力と移動速度を設定するメソッド
@@ -90,8 +90,6 @@ public class ThiefAI : MonoBehaviour
 
 
     // 探索状態の行動
-    // TODO: 探索対象がない場合は部屋に設定されている移動ルートに沿って移動する処理を追加する
-    //     : ? 歩くだけで探索度が上がるかも
     private void Explore()
     {
         // 探索対象を決定
@@ -103,13 +101,37 @@ public class ThiefAI : MonoBehaviour
             return;
         }
 
-        // 現在の探索対象の記憶情報
-        VisionTargetMemory targetMemory = roomMemories[currentRoom].recognizedObjects[currentTarget];
-
-        if (targetMemory.isExplored)
+        if (currentTarget is VisionTarget)
         {
-            // 探索対象が既に探索済みの場合は、次の探索対象を決定
-            DecideTarget();
+            // 現在の探索対象の記憶情報
+            VisionTargetMemory targetMemory = roomMemories[currentRoom].recognizedObjects[(VisionTarget)currentTarget];
+
+            if (targetMemory.isExplored)
+            {
+                // 探索対象が既に探索済みの場合は、次の探索対象を決定
+                DecideTarget();
+            }
+            else
+            {
+                // 探索対象に向かって移動
+                Vector3 direction = (currentTarget.transform.position - transform.position).normalized;
+                transform.position += direction * speed * Time.deltaTime;
+
+                // 探索対象の方に向く
+                Quaternion targetRotation = Quaternion.LookRotation(direction);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * speed * 0.5f);
+
+                // 探索対象に十分近づいたら、探索完了とする
+                if (Vector3.Distance(transform.position, currentTarget.transform.position) < targetMemory.exploredDistanceThreshold)
+                {
+                    // 探索対象を探索済みに設定
+                    targetMemory.isExplored = true;
+                    // 探索度を加算
+                    roomMemories[currentRoom].explorationLevel += targetMemory.explorationValue;
+                    // 次の探索対象を決定
+                    DecideTarget();
+                }
+            }
         }
         else
         {
@@ -121,14 +143,15 @@ public class ThiefAI : MonoBehaviour
             Quaternion targetRotation = Quaternion.LookRotation(direction);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * speed * 0.5f);
 
-            // 探索対象に十分近づいたら、探索完了とする
-            if (Vector3.Distance(transform.position, currentTarget.transform.position) < targetMemory.exploredDistanceThreshold)
+             // 探索対象に十分近づいたら、次の探索対象を決定
+            if (Vector3.Distance(transform.position, currentTarget.transform.position) < 2.0f)
             {
-                // 探索対象を探索済みに設定
-                targetMemory.isExplored = true;
-                // 探索度を加算
-                roomMemories[currentRoom].explorationLevel += targetMemory.explorationValue;
-                // 次の探索対象を決定
+                DecideTarget();
+            }
+
+            // 未探索のオブジェクトを視認した場合はそっちの探索に切り替える
+            if (HasUnexploredTargets())
+            {
                 DecideTarget();
             }
         }
@@ -183,29 +206,110 @@ public class ThiefAI : MonoBehaviour
         }
     }
 
+    // 視認しているオブジェクトの中に未探索のものがあるかどうかを判定する処理
+    private bool HasUnexploredTargets()
+    {
+        // 視認しているオブジェクトの中に未探索のものがあるかどうかを判定
+        foreach (KeyValuePair<VisionTarget, VisionTargetMemory> entry in roomMemories[currentRoom].recognizedObjects)
+        {
+            // 未探索のオブジェクトがある場合はtrueを返す
+            if (!entry.Value.isExplored) return true;
+        }
+
+        // 全てのオブジェクトが探索済みの場合はfalseを返す
+        return false;
+    }
+
     // 探索対象を決める処理
     // TODO: 探索対象の優先順位を決めるロジックを追加する（例： 宝物 > プレイヤー > トラップ = 部屋のオブジェクト）
+    //     : 探索対象がない場合は部屋に設定されている移動ルートに沿って移動する処理を追加する
+    //     : ? 歩くだけで探索度が上がるかも
     private void DecideTarget()
     {
         // 探索対象との距離
         float distanceToTarget = Mathf.Infinity;
 
-        // 視認したオブジェクトの中から、未探索で近いものを優先して探索対象に設定
-        foreach (KeyValuePair<VisionTarget, VisionTargetMemory> entry in roomMemories[currentRoom].recognizedObjects)
+        // 未探索のオブジェクトがある場合は、未探索のオブジェクトを優先して探索対象に設定
+        if (HasUnexploredTargets())
         {
-            // 既に探索済みのオブジェクトはスキップ
-            if (entry.Value.isExplored) continue;
-
-            // オブジェクトとの距離を計算
-            float distance = Vector3.Distance(transform.position, entry.Key.transform.position);
-
-            // より近いオブジェクトを探索対象に設定
-            if (distance < distanceToTarget)
+            // 視認したオブジェクトの中から、未探索で近いものを優先して探索対象に設定
+            foreach (KeyValuePair<VisionTarget, VisionTargetMemory> entry in roomMemories[currentRoom].recognizedObjects)
             {
-                distanceToTarget = distance;
-                currentTarget = entry.Key;
+                // 既に探索済みのオブジェクトはスキップ
+                if (entry.Value.isExplored) continue;
+
+                // オブジェクトとの距離を計算
+                float distance = Vector3.Distance(transform.position, entry.Key.transform.position);
+
+                // より近いオブジェクトを探索対象に設定
+                if (distance < distanceToTarget)
+                {
+                    distanceToTarget = distance;
+                    currentTarget = entry.Key;
+                }
+                else continue;
             }
-            else continue;
+        }
+        // 未探索のオブジェクトがない場合は、部屋の移動ルートに沿って移動する処理を追加する
+        else
+        {
+            // 前回の探索対象が視認オブジェクト(VisionTarget)かどうか
+            if (currentTarget == null || currentTarget is VisionTarget)
+            {
+                // 視認オブジェクトから移動ポイントにする場合は一番近いものを探索対象に設定
+                foreach (ThiefTarget target in currentRoom.movePoints)
+                {
+                    if (target == null) continue;
+
+                    // オブジェクトとの距離を計算
+                    float distance = Vector3.Distance(transform.position, target.transform.position);
+                    // より近いオブジェクトを探索対象に設定
+                    if (distance < distanceToTarget)
+                    {
+                        distanceToTarget = distance;
+                        currentTarget = target;
+                    }
+                    else continue;
+                }
+            }
+            // 移動ポイントから移動ポイントにする場合は、右回りの場合リストを加算、左回りの場合リストを減算して設定
+            else
+            {
+                // 現在の移動ポイントがリストのどこにあるかを判定
+                for (int i = 0; i < currentRoom.movePoints.Count; i++)
+                {
+                    // 現在の移動ポイントがリストのどこにあるかを判定
+                    if (currentRoom.movePoints[i] == currentTarget)
+                    {
+                        int nextIndex = 0;
+
+                        // 右回りの場合
+                        if (currentRoom.isRight)
+                        {
+                            // 次のインデックスを計算
+                            nextIndex = i + 1;
+
+                            // インデックスがリストの範囲を超える場合は、リストの先頭に戻す
+                            if (nextIndex >= currentRoom.movePoints.Count) nextIndex = 0;
+
+                            // リストを加算して次の移動ポイントを探索対象に設定
+                            currentTarget = currentRoom.movePoints[nextIndex];
+                        }
+                        // 左回りの場合
+                        else
+                        {
+                            // 次のインデックスを計算
+                            nextIndex = i - 1;
+
+                            // インデックスがリストの範囲を超える場合は、リストの末尾に戻す
+                            if (nextIndex < 0) nextIndex = currentRoom.movePoints.Count - 1;
+
+                            // リストを減算して次の移動ポイントを探索対象に設定
+                            currentTarget = currentRoom.movePoints[nextIndex];
+                        }
+                    }
+                }
+            }
         }
     }
 }
