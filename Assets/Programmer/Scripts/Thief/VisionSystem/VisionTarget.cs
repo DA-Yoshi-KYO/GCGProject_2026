@@ -23,7 +23,9 @@ public class VisionTarget : MonoBehaviour
         [Tooltip("宝物")]
         Treasure,
         [Tooltip("宝物以外の部屋オブジェクト")]
-        RoomObject
+        RoomObject,
+        [Tooltip("移動ポイント")]
+        MovePoint
     }
 
     [Tooltip("ターゲットの種類")]

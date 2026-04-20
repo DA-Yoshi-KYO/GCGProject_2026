@@ -90,6 +90,8 @@ public class ThiefAI : MonoBehaviour
 
 
     // 探索状態の行動
+    // TODO: 探索対象がない場合は部屋に設定されている移動ルートに沿って移動する処理を追加する
+    //     : ? 歩くだけで探索度が上がるかも
     private void Explore()
     {
         // 探索対象を決定
