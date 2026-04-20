@@ -118,8 +118,14 @@ public class ThiefAI : MonoBehaviour
                 transform.position += direction * speed * Time.deltaTime;
 
                 // 探索対象の方に向く
-                Quaternion targetRotation = Quaternion.LookRotation(direction);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * speed * 0.5f);
+                // Y軸のみ回転させる
+                Vector3 lookDirection = new Vector3(direction.x, 0, direction.z);
+                if (lookDirection != Vector3.zero)
+                {
+                    Quaternion targetRotation = Quaternion.LookRotation(lookDirection);
+                    transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * speed * 0.5f);
+                }
+
 
                 // 探索対象に十分近づいたら、探索完了とする
                 if (Vector3.Distance(transform.position, currentTarget.transform.position) < targetMemory.exploredDistanceThreshold)
@@ -140,10 +146,15 @@ public class ThiefAI : MonoBehaviour
             transform.position += direction * speed * Time.deltaTime;
 
             // 探索対象の方に向く
-            Quaternion targetRotation = Quaternion.LookRotation(direction);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * speed * 0.5f);
+            // Y軸のみ回転させる
+            Vector3 lookDirection = new Vector3(direction.x, 0, direction.z);
+            if (lookDirection != Vector3.zero)
+            {
+                Quaternion targetRotation = Quaternion.LookRotation(lookDirection);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * speed * 0.5f);
+            }
 
-             // 探索対象に十分近づいたら、次の探索対象を決定
+            // 探索対象に十分近づいたら、次の探索対象を決定
             if (Vector3.Distance(transform.position, currentTarget.transform.position) < 2.0f)
             {
                 DecideTarget();
