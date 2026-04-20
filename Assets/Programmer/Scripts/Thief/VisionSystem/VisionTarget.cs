@@ -9,7 +9,7 @@
 using UnityEngine;
 
 // 視界に入る対象を示すクラス
-public class VisionTarget : MonoBehaviour
+public class VisionTarget : ThiefTarget
 {
     // ターゲットの種類
     public enum TargetType
@@ -24,8 +24,6 @@ public class VisionTarget : MonoBehaviour
         Treasure,
         [Tooltip("宝物以外の部屋オブジェクト")]
         RoomObject,
-        [Tooltip("移動ポイント")]
-        MovePoint
     }
 
     [Tooltip("ターゲットの種類")]
