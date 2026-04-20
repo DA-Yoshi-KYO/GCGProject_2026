@@ -4,9 +4,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using static Unity.VisualScripting.Member;
 
 public class PlayBGM : MonoBehaviour
 {
+    //3D空間
+    private CriAtomEx3dSource source;
+    private CriAtomEx3dListener listener;
+    public GameObject speaker;
+    public GameObject player;
+
     private CriAtomEx.CueInfo[] cueInfoList;//CueName格納
     private CriAtomExPlayer[] playerInfoList;//Player生成
     private CriAtomExAcb[] criAtomExAcbsList;//CueSheet
@@ -21,10 +28,10 @@ public class PlayBGM : MonoBehaviour
 
     private void Awake()
     {
-        //現在のシーン更新
-        currentScene = SceneManager.GetActiveScene().name;
+        ////現在のシーン更新
+        //currentScene = SceneManager.GetActiveScene().name;
 
-        //初期化
+        ////初期化
         playerInfoList = new CriAtomExPlayer[1];
         playerInfoList[0] = new CriAtomExPlayer();
         cueInfoList = new CriAtomEx.CueInfo[1];
@@ -33,25 +40,43 @@ public class PlayBGM : MonoBehaviour
         sceneList = new string[1];
         volumeList = new float[1];
 
-        //ループ設定
+        ////ループ設定
+        //playerInfoList[0].Loop(true);
+
+        ////終了判定
+        //endBGM = false;
+
+        ////シーン更新
+        //SceneManager.activeSceneChanged += OnActiveSceneChanged;
+
+        //3D空間
+        source = new CriAtomEx3dSource();
+        listener = new CriAtomEx3dListener();
+        playerInfoList[0].Set3dSource(source);
+        playerInfoList[0].Set3dListener(listener);
+
+        playerInfoList[0].SetCue(criAtomExAcbsList[0], "CatMeow");
+        volumeList[0] = 1.0f;
+        playerInfoList[0].SetVolume(volumeList[0]);
         playerInfoList[0].Loop(true);
-
-        //終了判定
-        endBGM = false;
-
-        //シーン更新
-        SceneManager.activeSceneChanged += OnActiveSceneChanged;
-
+        playerInfoList[0].Prepare();
+        playerInfoList[0].Start();
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
+        source.SetPosition(speaker.transform.position.x, speaker.transform.position.y, speaker.transform.position.z);
+        source.Update();
+        source.SetPosition(player.transform.position.x, player.transform.position.y, player.transform.position.z);
+        listener.Update();
+
+
         //時間
         //time = Time.fixedDeltaTime;
         //Debug.Log(time);
 
-        Debug.Log(playerInfoList[0].GetStatus());
+        //Debug.Log(playerInfoList[0].GetStatus());
 
     }
 

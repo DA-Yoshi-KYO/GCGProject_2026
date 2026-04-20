@@ -254,6 +254,7 @@ GameObject:
   - component: {fileID: 557221705}
   - component: {fileID: 557221704}
   - component: {fileID: 557221703}
+  - component: {fileID: 557221708}
   m_Layer: 0
   m_Name: Speaker
   m_TagString: Untagged
@@ -273,6 +274,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 151f3d8823af8f84a8852db7e058b9b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  speaker: {fileID: 557221702}
+  player: {fileID: 1871634682}
 --- !u!65 &557221704
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -353,12 +356,45 @@ Transform:
   m_GameObject: {fileID: 557221702}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 6.9, y: 0, z: -7.37}
+  m_LocalPosition: {x: 3.2, y: 0, z: 819}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &557221708
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 557221702}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1e631c3b9947b54c823c6853a05529c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _playOnStart: 1
+  _regionOnStart: {fileID: 0}
+  _listenerOnStart: {fileID: 0}
+  _use3dPositioning: 1
+  _freezeOrientation: 0
+  _loop: 1
+  _volume: 1
+  _pitch: 0
+  _androidUseLowLatencyVoicePool: 0
+  need_to_player_update_all: 1
+  _use3dRandomization: 0
+  _randomPositionListMaxLength: 0
+  randomize3dConfig:
+    followsOriginalSource: 0
+    calculationType: 0
+    calculationParameters:
+    - 0
+    - 0
+    - 0
+  _cueName: CatMeow
+  _cueSheet: WorkingTitle
 --- !u!1 &902989989
 GameObject:
   m_ObjectHideFlags: 0
@@ -682,8 +718,9 @@ GameObject:
   - component: {fileID: 1871634685}
   - component: {fileID: 1871634684}
   - component: {fileID: 1871634683}
+  - component: {fileID: 1871634687}
   m_Layer: 0
-  m_Name: Listener
+  m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -775,6 +812,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1871634687
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1871634682}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce7d42e042e4c9c4db4bde98b863e167, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  regionOnStart: {fileID: 0}
+  activateListenerOnEnable: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
