@@ -14,11 +14,21 @@ public class RoomGrid : MonoBehaviour
     [SerializeField] private Vector2Int gridDivision;
 
     public Vector2 gridSize { get; private set; }   // グリッド1マスの大きさ
+    private Renderer rendererMaterial; // グリッドのマテリアル
 
     void Start()
     {
         // グリッド1マスの大きさを計算
         gridSize = new Vector2(transform.localScale.x / gridDivision.x, transform.localScale.z / gridDivision.x);
+        rendererMaterial = GetComponent<Renderer>();
+        if (rendererMaterial != null)
+        {
+            rendererMaterial.material.SetVector("_GridNum", new Vector4(gridDivision.x, gridDivision.y, 0, 0));
+        }
+        else        
+        {
+            Debug.LogWarning("RoomGrid: Material not found on the GameObject.");
+        }
     }
 
     /// <summary>
