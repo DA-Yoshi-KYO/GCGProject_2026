@@ -6,7 +6,7 @@ public class CustomPostFeature : ScriptableRendererFeature
 {
     public class CustomPass : ScriptableRenderPass
     {
-        Material material;
+        public Material material;
 
         RTHandle source;
         RTHandle tempRT;
@@ -23,6 +23,8 @@ public class CustomPostFeature : ScriptableRendererFeature
 
         public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData)
         {
+            source = renderingData.cameraData.renderer.cameraColorTargetHandle;
+
             var desc = renderingData.cameraData.cameraTargetDescriptor;
 
             RenderingUtils.ReAllocateIfNeeded(
@@ -63,7 +65,6 @@ public class CustomPostFeature : ScriptableRendererFeature
 
     public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
     {
-        pass.Setup(renderer.cameraColorTargetHandle);
         renderer.EnqueuePass(pass);
     }
 }
