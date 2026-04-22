@@ -1,13 +1,20 @@
+/* ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+ *    BGM再生用
+ * ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+ *    元浪梨緒
+ * ----------------------------------------------------------
+ * 2026-04-20 | 初回作成
+ * 
+ */
+
 using CriWare;
-using EffekseerTool.Data.Value;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using static Unity.VisualScripting.Member;
 
 public class PlayBGM : MonoBehaviour
 {
+    public BGMDataBase bgmDataBase;
+
     private CriAtomEx.CueInfo[] cueInfoList;//CueName格納
     private CriAtomExPlayer[] playerInfoList;//Player生成
     private CriAtomExAcb[] criAtomExAcbsList;//CueSheet
@@ -22,6 +29,9 @@ public class PlayBGM : MonoBehaviour
 
     private void Awake()
     {
+        //全てのデータ受け取る
+        BGMData[] data = bgmDataBase.bgmDatas;
+
         //現在のシーン更新
         currentScene = SceneManager.GetActiveScene().name;
 

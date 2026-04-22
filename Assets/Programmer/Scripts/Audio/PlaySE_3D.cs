@@ -1,6 +1,13 @@
+/* ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+ *    3DSE再生用
+ * ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+ *    元浪梨緒
+ * ----------------------------------------------------------
+ * 2026-04-22 | 初回作成
+ * 
+ */
+
 using CriWare;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PlaySE_3D : MonoBehaviour
