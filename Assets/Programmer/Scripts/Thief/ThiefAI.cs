@@ -144,21 +144,27 @@ public class ThiefAI : MonoBehaviour
                 // 探索対象に十分近づいたら、探索完了とする
                 if (Vector3.Distance(transform.position, currentTarget.transform.position) < targetMemory.exploredDistanceThreshold)
                 {
-                    // 探索対象を探索済みに設定
-                    targetMemory.isExplored = true;
-                    // 探索度を加算
-                    roomMemories[currentRoom].explorationLevel += targetMemory.explorationValue;
-                    
-                    // 宝物を探索している場合は、探索度に応じて発見状態に切り替える
+                    // 宝物を探索にしていて、完了した場合は、発見状態に切り替える
                     if (((VisionTarget)currentTarget).targetType == VisionTarget.TargetType.Treasure)
                     {
                         // 発見状態に切り替える
                         currentState = ThiefState.Found;
                     }
+                    // それ以外のオブジェクトを探索して完了した場合は、次の探索対象を決定する
                     else
                     {
-                        // 次の探索対象を決定
-                        DecideTarget();
+                        // 探索対象を探索済みに設定
+                        targetMemory.isExplored = true;
+                        // 探索度を加算
+                        roomMemories[currentRoom].explorationLevel += targetMemory.explorationValue;
+
+                        // 探索度が閾値を超えた場合は、次の部屋に移動するための処理を追加する
+                        if (roomMemories[currentRoom].explorationLevel >= nextRoomSearchThreshold)
+                        {
+
+                        }
+                        // それ以外の場合は、次の探索対象を決定する
+                        else DecideTarget();
                     }
                 }
             }
@@ -193,17 +199,18 @@ public class ThiefAI : MonoBehaviour
     }
 
     // 発見状態の行動
+    // ----------------
+    // TODO: 現在位置から出口までのルート構築処理を追加する(A*アルゴリズムを利用)
+    //     : 宝物発見バフの適応処理を追加する
     private void Found()
-    {
-        // TODO
-        // 発見後のバフ処理
-
-
+    { 
         // 状態を逃走に変更
         currentState = ThiefState.Escape;
     }
 
     // 逃走状態の行動
+    // ----------------
+    // TODO: 構築したルートに沿って移動する処理を追加する
     private void Escape()
     { 
     }
