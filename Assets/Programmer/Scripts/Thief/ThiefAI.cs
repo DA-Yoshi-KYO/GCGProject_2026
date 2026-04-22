@@ -52,8 +52,13 @@ public class ThiefAI : MonoBehaviour
     [Tooltip("ナビメッシュエージェント")]
     private NavMeshAgent navMeshAgent;
 
-    private void Start()
+    // 泥棒の耐久力と移動速度を設定するメソッド
+    public void Setting(int durability, float speed, int nextRoomSearchThreshold)
     {
+        this.durability = durability;
+        this.speed = speed;
+        this.nextRoomSearchThreshold = nextRoomSearchThreshold;
+
         // 初期状態を探索に設定
         currentState = ThiefState.Explore;
 
@@ -67,29 +72,9 @@ public class ThiefAI : MonoBehaviour
         roomMemories[currentRoom] = new RoomMemory();
         roomMemories[currentRoom].FirstSetting();
 
-        // 初期耐久力
-        durability = 4;
-
-        // 初期移動速度
-        speed = 3.0f;
-
-        // 次の部屋探索に切り替える探索度の閾値
-        nextRoomSearchThreshold = 70;
-
-        // ナビメッシュエージェントを取得
+        // ナビメッシュエージェントの速度を設定
         navMeshAgent = GetComponent<NavMeshAgent>();
         navMeshAgent.baseOffset = 1.0f; // キャラクターの高さに合わせてオフセットを設定
-        navMeshAgent.speed = speed;
-    }
-
-    // 泥棒の耐久力と移動速度を設定するメソッド
-    public void Setting(int durability, float speed, int nextRoomSearchThreshold)
-    {
-        this.durability = durability;
-        this.speed = speed;
-        this.nextRoomSearchThreshold = nextRoomSearchThreshold;
-
-        // ナビメッシュエージェントの速度を設定
         navMeshAgent.speed = speed;
     }
 

@@ -7,39 +7,26 @@
  * 2026-04-19 | 泥棒のパラメーター設定処理の記載(行動AIの設定、視界システムの設定)
  * 
  */
-using UnityEditor;
 using UnityEngine;
 
 
 // 泥棒を生成するシステム
-public class ThiefGenerator
+public class ThiefGenerator : MonoBehaviour
 {
-    [Tooltip("泥棒のデータベース")]
+    [SerializeField, Tooltip("泥棒のデータベース")]
     private ThiefDataSO thiefDB;
-    [Tooltip("ステージごとのウェーブデータのデータベース")]
+    [SerializeField, Tooltip("ステージごとのウェーブデータのデータベース")]
     private StageDataSO stageDataDB;
-    [Tooltip("泥棒のプレハブ")]
+    [SerializeField, Tooltip("泥棒のプレハブ")]
     private GameObject thiefPrefab;
-
-    [Tooltip("使用する泥棒データベースのパス")]
-    private string thiefDBPath = "Assets/Programmer/ScriptableObject/ThiefDB.asset";
-    [Tooltip("使用するステージデータベースのパス")]
-    private string stageDataDBPath = "Assets/Programmer/ScriptableObject/StageDB.asset";
-    [Tooltip("泥棒のプレハブのパス")]
-    private string thiefPrefabPath = "Assets/Programmer/Prefabs/Thief.prefab";
 
     private void Start()
     {
-        // 泥棒のデータベースをロード
-        thiefDB = AssetDatabase.LoadAssetAtPath<ThiefDataSO>(thiefDBPath);
-        // ステージごとのウェーブデータのデータベースをロード
-        stageDataDB = AssetDatabase.LoadAssetAtPath<StageDataSO>(stageDataDBPath);
-        // 泥棒のプレハブをロード
-        thiefPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(thiefPrefabPath);
+        Notify();
     }
 
     // 泥棒を生成するメソッド
-    public void Notify()
+    private void Notify()
     {
         // 現在のウェーブ数を取得
         int currentWave = GameObject.Find("Manager").GetComponent<WaveManager>().waveNumber;
@@ -93,6 +80,10 @@ public class ThiefGenerator
                 }
 
                 //--- 生成した泥棒の生成位置を選定
+                // (仮) 50,0,50 ~ -50,0,-50の範囲にランダムに生成
+                float x = Random.Range(-50.0f, 50.0f);
+                float z = Random.Range(-50.0f, 50.0f);
+                thief.transform.position = new Vector3(x, 0, z);
             }
         }
     }
