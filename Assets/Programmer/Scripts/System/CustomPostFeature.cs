@@ -1,3 +1,12 @@
+/* ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+ *    カスタムなポストエフェクトを実装するためのRendererFeature
+ * ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+ *    吉田 京志郎
+ * ----------------------------------------------------------
+ * 2026-04-21 | 初回作成
+ * 
+ */
+
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
@@ -37,11 +46,16 @@ public class CustomPostFeature : ScriptableRendererFeature
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
         {
             var cmd = CommandBufferPool.Get("CustomPost");
+            if (!AttachVolume())
+            {
+                CommandBufferPool.Release(cmd);
+                return;
+            }
 
-            // ① source → temp（加工）
+            // source → temp(加工)
             Blitter.BlitCameraTexture(cmd, source, tempRT, material, 0);
 
-            // ② temp → source（戻す）
+            // temp → source(戻す)
             Blitter.BlitCameraTexture(cmd, tempRT, source);
 
             context.ExecuteCommandBuffer(cmd);
@@ -51,6 +65,27 @@ public class CustomPostFeature : ScriptableRendererFeature
         public override void OnCameraCleanup(CommandBuffer cmd)
         {
             // RTHandleは自動管理されるので基本不要
+        }
+
+        private bool AttachVolume()
+        {
+            var stack = VolumeManager.instance.stack;   // Volumeスタックの取得
+            if (stack == null)
+            {
+                Debug.LogWarning("VolumeStackが見つかりません");
+                return false;
+            }
+
+            // パラメータの適応
+            // グレースケール
+            GrayScaleVolume volume = stack.GetComponent<GrayScaleVolume>();
+            if (volume.active)
+            {
+                material.SetFloat("_Intensity", volume.intensity.value);
+            }
+
+
+            return true;
         }
     }
 
