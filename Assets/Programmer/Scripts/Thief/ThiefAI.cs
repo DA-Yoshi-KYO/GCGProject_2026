@@ -7,12 +7,15 @@
  * 2026-04-20 | 探索対象の決定ロジックを追加
  *            | 探索対象の優先順位を追加
  * 2026-04-22 | 耐久値を減少させる処理を追加
+ *            | NavMeshAgentを利用して移動する処理を追加
  * 
  */
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 // 泥棒のAIシステム
+[RequireComponent(typeof(NavMeshAgent))]
 public class ThiefAI : MonoBehaviour
 {
     [Tooltip("泥棒の行動状態を定義する列挙型")]
@@ -46,6 +49,9 @@ public class ThiefAI : MonoBehaviour
     [Tooltip("次の部屋探索に切り替える探索度の閾値")]
     private int nextRoomSearchThreshold;
 
+    [Tooltip("ナビメッシュエージェント")]
+    private NavMeshAgent navMeshAgent;
+
     private void Start()
     {
         // 初期状態を探索に設定
@@ -69,6 +75,11 @@ public class ThiefAI : MonoBehaviour
 
         // 次の部屋探索に切り替える探索度の閾値
         nextRoomSearchThreshold = 70;
+
+        // ナビメッシュエージェントを取得
+        navMeshAgent = GetComponent<NavMeshAgent>();
+        navMeshAgent.baseOffset = 1.0f; // キャラクターの高さに合わせてオフセットを設定
+        navMeshAgent.speed = speed;
     }
 
     // 泥棒の耐久力と移動速度を設定するメソッド
@@ -77,6 +88,9 @@ public class ThiefAI : MonoBehaviour
         this.durability = durability;
         this.speed = speed;
         this.nextRoomSearchThreshold = nextRoomSearchThreshold;
+
+        // ナビメッシュエージェントの速度を設定
+        navMeshAgent.speed = speed;
     }
 
     private void Update()
@@ -128,18 +142,7 @@ public class ThiefAI : MonoBehaviour
             else
             {
                 // 探索対象に向かって移動
-                Vector3 direction = (currentTarget.transform.position - transform.position).normalized;
-                transform.position += direction * speed * Time.deltaTime;
-
-                // 探索対象の方に向く
-                // Y軸のみ回転させる
-                Vector3 lookDirection = new Vector3(direction.x, 0, direction.z);
-                if (lookDirection != Vector3.zero)
-                {
-                    Quaternion targetRotation = Quaternion.LookRotation(lookDirection);
-                    transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * speed * 0.5f);
-                }
-
+                navMeshAgent.SetDestination(currentTarget.transform.position);
 
                 // 探索対象に十分近づいたら、探索完了とする
                 if (Vector3.Distance(transform.position, currentTarget.transform.position) < targetMemory.exploredDistanceThreshold)
@@ -161,7 +164,7 @@ public class ThiefAI : MonoBehaviour
                         // 探索度が閾値を超えた場合は、次の部屋に移動するための処理を追加する
                         if (roomMemories[currentRoom].explorationLevel >= nextRoomSearchThreshold)
                         {
-
+                            Debug.Log("次の部屋に移動");
                         }
                         // それ以外の場合は、次の探索対象を決定する
                         else DecideTarget();
@@ -172,17 +175,7 @@ public class ThiefAI : MonoBehaviour
         else
         {
             // 探索対象に向かって移動
-            Vector3 direction = (currentTarget.transform.position - transform.position).normalized;
-            transform.position += direction * speed * Time.deltaTime;
-
-            // 探索対象の方に向く
-            // Y軸のみ回転させる
-            Vector3 lookDirection = new Vector3(direction.x, 0, direction.z);
-            if (lookDirection != Vector3.zero)
-            {
-                Quaternion targetRotation = Quaternion.LookRotation(lookDirection);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * speed * 0.5f);
-            }
+            navMeshAgent.SetDestination(currentTarget.transform.position);
 
             // 探索対象に十分近づいたら、次の探索対象を決定
             if (Vector3.Distance(transform.position, currentTarget.transform.position) < 2.0f)
