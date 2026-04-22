@@ -101,7 +101,14 @@ public class VisionSensor : MonoBehaviour
             else Gizmos.color = Color.green;
 
             Gizmos.DrawLine(transform.position, target.transform.position);
+        }
 
+        // 探索対象をギズモで表示
+        Gizmos.color = Color.blue;
+        ThiefAI thiefAI = this.GetComponent<ThiefAI>();
+        if (thiefAI != null && thiefAI.CurrentTarget != null)
+        {
+            Gizmos.DrawLine(transform.position, thiefAI.CurrentTarget.transform.position);
         }
     }
 }

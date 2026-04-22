@@ -12,7 +12,7 @@ using UnityEngine;
 
 
 // 泥棒を生成するシステム
-public class ThieGenerator
+public class ThiefGenerator
 {
     [Tooltip("泥棒のデータベース")]
     private ThiefDataSO thiefDB;
