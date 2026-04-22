@@ -4,6 +4,9 @@
  *    宇留野 陸斗
  * ----------------------------------------------------------
  * 2026-04-17 | 初回作成
+ * 2026-04-20 | 探索対象の決定ロジックを追加
+ *            | 探索対象の優先順位を追加
+ * 2026-04-22 | 耐久値を減少させる処理を追加
  * 
  */
 using System.Collections.Generic;
@@ -21,6 +24,8 @@ public class ThiefAI : MonoBehaviour
         Found,
         [Tooltip("逃走状態")]
         Escape,
+        [Tooltip("気絶状態")]
+        Stunned
     }
 
     [Tooltip("現在の行動状態")]
@@ -60,7 +65,10 @@ public class ThiefAI : MonoBehaviour
         durability = 4;
 
         // 初期移動速度
-        speed = 3f;
+        speed = 3.0f;
+
+        // 次の部屋探索に切り替える探索度の閾値
+        nextRoomSearchThreshold = 70;
     }
 
     // 泥棒の耐久力と移動速度を設定するメソッド
@@ -85,9 +93,11 @@ public class ThiefAI : MonoBehaviour
             case ThiefState.Escape:
                 Escape();
                 break;
+            case ThiefState.Stunned:
+                Stunned();
+                break;
         }
     }
-
 
 
     // 探索状態の行動
@@ -96,22 +106,25 @@ public class ThiefAI : MonoBehaviour
         // 探索対象を決定
         RecognizeObjects();
 
+        // 探索対象がない場合は、部屋の移動ポイントに沿って移動する処理を追加する
         if (currentTarget == null)
         {
             DecideTarget();
             return;
         }
 
+        // 現在の探索対象が視認オブジェクト(VisionTarget)かどうかを判定
         if (currentTarget is VisionTarget)
         {
             // 現在の探索対象の記憶情報
             VisionTargetMemory targetMemory = roomMemories[currentRoom].recognizedObjects[(VisionTarget)currentTarget];
 
+            // 探索対象が既に探索済みの場合
             if (targetMemory.isExplored)
             {
-                // 探索対象が既に探索済みの場合は、次の探索対象を決定
                 DecideTarget();
             }
+            // 探索対象が未探索の場合
             else
             {
                 // 探索対象に向かって移動
@@ -195,7 +208,18 @@ public class ThiefAI : MonoBehaviour
     { 
     }
 
-    // 部屋のオブジェクトを視認して記憶に保存する処理
+    // 気絶状態の行動
+    // ----------------
+    // TODO:その場で動けなくなる処理を追加する
+    private void Stunned()
+    {
+
+    }
+
+
+    /// <summary>
+    /// 部屋のオブジェクトを視認して記憶に保存する処理
+    /// </summary>
     private void RecognizeObjects()
     {
         // 視界内オブジェクトを取得
@@ -268,7 +292,12 @@ public class ThiefAI : MonoBehaviour
         }
     }
 
-    // 視認しているオブジェクトの中に未探索のものがあるかどうかを判定する処理
+    /// <summary>
+    /// 視認しているオブジェクトの中に未探索のものがあるかどうかを判定する処理
+    /// </summary>
+    /// <returns>
+    /// true:未探索のオブジェクトがある | false:認識している全てのオブジェクトが探索済み
+    /// </returns>
     private bool HasUnexploredTargets()
     {
         // 視認しているオブジェクトの中に未探索のものがあるかどうかを判定
@@ -282,9 +311,9 @@ public class ThiefAI : MonoBehaviour
         return false;
     }
 
-    // 探索対象を決める処理
-    // TODO: 探索対象の優先順位を決めるロジックを追加する（例： 宝物 > プレイヤー > トラップ = 部屋のオブジェクト）
-    //     : ? 歩くだけで探索度が上がるかも
+    /// <summary>
+    /// 探索対象を決める処理
+    /// </summary>
     private void DecideTarget()
     {
         // 探索対象との距離
@@ -422,6 +451,22 @@ public class ThiefAI : MonoBehaviour
                     }
                 }
             }
+        }
+    }
+
+    /// <summary>
+    ///  耐久値を減らす処理
+    /// </summary>
+    /// <param name="damage">与える減少値</param>
+    public void TakeDamage(int damage)
+    {
+        durability -= damage;
+
+        // 耐久力が0以下になった場合は、耐久力を0に補正して気絶状態にする
+        if (durability <= 0)
+        {
+            durability = 0;
+            currentState = ThiefState.Stunned;
         }
     }
 }
