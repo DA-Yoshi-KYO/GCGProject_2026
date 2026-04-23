@@ -14,7 +14,9 @@ public class PotGimmick : GimmickBase
         if (isFirstUpdate)
         {
             isFirstUpdate = false;
-            SetHitChecker(gimmickGridPos.x, gimmickGridPos.y);
+            Vector2Int directionVec = GetDirectionVec();
+            Vector2Int hitCheckerGridPos = new Vector2Int(gimmickGridPos.x + directionVec.x, gimmickGridPos.y + directionVec.y);
+            SetHitChecker(hitCheckerGridPos.x, hitCheckerGridPos.y);
         }
     }
 

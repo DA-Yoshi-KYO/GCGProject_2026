@@ -78,7 +78,9 @@ public class GimmickBase : MonoBehaviour
     [Tooltip("HitCheckerのオブジェクト")]
     public GameObject hitCheckerPrefab;
 
-    private GameObject hitChecker;
+    // ギミックの向き
+    [Header("ギミックの向き")]
+    public GimmickDirection gimmickDirection;
 
     // ギミックの種類
     [Header("ギミックの種類")]
@@ -88,17 +90,24 @@ public class GimmickBase : MonoBehaviour
     [Header("ギミックの状態")]
     public GimmickState gimmickState;
 
+    [Header("調整用（プログラマー専用）")]
+    public int Adjust;
+
     // ギミックのグリッド上の位置
     protected Vector2Int gimmickGridPos;
 
-    // ギミックの向き
-    protected GimmickDirection gimmickDirection;
+    private GameObject hitChecker;
 
     private void Start()
     {
         AdjustScaleToGrid();
+        SetGimmickPos(new Vector2Int(1,0));
     }
 
+
+    /// <summary>
+    /// ギミックの大きさを、グリッドの大きさに合わせて調整する関数
+    /// </summary>
     private void AdjustScaleToGrid()
     {
         MeshFilter meshFilter = GetComponentInChildren<MeshFilter>();
@@ -110,29 +119,24 @@ public class GimmickBase : MonoBehaviour
 
         Vector3 meshSize = meshFilter.sharedMesh.bounds.size;
 
-        // 各値をログで確認
-        Debug.Log($"meshSize: {meshSize}");
-        Debug.Log($"GimmickSizeX: {GimmickSizeX}, GimmickSizeY: {GimmickSizeY}");
-        Debug.Log($"gridSize: {roomGrid.gridSize}");
-
         float targetSizeX = GimmickSizeX * roomGrid.gridSize.x;
         float targetSizeZ = GimmickSizeY * roomGrid.gridSize.y;
-
-        Debug.Log($"targetSizeX: {targetSizeX}, targetSizeZ: {targetSizeZ}");
 
         float scaleX = targetSizeX / meshSize.x;
         float scaleZ = targetSizeZ / meshSize.z;
         float scaleY = (scaleX + scaleZ) / 2f;
-
-        Debug.Log($"scale: ({scaleX}, {scaleY}, {scaleZ})");
+        scaleX = scaleX * Adjust;
+        scaleY = scaleY * Adjust;
+        scaleZ = scaleZ * Adjust;
 
         transform.localScale = new Vector3(scaleX, scaleY, scaleZ);
     }
 
-    // 関数名：ActivateGimmick
-    // 引　数：なし
-    // 戻り値：なし
-    // 概　要：ギミックをActive状態にする関数
+
+
+    /// <summary>
+    /// ギミックをアクティブにする関数
+    /// </summary>
     public void ActivateGimmick()
     {
         if (gimmickState == GimmickState.Idle)
@@ -141,29 +145,47 @@ public class GimmickBase : MonoBehaviour
         }
     }
 
-    // 関数名：SetGimmickPos
-    // 引　数：Vector2Int gridPos - ギミックのグリッド
-    // 戻り値：なし
-    // 概　要：ギミックのグリッド上の位置を設定
+
+    /// <summary>
+    /// グリッド座標からワールド座標に変換して、ギミックの位置を設定する
+    /// </summary>
+    /// <param name="gridPos">グリッド座標</param>
     public void SetGimmickPos(Vector2Int gridPos)
     {
         gimmickGridPos = gridPos;
+        Vector3 newWorldPos = roomGrid.GetWorldPosFromGrid(gridPos);
+        newWorldPos.x = newWorldPos.x * (float)Adjust;
+        newWorldPos.y = newWorldPos.y * (float)Adjust;
+        newWorldPos.z = newWorldPos.z * (float)Adjust;
+        transform.position = newWorldPos;
     }
 
-    // 関数名：SetGimmickDirection
-    // 引　数：GimmickDirection direction - ギミックの向き
-    // 戻り値：なし
-    // 概　要：ギミックの向きを設定
+    /// <summary>
+    /// ワールド座標からグリッド座標に変換して、ギミックの位置を設定する
+    /// </summary>
+    /// <param name="WorldPos">ワールド座標</param>
+    public void SetGimmickPos(Vector3 WorldPos)
+    {
+        Vector2Int gridPos = roomGrid.GetGridFromPos(WorldPos);
+        SetGimmickPos(gridPos);
+    }
+
+
+    /// <summary>
+    /// ギミックの向きを設定する関数
+    /// </summary>
+    /// <param name="direction">ギミックの向き</param>
     public void SetGimmickDirection(GimmickDirection direction)
     {
         gimmickDirection = direction;
     }
 
-    // 関数名：SetHitChecker
-    // 引　数：int GridX - ギミックのグリッド上の
-    //           int GridY - ギミックのグリッド上の
-    // 戻り値：なし
-    // 概　要：ギミックの当たり判定を設定
+
+    /// <summary>
+    /// 泥棒に対する当たり判定を設定する関数
+    /// </summary>
+    /// <param name="GridX">グリッド座標</param>
+    /// <param name="GridY">グリッド座標</param>
     protected void SetHitChecker(int GridX,int GridY)
     {
         if(hitChecker == null)
@@ -179,6 +201,14 @@ public class GimmickBase : MonoBehaviour
 
             Vector3 EffectSize = new Vector3(EffectRangeX * roomGrid.gridSize.x,1, EffectRangeY * roomGrid.gridSize.y);
             Vector3 HitSize = new Vector3(HitRangeX * roomGrid.gridSize.x, 1, HitRangeY * roomGrid.gridSize.y);
+            
+            EffectSize.x = EffectSize.x * (float)Adjust;
+            EffectSize.y = EffectSize.y * (float)Adjust;
+            EffectSize.z = EffectSize.z * (float)Adjust;
+
+            HitSize.x = HitSize.x * (float)Adjust;
+            HitSize.y = HitSize.y * (float)Adjust;
+            HitSize.z = HitSize.z * (float)Adjust;
 
             Effect.transform.localScale = EffectSize;
             Hit.transform.localScale = HitSize;
@@ -187,17 +217,29 @@ public class GimmickBase : MonoBehaviour
         }
 
         Vector3 HitCheckerPos;
-        HitCheckerPos = transform.position; // ギミックのワールド座標を取得（仮）
+        HitCheckerPos = transform.position;
 
-        // ToDo グリッドからワールド座標へ変換する関数ができたら実装
+
+        HitCheckerPos = roomGrid.GetWorldPosFromGrid(new Vector2Int(GridX, GridY));
+        // 無限数チェック
+        if (float.IsInfinity(HitCheckerPos.x) || float.IsInfinity(HitCheckerPos.y) || float.IsInfinity(HitCheckerPos.z) || GridX < 0 || GridY < 0)
+        {
+            Debug.LogWarning("SetHitChecker: Invalid grid position (" + GridX + ", " + GridY + ")");
+            DeleteHitChecker();
+            return;
+        }
+
+        HitCheckerPos.x = HitCheckerPos.x * (float)Adjust;
+        HitCheckerPos.y = HitCheckerPos.y * (float)Adjust;
+        HitCheckerPos.z = HitCheckerPos.z * (float)Adjust;
 
         hitChecker.transform.position = HitCheckerPos;
     }
 
-    // 関数名：DeleteHitChecker
-    // 引　数：なし
-    // 戻り値：なし
-    // 概　要：ギミックの当たり判定を削除
+
+    /// <summary>
+    /// 泥棒に対する当たり判定を削除する関数
+    /// </summary>
     protected void DeleteHitChecker()
     {
         if(hitChecker != null)
@@ -206,6 +248,34 @@ public class GimmickBase : MonoBehaviour
         }
     }
 
+
+    /// <summary>
+    /// トラップの向きをベクトルで返す関数
+    /// </summary>
+    /// <returns>ギミックの向きを表すベクトル</returns>
+    public Vector2Int GetDirectionVec()
+    {
+        switch(gimmickDirection)
+        {
+            case GimmickDirection.Up:
+                return new Vector2Int(0, -1);
+            case GimmickDirection.Down:
+                return new Vector2Int(0, 1);
+            case GimmickDirection.Left:
+                return new Vector2Int(-1, 0);
+            case GimmickDirection.Right:
+                return new Vector2Int(1, 0);
+            default:
+                return Vector2Int.zero;
+        }
+    }
+
+
+
+
+
+
+    // ===============================================================================
 
     private void FixedUpdate()
     {
@@ -249,6 +319,6 @@ public class GimmickBase : MonoBehaviour
     {
         // Broken状態の処理
     }
-
+    // ===============================================================================
 }
 
