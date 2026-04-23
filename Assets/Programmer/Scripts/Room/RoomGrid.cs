@@ -19,7 +19,7 @@ public class RoomGrid : MonoBehaviour
     void Start()
     {
         // グリッド1マスの大きさを計算
-        gridSize = new Vector2(transform.localScale.x / gridDivision.x, transform.localScale.z / gridDivision.x);
+        gridSize = new Vector2(transform.localScale.x / gridDivision.x, transform.localScale.z / gridDivision.y);
         rendererMaterial = GetComponent<Renderer>();
         if (rendererMaterial != null)
         {
@@ -56,5 +56,38 @@ public class RoomGrid : MonoBehaviour
         if (gridPos.y < 0 || gridPos.y >= gridDivision.y) gridPos.y = -1;
         
         return gridPos;
+    }
+
+    /// <summary>
+    /// 引数のグリッド位置から、ワールド座標を返す
+    /// グリッドの範囲外の場合、無限数を返す
+    /// </summary>
+    /// <param name="gridPos">グリッド番号</param>
+    /// <returns>引数のグリッドが存在するワールド座標(範囲外の場合無限数)</returns>
+    public Vector3 GetWorldPosFromGrid(Vector2Int gridPos)
+    {
+        // 範囲外チェック
+        if (gridPos.x < 0 || gridPos.x >= gridDivision.x ||
+            gridPos.y < 0 || gridPos.y >= gridDivision.y)
+        {
+            return Vector3.zero;
+        }
+
+        // グリッドから相対座標に変換
+        Vector2 relativePos = new Vector2(
+            (gridPos.x + 0.5f) / gridDivision.x,
+            (gridPos.y + 0.5f) / gridDivision.y
+        );
+
+        // 相対座標からローカル座標に変換
+        float localX = relativePos.x - 0.5f;
+        float localZ = 0.5f - relativePos.y;
+        Vector3 localPos = new Vector3(localX, 0.0f, localZ);
+
+        // ローカル座標からワールド座標に変換して返す
+        Vector3 worldPos = transform.TransformPoint(localPos);
+        worldPos.y = transform.position.y;  // ワールド座標のY値を床の高さに合わせる
+
+        return worldPos;
     }
 }
