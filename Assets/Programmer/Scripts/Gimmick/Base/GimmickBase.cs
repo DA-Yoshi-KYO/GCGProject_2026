@@ -11,12 +11,14 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public enum GimmickState
 {
     Idle,
     Active,
     Cooldown,
+    Broken,
 };
 
 public enum  GimmickType
@@ -74,20 +76,44 @@ public class GimmickBase : MonoBehaviour
 
     [Header("HitChecker")]
     [Tooltip("HitCheckerのオブジェクト")]
-    public Object hitCheckerPrefab;
+    public GameObject hitCheckerPrefab;
+
+    private GameObject hitChecker;
 
     // ギミックの種類
     [Header("ギミックの種類")]
     public GimmickType gimmickType = GimmickType.NotReusable;
 
     // ギミックの状態
-    protected GimmickState gimmickState;
+    [Header("ギミックの状態")]
+    public GimmickState gimmickState;
 
     // ギミックのグリッド上の位置
     protected Vector2Int gimmickGridPos;
 
     // ギミックの向き
     protected GimmickDirection gimmickDirection;
+
+    private void Start()
+    {
+        Renderer rend = GetComponentInChildren<Renderer>();
+        if (rend == null) return;
+
+        // スケールを一旦1にリセットしてメッシュの元サイズを正確に取得
+        transform.localScale = Vector3.one;
+        Vector3 meshSize = rend.bounds.size;
+
+        // グリッド上で占有したいワールドサイズ
+        float targetSizeX = GimmickSizeX * roomGrid.gridSize.x;
+        float targetSizeZ = GimmickSizeY * roomGrid.gridSize.y;
+
+        // 元のメッシュサイズに対する比率でスケールを算出
+        float scaleX = targetSizeX / meshSize.x;
+        float scaleZ = targetSizeZ / meshSize.z;
+
+        float scaleY = (scaleX + scaleZ) / 2f; // XZの平均比率
+        transform.localScale = new Vector3(scaleX, scaleY, scaleZ);
+    }
 
     // 関数名：ActivateGimmick
     // 引　数：なし
@@ -118,4 +144,98 @@ public class GimmickBase : MonoBehaviour
     {
         gimmickDirection = direction;
     }
+
+    // 関数名：SetHitChecker
+    // 引　数：int GridX - ギミックのグリッド上の
+    //           int GridY - ギミックのグリッド上の
+    // 戻り値：なし
+    // 概　要：ギミックの当たり判定を設定
+    protected void SetHitChecker(int GridX,int GridY)
+    {
+        if(hitChecker == null)
+        {
+            hitChecker = Instantiate(hitCheckerPrefab, transform);
+            
+            // 当たり判定の大きさを設定
+            GameObject Effect = hitChecker.transform.Find("Effect").gameObject;
+            GameObject Hit = hitChecker.transform.Find("Hit").gameObject;
+
+            // 確認用キューブ　（後で削除）
+            GameObject Cube = hitChecker.transform.Find("Cube").gameObject;
+
+            Vector3 EffectSize = new Vector3(EffectRangeX * roomGrid.gridSize.x,1, EffectRangeY * roomGrid.gridSize.y);
+            Vector3 HitSize = new Vector3(HitRangeX * roomGrid.gridSize.x, 1, HitRangeY * roomGrid.gridSize.y);
+            Vector3 CubeSize = new Vector3(EffectRangeX * roomGrid.gridSize.x, 1, EffectRangeY * roomGrid.gridSize.y);
+
+            Effect.transform.localScale = EffectSize;
+            Hit.transform.localScale = HitSize;
+            Cube.transform.localScale = CubeSize;
+
+        }
+
+        Vector3 HitCheckerPos;
+        HitCheckerPos = transform.position; // ギミックのワールド座標を取得（仮）
+
+        // ToDo グリッドからワールド座標へ変換する関数ができたら実装
+
+        hitChecker.transform.position = HitCheckerPos;
+    }
+
+    // 関数名：DeleteHitChecker
+    // 引　数：なし
+    // 戻り値：なし
+    // 概　要：ギミックの当たり判定を削除
+    protected void DeleteHitChecker()
+    {
+        if(hitChecker != null)
+        {
+            Destroy(hitChecker);
+        }
+    }
+
+
+    private void FixedUpdate()
+    {
+        switch (gimmickState)
+        {
+            case GimmickState.Idle:
+                // Idle状態の処理
+                IdleUpdate();
+                break;
+            case GimmickState.Active:
+                // Active状態の処理
+                ActiveUpdate();
+                break;
+            case GimmickState.Cooldown:
+                // Cooldown状態の処理
+                CooldownUpdate();
+                break;
+            case GimmickState.Broken:
+                // Broken状態の処理
+                BrokenUpdate();
+                break;
+        }
+    }
+
+    protected virtual void IdleUpdate()
+    {
+        // Idle状態の処理
+    }
+
+    protected virtual void ActiveUpdate()
+    {
+        // Active状態の処理
+    }
+
+    protected virtual void CooldownUpdate()
+    {
+        // Cooldown状態の処理
+    }
+
+    protected virtual void BrokenUpdate()
+    {
+        // Broken状態の処理
+    }
+
 }
+
