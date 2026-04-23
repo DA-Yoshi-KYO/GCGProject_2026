@@ -7,6 +7,7 @@
  * 
  */
 
+/*
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
@@ -122,3 +123,5 @@ public class CustomPostFeature : ScriptableRendererFeature
         renderer.EnqueuePass(pass);
     }
 }
+
+*/
