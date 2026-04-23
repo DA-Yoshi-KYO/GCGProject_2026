@@ -8,14 +8,14 @@ using System.Collections.Generic;
  *                床・壁・ドア・固定モデルの情報を保持し、
  *                キー名から対象データを取得できるようにする
  *  履歴        : 2026/04/24 新規作成(ヨシモト)
- *                2026/04/24 ドア・モデルをキー検索できる構造に変更
+ *                2026/04/24 ドア・モデルをキー検索できる構造に変更(ヨシモト)
  *==================================================*/
 
 /// <summary>
 /// マップデータを保持する ScriptableObject です。
 /// キー文字列を使って、ドアや固定モデルの情報を取得できます。
 /// </summary>
-[CreateAssetMenu(menuName = "MapData_Scriptable")]
+[CreateAssetMenu(menuName = "ScriptableObjects/MapData_Scriptable")]
 public class CSS_MapData : ScriptableObject
 {
     /// <summary>
@@ -148,7 +148,7 @@ public class CSS_MapData : ScriptableObject
         dic_DoorData = new Dictionary<string, CS_DoorData>();
         dic_ModelData = new Dictionary<string, CS_ModelData>();
 
-        for (int i = 0 ; i < lcs_DoorData.Count ; i++)
+        for (int i = 0; i < lcs_DoorData.Count; i++)
         {
             if (lcs_DoorData[i] == null)
             {
@@ -172,7 +172,7 @@ public class CSS_MapData : ScriptableObject
             dic_DoorData.Add(key, lcs_DoorData[i]);
         }
 
-        for (int i = 0 ; i < lcs_ModelData.Count ; i++)
+        for (int i = 0; i < lcs_ModelData.Count; i++)
         {
             if (lcs_ModelData[i] == null)
             {
