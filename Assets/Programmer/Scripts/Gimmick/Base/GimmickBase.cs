@@ -96,22 +96,36 @@ public class GimmickBase : MonoBehaviour
 
     private void Start()
     {
-        Renderer rend = GetComponentInChildren<Renderer>();
-        if (rend == null) return;
+        AdjustScaleToGrid();
+    }
 
-        // スケールを一旦1にリセットしてメッシュの元サイズを正確に取得
-        transform.localScale = Vector3.one;
-        Vector3 meshSize = rend.bounds.size;
+    private void AdjustScaleToGrid()
+    {
+        MeshFilter meshFilter = GetComponentInChildren<MeshFilter>();
+        if (meshFilter == null || meshFilter.sharedMesh == null)
+        {
+            Debug.LogWarning("MeshFilterが見つかりません: " + gameObject.name);
+            return;
+        }
 
-        // グリッド上で占有したいワールドサイズ
+        Vector3 meshSize = meshFilter.sharedMesh.bounds.size;
+
+        // 各値をログで確認
+        Debug.Log($"meshSize: {meshSize}");
+        Debug.Log($"GimmickSizeX: {GimmickSizeX}, GimmickSizeY: {GimmickSizeY}");
+        Debug.Log($"gridSize: {roomGrid.gridSize}");
+
         float targetSizeX = GimmickSizeX * roomGrid.gridSize.x;
         float targetSizeZ = GimmickSizeY * roomGrid.gridSize.y;
 
-        // 元のメッシュサイズに対する比率でスケールを算出
+        Debug.Log($"targetSizeX: {targetSizeX}, targetSizeZ: {targetSizeZ}");
+
         float scaleX = targetSizeX / meshSize.x;
         float scaleZ = targetSizeZ / meshSize.z;
+        float scaleY = (scaleX + scaleZ) / 2f;
 
-        float scaleY = (scaleX + scaleZ) / 2f; // XZの平均比率
+        Debug.Log($"scale: ({scaleX}, {scaleY}, {scaleZ})");
+
         transform.localScale = new Vector3(scaleX, scaleY, scaleZ);
     }
 
@@ -154,7 +168,7 @@ public class GimmickBase : MonoBehaviour
     {
         if(hitChecker == null)
         {
-            hitChecker = Instantiate(hitCheckerPrefab, transform);
+            hitChecker = Instantiate(hitCheckerPrefab);
             
             // 当たり判定の大きさを設定
             GameObject Effect = hitChecker.transform.Find("Effect").gameObject;
