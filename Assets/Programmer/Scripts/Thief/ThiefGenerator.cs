@@ -62,7 +62,6 @@ public class ThiefGenerator : MonoBehaviour
             if (thiefParent == null)
             {
                 thiefParent = new GameObject("ThiefParent");
-                GameObject.Instantiate(thiefParent);
             }
 
 

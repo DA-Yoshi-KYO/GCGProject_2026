@@ -133,11 +133,8 @@ public class ThiefAI : MonoBehaviour
         // 現在の探索対象が視認オブジェクト(VisionTarget)かどうかを判定
         if (currentTarget is VisionTarget)
         {
-            // 現在の探索対象の記憶情報
-            VisionTargetMemory targetMemory = roomMemories[currentRoom].recognizedObjects[(VisionTarget)currentTarget];
-
             // 探索対象が既に探索済みの場合
-            if (targetMemory.isExplored)
+            if (((VisionTarget)currentTarget).isExplored)
             {
                 DecideTarget();
             }
@@ -158,7 +155,7 @@ public class ThiefAI : MonoBehaviour
                 navMeshAgent.SetDestination(currentTarget.transform.position);
 
                 // 探索対象に十分近づいたら、探索完了とする
-                if (Vector3.Distance(transform.position, currentTarget.transform.position) < targetMemory.exploredDistanceThreshold)
+                if (Vector3.Distance(transform.position, currentTarget.transform.position) < ((VisionTarget)currentTarget).exploredDistanceThreshold)
                 {
                     // 宝物を探索にしていて、完了した場合は、発見状態に切り替える
                     if (((VisionTarget)currentTarget).targetType == VisionTarget.TargetType.Treasure)
@@ -170,9 +167,9 @@ public class ThiefAI : MonoBehaviour
                     else
                     {
                         // 探索対象を探索済みに設定
-                        targetMemory.isExplored = true;
+                        ((VisionTarget)currentTarget).isExplored = true;
                         // 探索度を加算
-                        roomMemories[currentRoom].explorationLevel += targetMemory.explorationValue;
+                        roomMemories[currentRoom].explorationLevel += ((VisionTarget)currentTarget).explorationValue;
 
                         // 探索度が閾値を超えた場合は、次の部屋に移動するための処理を追加する
                         if (roomMemories[currentRoom].explorationLevel >= nextRoomSearchThreshold)
@@ -249,59 +246,58 @@ public class ThiefAI : MonoBehaviour
             }
 
             // オブジェクトが部屋の記憶にない場合は新たに追加
-            if (roomMemories[currentRoom].recognizedObjects == null) roomMemories[currentRoom].recognizedObjects = new Dictionary<VisionTarget, VisionTargetMemory>();
+            if (roomMemories[currentRoom].recognizedObjects == null) roomMemories[currentRoom].recognizedObjects = new List<VisionTarget>();
 
             // 現在の部屋の記憶にオブジェクトを追加
-            if (!roomMemories[currentRoom].recognizedObjects.ContainsKey(target))
+
+            foreach (var entry in roomMemories[currentRoom].recognizedObjects)
             {
-                // 新しいオブジェクトを記憶に追加
-                VisionTargetMemory newMemory = new VisionTargetMemory();
-                newMemory.FirstSetup();
+                // 既に記憶しているオブジェクトの場合はスキップ
+                if (entry == target) continue;
+            }
 
-                roomMemories[currentRoom].recognizedObjects.Add(target, newMemory);
+            // 新しいオブジェクトを記憶に追加
+            roomMemories[currentRoom].recognizedObjects.Add(target);
 
-                // 新しく記憶したオブジェクトの種類に応じて探索対象を切り替える
-                switch (target.targetType)
-                {
-                    case VisionTarget.TargetType.Player:
+            // 新しく記憶したオブジェクトの種類に応じて探索対象を切り替える
+            switch (target.targetType)
+            {
+                case VisionTarget.TargetType.Player:
+                    {
+                        // currentTarget が VisionTarget かつ Treasure のときだけブレーク
+                        if (currentTarget is VisionTarget vt && vt.targetType == VisionTarget.TargetType.Treasure)
+                            break;
+
+                        currentTarget = target;
+                    }
+                    break;
+                case VisionTarget.TargetType.Treasure:
+                    {
+                        // より近い宝物を探索対象に設定する
+                        if (currentTarget is VisionTarget vt && vt.targetType == VisionTarget.TargetType.Treasure)
                         {
-                            // currentTarget が VisionTarget かつ Treasure のときだけブレーク
-                            if (currentTarget is VisionTarget vt && vt.targetType == VisionTarget.TargetType.Treasure)
-                                break;
+                            float distance = Vector3.Distance(transform.position, target.transform.position);
+                            float currentDistance = Vector3.Distance(transform.position, currentTarget.transform.position);
 
-                            currentTarget = target;
-                        }
-                        break;
-                    case VisionTarget.TargetType.Treasure:
-                        {
-                            // より近い宝物を探索対象に設定する
-                            if (currentTarget is VisionTarget vt && vt.targetType == VisionTarget.TargetType.Treasure)
-                            {
-                                float distance = Vector3.Distance(transform.position, target.transform.position);
-                                float currentDistance = Vector3.Distance(transform.position, currentTarget.transform.position);
-
-                                // より近い宝物を探索対象に設定
-                                if (distance < currentDistance)
-                                {
-                                    currentTarget = target;
-                                }
-                            }
-                            // 現在の探索対象が宝物でない場合は、視認した宝物を探索対象に設定
-                            else
+                            // より近い宝物を探索対象に設定
+                            if (distance < currentDistance)
                             {
                                 currentTarget = target;
                             }
                         }
-                        break;
-                    case VisionTarget.TargetType.Exit:
-                    case VisionTarget.TargetType.Trap:
-                    case VisionTarget.TargetType.RoomObject:
-                    default:
-                        break;
-                }
+                        // 現在の探索対象が宝物でない場合は、視認した宝物を探索対象に設定
+                        else
+                        {
+                            currentTarget = target;
+                        }
+                    }
+                    break;
+                case VisionTarget.TargetType.Exit:
+                case VisionTarget.TargetType.Trap:
+                case VisionTarget.TargetType.RoomObject:
+                default:
+                    break;
             }
-            // 既に記憶しているオブジェクトの場合はスキップ
-            else continue;
         }
     }
 
@@ -314,10 +310,10 @@ public class ThiefAI : MonoBehaviour
     private bool HasUnexploredTargets()
     {
         // 視認しているオブジェクトの中に未探索のものがあるかどうかを判定
-        foreach (KeyValuePair<VisionTarget, VisionTargetMemory> entry in roomMemories[currentRoom].recognizedObjects)
+        foreach (var entry in roomMemories[currentRoom].recognizedObjects)
         {
             // 未探索のオブジェクトがある場合はtrueを返す
-            if (!entry.Value.isExplored) return true;
+            if (!entry.isExplored) return true;
         }
 
         // 全てのオブジェクトが探索済みの場合はfalseを返す
@@ -336,10 +332,10 @@ public class ThiefAI : MonoBehaviour
         if (HasUnexploredTargets())
         {
             // 視認したオブジェクトの中から、未探索で近いものを優先して探索対象に設定
-            foreach (KeyValuePair<VisionTarget, VisionTargetMemory> entry in roomMemories[currentRoom].recognizedObjects)
+            foreach (var entry in roomMemories[currentRoom].recognizedObjects)
             {
                 // 既に探索済みのオブジェクトはスキップ
-                if (entry.Value.isExplored) continue;
+                if (entry.isExplored) continue;
 
                 // 現在の探索対象が視認オブジェクト(VisionTarget)かどうか
                 if (currentTarget is VisionTarget)
@@ -350,16 +346,16 @@ public class ThiefAI : MonoBehaviour
                         case VisionTarget.TargetType.Treasure:
                             {
                                 // より近い宝物を探索対象に設定
-                                if (entry.Key.targetType != VisionTarget.TargetType.Treasure) continue;
+                                if (entry.targetType != VisionTarget.TargetType.Treasure) continue;
 
                                 // オブジェクトとの距離を計算
-                                float distance = Vector3.Distance(transform.position, entry.Key.transform.position);
+                                float distance = Vector3.Distance(transform.position, entry.transform.position);
 
                                 // より近いオブジェクトを探索対象に設定
                                 if (distance < distanceToTarget)
                                 {
                                     distanceToTarget = distance;
-                                    currentTarget = entry.Key;
+                                    currentTarget = entry;
                                 }
                                 else continue;
                             }
@@ -369,20 +365,20 @@ public class ThiefAI : MonoBehaviour
                                 // 宝物以外はスキップ
                                 if (((VisionTarget)currentTarget).targetType != VisionTarget.TargetType.Treasure) continue;
 
-                                currentTarget = entry.Key;
+                                currentTarget = entry;
                             }
                             break;
                         case VisionTarget.TargetType.Trap:
                         case VisionTarget.TargetType.RoomObject:
                             {
                                 // オブジェクトとの距離を計算
-                                float distance = Vector3.Distance(transform.position, entry.Key.transform.position);
+                                float distance = Vector3.Distance(transform.position, entry.transform.position);
 
                                 // より近いオブジェクトを探索対象に設定
                                 if (distance < distanceToTarget)
                                 {
                                     distanceToTarget = distance;
-                                    currentTarget = entry.Key;
+                                    currentTarget = entry;
                                 }
                                 else continue;
                             }
@@ -393,12 +389,12 @@ public class ThiefAI : MonoBehaviour
                 else
                 {
                     // オブジェクトとの距離を計算
-                    float distance = Vector3.Distance(transform.position, entry.Key.transform.position);
+                    float distance = Vector3.Distance(transform.position, entry.transform.position);
                     // より近いオブジェクトを探索対象に設定
                     if (distance < distanceToTarget)
                     {
                         distanceToTarget = distance;
-                        currentTarget = entry.Key;
+                        currentTarget = entry;
                     }
                     else continue;
                 }
@@ -430,7 +426,7 @@ public class ThiefAI : MonoBehaviour
             else
             {
                 // 現在の移動ポイントがリストのどこにあるかを判定
-                for (int i = 0; i < currentRoom.movePoints.Count; i++)
+                for (int i = 0 ; i < currentRoom.movePoints.Count ; i++)
                 {
                     // 現在の移動ポイントがリストのどこにあるかを判定
                     if (currentRoom.movePoints[i] == currentTarget)
