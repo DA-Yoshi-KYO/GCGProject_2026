@@ -51,6 +51,10 @@ public class ThiefAI : MonoBehaviour
     private float walkSpeed;
     private float runSpeed;
 
+    [Tooltip("ドロップするソウルの数")]
+    private int soulDropCount;
+    public int SoulDropCount => soulDropCount;
+
     [Tooltip("走り状態になる標的オブジェクトのタイプリスト")]
     private List<VisionTarget.TargetType> runTargetTypes;
 
@@ -63,16 +67,15 @@ public class ThiefAI : MonoBehaviour
     // 泥棒の耐久力と移動速度を設定するメソッド
     public void Setting(ThiefData data, float playerSpeed, RoomNode firstRoom)
     {
-        /*未実装、未設定　*///data.soulDropCount;
         /*未実装、未設定　*///data.jumpHeight;
         /*未設定、未設定　*///data.alertTime;
 
-
-        this.durability = data.durability;
-        this.walkSpeed = playerSpeed * data.walkSpeedMultiplier;
-        this.runSpeed = playerSpeed * data.runSpeedMultiplier;
-        this.nextRoomSearchThreshold = data.nextRoomSearchThreshold;
-        this.runTargetTypes = data.runTargetTypes;
+        durability = data.durability;
+        walkSpeed = playerSpeed * data.walkSpeedMultiplier;
+        runSpeed = playerSpeed * data.runSpeedMultiplier;
+        nextRoomSearchThreshold = data.nextRoomSearchThreshold;
+        runTargetTypes = data.runTargetTypes;
+        soulDropCount = data.soulDropCount;
 
         // 初期状態を探索に設定
         currentState = ThiefState.Explore;
