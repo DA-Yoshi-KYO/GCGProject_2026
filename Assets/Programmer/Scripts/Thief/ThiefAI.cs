@@ -8,9 +8,12 @@
  *            | 探索対象の優先順位を追加
  * 2026-04-22 | 耐久値を減少させる処理を追加
  *            | NavMeshAgentを利用して移動する処理を追加
+ * 2026-04-23 | 泥棒のデータベースの項目変更に合わせて、Settingメソッドの内容を変更
+ *            | 走り状態になる標的オブジェクトのタイプに応じて、移動速度を切り替える処理を追加
  * 
  */
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -45,7 +48,12 @@ public class ThiefAI : MonoBehaviour
     [Tooltip("泥棒の耐久力")]
     private int durability;
     [Tooltip("泥棒の移動速度")]
-    private float speed;
+    private float walkSpeed;
+    private float runSpeed;
+
+    [Tooltip("走り状態になる標的オブジェクトのタイプリスト")]
+    private List<VisionTarget.TargetType> runTargetTypes;
+
     [Tooltip("次の部屋探索に切り替える探索度の閾値")]
     private int nextRoomSearchThreshold;
 
@@ -53,17 +61,24 @@ public class ThiefAI : MonoBehaviour
     private NavMeshAgent navMeshAgent;
 
     // 泥棒の耐久力と移動速度を設定するメソッド
-    public void Setting(int durability, float speed, int nextRoomSearchThreshold)
+    public void Setting(ThiefData data, float playerSpeed, RoomNode firstRoom)
     {
-        this.durability = durability;
-        this.speed = speed;
-        this.nextRoomSearchThreshold = nextRoomSearchThreshold;
+        /*未実装、未設定　*///data.soulDropCount;
+        /*未実装、未設定　*///data.jumpHeight;
+        /*未設定、未設定　*///data.alertTime;
+
+
+        this.durability = data.durability;
+        this.walkSpeed = playerSpeed * data.walkSpeedMultiplier;
+        this.runSpeed = playerSpeed * data.runSpeedMultiplier;
+        this.nextRoomSearchThreshold = data.nextRoomSearchThreshold;
+        this.runTargetTypes = data.runTargetTypes;
 
         // 初期状態を探索に設定
         currentState = ThiefState.Explore;
 
         // 初期部屋を設定（仮）
-        currentRoom = FindObjectOfType<RoomNode>();
+        currentRoom = firstRoom;
 
         // 部屋の記憶を初期化
         roomMemories = new Dictionary<RoomNode, RoomMemory>();
@@ -75,7 +90,7 @@ public class ThiefAI : MonoBehaviour
         // ナビメッシュエージェントの速度を設定
         navMeshAgent = GetComponent<NavMeshAgent>();
         navMeshAgent.baseOffset = 1.0f; // キャラクターの高さに合わせてオフセットを設定
-        navMeshAgent.speed = speed;
+        navMeshAgent.speed = this.walkSpeed;
     }
 
     private void Update()
@@ -126,6 +141,16 @@ public class ThiefAI : MonoBehaviour
             // 探索対象が未探索の場合
             else
             {
+                // 探索対象が走り状態になる標的オブジェクトのタイプリストに含まれている場合は、走り状態に切り替える
+                if (runTargetTypes.Contains(((VisionTarget)currentTarget).targetType))
+                {
+                    navMeshAgent.speed = this.runSpeed;
+                }
+                else
+                {
+                    navMeshAgent.speed = this.walkSpeed;
+                }
+
                 // 探索対象に向かって移動
                 navMeshAgent.SetDestination(currentTarget.transform.position);
 
