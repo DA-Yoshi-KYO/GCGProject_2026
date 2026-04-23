@@ -45,18 +45,39 @@ public class CustomPostFeature : ScriptableRendererFeature
 
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
         {
+            AttachVolume();
+
+            //if (!renderingData.cameraData.postProcessEnabled) return;
+            //if (renderingData.cameraData.isSceneViewCamera) return;
+
             var cmd = CommandBufferPool.Get("CustomPost");
-            if (!AttachVolume())
+
+            var renderer = renderingData.cameraData.renderer;
+            var src = renderer.cameraColorTargetHandle;
+
+            if (material == null)
             {
+                Debug.LogError("Material null");
                 CommandBufferPool.Release(cmd);
                 return;
             }
 
-            // source → temp(加工)
-            Blitter.BlitCameraTexture(cmd, source, tempRT, material, 0);
+            var desc = renderingData.cameraData.cameraTargetDescriptor;
+            desc.depthBufferBits = 0;
 
-            // temp → source(戻す)
-            Blitter.BlitCameraTexture(cmd, tempRT, source);
+            RenderingUtils.ReAllocateIfNeeded(ref tempRT, desc, name: "_TempRT");
+
+            if (tempRT == null)
+            {
+                Debug.LogError("tempRT null");
+                CommandBufferPool.Release(cmd);
+                return;
+            }
+
+            AttachVolume();
+
+            Blitter.BlitCameraTexture(cmd, src, tempRT, material, 0);
+            Blitter.BlitCameraTexture(cmd, tempRT, src);
 
             context.ExecuteCommandBuffer(cmd);
             CommandBufferPool.Release(cmd);
@@ -67,13 +88,12 @@ public class CustomPostFeature : ScriptableRendererFeature
             // RTHandleは自動管理されるので基本不要
         }
 
-        private bool AttachVolume()
+        private void AttachVolume()
         {
             var stack = VolumeManager.instance.stack;   // Volumeスタックの取得
             if (stack == null)
             {
                 Debug.LogWarning("VolumeStackが見つかりません");
-                return false;
             }
 
             // パラメータの適応
@@ -81,11 +101,9 @@ public class CustomPostFeature : ScriptableRendererFeature
             GrayScaleVolume volume = stack.GetComponent<GrayScaleVolume>();
             if (volume.active)
             {
+                material.SetInt("_UseGrayscale", volume.enable.value ? 1 : 0);
                 material.SetFloat("_Intensity", volume.intensity.value);
             }
-
-
-            return true;
         }
     }
 
@@ -94,12 +112,13 @@ public class CustomPostFeature : ScriptableRendererFeature
 
     public override void Create()
     {
-        pass = new CustomPass(material);
+        pass = new CustomPass(null);
         pass.renderPassEvent = RenderPassEvent.AfterRenderingPostProcessing;
     }
 
     public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
     {
+        pass.material = material;
         renderer.EnqueuePass(pass);
     }
 }

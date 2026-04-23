@@ -5,8 +5,11 @@ Shader "Custom/AllPostProcess"
         _MainTex ("Texture", 2D) = "white" {}
 
         // C#からの入力データ
-        _UseGrayscale ("Use Grayscale", Int) = 0
-        _UseInvert ("Use Invert", Int) = 0
+        // グレースケール
+        _UseGrayscale ("UseGrayscale", Int) = 0
+
+        // 色反転
+        _UseInvert ("UseInvert", Int) = 0
     }
 
     SubShader
@@ -29,8 +32,8 @@ Shader "Custom/AllPostProcess"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
             // ===== 入力 =====
-            TEXTURE2D(_MainTex);
-            SAMPLER(sampler_MainTex);
+            TEXTURE2D(_BlitTexture);
+            SAMPLER(sampler_BlitTexture);
 
             int _UseGrayscale;
             int _UseInvert;
@@ -59,7 +62,7 @@ Shader "Custom/AllPostProcess"
             }
 
             // ===== ポストプロセス用関数 =====
-            // グレースケールをかけます
+            // グレースケールをかける
             // ※テスト用関数
             half4 Effect_Grayscale(half4 col)
             {
@@ -67,7 +70,7 @@ Shader "Custom/AllPostProcess"
                 return float4(g, g, g, 1);
             }
 
-            // 色を反転させます
+            // 色を反転
             // ※テスト用関数
             half4 Effect_Invert(half4 col)
             {
@@ -77,17 +80,19 @@ Shader "Custom/AllPostProcess"
             // ===== フラグメント =====
             half4 Frag(Varyings i) : SV_Target
             {
+                return float4(1, 0, 0, 1);
                 float2 uv = i.uv;
 
                 // 元画面
-                half4 col = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv);
+                half4 col = SAMPLE_TEXTURE2D(_BlitTexture, sampler_BlitTexture, uv);
 
                 // ポストプロセスの重ねがけ
-                if (_UseGrayscale == 1)
-                    col = Effect_Grayscale(col);
+                //if (_UseGrayscale == 1)
 
-                if (_UseInvert == 1)
-                    col = Effect_Invert(col);
+                // if (_UseInvert == 1)
+                //     col = Effect_Invert(col);
+
+                col = Effect_Grayscale(col);
 
                 return col;
             }
