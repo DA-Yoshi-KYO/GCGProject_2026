@@ -179,11 +179,10 @@ public class GimmickBase : MonoBehaviour
 
             Vector3 EffectSize = new Vector3(EffectRangeX * roomGrid.gridSize.x,1, EffectRangeY * roomGrid.gridSize.y);
             Vector3 HitSize = new Vector3(HitRangeX * roomGrid.gridSize.x, 1, HitRangeY * roomGrid.gridSize.y);
-            Vector3 CubeSize = new Vector3(EffectRangeX * roomGrid.gridSize.x, 1, EffectRangeY * roomGrid.gridSize.y);
 
             Effect.transform.localScale = EffectSize;
             Hit.transform.localScale = HitSize;
-            Cube.transform.localScale = CubeSize;
+            Cube.transform.localScale = EffectSize;
 
         }
 
