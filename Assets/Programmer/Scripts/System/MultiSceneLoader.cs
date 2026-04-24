@@ -34,9 +34,9 @@ public class MultiSceneLoader : MonoBehaviour
             foreach (var obj in rootObjects)
             {
                 // ここでobjを使って何か処理をする
-                ThiefAI thiefAI = obj.GetComponentInChildren<ThiefAI>();
+                //ThiefAI thiefAI = obj.GetComponentInChildren<ThiefAI>();
 
-                thiefAI.Setting(100, 5.0f, 3);
+                //thiefAI.Setting(100, 5.0f, 3);
             }
         }
     }

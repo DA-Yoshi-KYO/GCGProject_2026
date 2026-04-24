@@ -14,7 +14,7 @@ public class WaveManager : MonoBehaviour
     private int waveCount;
     public int waveNumber => waveCount;
 
-    private void Start()
+    private void Awake()
     {
         Reset();
     }
