@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-7048415785760715989
+--- !u!114 &-6750463509532660463
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -73,8 +73,9 @@ MonoBehaviour:
     hdrDebugViewPS: {fileID: 4800000, guid: 573620ae32aec764abd4d728906d2587, type: 3}
   m_RendererFeatures:
   - {fileID: -1878332245247344467}
-  - {fileID: -7048415785760715989}
-  m_RendererFeatureMap: adc0de57c6d2eee52b0b7adc2fff2e9e
+  - {fileID: 8601623981657528376}
+  - {fileID: -6750463509532660463}
+  m_RendererFeatureMap: adc0de57c6d2eee538982d1e701b5f7711ad111d348951a2
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -137,3 +138,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Active: 1
   material: {fileID: 2100000, guid: 880f9f0c24182a3499556617cbefbeda, type: 2}
+--- !u!114 &8601623981657528376
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1ca3d155cff17d40b92b64be1661a19, type: 3}
+  m_Name: CustomPostProcessFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  injectionPoint: 600
+  fetchColorBuffer: 1
+  requirements: 0
+  passMaterial: {fileID: 2100000, guid: 880f9f0c24182a3499556617cbefbeda, type: 2}
+  passIndex: 0
+  bindDepthStencilAttachment: 0

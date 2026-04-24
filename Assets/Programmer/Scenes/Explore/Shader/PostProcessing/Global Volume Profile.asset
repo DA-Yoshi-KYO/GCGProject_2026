@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d7fd9488000d3734a9e00ee676215985, type: 3}
   m_Name: Global Volume Profile
   m_EditorClassIdentifier: 
-  components: []
+  components:
+  - {fileID: 5516976581785188843}
 --- !u!114 &2785025442358896991
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -32,3 +33,22 @@ MonoBehaviour:
   intensity:
     m_OverrideState: 0
     m_Value: 0
+--- !u!114 &5516976581785188843
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b27d024dd1daf444bac1e7d988cafa2d, type: 3}
+  m_Name: PostProcessVolume
+  m_EditorClassIdentifier: 
+  active: 1
+  enable:
+    m_OverrideState: 0
+    m_Value: 0
+  intensity:
+    m_OverrideState: 0
+    m_Value: 1

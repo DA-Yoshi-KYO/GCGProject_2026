@@ -1,5 +1,5 @@
 /* ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
- *    グレースケール用のボリューム
+ *    ポストプロセス用のボリューム
  * ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
  *    吉田 京志郎
  * ----------------------------------------------------------
@@ -10,7 +10,7 @@
 using UnityEngine.Rendering;
 
 [System.Serializable, VolumeComponentMenu("CustomPostEffect/GrayScale")]
-public class GrayScaleVolume : VolumeComponent
+public class PostProcessVolume : VolumeComponent
 {
     public BoolParameter enable = new BoolParameter(false);
     public ClampedFloatParameter intensity = new ClampedFloatParameter(1.0f, 0.0f, 1.0f);
