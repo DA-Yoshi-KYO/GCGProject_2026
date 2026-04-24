@@ -167,6 +167,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8680212374388006181}
+  - component: {fileID: 2398870776643814341}
   m_Layer: 0
   m_Name: HitChecker
   m_TagString: Untagged
@@ -192,6 +193,23 @@ Transform:
   - {fileID: 3341751735383793643}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2398870776643814341
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5250139902968933795}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab601d9943549064386c97dc19526bf4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hit: {fileID: 4883029484676775618}
+  effect: {fileID: 6835616385186315145}
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!1 &6080328134442126634
 GameObject:
   m_ObjectHideFlags: 0

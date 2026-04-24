@@ -104,6 +104,7 @@ public class GimmickBase : MonoBehaviour
     public GimmickState gimmickState;
 
     [Header("調整用（プログラマー専用）")]
+    [Tooltip("ギミックの大きさや位置を調整するための値"), Min(1)]
     public int Adjust;
 
     // ギミックのグリッド上の位置
@@ -200,7 +201,14 @@ public class GimmickBase : MonoBehaviour
         if(hitChecker == null)
         {
             hitChecker = Instantiate(hitCheckerPrefab);
-            
+
+            HitChecker hit = hitChecker.GetComponent<HitChecker>();
+            if (hit != null)
+            {
+                hit.SetHitDamage(attackPower);
+                hit.SetEffectDamage(effectPower);
+            }
+
             // 当たり判定の大きさを設定
             GameObject Effect = hitChecker.transform.Find("Effect").gameObject;
             GameObject Hit = hitChecker.transform.Find("Hit").gameObject;
