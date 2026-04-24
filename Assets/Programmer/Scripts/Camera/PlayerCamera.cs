@@ -1,5 +1,11 @@
-using System.Collections;
-using System.Collections.Generic;
+/* ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+ *    プレイヤーカメラ作成
+ * ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+ *    元浪梨緒
+ * ----------------------------------------------------------
+ * 2026-04-24 | 初回作成
+ * 
+ */
 using UnityEngine;
 
 public class PlayerCamera : MonoBehaviour
