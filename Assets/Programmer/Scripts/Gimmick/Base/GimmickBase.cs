@@ -270,6 +270,14 @@ public class GimmickBase : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// ギミックの大きさをグリッド単位で返す関数
+    /// </summary>
+    /// <returns>ギミックの大きさを表すベクトル</returns>
+    public Vector2Int GetGimmickSize()
+    {
+        return new Vector2Int((int)GimmickSizeX, (int)GimmickSizeY);
+    }
 
 
 
