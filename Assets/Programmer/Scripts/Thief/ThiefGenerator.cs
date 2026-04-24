@@ -5,41 +5,30 @@
  * ----------------------------------------------------------
  * 2026-04-17 | 初回作成
  * 2026-04-19 | 泥棒のパラメーター設定処理の記載(行動AIの設定、視界システムの設定)
+ * 2026-04-23 | 移動速度の設定処理の記載(プレイヤーの速度を仮で用意して、そこから泥棒の速度を計算するように変更)
  * 
  */
-using UnityEditor;
+using Unity.Mathematics;
 using UnityEngine;
 
 
 // 泥棒を生成するシステム
-public class ThiefGenerator
+public class ThiefGenerator : MonoBehaviour
 {
-    [Tooltip("泥棒のデータベース")]
+    [SerializeField, Tooltip("泥棒のデータベース")]
     private ThiefDataSO thiefDB;
-    [Tooltip("ステージごとのウェーブデータのデータベース")]
+    [SerializeField, Tooltip("ステージごとのウェーブデータのデータベース")]
     private StageDataSO stageDataDB;
-    [Tooltip("泥棒のプレハブ")]
+    [SerializeField, Tooltip("泥棒のプレハブ")]
     private GameObject thiefPrefab;
-
-    [Tooltip("使用する泥棒データベースのパス")]
-    private string thiefDBPath = "Assets/Programmer/ScriptableObject/ThiefDB.asset";
-    [Tooltip("使用するステージデータベースのパス")]
-    private string stageDataDBPath = "Assets/Programmer/ScriptableObject/StageDB.asset";
-    [Tooltip("泥棒のプレハブのパス")]
-    private string thiefPrefabPath = "Assets/Programmer/Prefabs/Thief.prefab";
 
     private void Start()
     {
-        // 泥棒のデータベースをロード
-        thiefDB = AssetDatabase.LoadAssetAtPath<ThiefDataSO>(thiefDBPath);
-        // ステージごとのウェーブデータのデータベースをロード
-        stageDataDB = AssetDatabase.LoadAssetAtPath<StageDataSO>(stageDataDBPath);
-        // 泥棒のプレハブをロード
-        thiefPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(thiefPrefabPath);
+        Notify();
     }
 
     // 泥棒を生成するメソッド
-    public void Notify()
+    private void Notify()
     {
         // 現在のウェーブ数を取得
         int currentWave = GameObject.Find("Manager").GetComponent<WaveManager>().waveNumber;
@@ -57,6 +46,7 @@ public class ThiefGenerator
             // 泥棒のタイプに応じたデータを取得
             ThiefData data = new ThiefData();
 
+            // 泥棒のデータベースから、泥棒のタイプに応じたデータを取得
             for (int i = 0 ; i < thiefDB.thiefData.Length ; i++)
             {
                 if(thiefDB.thiefData[i].typeName == thiefData.type)
@@ -66,33 +56,40 @@ public class ThiefGenerator
                 }
             }
 
+
+            // 生成する泥棒の親オブジェクトを取得、存在しない場合は生成
+            GameObject thiefParent = GameObject.Find("ThiefParent");
+            if (thiefParent == null)
+            {
+                thiefParent = new GameObject("ThiefParent");
+            }
+
+
             //泥棒の生成
             for (int i = 0 ; i < thiefData.count ; i++)
             {
                 GameObject thief = GameObject.Instantiate(thiefPrefab);
                 //--- 泥棒のデータを設定
 
+                /* 仮で実数変数でプレイヤー速度を用意 */
+                float playerSpeed = 3.0f;
+
                 // 行動AIの設定
                 ThiefAI thiefAI = thief.GetComponent<ThiefAI>();
-                thiefAI.Setting(data.durability, data.speed, data.nextRoomSearchThreshold);
+                thiefAI.Setting(data, playerSpeed, FindObjectOfType<RoomNode>());
 
                 // 視界システムの設定
                 VisionSensor thiefView = thief.GetComponent<VisionSensor>();
                 thiefView.Setting(data.viewDistance, data.viewAngle);
 
-                // --- 生成した泥棒を管理するオブジェクトの子にする
-                GameObject thiefManager = GameObject.Find("ThiefManager");
-                if (thiefManager != null)
-                {
-                    thief.transform.parent = thiefManager.transform;
-                }
-                else
-                {
-                    GameObject parent  = GameObject.Instantiate(new GameObject("ThiefManager"));
-                    thief.transform.parent = parent.transform;
-                }
-
+                // --- 泥棒をthiefParentの子オブジェクトに設定
+                thief.transform.parent = thiefParent.transform;
+                
                 //--- 生成した泥棒の生成位置を選定
+                // (仮) 50,0,50 ~ -50,0,-50の範囲にランダムに生成
+                float x = UnityEngine.Random.Range(-50.0f, 50.0f);
+                float z = UnityEngine.Random.Range(-50.0f, 50.0f);
+                thief.transform.position = new Vector3(x, 0, z);
             }
         }
     }

@@ -1,6 +1,13 @@
+/* ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+ *    3DSE再生用
+ * ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+ *    元浪梨緒
+ * ----------------------------------------------------------
+ * 2026-04-22 | 初回作成
+ * 
+ */
+
 using CriWare;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PlaySE_3D : MonoBehaviour
@@ -11,8 +18,8 @@ public class PlaySE_3D : MonoBehaviour
     public GameObject speaker;//音源発生のオブジェクト
     public GameObject player;//プレイヤー
 
+    private CriAtomExPlayer playerInfo;//AtomExPlayer
     private CriAtomEx.CueInfo[] cueInfoList;//CueName格納
-    private CriAtomExPlayer[] playerInfoList;//AtomExPlayer格納
     private CriAtomExAcb[] criAtomExAcbsList;//CueSheet格納
 
     private float[] volumeList;//音量
@@ -21,8 +28,7 @@ public class PlaySE_3D : MonoBehaviour
     void Start()
     {
         ////初期化
-        playerInfoList = new CriAtomExPlayer[1];
-        playerInfoList[0] = new CriAtomExPlayer();
+        playerInfo = new CriAtomExPlayer();
         cueInfoList = new CriAtomEx.CueInfo[1];
         cueInfoList[0] = new CriAtomEx.CueInfo();
         criAtomExAcbsList = new CriAtomExAcb[1];
@@ -30,15 +36,15 @@ public class PlaySE_3D : MonoBehaviour
         source = new CriAtomEx3dSource();
         listener = new CriAtomEx3dListener();
 
-        playerInfoList[0].Set3dSource(source);
-        playerInfoList[0].Set3dListener(listener);
+        playerInfo.Set3dSource(source);
+        playerInfo.Set3dListener(listener);
 
-        playerInfoList[0].SetCue(criAtomExAcbsList[0], "CatMeow");
+        playerInfo.SetCue(criAtomExAcbsList[0], "CatMeow");
         volumeList[0] = 1.0f;
-        playerInfoList[0].SetVolume(volumeList[0]);
-        playerInfoList[0].Loop(true);//本来ならfalseだけど確認のためtrueにしている
-        playerInfoList[0].Prepare();
-        playerInfoList[0].Start();
+        playerInfo.SetVolume(volumeList[0]);
+        playerInfo.Loop(true);//本来ならfalseだけど確認のためtrueにしている
+        playerInfo.Prepare();
+        playerInfo.Start();
     }
 
     // Update is called once per frame
@@ -51,5 +57,6 @@ public class PlaySE_3D : MonoBehaviour
         //オーディエンスの座標更新
         listener.SetPosition(player.transform.position.x, player.transform.position.y, player.transform.position.z);
         listener.Update();
+
     }
 }
