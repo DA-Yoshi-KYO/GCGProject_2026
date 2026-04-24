@@ -87,8 +87,6 @@ public class PlayerAction : MonoBehaviour
                     0.0f,
                     transform.forward.z * transform.localScale.z);
 
-        Debug.Log(settingPos);
-
         //グリッドの位置を取得
         var roomGrid = FindObjectOfType<RoomGrid>();
 
@@ -96,7 +94,6 @@ public class PlayerAction : MonoBehaviour
 
         Vector3 gridPos = roomGrid.GetWorldPosFromGrid(grid);
 
-        Debug.Log(gridPos);
         //生成
         Instantiate(gimmickList[currentGimmickIndex].Key, gridPos, Quaternion.identity);
   

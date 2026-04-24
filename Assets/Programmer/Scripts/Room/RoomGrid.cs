@@ -20,7 +20,8 @@ public class RoomGrid : MonoBehaviour
     void Start()
     {
         // グリッド1マスの大きさを計算
-        gridSize = new Vector2(transform.localScale.x / gridDivision.x, transform.localScale.z / gridDivision.y);
+        gridObject = gameObject.transform.GetChild(0).gameObject;
+        gridSize = new Vector2(gridObject.transform.lossyScale.x / gridDivision.x, gridObject.transform.lossyScale.z / gridDivision.y);
         rendererMaterial = GetComponent<Renderer>();
         if (rendererMaterial != null)
         {
@@ -31,7 +32,6 @@ public class RoomGrid : MonoBehaviour
             Debug.LogWarning("RoomGrid: Material not found on the GameObject.");
         }
 
-        gridObject = gameObject.transform.GetChild(0).gameObject;
     }
 
     /// <summary>
@@ -45,16 +45,15 @@ public class RoomGrid : MonoBehaviour
         // ワールド座標を床から見たローカル座標に変換
         Vector3 localPos = transform.InverseTransformPoint(pos);
 
-        // 北西を原点(0.0f,0.0f)とした相対座標に変換
-        
+        // 北西を原点(0.0f,0.0f)とした相対座標に変換   
         Vector2 relativePos = new Vector2(
             localPos.x + gridObject.transform.lossyScale.x * 0.5f,
             gridObject.transform.lossyScale.z * 0.5f - localPos.z);
-
+        
         // グリッドの分割数に基づいてグリッド位置を計算
         Vector2Int gridPos = new Vector2Int(
-            Mathf.FloorToInt(relativePos.x / 1.0f * gridDivision.x),
-            Mathf.FloorToInt(relativePos.y / 1.0f * gridDivision.y)
+            Mathf.FloorToInt(relativePos.x),
+            Mathf.FloorToInt(relativePos.y)
         );
 
         // グリッドの範囲外の場合は-1を返す
@@ -81,19 +80,14 @@ public class RoomGrid : MonoBehaviour
 
         // グリッドから相対座標に変換
         Vector2 relativePos = new Vector2(
-            (gridPos.x + 0.5f) / gridDivision.x,
-            (gridPos.y + 0.5f) / gridDivision.y
+            gridPos.x * gridSize.x - gridObject.transform.lossyScale.x * 0.5f + gridSize.x * 0.5f,
+            gridObject.transform.lossyScale.z * 0.5f - gridPos.y * gridSize.y - gridSize.x * 0.5f
         );
-
-        // 相対座標からローカル座標に変換
-        float localX = relativePos.x - 0.5f;
-        float localZ = 0.5f - relativePos.y;
-        Vector3 localPos = new Vector3(localX, 0.0f, localZ);
-
-        // ローカル座標からワールド座標に変換して返す
+        
+        Debug.Log($"relativePos: {relativePos}");
+        Vector3 localPos = new Vector3(relativePos.x, transform.position.y, relativePos.y);
         Vector3 worldPos = transform.TransformPoint(localPos);
-        worldPos.y = transform.position.y;  // ワールド座標のY値を床の高さに合わせる
-
+        worldPos.y = transform.position.y;
         return worldPos;
     }
 }
