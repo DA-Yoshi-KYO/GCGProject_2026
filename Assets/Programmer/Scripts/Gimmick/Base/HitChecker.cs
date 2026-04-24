@@ -154,6 +154,7 @@ public class HitChecker : MonoBehaviour
                                 break;
                             case Gimmick.EmptyChest:
                                 EnemyCharm(effectEnemies[i].gameObject);
+                                Debug.Log("EffectCharm");
                                 break;
                         }
                     }
@@ -178,6 +179,7 @@ public class HitChecker : MonoBehaviour
                             if(emptyChestGimmick != null)
                             {
                                 emptyChestGimmick.Durability_Value_Decreased();
+                                Debug.Log("Durability decreased");
                             }
                             break;
                     }

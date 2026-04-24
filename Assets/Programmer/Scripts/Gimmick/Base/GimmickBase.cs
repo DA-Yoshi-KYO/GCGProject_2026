@@ -114,15 +114,13 @@ public class GimmickBase : MonoBehaviour
 
     private void Start()
     {
-        AdjustScaleToGrid();
-        SetGimmickPos(new Vector2Int(0, 1));
     }
 
 
     /// <summary>
     /// ギミックの大きさを、グリッドの大きさに合わせて調整する関数
     /// </summary>
-    private void AdjustScaleToGrid()
+    public void AdjustScaleToGrid()
     {
         MeshFilter meshFilter = GetComponentInChildren<MeshFilter>();
         if (meshFilter == null || meshFilter.sharedMesh == null)
