@@ -20,26 +20,22 @@ public enum SceneName
     MainScene,
     BootStrap,
 };
-public enum CueSheetName
-{
-    WorkingTitle,
-};
+
 public enum CueName
 {
-    CatMeow,
+    Cat,
 };
 
 [Serializable]
-public class BGMData
+public class BackGround_BGM_Data
 {
     public SceneName sceneName;//再生するシーン
-    public CueSheetName cueSheet;//キューシート
     public CueName cueName;//キュー
     public float volume;//音量
 }
 
-[CreateAssetMenu(fileName = "BGMDataSO", menuName = "ScriptableObjects/BGMDataSO")]
-public class BGMDataBase : ScriptableObject
+[CreateAssetMenu(fileName = "BackGround_BGM_DataSO", menuName = "ScriptableObjects/BackGround_BGM_DataSO")]
+public class BackGround_BGM_DataBase : ScriptableObject
 {
-    public BGMData[] bgmDatas;
+    public BackGround_BGM_Data[] bgmDatas;
 }

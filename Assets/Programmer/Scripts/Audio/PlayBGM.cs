@@ -13,14 +13,13 @@ using UnityEngine.SceneManagement;
 
 public class PlayBGM : MonoBehaviour
 {
-    public BGMDataBase bgmDataBase;//データベース
-    private BGMData[] dataList;//データのリスト
+    public BackGround_BGM_DataBase dataBase;//データベース
+    private BackGround_BGM_Data[] dataList;//データのリスト
 
     private CriAtomExPlayer playerInfo;//Player生成
     private CriAtomExAcb[] criAtomExAcbsList;//CueSheet
-    private CriAtomEx.CueInfo[] cueInfoList;//CueName格納
+    //private CriAtomEx.CueInfo[] cueInfoList;//CueName格納
 
-    //private string[] cueSheetList;//キューシートリスト
     //private string[] cueNameList;//キューネームリスト
     //private string[] sceneList;//シーンリスト
 
@@ -29,13 +28,10 @@ public class PlayBGM : MonoBehaviour
 
     private bool endBGM = false;//BGM終了判定
 
-    //private double time = 0;//時間
-
-
     private void Awake()
     {
         //全てのデータ受け取る
-        dataList = bgmDataBase.bgmDatas;
+        dataList = dataBase.bgmDatas;
 
         //現在のシーン更新
         currentScene = SceneManager.GetActiveScene().name;
@@ -43,13 +39,9 @@ public class PlayBGM : MonoBehaviour
         ////初期化
         playerInfo = new CriAtomExPlayer();
         criAtomExAcbsList = new CriAtomExAcb[dataList.Length];
-        cueInfoList = new CriAtomEx.CueInfo[dataList.Length];
+        //cueInfoList = new CriAtomEx.CueInfo[dataList.Length];
 
-        //cueSheetList = new string[System.Enum.GetValues(typeof(CueSheetName)).Length];
-        //for (int i = 0 ; i < System.Enum.GetValues(typeof(CueSheetName)).Length ; ++i)
-        //{
-        //    cueSheetList = System.Enum.GetNames(typeof(CueSheetName));
-        //}
+
         //cueNameList = new string[System.Enum.GetValues(typeof(CueName)).Length];
         //for (int i = 0 ; i < System.Enum.GetValues(typeof(CueName)).Length ; ++i)
         //{
@@ -74,12 +66,7 @@ public class PlayBGM : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        //時間
-        //time = Time.fixedDeltaTime;
-        //Debug.Log(time);
-
-        //Debug.Log(criAtomExAcbsList[0].ToString());
-        //Debug.Log(sceneList[1]);
+        //Debug.Log();
         //Debug.Log(playerInfo.GetStatus());
     }
 
@@ -169,7 +156,6 @@ public class PlayBGM : MonoBehaviour
                     criAtomExAcbsList[i] = null;
                 }
 
-                //criAtomExAcbsList[i] = CriAtomExAcb.LoadAcbFile(null, dataList[i].cueSheet.ToString() + ".acb", null);
                 playerInfo.SetCue(criAtomExAcbsList[0], dataList[i].cueName.ToString());
                 playerInfo.SetVolume(dataList[i].volume);
                 playerInfo.Loop(true);

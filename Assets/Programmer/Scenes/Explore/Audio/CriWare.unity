@@ -156,7 +156,7 @@ MonoBehaviour:
     numberOfLoaders: 16
     numberOfBinders: 8
     numberOfInstallers: 2
-    installBufferSize: 0
+    installBufferSize: 32
     maxPath: 256
     userAgentString: 
     minimizeFileDescriptorUsage: 0
@@ -181,7 +181,7 @@ MonoBehaviour:
       streamingVoices: 0
     outputSamplingRate: 0
     usesInGamePreview: 0
-    inGamePreviewMode: 3
+    inGamePreviewMode: 0
     inGamePreviewConfig:
       maxPreviewObjects: 200
       communicationBufferSize: 2048
@@ -536,8 +536,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1026311042}
-  - component: {fileID: 1026311041}
   - component: {fileID: 1026311043}
+  - component: {fileID: 1026311044}
   m_Layer: 0
   m_Name: CRIWARE
   m_TagString: Untagged
@@ -545,27 +545,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1026311041
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1026311040}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 91f529aa944b914449d62b8c40f188fe, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  acfFile: GCG.acf
-  cueSheets:
-  - name: WorkingTitle
-    acbFile: WorkingTitle.acb
-    awbFile: 
-    loaderStatus: 0
-  dspBusSetting: 
-  dontDestroyOnLoad: 0
-  dontRemoveExistsCueSheet: 0
 --- !u!4 &1026311042
 Transform:
   m_ObjectHideFlags: 0
@@ -593,7 +572,36 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 151f3d8823af8f84a8852db7e058b9b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bgmDataBase: {fileID: 11400000, guid: 64b9c7714e5187c40ac52c97f93c6b88, type: 2}
+  dataBase: {fileID: 11400000, guid: 6d82b6838749d1b41b2674a8ad8e4762, type: 2}
+--- !u!114 &1026311044
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1026311040}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91f529aa944b914449d62b8c40f188fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  acfFile: GCG.acf
+  cueSheets:
+  - name: 3D_SE
+    acbFile: 3D_SE.acb
+    awbFile: 
+    loaderStatus: 0
+  - name: BackGround_BGM
+    acbFile: BackGround_BGM.acb
+    awbFile: 
+    loaderStatus: 0
+  - name: BackGround_SE
+    acbFile: BackGround_SE.acb
+    awbFile: 
+    loaderStatus: 0
+  dspBusSetting: 
+  dontDestroyOnLoad: 0
+  dontRemoveExistsCueSheet: 0
 --- !u!1 &1290309801
 GameObject:
   m_ObjectHideFlags: 0

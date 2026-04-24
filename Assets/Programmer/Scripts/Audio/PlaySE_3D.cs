@@ -57,5 +57,6 @@ public class PlaySE_3D : MonoBehaviour
         //オーディエンスの座標更新
         listener.SetPosition(player.transform.position.x, player.transform.position.y, player.transform.position.z);
         listener.Update();
+
     }
 }
