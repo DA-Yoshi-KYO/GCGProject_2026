@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Rendering.VirtualTexturing;
 
 public class PlayerAction : MonoBehaviour
 {
@@ -14,13 +15,13 @@ public class PlayerAction : MonoBehaviour
     private int currentGimmickIndex = 0;//現在選択しているギミック
 
     //プレイヤーのモード
-    private enum PlayerMode
+    public enum PlayerMode
     {
         Normal,//通常
         Setting,//設置フェーズ
     };
 
-    private PlayerMode currentMode;
+    public PlayerMode currentMode { private set; get; }
 
     // Start is called before the first frame update
     void Start()
