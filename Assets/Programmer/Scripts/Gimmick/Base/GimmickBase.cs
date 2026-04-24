@@ -50,35 +50,35 @@ public class GimmickBase : MonoBehaviour
     // 大きさ
     [Header("大きさ")]
     [Tooltip("X方向の大きさ"), Min(0)]
-    public float GimmickSizeX;
+    public float gimmickSizeX;
     [Tooltip("Y方向の大きさ"), Min(0)]
-    public float GimmickSizeY;
+    public float gimmickSizeY;
 
     // 命中範囲
     [Header("命中範囲")]
     [Tooltip("X方向の命中範囲"), Min(0)]
-    public float HitRangeX;
+    public float hitRangeX;
     [Tooltip("Y方向の命中範囲"), Min(0)]
-    public float HitRangeY;
+    public float hitRangeY;
 
     // 効果範囲
     [Header("効果範囲")]
     [Tooltip("X方向の効果範囲"), Min(0)]
-    public float EffectRangeX;
+    public float effectRangeX;
     [Tooltip("Y方向の効果範囲"), Min(0)]
-    public float EffectRangeY;
+    public float effectRangeY;
 
     // 必要なソウル数
     [Header("必要ソウル数")]
     [Tooltip("必要なソウル数"), Min(0)]
-    public int RequiredSoul;
+    public int requiredSoul;
 
     // 攻撃力と効果力
     [Header("攻撃力")]
     [Tooltip("命中時"), Min(0)]
-    public int AttackPower;
+    public int attackPower;
     [Tooltip("非命中時"), Min(0)]
-    public int EffectPower;
+    public int effectPower;
 
     [Header("RoomGrid")]
     [Tooltip("RoomGridのオブジェクト")]
@@ -132,8 +132,8 @@ public class GimmickBase : MonoBehaviour
 
         Vector3 meshSize = meshFilter.sharedMesh.bounds.size;
 
-        float targetSizeX = GimmickSizeX * roomGrid.gridSize.x;
-        float targetSizeZ = GimmickSizeY * roomGrid.gridSize.y;
+        float targetSizeX = gimmickSizeX * roomGrid.gridSize.x;
+        float targetSizeZ = gimmickSizeY * roomGrid.gridSize.y;
 
         float scaleX = targetSizeX / meshSize.x;
         float scaleZ = targetSizeZ / meshSize.z;
@@ -208,8 +208,8 @@ public class GimmickBase : MonoBehaviour
             // 確認用キューブ　（後で削除）
             GameObject Cube = hitChecker.transform.Find("Cube").gameObject;
 
-            Vector3 EffectSize = new Vector3(EffectRangeX * roomGrid.gridSize.x,1, EffectRangeY * roomGrid.gridSize.y);
-            Vector3 HitSize = new Vector3(HitRangeX * roomGrid.gridSize.x, 1, HitRangeY * roomGrid.gridSize.y);
+            Vector3 EffectSize = new Vector3(effectRangeX * roomGrid.gridSize.x,1, effectRangeY * roomGrid.gridSize.y);
+            Vector3 HitSize = new Vector3(hitRangeX * roomGrid.gridSize.x, 1, hitRangeY * roomGrid.gridSize.y);
             
             EffectSize.x = EffectSize.x * (float)Adjust;
             EffectSize.y = EffectSize.y * (float)Adjust;
@@ -283,7 +283,7 @@ public class GimmickBase : MonoBehaviour
     /// <returns>ギミックの大きさを表すベクトル</returns>
     public Vector2Int GetGimmickSize()
     {
-        return new Vector2Int((int)GimmickSizeX, (int)GimmickSizeY);
+        return new Vector2Int((int)gimmickSizeX, (int)gimmickSizeY);
     }
 
     /// <summary>

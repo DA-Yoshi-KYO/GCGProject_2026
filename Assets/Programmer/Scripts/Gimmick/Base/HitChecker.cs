@@ -8,9 +8,9 @@ using UnityEngine;
 public class HitChecker : MonoBehaviour
 {
     [Header("命中範囲")]
-    public BoxCollider Hit;
+    public BoxCollider hit;
     [Header("効果範囲")]
-    public BoxCollider Effect;
+    public BoxCollider effect;
 
     private bool isHit = false;
     private bool isEffect = false;
