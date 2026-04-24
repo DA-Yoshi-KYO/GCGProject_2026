@@ -46,5 +46,6 @@ public class PotGimmick : GimmickBase
     {
         isFirstUpdate = true;
         DeleteHitChecker();
+        Destroy(gameObject);
     }
 }

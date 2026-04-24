@@ -179,6 +179,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4788694987640629296}
+  - component: {fileID: 5989332744157467278}
   m_Layer: 0
   m_Name: Model
   m_TagString: Untagged
@@ -202,6 +203,28 @@ Transform:
   - {fileID: 4625585797849588239}
   m_Father: {fileID: 3279101354686393898}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!64 &5989332744157467278
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5735771377558649148}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 0}
 --- !u!1 &7905465617219888894
 GameObject:
   m_ObjectHideFlags: 0
@@ -262,7 +285,7 @@ MonoBehaviour:
     type: 3}
   gimmickDirection: 0
   gimmickType: 0
-  gimmick: 0
+  gimmick: 1
   gimmickState: 0
-  Adjust: 0
+  Adjust: 10
   activeTime: 10
