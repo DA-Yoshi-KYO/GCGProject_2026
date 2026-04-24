@@ -623,6 +623,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4221160367055552894}
   - component: {fileID: 6584715793694440505}
+  - component: {fileID: 2817741669643907525}
   m_Layer: 0
   m_Name: EmptyChest
   m_TagString: Untagged
@@ -660,8 +661,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gimmickSizeX: 1
   gimmickSizeY: 1
-  hitRangeX: 1
-  hitRangeY: 1
+  hitRangeX: 2
+  hitRangeY: 2
   effectRangeX: 4
   effectRangeY: 4
   requiredSoul: 1
@@ -676,6 +677,20 @@ MonoBehaviour:
   gimmickState: 0
   Adjust: 10
   durability: 50
+--- !u!114 &2817741669643907525
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8099441442987179503}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee003987777810640bc67fb600e99a3c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isExplored: 0
+  alertValue: 0
 --- !u!1 &8166555190473919733
 GameObject:
   m_ObjectHideFlags: 0

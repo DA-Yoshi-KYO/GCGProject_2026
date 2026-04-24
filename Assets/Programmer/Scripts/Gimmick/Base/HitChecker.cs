@@ -118,9 +118,17 @@ public class HitChecker : MonoBehaviour
         }
     }
 
-    private void EnemyCharm()
+    private void EnemyCharm(GameObject enemy)
     {
-        //ToDo : 敵を魅了する処理
+        ThiefAI thiefAI = enemy.GetComponent<ThiefAI>();
+        if (thiefAI != null)
+        {
+            TrapTarget trapTarget = parentGameObject.GetComponent<TrapTarget>();
+            if (trapTarget != null)
+            {
+                thiefAI.SetTarget(trapTarget);
+            }
+        }
     }
     private void FixedUpdate()
     {
@@ -145,7 +153,7 @@ public class HitChecker : MonoBehaviour
                                 EnemyDame(effectEnemies[i].gameObject, effectDamage);
                                 break;
                             case Gimmick.EmptyChest:
-                                EnemyCharm();
+                                EnemyCharm(effectEnemies[i].gameObject);
                                 break;
                         }
                     }
@@ -165,7 +173,7 @@ public class HitChecker : MonoBehaviour
                             EnemyDame(enemy, hitDamage);
                             break;
                         case Gimmick.EmptyChest:
-                            EnemyCharm();
+                            EnemyCharm(enemy);
                             EmptyChestGimmick emptyChestGimmick = parentGameObject.GetComponent<EmptyChestGimmick>();
                             if(emptyChestGimmick != null)
                             {
