@@ -17,6 +17,10 @@ using UnityEngine;
 
 public class PotGimmick : GimmickBase
 {
+    [Header("アクティブ時間")]
+    [Tooltip("アクティブ状態の時間"), Min(0)]
+    public float activeTime;
+
     private bool isFirstUpdate = true;
     protected override void IdleUpdate()
     {
@@ -30,6 +34,11 @@ public class PotGimmick : GimmickBase
             Vector2Int directionVec = GetDirectionVec();
             Vector2Int hitCheckerGridPos = new Vector2Int(gimmickGridPos.x + directionVec.x, gimmickGridPos.y + directionVec.y);
             SetHitChecker(hitCheckerGridPos.x, hitCheckerGridPos.y);
+        }
+            activeTime -= Time.deltaTime;
+        if (activeTime <= 0)
+        {
+            gimmickState = GimmickState.Broken;
         }
     }
 
