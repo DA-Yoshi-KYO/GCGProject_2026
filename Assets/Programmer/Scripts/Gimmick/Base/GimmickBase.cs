@@ -20,7 +20,7 @@ public enum Gimmick
     None,
     Pot,
     IronBall,
-    FakeChest,
+    EmptyChest,
 }
 
 public enum GimmickState
@@ -33,8 +33,8 @@ public enum GimmickState
 
 public enum  GimmickType
 {
-    NotReusable,
-    Reusable,
+    NotReusable = 0,
+    Reusable = 1,
 }
 
 public enum GimmickDirection
@@ -94,7 +94,7 @@ public class GimmickBase : MonoBehaviour
 
     // ギミックの種類
     [Header("ギミックのタイプ")]
-    public GimmickType gimmickType = GimmickType.NotReusable;
+    public GimmickType gimmickType;
 
     [Header("ギミックの種類")]
     public Gimmick gimmick;
@@ -115,7 +115,6 @@ public class GimmickBase : MonoBehaviour
     private void Start()
     {
         AdjustScaleToGrid();
-        SetGimmickPos(new Vector2Int(1,0));
     }
 
 
@@ -207,6 +206,9 @@ public class GimmickBase : MonoBehaviour
             {
                 hit.SetHitDamage(attackPower);
                 hit.SetEffectDamage(effectPower);
+                hit.HitLoop(gimmickType == GimmickType.Reusable);
+                hit.SetGimmick(gimmick);
+                hit.SetParentGameObject(gameObject);
             }
 
             // 当たり判定の大きさを設定
@@ -348,7 +350,6 @@ public class GimmickBase : MonoBehaviour
     {
         // Broken状態の処理
     }
-
     // ===============================================================================
 }
 

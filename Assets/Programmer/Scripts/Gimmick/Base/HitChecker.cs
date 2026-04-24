@@ -21,6 +21,8 @@ public class HitChecker : MonoBehaviour
     private bool firstUpdate = true;
     private int hitDamage = 0;
     private int effectDamage = 0;
+    private Gimmick gimmick;
+    GameObject parentGameObject;
 
     /// <summary>
     /// 当たり判定の処理をループさせるかどうか
@@ -84,6 +86,38 @@ public class HitChecker : MonoBehaviour
         effectDamage = damage;
     }
 
+    /// <summary>
+    /// ギミック情報を設定する関数
+    /// </summary>
+    /// <param name="gimmick"></param>
+    public void SetGimmick(Gimmick gimmick)
+    {
+        this.gimmick = gimmick;
+    }
+
+    /// <summary>
+    /// 召喚もとのギミックのGameObjectを設定する関数
+    /// </summary>
+    /// <param name="parentGameObject"></param>
+    public void SetParentGameObject(GameObject parentGameObject)
+    {
+        this.parentGameObject = parentGameObject;
+    }
+
+    /// <summary>
+    /// Enemyにダメージを与える関数
+    /// </summary>
+    /// <param name="enemy"></param>
+    /// <param name="damage"></param>
+    private void EnemyDame(GameObject enemy, int damage)
+    {
+        ThiefAI thiefAI = enemy.GetComponent<ThiefAI>();
+        if (thiefAI != null)
+        {
+            thiefAI.TakeDamage(effectDamage);
+        }
+    }
+
     private void FixedUpdate()
     {
         if(firstUpdate || isLoop)
@@ -101,11 +135,13 @@ public class HitChecker : MonoBehaviour
                     // 効果範囲内のみの敵に対する処理
                     if (effectEnemies[i] != hitEnemies[j])
                     {
-                        GameObject enemy = effectEnemies[i].gameObject;
-                        ThiefAI thiefAI = enemy.GetComponent<ThiefAI>();
-                        if (thiefAI != null)
+                        switch(gimmick)
                         {
-                            thiefAI.TakeDamage(effectDamage);
+                            case Gimmick.Pot:
+                                EnemyDame(effectEnemies[i].gameObject, effectDamage);
+                                break;
+                            case Gimmick.EmptyChest:
+                                break;
                         }
                     }
                 }
@@ -117,7 +153,14 @@ public class HitChecker : MonoBehaviour
                 ThiefAI thiefAI = enemy.GetComponent<ThiefAI>();
                 if (thiefAI != null)
                 {
-                    thiefAI.TakeDamage(hitDamage);
+                    switch(gimmick)
+                    {
+                        case Gimmick.Pot:
+                            EnemyDame(enemy, hitDamage);
+                            break;
+                        case Gimmick.EmptyChest:
+                            break;
+                    }
                 }
             }
         }
