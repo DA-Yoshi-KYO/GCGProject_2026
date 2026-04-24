@@ -4,18 +4,18 @@ using System.Collections.Generic;
 /*==================================================
  *  ファイル名  : CSS_MapData.cs
  *  制作者      : 吉本竜
- *  内容        : マップデータを保持する ScriptableObject
+ *  内容       : マップデータを保持する ScriptableObject
  *                床・壁・ドア・固定モデルの情報を保持し、
  *                キー名から対象データを取得できるようにする
- *  履歴        : 2026/04/24 新規作成(ヨシモト)
- *                2026/04/24 ドア・モデルをキー検索できる構造に変更(ヨシモト)
+ *  履歴       : 2026/04/24 新規作成(ヨシモト)
+ *              2026/04/24 ドア・モデルをキー検索できる構造に変更
  *==================================================*/
 
 /// <summary>
 /// マップデータを保持する ScriptableObject です。
 /// キー文字列を使って、ドアや固定モデルの情報を取得できます。
 /// </summary>
-[CreateAssetMenu(menuName = "ScriptableObjects/MapData_Scriptable")]
+[CreateAssetMenu(menuName = "MapData_Scriptable")]
 public class CSS_MapData : ScriptableObject
 {
     /// <summary>
@@ -31,7 +31,7 @@ public class CSS_MapData : ScriptableObject
         private GameObject go_DoorObject;
 
         [Header("ドアの配置座標"), SerializeField]
-        private Vector2Int v2n_DoorBlockPos;
+        private Vector3 v3_DoorBlockPos;
 
         /// <summary>
         /// ドアのキー名を取得します。
@@ -46,7 +46,7 @@ public class CSS_MapData : ScriptableObject
         /// <summary>
         /// ドアの配置座標を取得します。
         /// </summary>
-        public Vector2Int DoorBlockPos => v2n_DoorBlockPos;
+        public Vector3 DoorBlockPos => v3_DoorBlockPos;
     }
 
     /// <summary>
@@ -62,7 +62,7 @@ public class CSS_MapData : ScriptableObject
         private GameObject go_ModelObject;
 
         [Header("モデルの配置座標"), SerializeField]
-        private Vector2Int v2n_ModelBlockPos;
+        private Vector3 v3_ModelBlockPos;
 
         /// <summary>
         /// モデルのキー名を取得します。
@@ -77,7 +77,7 @@ public class CSS_MapData : ScriptableObject
         /// <summary>
         /// モデルの配置座標を取得します。
         /// </summary>
-        public Vector2Int ModelBlockPos => v2n_ModelBlockPos;
+        public Vector3 ModelBlockPos => v3_ModelBlockPos;
     }
 
     [Header("床ブロック"), SerializeField]
@@ -148,7 +148,7 @@ public class CSS_MapData : ScriptableObject
         dic_DoorData = new Dictionary<string, CS_DoorData>();
         dic_ModelData = new Dictionary<string, CS_ModelData>();
 
-        for (int i = 0; i < lcs_DoorData.Count; i++)
+        for (int i = 0 ; i < lcs_DoorData.Count ; i++)
         {
             if (lcs_DoorData[i] == null)
             {
@@ -172,7 +172,7 @@ public class CSS_MapData : ScriptableObject
             dic_DoorData.Add(key, lcs_DoorData[i]);
         }
 
-        for (int i = 0; i < lcs_ModelData.Count; i++)
+        for (int i = 0 ; i < lcs_ModelData.Count ; i++)
         {
             if (lcs_ModelData[i] == null)
             {
@@ -233,7 +233,7 @@ public class CSS_MapData : ScriptableObject
     /// </summary>
     /// <param name="s_DoorKey">取得したいドアのキー名</param>
     /// <returns>一致したドアの配置座標。存在しない場合は Vector2Int.zero</returns>
-    public Vector2Int GetDoorBlockPos(string s_DoorKey)
+    public Vector3 GetDoorBlockPos(string s_DoorKey)
     {
         EnsureInitialized();
 
@@ -243,7 +243,7 @@ public class CSS_MapData : ScriptableObject
         }
 
         Debug.LogWarning($"[CSS_MapData] DoorKey が見つかりません。Key : {s_DoorKey}", this);
-        return Vector2Int.zero;
+        return Vector3.zero;
     }
 
     /// <summary>
@@ -269,7 +269,7 @@ public class CSS_MapData : ScriptableObject
     /// </summary>
     /// <param name="s_ModelKey">取得したいモデルのキー名</param>
     /// <returns>一致したモデルの配置座標。存在しない場合は Vector2Int.zero</returns>
-    public Vector2Int GetModelBlockPos(string s_ModelKey)
+    public Vector3 GetModelBlockPos(string s_ModelKey)
     {
         EnsureInitialized();
 
@@ -279,7 +279,7 @@ public class CSS_MapData : ScriptableObject
         }
 
         Debug.LogWarning($"[CSS_MapData] ModelKey が見つかりません。Key : {s_ModelKey}", this);
-        return Vector2Int.zero;
+        return Vector3.zero;
     }
 
     /// <summary>
@@ -289,7 +289,7 @@ public class CSS_MapData : ScriptableObject
     /// <param name="go_DoorObject">取得したドアオブジェクト</param>
     /// <param name="v2n_BlockPos">取得したドア配置座標</param>
     /// <returns>取得に成功した場合は true</returns>
-    public bool TryGetDoorData(string s_DoorKey, out GameObject go_DoorObject, out Vector2Int v2n_BlockPos)
+    public bool TryGetDoorData(string s_DoorKey, out GameObject go_DoorObject, out Vector3 v2n_BlockPos)
     {
         EnsureInitialized();
 
@@ -301,7 +301,7 @@ public class CSS_MapData : ScriptableObject
         }
 
         go_DoorObject = null;
-        v2n_BlockPos = Vector2Int.zero;
+        v2n_BlockPos = Vector3.zero;
         return false;
     }
 
@@ -312,7 +312,7 @@ public class CSS_MapData : ScriptableObject
     /// <param name="go_ModelObject">取得したモデルオブジェクト</param>
     /// <param name="v2n_BlockPos">取得したモデル配置座標</param>
     /// <returns>取得に成功した場合は true</returns>
-    public bool TryGetModelData(string s_ModelKey, out GameObject go_ModelObject, out Vector2Int v2n_BlockPos)
+    public bool TryGetModelData(string s_ModelKey, out GameObject go_ModelObject, out Vector3 v2n_BlockPos)
     {
         EnsureInitialized();
 
@@ -324,7 +324,7 @@ public class CSS_MapData : ScriptableObject
         }
 
         go_ModelObject = null;
-        v2n_BlockPos = Vector2Int.zero;
+        v2n_BlockPos = Vector3.zero;
         return false;
     }
 }
