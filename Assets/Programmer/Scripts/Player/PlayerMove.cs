@@ -1,6 +1,11 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
+/* ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+ *    プレイヤー移動作成
+ * ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+ *    元浪梨緒
+ * ----------------------------------------------------------
+ * 2026-04-24 | 初回作成
+ * 
+ */
 using UnityEngine;
 
 public class PlayerMove : MonoBehaviour
@@ -10,9 +15,17 @@ public class PlayerMove : MonoBehaviour
     [Header("移動速度（走り）")][SerializeField] private float velocityRun = 1.0f;//移動速度（走り）
     [Header("ジャンプ量")][SerializeField] private float jumpAmount = 2.5f;//ジャンプ量
 
+    public PlayerInput playerInput { private set; get; }
+
     private float accelartion = 10;//加速度
 
     private Rigidbody rb;
+
+    private void Awake()
+    {
+        playerInput = new PlayerInput();
+        playerInput.Player.Enable();
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -35,25 +48,25 @@ public class PlayerMove : MonoBehaviour
         right = new Vector3(rightXZ.x, 0.0f, rightXZ.y);
 
         //移動
-        if (Input.GetKey(KeyCode.W))
+        if (playerInput.Player.MoveForward.IsPressed())
         {
             rb.AddForce(new Vector3(forward.x,0.0f, forward.z) * accelartion, ForceMode.Acceleration);
         }
-        else if (Input.GetKey(KeyCode.S))
+        else if (playerInput.Player.MoveBack.IsPressed())
         {
             rb.AddForce(new Vector3(-forward.x, 0.0f, -forward.z) * accelartion, ForceMode.Acceleration);
         }
 
-        if (Input.GetKey(KeyCode.A))
+        if (playerInput.Player.MoveLeft.IsPressed())
         {
             rb.AddForce(new Vector3(-right.x, 0.0f, -right.z) * accelartion, ForceMode.Acceleration);
         }
-        else if (Input.GetKey(KeyCode.D))
+        else if (playerInput.Player.MoveRight.IsPressed())
         {
             rb.AddForce(new Vector3(right.x, 0.0f, right.z) * accelartion, ForceMode.Acceleration);
         }
 
-        if (Input.GetKey(KeyCode.LeftShift))
+        if (playerInput.Player.Dash.IsPressed())
         {
             //走り
             if (rb.velocity.magnitude > moveAmount * velocityRun)
@@ -71,7 +84,7 @@ public class PlayerMove : MonoBehaviour
         }
 
         //ジャンプ
-        if(Input.GetKeyDown(KeyCode.Space))
+        if(playerInput.Player.Jump.triggered)
         {
             rb.AddForce(new Vector3(0.0f, 1.0f, 0.0f) * jumpAmount, ForceMode.Impulse);
         }

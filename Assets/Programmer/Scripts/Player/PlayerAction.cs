@@ -1,8 +1,13 @@
-using System.Collections;
+/* ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+ *    プレイヤーアクション作成
+ * ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+ *    元浪梨緒
+ * ----------------------------------------------------------
+ * 2026-04-24 | 初回作成
+ * 
+ */
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Rendering.VirtualTexturing;
 
 public class PlayerAction : MonoBehaviour
 {
@@ -44,15 +49,17 @@ public class PlayerAction : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        PlayerMove playerMove = GetComponent<PlayerMove>();
+
         //キー操作でUIのギミックの選択
-        if(Input.GetKeyDown(KeyCode.RightArrow))
+        if (playerMove.playerInput.Player.GimmickChangeRight.triggered)
         {
             currentGimmickIndex++;
 
             if (currentGimmickIndex > gimmickList.Count)
                 currentGimmickIndex = 0;
         }
-        else if(Input.GetKeyDown(KeyCode.LeftArrow))
+        else if(playerMove.playerInput.Player.GimmickChangeLeft.triggered)
         {
             currentGimmickIndex--;
 
@@ -61,7 +68,7 @@ public class PlayerAction : MonoBehaviour
         }
         
         //モードの切り替え
-        if(Input.GetKeyDown(KeyCode.Q))
+        if(playerMove.playerInput.Player.Interact.triggered)
         {
             switch (currentMode)
             {
@@ -75,6 +82,12 @@ public class PlayerAction : MonoBehaviour
                 default:
                     break;
             }
+        }
+
+        //設置モードのキャンセル
+        if (playerMove.playerInput.Player.InteractCancel.triggered)
+        {
+            currentMode = PlayerMode.Normal;
         }
     }
 
