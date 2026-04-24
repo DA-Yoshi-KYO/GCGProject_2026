@@ -118,6 +118,10 @@ public class HitChecker : MonoBehaviour
         }
     }
 
+    private void EnemyCharm()
+    {
+        //ToDo : 敵を魅了する処理
+    }
     private void FixedUpdate()
     {
         if(firstUpdate || isLoop)
@@ -141,11 +145,13 @@ public class HitChecker : MonoBehaviour
                                 EnemyDame(effectEnemies[i].gameObject, effectDamage);
                                 break;
                             case Gimmick.EmptyChest:
+                                EnemyCharm();
                                 break;
                         }
                     }
                 }
             }
+
             // 命中範囲内の敵に対する処理
             for (int i = 0 ; i < hitEnemies.Length ; i++)
             {
@@ -159,6 +165,12 @@ public class HitChecker : MonoBehaviour
                             EnemyDame(enemy, hitDamage);
                             break;
                         case Gimmick.EmptyChest:
+                            EnemyCharm();
+                            EmptyChestGimmick emptyChestGimmick = parentGameObject.GetComponent<EmptyChestGimmick>();
+                            if(emptyChestGimmick != null)
+                            {
+                                emptyChestGimmick.Durability_Value_Decreased();
+                            }
                             break;
                     }
                 }

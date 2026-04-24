@@ -115,6 +115,7 @@ public class GimmickBase : MonoBehaviour
     private void Start()
     {
         AdjustScaleToGrid();
+        SetGimmickPos(new Vector2Int(0, 1));
     }
 
 
@@ -215,9 +216,6 @@ public class GimmickBase : MonoBehaviour
             GameObject Effect = hitChecker.transform.Find("Effect").gameObject;
             GameObject Hit = hitChecker.transform.Find("Hit").gameObject;
 
-            // 確認用キューブ　（後で削除）
-            GameObject Cube = hitChecker.transform.Find("Cube").gameObject;
-
             Vector3 EffectSize = new Vector3(effectRangeX * roomGrid.gridSize.x,1, effectRangeY * roomGrid.gridSize.y);
             Vector3 HitSize = new Vector3(hitRangeX * roomGrid.gridSize.x, 1, hitRangeY * roomGrid.gridSize.y);
             
@@ -231,8 +229,6 @@ public class GimmickBase : MonoBehaviour
 
             Effect.transform.localScale = EffectSize;
             Hit.transform.localScale = HitSize;
-            Cube.transform.localScale = EffectSize;
-
         }
 
         Vector3 HitCheckerPos;
@@ -345,7 +341,6 @@ public class GimmickBase : MonoBehaviour
     {
         // Cooldown状態の処理
     }
-
     protected virtual void BrokenUpdate()
     {
         // Broken状態の処理
