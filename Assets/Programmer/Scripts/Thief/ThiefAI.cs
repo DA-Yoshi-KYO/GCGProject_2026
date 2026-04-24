@@ -54,7 +54,6 @@ public class ThiefAI : MonoBehaviour
 
     [Tooltip("ドロップするソウルの数")]
     private int soulDropCount;
-    public int SoulDropCount => soulDropCount;
 
     [Tooltip("走り状態になる標的オブジェクトのタイプリスト")]
     private List<VisionTarget.TargetType> runTargetTypes;
@@ -298,53 +297,57 @@ public class ThiefAI : MonoBehaviour
         // 未探索のオブジェクトがある場合は、未探索のオブジェクトを優先して探索対象に設定
         if (HasUnexploredTargets())
         {
-            // 視認したオブジェクトの中から、未探索で近いものを優先して探索対象に設定
             foreach (var entry in roomMemories[currentRoom].recognizedObjects)
             {
                 // 既に探索済みのオブジェクトはスキップ
                 if (entry.isExplored) continue;
 
                 // 現在の探索対象が視認オブジェクト(VisionTarget)かどうか
-                if (currentTarget is VisionTarget)
+                if (entry is VisionTarget)
                 {
                     // 探索対象の優先順位を決めるロジック
-                    switch (((VisionTarget)currentTarget).targetType)
+                    switch (((VisionTarget)entry).targetType)
                     {
                         case VisionTarget.TargetType.Treasure:
                             {
-                                // より近い宝物を探索対象に設定
-                                if (entry is VisionTarget)
+                                if (currentTarget is VisionTarget)
                                 {
-                                    if (((VisionTarget)entry).targetType != VisionTarget.TargetType.Treasure) continue;
-                                }
-                                else if (entry is TrapTarget)
-                                {
-                                    // 宝物罠の場合のみ、処理を継続する
-                                }
-                                // オブジェクトとの距離を計算
-                                float distance = Vector3.Distance(transform.position, entry.transform.position);
+                                    // 現在の探索対象が宝物でない場合は、問答無用で宝物を探索対象に設定
+                                    if (((VisionTarget)currentTarget).targetType != VisionTarget.TargetType.Treasure)
+                                    {
+                                        currentTarget = entry;
+                                        break;
+                                    }
+                                    // 現在の探索対象も宝物の場合は、距離が近い方を探索対象に設定する
+                                    else
+                                    {
+                                        // オブジェクトとの距離を計算
+                                        float distance = Vector3.Distance(transform.position, entry.transform.position);
 
-                                // より近いオブジェクトを探索対象に設定
-                                if (distance < distanceToTarget)
-                                {
-                                    distanceToTarget = distance;
-                                    currentTarget = entry;
+                                        // より近いオブジェクトを探索対象に設定
+                                        if (distance < distanceToTarget)
+                                        {
+                                            distanceToTarget = distance;
+                                            currentTarget = entry;
+                                        }
+                                        else continue;
+                                    }
                                 }
-                                else continue;
-                            }
-                            break;
-                        case VisionTarget.TargetType.Player:
-                            {
-                                // 現在の探索対象が宝物の場合は、プレイヤーを探索対象に設定しない
-                                if (((VisionTarget)currentTarget).targetType == VisionTarget.TargetType.Treasure) continue;
-                                // 宝物罠の場合も、プレイヤーを探索対象に設定しない
-                                // if (currentTarget is TrapTarget) continue;
+                                else if (currentTarget is TrapTarget)
+                                {
+                                    // 宝物罠の場合ではない場合は、スキップ
+                                    // 宝物罠の場合は、距離判定で探索対象を切り替える
 
-                                currentTarget = entry;
+                                }
                             }
                             break;
                         case VisionTarget.TargetType.RoomObject:
                             {
+                                // 現在の探索対象が宝物の場合は、スキップ
+                                if (currentTarget is VisionTarget vt && vt.targetType == VisionTarget.TargetType.Treasure) continue;
+                                // 現在の探索対象が宝物の罠の場合は、スキップ
+                                // if (currentTarget is TrapTarget) continue;
+
                                 // オブジェクトとの距離を計算
                                 float distance = Vector3.Distance(transform.position, entry.transform.position);
 
@@ -359,8 +362,20 @@ public class ThiefAI : MonoBehaviour
                             break;
                     }
                 }
-                else
+                else if (entry is PlayerTarget)
                 {
+                    // 宝物を探索対象にしている場合は、スキップ
+                    if (currentTarget is VisionTarget vt && vt.targetType == VisionTarget.TargetType.Treasure) continue;
+                    // 宝物の罠を探索対象にしている場合は、スキップ
+                    // if (currentTarget is TrapTarget) continue;
+                }
+                else if (entry is TrapTarget)
+                {
+                    // 宝物を探索対象にしている場合は、スキップ
+                    if (currentTarget is VisionTarget vt && vt.targetType == VisionTarget.TargetType.Treasure) continue;
+                    // 宝物の罠を探索対象にしている場合は、スキップ
+                    if (currentTarget is TrapTarget) continue;
+
                     // オブジェクトとの距離を計算
                     float distance = Vector3.Distance(transform.position, entry.transform.position);
                     // より近いオブジェクトを探索対象に設定

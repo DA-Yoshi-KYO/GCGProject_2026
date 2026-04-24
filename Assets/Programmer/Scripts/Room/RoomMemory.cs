@@ -17,12 +17,12 @@ public class RoomMemory
     [Tooltip("部屋の危険度"), Range(0, 100)]
     public int dangerLevel;
     [Tooltip("認識したオブジェクトの情報リスト")]
-    public List<VisionTarget> recognizedObjects;
+    public List<ThiefTarget> recognizedObjects;
 
     public void FirstSetting()
     {
         explorationLevel = 0;
         dangerLevel = 0;
-        recognizedObjects = new List<VisionTarget>();
+        recognizedObjects = new List<ThiefTarget>();
     }
 }

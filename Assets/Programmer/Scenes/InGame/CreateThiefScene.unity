@@ -259,10 +259,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aeba2c4b2265ed54f9019ee893a861a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isExplored: 0
   targetType: 4
   explorationValue: 10
   exploredDistanceThreshold: 2
-  isExplored: 0
 --- !u!65 &204352855
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -381,10 +381,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aeba2c4b2265ed54f9019ee893a861a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isExplored: 0
   targetType: 4
   explorationValue: 10
   exploredDistanceThreshold: 2
-  isExplored: 0
 --- !u!65 &208207517
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -564,6 +564,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 15b1809f81681ff4cbe60af95d73e274, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isExplored: 0
 --- !u!65 &301859937
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -905,6 +906,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 15b1809f81681ff4cbe60af95d73e274, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isExplored: 0
 --- !u!65 &568620441
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1233,10 +1235,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aeba2c4b2265ed54f9019ee893a861a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isExplored: 0
   targetType: 4
   explorationValue: 10
   exploredDistanceThreshold: 2
-  isExplored: 0
 --- !u!65 &1016435764
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1565,10 +1567,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aeba2c4b2265ed54f9019ee893a861a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isExplored: 0
   targetType: 4
   explorationValue: 10
   exploredDistanceThreshold: 2
-  isExplored: 0
 --- !u!65 &1093426633
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1687,6 +1689,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 15b1809f81681ff4cbe60af95d73e274, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isExplored: 0
 --- !u!65 &1128854660
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1805,10 +1808,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aeba2c4b2265ed54f9019ee893a861a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isExplored: 0
   targetType: 4
   explorationValue: 10
   exploredDistanceThreshold: 2
-  isExplored: 0
 --- !u!65 &1185635057
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1927,10 +1930,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aeba2c4b2265ed54f9019ee893a861a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isExplored: 0
   targetType: 4
   explorationValue: 10
   exploredDistanceThreshold: 2
-  isExplored: 0
 --- !u!65 &1238643617
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -2049,6 +2052,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 15b1809f81681ff4cbe60af95d73e274, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isExplored: 0
 --- !u!65 &1307099389
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -2167,10 +2171,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aeba2c4b2265ed54f9019ee893a861a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isExplored: 0
   targetType: 4
   explorationValue: 10
   exploredDistanceThreshold: 2
-  isExplored: 0
 --- !u!65 &1365526836
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -2289,6 +2293,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 15b1809f81681ff4cbe60af95d73e274, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isExplored: 0
 --- !u!65 &1563809838
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -2512,6 +2517,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 15b1809f81681ff4cbe60af95d73e274, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isExplored: 0
 --- !u!65 &1660507286
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -2610,7 +2616,7 @@ GameObject:
   - component: {fileID: 1747421209}
   - component: {fileID: 1747421208}
   - component: {fileID: 1747421207}
-  - component: {fileID: 1747421206}
+  - component: {fileID: 1747421211}
   m_Layer: 30
   m_Name: RoomObject
   m_TagString: Untagged
@@ -2618,22 +2624,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1747421206
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1747421205}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aeba2c4b2265ed54f9019ee893a861a8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  targetType: 4
-  explorationValue: 10
-  exploredDistanceThreshold: 2
-  isExplored: 0
 --- !u!65 &1747421207
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -2720,6 +2710,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1811252452}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1747421211
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1747421205}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee003987777810640bc67fb600e99a3c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isExplored: 0
+  alertValue: 0
 --- !u!1 &1763556948
 GameObject:
   m_ObjectHideFlags: 0
@@ -2752,6 +2756,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 15b1809f81681ff4cbe60af95d73e274, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isExplored: 0
 --- !u!65 &1763556950
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -2870,6 +2875,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 15b1809f81681ff4cbe60af95d73e274, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isExplored: 0
 --- !u!65 &1809266294
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -3104,7 +3110,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   roomID: 0
   roomObjects:
-  - {fileID: 1747421206}
+  - {fileID: 0}
   - {fileID: 208207516}
   - {fileID: 1016435763}
   - {fileID: 1185635056}
@@ -3384,10 +3390,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aeba2c4b2265ed54f9019ee893a861a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isExplored: 0
   targetType: 4
   explorationValue: 10
   exploredDistanceThreshold: 2
-  isExplored: 0
 --- !u!65 &2098842180
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -3506,10 +3512,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aeba2c4b2265ed54f9019ee893a861a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isExplored: 0
   targetType: 4
   explorationValue: 10
   exploredDistanceThreshold: 2
-  isExplored: 0
 --- !u!65 &2139744397
 BoxCollider:
   m_ObjectHideFlags: 0
