@@ -307,25 +307,6 @@ MonoBehaviour:
   upCamera: {fileID: 1808630313}
   cameraForward: {x: 0, y: 0, z: 0}
   cameraRight: {x: 0, y: 0, z: 0}
---- !u!1 &329340253 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 7413826158010265918, guid: f0844ca806b09ed4499a83aeb593a8cb,
-    type: 3}
-  m_PrefabInstance: {fileID: 665408394}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &329340254
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 329340253}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe4d5e07842250146aabdd6b91d5d8bb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  gridDivision: {x: 10, y: 10}
 --- !u!1 &633882584
 GameObject:
   m_ObjectHideFlags: 0
@@ -510,11 +491,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 7413826158010265918, guid: f0844ca806b09ed4499a83aeb593a8cb,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 329340254}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f0844ca806b09ed4499a83aeb593a8cb, type: 3}
 --- !u!1 &824541544
 GameObject:
@@ -682,7 +659,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_BackGroundColor: {r: 0, g: 0, b: 0, a: 1}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
