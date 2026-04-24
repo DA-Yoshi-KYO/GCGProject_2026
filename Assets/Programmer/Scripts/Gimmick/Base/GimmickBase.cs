@@ -1,6 +1,8 @@
 // == GimmickBase.cs ==
 // 作者 :秋野翔太
 // 更新 :2026/04/22 作成開始
+//      :2026/04/24 ギミックの大きさ取得関数の追加
+//      :2026/04/24 ギミックの識別タグ取得関数の追加
 
 // ギミック仕様
 // Active状態のときに、命中範囲、効果範囲に当たり判定を設ける
@@ -12,6 +14,14 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
+
+public enum Gimmick
+{
+    None,
+    Pot,
+    IronBall,
+    FakeChest,
+}
 
 public enum GimmickState
 {
@@ -36,7 +46,7 @@ public enum GimmickDirection
 }
 
 public class GimmickBase : MonoBehaviour
-{
+{ 
     // 大きさ
     [Header("大きさ")]
     [Tooltip("X方向の大きさ"), Min(0)]
@@ -83,8 +93,11 @@ public class GimmickBase : MonoBehaviour
     public GimmickDirection gimmickDirection;
 
     // ギミックの種類
-    [Header("ギミックの種類")]
+    [Header("ギミックのタイプ")]
     public GimmickType gimmickType = GimmickType.NotReusable;
+
+    [Header("ギミックの種類")]
+    public Gimmick gimmick;
 
     // ギミックの状態
     [Header("ギミックの状態")]
@@ -132,8 +145,6 @@ public class GimmickBase : MonoBehaviour
         transform.localScale = new Vector3(scaleX, scaleY, scaleZ);
     }
 
-
-
     /// <summary>
     /// ギミックをアクティブにする関数
     /// </summary>
@@ -170,7 +181,6 @@ public class GimmickBase : MonoBehaviour
         SetGimmickPos(gridPos);
     }
 
-
     /// <summary>
     /// ギミックの向きを設定する関数
     /// </summary>
@@ -179,7 +189,6 @@ public class GimmickBase : MonoBehaviour
     {
         gimmickDirection = direction;
     }
-
 
     /// <summary>
     /// 泥棒に対する当たり判定を設定する関数
@@ -236,7 +245,6 @@ public class GimmickBase : MonoBehaviour
         hitChecker.transform.position = HitCheckerPos;
     }
 
-
     /// <summary>
     /// 泥棒に対する当たり判定を削除する関数
     /// </summary>
@@ -247,7 +255,6 @@ public class GimmickBase : MonoBehaviour
             Destroy(hitChecker);
         }
     }
-
 
     /// <summary>
     /// トラップの向きをベクトルで返す関数
@@ -279,8 +286,14 @@ public class GimmickBase : MonoBehaviour
         return new Vector2Int((int)GimmickSizeX, (int)GimmickSizeY);
     }
 
-
-
+    /// <summary>
+    /// ギミックの識別タグを返す関数
+    /// </summary>
+    /// <returns>ギミックの識別タグ</returns>
+    public Gimmick GetGimmickTag()
+    {
+        return gimmick;
+    }
 
 
     // ===============================================================================
@@ -327,6 +340,7 @@ public class GimmickBase : MonoBehaviour
     {
         // Broken状態の処理
     }
+
     // ===============================================================================
 }
 

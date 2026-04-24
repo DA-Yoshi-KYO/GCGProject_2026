@@ -1,3 +1,16 @@
+// == PotGimmick.cs ==
+// 作者 :秋野翔太
+// 更新 :2026/04/22 作成開始
+//
+// ポットギミック仕様
+// ・Active状態のとき、命中範囲に当たり判定を
+// ・当たり判定内に、敵がいた場合、攻撃力を与える
+// ・Broken状態のとき、当たり判定を消す
+// ・当たり判定は、ギミックの向きに応じて、
+//   ギミックの前方に設置する
+// ・当たり判定の大きさは、HitRangeX, HitRangeY
+
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
