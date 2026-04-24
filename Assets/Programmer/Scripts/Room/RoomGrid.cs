@@ -15,6 +15,7 @@ public class RoomGrid : MonoBehaviour
 
     public Vector2 gridSize { get; private set; }   // グリッド1マスの大きさ
     private Renderer rendererMaterial; // グリッドのマテリアル
+    private GameObject gridObject; // グリッドの大きさを正確に取得する為の子オブジェクト
 
     void Start()
     {
@@ -29,6 +30,8 @@ public class RoomGrid : MonoBehaviour
         {
             Debug.LogWarning("RoomGrid: Material not found on the GameObject.");
         }
+
+        gridObject = gameObject.transform.GetChild(0).gameObject;
     }
 
     /// <summary>
@@ -43,7 +46,10 @@ public class RoomGrid : MonoBehaviour
         Vector3 localPos = transform.InverseTransformPoint(pos);
 
         // 北西を原点(0.0f,0.0f)とした相対座標に変換
-        Vector2 relativePos = new Vector2(localPos.x + 0.5f, 0.5f - localPos.z);
+        
+        Vector2 relativePos = new Vector2(
+            localPos.x + gridObject.transform.lossyScale.x * 0.5f,
+            gridObject.transform.lossyScale.z * 0.5f - localPos.z);
 
         // グリッドの分割数に基づいてグリッド位置を計算
         Vector2Int gridPos = new Vector2Int(
