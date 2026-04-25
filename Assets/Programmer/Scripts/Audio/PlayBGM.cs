@@ -1,92 +1,85 @@
+/* ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+ *    BGM再生用
+ * ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+ *    元浪梨緒
+ * ----------------------------------------------------------
+ * 2026-04-20 | 初回作成
+ * 
+ */
+
 using CriWare;
-using EffekseerTool.Data.Value;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using static Unity.VisualScripting.Member;
 
 public class PlayBGM : MonoBehaviour
 {
-    //3D空間
-    private CriAtomEx3dSource source;
-    private CriAtomEx3dListener listener;
-    public GameObject speaker;
-    public GameObject player;
+    public BackGround_BGM_DataBase dataBase;//データベース
+    private BackGround_BGM_Data[] dataList;//データのリスト
 
-    private CriAtomEx.CueInfo[] cueInfoList;//CueName格納
-    private CriAtomExPlayer[] playerInfoList;//Player生成
+    private CriAtomExPlayer playerInfo;//Player生成
     private CriAtomExAcb[] criAtomExAcbsList;//CueSheet
-    private string[] sceneList;//シーン
+    //private CriAtomEx.CueInfo[] cueInfoList;//CueName格納
+
+    //private string[] cueNameList;//キューネームリスト
+    //private string[] sceneList;//シーンリスト
+
 
     private string currentScene;//現在のシーン
 
     private bool endBGM = false;//BGM終了判定
-                                //private double time = 0;//時間
-
-    private float[] volumeList;//音量
 
     private void Awake()
     {
-        ////現在のシーン更新
-        //currentScene = SceneManager.GetActiveScene().name;
+        //全てのデータ受け取る
+        dataList = dataBase.bgmDatas;
+
+        //現在のシーン更新
+        currentScene = SceneManager.GetActiveScene().name;
 
         ////初期化
-        playerInfoList = new CriAtomExPlayer[1];
-        playerInfoList[0] = new CriAtomExPlayer();
-        cueInfoList = new CriAtomEx.CueInfo[1];
-        cueInfoList[0] = new CriAtomEx.CueInfo();
-        criAtomExAcbsList = new CriAtomExAcb[1];
-        sceneList = new string[1];
-        volumeList = new float[1];
+        playerInfo = new CriAtomExPlayer();
+        criAtomExAcbsList = new CriAtomExAcb[dataList.Length];
+        //cueInfoList = new CriAtomEx.CueInfo[dataList.Length];
 
-        ////ループ設定
-        //playerInfoList[0].Loop(true);
 
-        ////終了判定
-        //endBGM = false;
+        //cueNameList = new string[System.Enum.GetValues(typeof(CueName)).Length];
+        //for (int i = 0 ; i < System.Enum.GetValues(typeof(CueName)).Length ; ++i)
+        //{
+        //    cueNameList = System.Enum.GetNames(typeof(CueName));
+        //}
+        //sceneList = new string[System.Enum.GetValues(typeof(SceneName)).Length];
+        //for (int i = 0 ; i < System.Enum.GetValues(typeof(SceneName)).Length ; ++i)
+        //{
+        //    sceneList = System.Enum.GetNames(typeof(SceneName));
+        //}
 
-        ////シーン更新
-        //SceneManager.activeSceneChanged += OnActiveSceneChanged;
+        //終了判定
+        endBGM = false;
 
-        //3D空間
-        source = new CriAtomEx3dSource();
-        listener = new CriAtomEx3dListener();
-        playerInfoList[0].Set3dSource(source);
-        playerInfoList[0].Set3dListener(listener);
+        //シーン更新
+        SceneManager.activeSceneChanged += OnActiveSceneChanged;
+    }
 
-        playerInfoList[0].SetCue(criAtomExAcbsList[0], "CatMeow");
-        volumeList[0] = 1.0f;
-        playerInfoList[0].SetVolume(volumeList[0]);
-        playerInfoList[0].Loop(true);
-        playerInfoList[0].Prepare();
-        playerInfoList[0].Start();
+    public void Start()
+    {
+        playerInfo.Prepare();
+        playerInfo.Start();
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
-        source.SetPosition(speaker.transform.position.x, speaker.transform.position.y, speaker.transform.position.z);
-        source.Update();
-        source.SetPosition(player.transform.position.x, player.transform.position.y, player.transform.position.z);
-        listener.Update();
-
-
-        //時間
-        //time = Time.fixedDeltaTime;
-        //Debug.Log(time);
-
-        //Debug.Log(playerInfoList[0].GetStatus());
-
+        //Debug.Log();
+        Debug.Log(playerInfo.GetStatus());
     }
 
     //シーン更新
     void OnActiveSceneChanged(Scene prevScene, Scene nextScene)
     {
         //再生終了
-        if (playerInfoList[0].GetStatus() == CriAtomExPlayer.Status.Playing)
+        if (playerInfo.GetStatus() == CriAtomExPlayer.Status.Playing)
         {
-            playerInfoList[0].Stop();
+            playerInfo.Stop();
         }
 
         //現在のシーンと次のシーンが違うとき
@@ -108,29 +101,62 @@ public class PlayBGM : MonoBehaviour
     //BGM設定
     void SettingBGM()
     {
-        //シーン情報別設定
-        switch (currentScene)
+        ////シーン情報別設定
+        //switch (currentScene)
+        //{
+        //    case "CriWare":
+        //        playerInfo.SetCue(criAtomExAcbsList[0], "CatMeow");
+        //        volumeList[0] = 1.0f;
+        //        playerInfo.SetVolume(volumeList[0]);
+        //        playerInfo.Loop(true);
+        //        playerInfo.Prepare();
+        //        playerInfo.Start();
+        //        ////CueSheet情報
+        //        //criAtomExAcbsList[0] = CriAtom.GetAcb("WorkingTitle");
+        //        //cueInfoList = criAtomExAcbsList[0].GetCueInfoList();
+        //        ////CueName情報
+        //        //playerInfoList[0].SetCue(criAtomExAcbsList[0], "CatMeow(WorkingTitle)");
+        //        ////音量
+        //        //volumeList[0] = 1.0f;
+        //        //playerInfoList[0].SetVolume(volumeList[0]);
+        //        ////再生
+        //        //playerInfoList[0].Start();
+        //        break;
+        //    default:
+        //        break;
+        //}
+
+
+        for (int i = 0 ; i < dataList.Length; ++i)
         {
-            case "CriWare":
-                playerInfoList[0].SetCue(criAtomExAcbsList[0], "CatMeow");
-                volumeList[0] = 1.0f;
-                playerInfoList[0].SetVolume(volumeList[0]);
-                playerInfoList[0].Loop(true);
-                playerInfoList[0].Prepare();
-                playerInfoList[0].Start();
-                ////CueSheet情報
-                //criAtomExAcbsList[0] = CriAtom.GetAcb("WorkingTitle");
-                //cueInfoList = criAtomExAcbsList[0].GetCueInfoList();
-                ////CueName情報
-                //playerInfoList[0].SetCue(criAtomExAcbsList[0], "CatMeow(WorkingTitle)");
-                ////音量
-                //volumeList[0] = 1.0f;
-                //playerInfoList[0].SetVolume(volumeList[0]);
-                ////再生
-                //playerInfoList[0].Start();
-                break;
-            default:
-                break;
+            if (currentScene == dataList[i].sceneName.ToString())
+            {
+                //for (int j = 0 ; j < sceneList.Length ; ++j)
+                //{
+                //    switch (j)
+                //    {
+                //        case sceneList:
+                //            playerInfo.SetCue(criAtomExAcbsList[0], "CatMeow");
+                //            playerInfo.SetVolume(dataList[i].volume);
+                //            break;
+                //        case "Shading":
+                //            break;
+                //        case "CreateRoom":
+                //            break;
+                //        case "CreateThiefScene":
+                //            break;
+                //        case "MainScene":
+                //            break;
+                //        case "BootStrap":
+                //            break;
+                //        default: break;
+                //    }
+                //}
+
+                playerInfo.SetCue(criAtomExAcbsList[0], dataList[i].cueName.ToString());
+                playerInfo.SetVolume(dataList[i].volume);
+                playerInfo.Loop(true);
+            }
         }
     }
 }

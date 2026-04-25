@@ -15,11 +15,13 @@ public class RoomGrid : MonoBehaviour
 
     public Vector2 gridSize { get; private set; }   // グリッド1マスの大きさ
     private Renderer rendererMaterial; // グリッドのマテリアル
+    private GameObject gridObject; // グリッドの大きさを正確に取得する為の子オブジェクト
 
     void Start()
     {
         // グリッド1マスの大きさを計算
-        gridSize = new Vector2(transform.localScale.x / gridDivision.x, transform.localScale.z / gridDivision.x);
+        gridObject = gameObject.transform.GetChild(0).gameObject;
+        gridSize = new Vector2(gridObject.transform.lossyScale.x / gridDivision.x, gridObject.transform.lossyScale.z / gridDivision.y);
         rendererMaterial = GetComponent<Renderer>();
         if (rendererMaterial != null)
         {
@@ -29,6 +31,7 @@ public class RoomGrid : MonoBehaviour
         {
             Debug.LogWarning("RoomGrid: Material not found on the GameObject.");
         }
+
     }
 
     /// <summary>
@@ -42,13 +45,15 @@ public class RoomGrid : MonoBehaviour
         // ワールド座標を床から見たローカル座標に変換
         Vector3 localPos = transform.InverseTransformPoint(pos);
 
-        // 北西を原点(0.0f,0.0f)とした相対座標に変換
-        Vector2 relativePos = new Vector2(localPos.x + 0.5f, 0.5f - localPos.z);
-
+        // 北西を原点(0.0f,0.0f)とした相対座標に変換   
+        Vector2 relativePos = new Vector2(
+            localPos.x + gridObject.transform.lossyScale.x * 0.5f,
+            gridObject.transform.lossyScale.z * 0.5f - localPos.z);
+        
         // グリッドの分割数に基づいてグリッド位置を計算
         Vector2Int gridPos = new Vector2Int(
-            Mathf.FloorToInt(relativePos.x / 1.0f * gridDivision.x),
-            Mathf.FloorToInt(relativePos.y / 1.0f * gridDivision.y)
+            Mathf.FloorToInt(relativePos.x),
+            Mathf.FloorToInt(relativePos.y)
         );
 
         // グリッドの範囲外の場合は-1を返す
@@ -56,5 +61,33 @@ public class RoomGrid : MonoBehaviour
         if (gridPos.y < 0 || gridPos.y >= gridDivision.y) gridPos.y = -1;
         
         return gridPos;
+    }
+
+    /// <summary>
+    /// 引数のグリッド位置から、ワールド座標を返す
+    /// グリッドの範囲外の場合、無限数を返す
+    /// </summary>
+    /// <param name="gridPos">グリッド番号</param>
+    /// <returns>引数のグリッドが存在するワールド座標(範囲外の場合無限数)</returns>
+    public Vector3 GetWorldPosFromGrid(Vector2Int gridPos)
+    {
+        // 範囲外チェック
+        if (gridPos.x < 0 || gridPos.x >= gridDivision.x ||
+            gridPos.y < 0 || gridPos.y >= gridDivision.y)
+        {
+            return Vector3.zero;
+        }
+
+        // グリッドから相対座標に変換
+        Vector2 relativePos = new Vector2(
+            gridPos.x * gridSize.x - gridObject.transform.lossyScale.x * 0.5f + gridSize.x * 0.5f,
+            gridObject.transform.lossyScale.z * 0.5f - gridPos.y * gridSize.y - gridSize.x * 0.5f
+        );
+        
+        Debug.Log($"relativePos: {relativePos}");
+        Vector3 localPos = new Vector3(relativePos.x, transform.position.y, relativePos.y);
+        Vector3 worldPos = transform.TransformPoint(localPos);
+        worldPos.y = transform.position.y;
+        return worldPos;
     }
 }

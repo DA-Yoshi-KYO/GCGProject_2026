@@ -4,9 +4,11 @@
  *    宇留野 陸斗
  * ----------------------------------------------------------
  * 2026-04-17 | 初回作成
+ * 2026-04-23 | 仕様書の内容に合わせて項目を追加
  * 
  */
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 // 泥棒の定数値管理用クラス
@@ -17,24 +19,39 @@ public class ThiefData
     [Tooltip("泥棒の種類名")]
     public string typeName;
 
-    [Header("次の部屋探索に切り替える探索度の閾値")]
-    [Tooltip("次の部屋探索に切り替える探索度の閾値"), Range(0, 100)]
-    public int nextRoomSearchThreshold;
-
     [Header("耐久値")]
     [Tooltip("泥棒の耐久値"), Min(1)]
     public int durability;
 
-    [Header("移動速度")]
-    [Tooltip("泥棒の移動速度"), Min(0)]
-    public float speed;
+    [Header("探索に関する項目")]
+    [Tooltip("泥棒の歩き速度倍率"), Range(0.0f,1.0f)]
+    public float walkSpeedMultiplier;
+    [Tooltip("泥棒の走り速度倍率"), Range(0.0f, 1.0f)]
+    public float runSpeedMultiplier;
+    [Tooltip("ジャンプ可能な高さ(マス目)"), Min(0)]
+    public int jumpHeight;
 
-    [Header("視界の半径")]
+    [Header("走り状態になる標的オブジェクトタイプ")]
+    [Tooltip("泥棒が走り状態になる標的オブジェクトのタイプ")]
+    public List<VisionTarget.TargetType> runTargetTypes;
+
+    [Header("警戒時間(秒)")]
+    [Tooltip("泥棒が警戒状態の継続時間"), Min(0)]
+    public int alertTime;
+
+    [Header("ソウルのドロップ数")]
+    [Tooltip("泥棒が倒されたときにドロップするソウルの数"), Min(0)]
+    public int soulDropCount;
+
+    [Header("視界に関する項目")]
     [Tooltip("泥棒の視界の半径"), Min(0)]
     public float viewDistance;
-    [Header("視界の角度")]
     [Tooltip("泥棒の視界の角度"), Range(0, 360)]
-    public float viewAngle;
+    public int viewAngle;
+
+    [Header("次の部屋探索に切り替える探索度")]
+    [Tooltip("次の部屋探索に切り替える探索度の閾値"), Range(0, 100)]
+    public int nextRoomSearchThreshold;
 }
 
 // ScriptableObjectとして定義することで、Unityエディタ上でデータを管理できるようにする

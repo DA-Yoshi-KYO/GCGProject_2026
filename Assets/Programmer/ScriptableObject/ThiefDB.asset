@@ -13,9 +13,14 @@ MonoBehaviour:
   m_Name: ThiefDB
   m_EditorClassIdentifier: Assembly-CSharp::ThiefDataSO
   thiefData:
-  - typeName: typeA
-    nextRoomSearchThreshold: 50
+  - typeName: A
     durability: 3
-    speed: 10
+    walkSpeedMultiplier: 0.5
+    runSpeedMultiplier: 0.8
+    jumpHeight: 0
+    runTargetTypes: 00000000
+    alertTime: 0
+    soulDropCount: 0
     viewDistance: 10
-    viewAngle: 120
+    viewAngle: 90
+    nextRoomSearchThreshold: 50
