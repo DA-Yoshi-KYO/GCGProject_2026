@@ -15,4 +15,16 @@ public class TrapTarget : ThiefTarget
     [Tooltip("泥棒のこの罠に対する警戒度"), Range(0, 100)]
     public int alertValue;
 
+    [Header("このギミックのScript")]
+    [Tooltip("この罠のギミックのScript")]
+    public GimmickBase gimmickScript;
+
+    private void Awake()
+    {
+        if (gimmickScript == null)
+        {
+            gimmickScript = GetComponent<GimmickBase>();
+        }
+    }
+
 }

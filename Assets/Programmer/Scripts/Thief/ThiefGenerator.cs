@@ -72,7 +72,7 @@ public class ThiefGenerator : MonoBehaviour
                 //--- 泥棒のデータを設定
 
                 /* 仮で実数変数でプレイヤー速度を用意 */
-                float playerSpeed = 3.0f;
+                float playerSpeed = 10.0f;
 
                 // 行動AIの設定
                 ThiefAI thiefAI = thief.GetComponent<ThiefAI>();

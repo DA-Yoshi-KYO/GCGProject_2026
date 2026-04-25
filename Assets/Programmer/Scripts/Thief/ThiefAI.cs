@@ -247,16 +247,16 @@ public class ThiefAI : MonoBehaviour
                 roomMemories[currentRoom].FirstSetting();
             }
 
-            // オブジェクトが部屋の記憶にない場合は新たに追加
+            // 現在の部屋の記憶に認識しているオブジェクトのリストがない場合は新たに作成
             if (roomMemories[currentRoom].recognizedObjects == null) roomMemories[currentRoom].recognizedObjects = new List<ThiefTarget>();
 
-            // 現在の部屋の記憶にオブジェクトを追加
-
+            bool isAlreadyRecognized = false; // 既に記憶しているオブジェクトかどうかを判定するフラグ
             foreach (var entry in roomMemories[currentRoom].recognizedObjects)
             {
                 // 既に記憶しているオブジェクトの場合はスキップ
-                if (entry == target) continue;
+                if (entry == target) isAlreadyRecognized = true;
             }
+            if (isAlreadyRecognized) continue;
 
             // 新しいオブジェクトを記憶に追加
             roomMemories[currentRoom].recognizedObjects.Add(target);
@@ -275,6 +275,9 @@ public class ThiefAI : MonoBehaviour
     /// </returns>
     private bool HasUnexploredTargets()
     {
+        // 現在の部屋の記憶がない場合や、認識しているオブジェクトがない場合は、未探索のオブジェクトがないと判定してfalseを返す
+        if (roomMemories[currentRoom] == null || roomMemories[currentRoom].recognizedObjects == null) return false;
+
         // 視認しているオブジェクトの中に未探索のものがあるかどうかを判定
         foreach (var entry in roomMemories[currentRoom].recognizedObjects)
         {
@@ -335,9 +338,21 @@ public class ThiefAI : MonoBehaviour
                                 }
                                 else if (currentTarget is TrapTarget)
                                 {
-                                    // 宝物罠の場合ではない場合は、スキップ
-                                    // 宝物罠の場合は、距離判定で探索対象を切り替える
 
+                                    // 空の宝箱型の罠の場合ではない場合は、スキップ
+                                    if (entry is TrapTarget tt && tt.gimmickScript.gimmick != Gimmick.EmptyChest) continue;
+
+                                    // 宝物罠の場合は、距離判定で探索対象を切り替える
+                                    // オブジェクトとの距離を計算
+                                    float distance = Vector3.Distance(transform.position, entry.transform.position);
+
+                                    // より近いオブジェクトを探索対象に設定
+                                    if (distance < distanceToTarget)
+                                    {
+                                        distanceToTarget = distance;
+                                        currentTarget = entry;
+                                    }
+                                    else continue;
                                 }
                             }
                             break;
@@ -345,8 +360,8 @@ public class ThiefAI : MonoBehaviour
                             {
                                 // 現在の探索対象が宝物の場合は、スキップ
                                 if (currentTarget is VisionTarget vt && vt.targetType == VisionTarget.TargetType.Treasure) continue;
-                                // 現在の探索対象が宝物の罠の場合は、スキップ
-                                // if (currentTarget is TrapTarget) continue;
+                                // 現在の探索対象が空の宝箱型の罠の場合は、スキップ
+                                if (currentTarget is TrapTarget tt && tt.gimmickScript.gimmick == Gimmick.EmptyChest) continue;
 
                                 // オブジェクトとの距離を計算
                                 float distance = Vector3.Distance(transform.position, entry.transform.position);
@@ -366,15 +381,16 @@ public class ThiefAI : MonoBehaviour
                 {
                     // 宝物を探索対象にしている場合は、スキップ
                     if (currentTarget is VisionTarget vt && vt.targetType == VisionTarget.TargetType.Treasure) continue;
-                    // 宝物の罠を探索対象にしている場合は、スキップ
-                    // if (currentTarget is TrapTarget) continue;
+                    // 空の宝箱型の罠を探索対象にしている場合は、スキップ
+                    if (currentTarget is TrapTarget tt && tt.gimmickScript.gimmick == Gimmick.EmptyChest) continue;
+
                 }
                 else if (entry is TrapTarget)
                 {
                     // 宝物を探索対象にしている場合は、スキップ
                     if (currentTarget is VisionTarget vt && vt.targetType == VisionTarget.TargetType.Treasure) continue;
                     // 宝物の罠を探索対象にしている場合は、スキップ
-                    if (currentTarget is TrapTarget) continue;
+                    if (currentTarget is TrapTarget tt && tt.gimmickScript.gimmick == Gimmick.EmptyChest) continue;
 
                     // オブジェクトとの距離を計算
                     float distance = Vector3.Distance(transform.position, entry.transform.position);
@@ -391,8 +407,8 @@ public class ThiefAI : MonoBehaviour
         // 未探索のオブジェクトがない場合は、部屋の移動ルートに沿って移動する処理を追加する
         else
         {
-            // 前回の探索対象が視認オブジェクト(VisionTarget)かどうか
-            if (currentTarget == null || currentTarget is VisionTarget || currentTarget is TrapTarget)
+            // 前回の探索対象がThiefTargetの派生クラスかどうか(前回が移動ポイントでない場合)
+            if (currentTarget == null || currentTarget is VisionTarget || currentTarget is TrapTarget || currentTarget is PlayerTarget)
             {
                 // 視認オブジェクトから移動ポイントにする場合は一番近いものを探索対象に設定
                 foreach (ThiefTarget target in currentRoom.movePoints)
@@ -422,7 +438,7 @@ public class ThiefAI : MonoBehaviour
                         int nextIndex = 0;
 
                         // 右回りの場合
-                        if (currentRoom.isRight)
+                        if (currentRoom.isListDown)
                         {
                             // 次のインデックスを計算
                             nextIndex = i + 1;
@@ -432,6 +448,7 @@ public class ThiefAI : MonoBehaviour
 
                             // リストを加算して次の移動ポイントを探索対象に設定
                             currentTarget = currentRoom.movePoints[nextIndex];
+                            break;
                         }
                         // 左回りの場合
                         else
@@ -444,6 +461,7 @@ public class ThiefAI : MonoBehaviour
 
                             // リストを減算して次の移動ポイントを探索対象に設定
                             currentTarget = currentRoom.movePoints[nextIndex];
+                            break;
                         }
                     }
                 }
@@ -464,6 +482,9 @@ public class ThiefAI : MonoBehaviour
         {
             durability = 0;
             currentState = ThiefState.Stunned;
+
+            // プレイヤーにソウルを入手させる
+            GameObject.FindObjectOfType<PlayerAction>().AddSoul(soulDropCount);
         }
     }
 
