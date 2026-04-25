@@ -12,6 +12,7 @@
  *            | 走り状態になる標的オブジェクトのタイプに応じて、移動速度を切り替える処理を追加
  * 2026-04-24 | 探索対象を強制的に変更する処理を追加
  *            | 探索対象の決定ロジックを一つにまとめる(複数個所に分散していたものを、DecideTargetメソッドにまとめる)
+ * 2026-04-25 | 次に設定する移動ポイントを決定するロジックの不具合を修正
  * 
  */
 using System.Collections.Generic;
@@ -20,6 +21,7 @@ using UnityEngine.AI;
 
 // 泥棒のAIシステム
 [RequireComponent(typeof(NavMeshAgent))]
+[RequireComponent(typeof(VisionSensor))]
 public class ThiefAI : MonoBehaviour
 {
     [Tooltip("泥棒の行動状態を定義する列挙型")]
@@ -52,6 +54,11 @@ public class ThiefAI : MonoBehaviour
     private float walkSpeed;
     private float runSpeed;
 
+    [Tooltip("気絶後に退場するまでの時間")]
+    private int exitAfterStunTime;
+    [Tooltip("気絶後の経過時間")]
+    private float elapsedTimeAfterStun;
+
     [Tooltip("ドロップするソウルの数")]
     private int soulDropCount;
 
@@ -75,6 +82,7 @@ public class ThiefAI : MonoBehaviour
         runSpeed = playerSpeed * data.runSpeedMultiplier;
         nextRoomSearchThreshold = data.nextRoomSearchThreshold;
         runTargetTypes = data.runTargetTypes;
+        exitAfterStunTime = data.exitAfterStunTime;
         soulDropCount = data.soulDropCount;
 
         // 初期状態を探索に設定
@@ -220,12 +228,20 @@ public class ThiefAI : MonoBehaviour
 
     // 気絶状態の行動
     // ----------------
-    // TODO:その場で動けなくなる処理を追加する
+    // TODO: その場で動けなくなる処理を追加する
+    //     : 退場するときは徐々に消えるようにする処理を追加する
     private void Stunned()
     {
-
+        // 経過時間を加算
+        elapsedTimeAfterStun += Time.deltaTime;
+        // 経過時間が退場するまでの時間を超えた場合は、退場する処理を追加する
+        if (elapsedTimeAfterStun >= exitAfterStunTime)
+        {
+            // 退場する処理を追加する
+            Debug.Log("泥棒が退場");
+            Destroy(gameObject);
+        }
     }
-
 
     /// <summary>
     /// 部屋のオブジェクトを視認して記憶に保存する処理
@@ -235,7 +251,6 @@ public class ThiefAI : MonoBehaviour
         // 視界内オブジェクトを取得
         List<ThiefTarget> visionTargets = this.GetComponent<VisionSensor>().Scan();
         
-
         bool isNewObjectRecognized = false; // 新たに視認したオブジェクトがあるかどうかを判定するフラグ
         // 視認したオブジェクトを記憶に保存
         foreach (ThiefTarget target in visionTargets)
@@ -484,7 +499,11 @@ public class ThiefAI : MonoBehaviour
             currentState = ThiefState.Stunned;
 
             // プレイヤーにソウルを入手させる
-            GameObject.FindObjectOfType<PlayerAction>().AddSoul(soulDropCount);
+            PlayerAction playerAction = GameObject.FindObjectOfType<PlayerAction>();
+
+            // playerActionが見つかった場合は、ソウルを加算する処理を実行する。見つからない場合は、エラーログを出力する。
+            if (playerAction != null)playerAction.AddSoul(soulDropCount);
+            else Debug.LogError("PlayerActionが見つかりませんでした。ThiefAIのTakeDamageメソッドで、プレイヤーにソウルを入手させる処理が正常に動作しない可能性があります。");
         }
     }
 
@@ -492,7 +511,7 @@ public class ThiefAI : MonoBehaviour
     /// 探索対象を強制的に変更する処理
     /// (対象：プレイヤーが攻撃してきたときや、ミミックの罠にかかったときなど)
     /// </summary>
-    /// <param name="target"></param>
+    /// <param name="target">新しく設定する探索対象</param>
     public void SetTarget(ThiefTarget target)
     {
         currentTarget = target;
