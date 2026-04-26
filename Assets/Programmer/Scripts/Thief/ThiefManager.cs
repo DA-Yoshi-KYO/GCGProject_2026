@@ -1,11 +1,12 @@
 /* ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
- *    泥棒を生成するシステム
+ *    泥棒を管理するシステム
  * ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
  *    宇留野 陸斗
  * ----------------------------------------------------------
  * 2026-04-17 | 初回作成
  * 2026-04-19 | 泥棒のパラメーター設定処理の記載(行動AIの設定、視界システムの設定)
  * 2026-04-23 | 移動速度の設定処理の記載(プレイヤーの速度を仮で用意して、そこから泥棒の速度を計算するように変更)
+ * 2026-04-26 | ファイル名・クラス名をThiefManagerに変更
  * 
  */
 using Unity.Mathematics;
@@ -13,7 +14,7 @@ using UnityEngine;
 
 
 // 泥棒を生成するシステム
-public class ThiefGenerator : MonoBehaviour
+public class ThiefManager : MonoBehaviour
 {
     [SerializeField, Tooltip("泥棒のデータベース")]
     private ThiefDataSO thiefDB;
