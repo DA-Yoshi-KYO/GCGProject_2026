@@ -39,6 +39,10 @@ public class ThiefData
     [Tooltip("泥棒が警戒状態の継続時間"), Min(0)]
     public int alertTime;
 
+    [Header("気絶した後に退場するまでの間隔(秒)")]
+    [Tooltip("泥棒が気絶した後に退場するまでの間隔"), Min(0)]
+    public int exitAfterStunTime;
+
     [Header("ソウルのドロップ数")]
     [Tooltip("泥棒が倒されたときにドロップするソウルの数"), Min(0)]
     public int soulDropCount;
