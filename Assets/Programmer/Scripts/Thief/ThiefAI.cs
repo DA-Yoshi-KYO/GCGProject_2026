@@ -37,6 +37,7 @@ public class ThiefAI : MonoBehaviour
         Stunned
     }
 
+    [SerializeField]
     [Tooltip("現在の行動状態")]
     private ThiefState currentState;
 
@@ -232,6 +233,9 @@ public class ThiefAI : MonoBehaviour
     //     : 退場するときは徐々に消えるようにする処理を追加する
     private void Stunned()
     {
+        // ナビメッシュエージェントを停止させる
+        navMeshAgent.isStopped = true;
+
         // 経過時間を加算
         elapsedTimeAfterStun += Time.deltaTime;
         // 経過時間が退場するまでの時間を超えた場合は、退場する処理を追加する
@@ -239,6 +243,7 @@ public class ThiefAI : MonoBehaviour
         {
             // 退場する処理を追加する
             Debug.Log("泥棒が退場");
+            
             Destroy(gameObject);
         }
     }
@@ -516,5 +521,30 @@ public class ThiefAI : MonoBehaviour
     {
         currentTarget = target;
     }
+
+
+    //////////////////////////////////////////////////////////////////
+    /// デバック用の処理
+
+    [ContextMenu("ステータス状態を設定")]
+    private void Debug_SetNextStatus()
+    {
+        switch (currentState)
+        {
+            case ThiefState.Explore:
+                currentState = ThiefState.Found;
+                break;
+            case ThiefState.Found:
+                currentState = ThiefState.Escape;
+                break;
+            case ThiefState.Escape:
+                currentState = ThiefState.Stunned;
+                break;
+            case ThiefState.Stunned:
+                currentState = ThiefState.Explore;
+                break;
+        }
+    }
+
 }
 

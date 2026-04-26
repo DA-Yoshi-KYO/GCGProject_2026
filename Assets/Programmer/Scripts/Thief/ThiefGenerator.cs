@@ -93,4 +93,22 @@ public class ThiefGenerator : MonoBehaviour
             }
         }
     }
+
+    //////////////////////////////////////////////////////////////////
+    /// デバック用の処理
+
+    [ContextMenu("泥棒を再生成")]
+    private void DebugNotify()
+    {
+        // 生成した泥棒を全て削除
+        GameObject thiefParent = GameObject.Find("ThiefParent");
+        if (thiefParent != null)
+        {
+            Destroy(thiefParent);
+        }
+
+        // 泥棒を再生成
+        Notify();
+    }
+
 }
