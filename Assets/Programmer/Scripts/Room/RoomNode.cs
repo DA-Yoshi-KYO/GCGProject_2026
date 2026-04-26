@@ -21,11 +21,14 @@ public class RoomNode : MonoBehaviour
     // 部屋の移動ポイントを回る方向をギズモで表示する
     void OnDrawGizmos()
     {
-        if (movePoints == null || movePoints.Count == 0)
+        if (movePoints.Count == 0)
             return;
         Gizmos.color = Color.green;
         for (int i = 0; i < movePoints.Count; i++)
         {
+            if (movePoints[i] == null)
+                continue;
+
             Vector3 currentPoint = movePoints[i].transform.position;
             Vector3 nextPoint = movePoints[(i + 1) % movePoints.Count].transform.position;
             // 線を引く

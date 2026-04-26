@@ -32,7 +32,7 @@ public class ThiefManager : MonoBehaviour
     private void Notify()
     {
         // 現在のウェーブ数を取得
-        int currentWave = GameObject.Find("Manager").GetComponent<WaveManager>().waveNumber;
+        int currentWave = GameObject.Find("ThiefManager").GetComponent<WaveManager>().waveNumber;
 
 
         /*仮で実数変数として指定*/int stageNumber = 1;
