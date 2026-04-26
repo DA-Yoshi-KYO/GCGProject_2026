@@ -12,15 +12,30 @@ using UnityEngine;
 // 部屋の情報を管理するクラス
 public class RoomNode : MonoBehaviour
 {
-    [Tooltip("部屋のID")]
-    public int roomID;
-
-    [Tooltip("部屋に設置されているオブジェクトリスト")]
-    public List<VisionTarget> roomObjects;
-
     [Tooltip("部屋の移動ポイントリスト")]
     public List<ThiefTarget> movePoints;
 
     [Tooltip("移動ポイントの回り方")]
-    public bool isRight;// trueなら右回り、falseなら左回り
+    public bool isListDown = true;// trueなら右回り、falseなら左回り
+
+    // 部屋の移動ポイントを回る方向をギズモで表示する
+    void OnDrawGizmos()
+    {
+        if (movePoints == null || movePoints.Count == 0)
+            return;
+        Gizmos.color = Color.green;
+        for (int i = 0; i < movePoints.Count; i++)
+        {
+            Vector3 currentPoint = movePoints[i].transform.position;
+            Vector3 nextPoint = movePoints[(i + 1) % movePoints.Count].transform.position;
+            // 線を引く
+            Gizmos.DrawLine(currentPoint, nextPoint);
+            // 矢印を描く
+            Vector3 direction = (nextPoint - currentPoint).normalized;
+            Vector3 arrowHead = currentPoint + direction * 0.5f; // 矢印の長さ
+            Gizmos.DrawLine(currentPoint, arrowHead);
+            Gizmos.DrawLine(arrowHead, arrowHead + Quaternion.Euler(0, 0, isListDown ? -30 : 30) * direction * 0.2f);
+            Gizmos.DrawLine(arrowHead, arrowHead + Quaternion.Euler(0, 0, isListDown ? 30 : -30) * direction * 0.2f);
+        }
+    }
 }

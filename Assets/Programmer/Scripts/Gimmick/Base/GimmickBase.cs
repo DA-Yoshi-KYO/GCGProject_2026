@@ -20,7 +20,7 @@ public enum Gimmick
     None,
     Pot,
     IronBall,
-    FakeChest,
+    EmptyChest,
 }
 
 public enum GimmickState
@@ -33,8 +33,8 @@ public enum GimmickState
 
 public enum  GimmickType
 {
-    NotReusable,
-    Reusable,
+    NotReusable = 0,
+    Reusable = 1,
 }
 
 public enum GimmickDirection
@@ -94,7 +94,7 @@ public class GimmickBase : MonoBehaviour
 
     // ギミックの種類
     [Header("ギミックのタイプ")]
-    public GimmickType gimmickType = GimmickType.NotReusable;
+    public GimmickType gimmickType;
 
     [Header("ギミックの種類")]
     public Gimmick gimmick;
@@ -104,6 +104,7 @@ public class GimmickBase : MonoBehaviour
     public GimmickState gimmickState;
 
     [Header("調整用（プログラマー専用）")]
+    [Tooltip("ギミックの大きさや位置を調整するための値"), Min(1)]
     public int Adjust;
 
     // ギミックのグリッド上の位置
@@ -113,15 +114,13 @@ public class GimmickBase : MonoBehaviour
 
     private void Start()
     {
-        AdjustScaleToGrid();
-        SetGimmickPos(new Vector2Int(1,0));
     }
 
 
     /// <summary>
     /// ギミックの大きさを、グリッドの大きさに合わせて調整する関数
     /// </summary>
-    private void AdjustScaleToGrid()
+    public void AdjustScaleToGrid()
     {
         MeshFilter meshFilter = GetComponentInChildren<MeshFilter>();
         if (meshFilter == null || meshFilter.sharedMesh == null)
@@ -200,13 +199,20 @@ public class GimmickBase : MonoBehaviour
         if(hitChecker == null)
         {
             hitChecker = Instantiate(hitCheckerPrefab);
-            
+
+            HitChecker hit = hitChecker.GetComponent<HitChecker>();
+            if (hit != null)
+            {
+                hit.SetHitDamage(attackPower);
+                hit.SetEffectDamage(effectPower);
+                hit.HitLoop(gimmickType == GimmickType.Reusable);
+                hit.SetGimmick(gimmick);
+                hit.SetParentGameObject(gameObject);
+            }
+
             // 当たり判定の大きさを設定
             GameObject Effect = hitChecker.transform.Find("Effect").gameObject;
             GameObject Hit = hitChecker.transform.Find("Hit").gameObject;
-
-            // 確認用キューブ　（後で削除）
-            GameObject Cube = hitChecker.transform.Find("Cube").gameObject;
 
             Vector3 EffectSize = new Vector3(effectRangeX * roomGrid.gridSize.x,1, effectRangeY * roomGrid.gridSize.y);
             Vector3 HitSize = new Vector3(hitRangeX * roomGrid.gridSize.x, 1, hitRangeY * roomGrid.gridSize.y);
@@ -221,8 +227,6 @@ public class GimmickBase : MonoBehaviour
 
             Effect.transform.localScale = EffectSize;
             Hit.transform.localScale = HitSize;
-            Cube.transform.localScale = EffectSize;
-
         }
 
         Vector3 HitCheckerPos;
@@ -335,12 +339,10 @@ public class GimmickBase : MonoBehaviour
     {
         // Cooldown状態の処理
     }
-
     protected virtual void BrokenUpdate()
     {
         // Broken状態の処理
     }
-
     // ===============================================================================
 }
 

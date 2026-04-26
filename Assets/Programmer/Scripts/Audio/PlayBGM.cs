@@ -53,9 +53,6 @@ public class PlayBGM : MonoBehaviour
         //    sceneList = System.Enum.GetNames(typeof(SceneName));
         //}
 
-        //ループ設定
-        playerInfo.Loop(true);
-
         //終了判定
         endBGM = false;
 
@@ -63,11 +60,17 @@ public class PlayBGM : MonoBehaviour
         SceneManager.activeSceneChanged += OnActiveSceneChanged;
     }
 
+    public void Start()
+    {
+        playerInfo.Prepare();
+        playerInfo.Start();
+    }
+
     // Update is called once per frame
     void FixedUpdate()
     {
         //Debug.Log();
-        //Debug.Log(playerInfo.GetStatus());
+        Debug.Log(playerInfo.GetStatus());
     }
 
     //シーン更新
@@ -150,17 +153,9 @@ public class PlayBGM : MonoBehaviour
                 //    }
                 //}
 
-                if (criAtomExAcbsList[i] != null)
-                {
-                    criAtomExAcbsList[i].Dispose();
-                    criAtomExAcbsList[i] = null;
-                }
-
                 playerInfo.SetCue(criAtomExAcbsList[0], dataList[i].cueName.ToString());
                 playerInfo.SetVolume(dataList[i].volume);
                 playerInfo.Loop(true);
-                playerInfo.Prepare();
-                playerInfo.Start();
             }
         }
     }

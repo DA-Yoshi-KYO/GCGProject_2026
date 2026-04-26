@@ -14,12 +14,6 @@ public class VisionTarget : ThiefTarget
     // ターゲットの種類
     public enum TargetType
     {
-        [Tooltip("プレイヤー")]
-        Player,
-        [Tooltip("出入口")]
-        Exit,
-        [Tooltip("罠")]
-        Trap,
         [Tooltip("宝物")]
         Treasure,
         [Tooltip("宝物以外の部屋オブジェクト")]
@@ -29,6 +23,11 @@ public class VisionTarget : ThiefTarget
     [Tooltip("ターゲットの種類")]
     public TargetType targetType;
 
-    // Exitの場合隣の部屋を示す変数
-    public RoomNode connectedRoom;
+    [Header("探索したときに得る探索度")]
+    [Tooltip("探索したときに得る探索度")]
+    public int explorationValue;
+
+    [Header("探索済みとする距離")]
+    [Tooltip("探索済みとする距離")]
+    public float exploredDistanceThreshold;
 }

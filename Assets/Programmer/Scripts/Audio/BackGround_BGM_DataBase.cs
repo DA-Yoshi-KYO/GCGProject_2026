@@ -29,9 +29,9 @@ public enum CueName
 [Serializable]
 public class BackGround_BGM_Data
 {
-    public SceneName sceneName;//再生するシーン
-    public CueName cueName;//キュー
-    public float volume;//音量
+    [Header("再生するシーン名")] public SceneName sceneName;//再生するシーン
+    [Header("再生音源")] public CueName cueName;//キュー
+    [Header("音量")] public float volume;//音量
 }
 
 [CreateAssetMenu(fileName = "BackGround_BGM_DataSO", menuName = "ScriptableObjects/BackGround_BGM_DataSO")]
