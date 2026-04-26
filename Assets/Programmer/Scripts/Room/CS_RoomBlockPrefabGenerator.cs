@@ -28,6 +28,11 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
     [SerializeField]
     private List<GameObject> list_RoomBlockPrefabs = new List<GameObject>();
 
+    private void Awake()
+    {
+        CreateRooms();
+    }
+
     /// <summary>
     /// ルームブロックを生成します。
     /// すでに生成済みの場合は重複生成を防ぐため、処理を中断します。

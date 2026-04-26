@@ -33,6 +33,11 @@ public class PlayerMove : MonoBehaviour
         rb = GetComponent<Rigidbody>();
     }
 
+    private void OnDestroy()
+    {
+        playerInput.Player.Disable();
+    }
+
     // Update is called once per frame
     void Update()
     {
