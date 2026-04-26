@@ -86,6 +86,15 @@ public class ThiefGenerator : MonoBehaviour
                 thief.transform.parent = thiefParent.transform;
                 
                 //--- 生成した泥棒の生成位置を選定
+
+                GameObject debugPoint = GameObject.Find("Debug_ThiefPoint");
+                if (debugPoint != null)
+                {
+                    // デバッグ用の生成ポイントが存在する場合は、そこに生成
+                    thief.transform.position = debugPoint.transform.position;
+                    continue;
+                }
+
                 // (仮) 50,0,50 ~ -50,0,-50の範囲にランダムに生成
                 float x = UnityEngine.Random.Range(-50.0f, 50.0f);
                 float z = UnityEngine.Random.Range(-50.0f, 50.0f);

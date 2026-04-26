@@ -49,6 +49,9 @@ public class ThiefAI : MonoBehaviour
     private ThiefTarget currentTarget;
     public ThiefTarget CurrentTarget => currentTarget;
 
+    [Tooltip("持っている宝物オジェクト")]// 見つけたら設定する
+    private GameObject heldTreasure;
+
     [Tooltip("泥棒の耐久力")]
     private int durability;
     [Tooltip("泥棒の移動速度")]
@@ -216,15 +219,85 @@ public class ThiefAI : MonoBehaviour
     //     : 宝物発見バフの適応処理を追加する
     private void Found()
     { 
+        // 宝物を持つ
+        heldTreasure = currentTarget.gameObject;
+        currentTarget.gameObject.transform.parent = this.transform; // 泥棒の子オブジェクトにする
+        currentTarget.GetComponent<Collider>().enabled = false; // 宝物のコライダーを無効にする
+
         // 状態を逃走に変更
         currentState = ThiefState.Escape;
+
+        float distanceToTarget = Mathf.Infinity;
+        if (currentTarget == null || currentTarget is VisionTarget || currentTarget is TrapTarget || currentTarget is PlayerTarget)
+        {
+            // 視認オブジェクトから移動ポイントにする場合は一番近いものを探索対象に設定
+            foreach (ThiefTarget target in currentRoom.movePoints)
+            {
+                if (target == null) continue;
+
+                // オブジェクトとの距離を計算
+                float distance = Vector3.Distance(transform.position, target.transform.position);
+                // より近いオブジェクトを探索対象に設定
+                if (distance < distanceToTarget)
+                {
+                    distanceToTarget = distance;
+                    currentTarget = target;
+                }
+                else continue;
+            }
+        }
     }
 
     // 逃走状態の行動
+    // (仮)移動ポイントを探索対象にして移動する処理を追加する
     // ----------------
     // TODO: 構築したルートに沿って移動する処理を追加する
     private void Escape()
-    { 
+    {
+
+        // 探索対象に向かって移動
+        navMeshAgent.SetDestination(currentTarget.transform.position);
+
+        // 探索対象に十分近づいたら、次の探索対象を決定
+        if (Vector3.Distance(transform.position, currentTarget.transform.position) < 2.0f)
+        {
+            // 現在の移動ポイントがリストのどこにあるかを判定
+            for (int i = 0 ; i < currentRoom.movePoints.Count ; i++)
+            {
+                // 現在の移動ポイントがリストのどこにあるかを判定
+                if (currentRoom.movePoints[i] == currentTarget)
+                {
+                    int nextIndex = 0;
+
+                    // 右回りの場合
+                    if (currentRoom.isListDown)
+                    {
+                        // 次のインデックスを計算
+                        nextIndex = i + 1;
+
+                        // インデックスがリストの範囲を超える場合は、リストの先頭に戻す
+                        if (nextIndex >= currentRoom.movePoints.Count) nextIndex = 0;
+
+                        // リストを加算して次の移動ポイントを探索対象に設定
+                        currentTarget = currentRoom.movePoints[nextIndex];
+                        break;
+                    }
+                    // 左回りの場合
+                    else
+                    {
+                        // 次のインデックスを計算
+                        nextIndex = i - 1;
+
+                        // インデックスがリストの範囲を超える場合は、リストの末尾に戻す
+                        if (nextIndex < 0) nextIndex = currentRoom.movePoints.Count - 1;
+
+                        // リストを減算して次の移動ポイントを探索対象に設定
+                        currentTarget = currentRoom.movePoints[nextIndex];
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     // 気絶状態の行動
@@ -325,6 +398,9 @@ public class ThiefAI : MonoBehaviour
                 // 既に探索済みのオブジェクトはスキップ
                 if (entry.isExplored) continue;
 
+                // 既に探索対象に設定しているオブジェクトはスキップ
+                if (entry == currentTarget) continue;
+
                 // 現在の探索対象が視認オブジェクト(VisionTarget)かどうか
                 if (entry is VisionTarget)
                 {
@@ -373,6 +449,11 @@ public class ThiefAI : MonoBehaviour
                                         currentTarget = entry;
                                     }
                                     else continue;
+                                }
+                                else
+                                {
+                                    // プレイヤーを探索対象にしている場合は、問答無用で宝物を探索対象に設定
+                                    currentTarget = entry;
                                 }
                             }
                             break;
@@ -423,6 +504,7 @@ public class ThiefAI : MonoBehaviour
                     else continue;
                 }
             }
+
         }
         // 未探索のオブジェクトがない場合は、部屋の移動ルートに沿って移動する処理を追加する
         else
