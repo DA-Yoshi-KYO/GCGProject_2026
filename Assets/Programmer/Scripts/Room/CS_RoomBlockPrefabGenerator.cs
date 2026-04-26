@@ -395,4 +395,28 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
 
         Destroy(go_Target);
     }
+
+    /// <summary>
+    /// 外部スクリプトやUIボタンからルームブロック生成を実行します。
+    /// </summary>
+    public void CreateRooms()
+    {
+        GenerateRoomBlocks();
+    }
+
+    /// <summary>
+    /// 外部スクリプトやUIボタンからルームブロック再生成を実行します。
+    /// </summary>
+    public void RecreateRooms()
+    {
+        RegenerateRoomBlocks();
+    }
+
+    /// <summary>
+    /// 外部スクリプトやUIボタンから生成済みルームブロック削除を実行します。
+    /// </summary>
+    public void DeleteRooms()
+    {
+        DeleteGeneratedRoomBlocks();
+    }
 }
