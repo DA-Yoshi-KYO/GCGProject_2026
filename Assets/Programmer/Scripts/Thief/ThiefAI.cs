@@ -220,7 +220,7 @@ public class ThiefAI : MonoBehaviour
     // TODO: 現在位置から出口までのルート構築処理を追加する(A*アルゴリズムを利用)
     //     : 宝物発見バフの適応処理を追加する
     private void Found()
-    { 
+    {
         // 宝物を持つ
         heldTreasure = currentTarget.gameObject;
         currentTarget.gameObject.transform.parent = this.transform; // 泥棒の子オブジェクトにする
@@ -229,24 +229,26 @@ public class ThiefAI : MonoBehaviour
         // 状態を逃走に変更
         currentState = ThiefState.Escape;
 
-        float distanceToTarget = Mathf.Infinity;
-        if (currentTarget == null || currentTarget is VisionTarget || currentTarget is TrapTarget || currentTarget is PlayerTarget)
-        {
-            // 視認オブジェクトから移動ポイントにする場合は一番近いものを探索対象に設定
-            foreach (ThiefTarget target in currentRoom.movePoints)
-            {
-                if (target == null) continue;
+        // 取得した宝物を他の泥棒の記憶から消去する
+        GameObject.FindObjectOfType<ThiefManager>().EraseTheMemoryToAllThief(currentTarget);
+        // 探索対象をリセット
+        currentTarget = null;
 
-                // オブジェクトとの距離を計算
-                float distance = Vector3.Distance(transform.position, target.transform.position);
-                // より近いオブジェクトを探索対象に設定
-                if (distance < distanceToTarget)
-                {
-                    distanceToTarget = distance;
-                    currentTarget = target;
-                }
-                else continue;
+        float distanceToTarget = Mathf.Infinity;
+        // 視認オブジェクトから移動ポイントにする場合は一番近いものを探索対象に設定
+        foreach (ThiefTarget target in currentRoom.movePoints)
+        {
+            if (target == null) continue;
+
+            // オブジェクトとの距離を計算
+            float distance = Vector3.Distance(transform.position, target.transform.position);
+            // より近いオブジェクトを探索対象に設定
+            if (distance < distanceToTarget)
+            {
+                distanceToTarget = distance;
+                currentTarget = target;
             }
+            else continue;
         }
     }
 
@@ -604,6 +606,34 @@ public class ThiefAI : MonoBehaviour
     public void SetTarget(ThiefTarget target)
     {
         currentTarget = target;
+    }
+
+    /// <summary>
+    /// 指定のオブジェクトに関する記憶を消去する処理
+    /// </summary>
+    /// <param name="obj">指定オブジェクト</param>
+    public void EraseTheMemory(ThiefTarget obj)
+    {
+        foreach(var room in roomMemories)
+        {
+            // 指定のオブジェクトに関する記憶がない場合はスキップ
+            if (room.Value.recognizedObjects == null) continue;
+
+            foreach (var entry in room.Value.recognizedObjects)
+            {
+                // 指定のオブジェクトに関する記憶がある場合は、記憶から削除する
+                if (entry == obj)
+                {
+                    room.Value.recognizedObjects.Remove(entry);
+                    break;
+                }
+            }
+        }
+
+        if (currentTarget == obj)
+        {
+            currentTarget = null;
+        }
     }
 
 

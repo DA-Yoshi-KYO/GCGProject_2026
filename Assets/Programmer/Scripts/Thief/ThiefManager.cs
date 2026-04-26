@@ -104,6 +104,23 @@ public class ThiefManager : MonoBehaviour
         }
     }
 
+    // 指定したオブジェクトの記憶を消去するメソッド
+    public void EraseTheMemoryToAllThief(ThiefTarget obj)
+    {
+        // 全泥棒を取得
+        GameObject[] thieves = GameObject.FindAnyObjectByType<ThiefAI>().gameObject.scene.GetRootGameObjects();
+        foreach (var thief in thieves)
+        {
+            ThiefAI thiefAI = thief.GetComponentInChildren<ThiefAI>();
+            if (thiefAI != null)
+            {
+                thiefAI.EraseTheMemory(obj);
+            }
+        }
+
+    }
+
+
     //////////////////////////////////////////////////////////////////
     /// デバック用の処理
 
