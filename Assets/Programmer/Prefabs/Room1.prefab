@@ -1502,7 +1502,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2174924266256480630}
   - component: {fileID: 4094073232680076365}
-  - component: {fileID: 6468835898399234663}
+  - component: {fileID: 2029860184245165261}
   m_Layer: 0
   m_Name: Room1
   m_TagString: Untagged
@@ -1548,7 +1548,7 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   isListDown: 1
---- !u!114 &6468835898399234663
+--- !u!114 &2029860184245165261
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1557,7 +1557,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 8863532542949226815}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 93930cc06ff88b346bb08e70bb6a2139, type: 3}
+  m_Script: {fileID: 11500000, guid: 42ffa512e323bc54cab6172d7191fb59, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &8960515018597142246
@@ -1970,6 +1970,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 3604793970953328440}
     m_Modifications:
+    - target: {fileID: 1664128552748834844, guid: 37618d5bfddbff440b1b843f18840ed7,
+        type: 3}
+      propertyPath: e_MoveDirection
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5179914963820716303, guid: 37618d5bfddbff440b1b843f18840ed7,
         type: 3}
       propertyPath: m_Name

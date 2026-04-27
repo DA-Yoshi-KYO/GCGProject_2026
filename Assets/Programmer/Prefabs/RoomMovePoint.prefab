@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8391268191879825031}
   - component: {fileID: 4406977002917531112}
+  - component: {fileID: 1664128552748834844}
   m_Layer: 0
   m_Name: RoomMovePoint
   m_TagString: RoomMovePoint
@@ -47,9 +48,27 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1664128552748834844
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5179914963820716303}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a522c4a2bffae8b4f9a3a2b1c1674f46, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  e_MoveDirection: 0
+  tf_PlayerSpawnPoint: {fileID: 0}
+  go_OpenDoorObject: {fileID: 0}
+  go_ClosedWallObject: {fileID: 0}
+  str_PlayerTag: Player
+  f_MoveCoolTime: 0.25
