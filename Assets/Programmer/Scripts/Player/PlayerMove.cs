@@ -17,7 +17,7 @@ public class PlayerMove : MonoBehaviour
 
     public PlayerInput playerInput { private set; get; }
 
-    private float accelartion = 10;//加速度
+    private float acceleration = 10;//加速度
 
     private Rigidbody rb;
 
@@ -31,6 +31,7 @@ public class PlayerMove : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+
     }
 
     private void OnDestroy()
@@ -41,6 +42,9 @@ public class PlayerMove : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
+        // PlayerPositionに生成Roomの情報をセットします。
+        GetComponent<CS_RoomPlayerPosition>().RefreshPlayerRoomData();
+
         //カメラの方向
         PlayerCamera playerCamera = GetComponent<PlayerCamera>();
         Vector3 forward = playerCamera.cameraForward;
@@ -55,20 +59,20 @@ public class PlayerMove : MonoBehaviour
         //移動
         if (playerInput.Player.MoveForward.IsPressed())
         {
-            rb.AddForce(new Vector3(forward.x,0.0f, forward.z) * accelartion, ForceMode.Acceleration);
+            rb.AddForce(new Vector3(forward.x, 0.0f, forward.z) * acceleration, ForceMode.Acceleration);
         }
         else if (playerInput.Player.MoveBack.IsPressed())
         {
-            rb.AddForce(new Vector3(-forward.x, 0.0f, -forward.z) * accelartion, ForceMode.Acceleration);
+            rb.AddForce(new Vector3(-forward.x, 0.0f, -forward.z) * acceleration, ForceMode.Acceleration);
         }
 
         if (playerInput.Player.MoveLeft.IsPressed())
         {
-            rb.AddForce(new Vector3(-right.x, 0.0f, -right.z) * accelartion, ForceMode.Acceleration);
+            rb.AddForce(new Vector3(-right.x, 0.0f, -right.z) * acceleration, ForceMode.Acceleration);
         }
         else if (playerInput.Player.MoveRight.IsPressed())
         {
-            rb.AddForce(new Vector3(right.x, 0.0f, right.z) * accelartion, ForceMode.Acceleration);
+            rb.AddForce(new Vector3(right.x, 0.0f, right.z) * acceleration, ForceMode.Acceleration);
         }
 
         if (playerInput.Player.Dash.IsPressed())
@@ -77,7 +81,7 @@ public class PlayerMove : MonoBehaviour
             if (rb.velocity.magnitude > moveAmount * velocityRun)
             {
                 rb.velocity = rb.velocity.normalized * (moveAmount * velocityRun);
-            }   
+            }
         }
         else
         {

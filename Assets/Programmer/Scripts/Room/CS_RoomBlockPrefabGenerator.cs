@@ -60,8 +60,6 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
 
         StartCoroutine(RegenerateRoomBlocksRuntimeCoroutine());
 
-        // PlayerPositionに生成Roomの情報をセットします。
-        roomPlayerPosition.RefreshPlayerRoomData();
     }
 
     /// <summary>

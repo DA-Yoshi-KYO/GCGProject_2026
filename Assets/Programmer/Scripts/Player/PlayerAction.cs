@@ -93,7 +93,7 @@ public class PlayerAction : MonoBehaviour
                     transform.forward.z * transform.localScale.z);
 
         //グリッドの位置を取得
-        var roomGrid = FindObjectOfType<RoomGrid>();
+        var roomGrid = GetComponent<CS_RoomPlayerPosition>().planeObject.GetComponent<RoomGrid>();
 
         Vector2Int grid = roomGrid.GetGridFromPos(settingPos);
 
