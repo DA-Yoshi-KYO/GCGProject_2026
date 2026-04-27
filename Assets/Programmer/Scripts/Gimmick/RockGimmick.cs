@@ -1,6 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.Burst.CompilerServices;
 using UnityEngine;
 
 public class RockGimmick : GimmickBase
@@ -42,7 +39,7 @@ public class RockGimmick : GimmickBase
             world.z = hitCheckerGridPos.y;
 
             // ★XZだけグリッド、Yは固定高さ
-            transform.position = new Vector3(world.x, world.y, world.z);
+            //transform.position = new Vector3(world.x, world.y, world.z);
 
             velocity = Vector3.zero;
 
