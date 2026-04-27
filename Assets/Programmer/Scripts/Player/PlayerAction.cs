@@ -9,17 +9,15 @@
  */
 using System.Collections.Generic;
 using UnityEngine;
-using static PlayerAction;
 
 public class PlayerAction : MonoBehaviour
 {
     [SerializeField] private int initSoul = 5;//初期のソウルの数
-    private int currentSoul;//現在のソウルの数
+    [Unity.VisualScripting.DoNotSerialize] public int currentSoul { private set; get; } = 0;//現在のソウルの数
 
-    [SerializeField] private  GameObject[] gimmickKind;//所持しているギミックの種類
-    private List<KeyValuePair<GameObject, int>> gimmickList;//所持しているギミックの数
+    public List<GameObject> gimmickKind;//所持しているギミックの種類
 
-    private int currentGimmickIndex = 0;//現在選択しているギミック
+    [Unity.VisualScripting.DoNotSerialize] public int currentGimmickIndex { private set; get; } = 0;//現在選択しているギミック
 
     //プレイヤーのモード
     public enum PlayerMode
@@ -38,18 +36,10 @@ public class PlayerAction : MonoBehaviour
 
         //現在のモード
         currentMode = PlayerMode.Normal;
-
-        //ギミックごとに持っている数を初期化
-        gimmickList = new List<KeyValuePair<GameObject, int>>();
-
-        for (int i = 0 ; i < gimmickKind.Length ; ++i)
-        {
-            gimmickList.Add(new KeyValuePair<GameObject, int>(gimmickKind[i], 0));
-        }
     }
 
     // Update is called once per frame
-    void FixedUpdate()
+    void Update()
     {
         PlayerMove playerMove = GetComponent<PlayerMove>();
 
@@ -58,7 +48,7 @@ public class PlayerAction : MonoBehaviour
         {
             currentGimmickIndex++;
 
-            if (currentGimmickIndex > gimmickList.Count)
+            if (currentGimmickIndex >= gimmickKind.Count)
                 currentGimmickIndex = 0;
         }
         else if(playerMove.playerInput.Player.GimmickChangeLeft.triggered)
@@ -66,7 +56,7 @@ public class PlayerAction : MonoBehaviour
             currentGimmickIndex--;
 
             if (currentGimmickIndex < 0)
-                currentGimmickIndex = gimmickList.Count;
+                currentGimmickIndex = gimmickKind.Count - 1;
         }
         
         //モードの切り替え
@@ -110,21 +100,21 @@ public class PlayerAction : MonoBehaviour
         Vector3 gridPos = roomGrid.GetWorldPosFromGrid(grid);
 
         //生成
-        GimmickBase gimmick = Instantiate(gimmickList[currentGimmickIndex].Key, gridPos, Quaternion.identity).GetComponent<GimmickBase>();
+        GimmickBase gimmick = Instantiate(gimmickKind[currentGimmickIndex], gridPos, Quaternion.identity).GetComponent<GimmickBase>();
 
         //ソウルの消費
         currentSoul -= gimmick.requiredSoul;
 
-        // ソウルが0未満になったらギミックを破壊
+        // ソウルが0未満になる場合は召喚を行わずソウル数を戻す
         if (currentSoul < 0)
         {
-            currentSoul = 0;
+            currentSoul += gimmick.requiredSoul;
             Destroy(gimmick.gameObject);
         }
 
         //gimmickBase.roomGrid = roomGrid.csを設定 
-        gimmick.SetGimmickPos(grid);// 位置の設定
-        gimmick.AdjustScaleToGrid();// グリッドに合わせてサイズを調整
+        //gimmick.SetGimmickPos(grid);// 位置の設定
+        //gimmick.AdjustScaleToGrid();// グリッドに合わせてサイズを調整
 
 
     }
