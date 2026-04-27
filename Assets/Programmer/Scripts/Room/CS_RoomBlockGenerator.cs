@@ -1,298 +1,522 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 /*==================================================
  *  ファイル名  : CS_RoomBlockGenerator.cs
  *  制作者      : 吉本竜
- *  内容        : RoomCreatePointタグの位置を中心にランダムなルームブロックを生成・再生成・削除する
+ *  内容        : RoomCreatePointにRoomをランダム生成し、RoomMovePoint同士を動的接続する
  *  履歴        : 2026/04/26 新規作成(ヨシモト)
- *              : 2026/04/26 再生成処理と削除処理を追加
- *              : 2026/04/26 複数のRoomBlockDataからランダム生成する処理を追加
+ *                2026/04/26 再生成処理と削除処理を追加
+ *                2026/04/26 複数のRoomBlockDataからランダム生成する処理を追加
+ *                2026/04/27 動的RoomMovePoint接続処理を追加(ヨシモト)
  *==================================================*/
 
 /// <summary>
-/// RoomCreatePointタグが付いたオブジェクトの位置を中心に、
-/// 複数のRoomBlockDataからランダムに選択してルームブロックを生成するクラスです。
+/// RoomCreatePointにランダムなRoomPrefabを生成し、
+/// 生成後にRoomMovePoint同士を動的に接続するクラスです。
 /// </summary>
 public class CS_RoomBlockGenerator : MonoBehaviour
 {
-    private const string TAG_ROOM_CREATE_POINT = "RoomCreatePoint";
     private const string GENERATED_ROOT_NAME = "__GeneratedRoomBlocks";
 
-    [Header("ランダム生成に使うルームデータ一覧")]
+    [Header("ランダム生成に使うRoomPrefab")]
     [SerializeField]
-    private List<CSS_RoomBlockData> css_RoomBlockDataList = new List<CSS_RoomBlockData>();
+    private List<GameObject> list_RoomPrefabs = new List<GameObject>();
 
     /// <summary>
-    /// RoomCreatePointタグが付いた全ての位置に、ランダムなルームブロックを生成します。
-    /// すでに生成済みの場合は重複生成しません。
+    /// Roomを生成します。
     /// </summary>
     [ContextMenu("ルームブロックを生成")]
     public void GenerateRoomBlocks()
     {
-        if (!CanGenerate())
-        {
-            return;
-        }
-
-        GameObject[] go_RoomCreatePoints = FindRoomCreatePoints();
-
-        if (go_RoomCreatePoints.Length == 0)
-        {
-            return;
-        }
-
-        foreach (GameObject go_RoomCreatePoint in go_RoomCreatePoints)
-        {
-            Transform tf_RoomCreatePoint = go_RoomCreatePoint.transform;
-
-            if (tf_RoomCreatePoint.Find(GENERATED_ROOT_NAME) != null)
-            {
-                Debug.LogWarning(go_RoomCreatePoint.name + " はすでに生成済みです。作り直す場合は「ルームブロックを再生成」を使用してください。");
-                continue;
-            }
-
-            CSS_RoomBlockData css_SelectedRoomBlockData = GetRandomRoomBlockData();
-
-            if (css_SelectedRoomBlockData == null)
-            {
-                continue;
-            }
-
-            GenerateRoomBlocksAtCreatePoint(tf_RoomCreatePoint, css_SelectedRoomBlockData);
-        }
+        GenerateRoomBlocksInternal(false);
     }
 
     /// <summary>
-    /// 生成済みのルームブロックを削除してから、全てのRoomCreatePointにランダムなルームブロックを再生成します。
+    /// 生成済みRoomを削除して再生成します。
     /// </summary>
     [ContextMenu("ルームブロックを再生成")]
     public void RegenerateRoomBlocks()
     {
-        if (!CanGenerate())
-        {
-            return;
-        }
-
-        DeleteGeneratedRoomBlocks();
-
-        GameObject[] go_RoomCreatePoints = FindRoomCreatePoints();
-
-        if (go_RoomCreatePoints.Length == 0)
-        {
-            return;
-        }
-
-        foreach (GameObject go_RoomCreatePoint in go_RoomCreatePoints)
-        {
-            CSS_RoomBlockData css_SelectedRoomBlockData = GetRandomRoomBlockData();
-
-            if (css_SelectedRoomBlockData == null)
-            {
-                continue;
-            }
-
-            GenerateRoomBlocksAtCreatePoint(go_RoomCreatePoint.transform, css_SelectedRoomBlockData);
-        }
+        ClearGeneratedRoomBlocks();
+        GenerateRoomBlocksInternal(true);
     }
 
     /// <summary>
-    /// RoomCreatePointタグが付いた全てのオブジェクトから、生成済みルームブロックを削除します。
+    /// 生成済みRoomを削除します。
     /// </summary>
     [ContextMenu("生成済みルームブロックを削除")]
     public void DeleteGeneratedRoomBlocks()
     {
-        GameObject[] go_RoomCreatePoints = FindRoomCreatePoints();
+        Transform tf_GeneratedRoot = FindGeneratedRoot();
 
-        if (go_RoomCreatePoints.Length == 0)
+        if (tf_GeneratedRoot == null)
         {
             return;
         }
 
-        foreach (GameObject go_RoomCreatePoint in go_RoomCreatePoints)
-        {
-            Transform tf_GeneratedRoot = go_RoomCreatePoint.transform.Find(GENERATED_ROOT_NAME);
+        DestroyObjectSafe(tf_GeneratedRoot.gameObject);
+    }
 
-            if (tf_GeneratedRoot == null)
+    /// <summary>
+    /// 生成済みRoomの接続だけを更新します。
+    /// </summary>
+    [ContextMenu("生成済みルーム接続を更新")]
+    public void RebuildGeneratedRoomLinks()
+    {
+        Dictionary<CS_RoomCreatePoint, CS_RoomInstance> dic_RoomMap = BuildGeneratedRoomMapFromScene();
+
+        if (dic_RoomMap.Count <= 0)
+        {
+            Debug.LogWarning("[RoomBlockGenerator] 接続更新できる生成済みRoomがありません。");
+            return;
+        }
+
+        ConnectGeneratedRooms(dic_RoomMap);
+    }
+
+    /// <summary>
+    /// 外部関数からRoom生成を実行します。
+    /// </summary>
+    public void CreateRooms()
+    {
+        GenerateRoomBlocks();
+    }
+
+    /// <summary>
+    /// 外部関数からRoom再生成を実行します。
+    /// </summary>
+    public void RecreateRooms()
+    {
+        RegenerateRoomBlocks();
+    }
+
+    /// <summary>
+    /// 外部関数からRoom削除を実行します。
+    /// </summary>
+    public void DeleteRooms()
+    {
+        DeleteGeneratedRoomBlocks();
+    }
+
+    /// <summary>
+    /// Roomを生成し、生成後に接続します。
+    /// </summary>
+    /// <param name="isForceGenerate">強制生成するかどうか。</param>
+    private void GenerateRoomBlocksInternal(bool isForceGenerate)
+    {
+        if (!isForceGenerate && HasGeneratedRoomBlocks())
+        {
+            Debug.LogWarning("[RoomBlockGenerator] すでに生成済みです。再生成を使ってください。");
+            return;
+        }
+
+        List<GameObject> list_ValidPrefabs = GetValidRoomPrefabs();
+
+        if (list_ValidPrefabs.Count <= 0)
+        {
+            Debug.LogError("[RoomBlockGenerator] 生成に使えるRoomPrefabがありません。");
+            return;
+        }
+
+        CS_RoomCreatePoint[] createPoints = FindRoomCreatePoints();
+
+        if (createPoints.Length <= 0)
+        {
+            Debug.LogWarning("[RoomBlockGenerator] CS_RoomCreatePointが見つかりません。");
+            return;
+        }
+
+        Transform tf_GeneratedRoot = GetOrCreateGeneratedRoot();
+
+        Dictionary<CS_RoomCreatePoint, CS_RoomInstance> dic_RoomMap =
+            new Dictionary<CS_RoomCreatePoint, CS_RoomInstance>();
+
+        for (int i = 0 ; i < createPoints.Length ; i++)
+        {
+            CS_RoomCreatePoint createPoint = createPoints[i];
+            GameObject randomPrefab = GetRandomRoomPrefab(list_ValidPrefabs);
+
+            if (randomPrefab == null)
             {
                 continue;
             }
 
-            DestroyGameObject(tf_GeneratedRoot.gameObject);
+            Vector3 spawnPosition = GetObjectCenter(createPoint.gameObject);
+            Quaternion spawnRotation = createPoint.transform.rotation;
+
+            GameObject generatedRoom = CreateRoomInstance(
+                randomPrefab,
+                spawnPosition,
+                spawnRotation,
+                tf_GeneratedRoot
+            );
+
+            generatedRoom.name = randomPrefab.name + "_Generated_" + i.ToString("00");
+
+            CS_RoomInstance roomInstance = generatedRoom.GetComponent<CS_RoomInstance>();
+
+            if (roomInstance == null)
+            {
+                roomInstance = generatedRoom.AddComponent<CS_RoomInstance>();
+            }
+
+            roomInstance.InitializeMovePoints();
+
+            CS_RoomGeneratedInfo generatedInfo = generatedRoom.GetComponent<CS_RoomGeneratedInfo>();
+
+            if (generatedInfo == null)
+            {
+                generatedInfo = generatedRoom.AddComponent<CS_RoomGeneratedInfo>();
+            }
+
+            generatedInfo.SetSourceCreatePoint(createPoint);
+
+            dic_RoomMap.Add(createPoint, roomInstance);
+        }
+
+        ConnectGeneratedRooms(dic_RoomMap);
+
+        Debug.Log("[RoomBlockGenerator] Room生成と接続が完了しました。生成数 : " + dic_RoomMap.Count);
+    }
+
+    /// <summary>
+    /// 生成済みRoom同士を接続します。
+    /// </summary>
+    /// <param name="dic_RoomMap">RoomCreatePointと生成Roomの対応表。</param>
+    private void ConnectGeneratedRooms(Dictionary<CS_RoomCreatePoint, CS_RoomInstance> dic_RoomMap)
+    {
+        foreach (CS_RoomInstance roomInstance in dic_RoomMap.Values)
+        {
+            roomInstance.ClearAllMovePointTargets();
+        }
+
+        foreach (KeyValuePair<CS_RoomCreatePoint, CS_RoomInstance> pair in dic_RoomMap)
+        {
+            CS_RoomCreatePoint currentCreatePoint = pair.Key;
+            CS_RoomInstance currentRoom = pair.Value;
+
+            ConnectOneDirection(currentCreatePoint, currentRoom, CSE_RoomDoorDirection.Right, dic_RoomMap);
+            ConnectOneDirection(currentCreatePoint, currentRoom, CSE_RoomDoorDirection.Left, dic_RoomMap);
+            ConnectOneDirection(currentCreatePoint, currentRoom, CSE_RoomDoorDirection.Front, dic_RoomMap);
+            ConnectOneDirection(currentCreatePoint, currentRoom, CSE_RoomDoorDirection.Back, dic_RoomMap);
         }
     }
 
     /// <summary>
-    /// ルームブロック生成に必要なデータが揃っているか確認します。
+    /// 1方向分のRoomMovePoint接続を行います。
     /// </summary>
-    /// <returns>生成可能な場合はtrueを返します。</returns>
-    private bool CanGenerate()
+    /// <param name="currentCreatePoint">現在のRoomCreatePoint。</param>
+    /// <param name="currentRoom">現在の生成Room。</param>
+    /// <param name="e_CurrentDirection">現在Roomの出口方向。</param>
+    /// <param name="dic_RoomMap">RoomCreatePointと生成Roomの対応表。</param>
+    private void ConnectOneDirection(
+        CS_RoomCreatePoint currentCreatePoint,
+        CS_RoomInstance currentRoom,
+        CSE_RoomDoorDirection e_CurrentDirection,
+        Dictionary<CS_RoomCreatePoint, CS_RoomInstance> dic_RoomMap)
     {
-        if (css_RoomBlockDataList == null || css_RoomBlockDataList.Count == 0)
+        if (!currentRoom.TryGetMovePoint(e_CurrentDirection, out CS_RoomMovePoint currentMovePoint))
         {
-            Debug.LogWarning("ルーム生成データ一覧が設定されていません。");
-            return false;
+            return;
         }
 
-        for (int i = 0 ; i < css_RoomBlockDataList.Count ; i++)
+        if (!currentCreatePoint.TryGetConnection(e_CurrentDirection, out CS_RoomMoveConnection connection))
         {
-            CSS_RoomBlockData css_RoomBlockData = css_RoomBlockDataList[i];
-
-            if (css_RoomBlockData == null)
-            {
-                continue;
-            }
-
-            if (css_RoomBlockData.GetBlockPrefab == null)
-            {
-                continue;
-            }
-
-            return true;
+            currentMovePoint.ClearTarget();
+            return;
         }
 
-        Debug.LogWarning("使用可能なルーム生成データがありません。RoomBlockDataとBlockPrefabを設定してください。");
-        return false;
+        if (!dic_RoomMap.TryGetValue(connection.TargetCreatePoint, out CS_RoomInstance targetRoom))
+        {
+            currentMovePoint.ClearTarget();
+            Debug.LogWarning("[RoomBlockGenerator] 移動先RoomCreatePointに生成Roomがありません : " + connection.TargetCreatePoint.name);
+            return;
+        }
+
+        if (!targetRoom.TryGetMovePoint(connection.TargetOutDirection, out CS_RoomMovePoint targetMovePoint))
+        {
+            currentMovePoint.ClearTarget();
+            Debug.LogWarning("[RoomBlockGenerator] 移動先Roomに指定方向のRoomMovePointがありません : " + connection.TargetOutDirection);
+            return;
+        }
+
+        currentMovePoint.SetTargetMovePoint(targetMovePoint);
     }
 
     /// <summary>
-    /// RoomCreatePointタグが付いたオブジェクトを全て取得します。
+    /// 生成済みRoomからRoomCreatePointとの対応表を再構築します。
     /// </summary>
-    /// <returns>RoomCreatePointタグが付いたGameObject配列。</returns>
-    private GameObject[] FindRoomCreatePoints()
+    /// <returns>RoomCreatePointと生成Roomの対応表。</returns>
+    private Dictionary<CS_RoomCreatePoint, CS_RoomInstance> BuildGeneratedRoomMapFromScene()
     {
-        GameObject[] go_RoomCreatePoints = GameObject.FindGameObjectsWithTag(TAG_ROOM_CREATE_POINT);
+        Dictionary<CS_RoomCreatePoint, CS_RoomInstance> dic_RoomMap =
+            new Dictionary<CS_RoomCreatePoint, CS_RoomInstance>();
 
-        if (go_RoomCreatePoints.Length == 0)
+        Transform tf_GeneratedRoot = FindGeneratedRoot();
+
+        if (tf_GeneratedRoot == null)
         {
-            Debug.LogWarning("RoomCreatePointタグが付いたオブジェクトがシーン内にありません。");
+            return dic_RoomMap;
         }
 
-        return go_RoomCreatePoints;
+        CS_RoomGeneratedInfo[] generatedInfos =
+            tf_GeneratedRoot.GetComponentsInChildren<CS_RoomGeneratedInfo>(true);
+
+        for (int i = 0 ; i < generatedInfos.Length ; i++)
+        {
+            CS_RoomGeneratedInfo info = generatedInfos[i];
+
+            if (info.SourceCreatePoint == null)
+            {
+                continue;
+            }
+
+            CS_RoomInstance roomInstance = info.GetComponent<CS_RoomInstance>();
+
+            if (roomInstance == null)
+            {
+                continue;
+            }
+
+            roomInstance.InitializeMovePoints();
+
+            if (!dic_RoomMap.ContainsKey(info.SourceCreatePoint))
+            {
+                dic_RoomMap.Add(info.SourceCreatePoint, roomInstance);
+            }
+        }
+
+        return dic_RoomMap;
     }
 
     /// <summary>
-    /// ルームデータ一覧から使用可能なデータをランダムに1つ取得します。
+    /// シーン上のRoomCreatePointを取得します。
     /// </summary>
-    /// <returns>ランダムに選ばれたRoomBlockData。</returns>
-    private CSS_RoomBlockData GetRandomRoomBlockData()
+    /// <returns>RoomCreatePoint配列。</returns>
+    private CS_RoomCreatePoint[] FindRoomCreatePoints()
     {
-        List<CSS_RoomBlockData> css_ValidRoomBlockDataList = new List<CSS_RoomBlockData>();
+        CS_RoomCreatePoint[] createPoints = FindObjectsOfType<CS_RoomCreatePoint>(true);
 
-        for (int i = 0 ; i < css_RoomBlockDataList.Count ; i++)
+        System.Array.Sort(
+            createPoints,
+            (a, b) => string.Compare(a.name, b.name, System.StringComparison.Ordinal)
+        );
+
+        return createPoints;
+    }
+
+    /// <summary>
+    /// 有効なRoomPrefabだけを取得します。
+    /// </summary>
+    /// <returns>有効なRoomPrefabリスト。</returns>
+    private List<GameObject> GetValidRoomPrefabs()
+    {
+        List<GameObject> validPrefabs = new List<GameObject>();
+
+        for (int i = 0 ; i < list_RoomPrefabs.Count ; i++)
         {
-            CSS_RoomBlockData css_RoomBlockData = css_RoomBlockDataList[i];
-
-            if (css_RoomBlockData == null)
+            if (list_RoomPrefabs[i] == null)
             {
                 continue;
             }
 
-            if (css_RoomBlockData.GetBlockPrefab == null)
-            {
-                continue;
-            }
-
-            css_ValidRoomBlockDataList.Add(css_RoomBlockData);
+            validPrefabs.Add(list_RoomPrefabs[i]);
         }
 
-        if (css_ValidRoomBlockDataList.Count == 0)
+        return validPrefabs;
+    }
+
+    /// <summary>
+    /// RoomPrefabをランダムに取得します。
+    /// </summary>
+    /// <param name="validPrefabs">有効なPrefabリスト。</param>
+    /// <returns>ランダムに選ばれたPrefab。</returns>
+    private GameObject GetRandomRoomPrefab(List<GameObject> validPrefabs)
+    {
+        if (validPrefabs == null || validPrefabs.Count <= 0)
         {
-            Debug.LogWarning("ランダム選択できるRoomBlockDataがありません。");
             return null;
         }
 
-        int i_RandomIndex = Random.Range(0, css_ValidRoomBlockDataList.Count);
-
-        return css_ValidRoomBlockDataList[i_RandomIndex];
+        int randomIndex = Random.Range(0, validPrefabs.Count);
+        return validPrefabs[randomIndex];
     }
 
     /// <summary>
-    /// 指定したRoomCreatePointの位置を中心に、指定したルームデータを使ってブロックを生成します。
+    /// 生成済みRootを探します。
     /// </summary>
-    /// <param name="tf_RoomCreatePoint">ルーム生成の中心になるTransform。</param>
-    /// <param name="css_SelectedRoomBlockData">生成に使用するルームデータ。</param>
-    private void GenerateRoomBlocksAtCreatePoint(Transform tf_RoomCreatePoint, CSS_RoomBlockData css_SelectedRoomBlockData)
+    /// <returns>生成済みRoot。</returns>
+    private Transform FindGeneratedRoot()
     {
-        Transform tf_GeneratedRoot = CreateGeneratedRoot(tf_RoomCreatePoint, css_SelectedRoomBlockData.name);
+        return transform.Find(GENERATED_ROOT_NAME);
+    }
 
-        GameObject go_BlockPrefab = css_SelectedRoomBlockData.GetBlockPrefab;
+    /// <summary>
+    /// 生成済みRootを取得または作成します。
+    /// </summary>
+    /// <returns>生成済みRoot。</returns>
+    private Transform GetOrCreateGeneratedRoot()
+    {
+        Transform generatedRoot = FindGeneratedRoot();
 
-        int i_RoomWidth = css_SelectedRoomBlockData.GetRoomWidth;
-        int i_RoomDepth = css_SelectedRoomBlockData.GetRoomDepth;
-        float f_BlockSize = css_SelectedRoomBlockData.GetBlockSize;
-
-        float f_StartX = -((i_RoomWidth - 1) * f_BlockSize) * 0.5f;
-        float f_StartZ = -((i_RoomDepth - 1) * f_BlockSize) * 0.5f;
-
-        for (int i_Z = 0 ; i_Z < i_RoomDepth ; i_Z++)
+        if (generatedRoot != null)
         {
-            for (int i_X = 0 ; i_X < i_RoomWidth ; i_X++)
+            return generatedRoot;
+        }
+
+        GameObject rootObject = new GameObject(GENERATED_ROOT_NAME);
+
+#if UNITY_EDITOR
+        if (!Application.isPlaying)
+        {
+            Undo.RegisterCreatedObjectUndo(rootObject, "Create Generated Room Root");
+        }
+#endif
+
+        rootObject.transform.SetParent(transform);
+        rootObject.transform.localPosition = Vector3.zero;
+        rootObject.transform.localRotation = Quaternion.identity;
+        rootObject.transform.localScale = Vector3.one;
+
+        return rootObject.transform;
+    }
+
+    /// <summary>
+    /// 生成済みRoomがあるか確認します。
+    /// </summary>
+    /// <returns>生成済みRoomがある場合はtrue。</returns>
+    private bool HasGeneratedRoomBlocks()
+    {
+        Transform generatedRoot = FindGeneratedRoot();
+
+        if (generatedRoot == null)
+        {
+            return false;
+        }
+
+        return generatedRoot.childCount > 0;
+    }
+
+    /// <summary>
+    /// 生成済みRoomを削除します。
+    /// Root自体は残します。
+    /// </summary>
+    private void ClearGeneratedRoomBlocks()
+    {
+        Transform generatedRoot = FindGeneratedRoot();
+
+        if (generatedRoot == null)
+        {
+            return;
+        }
+
+        for (int i = generatedRoot.childCount - 1 ; i >= 0 ; i--)
+        {
+            DestroyObjectSafe(generatedRoot.GetChild(i).gameObject);
+        }
+    }
+
+    /// <summary>
+    /// RoomPrefabを生成します。
+    /// </summary>
+    /// <param name="prefab">生成するPrefab。</param>
+    /// <param name="position">生成位置。</param>
+    /// <param name="rotation">生成回転。</param>
+    /// <param name="parent">親Transform。</param>
+    /// <returns>生成されたRoom。</returns>
+    private GameObject CreateRoomInstance(
+        GameObject prefab,
+        Vector3 position,
+        Quaternion rotation,
+        Transform parent)
+    {
+        GameObject instance = null;
+
+#if UNITY_EDITOR
+        if (!Application.isPlaying)
+        {
+            instance = PrefabUtility.InstantiatePrefab(prefab, parent) as GameObject;
+
+            if (instance != null)
             {
-                Vector3 v3_LocalBlockPos = new Vector3(
-                    f_StartX + i_X * f_BlockSize,
-                    0.0f,
-                    f_StartZ + i_Z * f_BlockSize
-                );
-
-                GameObject go_Block = Instantiate(
-                    go_BlockPrefab,
-                    tf_GeneratedRoot
-                );
-
-                go_Block.transform.localPosition = v3_LocalBlockPos;
-                go_Block.transform.localRotation = Quaternion.identity;
-                go_Block.transform.localScale = Vector3.one;
-
-                go_Block.name = go_BlockPrefab.name
-                              + "_X" + i_X.ToString("00")
-                              + "_Z" + i_Z.ToString("00");
+                Undo.RegisterCreatedObjectUndo(instance, "Generate Room");
             }
         }
+#endif
 
-        Debug.Log(tf_RoomCreatePoint.name + " に " + css_SelectedRoomBlockData.name + " を生成しました。");
+        if (instance == null)
+        {
+            instance = Instantiate(prefab, parent);
+        }
+
+        instance.transform.SetPositionAndRotation(position, rotation);
+
+        return instance;
     }
 
     /// <summary>
-    /// 生成済みブロックをまとめる親オブジェクトを作成します。
+    /// 対象オブジェクトの中心位置を取得します。
+    /// Collider、Renderer、Transformの順で取得します。
     /// </summary>
-    /// <param name="tf_RoomCreatePoint">ルーム生成の中心になるTransform。</param>
-    /// <param name="s_SelectedRoomDataName">生成に使用したルームデータ名。</param>
-    /// <returns>生成済みブロックをまとめる親Transform。</returns>
-    private Transform CreateGeneratedRoot(Transform tf_RoomCreatePoint, string s_SelectedRoomDataName)
+    /// <param name="target">対象オブジェクト。</param>
+    /// <returns>中心位置。</returns>
+    private Vector3 GetObjectCenter(GameObject target)
     {
-        GameObject go_GeneratedRoot = new GameObject(GENERATED_ROOT_NAME);
+        Collider[] colliders = target.GetComponentsInChildren<Collider>();
 
-        go_GeneratedRoot.transform.SetParent(tf_RoomCreatePoint);
-        go_GeneratedRoot.transform.localPosition = Vector3.zero;
-        go_GeneratedRoot.transform.localRotation = Quaternion.identity;
-        go_GeneratedRoot.transform.localScale = Vector3.one;
+        if (colliders.Length > 0)
+        {
+            Bounds bounds = colliders[0].bounds;
 
-        go_GeneratedRoot.name = GENERATED_ROOT_NAME;
+            for (int i = 1 ; i < colliders.Length ; i++)
+            {
+                bounds.Encapsulate(colliders[i].bounds);
+            }
 
-        GameObject go_RoomDataNameObject = new GameObject("RoomData_" + s_SelectedRoomDataName);
-        go_RoomDataNameObject.transform.SetParent(go_GeneratedRoot.transform);
-        go_RoomDataNameObject.transform.localPosition = Vector3.zero;
-        go_RoomDataNameObject.transform.localRotation = Quaternion.identity;
-        go_RoomDataNameObject.transform.localScale = Vector3.one;
+            return bounds.center;
+        }
 
-        return go_GeneratedRoot.transform;
+        Renderer[] renderers = target.GetComponentsInChildren<Renderer>();
+
+        if (renderers.Length > 0)
+        {
+            Bounds bounds = renderers[0].bounds;
+
+            for (int i = 1 ; i < renderers.Length ; i++)
+            {
+                bounds.Encapsulate(renderers[i].bounds);
+            }
+
+            return bounds.center;
+        }
+
+        return target.transform.position;
     }
 
     /// <summary>
-    /// GameObjectを削除します。
-    /// EditModeではDestroyImmediate、PlayModeではDestroyを使用します。
+    /// Play中とEditor中の両方に対応して安全に削除します。
     /// </summary>
-    /// <param name="go_Target">削除対象のGameObject。</param>
-    private void DestroyGameObject(GameObject go_Target)
+    /// <param name="target">削除対象。</param>
+    private void DestroyObjectSafe(GameObject target)
     {
-        if (Application.isPlaying)
+        if (target == null)
         {
-            Destroy(go_Target);
+            return;
         }
-        else
+
+#if UNITY_EDITOR
+        if (!Application.isPlaying)
         {
-            DestroyImmediate(go_Target);
+            Undo.DestroyObjectImmediate(target);
+            return;
         }
+#endif
+
+        Destroy(target);
     }
 }
