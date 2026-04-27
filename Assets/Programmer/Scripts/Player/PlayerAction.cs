@@ -2,9 +2,10 @@
  *    プレイヤーアクション作成
  * ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
  *    元浪梨緒
+ *    秋野翔太
  * ----------------------------------------------------------
  * 2026-04-24 | 初回作成
- * 
+ * 2026-04-27 | ソウル消費およびギミックの初期化の実装
  */
 using System.Collections.Generic;
 using UnityEngine;
@@ -108,8 +109,23 @@ public class PlayerAction : MonoBehaviour
         Vector3 gridPos = roomGrid.GetWorldPosFromGrid(grid);
 
         //生成
-        Instantiate(gimmickList[currentGimmickIndex].Key, gridPos, Quaternion.identity);
-  
+        GimmickBase gimmick = Instantiate(gimmickList[currentGimmickIndex].Key, gridPos, Quaternion.identity).GetComponent<GimmickBase>();
+
+        //ソウルの消費
+        currentSoul -= gimmick.requiredSoul;
+
+        // ソウルが0未満になったらギミックを破壊
+        if (currentSoul < 0)
+        {
+            currentSoul = 0;
+            Destroy(gimmick.gameObject);
+        }
+
+        //gimmickBase.roomGrid = roomGrid.csを設定 
+        gimmick.SetGimmickPos(grid);// 位置の設定
+        gimmick.AdjustScaleToGrid();// グリッドに合わせてサイズを調整
+
+
     }
 
     //ソウルの数を加算する関数

@@ -39,7 +39,7 @@ public class PlayerMove : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         //カメラの方向
         PlayerCamera playerCamera = GetComponent<PlayerCamera>();
