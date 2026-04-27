@@ -9,6 +9,7 @@
  */
 using System.Collections.Generic;
 using UnityEngine;
+using static PlayerAction;
 
 public class PlayerAction : MonoBehaviour
 {
@@ -48,7 +49,7 @@ public class PlayerAction : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         PlayerMove playerMove = GetComponent<PlayerMove>();
 
@@ -132,5 +133,21 @@ public class PlayerAction : MonoBehaviour
     public void AddSoul(int addnum)
     {
         currentSoul += addnum;
+    }
+
+    private void OnCollisionStay(Collision collision)
+    {
+        //接触している
+        if (collision.gameObject.CompareTag("Gimmick"))
+        {
+            PlayerMove playerMove = GetComponent<PlayerMove>();
+            if (playerMove.playerInput.Player.Interact.triggered)
+            {
+                //ギミックの情報を取得
+                GimmickBase gimmick = collision.gameObject.GetComponent<GimmickBase>();
+                if ((gimmick.gimmickState != GimmickState.Idle)) return;
+                gimmick.ActivateGimmick();
+            }
+        }
     }
 }
