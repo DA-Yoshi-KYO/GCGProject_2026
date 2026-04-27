@@ -87,12 +87,14 @@ public class PlayerMove : MonoBehaviour
                 rb.velocity = rb.velocity.normalized * (moveAmount * velocityWalk);
             }
         }
+    }
 
+    void Update()
+    {
         //ジャンプ
-        if(playerInput.Player.Jump.triggered)
+        if (playerInput.Player.Jump.triggered)
         {
             rb.AddForce(new Vector3(0.0f, 1.0f, 0.0f) * jumpAmount, ForceMode.Impulse);
         }
-
     }
 }
