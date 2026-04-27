@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,13 +9,16 @@ using UnityEditor;
 /*==================================================
  *  ファイル名  : CS_RoomBlockPrefabGenerator.cs
  *  制作者      : 吉本竜
- *  内容        : RoomCreatePointタグが付いたオブジェクトの子としてRoomPrefabをランダム生成する
+ *  内容        : RoomCreatePointタグが付いたオブジェクトの子としてRoomPrefabをランダム生成し、
+ *                生成後にRoomMovePoint同士を動的接続する
  *  履歴        : 2026/04/27 RoomCreatePointの子に生成する形へ修正(ヨシモト)
+ *                2026/04/27 実行時の自動再生成処理を追加(ヨシモト)
  *==================================================*/
 
 /// <summary>
 /// RoomCreatePointタグが付いたオブジェクトを探し、
 /// その子オブジェクトとしてRoomPrefabをランダム生成するクラスです。
+/// 実行時には既存の生成済みRoomを削除してから再生成できます。
 /// </summary>
 public class CS_RoomBlockPrefabGenerator : MonoBehaviour
 {
@@ -29,8 +33,33 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
     [SerializeField]
     private List<GameObject> list_RoomBlockPrefabs = new List<GameObject>();
 
+    [Header("実行時生成設定")]
+    [SerializeField]
+    private bool bool_IsAutoRegenerateOnStart = true;
+
+    private bool bool_IsRuntimeRegenerating = false;
+
+    /// <summary>
+    /// ゲーム実行時にRoomを自動で再生成します。
+    /// </summary>
+    private void Awake()
+    {
+        if (!Application.isPlaying)
+        {
+            return;
+        }
+
+        if (!bool_IsAutoRegenerateOnStart)
+        {
+            return;
+        }
+
+        StartCoroutine(RegenerateRoomBlocksRuntimeCoroutine());
+    }
+
     /// <summary>
     /// RoomCreatePointの子にRoomを生成します。
+    /// すでに生成済みの場合は重複生成を防ぐため処理を中断します。
     /// </summary>
     [ContextMenu("ルームブロックを生成")]
     public void GenerateRoomBlocks()
@@ -46,10 +75,17 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
 
     /// <summary>
     /// 生成済みRoomを削除してから再生成します。
+    /// Editor中は即時再生成、Play中はDestroy反映のため1フレーム待ってから再生成します。
     /// </summary>
     [ContextMenu("ルームブロックを再生成")]
     public void RegenerateRoomBlocks()
     {
+        if (Application.isPlaying)
+        {
+            StartCoroutine(RegenerateRoomBlocksRuntimeCoroutine());
+            return;
+        }
+
         DeleteGeneratedRoomBlocks();
         GenerateRoomBlocksInternal();
     }
@@ -70,6 +106,23 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
         DeleteOldGeneratedRoot();
 
         Debug.Log("[RoomBlockPrefabGenerator] 生成済みRoomを削除しました。");
+    }
+
+    /// <summary>
+    /// 生成済みRoomのRoomMovePoint接続だけを再構築します。
+    /// </summary>
+    [ContextMenu("生成済みルーム接続を更新")]
+    public void RebuildGeneratedRoomLinks()
+    {
+        Dictionary<CS_RoomCreatePoint, GameObject> dic_GeneratedRoomMap = BuildGeneratedRoomMapFromScene();
+
+        if (dic_GeneratedRoomMap.Count <= 0)
+        {
+            Debug.LogWarning("[RoomBlockPrefabGenerator] 接続更新できる生成済みRoomがありません。");
+            return;
+        }
+
+        ConnectGeneratedRooms(dic_GeneratedRoomMap);
     }
 
     /// <summary>
@@ -97,7 +150,30 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
     }
 
     /// <summary>
+    /// Play中用のRoom再生成処理です。
+    /// Destroyはフレーム終わりに実行されるため、1フレーム待ってから再生成します。
+    /// </summary>
+    private IEnumerator RegenerateRoomBlocksRuntimeCoroutine()
+    {
+        if (bool_IsRuntimeRegenerating)
+        {
+            yield break;
+        }
+
+        bool_IsRuntimeRegenerating = true;
+
+        DeleteGeneratedRoomBlocks();
+
+        yield return null;
+
+        GenerateRoomBlocksInternal();
+
+        bool_IsRuntimeRegenerating = false;
+    }
+
+    /// <summary>
     /// RoomCreatePointの子にRoomを生成します。
+    /// 生成後にRoomMovePoint同士を接続します。
     /// </summary>
     private void GenerateRoomBlocksInternal()
     {
@@ -142,8 +218,7 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
             generatedRoom.name = GENERATED_NAME_PREFIX + randomPrefab.name + "_" + i.ToString("00");
         }
 
-        Dictionary<CS_RoomCreatePoint, GameObject> dic_GeneratedRoomMap =
-        BuildGeneratedRoomMapFromScene();
+        Dictionary<CS_RoomCreatePoint, GameObject> dic_GeneratedRoomMap = BuildGeneratedRoomMapFromScene();
 
         ConnectGeneratedRooms(dic_GeneratedRoomMap);
 
@@ -389,9 +464,9 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
         }
 #endif
 
+        target.SetActive(false);
         Destroy(target);
     }
-
 
     /// <summary>
     /// 生成済みRoomから、RoomCreatePointと生成Roomの対応表を作成します。
@@ -442,7 +517,7 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
         {
             Transform child = parent.GetChild(i);
 
-            if (child.name.StartsWith("__GeneratedRoom_") || child.name.Contains("_Generated_"))
+            if (IsGeneratedRoomName(child.name))
             {
                 return child.gameObject;
             }
