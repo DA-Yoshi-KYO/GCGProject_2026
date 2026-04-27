@@ -1,15 +1,19 @@
 using UnityEngine;
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 /*==================================================
  *  ファイル名  : CS_RoomMovePoint.cs
  *  制作者      : 吉本竜
  *  内容        : 生成後に自動接続されるRoom移動ポイント
- *  履歴        : 2026/04/27 新規作成(ヨシモト)
+ *  履歴        : 2026/04/27 接続先をEditor生成後も保持するよう修正(ヨシモト)
  *==================================================*/
 
 /// <summary>
 /// Room内の出入口ポイントです。
-/// 実際の移動先はRoom生成後にRoomManagerから自動設定されます。
+/// 実際の移動先はRoom生成後にGeneratorから自動設定されます。
 /// </summary>
 [DisallowMultipleComponent]
 public class CS_RoomMovePoint : MonoBehaviour
@@ -38,9 +42,11 @@ public class CS_RoomMovePoint : MonoBehaviour
     [SerializeField]
     private float f_MoveCoolTime = 0.25f;
 
+    [SerializeField, HideInInspector]
+    private CS_RoomMovePoint cs_TargetMovePoint;
+
     private static float s_LastMoveTime = -999.0f;
 
-    private CS_RoomMovePoint cs_TargetMovePoint;
     private Collider[] colliders;
 
     /// <summary>
@@ -49,16 +55,26 @@ public class CS_RoomMovePoint : MonoBehaviour
     public CSE_RoomDoorDirection MoveDirection => e_MoveDirection;
 
     /// <summary>
+    /// 接続先があるか取得します。
+    /// </summary>
+    public bool HasTarget => cs_TargetMovePoint != null;
+
+    /// <summary>
     /// 初期化します。
     /// </summary>
     private void Awake()
     {
         CacheColliders();
+        ApplyUsableState(cs_TargetMovePoint != null);
+    }
 
-        if (cs_TargetMovePoint == null)
-        {
-            ApplyUsableState(false);
-        }
+    /// <summary>
+    /// 有効化時に状態を反映します。
+    /// </summary>
+    private void OnEnable()
+    {
+        CacheColliders();
+        ApplyUsableState(cs_TargetMovePoint != null);
     }
 
     /// <summary>
@@ -69,6 +85,7 @@ public class CS_RoomMovePoint : MonoBehaviour
     {
         cs_TargetMovePoint = cs_Target;
         ApplyUsableState(cs_TargetMovePoint != null);
+        MarkDirty();
     }
 
     /// <summary>
@@ -78,6 +95,7 @@ public class CS_RoomMovePoint : MonoBehaviour
     {
         cs_TargetMovePoint = null;
         ApplyUsableState(false);
+        MarkDirty();
     }
 
     /// <summary>
@@ -95,13 +113,17 @@ public class CS_RoomMovePoint : MonoBehaviour
     /// <param name="other">Triggerに入ったCollider。</param>
     private void OnTriggerEnter(Collider other)
     {
+        Debug.Log("[RoomMovePoint] Triggerに入りました : " + other.name);
+
         if (cs_TargetMovePoint == null)
         {
+            Debug.LogWarning("[RoomMovePoint] 移動先が設定されていません : " + name);
             return;
         }
 
-        if (!other.CompareTag(str_PlayerTag))
+        if (!TryGetPlayerTransform(other, out Transform playerTransform))
         {
+            Debug.LogWarning("[RoomMovePoint] Playerではありません : " + other.name);
             return;
         }
 
@@ -112,20 +134,51 @@ public class CS_RoomMovePoint : MonoBehaviour
 
         s_LastMoveTime = Time.time;
 
-        MovePlayer(other, cs_TargetMovePoint.GetSpawnTransform());
+        MovePlayer(playerTransform, cs_TargetMovePoint.GetSpawnTransform());
+    }
+
+    /// <summary>
+    /// ColliderからプレイヤーTransformを取得します。
+    /// </summary>
+    /// <param name="other">Triggerに入ったCollider。</param>
+    /// <param name="playerTransform">取得したプレイヤーTransform。</param>
+    /// <returns>プレイヤーだった場合はtrue。</returns>
+    private bool TryGetPlayerTransform(Collider other, out Transform playerTransform)
+    {
+        if (other.CompareTag(str_PlayerTag))
+        {
+            playerTransform = other.attachedRigidbody != null
+                ? other.attachedRigidbody.transform
+                : other.transform;
+
+            return true;
+        }
+
+        if (other.attachedRigidbody != null && other.attachedRigidbody.CompareTag(str_PlayerTag))
+        {
+            playerTransform = other.attachedRigidbody.transform;
+            return true;
+        }
+
+        Transform rootTransform = other.transform.root;
+
+        if (rootTransform != null && rootTransform.CompareTag(str_PlayerTag))
+        {
+            playerTransform = rootTransform;
+            return true;
+        }
+
+        playerTransform = null;
+        return false;
     }
 
     /// <summary>
     /// プレイヤーを指定位置へ移動します。
     /// </summary>
-    /// <param name="playerCollider">プレイヤーのCollider。</param>
+    /// <param name="playerTransform">プレイヤーTransform。</param>
     /// <param name="targetTransform">移動先Transform。</param>
-    private void MovePlayer(Collider playerCollider, Transform targetTransform)
+    private void MovePlayer(Transform playerTransform, Transform targetTransform)
     {
-        Transform playerTransform = playerCollider.attachedRigidbody != null
-            ? playerCollider.attachedRigidbody.transform
-            : playerCollider.transform;
-
         CharacterController characterController = playerTransform.GetComponent<CharacterController>();
 
         if (characterController != null)
@@ -191,5 +244,18 @@ public class CS_RoomMovePoint : MonoBehaviour
             colliders[i].isTrigger = true;
             colliders[i].enabled = isEnabled;
         }
+    }
+
+    /// <summary>
+    /// Editor上で変更を保存対象にします。
+    /// </summary>
+    private void MarkDirty()
+    {
+#if UNITY_EDITOR
+        if (!Application.isPlaying)
+        {
+            EditorUtility.SetDirty(this);
+        }
+#endif
     }
 }
