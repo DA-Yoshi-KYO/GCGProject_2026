@@ -112,7 +112,7 @@ public class PlayerAction : MonoBehaviour
             Destroy(gimmick.gameObject);
         }
 
-        //gimmickBase.roomGrid = roomGrid.csを設定 
+        gimmick.roomGrid = roomGrid;
         //gimmick.SetGimmickPos(grid);// 位置の設定
         //gimmick.AdjustScaleToGrid();// グリッドに合わせてサイズを調整
 
