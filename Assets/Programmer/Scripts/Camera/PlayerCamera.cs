@@ -14,8 +14,8 @@ public class PlayerCamera : MonoBehaviour
     private Camera roomCamera;//部屋のカメラ
     private Camera upCamera;//上視点のカメラ
 
-    public Vector3 cameraForward = Vector3.zero;//カメラから見た方向
-    public Vector3 cameraRight = Vector3.zero;//カメラの右方向ベクトル    
+    [Unity.VisualScripting.DoNotSerialize] public Vector3 cameraForward = Vector3.zero;//カメラから見た方向
+    [Unity.VisualScripting.DoNotSerialize] public Vector3 cameraRight = Vector3.zero;//カメラの右方向ベクトル    
 
     // Start is called before the first frame update
     void Start()
