@@ -2,9 +2,10 @@
  *    プレイヤーアクション作成
  * ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
  *    元浪梨緒
+ *    秋野翔太
  * ----------------------------------------------------------
  * 2026-04-24 | 初回作成
- * 
+ * 2026-04-27 | ソウル消費およびギミックの初期化の実装
  */
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,12 +13,11 @@ using UnityEngine;
 public class PlayerAction : MonoBehaviour
 {
     [SerializeField] private int initSoul = 5;//初期のソウルの数
-    private int currentSoul;//現在のソウルの数
+    [Unity.VisualScripting.DoNotSerialize] public int currentSoul { private set; get; } = 0;//現在のソウルの数
 
-    [SerializeField] private  GameObject[] gimmickKind;//所持しているギミックの種類
-    private List<KeyValuePair<GameObject, int>> gimmickList;//所持しているギミックの数
+    public List<GameObject> gimmickKind;//所持しているギミックの種類
 
-    private int currentGimmickIndex = 0;//現在選択しているギミック
+    [Unity.VisualScripting.DoNotSerialize] public int currentGimmickIndex { private set; get; } = 0;//現在選択しているギミック
 
     //プレイヤーのモード
     public enum PlayerMode
@@ -36,14 +36,6 @@ public class PlayerAction : MonoBehaviour
 
         //現在のモード
         currentMode = PlayerMode.Normal;
-
-        //ギミックごとに持っている数を初期化
-        gimmickList = new List<KeyValuePair<GameObject, int>>();
-
-        for (int i = 0 ; i < gimmickKind.Length ; ++i)
-        {
-            gimmickList.Add(new KeyValuePair<GameObject, int>(gimmickKind[i], 0));
-        }
     }
 
     // Update is called once per frame
@@ -56,7 +48,7 @@ public class PlayerAction : MonoBehaviour
         {
             currentGimmickIndex++;
 
-            if (currentGimmickIndex > gimmickList.Count)
+            if (currentGimmickIndex >= gimmickKind.Count)
                 currentGimmickIndex = 0;
         }
         else if(playerMove.playerInput.Player.GimmickChangeLeft.triggered)
@@ -64,7 +56,7 @@ public class PlayerAction : MonoBehaviour
             currentGimmickIndex--;
 
             if (currentGimmickIndex < 0)
-                currentGimmickIndex = gimmickList.Count;
+                currentGimmickIndex = gimmickKind.Count - 1;
         }
         
         //モードの切り替え
@@ -108,13 +100,44 @@ public class PlayerAction : MonoBehaviour
         Vector3 gridPos = roomGrid.GetWorldPosFromGrid(grid);
 
         //生成
-        Instantiate(gimmickList[currentGimmickIndex].Key, gridPos, Quaternion.identity);
-  
+        GimmickBase gimmick = Instantiate(gimmickKind[currentGimmickIndex], gridPos, Quaternion.identity).GetComponent<GimmickBase>();
+
+        //ソウルの消費
+        currentSoul -= gimmick.requiredSoul;
+
+        // ソウルが0未満になる場合は召喚を行わずソウル数を戻す
+        if (currentSoul < 0)
+        {
+            currentSoul += gimmick.requiredSoul;
+            Destroy(gimmick.gameObject);
+        }
+
+        //gimmickBase.roomGrid = roomGrid.csを設定 
+        //gimmick.SetGimmickPos(grid);// 位置の設定
+        //gimmick.AdjustScaleToGrid();// グリッドに合わせてサイズを調整
+
+
     }
 
     //ソウルの数を加算する関数
     public void AddSoul(int addnum)
     {
         currentSoul += addnum;
+    }
+
+    private void OnCollisionStay(Collision collision)
+    {
+        //接触している
+        if (collision.gameObject.CompareTag("Gimmick"))
+        {
+            PlayerMove playerMove = GetComponent<PlayerMove>();
+            if (playerMove.playerInput.Player.Interact.triggered)
+            {
+                //ギミックの情報を取得
+                GimmickBase gimmick = collision.gameObject.GetComponent<GimmickBase>();
+                if ((gimmick.gimmickState != GimmickState.Idle)) return;
+                gimmick.ActivateGimmick();
+            }
+        }
     }
 }
