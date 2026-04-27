@@ -39,6 +39,10 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
 
     private bool bool_IsRuntimeRegenerating = false;
 
+    [Header("ルームマネージャー")]
+    [SerializeField]
+    private CS_RoomPlayerPosition roomPlayerPosition;
+
     /// <summary>
     /// ゲーム実行時にRoomを自動で再生成します。
     /// </summary>
@@ -55,6 +59,9 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
         }
 
         StartCoroutine(RegenerateRoomBlocksRuntimeCoroutine());
+
+        // PlayerPositionに生成Roomの情報をセットします。
+        roomPlayerPosition.RefreshPlayerRoomData();
     }
 
     /// <summary>

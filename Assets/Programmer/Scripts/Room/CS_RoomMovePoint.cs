@@ -49,6 +49,9 @@ public class CS_RoomMovePoint : MonoBehaviour
 
     private Collider[] colliders;
 
+    private CS_RoomPlayerPosition roomPlayerPosition;
+
+
     /// <summary>
     /// このRoomMovePointの方向を取得します。
     /// </summary>
@@ -64,6 +67,8 @@ public class CS_RoomMovePoint : MonoBehaviour
     /// </summary>
     private void Awake()
     {
+        roomPlayerPosition = FindFirstObjectByType<CS_RoomPlayerPosition>();
+
         CacheColliders();
         ApplyUsableState(cs_TargetMovePoint != null);
     }
@@ -191,6 +196,11 @@ public class CS_RoomMovePoint : MonoBehaviour
         if (characterController != null)
         {
             characterController.enabled = true;
+        }
+
+        if (roomPlayerPosition != null)
+        {
+            roomPlayerPosition.RefreshPlayerRoomData();
         }
     }
 
