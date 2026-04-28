@@ -7,18 +7,30 @@
  * 
  */
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerCamera : MonoBehaviour
 {
-    [SerializeField] private Camera roomCamera;//部屋のカメラ
-    [SerializeField] private Camera upCamera;//上視点のカメラ
+    private Camera roomCamera;//部屋のカメラ
+    private Camera upCamera;//上視点のカメラ
 
-    public Vector3 cameraForward = Vector3.zero;//カメラから見た方向
-    public Vector3 cameraRight = Vector3.zero;//カメラの右方向ベクトル    
+    [Unity.VisualScripting.DoNotSerialize] public Vector3 cameraForward = Vector3.zero;//カメラから見た方向
+    [Unity.VisualScripting.DoNotSerialize] public Vector3 cameraRight = Vector3.zero;//カメラの右方向ベクトル    
 
     // Start is called before the first frame update
     void Start()
     {
+        Scene mainScene = SceneManager.GetSceneByName("MainScene");
+        if (mainScene == null)
+        {
+            Debug.Log(mainScene.name + "が見つかりません");
+            return;
+        }
+
+        // メインシーンからカメラの情報を受け取る
+        roomCamera = GameObject.Find("RoomCamera").GetComponent<Camera>();
+        upCamera = GameObject.Find("UpCamera").GetComponent<Camera>();
+
         roomCamera.depth = 1;
         upCamera.depth = -1;
     }

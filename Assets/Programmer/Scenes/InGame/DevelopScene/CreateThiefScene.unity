@@ -122,6 +122,37 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &12621694
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 12621695}
+  m_Layer: 0
+  m_Name: Debug_ThiefPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &12621695
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 12621694}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -15.8, y: 0, z: 9.45}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &194955329
 GameObject:
   m_ObjectHideFlags: 0
@@ -260,7 +291,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isExplored: 0
-  targetType: 4
+  targetType: 1
   explorationValue: 10
   exploredDistanceThreshold: 2
 --- !u!65 &204352855
@@ -382,7 +413,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isExplored: 0
-  targetType: 4
+  targetType: 0
   explorationValue: 10
   exploredDistanceThreshold: 2
 --- !u!65 &208207517
@@ -426,7 +457,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: 65de76dabfbc72540a1d50236ac670d4, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -483,7 +514,7 @@ GameObject:
   - component: {fileID: 210697261}
   - component: {fileID: 210697263}
   m_Layer: 0
-  m_Name: Manager
+  m_Name: ThiefManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -645,7 +676,7 @@ Transform:
   m_GameObject: {fileID: 301859935}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 3.04, y: 0, z: 1.02}
+  m_LocalPosition: {x: 2.32, y: 0, z: 1.02}
   m_LocalScale: {x: 0.1, y: 1, z: 0.1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -987,7 +1018,7 @@ Transform:
   m_GameObject: {fileID: 568620439}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -2.33, y: 0, z: 1.08}
+  m_LocalPosition: {x: -2.33, y: 0, z: 1.522}
   m_LocalScale: {x: 0.1, y: 1, z: 0.1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1236,7 +1267,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isExplored: 0
-  targetType: 4
+  targetType: 1
   explorationValue: 10
   exploredDistanceThreshold: 2
 --- !u!65 &1016435764
@@ -1568,7 +1599,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isExplored: 0
-  targetType: 4
+  targetType: 1
   explorationValue: 10
   exploredDistanceThreshold: 2
 --- !u!65 &1093426633
@@ -1770,7 +1801,7 @@ Transform:
   m_GameObject: {fileID: 1128854658}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.08, y: 0, z: 3.61}
+  m_LocalPosition: {x: 3.21, y: 0, z: 2.58}
   m_LocalScale: {x: 0.1, y: 1, z: 0.1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1809,7 +1840,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isExplored: 0
-  targetType: 4
+  targetType: 1
   explorationValue: 10
   exploredDistanceThreshold: 2
 --- !u!65 &1185635057
@@ -1931,7 +1962,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isExplored: 0
-  targetType: 4
+  targetType: 1
   explorationValue: 10
   exploredDistanceThreshold: 2
 --- !u!65 &1238643617
@@ -2133,7 +2164,7 @@ Transform:
   m_GameObject: {fileID: 1307099387}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.1600001, y: 0, z: -1.6899999}
+  m_LocalPosition: {x: -1.83, y: 0, z: 0.27}
   m_LocalScale: {x: 0.1, y: 1, z: 0.1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2172,7 +2203,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isExplored: 0
-  targetType: 4
+  targetType: 1
   explorationValue: 10
   exploredDistanceThreshold: 2
 --- !u!65 &1365526836
@@ -2374,7 +2405,7 @@ Transform:
   m_GameObject: {fileID: 1563809836}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.3260001, y: 0, z: -0.326}
+  m_LocalPosition: {x: -0.15, y: 0, z: -1.77}
   m_LocalScale: {x: 0.1, y: 1, z: 0.1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2719,11 +2750,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 1747421205}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ee003987777810640bc67fb600e99a3c, type: 3}
+  m_Script: {fileID: 11500000, guid: aeba2c4b2265ed54f9019ee893a861a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   isExplored: 0
-  alertValue: 0
+  targetType: 1
+  explorationValue: 0
+  exploredDistanceThreshold: 2
 --- !u!1 &1763556948
 GameObject:
   m_ObjectHideFlags: 0
@@ -3108,18 +3141,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4b50624b32a4654b93f5324958fcc46, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  roomID: 0
-  roomObjects:
-  - {fileID: 0}
-  - {fileID: 208207516}
-  - {fileID: 1016435763}
-  - {fileID: 1185635056}
-  - {fileID: 2098842179}
-  - {fileID: 1365526835}
-  - {fileID: 1093426632}
-  - {fileID: 1238643616}
-  - {fileID: 2139744396}
-  - {fileID: 204352854}
   movePoints:
   - {fileID: 1128854659}
   - {fileID: 301859936}
@@ -3129,7 +3150,7 @@ MonoBehaviour:
   - {fileID: 1563809837}
   - {fileID: 1307099388}
   - {fileID: 568620440}
-  isRight: 0
+  isListDown: 1
 --- !u!114 &1811252454
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3159,7 +3180,7 @@ MonoBehaviour:
   m_OverrideVoxelSize: 0
   m_VoxelSize: 0.16666667
   m_MinRegionArea: 2
-  m_NavMeshData: {fileID: 23800000, guid: 55abe48c34942d84c8a0074fada3060b, type: 2}
+  m_NavMeshData: {fileID: 23800000, guid: f88f1b59c0b9a9b46b0268ae6501dcaa, type: 2}
   m_BuildHeightMesh: 0
 --- !u!1 &1896824821
 GameObject:
@@ -3391,7 +3412,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isExplored: 0
-  targetType: 4
+  targetType: 1
   explorationValue: 10
   exploredDistanceThreshold: 2
 --- !u!65 &2098842180
@@ -3513,7 +3534,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isExplored: 0
-  targetType: 4
+  targetType: 1
   explorationValue: 10
   exploredDistanceThreshold: 2
 --- !u!65 &2139744397
@@ -3610,3 +3631,4 @@ SceneRoots:
   - {fileID: 493892581}
   - {fileID: 210697262}
   - {fileID: 1811252452}
+  - {fileID: 12621695}

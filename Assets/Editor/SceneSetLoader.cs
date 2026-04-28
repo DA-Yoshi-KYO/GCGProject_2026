@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using System.Linq;
 
 public static class SceneSetLoader
 {
@@ -19,15 +20,24 @@ public static class SceneSetLoader
     public static void OpenInGameSet()
     {
         // InGame用のフォルダからシーンを検索
-        var guids = AssetDatabase.FindAssets("t:Scene", new[] { "Assets/Programmer/Scenes/InGame" });
+        var root = "Assets/Programmer/Scenes/InGame";
+        var guids = AssetDatabase.FindAssets("t:Scene", new[] { root });
+
+        int rootDepth = root.Count(c => c == '/');
+
 
         List<string> paths = new List<string>();    // シーンのパスを格納するリスト
-        for (int i = 0; i < guids.Length; i++)
+        foreach (var guid in guids)
         {
-            paths.Add(AssetDatabase.GUIDToAssetPath(guids[i])); // GUIDからシーンのパスを取得してリストに追加
+            var path = AssetDatabase.GUIDToAssetPath(guid);
+            int depth = path.Count(c => c == '/');
+            if (depth != rootDepth + 1) continue;
+
+            paths.Add(path); // GUIDからシーンのパスを取得してリストに追加
 
             // メインシーンを先に開く
-            if (paths[i].Contains("MainScene")) EditorSceneManager.OpenScene(paths[i]);
+            if (path.Contains("MainScene"))
+                EditorSceneManager.OpenScene(path);
         }
 
         // メインシーン以外のシーンをアドティブモードで開く

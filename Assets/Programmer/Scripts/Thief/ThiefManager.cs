@@ -1,11 +1,12 @@
 /* ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
- *    泥棒を生成するシステム
+ *    泥棒を管理するシステム
  * ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
  *    宇留野 陸斗
  * ----------------------------------------------------------
  * 2026-04-17 | 初回作成
  * 2026-04-19 | 泥棒のパラメーター設定処理の記載(行動AIの設定、視界システムの設定)
  * 2026-04-23 | 移動速度の設定処理の記載(プレイヤーの速度を仮で用意して、そこから泥棒の速度を計算するように変更)
+ * 2026-04-26 | ファイル名・クラス名をThiefManagerに変更
  * 
  */
 using Unity.Mathematics;
@@ -13,7 +14,7 @@ using UnityEngine;
 
 
 // 泥棒を生成するシステム
-public class ThiefGenerator : MonoBehaviour
+public class ThiefManager : MonoBehaviour
 {
     [SerializeField, Tooltip("泥棒のデータベース")]
     private ThiefDataSO thiefDB;
@@ -31,7 +32,7 @@ public class ThiefGenerator : MonoBehaviour
     private void Notify()
     {
         // 現在のウェーブ数を取得
-        int currentWave = GameObject.Find("Manager").GetComponent<WaveManager>().waveNumber;
+        int currentWave = GameObject.Find("ThiefManager").GetComponent<WaveManager>().waveNumber;
 
 
         /*仮で実数変数として指定*/int stageNumber = 1;
@@ -72,7 +73,7 @@ public class ThiefGenerator : MonoBehaviour
                 //--- 泥棒のデータを設定
 
                 /* 仮で実数変数でプレイヤー速度を用意 */
-                float playerSpeed = 3.0f;
+                float playerSpeed = 10.0f;
 
                 // 行動AIの設定
                 ThiefAI thiefAI = thief.GetComponent<ThiefAI>();
@@ -86,6 +87,15 @@ public class ThiefGenerator : MonoBehaviour
                 thief.transform.parent = thiefParent.transform;
                 
                 //--- 生成した泥棒の生成位置を選定
+
+                GameObject debugPoint = GameObject.Find("Debug_ThiefPoint");
+                if (debugPoint != null)
+                {
+                    // デバッグ用の生成ポイントが存在する場合は、そこに生成
+                    thief.transform.position = debugPoint.transform.position;
+                    continue;
+                }
+
                 // (仮) 50,0,50 ~ -50,0,-50の範囲にランダムに生成
                 float x = UnityEngine.Random.Range(-50.0f, 50.0f);
                 float z = UnityEngine.Random.Range(-50.0f, 50.0f);
@@ -93,4 +103,39 @@ public class ThiefGenerator : MonoBehaviour
             }
         }
     }
+
+    // 指定したオブジェクトの記憶を消去するメソッド
+    public void EraseTheMemoryToAllThief(ThiefTarget obj)
+    {
+        // 全泥棒を取得
+        GameObject[] thieves = GameObject.FindAnyObjectByType<ThiefAI>().gameObject.scene.GetRootGameObjects();
+        foreach (var thief in thieves)
+        {
+            ThiefAI thiefAI = thief.GetComponentInChildren<ThiefAI>();
+            if (thiefAI != null)
+            {
+                thiefAI.EraseTheMemory(obj);
+            }
+        }
+
+    }
+
+
+    //////////////////////////////////////////////////////////////////
+    /// デバック用の処理
+
+    [ContextMenu("泥棒を再生成")]
+    private void DebugNotify()
+    {
+        // 生成した泥棒を全て削除
+        GameObject thiefParent = GameObject.Find("ThiefParent");
+        if (thiefParent != null)
+        {
+            Destroy(thiefParent);
+        }
+
+        // 泥棒を再生成
+        Notify();
+    }
+
 }
