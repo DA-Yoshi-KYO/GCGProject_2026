@@ -17,7 +17,8 @@ public class CS_RoomPlayerPosition : MonoBehaviour
     [SerializeField]
     private GameObject player;
 
-    private GameObject playerRoomData;
+    [HideInInspector] public GameObject playerRoomData { private set; get; }
+    [HideInInspector] public GameObject doorPoint { private set; get; }
     [HideInInspector] public GameObject planeObject { private set; get; }
 
     /// <summary>
@@ -35,18 +36,14 @@ public class CS_RoomPlayerPosition : MonoBehaviour
                 if (t.name == "Plane")
                 {
                     planeObject = t.gameObject;
-                    break;
+                }
+
+                if (t.name == "RoomMovePoint01")
+                {
+                    doorPoint = t.gameObject;
                 }
             }
         }
-    }
-
-    /// <summary>
-    /// Playerが現在いるRoomCreatePointを取得します。
-    /// </summary>
-    public GameObject GetPlayerRoomData()
-    {
-        return playerRoomData;
     }
 
     /// <summary>

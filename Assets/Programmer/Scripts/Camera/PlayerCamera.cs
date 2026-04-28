@@ -17,6 +17,8 @@ public class PlayerCamera : MonoBehaviour
     [HideInInspector] public Vector3 cameraForward = Vector3.zero;//カメラから見た方向
     [HideInInspector] public Vector3 cameraRight = Vector3.zero;//カメラの右方向ベクトル    
 
+    [Header("カメラの位置を入り口からどれだけ高く離すか")][SerializeField] private float camHeight = 10.0f;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -54,6 +56,18 @@ public class PlayerCamera : MonoBehaviour
             default:
                 break;
         }
+
+
+    }
+
+    private void LateUpdate()
+    {
+        Vector3 doorPos = GetComponent<CS_RoomPlayerPosition>().doorPoint.transform.position;
+        Vector3 roomCamPos = roomCamera.gameObject.transform.position;
+        roomCamPos = doorPos;
+        roomCamPos.y = doorPos.y + camHeight;
+        roomCamera.gameObject.transform.position = roomCamPos;
+        roomCamera.gameObject.transform.LookAt(gameObject.transform.position);
     }
 
     //部屋のカメラ処理
