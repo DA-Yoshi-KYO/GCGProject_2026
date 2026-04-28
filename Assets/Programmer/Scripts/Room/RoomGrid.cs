@@ -7,6 +7,7 @@
  * 
  */
 using UnityEngine;
+using System.Collections.Generic;
 
 public class RoomGrid : MonoBehaviour
 {
@@ -16,6 +17,8 @@ public class RoomGrid : MonoBehaviour
     public Vector2 gridSize { get; private set; }   // グリッド1マスの大きさ
     private Renderer rendererMaterial; // グリッドのマテリアル
     private GameObject gridObject; // グリッドの大きさを正確に取得する為の子オブジェクト
+
+    List<List<GameObject>> gridGimmicks;
 
     void Start()
     {
@@ -32,6 +35,52 @@ public class RoomGrid : MonoBehaviour
             Debug.LogWarning("RoomGrid: Material not found on the GameObject.");
         }
 
+        gridGimmicks = new List<List<GameObject>>();
+        for (int i = 0 ; i < gridDivision.y ; i++)
+        {
+            gridGimmicks.Add(new List<GameObject>());
+            for (int j = 0 ; j < gridDivision.x ; j++)
+            {
+                gridGimmicks[i].Add(new GameObject());
+            }
+        }
+    }
+
+    /// <summary>
+    /// グリッド位置にギミックが存在するかを取得する
+    /// </summary>
+    /// <param name="grid">確認するグリッド位置</param>
+    /// <returns>true:存在する false:存在しない</returns>
+    public bool IsGridOnGimmick(Vector2Int grid)
+    {
+        if (grid.x == -1 || grid.y == -1) return false;
+
+        return gridGimmicks[grid.y][grid.x] != true;
+    }
+
+    /// <summary>
+    /// 引数のワールド座標から変換されるグリッド位置にギミックを召喚する
+    /// </summary>
+    /// <param name="pos">座標</param>
+    /// <param name="gimmick">召喚するgimmickのベースクラス</param>
+    /// <returns>true:召喚成功 false:召喚失敗</returns>
+    public bool SetGimmickInGrid(Vector3 pos, GimmickBase gimmick)
+    {
+        if (gimmick == null) return false;
+        
+        Vector2Int grid = GetGridFromPos(pos);
+        if (grid.x == -1 || grid.y == -1) return false;
+        if (IsGridOnGimmick(grid)) return false;
+
+        Vector3 spawnPos = GetWorldPosFromGrid(grid);
+        if (spawnPos == Vector3.positiveInfinity) return false;
+
+        GameObject gimmickObject = Instantiate(gimmick.gameObject, spawnPos, Quaternion.identity);
+        GimmickBase spawnGimmick = gimmickObject.GetComponent<GimmickBase>();
+        spawnGimmick.roomGrid = this;
+        // spawnGimmick.AdjustScaleToGrid();
+
+        return true;
     }
 
     /// <summary>
@@ -75,7 +124,7 @@ public class RoomGrid : MonoBehaviour
         if (gridPos.x < 0 || gridPos.x >= gridDivision.x ||
             gridPos.y < 0 || gridPos.y >= gridDivision.y)
         {
-            return Vector3.zero;
+            return Vector3.positiveInfinity;
         }
 
         // グリッドから相対座標に変換
