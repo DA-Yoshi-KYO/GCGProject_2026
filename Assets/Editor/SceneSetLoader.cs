@@ -48,6 +48,13 @@ public static class SceneSetLoader
         }
     }
 
+    [MenuItem("Scenes/Open Designer Set")]
+    public static void OpenInDesignerSet()
+    {
+        OpenInGameSet();
+        EditorSceneManager.OpenScene("Assets/Designer/AssetCheck.unity", OpenSceneMode.Additive);
+    }
+
     // アウトゲーム用のシーンセットを開くメニューアイテム
     [MenuItem("Scenes/Open OutGame Set")]
     public static void OpenGameSet()
