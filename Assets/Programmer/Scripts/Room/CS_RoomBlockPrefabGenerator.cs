@@ -9,29 +9,110 @@ using UnityEditor;
 /*==================================================
  *  ファイル名  : CS_RoomBlockPrefabGenerator.cs
  *  制作者      : 吉本竜
- *  内容        : RoomCreatePointタグが付いたオブジェクトの子としてRoomPrefabをランダム生成し、
+ *  内容        : 登録されたRoomCreatePointの子としてRoomPrefabを生成し、
  *                生成後にRoomMovePoint同士を動的接続する
  *  履歴        : 2026/04/27 RoomCreatePointの子に生成する形へ修正(ヨシモト)
  *                2026/04/27 実行時の自動再生成処理を追加(ヨシモト)
+ *                2026/04/28 登録リスト生成方式へ変更(ヨシモト)
+ *                2026/04/28 生成方式をRoomCreatePointごとの設定へ変更(ヨシモト)
+ *                2026/04/28 RoomPlayerPositionを同一GameObjectから取得する形へ変更(ヨシモト)
  *==================================================*/
 
 /// <summary>
-/// RoomCreatePointタグが付いたオブジェクトを探し、
-/// その子オブジェクトとしてRoomPrefabをランダム生成するクラスです。
+/// RoomPrefabの生成方式です。
+/// </summary>
+public enum CSE_RoomBlockGenerateType
+{
+    Fixed,
+    Random
+}
+
+/// <summary>
+/// 登録されたRoomCreatePointの子としてRoomPrefabを生成するクラスです。
 /// 実行時には既存の生成済みRoomを削除してから再生成できます。
 /// </summary>
 public class CS_RoomBlockPrefabGenerator : MonoBehaviour
 {
+    private const string ROOM_CREATE_POINT_TAG = "RoomCreatePoint";
     private const string GENERATED_NAME_PREFIX = "__GeneratedRoom_";
     private const string OLD_GENERATED_ROOT_NAME = "__GeneratedRoomBlocks";
 
-    [Header("生成ポイントタグ")]
-    [SerializeField]
-    private string str_RoomCreatePointTag = "RoomCreatePoint";
+    [System.Serializable]
+    private class CS_RoomCreatePointGenerateData
+    {
+        [Header("生成先RoomCreatePoint")]
+        [SerializeField]
+        private GameObject go_RoomCreatePointObject;
 
-    [Header("ランダム生成に使うルームブロックPrefab")]
+        [Header("このRoomCreatePointの生成方式")]
+        [SerializeField]
+        private CSE_RoomBlockGenerateType e_GenerateType = CSE_RoomBlockGenerateType.Random;
+
+        [Header("固定生成で使うRoomPrefab")]
+        [SerializeField]
+        private GameObject go_FixedRoomPrefab;
+
+        [Header("ランダム生成で使うRoomPrefab候補")]
+        [SerializeField]
+        private List<GameObject> list_RandomRoomBlockPrefabs = new List<GameObject>();
+
+        /// <summary>
+        /// RoomCreatePointのGameObjectを取得します。
+        /// </summary>
+        public GameObject RoomCreatePointObject => go_RoomCreatePointObject;
+
+        /// <summary>
+        /// このRoomCreatePointの生成方式を取得します。
+        /// </summary>
+        public CSE_RoomBlockGenerateType GenerateType => e_GenerateType;
+
+        /// <summary>
+        /// 固定生成で使うRoomPrefabを取得します。
+        /// </summary>
+        public GameObject FixedRoomPrefab => go_FixedRoomPrefab;
+
+        /// <summary>
+        /// ランダム生成で使うRoomPrefab候補を取得します。
+        /// </summary>
+        public List<GameObject> RandomRoomBlockPrefabs => list_RandomRoomBlockPrefabs;
+
+        /// <summary>
+        /// RoomCreatePointのTransformを取得します。
+        /// </summary>
+        public Transform RoomCreatePointTransform
+        {
+            get
+            {
+                if (go_RoomCreatePointObject == null)
+                {
+                    return null;
+                }
+
+                return go_RoomCreatePointObject.transform;
+            }
+        }
+
+        /// <summary>
+        /// CS_RoomCreatePointを取得します。
+        /// </summary>
+        public CS_RoomCreatePoint RoomCreatePoint
+        {
+            get
+            {
+                if (go_RoomCreatePointObject == null)
+                {
+                    return null;
+                }
+
+                return go_RoomCreatePointObject.GetComponent<CS_RoomCreatePoint>();
+            }
+        }
+    }
+
+    [Header("生成対象RoomCreatePoint一覧")]
     [SerializeField]
-    private List<GameObject> list_RoomBlockPrefabs = new List<GameObject>();
+    private List<CS_RoomCreatePointGenerateData> list_RoomCreatePointGenerateData =
+        new List<CS_RoomCreatePointGenerateData>();
 
     [Header("実行時生成設定")]
     [SerializeField]
@@ -39,15 +120,15 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
 
     private bool bool_IsRuntimeRegenerating = false;
 
-    [Header("ルームマネージャー")]
-    [SerializeField]
-    private CS_RoomPlayerPosition roomPlayerPosition;
+    private CS_RoomPlayerPosition cs_RoomPlayerPosition;
 
     /// <summary>
     /// ゲーム実行時にRoomを自動で再生成します。
     /// </summary>
     private void Awake()
     {
+        CacheRoomPlayerPosition();
+
         if (!Application.isPlaying)
         {
             return;
@@ -59,11 +140,10 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
         }
 
         StartCoroutine(RegenerateRoomBlocksRuntimeCoroutine());
-
     }
 
     /// <summary>
-    /// RoomCreatePointの子にRoomを生成します。
+    /// 登録されたRoomCreatePointの子にRoomを生成します。
     /// すでに生成済みの場合は重複生成を防ぐため処理を中断します。
     /// </summary>
     [ContextMenu("ルームブロックを生成")]
@@ -76,6 +156,7 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
         }
 
         GenerateRoomBlocksInternal();
+        RefreshRoomPlayerPosition();
     }
 
     /// <summary>
@@ -93,6 +174,7 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
 
         DeleteGeneratedRoomBlocks();
         GenerateRoomBlocksInternal();
+        RefreshRoomPlayerPosition();
     }
 
     /// <summary>
@@ -101,11 +183,21 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
     [ContextMenu("生成済みルームブロックを削除")]
     public void DeleteGeneratedRoomBlocks()
     {
-        GameObject[] roomCreatePoints = FindRoomCreatePointObjects();
-
-        for (int i = 0 ; i < roomCreatePoints.Length ; i++)
+        if (list_RoomCreatePointGenerateData == null)
         {
-            DeleteGeneratedChildren(roomCreatePoints[i].transform);
+            return;
+        }
+
+        for (int i = 0 ; i < list_RoomCreatePointGenerateData.Count ; i++)
+        {
+            CS_RoomCreatePointGenerateData generateData = list_RoomCreatePointGenerateData[i];
+
+            if (generateData == null || generateData.RoomCreatePointTransform == null)
+            {
+                continue;
+            }
+
+            DeleteGeneratedChildren(generateData.RoomCreatePointTransform);
         }
 
         DeleteOldGeneratedRoot();
@@ -119,7 +211,8 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
     [ContextMenu("生成済みルーム接続を更新")]
     public void RebuildGeneratedRoomLinks()
     {
-        Dictionary<CS_RoomCreatePoint, GameObject> dic_GeneratedRoomMap = BuildGeneratedRoomMapFromScene();
+        Dictionary<CS_RoomCreatePoint, GameObject> dic_GeneratedRoomMap =
+            BuildGeneratedRoomMapFromRegisteredList();
 
         if (dic_GeneratedRoomMap.Count <= 0)
         {
@@ -173,128 +266,212 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
 
         GenerateRoomBlocksInternal();
 
+        yield return null;
+
+        RefreshRoomPlayerPosition();
+
         bool_IsRuntimeRegenerating = false;
     }
 
     /// <summary>
-    /// RoomCreatePointの子にRoomを生成します。
+    /// 登録されたRoomCreatePointの子にRoomを生成します。
     /// 生成後にRoomMovePoint同士を接続します。
     /// </summary>
     private void GenerateRoomBlocksInternal()
     {
-        List<GameObject> validPrefabs = GetValidRoomBlockPrefabs();
-
-        if (validPrefabs.Count <= 0)
+        if (list_RoomCreatePointGenerateData == null || list_RoomCreatePointGenerateData.Count <= 0)
         {
-            Debug.LogError("[RoomBlockPrefabGenerator] 生成に使えるRoomPrefabがありません。");
-            return;
-        }
-
-        GameObject[] roomCreatePoints = FindRoomCreatePointObjects();
-
-        if (roomCreatePoints.Length <= 0)
-        {
-            Debug.LogWarning("[RoomBlockPrefabGenerator] RoomCreatePointタグが付いたオブジェクトが見つかりません。");
+            Debug.LogWarning("[RoomBlockPrefabGenerator] 生成対象RoomCreatePointが登録されていません。");
             return;
         }
 
         DeleteOldGeneratedRoot();
 
-        for (int i = 0 ; i < roomCreatePoints.Length ; i++)
-        {
-            GameObject pointObject = roomCreatePoints[i];
-            GameObject randomPrefab = GetRandomRoomBlockPrefab(validPrefabs);
+        int generatedCount = 0;
 
-            if (randomPrefab == null)
+        for (int i = 0 ; i < list_RoomCreatePointGenerateData.Count ; i++)
+        {
+            CS_RoomCreatePointGenerateData generateData = list_RoomCreatePointGenerateData[i];
+
+            if (!IsValidGenerateData(generateData, i))
             {
                 continue;
             }
 
+            GameObject roomPrefab = GetRoomBlockPrefab(generateData, i);
+
+            if (roomPrefab == null)
+            {
+                continue;
+            }
+
+            GameObject pointObject = generateData.RoomCreatePointObject;
+            Transform pointTransform = generateData.RoomCreatePointTransform;
+
             Vector3 spawnPosition = GetObjectCenter(pointObject);
-            Quaternion spawnRotation = pointObject.transform.rotation;
+            Quaternion spawnRotation = pointTransform.rotation;
 
             GameObject generatedRoom = CreateRoomInstance(
-                randomPrefab,
+                roomPrefab,
                 spawnPosition,
                 spawnRotation,
-                pointObject.transform
+                pointTransform
             );
 
-            generatedRoom.name = GENERATED_NAME_PREFIX + randomPrefab.name + "_" + i.ToString("00");
+            generatedRoom.name = GENERATED_NAME_PREFIX + roomPrefab.name + "_" + i.ToString("00");
+
+            generatedCount++;
         }
 
-        Dictionary<CS_RoomCreatePoint, GameObject> dic_GeneratedRoomMap = BuildGeneratedRoomMapFromScene();
+        Dictionary<CS_RoomCreatePoint, GameObject> dic_GeneratedRoomMap =
+            BuildGeneratedRoomMapFromRegisteredList();
 
         ConnectGeneratedRooms(dic_GeneratedRoomMap);
 
-        Debug.Log("[RoomBlockPrefabGenerator] RoomCreatePointの子にRoomを生成しました。生成数 : " + roomCreatePoints.Length);
+        Debug.Log("[RoomBlockPrefabGenerator] 登録されたRoomCreatePointの子にRoomを生成しました。生成数 : " + generatedCount);
     }
 
     /// <summary>
-    /// RoomCreatePointタグが付いたオブジェクトを取得します。
+    /// 生成データが有効か確認します。
     /// </summary>
-    /// <returns>RoomCreatePointタグが付いたオブジェクト配列。</returns>
-    private GameObject[] FindRoomCreatePointObjects()
+    /// <param name="generateData">生成データ。</param>
+    /// <param name="index">リスト番号。</param>
+    /// <returns>有効な場合はtrue。</returns>
+    private bool IsValidGenerateData(CS_RoomCreatePointGenerateData generateData, int index)
     {
-        if (string.IsNullOrWhiteSpace(str_RoomCreatePointTag))
+        if (generateData == null)
         {
-            Debug.LogError("[RoomBlockPrefabGenerator] 生成ポイントタグが空です。");
-            return new GameObject[0];
+            Debug.LogWarning("[RoomBlockPrefabGenerator] 生成データがnullです。Index : " + index);
+            return false;
+        }
+
+        if (generateData.RoomCreatePointObject == null)
+        {
+            Debug.LogWarning("[RoomBlockPrefabGenerator] RoomCreatePointObjectが登録されていません。Index : " + index);
+            return false;
+        }
+
+        if (generateData.RoomCreatePoint == null)
+        {
+            Debug.LogWarning("[RoomBlockPrefabGenerator] CS_RoomCreatePointが付いていません : " + generateData.RoomCreatePointObject.name);
+            return false;
+        }
+
+        if (!IsRoomCreatePointTagValid(generateData.RoomCreatePointObject))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// RoomCreatePointタグが正しく設定されているか確認します。
+    /// </summary>
+    /// <param name="target">確認対象。</param>
+    /// <returns>正しい場合はtrue。</returns>
+    private bool IsRoomCreatePointTagValid(GameObject target)
+    {
+        if (target == null)
+        {
+            return false;
         }
 
         try
         {
-            GameObject[] roomCreatePoints = GameObject.FindGameObjectsWithTag(str_RoomCreatePointTag);
-
-            System.Array.Sort(
-                roomCreatePoints,
-                (a, b) => string.Compare(a.name, b.name, System.StringComparison.Ordinal)
-            );
-
-            return roomCreatePoints;
+            if (!target.CompareTag(ROOM_CREATE_POINT_TAG))
+            {
+                Debug.LogWarning("[RoomBlockPrefabGenerator] RoomCreatePointタグが付いていません : " + target.name);
+                return false;
+            }
         }
         catch (UnityException)
         {
-            Debug.LogError("[RoomBlockPrefabGenerator] Tag「" + str_RoomCreatePointTag + "」が存在しません。UnityのTagsに追加してください。");
-            return new GameObject[0];
+            Debug.LogError("[RoomBlockPrefabGenerator] Tag「" + ROOM_CREATE_POINT_TAG + "」が存在しません。UnityのTagsに追加してください。");
+            return false;
         }
+
+        return true;
     }
 
     /// <summary>
-    /// nullではないRoomPrefabだけを取得します。
+    /// 生成方式に応じたRoomPrefabを取得します。
     /// </summary>
-    /// <returns>有効なRoomPrefabリスト。</returns>
-    private List<GameObject> GetValidRoomBlockPrefabs()
+    /// <param name="generateData">生成データ。</param>
+    /// <param name="index">リスト番号。</param>
+    /// <returns>生成に使うRoomPrefab。</returns>
+    private GameObject GetRoomBlockPrefab(CS_RoomCreatePointGenerateData generateData, int index)
     {
-        List<GameObject> validPrefabs = new List<GameObject>();
-
-        for (int i = 0 ; i < list_RoomBlockPrefabs.Count ; i++)
+        if (generateData.GenerateType == CSE_RoomBlockGenerateType.Fixed)
         {
-            if (list_RoomBlockPrefabs[i] == null)
-            {
-                continue;
-            }
-
-            validPrefabs.Add(list_RoomBlockPrefabs[i]);
+            return GetFixedRoomBlockPrefab(generateData, index);
         }
 
-        return validPrefabs;
+        return GetRandomRoomBlockPrefab(generateData, index);
     }
 
     /// <summary>
-    /// 有効なRoomPrefabリストからランダムで1つ取得します。
+    /// 固定生成用のRoomPrefabを取得します。
     /// </summary>
-    /// <param name="validPrefabs">有効なRoomPrefabリスト。</param>
+    /// <param name="generateData">生成データ。</param>
+    /// <param name="index">リスト番号。</param>
+    /// <returns>固定生成用RoomPrefab。</returns>
+    private GameObject GetFixedRoomBlockPrefab(CS_RoomCreatePointGenerateData generateData, int index)
+    {
+        if (generateData.FixedRoomPrefab == null)
+        {
+            Debug.LogWarning("[RoomBlockPrefabGenerator] 固定生成用RoomPrefabが設定されていません。Index : " + index);
+            return null;
+        }
+
+        return generateData.FixedRoomPrefab;
+    }
+
+    /// <summary>
+    /// ランダム生成用のRoomPrefabを取得します。
+    /// </summary>
+    /// <param name="generateData">生成データ。</param>
+    /// <param name="index">リスト番号。</param>
     /// <returns>ランダムに選ばれたRoomPrefab。</returns>
-    private GameObject GetRandomRoomBlockPrefab(List<GameObject> validPrefabs)
+    private GameObject GetRandomRoomBlockPrefab(CS_RoomCreatePointGenerateData generateData, int index)
     {
-        if (validPrefabs == null || validPrefabs.Count <= 0)
+        List<GameObject> validPrefabs = GetValidRoomBlockPrefabs(generateData.RandomRoomBlockPrefabs);
+
+        if (validPrefabs.Count <= 0)
         {
+            Debug.LogWarning("[RoomBlockPrefabGenerator] ランダム生成候補RoomPrefabが設定されていません。Index : " + index);
             return null;
         }
 
         int randomIndex = Random.Range(0, validPrefabs.Count);
         return validPrefabs[randomIndex];
+    }
+
+    /// <summary>
+    /// nullではないRoomPrefabだけを取得します。
+    /// </summary>
+    /// <param name="roomPrefabs">確認対象Prefabリスト。</param>
+    /// <returns>有効なRoomPrefabリスト。</returns>
+    private List<GameObject> GetValidRoomBlockPrefabs(List<GameObject> roomPrefabs)
+    {
+        List<GameObject> validPrefabs = new List<GameObject>();
+
+        if (roomPrefabs == null)
+        {
+            return validPrefabs;
+        }
+
+        for (int i = 0 ; i < roomPrefabs.Count ; i++)
+        {
+            if (roomPrefabs[i] == null)
+            {
+                continue;
+            }
+
+            validPrefabs.Add(roomPrefabs[i]);
+        }
+
+        return validPrefabs;
     }
 
     /// <summary>
@@ -381,17 +558,25 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
     /// <returns>生成済みRoomがある場合はtrue。</returns>
     private bool HasGeneratedRoomBlocks()
     {
-        GameObject[] roomCreatePoints = FindRoomCreatePointObjects();
-
-        for (int i = 0 ; i < roomCreatePoints.Length ; i++)
+        if (list_RoomCreatePointGenerateData != null)
         {
-            Transform pointTransform = roomCreatePoints[i].transform;
-
-            for (int childIndex = 0 ; childIndex < pointTransform.childCount ; childIndex++)
+            for (int i = 0 ; i < list_RoomCreatePointGenerateData.Count ; i++)
             {
-                if (IsGeneratedRoomName(pointTransform.GetChild(childIndex).name))
+                CS_RoomCreatePointGenerateData generateData = list_RoomCreatePointGenerateData[i];
+
+                if (generateData == null || generateData.RoomCreatePointTransform == null)
                 {
-                    return true;
+                    continue;
+                }
+
+                Transform pointTransform = generateData.RoomCreatePointTransform;
+
+                for (int childIndex = 0 ; childIndex < pointTransform.childCount ; childIndex++)
+                {
+                    if (IsGeneratedRoomName(pointTransform.GetChild(childIndex).name))
+                    {
+                        return true;
+                    }
                 }
             }
         }
@@ -474,28 +659,43 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
     }
 
     /// <summary>
-    /// 生成済みRoomから、RoomCreatePointと生成Roomの対応表を作成します。
+    /// 登録リストから、RoomCreatePointと生成Roomの対応表を作成します。
     /// </summary>
     /// <returns>RoomCreatePointと生成Roomの対応表。</returns>
-    private Dictionary<CS_RoomCreatePoint, GameObject> BuildGeneratedRoomMapFromScene()
+    private Dictionary<CS_RoomCreatePoint, GameObject> BuildGeneratedRoomMapFromRegisteredList()
     {
         Dictionary<CS_RoomCreatePoint, GameObject> dic_GeneratedRoomMap =
             new Dictionary<CS_RoomCreatePoint, GameObject>();
 
-        GameObject[] roomCreatePointObjects = FindRoomCreatePointObjects();
-
-        for (int i = 0 ; i < roomCreatePointObjects.Length ; i++)
+        if (list_RoomCreatePointGenerateData == null)
         {
-            CS_RoomCreatePoint createPoint =
-                roomCreatePointObjects[i].GetComponent<CS_RoomCreatePoint>();
+            return dic_GeneratedRoomMap;
+        }
 
-            if (createPoint == null)
+        for (int i = 0 ; i < list_RoomCreatePointGenerateData.Count ; i++)
+        {
+            CS_RoomCreatePointGenerateData generateData = list_RoomCreatePointGenerateData[i];
+
+            if (generateData == null)
             {
-                Debug.LogWarning("[RoomBlockPrefabGenerator] CS_RoomCreatePointが付いていません : " + roomCreatePointObjects[i].name);
                 continue;
             }
 
-            GameObject generatedRoom = FindGeneratedRoomChild(roomCreatePointObjects[i].transform);
+            CS_RoomCreatePoint createPoint = generateData.RoomCreatePoint;
+
+            if (createPoint == null)
+            {
+                continue;
+            }
+
+            Transform pointTransform = generateData.RoomCreatePointTransform;
+
+            if (pointTransform == null)
+            {
+                continue;
+            }
+
+            GameObject generatedRoom = FindGeneratedRoomChild(pointTransform);
 
             if (generatedRoom == null)
             {
@@ -635,5 +835,34 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// 同じGameObjectに付いているCS_RoomPlayerPositionを取得します。
+    /// </summary>
+    private void CacheRoomPlayerPosition()
+    {
+        if (cs_RoomPlayerPosition != null)
+        {
+            return;
+        }
+
+        cs_RoomPlayerPosition = GetComponent<CS_RoomPlayerPosition>();
+    }
+
+    /// <summary>
+    /// PlayerPosition側の現在Room情報を更新します。
+    /// </summary>
+    private void RefreshRoomPlayerPosition()
+    {
+        CacheRoomPlayerPosition();
+
+        if (cs_RoomPlayerPosition == null)
+        {
+            Debug.LogWarning("[RoomBlockPrefabGenerator] 同じGameObjectにCS_RoomPlayerPositionが付いていません。");
+            return;
+        }
+
+        cs_RoomPlayerPosition.RefreshPlayerRoomData();
     }
 }

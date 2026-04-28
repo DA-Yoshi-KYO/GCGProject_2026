@@ -9,7 +9,11 @@
 // 当たり判定内に、敵がいた場合、攻撃力を与える
 //
 
+using System.Collections;
+using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public enum Gimmick
 {

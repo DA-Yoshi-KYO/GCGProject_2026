@@ -85,32 +85,38 @@ public class PlayerAction : MonoBehaviour
 
     private void SettingAction()
     {
-        if (gimmickKind[currentGimmickIndex] == null)
-        {
-            Debug.LogError("選択されたギミックが見つかりません");
-            return;
-        }
-        GimmickBase gimmick = gimmickKind[currentGimmickIndex].GetComponent<GimmickBase>();
-        if (gimmick == null)
-        {
-            Debug.LogError("選択されたギミックにGimmickBaseコンポーネントが付いていません"); return;
-        }
-        if (currentSoul - gimmick.requiredSoul <= 0) return;    // ソウルが足りない場合召喚しない
-
-        var roomGrid = GetComponent<CS_RoomPlayerPosition>().planeObject.GetComponent<RoomGrid>();
-        
         //ギミックの生成位置
         Vector3 settingPos = Vector3.zero;
         settingPos = transform.position + 
-            new Vector3(transform.forward.x * roomGrid.gridSize.x,
+            new Vector3(transform.forward.x * transform.localScale.x,
                     0.0f,
-                    transform.forward.z * roomGrid.gridSize.y);
+                    transform.forward.z * transform.localScale.z);
 
-        //グリッドの位置に召喚を試みる
-        if (!roomGrid.SetGimmickInGrid(settingPos, gimmick)) return;    // 召喚に失敗
+        //グリッドの位置を取得
+        var roomGrid = FindObjectOfType<RoomGrid>();
+
+        Vector2Int grid = roomGrid.GetGridFromPos(settingPos);
+
+        Vector3 gridPos = roomGrid.GetWorldPosFromGrid(grid);
+
+        //生成
+        GimmickBase gimmick = Instantiate(gimmickKind[currentGimmickIndex], gridPos, Quaternion.identity).GetComponent<GimmickBase>();
 
         //ソウルの消費
         currentSoul -= gimmick.requiredSoul;
+
+        // ソウルが0未満になる場合は召喚を行わずソウル数を戻す
+        if (currentSoul < 0)
+        {
+            currentSoul += gimmick.requiredSoul;
+            Destroy(gimmick.gameObject);
+        }
+
+        //gimmickBase.roomGrid = roomGrid.csを設定 
+        //gimmick.SetGimmickPos(grid);// 位置の設定
+        //gimmick.AdjustScaleToGrid();// グリッドに合わせてサイズを調整
+
+
     }
 
     //ソウルの数を加算する関数

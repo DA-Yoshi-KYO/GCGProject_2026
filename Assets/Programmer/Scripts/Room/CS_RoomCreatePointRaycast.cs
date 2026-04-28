@@ -68,6 +68,11 @@ public static class CS_RoomCreatePointRaycast
         {
             GameObject go_HitObject = hit.collider.gameObject;
 
+            if (go_HitObject.scene != scene_Target)
+            {
+                continue;
+            }
+
             if (!go_HitObject.CompareTag(STR_PLANE_TAG_NAME))
             {
                 continue;

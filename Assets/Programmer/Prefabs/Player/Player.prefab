@@ -14,7 +14,6 @@ GameObject:
   - component: {fileID: 5236082132703535882}
   - component: {fileID: 3152219394414369179}
   - component: {fileID: 1188213421558520057}
-  - component: {fileID: 6407182837705943133}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -31,9 +30,9 @@ Transform:
   m_GameObject: {fileID: 91267025467519389}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 1.02, y: 2.24, z: -0.41}
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
-  m_ConstrainProportionsScale: 1
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2948798605621965218}
   m_Father: {fileID: 0}
@@ -135,19 +134,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cameraForward: {x: 0, y: 0, z: 0}
   cameraRight: {x: 0, y: 0, z: 0}
---- !u!114 &6407182837705943133
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 91267025467519389}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d06428832aaa10943a333fa66fc80289, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  player: {fileID: 91267025467519389}
 --- !u!1001 &3415564462067734089
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -206,11 +192,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: -7511558181221131132, guid: b25c49061faf3dd40a73bcead0d54f24,
-        type: 3}
-      propertyPath: m_Materials.Array.data[0]
-      value: 
-      objectReference: {fileID: 2100000, guid: 17648b18d2f501e45a5d7006bb65aa63, type: 2}
     - target: {fileID: 919132149155446097, guid: b25c49061faf3dd40a73bcead0d54f24,
         type: 3}
       propertyPath: m_Name
