@@ -30,4 +30,7 @@ public class VisionTarget : ThiefTarget
     [Header("探索済みとする距離")]
     [Tooltip("探索済みとする距離")]
     public float exploredDistanceThreshold;
+
+    [Header("探索進行度"), Tooltip("このターゲットの探索進行度")]
+    public float explorationProgress = 0.0f;
 }

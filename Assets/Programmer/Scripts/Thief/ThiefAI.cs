@@ -43,6 +43,15 @@ public class ThiefAI : MonoBehaviour
     [Tooltip("現在の行動状態")]
     private ThiefState currentState;
 
+    [SerializeField, Header("泥棒のリアクションスプライト(仮)")]
+    private List<Sprite> reactionSprites;
+    enum ReactionSpriteType
+    {
+        Normal, // 通常
+        Search, // 探索
+        Stun    // 気絶
+    }
+
     [Tooltip("現在いる部屋の情報")]
     private RoomNode currentRoom;
     [Tooltip("部屋に関する記憶")]
@@ -54,11 +63,14 @@ public class ThiefAI : MonoBehaviour
     [Tooltip("持っている宝物オジェクト")]// 見つけたら設定する
     private GameObject heldTreasure;
 
-    [Tooltip("泥棒の耐久力")]
+    [SerializeField, Tooltip("泥棒の耐久力")]
     private int durability;
-    [Tooltip("泥棒の移動速度")]
+    [SerializeField, Tooltip("泥棒の移動速度")]
     private float walkSpeed;
     private float runSpeed;
+
+    [Tooltip("泥棒が探索するのにかかる秒数")]
+    private int searchTime;
 
     [Tooltip("気絶後に退場するまでの時間")]
     private int exitAfterStunTime;
@@ -78,18 +90,20 @@ public class ThiefAI : MonoBehaviour
     private NavMeshAgent navMeshAgent;
 
     // 泥棒の耐久力と移動速度を設定するメソッド
-    public void Setting(ThiefData data, float playerSpeed, RoomNode firstRoom)
+    public void Setting(ThiefTypeData typedata, ThiefData data, float playerSpeed, RoomNode firstRoom)
     {
         /*未実装、未設定　*///data.jumpHeight;
         /*未設定、未設定　*///data.alertTime;
 
-        durability = data.durability;
-        walkSpeed = playerSpeed * data.walkSpeedMultiplier;
-        runSpeed = playerSpeed * data.runSpeedMultiplier;
-        nextRoomSearchThreshold = data.nextRoomSearchThreshold;
-        runTargetTypes = data.runTargetTypes;
+        durability = typedata.durability;
+        walkSpeed = playerSpeed * typedata.walkSpeedMultiplier;
+        runSpeed = playerSpeed * typedata.runSpeedMultiplier;
+        nextRoomSearchThreshold = typedata.nextRoomSearchThreshold;
+        runTargetTypes = typedata.runTargetTypes;
+        soulDropCount = typedata.soulDropCount;
+        searchTime = typedata.searchTime;
+
         exitAfterStunTime = data.exitAfterStunTime;
-        soulDropCount = data.soulDropCount;
 
         // 初期状態を探索に設定
         currentState = ThiefState.Explore;
@@ -137,6 +151,8 @@ public class ThiefAI : MonoBehaviour
         // 探索対象を決定
         RecognizeObjects();
 
+        ChangeFace(ReactionSpriteType.Normal);
+
         // 探索対象がない場合は、部屋の移動ポイントに沿って移動する処理を追加する
         if (currentTarget == null)
         {
@@ -168,32 +184,38 @@ public class ThiefAI : MonoBehaviour
                 // 探索対象に向かって移動
                 navMeshAgent.SetDestination(currentTarget.transform.position);
 
-                // 探索対象に十分近づいたら、探索完了とする
+                // 探索対象に十分近づいたら、探索度を進める
                 if (Vector3.Distance(transform.position, currentTarget.transform.position) < ((VisionTarget)currentTarget).exploredDistanceThreshold)
                 {
-                    // 宝物を探索にしていて、完了した場合は、発見状態に切り替える
-                    if (((VisionTarget)currentTarget).targetType == VisionTarget.TargetType.Treasure)
-                    {
-                        // 発見状態に切り替える
-                        currentState = ThiefState.Found;
-                    }
-                    // それ以外のオブジェクトを探索して完了した場合は、次の探索対象を決定する
-                    else
-                    {
-                        // 探索対象を探索済みに設定
-                        ((VisionTarget)currentTarget).isExplored = true;
-                        // 探索度を加算
-                        roomMemories[currentRoom].explorationLevel += ((VisionTarget)currentTarget).explorationValue;
+                    ChangeFace(ReactionSpriteType.Search); // 探索完了の表情に変更する処理を追加する
 
-                        // 探索度が閾値を超えた場合は、次の部屋に移動するための処理を追加する
-                        if (roomMemories[currentRoom].explorationLevel >= nextRoomSearchThreshold)
+                    if (ProgressTargetSearchTime())
+                    {
+                        // 宝物を探索にしていて、完了した場合は、発見状態に切り替える
+                        if (((VisionTarget)currentTarget).targetType == VisionTarget.TargetType.Treasure)
                         {
-                            Debug.Log("次の部屋に移動");
+                            // 発見状態に切り替える
+                            currentState = ThiefState.Found;
                         }
-                        // それ以外の場合は、次の探索対象を決定する
-                        else DecideTarget();
+                        // それ以外のオブジェクトを探索して完了した場合は、次の探索対象を決定する
+                        else
+                        {
+                            // 探索対象を探索済みに設定
+                            ((VisionTarget)currentTarget).isExplored = true;
+                            // 探索度を加算
+                            roomMemories[currentRoom].explorationLevel += ((VisionTarget)currentTarget).explorationValue;
+
+                            // 探索度が閾値を超えた場合は、次の部屋に移動するための処理を追加する
+                            if (roomMemories[currentRoom].explorationLevel >= nextRoomSearchThreshold)
+                            {
+                                Debug.Log("次の部屋に移動");
+                            }
+                            // それ以外の場合は、次の探索対象を決定する
+                            else DecideTarget();
+                        }
                     }
                 }
+                else ((VisionTarget)currentTarget).explorationProgress = 0; // 探索対象から十分に離れた場合は、探索進行度をリセットする
             }
         }
         else
@@ -321,7 +343,7 @@ public class ThiefAI : MonoBehaviour
             // 退場する処理を追加する
             Debug.Log("泥棒が退場");
             
-            Destroy(gameObject);
+            //Destroy(gameObject);
         }
     }
 
@@ -589,6 +611,9 @@ public class ThiefAI : MonoBehaviour
             durability = 0;
             currentState = ThiefState.Stunned;
 
+            // 泥棒の表情を気絶の表情に変更する処理を追加する
+            ChangeFace(ReactionSpriteType.Stun);
+
             // プレイヤーにソウルを入手させる
             PlayerAction playerAction = GameObject.FindObjectOfType<PlayerAction>();
 
@@ -636,28 +661,58 @@ public class ThiefAI : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 探索対象の探索にかかる時間を経過させる処理
+    /// </summary>
+    /// <returns>探索が終了しているかどうか</returns>
+    private bool ProgressTargetSearchTime()
+    {
+        // 探索対象がない場合は、falseを返す
+        if (currentTarget == null) return false;
+
+        // 探索対象の探索にかかる時間を経過させる
+        //　((VisionTarget)currentTarget).explorationProgress　: 対象の探索度(MAX : 100.0f)
+        // searchTime : 探索対象の探索にかかる時間
+        ((VisionTarget)currentTarget).explorationProgress += (100.0f / searchTime) * Time.deltaTime;
+
+        // 探索対象の探索にかかる時間が経過した場合は、trueを返す
+        if (((VisionTarget)currentTarget).explorationProgress >= 100.0f) return true;
+
+        return false;
+    }
+
+    /// <summary>
+    /// 泥棒の表情を変更する処理
+    /// </summary>
+    /// <param name="reaction">変更するタイプ</param>
+    private void ChangeFace(ReactionSpriteType reaction)
+    {
+        // 子オブジェクトを取得
+        GameObject child = transform.GetChild(0).gameObject;
+        // 取得できなかった場合は、エラーログを出力して処理を終了する
+        if (child == null) Debug.LogError("子オブジェクトが見つかりませんでした。ThiefAIのChangeFaceメソッドで、泥棒の表情を変更する処理が正常に動作しない可能性があります。");
+
+        // 子オブジェクトからMeshRendererを取得
+        MeshRenderer meshRenderer = child.GetComponent<MeshRenderer>();
+        // 取得できなかった場合は、エラーログを出力して処理を終了する
+        if (meshRenderer == null) Debug.LogError(" MeshRendererが見つかりませんでした。ThiefAIのChangeFaceメソッドで、泥棒の表情を変更する処理が正常に動作しない可能性があります。");
+
+        // Materialの取得
+        Material material = meshRenderer.material;
+        // 取得できなかった場合は、エラーログを出力して処理を終了する
+        if (material == null) Debug.LogError(" Materialが見つかりませんでした。ThiefAIのChangeFaceメソッドで、泥棒の表情を変更する処理が正常に動作しない可能性があります。");
+
+        // 表情のスプライトを変更する
+        material.mainTexture = reactionSprites[(int)reaction].texture;
+    }
 
     //////////////////////////////////////////////////////////////////
     /// デバック用の処理
 
-    [ContextMenu("ステータス状態を設定")]
-    private void Debug_SetNextStatus()
+    [ContextMenu("ダメージを与える")]
+    private void DebugTakeDamage()
     {
-        switch (currentState)
-        {
-            case ThiefState.Explore:
-                currentState = ThiefState.Found;
-                break;
-            case ThiefState.Found:
-                currentState = ThiefState.Escape;
-                break;
-            case ThiefState.Escape:
-                currentState = ThiefState.Stunned;
-                break;
-            case ThiefState.Stunned:
-                currentState = ThiefState.Explore;
-                break;
-        }
+        TakeDamage(1);
     }
 
 }
