@@ -10806,11 +10806,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3580d4acadb9264689556c071cb6415, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  e_GenerateType: 1
-  str_RoomCreatePointTag: RoomCreatePoint
-  list_RoomCreatePointGenerateData: []
+  list_RoomCreatePointGenerateData:
+  - go_RoomCreatePointObject: {fileID: 0}
+    e_GenerateType: 0
+    go_FixedRoomPrefab: {fileID: 0}
+    list_RandomRoomBlockPrefabs: []
   bool_IsAutoRegenerateOnStart: 1
-  roomPlayerPosition: {fileID: 0}
 --- !u!1001 &1691444841
 PrefabInstance:
   m_ObjectHideFlags: 0
