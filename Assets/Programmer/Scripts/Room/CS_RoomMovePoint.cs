@@ -246,6 +246,7 @@ public class CS_RoomMovePoint : MonoBehaviour
         if (roomPlayerPosition != null)
         {
             roomPlayerPosition.RefreshPlayerRoomData();
+            playerTransform.gameObject.GetComponent<PlayerCamera>().OnRoomMove();
         }
     }
 

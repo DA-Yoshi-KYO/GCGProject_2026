@@ -332,6 +332,7 @@ MonoBehaviour:
   targetType: 1
   explorationValue: 0
   exploredDistanceThreshold: 0
+  explorationProgress: 0
 --- !u!1 &1932585414107966644
 GameObject:
   m_ObjectHideFlags: 0
@@ -2047,6 +2048,7 @@ MonoBehaviour:
   targetType: 1
   explorationValue: 0
   exploredDistanceThreshold: 0
+  explorationProgress: 0
 --- !u!1 &5875383808550522078
 GameObject:
   m_ObjectHideFlags: 0
@@ -2084,6 +2086,7 @@ Transform:
   - {fileID: 4181210927172493120}
   - {fileID: 3547699303010029963}
   - {fileID: 8888101741739781233}
+  - {fileID: 1761420257151849477}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1652095594666006671
@@ -2272,6 +2275,37 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isExplored: 0
+--- !u!1 &6205166274460142151
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1761420257151849477}
+  m_Layer: 0
+  m_Name: Center
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1761420257151849477
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6205166274460142151}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 212790291542475046}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6320465845951630800
 GameObject:
   m_ObjectHideFlags: 0
@@ -2760,6 +2794,7 @@ MonoBehaviour:
   targetType: 1
   explorationValue: 0
   exploredDistanceThreshold: 0
+  explorationProgress: 0
 --- !u!1 &7330551455708406418
 GameObject:
   m_ObjectHideFlags: 0
@@ -3021,6 +3056,7 @@ MonoBehaviour:
   targetType: 1
   explorationValue: 0
   exploredDistanceThreshold: 0
+  explorationProgress: 0
 --- !u!1 &9119636952309184107
 GameObject:
   m_ObjectHideFlags: 0

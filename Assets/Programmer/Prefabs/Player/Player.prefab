@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 5236082132703535882}
   - component: {fileID: 3152219394414369179}
   - component: {fileID: 1188213421558520057}
+  - component: {fileID: 3367410344476483694}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -31,7 +32,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 1.02, y: 2.24, z: -0.41}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2948798605621965218}
@@ -57,9 +58,9 @@ CapsuleCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.5
-  m_Height: 2
+  m_Height: 1.13
   m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Center: {x: 0, y: 0.5, z: 0}
 --- !u!54 &3708375290872360893
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -103,6 +104,7 @@ MonoBehaviour:
   velocityWalk: 0.7
   velocityRun: 1
   jumpAmount: 2.5
+  accelartion: 10
 --- !u!114 &3152219394414369179
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -134,6 +136,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cameraForward: {x: 0, y: 0, z: 0}
   cameraRight: {x: 0, y: 0, z: 0}
+  upDirection: 10
+--- !u!114 &3367410344476483694
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 91267025467519389}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 41d2789afa3286444b421fa66657d37f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currentMode: 0
 --- !u!1001 &3415564462067734089
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -192,6 +208,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: b25c49061faf3dd40a73bcead0d54f24,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 17648b18d2f501e45a5d7006bb65aa63, type: 2}
     - target: {fileID: 919132149155446097, guid: b25c49061faf3dd40a73bcead0d54f24,
         type: 3}
       propertyPath: m_Name
