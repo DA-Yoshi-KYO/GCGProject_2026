@@ -1,4 +1,6 @@
 using UnityEngine;
+using System.Collections.Generic;
+
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -34,9 +36,13 @@ public class CS_RoomMovePoint : MonoBehaviour
     [SerializeField]
     private GameObject go_ClosedWallObject;
 
-    [Header("プレイヤータグ")]
+    [Header("移動可能タグ")]
     [SerializeField]
-    private string str_PlayerTag = "Player";
+    private List<string> list_MoveTargetTags = new List<string>
+    {
+        "Player",
+        "Thief"
+    };
 
     [Header("連続ワープ防止時間")]
     [SerializeField]
@@ -143,14 +149,20 @@ public class CS_RoomMovePoint : MonoBehaviour
     }
 
     /// <summary>
-    /// ColliderからプレイヤーTransformを取得します。
+    /// Colliderから移動対象Transformを取得します。
     /// </summary>
     /// <param name="other">Triggerに入ったCollider。</param>
-    /// <param name="playerTransform">取得したプレイヤーTransform。</param>
-    /// <returns>プレイヤーだった場合はtrue。</returns>
+    /// <param name="playerTransform">取得した移動対象Transform。</param>
+    /// <returns>移動対象だった場合はtrue。</returns>
     private bool TryGetPlayerTransform(Collider other, out Transform playerTransform)
     {
-        if (other.CompareTag(str_PlayerTag))
+        if (other == null)
+        {
+            playerTransform = null;
+            return false;
+        }
+
+        if (IsMoveTargetTag(other.gameObject))
         {
             playerTransform = other.attachedRigidbody != null
                 ? other.attachedRigidbody.transform
@@ -159,7 +171,7 @@ public class CS_RoomMovePoint : MonoBehaviour
             return true;
         }
 
-        if (other.attachedRigidbody != null && other.attachedRigidbody.CompareTag(str_PlayerTag))
+        if (other.attachedRigidbody != null && IsMoveTargetTag(other.attachedRigidbody.gameObject))
         {
             playerTransform = other.attachedRigidbody.transform;
             return true;
@@ -167,13 +179,46 @@ public class CS_RoomMovePoint : MonoBehaviour
 
         Transform rootTransform = other.transform.root;
 
-        if (rootTransform != null && rootTransform.CompareTag(str_PlayerTag))
+        if (rootTransform != null && IsMoveTargetTag(rootTransform.gameObject))
         {
             playerTransform = rootTransform;
             return true;
         }
 
         playerTransform = null;
+        return false;
+    }
+
+    /// <summary>
+    /// 指定GameObjectが移動対象タグを持っているか確認します。
+    /// </summary>
+    /// <param name="targetObject">確認対象GameObject。</param>
+    /// <returns>移動対象タグを持っている場合はtrue。</returns>
+    private bool IsMoveTargetTag(GameObject targetObject)
+    {
+        if (targetObject == null)
+        {
+            return false;
+        }
+
+        if (list_MoveTargetTags == null || list_MoveTargetTags.Count <= 0)
+        {
+            return false;
+        }
+
+        for (int i = 0 ; i < list_MoveTargetTags.Count ; i++)
+        {
+            if (string.IsNullOrWhiteSpace(list_MoveTargetTags[i]))
+            {
+                continue;
+            }
+
+            if (targetObject.CompareTag(list_MoveTargetTags[i]))
+            {
+                return true;
+            }
+        }
+
         return false;
     }
 
