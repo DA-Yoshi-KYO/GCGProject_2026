@@ -13,63 +13,52 @@ using UnityEngine;
 public class PlayerAction : MonoBehaviour
 {
     [SerializeField] private int initSoul = 5;//初期のソウルの数
-    [Unity.VisualScripting.DoNotSerialize] public int currentSoul { private set; get; } = 0;//現在のソウルの数
+    [HideInInspector] public int currentSoul { private set; get; } = 0;//現在のソウルの数
+    [HideInInspector] public int currentGimmickIndex { private set; get; } = 0;//現在選択しているギミック
 
     public List<GameObject> gimmickKind;//所持しているギミックの種類
-
-    [Unity.VisualScripting.DoNotSerialize] public int currentGimmickIndex { private set; get; } = 0;//現在選択しているギミック
-
-    //プレイヤーのモード
-    public enum PlayerMode
-    {
-        Normal,//通常
-        Setting,//設置フェーズ
-    };
-
-    public PlayerMode currentMode { private set; get; }
+    
+    private PlayerData playerData;
 
     // Start is called before the first frame update
     void Start()
     {
         //現在のソウルの数
         currentSoul = initSoul;
-
-        //現在のモード
-        currentMode = PlayerMode.Normal;
     }
 
     // Update is called once per frame
     void Update()
     {
-        PlayerMove playerMove = GetComponent<PlayerMove>();
-
+        playerData = GetComponent<PlayerData>();
         //キー操作でUIのギミックの選択
-        if (playerMove.playerInput.Player.GimmickChangeRight.triggered)
+        if (playerData.playerInput.Player.GimmickChangeRight.triggered)
         {
             currentGimmickIndex++;
 
             if (currentGimmickIndex >= gimmickKind.Count)
                 currentGimmickIndex = 0;
         }
-        else if(playerMove.playerInput.Player.GimmickChangeLeft.triggered)
+        else if(playerData.playerInput.Player.GimmickChangeLeft.triggered)
         {
             currentGimmickIndex--;
 
             if (currentGimmickIndex < 0)
                 currentGimmickIndex = gimmickKind.Count - 1;
         }
+
         
         //モードの切り替え
-        if(playerMove.playerInput.Player.Interact.triggered)
+        if (playerData.playerInput.Player.Interact.triggered)
         {
-            switch (currentMode)
+            switch (playerData.currentMode)
             {
-                case PlayerMode.Normal:
-                    currentMode = PlayerMode.Setting;
+                case PlayerData.PlayerMode.Normal:
+                    playerData.currentMode = PlayerData.PlayerMode.Setting;
                     break;
-                case PlayerMode.Setting:
+                case PlayerData.PlayerMode.Setting:
                     SettingAction();
-                    currentMode = PlayerMode.Normal;
+                    playerData.currentMode = PlayerData.PlayerMode.Normal;
                     break;
                 default:
                     break;
@@ -77,9 +66,9 @@ public class PlayerAction : MonoBehaviour
         }
 
         //設置モードのキャンセル
-        if (playerMove.playerInput.Player.InteractCancel.triggered)
+        if (playerData.playerInput.Player.InteractCancel.triggered)
         {
-            currentMode = PlayerMode.Normal;
+            playerData.currentMode = PlayerData.PlayerMode.Normal;
         }
     }
 
@@ -93,7 +82,8 @@ public class PlayerAction : MonoBehaviour
                     transform.forward.z * transform.localScale.z);
 
         //グリッドの位置を取得
-        var roomGrid = FindObjectOfType<RoomGrid>();
+        GameObject currentRoom = playerData.currentRoomData.GetPlayerRoomData();
+        var roomGrid = currentRoom.transform.GetComponentInChildren<RoomGrid>();
 
         Vector2Int grid = roomGrid.GetGridFromPos(settingPos);
 
@@ -130,8 +120,7 @@ public class PlayerAction : MonoBehaviour
         //接触している
         if (collision.gameObject.CompareTag("Gimmick"))
         {
-            PlayerMove playerMove = GetComponent<PlayerMove>();
-            if (playerMove.playerInput.Player.Interact.triggered)
+            if (playerData.playerInput.Player.Interact.triggered)
             {
                 //ギミックの情報を取得
                 GimmickBase gimmick = collision.gameObject.GetComponent<GimmickBase>();

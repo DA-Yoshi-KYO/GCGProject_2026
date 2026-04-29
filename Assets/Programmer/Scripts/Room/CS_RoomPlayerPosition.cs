@@ -88,24 +88,6 @@ public class CS_RoomPlayerPosition : MonoBehaviour
     }
 
     /// <summary>
-    /// 生成済みPlayerオブジェクトを取得します。
-    /// </summary>
-    /// <returns>生成済みPlayerオブジェクト。</returns>
-    public GameObject GetPlayerObject()
-    {
-        return playerInstance;
-    }
-
-    /// <summary>
-    /// PlayerPrefabを取得します。
-    /// </summary>
-    /// <returns>PlayerPrefab。</returns>
-    public GameObject GetPlayerPrefab()
-    {
-        return player;
-    }
-
-    /// <summary>
     /// 生成済みPlayerを削除します。
     /// </summary>
     private void DeletePlayerInstance()

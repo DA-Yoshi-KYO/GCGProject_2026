@@ -7,67 +7,108 @@
  * 
  */
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class PlayerCamera : MonoBehaviour
 {
-    private Camera roomCamera;//部屋のカメラ
-    private Camera upCamera;//上視点のカメラ
+    private PlayerData playerData;
 
-    [Unity.VisualScripting.DoNotSerialize] public Vector3 cameraForward = Vector3.zero;//カメラから見た方向
-    [Unity.VisualScripting.DoNotSerialize] public Vector3 cameraRight = Vector3.zero;//カメラの右方向ベクトル    
+    private GameObject roomCameraObject;//部屋のカメラ
+    private GameObject upCameraObject;//上視点のカメラ
+
+    [HideInInspector] public Vector3 cameraForward = Vector3.zero;//カメラから見た方向
+    [HideInInspector] public Vector3 cameraRight = Vector3.zero;//カメラの右方向ベクトル
+
+    [Header("上視点カメラの距離")][SerializeField] private float upDirection = 10.0f;
+
+    private PlayerData.PlayerMode prevMode = PlayerData.PlayerMode.Normal;  // 切り替え感知用保存変数
 
     // Start is called before the first frame update
     void Start()
     {
-        Scene mainScene = SceneManager.GetSceneByName("MainScene");
-        if (mainScene == null)
-        {
-            Debug.Log(mainScene.name + "が見つかりません");
-            return;
-        }
+        playerData = GetComponent<PlayerData>();
+        GameObject currentRoom = playerData.currentRoomData.GetPlayerRoomData();
 
-        // メインシーンからカメラの情報を受け取る
-        roomCamera = GameObject.Find("RoomCamera").GetComponent<Camera>();
-        upCamera = GameObject.Find("UpCamera").GetComponent<Camera>();
-
-        roomCamera.depth = 1;
-        upCamera.depth = -1;
+        roomCameraObject = currentRoom.transform.GetComponentInChildren<Camera>().gameObject;
+        roomCameraObject.GetComponent<Camera>().depth = 1;
+        
+        upCameraObject = GameObject.Find("UpCamera");
+        Vector3 upCameraPos = currentRoom.transform.position;
+        upCameraPos.y += upDirection;
+        upCameraObject.transform.position = upCameraPos;
+        upCameraObject.GetComponent<Camera>().depth = -1;
     }
 
     // Update is called once per frame
     void Update()
     {
-        //プレイヤーのモードによってカメラ切り替え
-        switch (GetComponent<PlayerAction>().currentMode)
+        PlayerData.PlayerMode currentMode = playerData.currentMode;
+
+        if (currentMode != prevMode)
         {
-            case PlayerAction.PlayerMode.Normal:
-                roomCamera.depth = 1;
-                upCamera.depth = -1;
+            switch (currentMode)
+            {
+                case PlayerData.PlayerMode.Normal:
+                    roomCameraObject.GetComponent<Camera>().depth = 1;
+                    upCameraObject.GetComponent<Camera>().depth = -1;
+                    break;
+                case PlayerData.PlayerMode.Setting:
+                    roomCameraObject.GetComponent<Camera>().depth = -1;
+                    upCameraObject.GetComponent<Camera>().depth = 1;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        //プレイヤーのモードによってカメラ切り替え
+        switch (currentMode)
+        {
+            case PlayerData.PlayerMode.Normal:
                 RoomCamera();
                 break;
-            case PlayerAction.PlayerMode.Setting:
-                roomCamera.depth = -1;
-                upCamera.depth = 1;
+            case PlayerData.PlayerMode.Setting:
                 UpCamera();
                 break;
             default:
                 break;
         }
+
+        prevMode = currentMode;
+
+    }
+
+    private void LateUpdate()
+    {
+        //roomCameraObject.transform.LookAt(gameObject.transform.position);
+        
     }
 
     //部屋のカメラ処理
     private void RoomCamera()
     {
-        cameraRight = roomCamera.transform.right;
-        cameraForward = roomCamera.transform.forward;
+        cameraRight = roomCameraObject.transform.right;
+        cameraForward = roomCameraObject.transform.forward;
     }
 
     //上視点のカメラ処理
     private void UpCamera()
     {
-        cameraRight = upCamera.transform.right;
-        cameraForward = upCamera.transform.up;
+        cameraRight = upCameraObject.transform.right;
+        cameraForward = upCameraObject.transform.up;
     }
 
+    public void OnRoomMove()
+    {
+        roomCameraObject.GetComponent<Camera>().depth = -1;
+
+        GameObject currentRoom = playerData.currentRoomData.GetPlayerRoomData();
+        roomCameraObject = currentRoom.transform.GetComponentInChildren<Camera>().gameObject;
+        
+        if (playerData.currentMode == PlayerData.PlayerMode.Normal)
+            roomCameraObject.GetComponent<Camera>().depth = 1;
+
+        Vector3 upCameraPos = currentRoom.transform.GetChild(0).Find ("Center").transform.position;
+        upCameraPos.y += upDirection;
+        upCameraObject.transform.position = upCameraPos;
+    }
 }
