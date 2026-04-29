@@ -45,14 +45,16 @@ public class ThiefManager : MonoBehaviour
         foreach (var thiefData in thiefDatas)
         {
             // 泥棒のタイプに応じたデータを取得
-            ThiefData data = new ThiefData();
+            ThiefTypeData typeData = new ThiefTypeData();
+            // 泥棒の種類間で共通のデータを取得
+            ThiefData commonData = thiefDB.commonData;
 
             // 泥棒のデータベースから、泥棒のタイプに応じたデータを取得
             for (int i = 0 ; i < thiefDB.thiefData.Length ; i++)
             {
                 if(thiefDB.thiefData[i].typeName == thiefData.type)
                 {
-                    data = thiefDB.thiefData[i];
+                    typeData = thiefDB.thiefData[i];
                     break;
                 }
             }
@@ -77,11 +79,11 @@ public class ThiefManager : MonoBehaviour
 
                 // 行動AIの設定
                 ThiefAI thiefAI = thief.GetComponent<ThiefAI>();
-                thiefAI.Setting(data, playerSpeed, FindObjectOfType<RoomNode>());
+                thiefAI.Setting(typeData, commonData, playerSpeed, FindObjectOfType<RoomNode>());
 
                 // 視界システムの設定
                 VisionSensor thiefView = thief.GetComponent<VisionSensor>();
-                thiefView.Setting(data.viewDistance, data.viewAngle);
+                thiefView.Setting(typeData.viewDistance, typeData.viewAngle);
 
                 // --- 泥棒をthiefParentの子オブジェクトに設定
                 thief.transform.parent = thiefParent.transform;
