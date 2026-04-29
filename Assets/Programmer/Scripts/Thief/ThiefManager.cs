@@ -9,7 +9,6 @@
  * 2026-04-26 | ファイル名・クラス名をThiefManagerに変更
  * 
  */
-using Unity.Mathematics;
 using UnityEngine;
 
 
@@ -97,11 +96,6 @@ public class ThiefManager : MonoBehaviour
                     thief.transform.position = debugPoint.transform.position;
                     continue;
                 }
-
-                // (仮) 50,0,50 ~ -50,0,-50の範囲にランダムに生成
-                float x = UnityEngine.Random.Range(-50.0f, 50.0f);
-                float z = UnityEngine.Random.Range(-50.0f, 50.0f);
-                thief.transform.position = new Vector3(x, 0, z);
             }
         }
     }

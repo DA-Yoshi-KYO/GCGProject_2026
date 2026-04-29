@@ -326,7 +326,9 @@ MonoBehaviour:
   tf_PlayerSpawnPoint: {fileID: 7975360121458622663}
   go_OpenDoorObject: {fileID: 0}
   go_ClosedWallObject: {fileID: 0}
-  str_PlayerTag: Player
+  list_MoveTargetTags:
+  - Player
+  - Thief
   f_MoveCoolTime: 0.25
   cs_TargetMovePoint: {fileID: 0}
 --- !u!1 &2521882716868843270
@@ -1699,9 +1701,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1946931771332116085}
-  - component: {fileID: 4460873213781933250}
   - component: {fileID: 2530784393251351423}
   - component: {fileID: 635781689112490359}
+  - component: {fileID: 1689804598147735077}
   m_Layer: 0
   m_Name: Room3
   m_TagString: Untagged
@@ -1731,37 +1733,6 @@ Transform:
   - {fileID: 153479550249952856}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4460873213781933250
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6332708109660949489}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a5ac11cc976e418e8d13136b07e1f52, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_AgentTypeID: 0
-  m_CollectObjects: 0
-  m_Size: {x: 10, y: 10, z: 10}
-  m_Center: {x: 0, y: 2, z: 0}
-  m_LayerMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_UseGeometry: 0
-  m_DefaultArea: 0
-  m_GenerateLinks: 0
-  m_IgnoreNavMeshAgent: 1
-  m_IgnoreNavMeshObstacle: 1
-  m_OverrideTileSize: 0
-  m_TileSize: 256
-  m_OverrideVoxelSize: 0
-  m_VoxelSize: 0.16666667
-  m_MinRegionArea: 2
-  m_NavMeshData: {fileID: 23800000, guid: ed39c37885744344db46f4aa27441d13, type: 2}
-  m_BuildHeightMesh: 0
 --- !u!114 &2530784393251351423
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1792,6 +1763,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42ffa512e323bc54cab6172d7191fb59, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1689804598147735077
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6332708109660949489}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a5ac11cc976e418e8d13136b07e1f52, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_AgentTypeID: 0
+  m_CollectObjects: 0
+  m_Size: {x: 10, y: 10, z: 10}
+  m_Center: {x: 0, y: 2, z: 0}
+  m_LayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_UseGeometry: 0
+  m_DefaultArea: 0
+  m_GenerateLinks: 0
+  m_IgnoreNavMeshAgent: 1
+  m_IgnoreNavMeshObstacle: 1
+  m_OverrideTileSize: 0
+  m_TileSize: 256
+  m_OverrideVoxelSize: 0
+  m_VoxelSize: 0.16666667
+  m_MinRegionArea: 2
+  m_NavMeshData: {fileID: 23800000, guid: 6ba8a721b58e7d746a2efb45727208b9, type: 2}
+  m_BuildHeightMesh: 0
 --- !u!1 &6386575131393747758
 GameObject:
   m_ObjectHideFlags: 0
@@ -1968,7 +1970,9 @@ MonoBehaviour:
   tf_PlayerSpawnPoint: {fileID: 8378528578614104849}
   go_OpenDoorObject: {fileID: 0}
   go_ClosedWallObject: {fileID: 0}
-  str_PlayerTag: Player
+  list_MoveTargetTags:
+  - Player
+  - Thief
   f_MoveCoolTime: 0.25
   cs_TargetMovePoint: {fileID: 0}
 --- !u!1 &6616799389184400045
