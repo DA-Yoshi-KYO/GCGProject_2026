@@ -935,7 +935,9 @@ MonoBehaviour:
   tf_PlayerSpawnPoint: {fileID: 4411401519739431305}
   go_OpenDoorObject: {fileID: 0}
   go_ClosedWallObject: {fileID: 0}
-  str_PlayerTag: Player
+  list_MoveTargetTags:
+  - Player
+  - Thief
   f_MoveCoolTime: 0.25
   cs_TargetMovePoint: {fileID: 0}
 --- !u!1 &3656351228375420113
@@ -2060,6 +2062,7 @@ GameObject:
   - component: {fileID: 212790291542475046}
   - component: {fileID: 1652095594666006671}
   - component: {fileID: 742925439289971661}
+  - component: {fileID: 5666653532611709217}
   m_Layer: 0
   m_Name: Room2
   m_TagString: Untagged
@@ -2121,6 +2124,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42ffa512e323bc54cab6172d7191fb59, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &5666653532611709217
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5875383808550522078}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a5ac11cc976e418e8d13136b07e1f52, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_AgentTypeID: 0
+  m_CollectObjects: 0
+  m_Size: {x: 10, y: 10, z: 10}
+  m_Center: {x: 0, y: 2, z: 0}
+  m_LayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_UseGeometry: 0
+  m_DefaultArea: 0
+  m_GenerateLinks: 0
+  m_IgnoreNavMeshAgent: 1
+  m_IgnoreNavMeshObstacle: 1
+  m_OverrideTileSize: 0
+  m_TileSize: 256
+  m_OverrideVoxelSize: 0
+  m_VoxelSize: 0.16666667
+  m_MinRegionArea: 2
+  m_NavMeshData: {fileID: 23800000, guid: 3218ec87cf6c0af4e873fc6c33c70330, type: 2}
+  m_BuildHeightMesh: 0
 --- !u!1 &5954853302731569335
 GameObject:
   m_ObjectHideFlags: 0
@@ -2866,7 +2900,9 @@ MonoBehaviour:
   tf_PlayerSpawnPoint: {fileID: 7688663700381868887}
   go_OpenDoorObject: {fileID: 0}
   go_ClosedWallObject: {fileID: 0}
-  str_PlayerTag: Player
+  list_MoveTargetTags:
+  - Player
+  - Thief
   f_MoveCoolTime: 0.25
   cs_TargetMovePoint: {fileID: 0}
 --- !u!1 &7849834998346785750
