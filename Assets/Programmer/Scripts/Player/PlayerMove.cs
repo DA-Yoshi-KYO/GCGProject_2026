@@ -15,9 +15,9 @@ public class PlayerMove : MonoBehaviour
     [Header("移動速度（走り）")][SerializeField] private float velocityRun = 1.0f;//移動速度（走り）
     [Header("ジャンプ量")][SerializeField] private float jumpAmount = 2.5f;//ジャンプ量
     [Header("加速度")][SerializeField] private float accelartion = 10;//加速度
-
+    
     private Rigidbody rb;
-    private PlayerData playerData;
+    private PlayerData playerData;  // プレイヤーのデータ
 
     // Start is called before the first frame update
     void Start()
