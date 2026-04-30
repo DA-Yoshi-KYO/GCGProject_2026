@@ -170,15 +170,6 @@ public class ThiefAI : MonoBehaviour
 
             navMeshAgent.SetDestination(nextRoomMovePoint.position);
 
-            if (nextRoomMovePoint != null && Vector3.Distance(transform.position, nextRoomMovePoint.position) < 2.0f)
-            {
-                // 次の部屋に移動するための処理を追加する
-                FindNowRoomNode();
-                // 次の部屋に移動するための移動ポイントをリセットする
-                nextRoomMovePoint = null;
-
-                isNextRoomMovePointDecided = false;
-            }
             return;
         }
 
