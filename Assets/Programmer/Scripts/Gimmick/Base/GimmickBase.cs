@@ -163,11 +163,11 @@ public class GimmickBase : MonoBehaviour
     public void SetGimmickPos(Vector2Int gridPos)
     {
         gimmickGridPos = gridPos;
-        Vector3 newWorldPos = roomGrid.GetWorldPosFromGrid(gridPos);
-        newWorldPos.x = newWorldPos.x * (float)Adjust;
-        newWorldPos.y = newWorldPos.y * (float)Adjust;
-        newWorldPos.z = newWorldPos.z * (float)Adjust;
-        transform.position = newWorldPos;
+        //Vector3 newWorldPos = roomGrid.GetWorldPosFromGrid(gridPos);
+        //newWorldPos.x = newWorldPos.x * (float)Adjust;
+        //newWorldPos.y = newWorldPos.y * (float)Adjust;
+        //newWorldPos.z = newWorldPos.z * (float)Adjust;
+        //transform.position = newWorldPos;
     }
 
     /// <summary>
