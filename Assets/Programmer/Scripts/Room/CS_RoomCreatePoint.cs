@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /*==================================================
@@ -74,5 +75,31 @@ public class CS_RoomCreatePoint : MonoBehaviour
             default:
                 return null;
         }
+    }
+
+    /// <summary>
+    /// 接続先が設定されている方向を全て取得します。
+    /// </summary>
+    /// <returns></returns>
+    public List<CSE_RoomDoorDirection> GetConnectDirections()
+    {
+        List<CSE_RoomDoorDirection> list = new List<CSE_RoomDoorDirection>();
+        if (cs_RightConnection.HasTarget)
+        {
+            list.Add(CSE_RoomDoorDirection.Right);
+        }
+        if (cs_LeftConnection.HasTarget)
+        {
+            list.Add(CSE_RoomDoorDirection.Left);
+        }
+        if (cs_FrontConnection.HasTarget)
+        {
+            list.Add(CSE_RoomDoorDirection.Front);
+        }
+        if (cs_BackConnection.HasTarget)
+        {
+            list.Add(CSE_RoomDoorDirection.Back);
+        }
+        return list;
     }
 }

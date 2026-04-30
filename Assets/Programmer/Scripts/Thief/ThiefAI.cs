@@ -43,22 +43,40 @@ public class ThiefAI : MonoBehaviour
     [Tooltip("現在の行動状態")]
     private ThiefState currentState;
 
+    [SerializeField, Header("泥棒のリアクションスプライト(仮)")]
+    private List<Sprite> reactionSprites;
+    enum ReactionSpriteType
+    {
+        Normal, // 通常
+        Search, // 探索
+        Stun    // 気絶
+    }
+
     [Tooltip("現在いる部屋の情報")]
     private RoomNode currentRoom;
+    private GameObject currentRoomObject;
     [Tooltip("部屋に関する記憶")]
     private Dictionary<RoomNode, RoomMemory> roomMemories;
     [Tooltip("探索対象")]
     private ThiefTarget currentTarget;
     public ThiefTarget CurrentTarget => currentTarget;
 
+    [Tooltip("次の部屋に移動するための移動ポイント")]
+    private Transform nextRoomMovePoint;
+    [Tooltip("次の部屋に移動するための移動ポイントを決定したかどうかを判定するフラグ")]
+    private bool isNextRoomMovePointDecided;
+
     [Tooltip("持っている宝物オジェクト")]// 見つけたら設定する
     private GameObject heldTreasure;
 
-    [Tooltip("泥棒の耐久力")]
+    [SerializeField, Tooltip("泥棒の耐久力")]
     private int durability;
-    [Tooltip("泥棒の移動速度")]
+    [SerializeField, Tooltip("泥棒の移動速度")]
     private float walkSpeed;
     private float runSpeed;
+
+    [Tooltip("泥棒が探索するのにかかる秒数")]
+    private int searchTime;
 
     [Tooltip("気絶後に退場するまでの時間")]
     private int exitAfterStunTime;
@@ -78,18 +96,20 @@ public class ThiefAI : MonoBehaviour
     private NavMeshAgent navMeshAgent;
 
     // 泥棒の耐久力と移動速度を設定するメソッド
-    public void Setting(ThiefData data, float playerSpeed, RoomNode firstRoom)
+    public void Setting(ThiefTypeData typedata, ThiefData data, float playerSpeed, RoomNode firstRoom)
     {
         /*未実装、未設定　*///data.jumpHeight;
         /*未設定、未設定　*///data.alertTime;
 
-        durability = data.durability;
-        walkSpeed = playerSpeed * data.walkSpeedMultiplier;
-        runSpeed = playerSpeed * data.runSpeedMultiplier;
-        nextRoomSearchThreshold = data.nextRoomSearchThreshold;
-        runTargetTypes = data.runTargetTypes;
+        durability = typedata.durability;
+        walkSpeed = playerSpeed * typedata.walkSpeedMultiplier;
+        runSpeed = playerSpeed * typedata.runSpeedMultiplier;
+        nextRoomSearchThreshold = typedata.nextRoomSearchThreshold;
+        runTargetTypes = typedata.runTargetTypes;
+        soulDropCount = typedata.soulDropCount;
+        searchTime = typedata.searchTime;
+
         exitAfterStunTime = data.exitAfterStunTime;
-        soulDropCount = data.soulDropCount;
 
         // 初期状態を探索に設定
         currentState = ThiefState.Explore;
@@ -108,6 +128,11 @@ public class ThiefAI : MonoBehaviour
         navMeshAgent = GetComponent<NavMeshAgent>();
         navMeshAgent.baseOffset = 1.0f; // キャラクターの高さに合わせてオフセットを設定
         navMeshAgent.speed = this.walkSpeed;
+    }
+
+    private void Start()
+    {
+        FindNowRoomNode();
     }
 
     private void Update()
@@ -136,6 +161,17 @@ public class ThiefAI : MonoBehaviour
     {
         // 探索対象を決定
         RecognizeObjects();
+
+        ChangeFace(ReactionSpriteType.Normal);
+
+        if (isNextRoomMovePointDecided || roomMemories[currentRoom].explorationLevel >= nextRoomSearchThreshold)
+        {
+            if (nextRoomMovePoint == null) NextDoorElection();
+
+            navMeshAgent.SetDestination(nextRoomMovePoint.position);
+
+            return;
+        }
 
         // 探索対象がない場合は、部屋の移動ポイントに沿って移動する処理を追加する
         if (currentTarget == null)
@@ -168,32 +204,41 @@ public class ThiefAI : MonoBehaviour
                 // 探索対象に向かって移動
                 navMeshAgent.SetDestination(currentTarget.transform.position);
 
-                // 探索対象に十分近づいたら、探索完了とする
+                // 探索対象に十分近づいたら、探索度を進める
                 if (Vector3.Distance(transform.position, currentTarget.transform.position) < ((VisionTarget)currentTarget).exploredDistanceThreshold)
                 {
-                    // 宝物を探索にしていて、完了した場合は、発見状態に切り替える
-                    if (((VisionTarget)currentTarget).targetType == VisionTarget.TargetType.Treasure)
-                    {
-                        // 発見状態に切り替える
-                        currentState = ThiefState.Found;
-                    }
-                    // それ以外のオブジェクトを探索して完了した場合は、次の探索対象を決定する
-                    else
-                    {
-                        // 探索対象を探索済みに設定
-                        ((VisionTarget)currentTarget).isExplored = true;
-                        // 探索度を加算
-                        roomMemories[currentRoom].explorationLevel += ((VisionTarget)currentTarget).explorationValue;
+                    ChangeFace(ReactionSpriteType.Search); // 探索完了の表情に変更する処理を追加する
 
-                        // 探索度が閾値を超えた場合は、次の部屋に移動するための処理を追加する
-                        if (roomMemories[currentRoom].explorationLevel >= nextRoomSearchThreshold)
+                    if (ProgressTargetSearchTime())
+                    {
+                        // 宝物を探索にしていて、完了した場合は、発見状態に切り替える
+                        if (((VisionTarget)currentTarget).targetType == VisionTarget.TargetType.Treasure)
                         {
-                            Debug.Log("次の部屋に移動");
+                            // 発見状態に切り替える
+                            currentState = ThiefState.Found;
                         }
-                        // それ以外の場合は、次の探索対象を決定する
-                        else DecideTarget();
+                        // それ以外のオブジェクトを探索して完了した場合は、次の探索対象を決定する
+                        else
+                        {
+                            // 探索対象を探索済みに設定
+                            ((VisionTarget)currentTarget).isExplored = true;
+                            // 探索度を加算
+                            roomMemories[currentRoom].explorationLevel += ((VisionTarget)currentTarget).explorationValue;
+
+                            // 探索度が閾値を超えた場合は、次の部屋に移動するための処理を追加する
+                            if (roomMemories[currentRoom].explorationLevel >= nextRoomSearchThreshold)
+                            {
+                                // 探索対象をリセット
+                                currentTarget = null;
+
+                                isNextRoomMovePointDecided = true;
+                            }
+                            // それ以外の場合は、次の探索対象を決定する
+                            else DecideTarget();
+                        }
                     }
                 }
+                else ((VisionTarget)currentTarget).explorationProgress = 0; // 探索対象から十分に離れた場合は、探索進行度をリセットする
             }
         }
         else
@@ -321,7 +366,7 @@ public class ThiefAI : MonoBehaviour
             // 退場する処理を追加する
             Debug.Log("泥棒が退場");
             
-            Destroy(gameObject);
+            //Destroy(gameObject);
         }
     }
 
@@ -589,6 +634,9 @@ public class ThiefAI : MonoBehaviour
             durability = 0;
             currentState = ThiefState.Stunned;
 
+            // 泥棒の表情を気絶の表情に変更する処理を追加する
+            ChangeFace(ReactionSpriteType.Stun);
+
             // プレイヤーにソウルを入手させる
             PlayerAction playerAction = GameObject.FindObjectOfType<PlayerAction>();
 
@@ -596,6 +644,44 @@ public class ThiefAI : MonoBehaviour
             if (playerAction != null)playerAction.AddSoul(soulDropCount);
             else Debug.LogError("PlayerActionが見つかりませんでした。ThiefAIのTakeDamageメソッドで、プレイヤーにソウルを入手させる処理が正常に動作しない可能性があります。");
         }
+    }
+
+    /// <summary>
+    /// 現在いる部屋に関するオブジェクトをRaycastで取得して、currentRoomに設定する処理
+    /// </summary>
+    private void FindNowRoomNode()
+    {
+        GameObject currentobject = CS_RoomCreatePointRaycast.GetRayRoomCreatePoint(this.gameObject);
+        if (currentobject == null) Debug.LogWarning("【泥棒】現在いる部屋に関するオブジェクトの取得に失敗しました");
+        currentRoom = currentobject.transform.GetComponentInChildren<RoomNode>();
+        currentRoomObject = currentobject;
+    }
+
+    /// <summary>
+    /// 次に設定する移動ポイントを決定するロジック
+    /// </summary>
+    private void NextDoorElection()
+    {
+        CS_RoomCreatePoint roomCreatePoint = currentRoomObject.transform.GetComponent<CS_RoomCreatePoint>();
+        if (roomCreatePoint == null)
+        {
+            Debug.LogError("【泥棒】現在いる部屋のRoomCreatePointが見つかりませんでした。ThiefAIのNextDoorElectionメソッドで、次に設定する移動ポイントを決定するロジックが正常に動作しない可能性があります。");
+            return;
+        }
+
+        // 現在いる部屋の接続している方向を取得
+        List<CSE_RoomDoorDirection> connectDirs = roomCreatePoint.GetConnectDirections();
+        if (connectDirs.Count == 0)
+        {
+            Debug.LogWarning("【泥棒】現在いる部屋の接続方向が見つかりませんでした。ThiefAIのNextDoorElectionメソッドで、次に設定する移動ポイントを決定するロジックが正常に動作しない可能性があります。");
+            return;
+        }
+
+        // 接続している部屋の方向をランダムに選択
+        int randomIndex = Random.Range(0, connectDirs.Count);
+
+        // 選択した方向にあるドアの位置を次の移動ポイントに設定
+        nextRoomMovePoint = currentRoom.GetDirectionWallToDoor(connectDirs[randomIndex]);
     }
 
     /// <summary>
@@ -636,28 +722,58 @@ public class ThiefAI : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 探索対象の探索にかかる時間を経過させる処理
+    /// </summary>
+    /// <returns>探索が終了しているかどうか</returns>
+    private bool ProgressTargetSearchTime()
+    {
+        // 探索対象がない場合は、falseを返す
+        if (currentTarget == null) return false;
+
+        // 探索対象の探索にかかる時間を経過させる
+        //　((VisionTarget)currentTarget).explorationProgress　: 対象の探索度(MAX : 100.0f)
+        // searchTime : 探索対象の探索にかかる時間
+        ((VisionTarget)currentTarget).explorationProgress += (100.0f / searchTime) * Time.deltaTime;
+
+        // 探索対象の探索にかかる時間が経過した場合は、trueを返す
+        if (((VisionTarget)currentTarget).explorationProgress >= 100.0f) return true;
+
+        return false;
+    }
+
+    /// <summary>
+    /// 泥棒の表情を変更する処理
+    /// </summary>
+    /// <param name="reaction">変更するタイプ</param>
+    private void ChangeFace(ReactionSpriteType reaction)
+    {
+        // 子オブジェクトを取得
+        GameObject child = transform.GetChild(0).gameObject;
+        // 取得できなかった場合は、エラーログを出力して処理を終了する
+        if (child == null) Debug.LogError("子オブジェクトが見つかりませんでした。ThiefAIのChangeFaceメソッドで、泥棒の表情を変更する処理が正常に動作しない可能性があります。");
+
+        // 子オブジェクトからMeshRendererを取得
+        MeshRenderer meshRenderer = child.GetComponent<MeshRenderer>();
+        // 取得できなかった場合は、エラーログを出力して処理を終了する
+        if (meshRenderer == null) Debug.LogError(" MeshRendererが見つかりませんでした。ThiefAIのChangeFaceメソッドで、泥棒の表情を変更する処理が正常に動作しない可能性があります。");
+
+        // Materialの取得
+        Material material = meshRenderer.material;
+        // 取得できなかった場合は、エラーログを出力して処理を終了する
+        if (material == null) Debug.LogError(" Materialが見つかりませんでした。ThiefAIのChangeFaceメソッドで、泥棒の表情を変更する処理が正常に動作しない可能性があります。");
+
+        // 表情のスプライトを変更する
+        material.mainTexture = reactionSprites[(int)reaction].texture;
+    }
 
     //////////////////////////////////////////////////////////////////
     /// デバック用の処理
 
-    [ContextMenu("ステータス状態を設定")]
-    private void Debug_SetNextStatus()
+    [ContextMenu("ダメージを与える")]
+    private void DebugTakeDamage()
     {
-        switch (currentState)
-        {
-            case ThiefState.Explore:
-                currentState = ThiefState.Found;
-                break;
-            case ThiefState.Found:
-                currentState = ThiefState.Escape;
-                break;
-            case ThiefState.Escape:
-                currentState = ThiefState.Stunned;
-                break;
-            case ThiefState.Stunned:
-                currentState = ThiefState.Explore;
-                break;
-        }
+        TakeDamage(1);
     }
 
 }

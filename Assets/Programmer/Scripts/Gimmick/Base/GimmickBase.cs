@@ -9,7 +9,11 @@
 // 当たり判定内に、敵がいた場合、攻撃力を与える
 //
 
+using System.Collections;
+using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public enum Gimmick
 {
@@ -159,11 +163,11 @@ public class GimmickBase : MonoBehaviour
     public void SetGimmickPos(Vector2Int gridPos)
     {
         gimmickGridPos = gridPos;
-        Vector3 newWorldPos = roomGrid.GetWorldPosFromGrid(gridPos);
-        newWorldPos.x = newWorldPos.x * (float)Adjust;
-        newWorldPos.y = newWorldPos.y * (float)Adjust;
-        newWorldPos.z = newWorldPos.z * (float)Adjust;
-        transform.position = newWorldPos;
+        //Vector3 newWorldPos = roomGrid.GetWorldPosFromGrid(gridPos);
+        //newWorldPos.x = newWorldPos.x * (float)Adjust;
+        //newWorldPos.y = newWorldPos.y * (float)Adjust;
+        //newWorldPos.z = newWorldPos.z * (float)Adjust;
+        //transform.position = newWorldPos;
     }
 
     /// <summary>

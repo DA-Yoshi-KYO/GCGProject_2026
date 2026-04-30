@@ -14,37 +14,21 @@ public class PlayerMove : MonoBehaviour
     [Header("移動速度（歩き）")][SerializeField] private float velocityWalk = 0.7f;//移動速度（歩き）
     [Header("移動速度（走り）")][SerializeField] private float velocityRun = 1.0f;//移動速度（走り）
     [Header("ジャンプ量")][SerializeField] private float jumpAmount = 2.5f;//ジャンプ量
-
-    public PlayerInput playerInput { private set; get; }
-
-    private float acceleration = 10;//加速度
-
+    [Header("加速度")][SerializeField] private float accelartion = 10;//加速度
+    
     private Rigidbody rb;
-
-    private void Awake()
-    {
-        playerInput = new PlayerInput();
-        playerInput.Player.Enable();
-    }
+    private PlayerData playerData;  // プレイヤーのデータ
 
     // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-
-    }
-
-    private void OnDestroy()
-    {
-        playerInput.Player.Disable();
+        playerData = GetComponent<PlayerData>();
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
-        // PlayerPositionに生成Roomの情報をセットします。
-        GetComponent<CS_RoomPlayerPosition>().RefreshPlayerRoomData();
-
         //カメラの方向
         PlayerCamera playerCamera = GetComponent<PlayerCamera>();
         Vector3 forward = playerCamera.cameraForward;
@@ -57,31 +41,31 @@ public class PlayerMove : MonoBehaviour
         right = new Vector3(rightXZ.x, 0.0f, rightXZ.y);
 
         //移動
-        if (playerInput.Player.MoveForward.IsPressed())
+        if (playerData.playerInput.Player.MoveForward.IsPressed())
         {
-            rb.AddForce(new Vector3(forward.x, 0.0f, forward.z) * acceleration, ForceMode.Acceleration);
+            rb.AddForce(new Vector3(forward.x,0.0f, forward.z) * accelartion, ForceMode.Acceleration);
         }
-        else if (playerInput.Player.MoveBack.IsPressed())
+        else if (playerData.playerInput.Player.MoveBack.IsPressed())
         {
-            rb.AddForce(new Vector3(-forward.x, 0.0f, -forward.z) * acceleration, ForceMode.Acceleration);
-        }
-
-        if (playerInput.Player.MoveLeft.IsPressed())
-        {
-            rb.AddForce(new Vector3(-right.x, 0.0f, -right.z) * acceleration, ForceMode.Acceleration);
-        }
-        else if (playerInput.Player.MoveRight.IsPressed())
-        {
-            rb.AddForce(new Vector3(right.x, 0.0f, right.z) * acceleration, ForceMode.Acceleration);
+            rb.AddForce(new Vector3(-forward.x, 0.0f, -forward.z) * accelartion, ForceMode.Acceleration);
         }
 
-        if (playerInput.Player.Dash.IsPressed())
+        if (playerData.playerInput.Player.MoveLeft.IsPressed())
+        {
+            rb.AddForce(new Vector3(-right.x, 0.0f, -right.z) * accelartion, ForceMode.Acceleration);
+        }
+        else if (playerData.playerInput.Player.MoveRight.IsPressed())
+        {
+            rb.AddForce(new Vector3(right.x, 0.0f, right.z) * accelartion, ForceMode.Acceleration);
+        }
+
+        if (playerData.playerInput.Player.Dash.IsPressed())
         {
             //走り
             if (rb.velocity.magnitude > moveAmount * velocityRun)
             {
                 rb.velocity = rb.velocity.normalized * (moveAmount * velocityRun);
-            }
+            }   
         }
         else
         {
@@ -91,14 +75,12 @@ public class PlayerMove : MonoBehaviour
                 rb.velocity = rb.velocity.normalized * (moveAmount * velocityWalk);
             }
         }
-    }
 
-    void Update()
-    {
         //ジャンプ
-        if (playerInput.Player.Jump.triggered)
+        if(playerData.playerInput.Player.Jump.triggered)
         {
             rb.AddForce(new Vector3(0.0f, 1.0f, 0.0f) * jumpAmount, ForceMode.Impulse);
         }
+
     }
 }

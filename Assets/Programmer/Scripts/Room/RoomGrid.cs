@@ -6,18 +6,16 @@
  * 2026-04-21 | 初回作成
  * 
  */
-using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class RoomGrid : MonoBehaviour
 {
     [Header("グリッドの分割数(X:横方向(X)、Y:奥方向(Z))")]
     [SerializeField] private Vector2Int gridDivision;
-
     public Vector2 gridSize { get; private set; }   // グリッド1マスの大きさ
     private Renderer rendererMaterial; // グリッドのマテリアル
     private GameObject gridObject; // グリッドの大きさを正確に取得する為の子オブジェクト
-
     List<List<GameObject>> gridGimmicks;
 
     void Start()
@@ -41,11 +39,11 @@ public class RoomGrid : MonoBehaviour
             gridGimmicks.Add(new List<GameObject>());
             for (int j = 0 ; j < gridDivision.x ; j++)
             {
-                gridGimmicks[i].Add(new GameObject());
+                gridGimmicks[i].Add(null);
             }
         }
     }
-
+    
     /// <summary>
     /// グリッド位置にギミックが存在するかを取得する
     /// </summary>
@@ -55,7 +53,7 @@ public class RoomGrid : MonoBehaviour
     {
         if (grid.x == -1 || grid.y == -1) return false;
 
-        return gridGimmicks[grid.y][grid.x] != true;
+        return gridGimmicks[grid.y][grid.x] != null;
     }
 
     /// <summary>
@@ -67,7 +65,7 @@ public class RoomGrid : MonoBehaviour
     public bool SetGimmickInGrid(Vector3 pos, GimmickBase gimmick)
     {
         if (gimmick == null) return false;
-        
+
         Vector2Int grid = GetGridFromPos(pos);
         if (grid.x == -1 || grid.y == -1) return false;
         if (IsGridOnGimmick(grid)) return false;
@@ -78,6 +76,8 @@ public class RoomGrid : MonoBehaviour
         GameObject gimmickObject = Instantiate(gimmick.gameObject, spawnPos, Quaternion.identity);
         GimmickBase spawnGimmick = gimmickObject.GetComponent<GimmickBase>();
         spawnGimmick.roomGrid = this;
+        gridGimmicks[grid.y][grid.x] = gimmickObject;
+        spawnGimmick.SetGimmickPos(grid);
         // spawnGimmick.AdjustScaleToGrid();
 
         return true;

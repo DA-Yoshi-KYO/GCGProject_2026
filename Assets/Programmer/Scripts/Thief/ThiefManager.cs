@@ -9,7 +9,6 @@
  * 2026-04-26 | ファイル名・クラス名をThiefManagerに変更
  * 
  */
-using Unity.Mathematics;
 using UnityEngine;
 
 
@@ -45,14 +44,16 @@ public class ThiefManager : MonoBehaviour
         foreach (var thiefData in thiefDatas)
         {
             // 泥棒のタイプに応じたデータを取得
-            ThiefData data = new ThiefData();
+            ThiefTypeData typeData = new ThiefTypeData();
+            // 泥棒の種類間で共通のデータを取得
+            ThiefData commonData = thiefDB.commonData;
 
             // 泥棒のデータベースから、泥棒のタイプに応じたデータを取得
             for (int i = 0 ; i < thiefDB.thiefData.Length ; i++)
             {
                 if(thiefDB.thiefData[i].typeName == thiefData.type)
                 {
-                    data = thiefDB.thiefData[i];
+                    typeData = thiefDB.thiefData[i];
                     break;
                 }
             }
@@ -77,11 +78,11 @@ public class ThiefManager : MonoBehaviour
 
                 // 行動AIの設定
                 ThiefAI thiefAI = thief.GetComponent<ThiefAI>();
-                thiefAI.Setting(data, playerSpeed, FindObjectOfType<RoomNode>());
+                thiefAI.Setting(typeData, commonData, playerSpeed, FindObjectOfType<RoomNode>());
 
                 // 視界システムの設定
                 VisionSensor thiefView = thief.GetComponent<VisionSensor>();
-                thiefView.Setting(data.viewDistance, data.viewAngle);
+                thiefView.Setting(typeData.viewDistance, typeData.viewAngle);
 
                 // --- 泥棒をthiefParentの子オブジェクトに設定
                 thief.transform.parent = thiefParent.transform;
@@ -95,11 +96,6 @@ public class ThiefManager : MonoBehaviour
                     thief.transform.position = debugPoint.transform.position;
                     continue;
                 }
-
-                // (仮) 50,0,50 ~ -50,0,-50の範囲にランダムに生成
-                float x = UnityEngine.Random.Range(-50.0f, 50.0f);
-                float z = UnityEngine.Random.Range(-50.0f, 50.0f);
-                thief.transform.position = new Vector3(x, 0, z);
             }
         }
     }
