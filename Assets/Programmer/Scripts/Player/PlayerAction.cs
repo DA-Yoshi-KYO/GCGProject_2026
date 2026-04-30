@@ -127,10 +127,6 @@ public class PlayerAction : MonoBehaviour
             currentSoul += gimmick.requiredSoul;
             Destroy(gimmick.gameObject);
         }
-
-        gimmick.roomGrid = roomGrid;
-        gimmick.SetGimmickPos(grid);// 位置の設定
-        gimmick.AdjustScaleToGrid();// グリッドに合わせてサイズを調整
     }
 
     //ソウルの数を加算する関数
@@ -144,10 +140,10 @@ public class PlayerAction : MonoBehaviour
         //接触している
         if (other.gameObject.CompareTag("Gimmick"))
         {
-            GimmickBase gimmick = collision.gameObject.GetComponent<GimmickBase>();
+            GimmickBase gimmick = other.gameObject.GetComponent<GimmickBase>();
             if ((gimmick.gimmickState != GimmickState.Idle)) return;
 
-            interactObject = collision.gameObject;
+            interactObject = other.gameObject;
         }
     }
 

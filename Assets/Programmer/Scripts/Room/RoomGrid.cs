@@ -78,7 +78,7 @@ public class RoomGrid : MonoBehaviour
         spawnGimmick.roomGrid = this;
         gridGimmicks[grid.y][grid.x] = gimmickObject;
         spawnGimmick.SetGimmickPos(grid);
-        // spawnGimmick.AdjustScaleToGrid();
+        spawnGimmick.AdjustScaleToGrid();
 
         return true;
     }
