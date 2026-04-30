@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 6585128417810237207}
   - component: {fileID: 6606053111696247535}
   - component: {fileID: 4737612621436864203}
-  - component: {fileID: 4875711185247687395}
   m_Layer: 0
   m_Name: Rock
   m_TagString: Gimmick
@@ -30,7 +29,7 @@ Transform:
   m_GameObject: {fileID: 5619306240066455382}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.8, y: 5.25, z: 0.89}
+  m_LocalPosition: {x: 0, y: 5.25, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -140,26 +139,3 @@ MonoBehaviour:
   raySideLength: 0.6
   slideSpeed: 30
   gravity: 1
---- !u!136 &4875711185247687395
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5619306240066455382}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 1
-  m_Height: 1
-  m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
