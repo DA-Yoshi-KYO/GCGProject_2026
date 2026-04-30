@@ -114,7 +114,7 @@ public class HitChecker : MonoBehaviour
         ThiefAI thiefAI = enemy.GetComponent<ThiefAI>();
         if (thiefAI != null)
         {
-            thiefAI.TakeDamage(effectDamage);
+            thiefAI.TakeDamage(effectDamage, gimmick);
         }
     }
 

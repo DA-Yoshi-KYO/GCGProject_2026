@@ -84,6 +84,10 @@ public class ThiefManager : MonoBehaviour
                 VisionSensor thiefView = thief.GetComponent<VisionSensor>();
                 thiefView.Setting(typeData.viewDistance, typeData.viewAngle);
 
+                // リアクションスの設定
+                ThiefReaction thiefReaction = thief.GetComponent<ThiefReaction>();
+                thiefReaction.RegisterReaction(typeData.reactionSprites);
+
                 // --- 泥棒をthiefParentの子オブジェクトに設定
                 thief.transform.parent = thiefParent.transform;
                 
