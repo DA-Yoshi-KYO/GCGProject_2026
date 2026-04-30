@@ -54,11 +54,17 @@ public class ThiefAI : MonoBehaviour
 
     [Tooltip("現在いる部屋の情報")]
     private RoomNode currentRoom;
+    private GameObject currentRoomObject;
     [Tooltip("部屋に関する記憶")]
     private Dictionary<RoomNode, RoomMemory> roomMemories;
     [Tooltip("探索対象")]
     private ThiefTarget currentTarget;
     public ThiefTarget CurrentTarget => currentTarget;
+
+    [Tooltip("次の部屋に移動するための移動ポイント")]
+    private Transform nextRoomMovePoint;
+    [Tooltip("次の部屋に移動するための移動ポイントを決定したかどうかを判定するフラグ")]
+    private bool isNextRoomMovePointDecided;
 
     [Tooltip("持っている宝物オジェクト")]// 見つけたら設定する
     private GameObject heldTreasure;
@@ -124,6 +130,11 @@ public class ThiefAI : MonoBehaviour
         navMeshAgent.speed = this.walkSpeed;
     }
 
+    private void Start()
+    {
+        FindNowRoomNode();
+    }
+
     private void Update()
     {
         // 現在の状態に応じた行動を実行
@@ -152,6 +163,15 @@ public class ThiefAI : MonoBehaviour
         RecognizeObjects();
 
         ChangeFace(ReactionSpriteType.Normal);
+
+        if (isNextRoomMovePointDecided || roomMemories[currentRoom].explorationLevel >= nextRoomSearchThreshold)
+        {
+            if (nextRoomMovePoint == null) NextDoorElection();
+
+            navMeshAgent.SetDestination(nextRoomMovePoint.position);
+
+            return;
+        }
 
         // 探索対象がない場合は、部屋の移動ポイントに沿って移動する処理を追加する
         if (currentTarget == null)
@@ -208,7 +228,10 @@ public class ThiefAI : MonoBehaviour
                             // 探索度が閾値を超えた場合は、次の部屋に移動するための処理を追加する
                             if (roomMemories[currentRoom].explorationLevel >= nextRoomSearchThreshold)
                             {
-                                Debug.Log("次の部屋に移動");
+                                // 探索対象をリセット
+                                currentTarget = null;
+
+                                isNextRoomMovePointDecided = true;
                             }
                             // それ以外の場合は、次の探索対象を決定する
                             else DecideTarget();
@@ -621,6 +644,44 @@ public class ThiefAI : MonoBehaviour
             if (playerAction != null)playerAction.AddSoul(soulDropCount);
             else Debug.LogError("PlayerActionが見つかりませんでした。ThiefAIのTakeDamageメソッドで、プレイヤーにソウルを入手させる処理が正常に動作しない可能性があります。");
         }
+    }
+
+    /// <summary>
+    /// 現在いる部屋に関するオブジェクトをRaycastで取得して、currentRoomに設定する処理
+    /// </summary>
+    private void FindNowRoomNode()
+    {
+        GameObject currentobject = CS_RoomCreatePointRaycast.GetRayRoomCreatePoint(this.gameObject);
+        if (currentobject == null) Debug.LogWarning("【泥棒】現在いる部屋に関するオブジェクトの取得に失敗しました");
+        currentRoom = currentobject.transform.GetComponentInChildren<RoomNode>();
+        currentRoomObject = currentobject;
+    }
+
+    /// <summary>
+    /// 次に設定する移動ポイントを決定するロジック
+    /// </summary>
+    private void NextDoorElection()
+    {
+        CS_RoomCreatePoint roomCreatePoint = currentRoomObject.transform.GetComponent<CS_RoomCreatePoint>();
+        if (roomCreatePoint == null)
+        {
+            Debug.LogError("【泥棒】現在いる部屋のRoomCreatePointが見つかりませんでした。ThiefAIのNextDoorElectionメソッドで、次に設定する移動ポイントを決定するロジックが正常に動作しない可能性があります。");
+            return;
+        }
+
+        // 現在いる部屋の接続している方向を取得
+        List<CSE_RoomDoorDirection> connectDirs = roomCreatePoint.GetConnectDirections();
+        if (connectDirs.Count == 0)
+        {
+            Debug.LogWarning("【泥棒】現在いる部屋の接続方向が見つかりませんでした。ThiefAIのNextDoorElectionメソッドで、次に設定する移動ポイントを決定するロジックが正常に動作しない可能性があります。");
+            return;
+        }
+
+        // 接続している部屋の方向をランダムに選択
+        int randomIndex = Random.Range(0, connectDirs.Count);
+
+        // 選択した方向にあるドアの位置を次の移動ポイントに設定
+        nextRoomMovePoint = currentRoom.GetDirectionWallToDoor(connectDirs[randomIndex]);
     }
 
     /// <summary>
