@@ -15,6 +15,7 @@
  * 2026-04-25 | 次に設定する移動ポイントを決定するロジックの不具合を修正
  * 2026-04-26 | 気絶後の退場処理を仮作成
  *            | 宝物を持って移動する処理を仮作成
+ * 2026-04-27 | 部屋移動の閾値に達していたら次の部屋に移動する処理を追加
  * 
  */
 using System.Collections.Generic;
@@ -94,6 +95,8 @@ public class ThiefAI : MonoBehaviour
 
     [Tooltip("ナビメッシュエージェント")]
     private NavMeshAgent navMeshAgent;
+    [Tooltip("泥棒のリアクションを管理するコンポーネント")]
+    private ThiefReaction thiefReaction;
 
     // 泥棒の耐久力と移動速度を設定するメソッド
     public void Setting(ThiefTypeData typedata, ThiefData data, float playerSpeed, RoomNode firstRoom)
@@ -128,6 +131,9 @@ public class ThiefAI : MonoBehaviour
         navMeshAgent = GetComponent<NavMeshAgent>();
         navMeshAgent.baseOffset = 1.0f; // キャラクターの高さに合わせてオフセットを設定
         navMeshAgent.speed = this.walkSpeed;
+
+        // 泥棒のリアクションを管理するコンポーネントを取得
+        thiefReaction = GetComponent<ThiefReaction>();
     }
 
     private void Start()
@@ -624,9 +630,24 @@ public class ThiefAI : MonoBehaviour
     ///  耐久値を減らす処理
     /// </summary>
     /// <param name="damage">与える減少値</param>
-    public void TakeDamage(int damage)
+    public void TakeDamage(int damage, Gimmick type)
     {
         durability -= damage;
+
+        switch (type)
+        {
+            case Gimmick.Pot:
+                thiefReaction.SetReactionUI(ThiefReaction.ThiefReactionType.Pot);
+                break;
+            case Gimmick.IronBall:
+                thiefReaction.SetReactionUI(ThiefReaction.ThiefReactionType.IronBall);
+                break;
+            case Gimmick.EmptyChest:
+            case Gimmick.None:
+            default:
+                break;
+        }
+
 
         // 耐久力が0以下になった場合は、耐久力を0に補正して気絶状態にする
         if (durability <= 0)
@@ -773,7 +794,7 @@ public class ThiefAI : MonoBehaviour
     [ContextMenu("ダメージを与える")]
     private void DebugTakeDamage()
     {
-        TakeDamage(1);
+        TakeDamage(1, Gimmick.Pot);
     }
 
 }
