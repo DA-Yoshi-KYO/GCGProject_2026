@@ -102,9 +102,9 @@ public class PlayerAction : MonoBehaviour
             Destroy(gimmick.gameObject);
         }
 
-        //gimmickBase.roomGrid = roomGrid.csを設定 
-        //gimmick.SetGimmickPos(grid);// 位置の設定
-        //gimmick.AdjustScaleToGrid();// グリッドに合わせてサイズを調整
+        gimmick.roomGrid = roomGrid;
+        gimmick.SetGimmickPos(grid);// 位置の設定
+        gimmick.AdjustScaleToGrid();// グリッドに合わせてサイズを調整
 
 
     }
@@ -115,15 +115,15 @@ public class PlayerAction : MonoBehaviour
         currentSoul += addnum;
     }
 
-    private void OnCollisionStay(Collision collision)
+    private void OnTriggerStay(Collider other)
     {
         //接触している
-        if (collision.gameObject.CompareTag("Gimmick"))
+        if (other.gameObject.CompareTag("Gimmick"))
         {
             if (playerData.playerInput.Player.Interact.triggered)
             {
                 //ギミックの情報を取得
-                GimmickBase gimmick = collision.gameObject.GetComponent<GimmickBase>();
+                GimmickBase gimmick = other.gameObject.GetComponent<GimmickBase>();
                 if ((gimmick.gimmickState != GimmickState.Idle)) return;
                 gimmick.ActivateGimmick();
             }
