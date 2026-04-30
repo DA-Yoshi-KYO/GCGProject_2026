@@ -120,6 +120,17 @@ public class PlayerAction : MonoBehaviour
 
         //ソウルの消費
         currentSoul -= gimmick.requiredSoul;
+
+        // ソウルが0未満になる場合は召喚を行わずソウル数を戻す
+        if (currentSoul < 0)
+        {
+            currentSoul += gimmick.requiredSoul;
+            Destroy(gimmick.gameObject);
+        }
+
+        gimmick.roomGrid = roomGrid;
+        gimmick.SetGimmickPos(grid);// 位置の設定
+        gimmick.AdjustScaleToGrid();// グリッドに合わせてサイズを調整
     }
 
     //ソウルの数を加算する関数
@@ -128,10 +139,10 @@ public class PlayerAction : MonoBehaviour
         currentSoul += addnum;
     }
 
-    private void OnCollisionStay(Collision collision)
+    private void OnTriggerStay(Collider other)
     {
         //接触している
-        if (collision.gameObject.CompareTag("Gimmick"))
+        if (other.gameObject.CompareTag("Gimmick"))
         {
             GimmickBase gimmick = collision.gameObject.GetComponent<GimmickBase>();
             if ((gimmick.gimmickState != GimmickState.Idle)) return;
