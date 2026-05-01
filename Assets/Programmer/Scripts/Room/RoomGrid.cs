@@ -11,8 +11,7 @@ using UnityEngine;
 
 public class RoomGrid : MonoBehaviour
 {
-    [Header("グリッドの分割数(X:横方向(X)、Y:奥方向(Z))")]
-    [SerializeField] private Vector2Int gridDivision;
+    private Vector2Int gridDivision;
     public Vector2 gridSize { get; private set; }   // グリッド1マスの大きさ
     private Renderer rendererMaterial; // グリッドのマテリアル
     private GameObject gridObject; // グリッドの大きさを正確に取得する為の子オブジェクト
@@ -20,6 +19,8 @@ public class RoomGrid : MonoBehaviour
 
     void Start()
     {
+        gridDivision = new Vector2Int((int)gameObject.transform.localScale.x, (int)gameObject.transform.localScale.y);
+
         // グリッド1マスの大きさを計算
         gridObject = gameObject.transform.GetChild(0).gameObject;
         gridSize = new Vector2(gridObject.transform.lossyScale.x / gridDivision.x, gridObject.transform.lossyScale.z / gridDivision.y);
