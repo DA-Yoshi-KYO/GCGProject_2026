@@ -126,6 +126,7 @@ public class ThiefAI : MonoBehaviour
         // 初期部屋の記憶を作成
         roomMemories[currentRoom] = new RoomMemory();
         roomMemories[currentRoom].FirstSetting();
+        roomMemories[currentRoom].explorationLevel = 100;
 
         // ナビメッシュエージェントの速度を設定
         navMeshAgent = GetComponent<NavMeshAgent>();
@@ -160,7 +161,6 @@ public class ThiefAI : MonoBehaviour
                 break;
         }
     }
-
 
     // 探索状態の行動
     private void Explore()
@@ -676,6 +676,13 @@ public class ThiefAI : MonoBehaviour
         if (currentobject == null) Debug.LogWarning("【泥棒】現在いる部屋に関するオブジェクトの取得に失敗しました");
         currentRoom = currentobject.transform.GetComponentInChildren<RoomNode>();
         currentRoomObject = currentobject;
+
+        // 現在いる部屋の記憶がない場合は新たに作成
+        if (!roomMemories.ContainsKey(currentRoom))
+        {
+            roomMemories[currentRoom] = new RoomMemory();
+            roomMemories[currentRoom].FirstSetting();
+        }
     }
 
     /// <summary>
@@ -786,6 +793,24 @@ public class ThiefAI : MonoBehaviour
 
         // 表情のスプライトを変更する
         material.mainTexture = reactionSprites[(int)reaction].texture;
+    }
+
+    /// <summary>
+    /// 指定した位置にワープする処理
+    /// </summary>
+    /// <param name="targetPos">指定位置</param>
+    public void WarpAction(Vector3 targetPos)
+    {
+        // 現在の経路をリセットして、ワープ後に新しい経路を計算させる
+        navMeshAgent.ResetPath(); 
+        // NavMeshAgentのWarpメソッドを使用して、指定した位置にワープする
+        navMeshAgent.Warp(targetPos);
+
+        transform.position = targetPos;
+        FindNowRoomNode();
+
+        isNextRoomMovePointDecided = false;
+        nextRoomMovePoint = null;
     }
 
     //////////////////////////////////////////////////////////////////
