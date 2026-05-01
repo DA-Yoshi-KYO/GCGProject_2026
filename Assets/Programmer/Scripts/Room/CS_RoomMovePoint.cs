@@ -145,7 +145,15 @@ public class CS_RoomMovePoint : MonoBehaviour
 
         s_LastMoveTime = Time.time;
 
-        MovePlayer(playerTransform, cs_TargetMovePoint.GetSpawnTransform());
+        switch (other.tag)
+        {
+            case "Player":
+                MovePlayer(playerTransform, cs_TargetMovePoint.GetSpawnTransform());
+                break;
+            case "Thief":
+                MoveThief(playerTransform, cs_TargetMovePoint.GetSpawnTransform());
+                break;
+        }
     }
 
     /// <summary>
@@ -247,6 +255,21 @@ public class CS_RoomMovePoint : MonoBehaviour
         {
             roomPlayerPosition.RefreshPlayerRoomData();
             playerTransform.gameObject.GetComponent<PlayerCamera>().OnRoomMove();
+        }
+    }
+
+    /// <summary>
+    /// 泥棒を指定位置へ移動します。
+    /// </summary>
+    /// <param name="thiefTransform">泥棒のTransform</param>
+    /// <param name="targetTransform">移動先のTransform</param>
+    private void MoveThief(Transform thiefTransform, Transform targetTransform)
+    {
+        ThiefAI thiefAI = thiefTransform.GetComponent<ThiefAI>();
+
+        if (thiefAI != null)
+        {
+            thiefAI.WarpAction(targetTransform.position);
         }
     }
 
