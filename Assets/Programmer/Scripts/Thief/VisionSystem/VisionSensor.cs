@@ -4,6 +4,7 @@
  *    宇留野 陸斗
  * ----------------------------------------------------------
  * 2026-04-19 | 初回作成
+ * 2026-04-24 | TrapTargetへの対応を追加
  * 
  */
 using System.Collections.Generic;
@@ -32,10 +33,10 @@ public class VisionSensor : MonoBehaviour
     }
 
     // 視界内のターゲットをスキャンしてリストで返す
-    public List<VisionTarget> Scan()
+    public List<ThiefTarget> Scan()
     {
         // 視界内のターゲットを格納するリスト
-        List<VisionTarget> visibleTargets = new List<VisionTarget>();
+        List<ThiefTarget> visibleTargets = new List<ThiefTarget>();
 
         // 視界内のコライダーを取得
         Collider[] hits = Physics.OverlapSphere(transform.position, viewDistance, targetLayer);
@@ -43,9 +44,17 @@ public class VisionSensor : MonoBehaviour
         // 取得したコライダーをループして、視界内にあるターゲットを判定
         foreach (var hit in hits)
         {
+            
             // VisionTargetコンポーネントを取得
-            VisionTarget target = hit.GetComponent<VisionTarget>();
-            if (target == null) continue;
+            ThiefTarget target = hit.GetComponent<VisionTarget>();
+            if (target == null)
+            {
+                target = hit.GetComponent<TrapTarget>();
+                if (target == null)
+                {
+                    continue; // VisionTargetもTrapTargetもない場合はスキップ
+                }
+            }
 
             // ターゲットが視界内にあるかどうかを判定
             if (IsVisible(target))
@@ -59,7 +68,7 @@ public class VisionSensor : MonoBehaviour
     }
 
     // ターゲットが視界内にあるかどうかを判定するメソッド
-    private bool IsVisible(VisionTarget target)
+    private bool IsVisible(ThiefTarget target)
     {
         // ターゲットへの方向ベクトルを計算
         Vector3 dir = (target.transform.position - transform.position).normalized;
@@ -101,7 +110,14 @@ public class VisionSensor : MonoBehaviour
             else Gizmos.color = Color.green;
 
             Gizmos.DrawLine(transform.position, target.transform.position);
+        }
 
+        // 探索対象をギズモで表示
+        Gizmos.color = Color.blue;
+        ThiefAI thiefAI = this.GetComponent<ThiefAI>();
+        if (thiefAI != null && thiefAI.CurrentTarget != null)
+        {
+            Gizmos.DrawLine(transform.position, thiefAI.CurrentTarget.transform.position);
         }
     }
 }
