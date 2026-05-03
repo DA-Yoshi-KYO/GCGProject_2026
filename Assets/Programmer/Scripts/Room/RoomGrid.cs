@@ -11,19 +11,13 @@ using UnityEngine;
 
 public class RoomGrid : MonoBehaviour
 {
-    private Vector2Int gridDivision;
-    public Vector2 gridSize { get; private set; }   // グリッド1マスの大きさ
+    [SerializeField] private Vector2Int gridDivision;
+    public Vector2 gridSize { get; private set; } = new Vector2(1, 1);   // グリッド1マスの大きさ
     private Renderer rendererMaterial; // グリッドのマテリアル
-    private GameObject gridObject; // グリッドの大きさを正確に取得する為の子オブジェクト
     List<List<GameObject>> gridGimmicks;
 
     void Start()
     {
-        gridDivision = new Vector2Int((int)gameObject.transform.localScale.x, (int)gameObject.transform.localScale.y);
-
-        // グリッド1マスの大きさを計算
-        gridObject = gameObject.transform.GetChild(0).gameObject;
-        gridSize = new Vector2(gridObject.transform.lossyScale.x / gridDivision.x, gridObject.transform.lossyScale.z / gridDivision.y);
         rendererMaterial = GetComponent<Renderer>();
         if (rendererMaterial != null)
         {
@@ -97,8 +91,8 @@ public class RoomGrid : MonoBehaviour
 
         // 北西を原点(0.0f,0.0f)とした相対座標に変換   
         Vector2 relativePos = new Vector2(
-            localPos.x + gridObject.transform.lossyScale.x * 0.5f,
-            gridObject.transform.lossyScale.z * 0.5f - localPos.z);
+            localPos.x + (gridDivision.x * gridSize.x) * 0.5f,
+            (gridDivision.y * gridSize.y) * 0.5f - localPos.z);
         
         // グリッドの分割数に基づいてグリッド位置を計算
         Vector2Int gridPos = new Vector2Int(
@@ -130,8 +124,8 @@ public class RoomGrid : MonoBehaviour
 
         // グリッドから相対座標に変換
         Vector2 relativePos = new Vector2(
-            gridPos.x * gridSize.x - gridObject.transform.lossyScale.x * 0.5f + gridSize.x * 0.5f,
-            gridObject.transform.lossyScale.z * 0.5f - gridPos.y * gridSize.y - gridSize.x * 0.5f
+            gridPos.x * gridSize.x - (gridDivision.x * gridSize.x) * 0.5f + gridSize.x * 0.5f,
+            (gridDivision.y * gridSize.y) * 0.5f - gridPos.y * gridSize.y - gridSize.x * 0.5f
         );
         
         Debug.Log($"relativePos: {relativePos}");
