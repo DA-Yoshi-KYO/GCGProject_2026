@@ -19,6 +19,7 @@ using UnityEditor;
  *                2026/04/28 RoomPlayerPositionを同一GameObjectから取得する形へ変更(ヨシモト)
  *                2026/04/28 Fixedは事前生成、Randomはゲーム開始時生成へ変更(ヨシモト)
  *                2026/04/29 Element0のStartPlayerPointへPlayerPrefabを生成する処理を追加(ヨシモト)
+ *                2026/05/03 Player生成時はRaycastではなくRoomCreatePointを直接設定する形へ変更(ヨシモト)
  *==================================================*/
 
 /// <summary>
@@ -38,6 +39,7 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
 {
     private const string ROOM_CREATE_POINT_TAG = "RoomCreatePoint";
     private const string START_PLAYER_POINT_NAME = "StartPlayerPoint";
+    private const string CENTER_NAME = "Center";
     private const string GENERATED_NAME_PREFIX = "__GeneratedRoom_";
     private const string DELETING_NAME_PREFIX = "__DeletingRoom_";
     private const string OLD_GENERATED_ROOT_NAME = "__GeneratedRoomBlocks";
@@ -144,7 +146,6 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
         {
             RebuildGeneratedRoomLinks();
             CreatePlayerAtFirstRoomStartPoint();
-            RefreshRoomPlayerPosition();
             return;
         }
 
@@ -159,7 +160,6 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
     public void GenerateRoomBlocks()
     {
         GenerateRoomBlocksByType(CSE_RoomBlockGenerateType.Fixed, false);
-        RefreshRoomPlayerPosition();
     }
 
     /// <summary>
@@ -171,7 +171,6 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
     {
         DeleteGeneratedRoomBlocksByType(CSE_RoomBlockGenerateType.Fixed);
         GenerateRoomBlocksByType(CSE_RoomBlockGenerateType.Fixed, true);
-        RefreshRoomPlayerPosition();
     }
 
     /// <summary>
@@ -182,7 +181,6 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
     public void GenerateRandomRoomBlocks()
     {
         GenerateRoomBlocksByType(CSE_RoomBlockGenerateType.Random, false);
-        RefreshRoomPlayerPosition();
     }
 
     /// <summary>
@@ -199,7 +197,6 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
 
         DeleteGeneratedRoomBlocksByType(CSE_RoomBlockGenerateType.Random);
         GenerateRoomBlocksByType(CSE_RoomBlockGenerateType.Random, true);
-        RefreshRoomPlayerPosition();
     }
 
     /// <summary>
@@ -279,7 +276,6 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
         yield return null;
 
         CreatePlayerAtFirstRoomStartPoint();
-        RefreshRoomPlayerPosition();
 
         bool_IsRuntimeRegenerating = false;
     }
@@ -361,6 +357,8 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
 
             generatedRoom.name = GENERATED_NAME_PREFIX + roomPrefab.name + "_" + i.ToString("00");
 
+            SetupGeneratedRoomForPlayerCamera(generatedRoom);
+
             generatedCount++;
         }
 
@@ -373,6 +371,88 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
         }
 
         Debug.Log("[RoomBlockPrefabGenerator] " + targetGenerateType + " のRoomを生成しました。生成数 : " + generatedCount);
+    }
+
+    /// <summary>
+    /// PlayerCameraが参照しやすいように生成Roomの階層を整えます。
+    /// </summary>
+    /// <param name="generatedRoom">生成されたRoom。</param>
+    private void SetupGeneratedRoomForPlayerCamera(GameObject generatedRoom)
+    {
+        if (generatedRoom == null)
+        {
+            return;
+        }
+
+        generatedRoom.transform.SetSiblingIndex(0);
+        EnsureDirectCenterChild(generatedRoom);
+    }
+
+    /// <summary>
+    /// 生成Room直下にCenterが存在する状態を保証します。
+    /// </summary>
+    /// <param name="generatedRoom">生成されたRoom。</param>
+    private void EnsureDirectCenterChild(GameObject generatedRoom)
+    {
+        if (generatedRoom == null)
+        {
+            return;
+        }
+
+        Transform directCenterTransform = generatedRoom.transform.Find(CENTER_NAME);
+
+        if (directCenterTransform != null)
+        {
+            return;
+        }
+
+        Transform existingCenterTransform =
+            FindChildByNameRecursive(generatedRoom.transform, CENTER_NAME);
+
+        GameObject centerObject = new GameObject(CENTER_NAME);
+        centerObject.transform.SetParent(generatedRoom.transform);
+
+        if (existingCenterTransform != null)
+        {
+            centerObject.transform.SetPositionAndRotation(
+                existingCenterTransform.position,
+                existingCenterTransform.rotation
+            );
+
+            return;
+        }
+
+        centerObject.transform.SetPositionAndRotation(
+            generatedRoom.transform.position,
+            generatedRoom.transform.rotation
+        );
+    }
+
+    /// <summary>
+    /// 子階層から指定名のTransformを探します。
+    /// </summary>
+    /// <param name="rootTransform">検索開始Transform。</param>
+    /// <param name="targetName">探す名前。</param>
+    /// <returns>見つかったTransform。</returns>
+    private Transform FindChildByNameRecursive(Transform rootTransform, string targetName)
+    {
+        if (rootTransform == null)
+        {
+            return null;
+        }
+
+        Transform[] childTransforms =
+            rootTransform.GetComponentsInChildren<Transform>(true);
+
+        for (int i = 0 ; i < childTransforms.Length ; i++)
+        {
+            if (childTransforms[i].name == targetName)
+            {
+                return childTransforms[i];
+            }
+        }
+
+        return null;
     }
 
     /// <summary>
@@ -817,12 +897,30 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
         if (connection.TargetCreatePoint == null)
         {
             currentMovePoint.ClearTarget();
+
+            Debug.LogWarning(
+                "[RoomBlockPrefabGenerator] 接続先RoomCreatePointがnullです。"
+                + " / 現在RoomCreatePoint : " + currentCreatePoint.name
+                + " / 現在Room : " + currentRoom.name
+                + " / 現在出口方向 : " + currentDirection
+            );
+
             return;
         }
 
         if (!dic_GeneratedRoomMap.TryGetValue(connection.TargetCreatePoint, out GameObject targetRoom))
         {
             currentMovePoint.ClearTarget();
+
+            Debug.LogWarning(
+                "[RoomBlockPrefabGenerator] 移動先RoomCreatePointに生成Roomがありません。"
+                + " / 現在RoomCreatePoint : " + currentCreatePoint.name
+                + " / 現在Room : " + currentRoom.name
+                + " / 現在出口方向 : " + currentDirection
+                + " / 移動先RoomCreatePoint : " + connection.TargetCreatePoint.name
+                + " / 移動先で探す方向 : " + connection.TargetOutDirection
+            );
+
             return;
         }
 
@@ -832,7 +930,18 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
         if (targetMovePoint == null)
         {
             currentMovePoint.ClearTarget();
-            Debug.LogWarning("[RoomBlockPrefabGenerator] 移動先Roomに指定方向のRoomMovePointがありません : " + connection.TargetOutDirection);
+
+            Debug.LogWarning(
+                "[RoomBlockPrefabGenerator] 移動先Roomに指定方向のRoomMovePointがありません。"
+                + " / 現在RoomCreatePoint : " + currentCreatePoint.name
+                + " / 現在Room : " + currentRoom.name
+                + " / 現在出口方向 : " + currentDirection
+                + " / 移動先RoomCreatePoint : " + connection.TargetCreatePoint.name
+                + " / 移動先Room : " + targetRoom.name
+                + " / 移動先で必要なRoomMovePoint方向 : " + connection.TargetOutDirection
+                + " / 移動先Room階層 : " + GetHierarchyPath(targetRoom.transform)
+            );
+
             return;
         }
 
@@ -909,7 +1018,10 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
             return;
         }
 
-        cs_RoomPlayerPosition.CreatePlayerAtStartPoint(startPlayerPoint);
+        cs_RoomPlayerPosition.CreatePlayerAtStartPoint(
+            startPlayerPoint,
+            firstGenerateData.RoomCreatePointObject
+        );
     }
 
     /// <summary>
@@ -951,23 +1063,26 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
     }
 
     /// <summary>
-    /// PlayerPosition側の現在Room情報を更新します。
+    /// TransformのHierarchy上のパスを取得します。
     /// </summary>
-    private void RefreshRoomPlayerPosition()
+    /// <param name="targetTransform">対象Transform。</param>
+    /// <returns>Hierarchyパス。</returns>
+    private string GetHierarchyPath(Transform targetTransform)
     {
-        if (!Application.isPlaying)
+        if (targetTransform == null)
         {
-            return;
+            return "null";
         }
 
-        CacheRoomPlayerPosition();
+        string path = targetTransform.name;
+        Transform currentTransform = targetTransform.parent;
 
-        if (cs_RoomPlayerPosition == null)
+        while (currentTransform != null)
         {
-            Debug.LogWarning("[RoomBlockPrefabGenerator] 同じGameObjectにCS_RoomPlayerPositionが付いていません。");
-            return;
+            path = currentTransform.name + "/" + path;
+            currentTransform = currentTransform.parent;
         }
 
-        cs_RoomPlayerPosition.RefreshPlayerRoomData();
+        return path;
     }
 }

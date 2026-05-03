@@ -1,7 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -11,6 +10,8 @@ using UnityEditor;
  *  制作者      : 吉本竜
  *  内容        : 生成後に自動接続されるRoom移動ポイント
  *  履歴        : 2026/04/27 接続先をEditor生成後も保持するよう修正(ヨシモト)
+ *                2026/05/03 Player移動後のRoom更新をRaycastではなく直接設定へ変更(ヨシモト)
+ *                2026/05/03 PlayerData.currentRoomDataを保証してからPlayerCameraを更新する処理を追加(ヨシモト)
  *==================================================*/
 
 /// <summary>
@@ -20,6 +21,10 @@ using UnityEditor;
 [DisallowMultipleComponent]
 public class CS_RoomMovePoint : MonoBehaviour
 {
+    private const string ROOM_CREATE_POINT_TAG = "RoomCreatePoint";
+    private const string PLAYER_TAG = "Player";
+    private const string THIEF_TAG = "Thief";
+
     [Header("このRoomMovePointの方向")]
     [SerializeField]
     private CSE_RoomDoorDirection e_MoveDirection = CSE_RoomDoorDirection.Right;
@@ -40,8 +45,8 @@ public class CS_RoomMovePoint : MonoBehaviour
     [SerializeField]
     private List<string> list_MoveTargetTags = new List<string>
     {
-        "Player",
-        "Thief"
+        PLAYER_TAG,
+        THIEF_TAG
     };
 
     [Header("連続ワープ防止時間")]
@@ -56,7 +61,6 @@ public class CS_RoomMovePoint : MonoBehaviour
     private Collider[] colliders;
 
     private CS_RoomPlayerPosition roomPlayerPosition;
-
 
     /// <summary>
     /// このRoomMovePointの方向を取得します。
@@ -132,9 +136,9 @@ public class CS_RoomMovePoint : MonoBehaviour
             return;
         }
 
-        if (!TryGetPlayerTransform(other, out Transform playerTransform))
+        if (!TryGetMoveTargetTransform(other, out Transform moveTargetTransform))
         {
-            Debug.LogWarning("[RoomMovePoint] Playerではありません : " + other.name);
+            Debug.LogWarning("[RoomMovePoint] 移動対象ではありません : " + other.name);
             return;
         }
 
@@ -145,34 +149,43 @@ public class CS_RoomMovePoint : MonoBehaviour
 
         s_LastMoveTime = Time.time;
 
-        switch (other.tag)
+        if (IsTagName(moveTargetTransform.gameObject, PLAYER_TAG))
         {
-            case "Player":
-                MovePlayer(playerTransform, cs_TargetMovePoint.GetSpawnTransform());
-                break;
-            case "Thief":
-                MoveThief(playerTransform, cs_TargetMovePoint.GetSpawnTransform());
-                break;
+            MovePlayer(moveTargetTransform, cs_TargetMovePoint.GetSpawnTransform());
+            return;
         }
+
+        if (IsTagName(moveTargetTransform.gameObject, THIEF_TAG))
+        {
+            MoveThief(moveTargetTransform, cs_TargetMovePoint.GetSpawnTransform());
+            return;
+        }
+
+        Debug.LogWarning(
+            "[RoomMovePoint] 移動対象タグですが、処理が未対応です : "
+            + moveTargetTransform.name
+            + " / Tag : "
+            + moveTargetTransform.tag
+        );
     }
 
     /// <summary>
     /// Colliderから移動対象Transformを取得します。
     /// </summary>
     /// <param name="other">Triggerに入ったCollider。</param>
-    /// <param name="playerTransform">取得した移動対象Transform。</param>
+    /// <param name="moveTargetTransform">取得した移動対象Transform。</param>
     /// <returns>移動対象だった場合はtrue。</returns>
-    private bool TryGetPlayerTransform(Collider other, out Transform playerTransform)
+    private bool TryGetMoveTargetTransform(Collider other, out Transform moveTargetTransform)
     {
         if (other == null)
         {
-            playerTransform = null;
+            moveTargetTransform = null;
             return false;
         }
 
         if (IsMoveTargetTag(other.gameObject))
         {
-            playerTransform = other.attachedRigidbody != null
+            moveTargetTransform = other.attachedRigidbody != null
                 ? other.attachedRigidbody.transform
                 : other.transform;
 
@@ -181,7 +194,7 @@ public class CS_RoomMovePoint : MonoBehaviour
 
         if (other.attachedRigidbody != null && IsMoveTargetTag(other.attachedRigidbody.gameObject))
         {
-            playerTransform = other.attachedRigidbody.transform;
+            moveTargetTransform = other.attachedRigidbody.transform;
             return true;
         }
 
@@ -189,11 +202,11 @@ public class CS_RoomMovePoint : MonoBehaviour
 
         if (rootTransform != null && IsMoveTargetTag(rootTransform.gameObject))
         {
-            playerTransform = rootTransform;
+            moveTargetTransform = rootTransform;
             return true;
         }
 
-        playerTransform = null;
+        moveTargetTransform = null;
         return false;
     }
 
@@ -221,7 +234,7 @@ public class CS_RoomMovePoint : MonoBehaviour
                 continue;
             }
 
-            if (targetObject.CompareTag(list_MoveTargetTags[i]))
+            if (IsTagName(targetObject, list_MoveTargetTags[i]))
             {
                 return true;
             }
@@ -231,12 +244,46 @@ public class CS_RoomMovePoint : MonoBehaviour
     }
 
     /// <summary>
+    /// CompareTagを使わずにタグ名を確認します。
+    /// 未定義タグ名でも例外を出さないためです。
+    /// </summary>
+    /// <param name="targetObject">確認対象GameObject。</param>
+    /// <param name="tagName">確認するタグ名。</param>
+    /// <returns>タグ名が一致する場合はtrue。</returns>
+    private bool IsTagName(GameObject targetObject, string tagName)
+    {
+        if (targetObject == null)
+        {
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(tagName))
+        {
+            return false;
+        }
+
+        return targetObject.tag == tagName;
+    }
+
+    /// <summary>
     /// プレイヤーを指定位置へ移動します。
     /// </summary>
     /// <param name="playerTransform">プレイヤーTransform。</param>
     /// <param name="targetTransform">移動先Transform。</param>
     private void MovePlayer(Transform playerTransform, Transform targetTransform)
     {
+        if (playerTransform == null)
+        {
+            Debug.LogWarning("[RoomMovePoint] PlayerTransformがnullです。");
+            return;
+        }
+
+        if (targetTransform == null)
+        {
+            Debug.LogWarning("[RoomMovePoint] 移動先Transformがnullです。");
+            return;
+        }
+
         CharacterController characterController = playerTransform.GetComponent<CharacterController>();
 
         if (characterController != null)
@@ -251,20 +298,149 @@ public class CS_RoomMovePoint : MonoBehaviour
             characterController.enabled = true;
         }
 
-        if (roomPlayerPosition != null)
+        UpdatePlayerRoomData(playerTransform);
+        UpdatePlayerCamera(playerTransform);
+    }
+
+    /// <summary>
+    /// Playerが現在いるRoomCreatePointを移動先から直接更新します。
+    /// </summary>
+    /// <param name="playerTransform">プレイヤーTransform。</param>
+    private void UpdatePlayerRoomData(Transform playerTransform)
+    {
+        if (roomPlayerPosition == null)
         {
-            roomPlayerPosition.RefreshPlayerRoomData();
-            playerTransform.gameObject.GetComponent<PlayerCamera>().OnRoomMove();
+            roomPlayerPosition = FindFirstObjectByType<CS_RoomPlayerPosition>();
         }
+
+        if (roomPlayerPosition == null)
+        {
+            Debug.LogWarning("[RoomMovePoint] CS_RoomPlayerPositionが見つかりません。");
+            return;
+        }
+
+        if (cs_TargetMovePoint == null)
+        {
+            Debug.LogWarning("[RoomMovePoint] 移動先RoomMovePointがnullです。");
+            return;
+        }
+
+        GameObject targetRoomCreatePoint =
+            FindParentRoomCreatePoint(cs_TargetMovePoint.transform);
+
+        if (targetRoomCreatePoint == null)
+        {
+            Debug.LogWarning(
+                "[RoomMovePoint] 移動先RoomMovePointの親階層にRoomCreatePointがありません。"
+                + " / TargetMovePoint : "
+                + cs_TargetMovePoint.name
+            );
+
+            return;
+        }
+
+        roomPlayerPosition.SetPlayerRoomData(targetRoomCreatePoint);
+        SetupPlayerDataCurrentRoom(playerTransform);
+    }
+
+    /// <summary>
+    /// PlayerData.currentRoomDataにRoom管理クラスを設定します。
+    /// </summary>
+    /// <param name="playerTransform">プレイヤーTransform。</param>
+    private void SetupPlayerDataCurrentRoom(Transform playerTransform)
+    {
+        if (playerTransform == null)
+        {
+            return;
+        }
+
+        if (roomPlayerPosition == null)
+        {
+            return;
+        }
+
+        PlayerData playerData = playerTransform.GetComponent<PlayerData>();
+
+        if (playerData == null)
+        {
+            Debug.LogWarning("[RoomMovePoint] PlayerDataがPlayerに付いていません : " + playerTransform.name);
+            return;
+        }
+    }
+
+    /// <summary>
+    /// PlayerCameraを移動後の部屋に合わせて更新します。
+    /// </summary>
+    /// <param name="playerTransform">プレイヤーTransform。</param>
+    private void UpdatePlayerCamera(Transform playerTransform)
+    {
+        if (playerTransform == null)
+        {
+            return;
+        }
+
+        SetupPlayerDataCurrentRoom(playerTransform);
+
+        PlayerCamera playerCamera = playerTransform.GetComponent<PlayerCamera>();
+
+        if (playerCamera == null)
+        {
+            Debug.LogWarning("[RoomMovePoint] PlayerCameraがPlayerに付いていません : " + playerTransform.name);
+            return;
+        }
+
+        playerCamera.OnRoomMove();
+    }
+
+    /// <summary>
+    /// 指定Transformの親階層からRoomCreatePointを探します。
+    /// </summary>
+    /// <param name="targetTransform">検索開始Transform。</param>
+    /// <returns>見つかったRoomCreatePoint。</returns>
+    private GameObject FindParentRoomCreatePoint(Transform targetTransform)
+    {
+        Transform currentTransform = targetTransform;
+
+        while (currentTransform != null)
+        {
+            CS_RoomCreatePoint roomCreatePoint =
+                currentTransform.GetComponent<CS_RoomCreatePoint>();
+
+            if (roomCreatePoint != null)
+            {
+                return currentTransform.gameObject;
+            }
+
+            if (IsTagName(currentTransform.gameObject, ROOM_CREATE_POINT_TAG))
+            {
+                return currentTransform.gameObject;
+            }
+
+            currentTransform = currentTransform.parent;
+        }
+
+        return null;
     }
 
     /// <summary>
     /// 泥棒を指定位置へ移動します。
     /// </summary>
-    /// <param name="thiefTransform">泥棒のTransform</param>
-    /// <param name="targetTransform">移動先のTransform</param>
+    /// <param name="thiefTransform">泥棒のTransform。</param>
+    /// <param name="targetTransform">移動先のTransform。</param>
     private void MoveThief(Transform thiefTransform, Transform targetTransform)
     {
+        if (thiefTransform == null)
+        {
+            Debug.LogWarning("[RoomMovePoint] ThiefTransformがnullです。");
+            return;
+        }
+
+        if (targetTransform == null)
+        {
+            Debug.LogWarning("[RoomMovePoint] 移動先Transformがnullです。");
+            return;
+        }
+
         ThiefAI thiefAI = thiefTransform.GetComponent<ThiefAI>();
 
         if (thiefAI != null)
