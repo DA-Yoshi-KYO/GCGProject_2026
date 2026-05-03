@@ -98,8 +98,17 @@ public class ThiefAI : MonoBehaviour
     [Tooltip("泥棒のリアクションを管理するコンポーネント")]
     private ThiefReaction thiefReaction;
 
+    [Tooltip("最初の部屋のオブジェクト")]
+    private GameObject firstRoomObject;
+    private RoomNode firstRoom;
+    private Transform firstEntryPoint; // 最初に入ってきたドアの位置(逃走ルートの最終目的位置)
+
+    [Tooltip("帰宅ルート")]
+    private List<Transform> escapeRoute;
+
+
     // 泥棒の耐久力と移動速度を設定するメソッド
-    public void Setting(ThiefTypeData typedata, ThiefData data, float playerSpeed, RoomNode firstRoom)
+    public void Setting(ThiefTypeData typedata, ThiefData data, float playerSpeed, RoomNode entryRoom, Transform entryPoint = null)
     {
         /*未実装、未設定　*///data.jumpHeight;
         /*未設定、未設定　*///data.alertTime;
@@ -118,7 +127,7 @@ public class ThiefAI : MonoBehaviour
         currentState = ThiefState.Explore;
 
         // 初期部屋を設定（仮）
-        currentRoom = firstRoom;
+        currentRoom = entryRoom;
 
         // 部屋の記憶を初期化
         roomMemories = new Dictionary<RoomNode, RoomMemory>();
@@ -135,6 +144,9 @@ public class ThiefAI : MonoBehaviour
 
         // 泥棒のリアクションを管理するコンポーネントを取得
         thiefReaction = GetComponent<ThiefReaction>();
+
+        firstRoom = entryRoom;
+        firstRoomObject = entryRoom.gameObject;
     }
 
     private void Start()
@@ -268,8 +280,7 @@ public class ThiefAI : MonoBehaviour
 
     // 発見状態の行動
     // ----------------
-    // TODO: 現在位置から出口までのルート構築処理を追加する(A*アルゴリズムを利用)
-    //     : 宝物発見バフの適応処理を追加する
+    // TODO: 宝物発見バフの適応処理を追加する
     private void Found()
     {
         // 宝物を持つ
@@ -304,55 +315,34 @@ public class ThiefAI : MonoBehaviour
     }
 
     // 逃走状態の行動
-    // (仮)移動ポイントを探索対象にして移動する処理を追加する
-    // ----------------
-    // TODO: 構築したルートに沿って移動する処理を追加する
     private void Escape()
     {
-
-        // 探索対象に向かって移動
-        navMeshAgent.SetDestination(currentTarget.transform.position);
-
-        // 探索対象に十分近づいたら、次の探索対象を決定
-        if (Vector3.Distance(transform.position, currentTarget.transform.position) < 2.0f)
+        // ルートが未構築なら構築する
+        if (escapeRoute == null || escapeRoute.Count == 0)
         {
-            // 現在の移動ポイントがリストのどこにあるかを判定
-            for (int i = 0 ; i < currentRoom.movePoints.Count ; i++)
-            {
-                // 現在の移動ポイントがリストのどこにあるかを判定
-                if (currentRoom.movePoints[i] == currentTarget)
-                {
-                    int nextIndex = 0;
-
-                    // 右回りの場合
-                    if (currentRoom.isListDown)
-                    {
-                        // 次のインデックスを計算
-                        nextIndex = i + 1;
-
-                        // インデックスがリストの範囲を超える場合は、リストの先頭に戻す
-                        if (nextIndex >= currentRoom.movePoints.Count) nextIndex = 0;
-
-                        // リストを加算して次の移動ポイントを探索対象に設定
-                        currentTarget = currentRoom.movePoints[nextIndex];
-                        break;
-                    }
-                    // 左回りの場合
-                    else
-                    {
-                        // 次のインデックスを計算
-                        nextIndex = i - 1;
-
-                        // インデックスがリストの範囲を超える場合は、リストの末尾に戻す
-                        if (nextIndex < 0) nextIndex = currentRoom.movePoints.Count - 1;
-
-                        // リストを減算して次の移動ポイントを探索対象に設定
-                        currentTarget = currentRoom.movePoints[nextIndex];
-                        break;
-                    }
-                }
-            }
+            EscapeRoute(); // ここで escapeRoute が埋まる＆ nextRoomMovePoint も先頭が入る想定
         }
+
+        // それでも無いなら、何らかの理由でルートが作れなかった
+        if (escapeRoute == null || escapeRoute.Count == 0)
+        {
+            // フォールバック（暫定）：従来の movePoints 逃走などに戻したい場合はここに書く
+            Debug.LogWarning("【泥棒】Escape: escapeRoute が空のため移動できません。");
+            return;
+        }
+
+        // 次に向かうドア
+        Transform door = escapeRoute[0];
+        if (door == null)
+        {
+            // 参照切れ対策：無効な要素を捨てて次へ
+            escapeRoute.RemoveAt(0);
+            return;
+        }
+
+        // ドアへ移動
+        navMeshAgent.isStopped = false;
+        navMeshAgent.SetDestination(door.position);
     }
 
     // 気絶状態の行動
@@ -811,6 +801,195 @@ public class ThiefAI : MonoBehaviour
 
         isNextRoomMovePointDecided = false;
         nextRoomMovePoint = null;
+
+        // 現在の状態が逃走状態の場合
+        if (currentState == ThiefState.Escape)
+        {
+            // ワープする = ドアを通過した
+            // escapeRouteの先頭が次の移動ポイントになる想定なので、先頭を削除して次の移動ポイントを設定する
+            if (escapeRoute != null && escapeRoute.Count > 0)
+            {
+                escapeRoute.RemoveAt(0);
+                if (escapeRoute.Count > 0)
+                {
+                    nextRoomMovePoint = escapeRoute[0];
+                    isNextRoomMovePointDecided = true;
+                }
+                else
+                {
+                    isNextRoomMovePointDecided = false;
+                    nextRoomMovePoint = null;
+                    Debug.Log("【泥棒】逃走完了");
+                    Destroy(gameObject);
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// 逃走ルートを構築する処理
+    /// </summary>
+    /// <remarks>
+    /// currentRoom から firstRoom まで、部屋接続(隣接)を BFS で探索してルート(部屋列)を復元する。
+    /// ルート上で通る各ドアの Transform を `escapeRoute` に順番に保存する。
+    /// </remarks>
+    private void EscapeRoute()
+    {
+        // 前提チェック
+        if (currentRoom == null)
+        {
+            Debug.LogWarning("【泥棒】EscapeRoute: currentRoom が null です。");
+            return;
+        }
+        if (firstRoom == null)
+        {
+            Debug.LogWarning("【泥棒】EscapeRoute: firstRoom が null です。Setting() で entryRoom を設定しているか確認してください。");
+            return;
+        }
+
+        // リスト初期化
+        if (escapeRoute == null) escapeRoute = new List<Transform>();
+        escapeRoute.Clear();
+
+        // 最終目的地（最初に入ってきた入口）を末尾に追加
+        if (firstEntryPoint != null)
+        {
+            escapeRoute.Add(firstEntryPoint);
+        }
+        else
+        {
+            Debug.LogWarning("【泥棒】EscapeRoute: firstEntryPoint が null のため最終目的地を追加できません。entry時に設定しているか確認してください。");
+        }
+
+        // 既に最初の部屋にいるなら、帰宅ルート不要
+        if (currentRoom == firstRoom)
+        {
+            isNextRoomMovePointDecided = false;
+            nextRoomMovePoint = null;
+            return;
+        }
+
+        // BFS 用
+        var queue = new Queue<RoomNode>();
+        var visited = new HashSet<RoomNode>();
+        var parent = new Dictionary<RoomNode, RoomNode>();
+
+        queue.Enqueue(currentRoom);
+        visited.Add(currentRoom);
+        parent[currentRoom] = null;
+
+        bool found = false;
+
+        // currentRoom から firstRoom を探索
+        while (queue.Count > 0)
+        {
+            RoomNode room = queue.Dequeue();
+            if (room == null) continue;
+
+            if (room == firstRoom)
+            {
+                found = true;
+                break;
+            }
+
+            Transform createPointTr = room.gameObject.transform.parent;
+            if (createPointTr == null) continue;
+
+            CS_RoomCreatePoint roomCreatePoint = createPointTr.GetComponent<CS_RoomCreatePoint>();
+            if (roomCreatePoint == null) continue;
+
+            for (int i = 0 ; i < 4 ; i++)
+            {
+                CS_RoomMoveConnection connection;
+                if (!roomCreatePoint.TryGetConnection((CSE_RoomDoorDirection)i, out connection)) continue;
+                if (connection == null || connection.TargetCreatePoint == null) continue;
+
+                RoomNode adjacentRoom = connection.TargetCreatePoint.gameObject.GetComponentInChildren<RoomNode>();
+                if (adjacentRoom == null) continue;
+
+                if (visited.Contains(adjacentRoom)) continue;
+
+                visited.Add(adjacentRoom);
+                parent[adjacentRoom] = room;
+                queue.Enqueue(adjacentRoom);
+            }
+        }
+
+        if (!found)
+        {
+            Debug.LogWarning("【泥棒】EscapeRoute: firstRoom までのルートが見つかりませんでした。");
+            return;
+        }
+
+        // 経路復元: currentRoom -> ... -> firstRoom
+        var pathRooms = new List<RoomNode>();
+        RoomNode cur = firstRoom;
+        while (cur != null)
+        {
+            pathRooms.Add(cur);
+            parent.TryGetValue(cur, out cur);
+        }
+        pathRooms.Reverse(); // currentRoom が先頭になる
+
+        if (pathRooms.Count < 2)
+        {
+            Debug.LogWarning("【泥棒】EscapeRoute: 復元した経路が不正です。");
+            return;
+        }
+
+        // 部屋列から「通るドア列(escapeRoute)」を作る
+        for (int idx = 0 ; idx < pathRooms.Count - 1 ; idx++)
+        {
+            RoomNode fromRoom = pathRooms[idx];
+            RoomNode toRoom = pathRooms[idx + 1];
+            if (fromRoom == null || toRoom == null) continue;
+
+            Transform fromCreatePointTr = fromRoom.gameObject.transform.parent;
+            if (fromCreatePointTr == null) continue;
+
+            CS_RoomCreatePoint fromCreatePoint = fromCreatePointTr.GetComponent<CS_RoomCreatePoint>();
+            if (fromCreatePoint == null) continue;
+
+            CSE_RoomDoorDirection? dirToNext = null;
+
+            // fromRoom 側の接続を見て、toRoom に繋がる方向を特定
+            for (int d = 0 ; d < 4 ; d++)
+            {
+                CS_RoomMoveConnection connection;
+                if (!fromCreatePoint.TryGetConnection((CSE_RoomDoorDirection)d, out connection)) continue;
+                if (connection == null || connection.TargetCreatePoint == null) continue;
+
+                RoomNode adjacentRoom = connection.TargetCreatePoint.gameObject.GetComponentInChildren<RoomNode>();
+                if (adjacentRoom == toRoom)
+                {
+                    dirToNext = (CSE_RoomDoorDirection)d;
+                    break;
+                }
+            }
+
+            if (dirToNext == null)
+            {
+                Debug.LogWarning("【泥棒】EscapeRoute: 次の部屋への接続方向を特定できませんでした。");
+                continue;
+            }
+
+            // NextDoorElection() と同様に、RoomNode からドアTransformを取得して保存
+            Transform doorTr = fromRoom.GetDirectionWallToDoor(dirToNext.Value);
+            if (doorTr == null)
+            {
+                Debug.LogWarning("【泥棒】EscapeRoute: ドア Transform の取得に失敗しました。");
+                continue;
+            }
+
+            escapeRoute.Add(doorTr);
+        }
+
+        // ついでに「次に向かうドア」を nextRoomMovePoint に入れておく（既存仕様と互換）
+        if (escapeRoute.Count > 0)
+        {
+            nextRoomMovePoint = escapeRoute[0];
+            isNextRoomMovePointDecided = true;
+        }
     }
 
     //////////////////////////////////////////////////////////////////
