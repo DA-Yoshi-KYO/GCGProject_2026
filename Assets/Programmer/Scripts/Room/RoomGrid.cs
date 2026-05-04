@@ -6,6 +6,7 @@
  * 2026-04-21 | 初回作成
  * 
  */
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -67,7 +68,24 @@ public class RoomGrid : MonoBehaviour
 
         Vector3 spawnPos = GetWorldPosFromGrid(grid);
         if (spawnPos == Vector3.positiveInfinity) return false;
+        Ray ray = new Ray();
+        ray.direction = Vector3.down;
+        const float rayOriginY = 255f;
+        ray.origin = new Vector3(spawnPos.x, rayOriginY, spawnPos.z);
+        RaycastHit[] hits = Physics.RaycastAll(ray, Mathf.Abs(rayOriginY - gameObject.transform.position.y));
+        Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+        GameObject hitObject = null;
+        foreach(var hitItem in hits)
+        {
+            Debug.Log(hitItem.transform.gameObject.name);
+            if (hitItem.transform.CompareTag("Player")) continue;
+            if (hitItem.transform.CompareTag("Thief")) continue;
 
+            hitObject = hitItem.transform.gameObject;
+            break;
+        }
+
+        if (hitObject != null && hitObject != gameObject) spawnPos.y = hitObject.transform.position.y + hitObject.transform.lossyScale.y / 2.0f;
         GameObject gimmickObject = Instantiate(gimmick.gameObject, spawnPos, Quaternion.identity);
         GimmickBase spawnGimmick = gimmickObject.GetComponent<GimmickBase>();
         spawnGimmick.roomGrid = this;
