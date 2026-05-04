@@ -1,16 +1,12 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class RockGimmick : GimmickBase
 {
     private bool isFirstActive = true;
-    //private bool hasHit = false;
 
     private Vector3 velocity = Vector3.zero;
     private GameObject checker;
 
-    //private float timer = 0f;
     [Header("下方向へのレイの距離")]
     public float rayDownLength = 1.2f;
     [Header("前後左右へのレイの距離")]
@@ -137,9 +133,7 @@ public class RockGimmick : GimmickBase
     // =========================
     private void Hit()
     {
-        Vector3 pos = transform.position + Vector3.down;
-
-        SetHitChecker((int)pos.x, (int)pos.z);
+        SetHitChecker(gimmickGridPos.x, gimmickGridPos.y);
     }
     // =========================
     // レイヒットオブジェクトの角度計算
