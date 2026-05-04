@@ -19,6 +19,7 @@ public class PlayerAction : MonoBehaviour
     public List<GameObject> gimmickKind;//所持しているギミックの種類
     
     private PlayerData playerData;
+    private GameObject currentRoom;
     GameObject interactObject = null;
 
     // Start is called before the first frame update
@@ -103,30 +104,28 @@ public class PlayerAction : MonoBehaviour
         {
             Debug.LogError("選択されたギミックにGimmickBaseコンポーネントが付いていません"); return;
         }
-        if (currentSoul - gimmick.requiredSoul <= 0) return;    // ソウルが足りない場合召喚しない
+        if (currentSoul - gimmick.requiredSoul < 0)
+        {
+            Debug.Log("ソウルが不足しています");
+            return;    // ソウルが足りない場合召喚しない
+        }
+        if (currentRoom == null)
+        {
+            Debug.Log("この部屋にトラップは配置できません");
+            return;    // 設置可能な部屋のみ設置する
+        }
 
-        var roomGrid = playerData.currentRoomData.GetPlayerRoomData().transform.GetChild(0).Find("Floors").Find("Plane").GetComponent<RoomGrid>();
+        var roomGrid = currentRoom.GetComponent<RoomGrid>();
 
         //ギミックの生成位置
         Vector3 settingPos = Vector3.zero;
-        settingPos = transform.position +
-            new Vector3(
-                transform.forward.x * roomGrid.gridSize.x,
-                0.0f,
-                transform.forward.z * roomGrid.gridSize.y);
+        settingPos = transform.position;
 
         //グリッドの位置に召喚を試みる
         if (!roomGrid.SetGimmickInGrid(settingPos, gimmick)) return;    // 召喚に失敗
 
         //ソウルの消費
         currentSoul -= gimmick.requiredSoul;
-
-        // ソウルが0未満になる場合は召喚を行わずソウル数を戻す
-        if (currentSoul < 0)
-        {
-            currentSoul += gimmick.requiredSoul;
-            Destroy(gimmick.gameObject);
-        }
     }
 
     //ソウルの数を加算する関数
@@ -147,7 +146,15 @@ public class PlayerAction : MonoBehaviour
         }
     }
 
-    private void OnCollisionExit(Collision collision)
+    private void OnTriggerEnter(Collider collision)
+    {
+        if (collision.gameObject.CompareTag("Floor"))
+        {
+            currentRoom = collision.gameObject;
+        }
+    }
+
+    private void OnTriggerExit(Collider collision)
     {
         if (collision.gameObject.CompareTag("Gimmick"))
         {
