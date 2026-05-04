@@ -53,6 +53,8 @@ public class GimmickBase : MonoBehaviour
     public float gimmickSizeX;
     [Tooltip("Y方向の大きさ"), Min(0)]
     public float gimmickSizeY;
+    [Tooltip("Z方向の大きさ"), Min(0)]
+    public float gimmickSizeZ;
 
     // 命中範囲
     [Header("命中範囲")]
@@ -60,6 +62,8 @@ public class GimmickBase : MonoBehaviour
     public float hitRangeX;
     [Tooltip("Y方向の命中範囲"), Min(0)]
     public float hitRangeY;
+    [Tooltip("Z方向の命中範囲"), Min(0)]
+    public float hitRangeZ;
 
     // 効果範囲
     [Header("効果範囲")]
@@ -67,6 +71,8 @@ public class GimmickBase : MonoBehaviour
     public float effectRangeX;
     [Tooltip("Y方向の効果範囲"), Min(0)]
     public float effectRangeY;
+    [Tooltip("Z方向の効果範囲"), Min(0)]
+    public float effectRangeZ;
 
     // 必要なソウル数
     [Header("必要ソウル数")]
@@ -132,7 +138,7 @@ public class GimmickBase : MonoBehaviour
         Vector3 meshSize = meshFilter.sharedMesh.bounds.size;
 
         float targetSizeX = gimmickSizeX * roomGrid.gridSize.x;
-        float targetSizeZ = gimmickSizeY * roomGrid.gridSize.y;
+        float targetSizeZ = gimmickSizeZ * roomGrid.gridSize.y;
 
         float scaleX = targetSizeX / meshSize.x;
         float scaleZ = targetSizeZ / meshSize.z;
@@ -214,8 +220,8 @@ public class GimmickBase : MonoBehaviour
             GameObject Effect = hitChecker.transform.Find("Effect").gameObject;
             GameObject Hit = hitChecker.transform.Find("Hit").gameObject;
 
-            Vector3 EffectSize = new Vector3(effectRangeX * roomGrid.gridSize.x,1, effectRangeY * roomGrid.gridSize.y);
-            Vector3 HitSize = new Vector3(hitRangeX * roomGrid.gridSize.x, 1, hitRangeY * roomGrid.gridSize.y);
+            Vector3 EffectSize = new Vector3(effectRangeX * roomGrid.gridSize.x,effectRangeY * roomGrid.gridSize.y, effectRangeZ * roomGrid.gridSize.y);
+            Vector3 HitSize = new Vector3(hitRangeX * roomGrid.gridSize.x, hitRangeY * roomGrid.gridSize.y, hitRangeZ * roomGrid.gridSize.y);
             
             EffectSize.x = EffectSize.x * (float)Adjust;
             EffectSize.y = EffectSize.y * (float)Adjust;
@@ -243,7 +249,7 @@ public class GimmickBase : MonoBehaviour
         }
 
         HitCheckerPos.x = HitCheckerPos.x * (float)Adjust;
-        HitCheckerPos.y = HitCheckerPos.y * (float)Adjust;
+        HitCheckerPos.y = (HitCheckerPos.y * (float)Adjust) + ((effectRangeY * roomGrid.gridSize.y) / 2.0f);
         HitCheckerPos.z = HitCheckerPos.z * (float)Adjust;
 
         hitChecker.transform.position = HitCheckerPos;
