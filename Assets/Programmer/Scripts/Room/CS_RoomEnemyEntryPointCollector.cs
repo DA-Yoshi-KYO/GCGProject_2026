@@ -7,6 +7,7 @@ using UnityEngine;
  *  制作者      : 吉本竜
  *  内容        : RoomCreatePoints配下から敵出入口として使うRoomMovePointを収集する
  *  履歴        : 2026/05/06 新規作成(ヨシモト)
+ *                2026/05/06 ScriptableObject参照を廃止し、最大出現数を直接取得する形へ変更(ヨシモト)
  *==================================================*/
 
 /// <summary>
@@ -32,7 +33,8 @@ public class CS_RoomEnemyEntryPointCollector : MonoBehaviour
 
     [Header("取得済み 敵出入口リスト")]
     [SerializeField]
-    private List<CS_RoomEnemyEntryPointData> list_EnemyEntryPointData = new List<CS_RoomEnemyEntryPointData>();
+    private List<CS_RoomEnemyEntryPointData> list_EnemyEntryPointData =
+        new List<CS_RoomEnemyEntryPointData>();
 
     /// <summary>
     /// 敵出入口リストを取得します。
@@ -65,6 +67,7 @@ public class CS_RoomEnemyEntryPointCollector : MonoBehaviour
     public void CollectEnemyEntryPointData()
     {
         list_EnemyEntryPointData.Clear();
+        IsCollected = false;
 
         Transform tr_SearchRoot = tr_RoomCreatePointsRoot;
 
@@ -122,9 +125,9 @@ public class CS_RoomEnemyEntryPointCollector : MonoBehaviour
         {
             CSE_RoomDoorDirection e_EnemyEntryDirection = list_EnemyEntryDirections[i];
 
-            if (!cs_RoomCreatePoint.TryGetEnemyEntryData(
+            if (!cs_RoomCreatePoint.TryGetEnemyEntryConnection(
                     e_EnemyEntryDirection,
-                    out CS_RoomEnemyEntryDataSO cs_RoomEnemyEntryDataSO))
+                    out CS_RoomMoveConnection cs_Connection))
             {
                 continue;
             }
@@ -140,12 +143,14 @@ public class CS_RoomEnemyEntryPointCollector : MonoBehaviour
                 continue;
             }
 
+            int int_MaxEnemySpawnCount = cs_Connection.GetMaxEnemySpawnCount();
+
             CS_RoomEnemyEntryPointData cs_EnemyEntryPointData =
                 new CS_RoomEnemyEntryPointData(
                     cs_RoomCreatePoint,
                     e_EnemyEntryDirection,
                     cs_RoomMovePoint,
-                    cs_RoomEnemyEntryDataSO);
+                    int_MaxEnemySpawnCount);
 
             list_EnemyEntryPointData.Add(cs_EnemyEntryPointData);
 

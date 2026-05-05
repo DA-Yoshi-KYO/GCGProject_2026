@@ -6,7 +6,7 @@ using UnityEngine;
  *  制作者      : 吉本竜
  *  内容        : RoomCreatePoint間の接続情報と出入口用途を管理する
  *  履歴        : 2026/04/27 新規作成(ヨシモト)
- *                2026/05/06 出入口用途と敵出入口データを追加(ヨシモト)
+ *                2026/05/06 出入口用途と敵最大出現数を追加(ヨシモト)
  *==================================================*/
 
 /// <summary>
@@ -27,9 +27,9 @@ public class CS_RoomMoveConnection
     [SerializeField]
     private CSE_RoomDoorDirection e_TargetOutDirection = CSE_RoomDoorDirection.Left;
 
-    [Header("敵出入口用データ")]
-    [SerializeField]
-    private CS_RoomEnemyEntryDataSO cs_RoomEnemyEntryDataSO;
+    [Header("敵出入口用 最大出現数")]
+    [SerializeField, Min(0)]
+    private int int_MaxEnemySpawnCount = 1;
 
     /// <summary>
     /// 出入口の用途を取得します。
@@ -52,9 +52,10 @@ public class CS_RoomMoveConnection
     public bool HasTarget => IsRoomMoveDoor && cs_TargetCreatePoint != null;
 
     /// <summary>
-    /// 敵出入口用データが設定されているか取得します。
+    /// 敵出入口として設定されているか取得します。
+    /// 既存処理との互換用に名前を残しています。
     /// </summary>
-    public bool HasEnemyEntryData => IsEnemyEntryDoor && cs_RoomEnemyEntryDataSO != null;
+    public bool HasEnemyEntryData => IsEnemyEntryDoor;
 
     /// <summary>
     /// 移動先RoomCreatePointを取得します。
@@ -67,21 +68,26 @@ public class CS_RoomMoveConnection
     public CSE_RoomDoorDirection TargetOutDirection => e_TargetOutDirection;
 
     /// <summary>
-    /// 敵出入口用データを取得します。
-    /// </summary>
-    public CS_RoomEnemyEntryDataSO RoomEnemyEntryDataSO => cs_RoomEnemyEntryDataSO;
-
-    /// <summary>
     /// この敵出入口から出現できる敵の最大数を取得します。
     /// </summary>
     /// <returns>最大出現数。</returns>
     public int GetMaxEnemySpawnCount()
     {
-        if (!HasEnemyEntryData)
+        if (!IsEnemyEntryDoor)
         {
             return 0;
         }
 
-        return cs_RoomEnemyEntryDataSO.GetMaxEnemySpawnCount();
+        return Mathf.Max(0, int_MaxEnemySpawnCount);
+    }
+
+    /// <summary>
+    /// 敵侵入数を取得します。
+    /// 互換用として、最大出現数を返します。
+    /// </summary>
+    /// <returns>最大出現数。</returns>
+    public int GetEnemyEntryCount()
+    {
+        return GetMaxEnemySpawnCount();
     }
 }
