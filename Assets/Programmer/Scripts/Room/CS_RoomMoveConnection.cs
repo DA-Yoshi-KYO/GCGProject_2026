@@ -4,16 +4,21 @@ using UnityEngine;
 /*==================================================
  *  ファイル名  : CS_RoomMoveConnection.cs
  *  制作者      : 吉本竜
- *  内容        : RoomCreatePoint間の接続情報
+ *  内容        : RoomCreatePoint間の接続情報と出入口用途を管理する
  *  履歴        : 2026/04/27 新規作成(ヨシモト)
+ *                2026/05/06 出入口用途と敵最大出現数を追加(ヨシモト)
  *==================================================*/
 
 /// <summary>
-/// RoomCreatePoint同士の接続情報です。
+/// RoomCreatePoint同士の接続情報と、出入口の用途を管理するクラスです。
 /// </summary>
 [Serializable]
 public class CS_RoomMoveConnection
 {
+    [Header("出入口の用途")]
+    [SerializeField]
+    private CSE_RoomDoorUsageType e_DoorUsageType = CSE_RoomDoorUsageType.RoomMove;
+
     [Header("移動先のRoomCreatePoint")]
     [SerializeField]
     private CS_RoomCreatePoint cs_TargetCreatePoint;
@@ -22,10 +27,35 @@ public class CS_RoomMoveConnection
     [SerializeField]
     private CSE_RoomDoorDirection e_TargetOutDirection = CSE_RoomDoorDirection.Left;
 
+    [Header("敵出入口用 最大出現数")]
+    [SerializeField, Min(0)]
+    private int int_MaxEnemySpawnCount = 1;
+
+    /// <summary>
+    /// 出入口の用途を取得します。
+    /// </summary>
+    public CSE_RoomDoorUsageType DoorUsageType => e_DoorUsageType;
+
+    /// <summary>
+    /// この出入口がルーム移動用かどうかを取得します。
+    /// </summary>
+    public bool IsRoomMoveDoor => e_DoorUsageType == CSE_RoomDoorUsageType.RoomMove;
+
+    /// <summary>
+    /// この出入口が敵出入口用かどうかを取得します。
+    /// </summary>
+    public bool IsEnemyEntryDoor => e_DoorUsageType == CSE_RoomDoorUsageType.EnemyEntry;
+
     /// <summary>
     /// 移動先RoomCreatePointが設定されているか取得します。
     /// </summary>
-    public bool HasTarget => cs_TargetCreatePoint != null;
+    public bool HasTarget => IsRoomMoveDoor && cs_TargetCreatePoint != null;
+
+    /// <summary>
+    /// 敵出入口として設定されているか取得します。
+    /// 既存処理との互換用に名前を残しています。
+    /// </summary>
+    public bool HasEnemyEntryData => IsEnemyEntryDoor;
 
     /// <summary>
     /// 移動先RoomCreatePointを取得します。
@@ -36,4 +66,28 @@ public class CS_RoomMoveConnection
     /// 移動先Roomの出現方向を取得します。
     /// </summary>
     public CSE_RoomDoorDirection TargetOutDirection => e_TargetOutDirection;
+
+    /// <summary>
+    /// この敵出入口から出現できる敵の最大数を取得します。
+    /// </summary>
+    /// <returns>最大出現数。</returns>
+    public int GetMaxEnemySpawnCount()
+    {
+        if (!IsEnemyEntryDoor)
+        {
+            return 0;
+        }
+
+        return Mathf.Max(0, int_MaxEnemySpawnCount);
+    }
+
+    /// <summary>
+    /// 敵侵入数を取得します。
+    /// 互換用として、最大出現数を返します。
+    /// </summary>
+    /// <returns>最大出現数。</returns>
+    public int GetEnemyEntryCount()
+    {
+        return GetMaxEnemySpawnCount();
+    }
 }

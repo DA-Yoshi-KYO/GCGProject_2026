@@ -4,39 +4,40 @@ using UnityEngine;
 /*==================================================
  *  ファイル名  : CS_RoomCreatePoint.cs
  *  制作者      : 吉本竜
- *  内容        : ランダム生成Roomの配置位置と接続情報を管理する
+ *  内容        : ランダム生成Roomの配置位置と出入口情報を管理する
  *  履歴        : 2026/04/27 新規作成(ヨシモト)
+ *                2026/05/06 出入口用途と敵最大出現数の取得処理を追加(ヨシモト)
  *==================================================*/
 
 /// <summary>
-/// ルーム生成位置と、各方向の移動接続情報を持つポイントです。
+/// ルーム生成位置と、各方向の出入口情報を持つポイントです。
 /// </summary>
 [DisallowMultipleComponent]
 public class CS_RoomCreatePoint : MonoBehaviour
 {
-    [Header("右出口の接続先")]
+    [Header("右出口の設定")]
     [SerializeField]
     private CS_RoomMoveConnection cs_RightConnection = new CS_RoomMoveConnection();
 
-    [Header("左出口の接続先")]
+    [Header("左出口の設定")]
     [SerializeField]
     private CS_RoomMoveConnection cs_LeftConnection = new CS_RoomMoveConnection();
 
-    [Header("前出口の接続先")]
+    [Header("前出口の設定")]
     [SerializeField]
     private CS_RoomMoveConnection cs_FrontConnection = new CS_RoomMoveConnection();
 
-    [Header("後ろ出口の接続先")]
+    [Header("後ろ出口の設定")]
     [SerializeField]
     private CS_RoomMoveConnection cs_BackConnection = new CS_RoomMoveConnection();
 
     /// <summary>
-    /// 指定方向の接続情報を取得します。
-    /// 接続先が未設定の場合はfalseを返します。
+    /// 指定方向のワープ接続情報を取得します。
+    /// 敵出入口や未設定の場合はfalseを返します。
     /// </summary>
-    /// <param name="e_FromDirection">このRoomから入る方向。</param>
+    /// <param name="e_FromDirection">このRoomから出る方向。</param>
     /// <param name="cs_Connection">取得した接続情報。</param>
-    /// <returns>接続先がある場合はtrue。</returns>
+    /// <returns>ワープ接続先がある場合はtrue。</returns>
     public bool TryGetConnection(
         CSE_RoomDoorDirection e_FromDirection,
         out CS_RoomMoveConnection cs_Connection)
@@ -49,6 +50,135 @@ public class CS_RoomCreatePoint : MonoBehaviour
         }
 
         return cs_Connection.HasTarget;
+    }
+
+    /// <summary>
+    /// 指定方向の敵出入口接続情報を取得します。
+    /// 敵出入口ではない場合はfalseを返します。
+    /// </summary>
+    /// <param name="e_FromDirection">確認したい出入口方向。</param>
+    /// <param name="cs_Connection">取得した接続情報。</param>
+    /// <returns>敵出入口の場合はtrue。</returns>
+    public bool TryGetEnemyEntryConnection(
+        CSE_RoomDoorDirection e_FromDirection,
+        out CS_RoomMoveConnection cs_Connection)
+    {
+        cs_Connection = GetConnection(e_FromDirection);
+
+        if (cs_Connection == null)
+        {
+            return false;
+        }
+
+        return cs_Connection.IsEnemyEntryDoor;
+    }
+
+    /// <summary>
+    /// 指定方向の敵最大出現数を取得します。
+    /// 敵出入口ではない場合は0を返します。
+    /// </summary>
+    /// <param name="e_FromDirection">確認したい出入口方向。</param>
+    /// <returns>敵の最大出現数。</returns>
+    public int GetMaxEnemySpawnCount(CSE_RoomDoorDirection e_FromDirection)
+    {
+        CS_RoomMoveConnection cs_Connection = GetConnection(e_FromDirection);
+
+        if (cs_Connection == null)
+        {
+            return 0;
+        }
+
+        return cs_Connection.GetMaxEnemySpawnCount();
+    }
+
+    /// <summary>
+    /// 指定方向の敵侵入数を取得します。
+    /// 互換用として、最大出現数を返します。
+    /// </summary>
+    /// <param name="e_FromDirection">確認したい出入口方向。</param>
+    /// <returns>敵の最大出現数。</returns>
+    public int GetEnemyEntryCount(CSE_RoomDoorDirection e_FromDirection)
+    {
+        return GetMaxEnemySpawnCount(e_FromDirection);
+    }
+
+    /// <summary>
+    /// 指定方向の扉用途を取得します。
+    /// </summary>
+    /// <param name="e_FromDirection">確認したい出入口方向。</param>
+    /// <returns>扉の用途。</returns>
+    public CSE_RoomDoorUsageType GetDoorUsageType(CSE_RoomDoorDirection e_FromDirection)
+    {
+        CS_RoomMoveConnection cs_Connection = GetConnection(e_FromDirection);
+
+        if (cs_Connection == null)
+        {
+            return CSE_RoomDoorUsageType.None;
+        }
+
+        return cs_Connection.DoorUsageType;
+    }
+
+    /// <summary>
+    /// ワープ接続先が設定されている方向を全て取得します。
+    /// </summary>
+    /// <returns>ワープ接続先がある方向リスト。</returns>
+    public List<CSE_RoomDoorDirection> GetConnectDirections()
+    {
+        List<CSE_RoomDoorDirection> list_ConnectDirections = new List<CSE_RoomDoorDirection>();
+
+        if (cs_RightConnection.HasTarget)
+        {
+            list_ConnectDirections.Add(CSE_RoomDoorDirection.Right);
+        }
+
+        if (cs_LeftConnection.HasTarget)
+        {
+            list_ConnectDirections.Add(CSE_RoomDoorDirection.Left);
+        }
+
+        if (cs_FrontConnection.HasTarget)
+        {
+            list_ConnectDirections.Add(CSE_RoomDoorDirection.Front);
+        }
+
+        if (cs_BackConnection.HasTarget)
+        {
+            list_ConnectDirections.Add(CSE_RoomDoorDirection.Back);
+        }
+
+        return list_ConnectDirections;
+    }
+
+    /// <summary>
+    /// 敵出入口として設定されている方向を全て取得します。
+    /// </summary>
+    /// <returns>敵出入口の方向リスト。</returns>
+    public List<CSE_RoomDoorDirection> GetEnemyEntryDirections()
+    {
+        List<CSE_RoomDoorDirection> list_EnemyEntryDirections = new List<CSE_RoomDoorDirection>();
+
+        if (cs_RightConnection.IsEnemyEntryDoor)
+        {
+            list_EnemyEntryDirections.Add(CSE_RoomDoorDirection.Right);
+        }
+
+        if (cs_LeftConnection.IsEnemyEntryDoor)
+        {
+            list_EnemyEntryDirections.Add(CSE_RoomDoorDirection.Left);
+        }
+
+        if (cs_FrontConnection.IsEnemyEntryDoor)
+        {
+            list_EnemyEntryDirections.Add(CSE_RoomDoorDirection.Front);
+        }
+
+        if (cs_BackConnection.IsEnemyEntryDoor)
+        {
+            list_EnemyEntryDirections.Add(CSE_RoomDoorDirection.Back);
+        }
+
+        return list_EnemyEntryDirections;
     }
 
     /// <summary>
@@ -75,31 +205,5 @@ public class CS_RoomCreatePoint : MonoBehaviour
             default:
                 return null;
         }
-    }
-
-    /// <summary>
-    /// 接続先が設定されている方向を全て取得します。
-    /// </summary>
-    /// <returns></returns>
-    public List<CSE_RoomDoorDirection> GetConnectDirections()
-    {
-        List<CSE_RoomDoorDirection> list = new List<CSE_RoomDoorDirection>();
-        if (cs_RightConnection.HasTarget)
-        {
-            list.Add(CSE_RoomDoorDirection.Right);
-        }
-        if (cs_LeftConnection.HasTarget)
-        {
-            list.Add(CSE_RoomDoorDirection.Left);
-        }
-        if (cs_FrontConnection.HasTarget)
-        {
-            list.Add(CSE_RoomDoorDirection.Front);
-        }
-        if (cs_BackConnection.HasTarget)
-        {
-            list.Add(CSE_RoomDoorDirection.Back);
-        }
-        return list;
     }
 }

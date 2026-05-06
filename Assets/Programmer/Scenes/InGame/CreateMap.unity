@@ -353,6 +353,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
+      propertyPath: cs_BackConnection.e_DoorUsageType
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
       propertyPath: cs_LeftConnection.cs_TargetCreatePoint
       value: 
       objectReference: {fileID: 0}
@@ -370,6 +375,11 @@ PrefabInstance:
         type: 3}
       propertyPath: cs_FrontConnection.e_TargetOutDirection
       value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_BackConnection.int_MaxEnemySpawnCount
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 6285496938507336483, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
@@ -8820,6 +8830,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1209633821}
+  - component: {fileID: 1209633822}
   m_Layer: 0
   m_Name: RoomCreatePoints
   m_TagString: Untagged
@@ -8850,6 +8861,23 @@ Transform:
   - {fileID: 1350434192}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1209633822
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1209633820}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a853a4e85fcd046499246999789a3fe2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tr_RoomCreatePointsRoot: {fileID: 1209633821}
+  str_RoomCreatePointTag: RoomCreatePoint
+  f_SearchDelaySeconds: 0.2
+  bool_IsDebugLog: 1
+  list_EnemyEntryPointData: []
 --- !u!1001 &1224970390
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -11450,6 +11478,7 @@ GameObject:
   - component: {fileID: 1680651119}
   - component: {fileID: 1680651121}
   - component: {fileID: 1680651122}
+  - component: {fileID: 1680651123}
   m_Layer: 0
   m_Name: RoomManager
   m_TagString: Untagged
@@ -11544,6 +11573,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   player: {fileID: 91267025467519389, guid: c5f61974942052e4885cf10b80a7166b, type: 3}
   bool_IsDebugCurrentRoom: 1
+--- !u!114 &1680651123
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1680651117}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1291b9dfc0ef6e640b58f1feb3508486, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cs_RoomEnemyEntryPointCollector: {fileID: 1209633822}
 --- !u!1001 &1691444841
 PrefabInstance:
   m_ObjectHideFlags: 0
