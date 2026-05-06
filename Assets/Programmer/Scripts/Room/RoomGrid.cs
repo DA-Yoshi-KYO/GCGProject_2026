@@ -2,8 +2,10 @@
  *    部屋のグリッド生成、管理
  * ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
  *    吉田 京志郎
+ *    大瀧蓮
  * ----------------------------------------------------------
  * 2026-04-21 | 初回作成
+ * 2026-05-06 | 偶数サイズギミックにおけるグリッド位置の補正を追加：大瀧
  * 
  */
 using System;
@@ -68,6 +70,39 @@ public class RoomGrid : MonoBehaviour
 
         Vector3 spawnPos = GetWorldPosFromGrid(grid);
         if (spawnPos == Vector3.positiveInfinity) return false;
+
+        // 大瀧編集部=========================
+        float sizeX = gimmick.gimmickSizeX;
+        float sizeY = gimmick.gimmickSizeY;
+
+        // グリッドサイズ
+        float gridSizeX = gridSize.x;
+        float gridSizeY = gridSize.y;
+
+        // 半分オフセット
+        float offsetX = sizeX * 0.5f;
+        float offsetY = sizeY * 0.5f;
+
+        // 偶数サイズ補正（囲碁）
+        if ((int)sizeX % 2 == 0)
+        {
+            if (pos.x <= spawnPos.x)
+                offsetX -= 1f * gridSizeX;   // 左に1マス 
+        }
+        if ((int)sizeY % 2 == 0)
+        {
+            if (pos.z <= spawnPos.z)
+                offsetY -= 1f * gridSizeY;   // 下に1マス
+        }
+        // ワールド座標に変換
+        offsetX *= gridSizeX;
+        offsetY *= gridSizeY;
+
+        // 中心が grid に来るように補正
+        spawnPos.x += offsetX - (gridSizeX * 0.5f);
+        spawnPos.z += offsetY - (gridSizeY * 0.5f);
+        // ===================================
+
         Ray ray = new Ray();
         ray.direction = Vector3.down;
         const float rayOriginY = 255f;
