@@ -19,8 +19,10 @@ public class PlayerMove : MonoBehaviour
     
     private Rigidbody rb;
     private PlayerData playerData;  // プレイヤーのデータ
-    private bool isGround;//接地判定
+
     private float rotateSpeed = 10.0f;//回転のスピード
+
+    private int jumpCount = 1;//ジャンプできる回数
 
     private Vector3 wallNormal;//壁の法線ベクトル
     private bool touchingWall;//壁に当たっているかどうか
@@ -116,18 +118,26 @@ public class PlayerMove : MonoBehaviour
 
     void Update()
     {
-        //二段ジャンプしないようにするための処理
-        Vector3 rayPos = transform.position;
-        rayPos.y += 0.5f;
-
-        isGround = Physics.Raycast(rayPos, Vector3.down, 0.5f);
-
         //ジャンプ
-        if (playerData.playerInput.Player.Jump.triggered && isGround)
+        if (playerData.playerInput.Player.Jump.triggered && jumpCount > 0)
         {
             rb.AddForce(new Vector3(0.0f, 1.0f, 0.0f) * jumpAmount, ForceMode.Impulse);
+            jumpCount--;
         }
     }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        //床に接地している場合ジャンプ回数を戻す
+        foreach (ContactPoint contact in collision.contacts)
+        {
+            if (contact.normal.y > 0.5f)
+            {
+                jumpCount = 1;
+            }
+        }
+    }
+
     private void OnCollisionStay(Collision collision)
     {
         touchingWall = false;
@@ -138,7 +148,7 @@ public class PlayerMove : MonoBehaviour
             Vector3 normal = contact.normal;
 
             //床は処理しない
-            if (Mathf.Abs(normal.y) > 0.5f)
+            if (normal.y > 0.8f)
                 continue;
 
             //壁に触れている
