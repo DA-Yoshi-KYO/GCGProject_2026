@@ -58,7 +58,7 @@ public class RoomNode : MonoBehaviour
         {
             case CSE_RoomDoorDirection.Right:
                 {
-                    Transform rightWall = wallParent.transform.Find("Righ");
+                    Transform rightWall = wallParent.transform.Find("Right");
 
                     wallChilds = rightWall.GetComponentsInChildren<Transform>();
                 }
