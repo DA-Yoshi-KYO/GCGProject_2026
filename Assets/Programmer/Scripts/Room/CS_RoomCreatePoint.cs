@@ -6,7 +6,7 @@ using UnityEngine;
  *  制作者      : 吉本竜
  *  内容        : ランダム生成Roomの配置位置と出入口情報を管理する
  *  履歴        : 2026/04/27 新規作成(ヨシモト)
- *                2026/05/06 出入口用途と敵最大出現数の取得処理を追加(ヨシモト)
+ *                2026/05/06 出入口用途と敵侵入設定の取得処理を追加(ヨシモト)
  *==================================================*/
 
 /// <summary>
@@ -53,24 +53,32 @@ public class CS_RoomCreatePoint : MonoBehaviour
     }
 
     /// <summary>
-    /// 指定方向の敵出入口接続情報を取得します。
-    /// 敵出入口ではない場合はfalseを返します。
+    /// 指定方向の敵出入口データを取得します。
+    /// 敵出入口ではない場合、またはデータ未設定の場合はfalseを返します。
     /// </summary>
     /// <param name="e_FromDirection">確認したい出入口方向。</param>
-    /// <param name="cs_Connection">取得した接続情報。</param>
-    /// <returns>敵出入口の場合はtrue。</returns>
-    public bool TryGetEnemyEntryConnection(
+    /// <param name="cs_EnemyEntryDataSO">取得した敵出入口データ。</param>
+    /// <returns>敵出入口データがある場合はtrue。</returns>
+    public bool TryGetEnemyEntryData(
         CSE_RoomDoorDirection e_FromDirection,
-        out CS_RoomMoveConnection cs_Connection)
+        out CSS_RoomEnemyEntryData cs_EnemyEntryDataSO)
     {
-        cs_Connection = GetConnection(e_FromDirection);
+        cs_EnemyEntryDataSO = null;
+
+        CS_RoomMoveConnection cs_Connection = GetConnection(e_FromDirection);
 
         if (cs_Connection == null)
         {
             return false;
         }
 
-        return cs_Connection.IsEnemyEntryDoor;
+        if (!cs_Connection.HasEnemyEntryData)
+        {
+            return false;
+        }
+
+        cs_EnemyEntryDataSO = cs_Connection.RoomEnemyEntryDataSO;
+        return true;
     }
 
     /// <summary>
@@ -158,22 +166,22 @@ public class CS_RoomCreatePoint : MonoBehaviour
     {
         List<CSE_RoomDoorDirection> list_EnemyEntryDirections = new List<CSE_RoomDoorDirection>();
 
-        if (cs_RightConnection.IsEnemyEntryDoor)
+        if (cs_RightConnection.HasEnemyEntryData)
         {
             list_EnemyEntryDirections.Add(CSE_RoomDoorDirection.Right);
         }
 
-        if (cs_LeftConnection.IsEnemyEntryDoor)
+        if (cs_LeftConnection.HasEnemyEntryData)
         {
             list_EnemyEntryDirections.Add(CSE_RoomDoorDirection.Left);
         }
 
-        if (cs_FrontConnection.IsEnemyEntryDoor)
+        if (cs_FrontConnection.HasEnemyEntryData)
         {
             list_EnemyEntryDirections.Add(CSE_RoomDoorDirection.Front);
         }
 
-        if (cs_BackConnection.IsEnemyEntryDoor)
+        if (cs_BackConnection.HasEnemyEntryData)
         {
             list_EnemyEntryDirections.Add(CSE_RoomDoorDirection.Back);
         }
