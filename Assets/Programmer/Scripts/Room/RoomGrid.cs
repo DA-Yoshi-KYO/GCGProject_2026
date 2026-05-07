@@ -18,26 +18,157 @@ public class RoomGrid : MonoBehaviour
     public Vector2 gridSize { get; private set; } = new Vector2(1, 1);   // グリッド1マスの大きさ
     private Renderer rendererMaterial; // グリッドのマテリアル
     List<List<GameObject>> gridGimmicks;
+    GameObject[,] gridObjects;
+    public enum GridOrigin
+    {
+        [Header("北西")] NorthWest,  // 北西
+        [Header("北東")] NorthEast,  // 北東
+        [Header("南西")] SouthWest,  // 南西
+        [Header("南東")] SouthEast,  // 南東
+    }
+    [Header("グリッドの原点(ここを[0,0]とし、溢れ判定を行う)")][SerializeField] private GridOrigin gridOrigin = GridOrigin.NorthWest;
 
     void Start()
     {
-        rendererMaterial = GetComponent<Renderer>();
-        if (rendererMaterial != null)
-        {
-            rendererMaterial.material.SetVector("_GridNum", new Vector4(gridDivision.x, gridDivision.y, 0, 0));
-        }
-        else        
-        {
-            Debug.LogWarning("RoomGrid: Material not found on the GameObject.");
-        }
+        /*
+                rendererMaterial = GetComponent<Renderer>();
+                if (rendererMaterial != null)
+                {
+                    rendererMaterial.material.SetVector("_GridNum", new Vector4(gridDivision.x, gridDivision.y, 0, 0));
+                }
+                else        
+                {
+                    Debug.LogWarning("RoomGrid: Material not found on the GameObject.");
+                }
+        */
 
+        // グリッド上のギミック情報を初期化
         gridGimmicks = new List<List<GameObject>>();
-        for (int i = 0 ; i < gridDivision.y ; i++)
+        for (int i = 0 ; i < gridDivision.y ; i++)  // グリッド[y][x]として保存
         {
             gridGimmicks.Add(new List<GameObject>());
             for (int j = 0 ; j < gridDivision.x ; j++)
             {
                 gridGimmicks[i].Add(null);
+            }
+        }
+
+        // グリッドから溢れているかチェックする
+        const int gridCellNumX = 3;
+        const int gridCellNumY = 3;
+        if (gridDivision.x % gridCellNumX == 0 && gridDivision.y % gridCellNumY == 0) return;
+
+        // グリッドから溢れたマスをカリングする
+        Vector2Int gridObjectLength = new Vector2Int(Mathf.CeilToInt((float)gridDivision.x / (float)gridCellNumX), Mathf.CeilToInt((float)gridDivision.y / (float)gridCellNumY));   // マス目は1グリッドあたり3つ;
+        gridObjects = new GameObject[gridObjectLength.y, gridObjectLength.x];
+        
+        Vector3 center = Vector3.zero;
+        int floorCount = 0;
+        foreach (Transform child in transform)
+        {
+            if (!child.gameObject.name.Contains("Floor")) continue;
+            center += child.localPosition;
+            floorCount++;
+        }
+        center /= floorCount;
+
+        // Floorの座標から3*3グリッドに変換
+        foreach (Transform child in transform)
+        {
+            if (!child.gameObject.name.Contains("Floor")) continue; // Floorオブジェクトのみ探索する
+
+            Vector3 localPos = child.localPosition; // 床から見た相対座標
+
+            // 左右前後の座標を計算
+            float left = center.x - gridDivision.x / 2.0f;
+            float right = center.x + gridDivision.x / 2.0f; 
+            float top = center.z + gridDivision.y / 2.0f;
+            float bottom = center.z - gridDivision.y / 2.0f;
+
+            // グリッド座標(float)
+            float fX = 0.0f;
+            float fZ = 0.0f;
+
+            // 基準点を元にグリッド座標に変換
+            switch (gridOrigin)
+            {
+                case GridOrigin.NorthWest:
+                    fX = localPos.x - left;
+                    fZ = top - localPos.z;
+                    break;
+                case GridOrigin.NorthEast:
+                    fX = right - localPos.x;
+                    fZ = top - localPos.z;
+                    break;
+                case GridOrigin.SouthWest:
+                    fX = localPos.x - left;
+                    fZ = localPos.z - bottom;
+                    break;
+                case GridOrigin.SouthEast:
+                    fX = right - localPos.x;
+                    fZ = localPos.z - bottom;
+                    break;
+            }
+
+            // グリッド座標をintに変換(切り捨て)
+            int x = Mathf.FloorToInt(fX / gridCellNumX);
+            int z = Mathf.FloorToInt(fZ / gridCellNumY);
+
+            gridObjects[z, x] = child.gameObject;
+        }
+
+        // それぞれどれだけ溢れているかチェックする
+        Vector2Int overflowObjectNum = new Vector2Int(gridObjects.GetLength(1), gridObjects.GetLength(0));
+        Vector2Int overflow = new Vector2Int(overflowObjectNum.x * gridCellNumX - gridDivision.x, overflowObjectNum.y * gridCellNumY - gridDivision.y);
+        Vector2Int overflowNum = overflow;
+        Vector2Int overflowObjectIndex = new Vector2Int(overflowObjectNum.x - 1, overflowObjectNum.y - 1);
+        int forcedQuitCount = 0;
+        while (overflowNum.x >= 0 && overflow.y >= 0)
+        {
+            if (overflowNum.x > 0)
+            {
+                float ratio = overflowNum.x >= gridCellNumX ? gridCellNumX : overflowNum.x;
+                switch (gridOrigin)
+                {
+                    case GridOrigin.NorthEast:
+                    case GridOrigin.SouthEast:
+                        ratio = -ratio;
+                        break;
+                }
+                for (int i = 0 ; i < overflowObjectNum.y ; i++)
+                {
+                    gridObjects[i, overflowObjectIndex.x].GetComponent<Renderer>().material.SetFloat("_CurringUVX", ratio / (float)gridCellNumX);
+                }
+                overflowObjectIndex.x--;
+                overflowNum.x -= gridCellNumX;
+            }
+            if (overflowNum.y > 0)
+            {
+                float ratio = overflowNum.y >= gridCellNumY ? gridCellNumY : overflowNum.y;
+                switch (gridOrigin)
+                {
+                    case GridOrigin.NorthWest:
+                        break;
+                    case GridOrigin.NorthEast:
+                        break;
+                    case GridOrigin.SouthWest:
+                        break;
+                    case GridOrigin.SouthEast:
+                        break;
+                }
+                for (int i = 0 ; i < overflowObjectNum.x ; i++)
+                {
+                    gridObjects[overflowObjectIndex.y, i].GetComponent<Renderer>().material.SetFloat("_CurringUVY", ratio / (float)gridCellNumY);
+                }
+                overflowObjectIndex.y--;
+                overflowNum.y -= gridCellNumY;
+            }
+
+            forcedQuitCount ++;
+            if (forcedQuitCount > 50)
+            {
+                Debug.LogError("RoomGrid.cs Start() was forced to quited!!");
+                break;
             }
         }
     }
@@ -78,7 +209,7 @@ public class RoomGrid : MonoBehaviour
         // グリッドサイズ
         float gridSizeX = gridSize.x;
         float gridSizeY = gridSize.y;
-
+    
         // 半分オフセット
         float offsetX = sizeX * 0.5f;
         float offsetY = sizeY * 0.5f;
@@ -181,7 +312,6 @@ public class RoomGrid : MonoBehaviour
             (gridDivision.y * gridSize.y) * 0.5f - gridPos.y * gridSize.y - gridSize.x * 0.5f
         );
         
-        Debug.Log($"relativePos: {relativePos}");
         Vector3 localPos = new Vector3(relativePos.x, transform.position.y, relativePos.y);
         Vector3 worldPos = transform.TransformPoint(localPos);
         worldPos.y = transform.position.y;
