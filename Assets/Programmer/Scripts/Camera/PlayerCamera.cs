@@ -13,6 +13,8 @@ public class PlayerCamera : MonoBehaviour
 {
     private PlayerData playerData;// プレイヤーのデータ
 
+    private RoomCamera roomCamera;//部屋のカメラ
+
     private GameObject roomCameraObject;//部屋のカメラ
     private GameObject upCameraObject;//上視点のカメラ
 
@@ -37,13 +39,15 @@ public class PlayerCamera : MonoBehaviour
         GameObject currentRoom = playerData.currentRoomData.GetPlayerRoomData();
 
         roomCameraObject = currentRoom.transform.GetComponentInChildren<Camera>().gameObject;
-        roomCameraObject.GetComponent<Camera>().depth = 1;
+        roomCameraObject.GetComponent<Camera>().enabled = true;
+
+        roomCamera = roomCameraObject.GetComponent<RoomCamera>();
 
         upCameraObject = GameObject.Find("UpCamera");
         Vector3 upCameraPos = currentRoom.transform.position;
         upCameraPos.y += upDirection;
         upCameraObject.transform.position = upCameraPos;
-        upCameraObject.GetComponent<Camera>().depth = -1;
+        upCameraObject.GetComponent<Camera>().enabled = false;
     }
 
     // Update is called once per frame
@@ -67,6 +71,8 @@ public class PlayerCamera : MonoBehaviour
                     break;
             }
         }
+
+        //現在のカメラの処理
         switch (currentMode)
         {
             case PlayerData.PlayerMode.Normal:
@@ -96,6 +102,21 @@ public class PlayerCamera : MonoBehaviour
     {
         cameraRight = roomCameraObject.transform.right;
         cameraForward = roomCameraObject.transform.forward;
+
+        //プレイヤーに追従して移動
+        Vector3 moveAmount = playerData.currentRoomData.GetPlayerRoomData().transform.position - transform.position;
+
+        moveAmount.y = 0.0f;
+
+        //カメラの移動の制限値
+        moveAmount.x = Mathf.Min(moveAmount.x, roomCamera.moveAmountLimit.x); 
+        moveAmount.x = Mathf.Max(moveAmount.x, -roomCamera.moveAmountLimit.x); 
+
+        moveAmount.z = Mathf.Min(moveAmount.z, roomCamera.moveAmountLimit.z); 
+        moveAmount.z = Mathf.Max(moveAmount.z, -roomCamera.moveAmountLimit.z); 
+
+        roomCameraObject.transform.position = roomCamera.initPos - moveAmount;
+
     }
 
     //上視点のカメラ処理
@@ -110,13 +131,15 @@ public class PlayerCamera : MonoBehaviour
     /// </summary>
     public void OnRoomMove()
     {
-        roomCameraObject.GetComponent<Camera>().depth = -1;
+        roomCameraObject.GetComponent<Camera>().enabled = false;
 
         GameObject currentRoom = playerData.currentRoomData.GetPlayerRoomData();
         roomCameraObject = currentRoom.transform.GetComponentInChildren<Camera>().gameObject;
+        
+        roomCamera = roomCameraObject.GetComponent<RoomCamera>();
 
         if (playerData.currentMode == PlayerData.PlayerMode.Normal)
-            roomCameraObject.GetComponent<Camera>().depth = 1;
+            roomCameraObject.GetComponent<Camera>().enabled = true;
 
         Vector3 upCameraPos = currentRoom.transform.GetChild(0).Find("Center").transform.position;
         upCameraPos.y += upDirection;
