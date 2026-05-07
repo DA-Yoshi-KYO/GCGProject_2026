@@ -16,6 +16,9 @@
  * 2026-04-26 | 気絶後の退場処理を仮作成
  *            | 宝物を持って移動する処理を仮作成
  * 2026-04-27 | 部屋移動の閾値に達していたら次の部屋に移動する処理を追加
+ * 2026-04-28 | 次の部屋に移動するための移動ポイントを決定するロジックを追加
+ * 2026-05-01 | 帰宅ルートを構築するロジックを追加
+ * 2026-05-07 | CS_RoomEnemyEntryPointDataを用いた初期部屋の設定の記載
  * 
  */
 using System.Collections.Generic;
@@ -53,11 +56,17 @@ public class ThiefAI : MonoBehaviour
         Stun    // 気絶
     }
 
+    
     [Tooltip("現在いる部屋の情報")]
     private RoomNode currentRoom;
     private GameObject currentRoomObject;
     [Tooltip("部屋に関する記憶")]
     private Dictionary<RoomNode, RoomMemory> roomMemories;
+
+    [Tooltip("視認オブジェクトの記憶")]
+    private Dictionary<VisionTarget, VisionTargetMemory> visionTargetMemories;
+
+    [SerializeField]//("※※※※※デバック表示※※※※※")
     [Tooltip("探索対象")]
     private ThiefTarget currentTarget;
     public ThiefTarget CurrentTarget => currentTarget;
@@ -99,7 +108,6 @@ public class ThiefAI : MonoBehaviour
     private ThiefReaction thiefReaction;
 
     [Tooltip("最初の部屋のオブジェクト")]
-    private GameObject firstRoomObject;
     private RoomNode firstRoom;
     private Transform firstEntryPoint; // 最初に入ってきたドアの位置(逃走ルートの最終目的位置)
 
@@ -108,7 +116,7 @@ public class ThiefAI : MonoBehaviour
 
 
     // 泥棒の耐久力と移動速度を設定するメソッド
-    public void Setting(ThiefTypeData typedata, ThiefData data, float playerSpeed, RoomNode entryRoom, Transform entryPoint = null)
+    public void Setting(ThiefTypeData typedata, ThiefData data, float playerSpeed, RoomNode entryRoom, Transform entryPoint)
     {
         /*未実装、未設定　*///data.jumpHeight;
         /*未設定、未設定　*///data.alertTime;
@@ -132,6 +140,9 @@ public class ThiefAI : MonoBehaviour
         // 部屋の記憶を初期化
         roomMemories = new Dictionary<RoomNode, RoomMemory>();
 
+        // 視認オブジェクトの記憶を初期化
+        visionTargetMemories = new Dictionary<VisionTarget, VisionTargetMemory>();
+
         // 初期部屋の記憶を作成
         roomMemories[currentRoom] = new RoomMemory();
         roomMemories[currentRoom].FirstSetting();
@@ -145,8 +156,9 @@ public class ThiefAI : MonoBehaviour
         // 泥棒のリアクションを管理するコンポーネントを取得
         thiefReaction = GetComponent<ThiefReaction>();
 
+        // 最初の部屋と入ってきたドアの位置を保存
         firstRoom = entryRoom;
-        firstRoomObject = entryRoom.gameObject;
+        firstEntryPoint = entryPoint;
     }
 
     private void Start()
@@ -182,9 +194,16 @@ public class ThiefAI : MonoBehaviour
 
         ChangeFace(ReactionSpriteType.Normal);
 
+        // 探索対象がない場合や、探索度が次の部屋に移動するための閾値を超えている場合は、次の部屋に移動するための処理を追加する
         if (isNextRoomMovePointDecided || roomMemories[currentRoom].explorationLevel >= nextRoomSearchThreshold)
         {
-            if (nextRoomMovePoint == null) NextDoorElection();
+            if (nextRoomMovePoint == null)
+            {
+                // 次の部屋に移動するための移動ポイントが決まっていない場合は、次の部屋に移動するための移動ポイントを決定するロジックを実行する
+                NextDoorElection();
+                // 再取得してもnullの場合
+                if (nextRoomMovePoint == null) return;
+            }
 
             navMeshAgent.SetDestination(nextRoomMovePoint.position);
 
@@ -202,7 +221,7 @@ public class ThiefAI : MonoBehaviour
         if (currentTarget is VisionTarget)
         {
             // 探索対象が既に探索済みの場合
-            if (((VisionTarget)currentTarget).isExplored)
+            if (visionTargetMemories[((VisionTarget)currentTarget)].isExplored)
             {
                 DecideTarget();
             }
@@ -239,7 +258,7 @@ public class ThiefAI : MonoBehaviour
                         else
                         {
                             // 探索対象を探索済みに設定
-                            ((VisionTarget)currentTarget).isExplored = true;
+                            visionTargetMemories[((VisionTarget)currentTarget)].isExplored = true;
                             // 探索度を加算
                             roomMemories[currentRoom].explorationLevel += ((VisionTarget)currentTarget).explorationValue;
 
@@ -256,7 +275,7 @@ public class ThiefAI : MonoBehaviour
                         }
                     }
                 }
-                else ((VisionTarget)currentTarget).explorationProgress = 0; // 探索対象から十分に離れた場合は、探索進行度をリセットする
+                else visionTargetMemories[((VisionTarget)currentTarget)].explorationProgress = 0; // 探索対象から離れた場合は、探索の進行度をリセットする
             }
         }
         else
@@ -362,7 +381,7 @@ public class ThiefAI : MonoBehaviour
             // 退場する処理を追加する
             Debug.Log("泥棒が退場");
             
-            //Destroy(gameObject);
+            Destroy(gameObject);
         }
     }
 
@@ -398,6 +417,9 @@ public class ThiefAI : MonoBehaviour
 
             // 新しいオブジェクトを記憶に追加
             roomMemories[currentRoom].recognizedObjects.Add(target);
+            // 記憶領域の作成
+            if(target is VisionTarget)visionTargetMemories[((VisionTarget)target)] = new VisionTargetMemory();
+
             isNewObjectRecognized = true; // 新たに視認したオブジェクトがある場合はフラグを立てる
         }
 
@@ -420,7 +442,7 @@ public class ThiefAI : MonoBehaviour
         foreach (var entry in roomMemories[currentRoom].recognizedObjects)
         {
             // 未探索のオブジェクトがある場合はtrueを返す
-            if (!entry.isExplored) return true;
+            if (!visionTargetMemories[((VisionTarget)entry)].isExplored) return true;
         }
 
         // 全てのオブジェクトが探索済みの場合はfalseを返す
@@ -441,7 +463,7 @@ public class ThiefAI : MonoBehaviour
             foreach (var entry in roomMemories[currentRoom].recognizedObjects)
             {
                 // 既に探索済みのオブジェクトはスキップ
-                if (entry.isExplored) continue;
+                if (visionTargetMemories[((VisionTarget)entry)].isExplored) continue;
 
                 // 既に探索対象に設定しているオブジェクトはスキップ
                 if (entry == currentTarget) continue;
@@ -663,7 +685,12 @@ public class ThiefAI : MonoBehaviour
     private void FindNowRoomNode()
     {
         GameObject currentobject = CS_RoomCreatePointRaycast.GetRayRoomCreatePoint(this.gameObject);
-        if (currentobject == null) Debug.LogWarning("【泥棒】現在いる部屋に関するオブジェクトの取得に失敗しました");
+        if (currentobject == null)
+        {
+            Debug.LogWarning("【泥棒】現在いる部屋に関するオブジェクトの取得に失敗しました");
+            return;
+        }
+
         currentRoom = currentobject.transform.GetComponentInChildren<RoomNode>();
         currentRoomObject = currentobject;
 
@@ -680,6 +707,13 @@ public class ThiefAI : MonoBehaviour
     /// </summary>
     private void NextDoorElection()
     {
+        if (currentRoomObject == null)
+        {
+            FindNowRoomNode();
+            Debug.LogError("【泥棒】現在いる部屋のオブジェクトが見つかりませんでした。ThiefAIのNextDoorElectionメソッドで、次に設定する移動ポイントを決定するロジックが正常に動作しない可能性があります。");
+            return;
+        }
+
         CS_RoomCreatePoint roomCreatePoint = currentRoomObject.transform.GetComponent<CS_RoomCreatePoint>();
         if (roomCreatePoint == null)
         {
@@ -695,8 +729,17 @@ public class ThiefAI : MonoBehaviour
             return;
         }
 
-        // 接続している部屋の方向をランダムに選択
-        int randomIndex = Random.Range(0, connectDirs.Count);
+        int randomIndex = 0;
+        while (true)
+        {
+            // 接続している部屋の方向をランダムに選択
+            randomIndex = Random.Range(0, connectDirs.Count);
+
+            CS_RoomMoveConnection nextRoom;
+            roomCreatePoint.TryGetConnection(connectDirs[randomIndex], out nextRoom);
+
+            if (!roomMemories.ContainsKey(nextRoom.TargetCreatePoint.GetComponentInChildren<RoomNode>())) break;
+        }
 
         // 選択した方向にあるドアの位置を次の移動ポイントに設定
         nextRoomMovePoint = currentRoom.GetDirectionWallToDoor(connectDirs[randomIndex]);
@@ -749,13 +792,17 @@ public class ThiefAI : MonoBehaviour
         // 探索対象がない場合は、falseを返す
         if (currentTarget == null) return false;
 
+        // 現在の探索対象が視認オブジェクト(VisionTarget)でない場合は、falseを返す
+        if (!(currentTarget is VisionTarget)) return false;
+
         // 探索対象の探索にかかる時間を経過させる
         //　((VisionTarget)currentTarget).explorationProgress　: 対象の探索度(MAX : 100.0f)
         // searchTime : 探索対象の探索にかかる時間
-        ((VisionTarget)currentTarget).explorationProgress += (100.0f / searchTime) * Time.deltaTime;
+        visionTargetMemories[((VisionTarget)currentTarget)].explorationProgress += (100.0f / searchTime) * Time.deltaTime;
+        Debug.Log($"探索対象の探索度: {visionTargetMemories[((VisionTarget)currentTarget)].explorationProgress}");
 
         // 探索対象の探索にかかる時間が経過した場合は、trueを返す
-        if (((VisionTarget)currentTarget).explorationProgress >= 100.0f) return true;
+        if (visionTargetMemories[((VisionTarget)currentTarget)].explorationProgress >= 100.0f) return true;
 
         return false;
     }
@@ -801,6 +848,7 @@ public class ThiefAI : MonoBehaviour
 
         isNextRoomMovePointDecided = false;
         nextRoomMovePoint = null;
+        currentTarget = null;
 
         // 現在の状態が逃走状態の場合
         if (currentState == ThiefState.Escape)
