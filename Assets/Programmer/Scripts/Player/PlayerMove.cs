@@ -20,6 +20,8 @@ public class PlayerMove : MonoBehaviour
     private Rigidbody rb;
     private PlayerData playerData;  // プレイヤーのデータ
 
+    public Vector3 playerMoveAmount;//プレイヤーの移動量
+
     private float rotateSpeed = 10.0f;//回転のスピード
 
     private int jumpCount = 1;//ジャンプできる回数
@@ -70,7 +72,7 @@ public class PlayerMove : MonoBehaviour
         bool pushingIntoWall = false;
         if (touchingWall)
         {
-            float inputDot = Vector3.Dot(forward, wallNormal);
+            float inputDot = Vector3.Dot(playerForward, wallNormal);
             //プレイヤーが壁方向を向いている
             if (inputDot < 0)
             {
@@ -114,6 +116,7 @@ public class PlayerMove : MonoBehaviour
             }
         }
 
+        playerMoveAmount = rb.velocity;
     }
 
     void Update()

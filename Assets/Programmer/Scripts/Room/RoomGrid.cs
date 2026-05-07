@@ -181,7 +181,6 @@ public class RoomGrid : MonoBehaviour
             (gridDivision.y * gridSize.y) * 0.5f - gridPos.y * gridSize.y - gridSize.x * 0.5f
         );
         
-        Debug.Log($"relativePos: {relativePos}");
         Vector3 localPos = new Vector3(relativePos.x, transform.position.y, relativePos.y);
         Vector3 worldPos = transform.TransformPoint(localPos);
         worldPos.y = transform.position.y;
