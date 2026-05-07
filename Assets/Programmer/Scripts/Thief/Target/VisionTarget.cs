@@ -4,6 +4,7 @@
  *    宇留野 陸斗
  * ----------------------------------------------------------
  * 2026-04-19 | 初回作成
+ * 2026-05-07 | 探索度を記憶システムに移動
  * 
  */
 using UnityEngine;
@@ -30,7 +31,4 @@ public class VisionTarget : ThiefTarget
     [Header("探索済みとする距離")]
     [Tooltip("探索済みとする距離")]
     public float exploredDistanceThreshold;
-
-    [Header("探索進行度"), Tooltip("このターゲットの探索進行度")]
-    public float explorationProgress = 0.0f;
 }
