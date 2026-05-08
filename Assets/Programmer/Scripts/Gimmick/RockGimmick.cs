@@ -15,14 +15,16 @@ public class RockGimmick : GimmickBase
     private Vector3 velocity = Vector3.zero;
     private GameObject checker;
 
+    private float SlopeAngleLimit = 15f;    //破壊判定がおこる斜面の角度限度値
+
     [Header("下方向へのレイの距離")]
-    public float rayDownLength = 1.2f;
+    public float rayDownLength = 1.2f;  //下方へのレイ
     [Header("前後左右へのレイの距離")]
-    public float raySideLength = 0.6f;
+    public float raySideLength = 0.6f;  //前後左右へのレイ
     [Header("滑り係数")]
-    public float slideSpeed = 1f;    // 滑る強さ
+    public float slideSpeed = 1f;       // 滑る強さ
     [Header("重力値")]
-    public float gravity = 2f;
+    public float gravity = 2f;          // 重力
     protected override void IdleUpdate()
     {
     }
@@ -47,7 +49,8 @@ public class RockGimmick : GimmickBase
             if (col != null) col.isTrigger = true;
         }
 
-        Hit();
+        Hit();  //ヒットチェック
+
         // =========================
         // 斜面滑り
         // =========================
@@ -56,9 +59,9 @@ public class RockGimmick : GimmickBase
 
         // レイ起点を少し上にずらして自身コライダへの衝突を回避する
         Vector3 rayOrigin = transform.position + Vector3.up * 0.1f;
-        bool hasValidHit = false;
+        bool hasValidHit = false;   //ヒットが有効かどうか
 
-        // 通常のレイキャスト（トリガーは無視）
+        // 下方向へのレイキャスト　※落下時の判定用
         if (Physics.Raycast(rayOrigin, Vector3.down, out hit, rayDownLength, ~0, QueryTriggerInteraction.Ignore))
         {
             // 自身または子に当たっているなら RaycastAll で次のヒットを探す
@@ -67,9 +70,11 @@ public class RockGimmick : GimmickBase
                 var hits = Physics.RaycastAll(rayOrigin, Vector3.down, rayDownLength);
                 foreach (var h in hits)
                 {
+                    //例外用処理
                     if (h.collider == null) continue;
                     if (h.collider.gameObject == gameObject) continue;
                     if (h.collider.transform.IsChildOf(transform)) continue;
+                    
                     hit = h;
                     hasValidHit = true;
                     break;
@@ -83,19 +88,16 @@ public class RockGimmick : GimmickBase
 
         if (hasValidHit)
         {
-            Debug.Log("DownRayが当たった: " + hit.collider.name);
-
             Vector3 normal = hit.normal;
 
             Vector3 slopeDir = Vector3.ProjectOnPlane(Vector3.down, normal);
 
             float angle = Vector3.Angle(normal, Vector3.up);
             float speed = Mathf.Sin(angle * Mathf.Deg2Rad) * slideSpeed;
-            if (angle < 10f)
+            if (angle < SlopeAngleLimit)
             {
                 //接地判定
                 //接地(滑らない床)は破壊
-                Debug.Log("地面接触：破壊");
                 Hit();
                 gimmickState = GimmickState.Broken;
             }
@@ -107,15 +109,14 @@ public class RockGimmick : GimmickBase
             //XZ方向にレイを飛ばす
             Vector3 flatForward = slopeDir;
             flatForward.y = 0f;
+
             //レイデバッグ
             Debug.DrawRay(transform.position, flatForward.normalized * raySideLength, Color.yellow);
             //レイ判定
             if (Physics.Raycast(transform.position, flatForward.normalized, out check, raySideLength))
             {
-                Debug.Log("XZ方向にヒット: " + check.collider.name);
-                if (HitBrokeAngle(check, flatForward, 30f))
+                if (HitBrokeAngle(check, flatForward, SlopeAngleLimit))
                 {
-                    Debug.Log("側面に接触：破壊");
                     Hit();
                     gimmickState = GimmickState.Broken;
                 }
