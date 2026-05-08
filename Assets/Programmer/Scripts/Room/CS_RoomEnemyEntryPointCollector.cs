@@ -7,7 +7,7 @@ using UnityEngine;
  *  制作者      : 吉本竜
  *  内容        : RoomCreatePoints配下から敵出入口として使うRoomMovePointを収集する
  *  履歴        : 2026/05/06 新規作成(ヨシモト)
- *                2026/05/06 ScriptableObject参照を廃止し、最大出現数を直接取得する形へ変更(ヨシモト)
+ *                2026/05/06 敵出入口データScriptableObjectを保持する形へ変更(ヨシモト)
  *==================================================*/
 
 /// <summary>
@@ -125,9 +125,9 @@ public class CS_RoomEnemyEntryPointCollector : MonoBehaviour
         {
             CSE_RoomDoorDirection e_EnemyEntryDirection = list_EnemyEntryDirections[i];
 
-            if (!cs_RoomCreatePoint.TryGetEnemyEntryConnection(
+            if (!cs_RoomCreatePoint.TryGetEnemyEntryData(
                     e_EnemyEntryDirection,
-                    out CS_RoomMoveConnection cs_Connection))
+                    out CSS_RoomEnemyEntryData cs_RoomEnemyEntryDataSO))
             {
                 continue;
             }
@@ -143,14 +143,12 @@ public class CS_RoomEnemyEntryPointCollector : MonoBehaviour
                 continue;
             }
 
-            int int_MaxEnemySpawnCount = cs_Connection.GetMaxEnemySpawnCount();
-
             CS_RoomEnemyEntryPointData cs_EnemyEntryPointData =
                 new CS_RoomEnemyEntryPointData(
                     cs_RoomCreatePoint,
                     e_EnemyEntryDirection,
                     cs_RoomMovePoint,
-                    int_MaxEnemySpawnCount);
+                    cs_RoomEnemyEntryDataSO);
 
             list_EnemyEntryPointData.Add(cs_EnemyEntryPointData);
 
