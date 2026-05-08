@@ -15,16 +15,21 @@ public class RockGimmick : GimmickBase
     private Vector3 velocity = Vector3.zero;
     private GameObject checker;
 
-    private float SlopeAngleLimit = 15f;    //破壊判定がおこる斜面の角度限度値
+    private float slopeAngleLimit = 15f;    //破壊判定がおこる斜面の角度限度値
 
     [Header("下方向へのレイの距離")]
-    public float rayDownLength = 1.2f;  //下方へのレイ
+    [SerializeField]
+    private float rayDownLength = 1.2f;  //下方へのレイ
     [Header("前後左右へのレイの距離")]
-    public float raySideLength = 0.6f;  //前後左右へのレイ
+    [SerializeField]
+    private float raySideLength = 0.6f;  //前後左右へのレイ
     [Header("滑り係数")]
-    public float slideSpeed = 1f;       // 滑る強さ
+    [SerializeField]
+    private float slideSpeed = 1f;       // 滑る強さ
     [Header("重力値")]
-    public float gravity = 2f;          // 重力
+    [SerializeField]
+    private float gravity = 2f;          // 重力
+
     protected override void IdleUpdate()
     {
     }
