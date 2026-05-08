@@ -799,7 +799,7 @@ public class ThiefAI : MonoBehaviour
         //　((VisionTarget)currentTarget).explorationProgress　: 対象の探索度(MAX : 100.0f)
         // searchTime : 探索対象の探索にかかる時間
         visionTargetMemories[((VisionTarget)currentTarget)].explorationProgress += (100.0f / searchTime) * Time.deltaTime;
-        Debug.Log($"探索対象の探索度: {visionTargetMemories[((VisionTarget)currentTarget)].explorationProgress}");
+        //Debug.Log($"探索対象の探索度: {visionTargetMemories[((VisionTarget)currentTarget)].explorationProgress}");
 
         // 探索対象の探索にかかる時間が経過した場合は、trueを返す
         if (visionTargetMemories[((VisionTarget)currentTarget)].explorationProgress >= 100.0f) return true;

@@ -20,14 +20,13 @@ public class PlayerMove : MonoBehaviour
     private Rigidbody rb;
     private PlayerData playerData;  // プレイヤーのデータ
 
-    public Vector3 playerMoveAmount;//プレイヤーの移動量
-
     private float rotateSpeed = 10.0f;//回転のスピード
 
     private int jumpCount = 1;//ジャンプできる回数
 
     private Vector3 wallNormal;//壁の法線ベクトル
     private bool touchingWall;//壁に当たっているかどうか
+    private bool touchingGround;//床に当たっているかどうか
 
     // Start is called before the first frame update
     void Start()
@@ -44,8 +43,7 @@ public class PlayerMove : MonoBehaviour
 
         velocity.y = 0.0f;
 
-        
-        if(velocity.magnitude > 0.1f)
+        if (velocity.magnitude > 0.1f)
         {
             velocity = velocity.normalized;
             Quaternion playerRotate = Quaternion.LookRotation(velocity);
@@ -67,7 +65,7 @@ public class PlayerMove : MonoBehaviour
 
         //プレイヤーの前方向
         Vector3 playerForward = transform.forward;
-        
+
         //壁に向かっているか判定
         bool pushingIntoWall = false;
         if (touchingWall)
@@ -80,43 +78,47 @@ public class PlayerMove : MonoBehaviour
             }
         }
 
-        //移動
-        if (playerData.playerInput.Player.MoveForward.IsPressed() && !pushingIntoWall)
+        if (touchingGround)
         {
-            rb.AddForce(new Vector3(forward.x,0.0f, forward.z) * accelartion, ForceMode.Acceleration);
-        }
-        else if (playerData.playerInput.Player.MoveBack.IsPressed() && !pushingIntoWall)
-        {
-            rb.AddForce(new Vector3(-forward.x, 0.0f, -forward.z) * accelartion, ForceMode.Acceleration);
-        }
-
-        if (playerData.playerInput.Player.MoveLeft.IsPressed() && !pushingIntoWall)
-        {
-            rb.AddForce(new Vector3(-right.x, 0.0f, -right.z) * accelartion, ForceMode.Acceleration);
-        }
-        else if (playerData.playerInput.Player.MoveRight.IsPressed() && !pushingIntoWall)
-        {
-            rb.AddForce(new Vector3(right.x, 0.0f, right.z) * accelartion, ForceMode.Acceleration);
-        }
-
-        if (playerData.playerInput.Player.Dash.IsPressed() && !pushingIntoWall)
-        {
-            //走り
-            if (rb.velocity.magnitude > moveAmount * velocityRun)
+            //移動
+            if (playerData.playerInput.Player.MoveForward.IsPressed())
             {
-                rb.velocity = rb.velocity.normalized * (moveAmount * velocityRun);
-            }   
-        }
-        else
-        {
-            //歩き
-            if (rb.velocity.magnitude > moveAmount * velocityWalk)
+                rb.AddForce(new Vector3(forward.x, 0.0f, forward.z) * accelartion, ForceMode.Acceleration);
+            }
+            else if (playerData.playerInput.Player.MoveBack.IsPressed())
             {
-                rb.velocity = rb.velocity.normalized * (moveAmount * velocityWalk);
+                rb.AddForce(new Vector3(-forward.x, 0.0f, -forward.z) * accelartion, ForceMode.Acceleration);
+            }
+
+            if (playerData.playerInput.Player.MoveLeft.IsPressed())
+            {
+                rb.AddForce(new Vector3(-right.x, 0.0f, -right.z) * accelartion, ForceMode.Acceleration);
+            }
+            else if (playerData.playerInput.Player.MoveRight.IsPressed())
+            {
+                rb.AddForce(new Vector3(right.x, 0.0f, right.z) * accelartion, ForceMode.Acceleration);
             }
         }
 
-        playerMoveAmount = rb.velocity;
+        if (!pushingIntoWall)
+        {
+            if (playerData.playerInput.Player.Dash.IsPressed())
+            {
+                //走り
+                if (rb.velocity.magnitude > moveAmount * velocityRun)
+                {
+                    rb.velocity = rb.velocity.normalized * (moveAmount * velocityRun);
+                }
+            }
+            else
+            {
+                //歩き
+                if (rb.velocity.magnitude > moveAmount * velocityWalk)
+                {
+                    rb.velocity = rb.velocity.normalized * (moveAmount * velocityWalk);
+                }
+            }
+        }
     }
 
     void Update()
@@ -126,6 +128,7 @@ public class PlayerMove : MonoBehaviour
         {
             rb.AddForce(new Vector3(0.0f, 1.0f, 0.0f) * jumpAmount, ForceMode.Impulse);
             jumpCount--;
+            touchingGround = false;
         }
     }
 
@@ -146,6 +149,7 @@ public class PlayerMove : MonoBehaviour
             if (contact.normal.y > 0.5f)
             {
                 jumpCount = 1;
+                touchingGround = true;
             }
         }
     }
@@ -153,6 +157,9 @@ public class PlayerMove : MonoBehaviour
     private void OnCollisionStay(Collision collision)
     {
         touchingWall = false;
+
+        if (!touchingGround)
+            return;
 
         //ジャンプ中に物体に衝突した際に止まらないようにする処理
         foreach (ContactPoint contact in collision.contacts)
