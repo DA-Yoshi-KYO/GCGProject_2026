@@ -1,17 +1,20 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.Burst.CompilerServices;
+/* ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+ *    大岩ギミック
+ * ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+ *    大瀧蓮
+ * ----------------------------------------------------------
+ * 2026-04-26 | 初回作成：大瀧
+ */
+
 using UnityEngine;
 
 public class RockGimmick : GimmickBase
 {
     private bool isFirstActive = true;
-    private bool hasHit = false;
 
     private Vector3 velocity = Vector3.zero;
     private GameObject checker;
 
-    private float timer = 0f;
     [Header("下方向へのレイの距離")]
     public float rayDownLength = 1.2f;
     [Header("前後左右へのレイの距離")]
@@ -19,7 +22,7 @@ public class RockGimmick : GimmickBase
     [Header("滑り係数")]
     public float slideSpeed = 1f;    // 滑る強さ
     [Header("重力値")]
-    public float gravity = 1f;
+    public float gravity = 2f;
     protected override void IdleUpdate()
     {
     }
@@ -35,15 +38,6 @@ public class RockGimmick : GimmickBase
             Vector2Int directionVec = GetDirectionVec();
             Vector2Int hitCheckerGridPos = new Vector2Int(gimmickGridPos.x + directionVec.x, gimmickGridPos.y + directionVec.y);
 
-            // ワールド変換
-            Vector3 world;
-            world.x = hitCheckerGridPos.x;
-            world.y = 50f;
-            world.z = hitCheckerGridPos.y;
-
-            // ★XZだけグリッド、Yは固定高さ
-            transform.position = new Vector3(world.x, world.y, world.z);
-
             velocity = Vector3.zero;
 
             checker = Instantiate(hitCheckerPrefab);
@@ -53,19 +47,41 @@ public class RockGimmick : GimmickBase
             if (col != null) col.isTrigger = true;
         }
 
-        // =========================
-        // 初期フレーム無視
-        // =========================
-        //timer += Time.deltaTime;
-        //if (timer < 0.1f) return;
         Hit();
         // =========================
         // 斜面滑り
         // =========================
         RaycastHit hit;
         RaycastHit check;
-        // 下にRayを飛ばす
-        if (Physics.Raycast(transform.position, Vector3.down, out hit, rayDownLength))
+
+        // レイ起点を少し上にずらして自身コライダへの衝突を回避する
+        Vector3 rayOrigin = transform.position + Vector3.up * 0.1f;
+        bool hasValidHit = false;
+
+        // 通常のレイキャスト（トリガーは無視）
+        if (Physics.Raycast(rayOrigin, Vector3.down, out hit, rayDownLength, ~0, QueryTriggerInteraction.Ignore))
+        {
+            // 自身または子に当たっているなら RaycastAll で次のヒットを探す
+            if (hit.collider != null && (hit.collider.gameObject == gameObject || hit.collider.transform.IsChildOf(transform)))
+            {
+                var hits = Physics.RaycastAll(rayOrigin, Vector3.down, rayDownLength);
+                foreach (var h in hits)
+                {
+                    if (h.collider == null) continue;
+                    if (h.collider.gameObject == gameObject) continue;
+                    if (h.collider.transform.IsChildOf(transform)) continue;
+                    hit = h;
+                    hasValidHit = true;
+                    break;
+                }
+            }
+            else
+            {
+                hasValidHit = true;
+            }
+        }
+
+        if (hasValidHit)
         {
             Debug.Log("DownRayが当たった: " + hit.collider.name);
 
@@ -75,7 +91,7 @@ public class RockGimmick : GimmickBase
 
             float angle = Vector3.Angle(normal, Vector3.up);
             float speed = Mathf.Sin(angle * Mathf.Deg2Rad) * slideSpeed;
-            if (angle < 20f)
+            if (angle < 10f)
             {
                 //接地判定
                 //接地(滑らない床)は破壊
@@ -110,28 +126,14 @@ public class RockGimmick : GimmickBase
 
             transform.position = pos;
         }
-
-        // =========================
-        // 落下
-        // =========================
-        velocity.y -= gravity * Time.deltaTime;
-        transform.position += velocity * Time.deltaTime;
-    }
-
-    // =========================
-    // 地面判定
-    // =========================
-    private bool CheckGround()
-    {
-        Vector3 pos = transform.position + Vector3.down;
-
-        if(pos.y <= 0f)
+        else
         {
-            Debug.Log("地面に接触: " + pos);
-            return true;
+            // =========================
+            // 落下
+            // =========================
+            velocity.y -= gravity * Time.deltaTime;
+            transform.position += velocity * Time.deltaTime;
         }
-
-        return false;
     }
 
     // =========================
@@ -139,9 +141,7 @@ public class RockGimmick : GimmickBase
     // =========================
     private void Hit()
     {
-        Vector3 pos = transform.position + Vector3.down;
-
-        SetHitChecker((int)pos.x, (int)pos.z);
+        SetHitChecker(gimmickGridPos.x, gimmickGridPos.y);
     }
     // =========================
     // レイヒットオブジェクトの角度計算
@@ -155,6 +155,9 @@ public class RockGimmick : GimmickBase
 
         return angle < breakAngle;
     }
+    // =========================
+    // 破壊処理
+    // =========================
     protected override void BrokenUpdate()
     {
         DeleteHitChecker();

@@ -11,7 +11,4 @@ using UnityEngine;
 // 泥棒が狙う対象を示すベースクラス
 public class ThiefTarget : MonoBehaviour
 {
-    [Header("探索済みかどうか")]
-    [Tooltip("探索済みかどうか")]
-    public bool isExplored;
 }
