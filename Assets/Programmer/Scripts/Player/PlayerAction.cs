@@ -139,7 +139,6 @@ public class PlayerAction : MonoBehaviour
 
         Vector3 settingPos = transform.position;
 
-        // 大瀧編集部 ===============================
         //ギミックのサイズ
         Vector2Int size = gimmick.GetGimmickSize();
         // グリッドサイズ
@@ -156,15 +155,23 @@ public class PlayerAction : MonoBehaviour
         // 向きで分岐
         Vector3 forward = transform.forward;
 
-        if (forward.x > 0)
-            settingPos += new Vector3(offsetX, 0, 0);
-        else if (forward.x < 0)
-            settingPos -= new Vector3(offsetX, 0, 0);
-        else if (forward.z > 0)
-            settingPos += new Vector3(0, 0, offsetZ);
-        else if (forward.z < 0)
-            settingPos -= new Vector3(0, 0, offsetZ);
-        // ==========================================
+        // X成分とZ成分の絶対値を比較して、どちらを優先するか決める
+        if (Mathf.Abs(forward.x) > Mathf.Abs(forward.z))
+        {
+            // X軸
+            if (forward.x >= 0f)
+                settingPos += new Vector3(offsetX, 0f, 0f);
+            else
+                settingPos -= new Vector3(offsetX, 0f, 0f);
+        }
+        else
+        {
+            // Z軸（同値なら Z を優先）
+            if (forward.z >= 0f)
+                settingPos += new Vector3(0f, 0f, offsetZ);
+            else
+                settingPos -= new Vector3(0f, 0f, offsetZ);
+        }
 
         // ===============================
         // グリッド変換
@@ -175,7 +182,7 @@ public class PlayerAction : MonoBehaviour
         if (spawnPos == Vector3.positiveInfinity) return Vector3.positiveInfinity;
 
         // ===============================
-        // 偶数補正（SetGimmickInGridと完全一致）
+        // 偶数補正（SetGimmickInGridに合わせる）※囲碁型配置
         float sizeX = gimmick.gimmickSizeX;
         float sizeY = gimmick.gimmickSizeY;
 
@@ -184,16 +191,16 @@ public class PlayerAction : MonoBehaviour
 
         if ((int)sizeX % 2 == 0)
             if (settingPos.x <= spawnPos.x)
-                offsetX -= 1f * gridSizeX;
+                offsetX -= 1f * gridSizeX; // 左に1マス
 
         if ((int)sizeY % 2 == 0)
             if (settingPos.z <= spawnPos.z)
-                offsetZ -= 1f * gridSizeY;
+                offsetZ -= 1f * gridSizeY; // 奥に1マス
 
         spawnPos.x += offsetX;
         spawnPos.z += offsetZ;
 
-
+        // 各種数値を取得
         grid = roomGrid.GetGridFromPos(settingPos);
         spawnPos = roomGrid.GetWorldPosFromGrid(grid);
         sizeX = gimmick.gimmickSizeX;
@@ -223,7 +230,7 @@ public class PlayerAction : MonoBehaviour
         offsetZ *= gridSizeY;
 
         // 中心が grid に来るように補正
-        spawnPos.x += offsetX - (gridSizeX * 0.5f);
+        spawnPos.x += offsetX - (gridSizeX * 0.5f); // 中心が grid に来るように補正
         spawnPos.z += offsetZ - (gridSizeY * 0.5f);
 
         return spawnPos;
@@ -232,17 +239,21 @@ public class PlayerAction : MonoBehaviour
     //ギミックの設置予定位置の取得とデバッグ用ボックス描画
     private void DebugDrawGimmickSet()
     {
+        // デバッグ用のギミック設置位置描画
         if (currentRoom == null) { Debug.Log("currentRoomError_DDGS"); return; }
         if (gimmickKind.Count == 0) { Debug.Log("gimmickKind.Count_DDGS"); return; }
 
         var roomGrid = currentRoom.GetComponent<RoomGrid>();
         GimmickBase gimmick = gimmickKind[currentGimmickIndex].GetComponent<GimmickBase>();
 
+        // ギミックの設置位置を計算
         Vector3 spawnPos = CalculateGimmickSetPosition();
         if (spawnPos == Vector3.positiveInfinity) return;
 
+        // グリッドサイズ取得
         Vector3 gridSize = roomGrid.gridSize;
 
+        // ギミックのサイズ取得
         float sizeX = gimmick.gimmickSizeX;
         float sizeY = gimmick.gimmickSizeY;
 
@@ -255,14 +266,14 @@ public class PlayerAction : MonoBehaviour
         line.widthMultiplier = 0.03f;
         line.useWorldSpace = true;
 
-        // 色
+        // 色設定
         bool canPlace = true;
         line.startColor = canPlace ? Color.green : Color.red;
         line.endColor = canPlace ? Color.green : Color.red;
 
         Object.Destroy(lineObj, 0.02f);
 
-        // ===============================
+        // ライン描画用のポイントを計算
         List<Vector3> points = new List<Vector3>();
 
         float width = sizeX * gridSize.x;
