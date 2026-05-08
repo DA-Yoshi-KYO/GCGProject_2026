@@ -202,37 +202,8 @@ public class RoomGrid : MonoBehaviour
         Vector3 spawnPos = GetWorldPosFromGrid(grid);
         if (spawnPos.magnitude == float.PositiveInfinity) return false; 
 
-        // 大瀧編集部=========================
-        float sizeX = gimmick.gimmickSizeX;
-        float sizeY = gimmick.gimmickSizeY;
-
-        // グリッドサイズ
-        float gridSizeX = gridSize.x;
-        float gridSizeY = gridSize.y;
-    
-        // 半分オフセット
-        float offsetX = sizeX * 0.5f;
-        float offsetY = sizeY * 0.5f;
-
-        // 偶数サイズ補正（囲碁）
-        if ((int)sizeX % 2 == 0)
-        {
-            if (pos.x <= spawnPos.x)
-                offsetX -= 1f * gridSizeX;   // 左に1マス 
-        }
-        if ((int)sizeY % 2 == 0)
-        {
-            if (pos.z <= spawnPos.z)
-                offsetY -= 1f * gridSizeY;   // 下に1マス
-        }
-        // ワールド座標に変換
-        offsetX *= gridSizeX;
-        offsetY *= gridSizeY;
-
-        // 中心が grid に来るように補正
-        spawnPos.x += offsetX - (gridSizeX * 0.5f);
-        spawnPos.z += offsetY - (gridSizeY * 0.5f);
-        // ===================================
+        //偶数補正
+        spawnPos = GimmickEvenNumberCorrection(spawnPos, grid, gimmick);
 
         Ray ray = new Ray();
         ray.direction = Vector3.down;
@@ -260,6 +231,48 @@ public class RoomGrid : MonoBehaviour
         spawnGimmick.AdjustScaleToGrid();
 
         return true;
+    }
+
+    // ギミックが偶数サイズだった場合の補正用計算関数
+    // 概要：奇数はチェス型、偶数は囲碁型に配置します。
+    // 引数：Vector3 / オブジェクトの設置する位置※偶数補正前の値
+    // 戻値：Vector3 / 補正した値を返します。
+    public Vector3 GimmickEvenNumberCorrection(Vector3 setPos, Vector2Int setGrid, GimmickBase gimmick)
+    {
+        Vector2Int grid = setGrid;
+        Vector3 spawnPos = setPos;
+
+        float sizeX = gimmick.gimmickSizeX;
+        float sizeY = gimmick.gimmickSizeY;
+
+        // グリッドサイズ
+        float gridSizeX = gridSize.x;
+        float gridSizeY = gridSize.y;
+
+        // 半分オフセット
+        float offsetX = sizeX * 0.5f;
+        float offsetY = sizeY * 0.5f;
+
+        // 偶数サイズ補正（囲碁）
+        if ((int)sizeX % 2 == 0)
+        {
+            if (setPos.x <= spawnPos.x)
+                offsetX -= 1f * gridSizeX;   // 左に1マス 
+        }
+        if ((int)sizeY % 2 == 0)
+        {
+            if (setPos.z <= spawnPos.z)
+                offsetY -= 1f * gridSizeY;   // 下に1マス
+        }
+        // ワールド座標に変換
+        offsetX *= gridSizeX;
+        offsetY *= gridSizeY;
+
+        // 中心が grid に来るように補正
+        spawnPos.x += offsetX - (gridSizeX * 0.5f);
+        spawnPos.z += offsetY - (gridSizeY * 0.5f);
+
+        return spawnPos;
     }
 
     /// <summary>

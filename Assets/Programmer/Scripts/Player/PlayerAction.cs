@@ -12,7 +12,6 @@
  */
 using System.Collections.Generic;
 using UnityEngine;
-using static UnityEditor.PlayerSettings;
 
 public class PlayerAction : MonoBehaviour
 {
@@ -155,12 +154,13 @@ public class PlayerAction : MonoBehaviour
         // 向きで分岐
         Vector3 forward = transform.forward;
 
+        // プレイヤの前面にギミックを置くために行う補正
         // X成分とZ成分の絶対値を比較して、どちらを優先するか決める
         if (Mathf.Abs(forward.x) > Mathf.Abs(forward.z))
         {
             // X軸
             if (forward.x >= 0f)
-                settingPos += new Vector3(offsetX, 0f, 0f);
+                settingPos += new Vector3(offsetX, 0f, 0f); //
             else
                 settingPos -= new Vector3(offsetX, 0f, 0f);
         }
@@ -183,55 +183,8 @@ public class PlayerAction : MonoBehaviour
 
         // ===============================
         // 偶数補正（SetGimmickInGridに合わせる）※囲碁型配置
-        float sizeX = gimmick.gimmickSizeX;
-        float sizeY = gimmick.gimmickSizeY;
-
-        float gridSizeX = gridSize.x;
-        float gridSizeY = gridSize.y;
-
-        if ((int)sizeX % 2 == 0)
-            if (settingPos.x <= spawnPos.x)
-                offsetX -= 1f * gridSizeX; // 左に1マス
-
-        if ((int)sizeY % 2 == 0)
-            if (settingPos.z <= spawnPos.z)
-                offsetZ -= 1f * gridSizeY; // 奥に1マス
-
-        spawnPos.x += offsetX;
-        spawnPos.z += offsetZ;
-
         // 各種数値を取得
-        grid = roomGrid.GetGridFromPos(settingPos);
         spawnPos = roomGrid.GetWorldPosFromGrid(grid);
-        sizeX = gimmick.gimmickSizeX;
-        sizeY = gimmick.gimmickSizeY;
-
-        // グリッドサイズ
-        gridSizeX = gridSize.x;
-        gridSizeY = gridSize.y;
-
-        // 半分オフセット
-        offsetX = sizeX * 0.5f;
-        offsetZ = sizeY * 0.5f;
-
-        // 偶数サイズ補正（囲碁）
-        if ((int)sizeX % 2 == 0)
-        {
-            if (settingPos.x <= spawnPos.x)
-                offsetX -= 1f * gridSizeX;   // 左に1マス 
-        }
-        if ((int)sizeY % 2 == 0)
-        {
-            if (settingPos.z <= spawnPos.z)
-                offsetZ -= 1f * gridSizeY;   // 下に1マス
-        }
-        // ワールド座標に変換
-        offsetX *= gridSizeX;
-        offsetZ *= gridSizeY;
-
-        // 中心が grid に来るように補正
-        spawnPos.x += offsetX - (gridSizeX * 0.5f); // 中心が grid に来るように補正
-        spawnPos.z += offsetZ - (gridSizeY * 0.5f);
 
         return spawnPos;
     }
@@ -256,6 +209,8 @@ public class PlayerAction : MonoBehaviour
         // ギミックのサイズ取得
         float sizeX = gimmick.gimmickSizeX;
         float sizeY = gimmick.gimmickSizeY;
+
+        spawnPos = roomGrid.GimmickEvenNumberCorrection(spawnPos, roomGrid.GetGridFromPos(spawnPos), gimmick);
 
         // ===============================
         // LineRenderer生成
