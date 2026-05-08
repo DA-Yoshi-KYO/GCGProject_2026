@@ -152,7 +152,7 @@ public partial class CSED_CreateTools
     /// <param name="f_fieldType">押された変数型</param>
     private void OnVariablePaletteButtonClicked(CSE_CreateTools_FieldType f_fieldType)
     {
-        Debug.Log("[CreateTools] 変数型ボタンが押されました : " + GetFieldTypeDisplayName(f_fieldType));
+        AddFieldData(f_fieldType);
     }
 
     /// <summary>

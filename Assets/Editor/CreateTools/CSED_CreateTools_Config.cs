@@ -58,7 +58,7 @@ public partial class CSED_CreateTools
     /// <summary>
     /// 右ウィンドウ初期比率
     /// </summary>
-    private const float c_RightInitRatio = 0.20f;
+    private const float c_RightInitRatio = 0.40f;
 
     /// <summary>
     /// 左内部上エリア初期比率
