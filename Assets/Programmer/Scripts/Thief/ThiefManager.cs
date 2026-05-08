@@ -32,9 +32,10 @@ public class ThiefManager : MonoBehaviour
     [Tooltip("敵の出入口のデータと、そこから生成された泥棒の数を管理する辞書")]
     private Dictionary<CS_RoomEnemyEntryPointData, int> spawnCount = new Dictionary<CS_RoomEnemyEntryPointData, int>();
 
-    [Tooltip("泥棒を生成する間隔の基本値")]
+    [SerializeField, Header("次の泥棒を生成するまでの感覚(秒)"), Tooltip("泥棒を生成する間隔の基本値")]
     private float createInterval = 1.0f;
-    private float firstCreateInterval = 5.0f; // 最初の生成間隔を保存する変数
+    [SerializeField, Header("最初の泥棒を生成するまでの時間(秒)"), Tooltip("最初の生成間隔")]
+    private float firstCreateInterval = 5.0f;
 
     private void Update()
     {
