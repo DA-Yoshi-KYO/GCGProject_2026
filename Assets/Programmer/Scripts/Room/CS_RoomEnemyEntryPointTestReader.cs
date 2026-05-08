@@ -218,9 +218,8 @@ public class CS_RoomEnemyEntryPointTestReader : MonoBehaviour
                 "[EnemyEntryPoint取得確認] " +
                 "EntryIndex : " + int_EntryIndex +
                 " / ThiefIndex : " + i +
-                " / ThiefData : " + cs_ThiefStatusData.name +
-                " / ThiefName : " + cs_ThiefStatusData.GetThiefName()
-            );
+                " / ThiefData : " + cs_ThiefStatusData.name
+                );
         }
     }
 }

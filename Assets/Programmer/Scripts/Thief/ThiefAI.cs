@@ -116,7 +116,7 @@ public class ThiefAI : MonoBehaviour
 
 
     // 泥棒の耐久力と移動速度を設定するメソッド
-    public void Setting(ThiefTypeData typedata, ThiefData data, float playerSpeed, RoomNode entryRoom, Transform entryPoint)
+    public void Setting(CSS_ThiefStatusData typedata, CSS_ThiefCommonStatusData data, float playerSpeed, RoomNode entryRoom, Transform entryPoint)
     {
         /*未実装、未設定　*///data.jumpHeight;
         /*未設定、未設定　*///data.alertTime;

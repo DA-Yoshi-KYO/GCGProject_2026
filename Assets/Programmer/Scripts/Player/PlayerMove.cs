@@ -129,6 +129,15 @@ public class PlayerMove : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 基準となるプレイヤーの移動速度を取得します。
+    /// </summary>
+    /// <returns>プレイヤーの移動速度</returns>
+    public float GetBasePlayerSpeed()
+    {
+        return moveAmount * velocityRun;
+    }
+
     private void OnCollisionEnter(Collision collision)
     {
         //床に接地している場合ジャンプ回数を戻す
