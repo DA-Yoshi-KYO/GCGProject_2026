@@ -44,10 +44,10 @@ public class PlayerMove : MonoBehaviour
 
         velocity.y = 0.0f;
 
-        velocity = velocity.normalized;
         
         if(velocity.magnitude > 0.1f)
         {
+            velocity = velocity.normalized;
             Quaternion playerRotate = Quaternion.LookRotation(velocity);
 
             rb.MoveRotation(Quaternion.Slerp(

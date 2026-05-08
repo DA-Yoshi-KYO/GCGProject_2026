@@ -200,7 +200,7 @@ public class RoomGrid : MonoBehaviour
         if (IsGridOnGimmick(grid)) return false;
 
         Vector3 spawnPos = GetWorldPosFromGrid(grid);
-        if (spawnPos == Vector3.positiveInfinity) return false;
+        if (spawnPos.magnitude == float.PositiveInfinity) return false; 
 
         // 大瀧編集部=========================
         float sizeX = gimmick.gimmickSizeX;

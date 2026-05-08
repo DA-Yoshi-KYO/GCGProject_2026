@@ -179,7 +179,7 @@ public class PlayerAction : MonoBehaviour
         if (grid.x == -1 || grid.y == -1) return Vector3.positiveInfinity;
 
         Vector3 spawnPos = roomGrid.GetWorldPosFromGrid(grid);
-        if (spawnPos == Vector3.positiveInfinity) return Vector3.positiveInfinity;
+        if (spawnPos.magnitude == float.PositiveInfinity) return Vector3.positiveInfinity;
 
         // ===============================
         // 偶数補正（SetGimmickInGridに合わせる）※囲碁型配置
@@ -248,7 +248,7 @@ public class PlayerAction : MonoBehaviour
 
         // ギミックの設置位置を計算
         Vector3 spawnPos = CalculateGimmickSetPosition();
-        if (spawnPos == Vector3.positiveInfinity) return;
+        if (spawnPos.magnitude == float.PositiveInfinity) return;
 
         // グリッドサイズ取得
         Vector3 gridSize = roomGrid.gridSize;

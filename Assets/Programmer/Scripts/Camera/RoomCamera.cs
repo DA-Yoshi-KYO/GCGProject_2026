@@ -9,7 +9,7 @@ using UnityEngine;
 
 public class RoomCamera : MonoBehaviour
 {
-    [HideInInspector] public Vector3 initPos;//初期値のカメラの位置
+    [HideInInspector] public Vector3 initPos = Vector3.zero;//初期値のカメラの位置
     [Header("移動量の制限値")]public Vector3 moveAmountLimit = Vector3.zero;//移動量制限値
 
     // Start is called before the first frame update

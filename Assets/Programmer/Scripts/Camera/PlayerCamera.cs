@@ -60,12 +60,12 @@ public class PlayerCamera : MonoBehaviour
             switch (currentMode)
             {
                 case PlayerData.PlayerMode.Normal:
-                    roomCameraObject.GetComponent<Camera>().depth = 1;
-                    upCameraObject.GetComponent<Camera>().depth = -1;
+                    roomCameraObject.GetComponent<Camera>().enabled = true;
+                    upCameraObject.GetComponent<Camera>().enabled = true;
                     break;
                 case PlayerData.PlayerMode.Setting:
-                    roomCameraObject.GetComponent<Camera>().depth = -1;
-                    upCameraObject.GetComponent<Camera>().depth = 1;
+                    roomCameraObject.GetComponent<Camera>().enabled = false;
+                    upCameraObject.GetComponent<Camera>().enabled = true;
                     break;
                 default:
                     break;
