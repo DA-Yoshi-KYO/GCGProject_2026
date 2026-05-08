@@ -6,11 +6,11 @@ using UnityEngine;
  *  制作者      : 吉本竜
  *  内容        : 敵出入口として使用するRoomMovePoint情報を保持する
  *  履歴        : 2026/05/06 新規作成(ヨシモト)
- *                2026/05/06 ScriptableObject参照を廃止し、最大出現数を直接保持する形へ変更(ヨシモト)
+ *                2026/05/06 敵出入口データScriptableObjectを保持する形へ変更(ヨシモト)
  *==================================================*/
 
 /// <summary>
-/// 敵出入口として使用するRoomCreatePoint、方向、RoomMovePoint、最大出現数をまとめた情報です。
+/// 敵出入口として使用するRoomCreatePoint、方向、RoomMovePoint、敵出入口データをまとめた情報です。
 /// </summary>
 [Serializable]
 public class CS_RoomEnemyEntryPointData
@@ -27,9 +27,9 @@ public class CS_RoomEnemyEntryPointData
     [SerializeField]
     private CS_RoomMovePoint cs_RoomMovePoint;
 
-    [Header("最大敵出現数")]
-    [SerializeField, Min(0)]
-    private int int_MaxEnemySpawnCount;
+    [Header("敵出入口データ")]
+    [SerializeField]
+    private CSS_RoomEnemyEntryData css_RoomEnemyEntryData;
 
     /// <summary>
     /// 対象RoomCreatePointを取得します。
@@ -45,6 +45,14 @@ public class CS_RoomEnemyEntryPointData
     /// 敵生成位置として使うRoomMovePointを取得します。
     /// </summary>
     public CS_RoomMovePoint RoomMovePoint => cs_RoomMovePoint;
+
+    /// <summary>
+    /// 敵出入口データを取得します。
+    /// 
+    /// TestReader側で、
+    /// どの敵出入口データが使われているか確認するために使用します。
+    /// </summary>
+    public CSS_RoomEnemyEntryData RoomEnemyEntryData => css_RoomEnemyEntryData;
 
     /// <summary>
     /// 敵生成位置として使うRoomMovePointのGameObjectを取得します。
@@ -97,7 +105,18 @@ public class CS_RoomEnemyEntryPointData
     /// <summary>
     /// この生成位置から出現できる敵の最大数を取得します。
     /// </summary>
-    public int MaxEnemySpawnCount => Mathf.Max(0, int_MaxEnemySpawnCount);
+    public int MaxEnemySpawnCount
+    {
+        get
+        {
+            if (css_RoomEnemyEntryData == null)
+            {
+                return 0;
+            }
+
+            return css_RoomEnemyEntryData.GetMaxEnemySpawnCount();
+        }
+    }
 
     /// <summary>
     /// 敵出入口情報を生成します。
@@ -105,16 +124,16 @@ public class CS_RoomEnemyEntryPointData
     /// <param name="cs_RoomCreatePoint">対象RoomCreatePoint。</param>
     /// <param name="e_EnemyEntryDirection">敵が入ってくる方向。</param>
     /// <param name="cs_RoomMovePoint">敵生成位置として使うRoomMovePoint。</param>
-    /// <param name="int_MaxEnemySpawnCount">最大敵出現数。</param>
+    /// <param name="css_RoomEnemyEntryData">敵出入口データ。</param>
     public CS_RoomEnemyEntryPointData(
         CS_RoomCreatePoint cs_RoomCreatePoint,
         CSE_RoomDoorDirection e_EnemyEntryDirection,
         CS_RoomMovePoint cs_RoomMovePoint,
-        int int_MaxEnemySpawnCount)
+        CSS_RoomEnemyEntryData css_RoomEnemyEntryData)
     {
         this.cs_RoomCreatePoint = cs_RoomCreatePoint;
         this.e_EnemyEntryDirection = e_EnemyEntryDirection;
         this.cs_RoomMovePoint = cs_RoomMovePoint;
-        this.int_MaxEnemySpawnCount = Mathf.Max(0, int_MaxEnemySpawnCount);
+        this.css_RoomEnemyEntryData = css_RoomEnemyEntryData;
     }
 }
