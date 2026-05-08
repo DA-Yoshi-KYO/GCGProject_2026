@@ -1,10 +1,10 @@
 /*
 +=====================================
- ƒtƒ@ƒCƒ‹–¼ : CSE_CreateTools.cs
- ŠT—v     : SCreateToolsƒc[ƒ‹‚ÌEditorWindowƒNƒ‰ƒX
- ìÒ     : ƒˆƒVƒ‚ƒg ƒŠƒ‡ƒE
- —š—ğ     : 2026/04/20 V‹Kì¬
-            2026/04/22 \¬®—
+ ãƒ•ã‚¡ã‚¤ãƒ«å : CSED_CreateTools.cs
+ æ¦‚è¦     : SCreateToolsãƒ„ãƒ¼ãƒ«ã®EditorWindowã‚¯ãƒ©ã‚¹
+ ä½œè€…     : ãƒ¨ã‚·ãƒ¢ãƒˆ ãƒªãƒ§ã‚¦
+ å±¥æ­´     : 2026/04/20 æ–°è¦ä½œæˆ
+            2026/04/22 æ§‹æˆæ•´ç†
 =====================================+
 */
 
@@ -13,23 +13,23 @@ using UnityEditor;
 using UnityEngine;
 
 /// <summary>
-/// ƒc[ƒ‹—p‚ÌEditorWindow—Œ`iIMGUIj
+/// ãƒ„ãƒ¼ãƒ«ç”¨ã®EditorWindowé››å½¢ï¼ˆIMGUIï¼‰
 /// </summary>
-public partial class CSE_CreateTools : EditorWindow
+public partial class CSED_CreateTools : EditorWindow
 {
     /// <summary>
-    /// ƒƒjƒ…[‚©‚çƒEƒBƒ“ƒhƒE‚ğŠJ‚­B
+    /// ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã‹ã‚‰ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚’é–‹ãã€‚
     /// </summary>
     [MenuItem("Tools/CreateTools")]
     public static void ShowWindow()
     {
-        CSE_CreateTools window = GetWindow<CSE_CreateTools>("CreateTools");
+        CSED_CreateTools window = GetWindow<CSED_CreateTools>("CreateTools");
         window.position = new Rect(100.0f, 100.0f, c_WindowInitWidth, c_WindowInitHeight);
         window.minSize = new Vector2(c_WindowMinWidth, c_WindowMinHeight);
     }
 
     /// <summary>
-    /// GUI‚ğ•`‰æ‚·‚éiIMGUIjB
+    /// GUIã‚’æç”»ã™ã‚‹ï¼ˆIMGUIï¼‰ã€‚
     /// </summary>
     private void OnGUI()
     {

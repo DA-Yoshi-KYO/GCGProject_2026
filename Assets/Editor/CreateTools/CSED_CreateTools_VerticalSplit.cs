@@ -1,9 +1,9 @@
 /*
 +=====================================
- ƒtƒ@ƒCƒ‹–¼ : CSE_CreateTools_VerticalSplit.cs
- ŠT—v     : SCreateToolsƒc[ƒ‹‚Ìã‰º•ªŠ„§ŒäƒNƒ‰ƒX
- ìÒ     : ƒˆƒVƒ‚ƒg ƒŠƒ‡ƒE
- —š—ğ     : 2026/04/22 V‹Kì¬
+ ãƒ•ã‚¡ã‚¤ãƒ«å : CSED_CreateTools_VerticalSplit.cs
+ æ¦‚è¦     : SCreateToolsãƒ„ãƒ¼ãƒ«ã®ä¸Šä¸‹åˆ†å‰²åˆ¶å¾¡ã‚¯ãƒ©ã‚¹
+ ä½œè€…     : ãƒ¨ã‚·ãƒ¢ãƒˆ ãƒªãƒ§ã‚¦
+ å±¥æ­´     : 2026/04/22 æ–°è¦ä½œæˆ
 =====================================+
 */
 
@@ -12,12 +12,12 @@ using UnityEditor;
 using UnityEngine;
 
 /// <summary>
-/// ƒc[ƒ‹ì¬ƒc[ƒ‹‚Ìã‰º•ªŠ„§Œä‚ğ‚Ü‚Æ‚ß‚éƒNƒ‰ƒX
+/// ãƒ„ãƒ¼ãƒ«ä½œæˆãƒ„ãƒ¼ãƒ«ã®ä¸Šä¸‹åˆ†å‰²åˆ¶å¾¡ã‚’ã¾ã¨ã‚ã‚‹ã‚¯ãƒ©ã‚¹
 /// </summary>
-public partial class CSE_CreateTools
+public partial class CSED_CreateTools
 {
     /// <summary>
-    /// ¶“à•”ã‰º•ªŠ„‚Ì‰Šú‰»‚ğs‚¤B
+    /// å·¦å†…éƒ¨ä¸Šä¸‹åˆ†å‰²ã®åˆæœŸåŒ–ã‚’è¡Œã†ã€‚
     /// </summary>
     private void InitializeVerticalSplit()
     {
@@ -38,9 +38,9 @@ public partial class CSE_CreateTools
     }
 
     /// <summary>
-    /// ã‰º•ªŠ„‚Ìƒhƒ‰ƒbƒOˆ—‚ğs‚¤B
+    /// ä¸Šä¸‹åˆ†å‰²ã®ãƒ‰ãƒ©ãƒƒã‚°å‡¦ç†ã‚’è¡Œã†ã€‚
     /// </summary>
-    /// <param name="f_event">Œ»İƒCƒxƒ“ƒg</param>
+    /// <param name="f_event">ç¾åœ¨ã‚¤ãƒ™ãƒ³ãƒˆ</param>
     private void HandleVerticalSplitDrag(Event f_event)
     {
         Rect splitterRect = GetLeftVerticalSplitterRect();
@@ -87,7 +87,7 @@ public partial class CSE_CreateTools
     }
 
     /// <summary>
-    /// ã‰º•ªŠ„ƒo[‚ğ•`‰æ‚·‚éB
+    /// ä¸Šä¸‹åˆ†å‰²ãƒãƒ¼ã‚’æç”»ã™ã‚‹ã€‚
     /// </summary>
     private void DrawVerticalSplitters()
     {
@@ -98,7 +98,7 @@ public partial class CSE_CreateTools
     }
 
     /// <summary>
-    /// ã‰º•ªŠ„‚Ì’l‚ğ—LŒø”ÍˆÍ‚Éû‚ß‚éB
+    /// ä¸Šä¸‹åˆ†å‰²ã®å€¤ã‚’æœ‰åŠ¹ç¯„å›²ã«åã‚ã‚‹ã€‚
     /// </summary>
     private void ClampVerticalSplit()
     {
@@ -113,9 +113,9 @@ public partial class CSE_CreateTools
     }
 
     /// <summary>
-    /// ¶ãRect‚ğæ“¾‚·‚éB
+    /// å·¦ä¸ŠRectã‚’å–å¾—ã™ã‚‹ã€‚
     /// </summary>
-    /// <returns>¶ãRect</returns>
+    /// <returns>å·¦ä¸ŠRect</returns>
     private Rect GetLeftTopWindowRect()
     {
         Rect leftRect = GetLeftWindowRect();
@@ -128,9 +128,9 @@ public partial class CSE_CreateTools
     }
 
     /// <summary>
-    /// ¶“à•”ã‰º•ªŠ„ƒo[Rect‚ğæ“¾‚·‚éB
+    /// å·¦å†…éƒ¨ä¸Šä¸‹åˆ†å‰²ãƒãƒ¼Rectã‚’å–å¾—ã™ã‚‹ã€‚
     /// </summary>
-    /// <returns>ã‰º•ªŠ„ƒo[Rect</returns>
+    /// <returns>ä¸Šä¸‹åˆ†å‰²ãƒãƒ¼Rect</returns>
     private Rect GetLeftVerticalSplitterRect()
     {
         Rect topRect = GetLeftTopWindowRect();
@@ -143,9 +143,9 @@ public partial class CSE_CreateTools
     }
 
     /// <summary>
-    /// ¶‰ºRect‚ğæ“¾‚·‚éB
+    /// å·¦ä¸‹Rectã‚’å–å¾—ã™ã‚‹ã€‚
     /// </summary>
-    /// <returns>¶‰ºRect</returns>
+    /// <returns>å·¦ä¸‹Rect</returns>
     private Rect GetLeftBottomWindowRect()
     {
         Rect leftRect = GetLeftWindowRect();

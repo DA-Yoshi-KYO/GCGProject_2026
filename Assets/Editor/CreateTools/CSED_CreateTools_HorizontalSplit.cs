@@ -1,9 +1,9 @@
 /*
 +=====================================
- ƒtƒ@ƒCƒ‹–¼ : CSE_CreateTools_HorizontalSplit.cs
- ŠT—v     : SCreateToolsƒc[ƒ‹‚Ì¶‰E•ªŠ„§ŒäƒNƒ‰ƒX
- ìÒ     : ƒˆƒVƒ‚ƒg ƒŠƒ‡ƒE
- —š—ğ     : 2026/04/22 V‹Kì¬
+ ãƒ•ã‚¡ã‚¤ãƒ«å : CSED_CreateTools_HorizontalSplit.cs
+ æ¦‚è¦     : SCreateToolsãƒ„ãƒ¼ãƒ«ã®å·¦å³åˆ†å‰²åˆ¶å¾¡ã‚¯ãƒ©ã‚¹
+ ä½œè€…     : ãƒ¨ã‚·ãƒ¢ãƒˆ ãƒªãƒ§ã‚¦
+ å±¥æ­´     : 2026/04/22 æ–°è¦ä½œæˆ
 =====================================+
 */
 
@@ -12,12 +12,12 @@ using UnityEditor;
 using UnityEngine;
 
 /// <summary>
-/// ƒc[ƒ‹ì¬ƒc[ƒ‹‚Ì¶‰E•ªŠ„§Œä‚ğ‚Ü‚Æ‚ß‚éƒNƒ‰ƒX
+/// ãƒ„ãƒ¼ãƒ«ä½œæˆãƒ„ãƒ¼ãƒ«ã®å·¦å³åˆ†å‰²åˆ¶å¾¡ã‚’ã¾ã¨ã‚ã‚‹ã‚¯ãƒ©ã‚¹
 /// </summary>
-public partial class CSE_CreateTools
+public partial class CSED_CreateTools
 {
     /// <summary>
-    /// ¶‰E•ªŠ„‚Ì‰Šú‰»‚ğs‚¤B
+    /// å·¦å³åˆ†å‰²ã®åˆæœŸåŒ–ã‚’è¡Œã†ã€‚
     /// </summary>
     private void InitializeHorizontalSplit()
     {
@@ -38,9 +38,9 @@ public partial class CSE_CreateTools
     }
 
     /// <summary>
-    /// ¶‰E•ªŠ„‚Ìƒhƒ‰ƒbƒOˆ—‚ğs‚¤B
+    /// å·¦å³åˆ†å‰²ã®ãƒ‰ãƒ©ãƒƒã‚°å‡¦ç†ã‚’è¡Œã†ã€‚
     /// </summary>
-    /// <param name="f_event">Œ»İƒCƒxƒ“ƒg</param>
+    /// <param name="f_event">ç¾åœ¨ã‚¤ãƒ™ãƒ³ãƒˆ</param>
     private void HandleHorizontalSplitDrag(Event f_event)
     {
         Rect leftSplitterRect = GetLeftHorizontalSplitterRect();
@@ -102,7 +102,7 @@ public partial class CSE_CreateTools
     }
 
     /// <summary>
-    /// ¶‰E•ªŠ„ƒo[‚ğ•`‰æ‚·‚éB
+    /// å·¦å³åˆ†å‰²ãƒãƒ¼ã‚’æç”»ã™ã‚‹ã€‚
     /// </summary>
     private void DrawHorizontalSplitters()
     {
@@ -117,16 +117,16 @@ public partial class CSE_CreateTools
     }
 
     /// <summary>
-    /// ¶‰E•ªŠ„‚Ì—LŒø‰¡•‚ğæ“¾‚·‚éB
+    /// å·¦å³åˆ†å‰²ã®æœ‰åŠ¹æ¨ªå¹…ã‚’å–å¾—ã™ã‚‹ã€‚
     /// </summary>
-    /// <returns>—LŒø‰¡•</returns>
+    /// <returns>æœ‰åŠ¹æ¨ªå¹…</returns>
     private float GetHorizontalContentWidth()
     {
         return position.width - (c_Margin * 2.0f) - (c_HorizontalSplitterWidth * 2.0f);
     }
 
     /// <summary>
-    /// ¶‰E•ªŠ„‚Ì’l‚ğ—LŒø”ÍˆÍ‚Éû‚ß‚éB
+    /// å·¦å³åˆ†å‰²ã®å€¤ã‚’æœ‰åŠ¹ç¯„å›²ã«åã‚ã‚‹ã€‚
     /// </summary>
     private void ClampHorizontalSplit()
     {
@@ -140,9 +140,9 @@ public partial class CSE_CreateTools
     }
 
     /// <summary>
-    /// ¶ƒEƒBƒ“ƒhƒERect‚ğæ“¾‚·‚éB
+    /// å·¦ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦Rectã‚’å–å¾—ã™ã‚‹ã€‚
     /// </summary>
-    /// <returns>¶Rect</returns>
+    /// <returns>å·¦Rect</returns>
     private Rect GetLeftWindowRect()
     {
         return new Rect(
@@ -153,9 +153,9 @@ public partial class CSE_CreateTools
     }
 
     /// <summary>
-    /// ¶‘¤¶‰E•ªŠ„ƒo[Rect‚ğæ“¾‚·‚éB
+    /// å·¦å´å·¦å³åˆ†å‰²ãƒãƒ¼Rectã‚’å–å¾—ã™ã‚‹ã€‚
     /// </summary>
-    /// <returns>¶‘¤•ªŠ„ƒo[Rect</returns>
+    /// <returns>å·¦å´åˆ†å‰²ãƒãƒ¼Rect</returns>
     private Rect GetLeftHorizontalSplitterRect()
     {
         Rect leftRect = GetLeftWindowRect();
@@ -168,9 +168,9 @@ public partial class CSE_CreateTools
     }
 
     /// <summary>
-    /// ’†‰›ƒEƒBƒ“ƒhƒERect‚ğæ“¾‚·‚éB
+    /// ä¸­å¤®ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦Rectã‚’å–å¾—ã™ã‚‹ã€‚
     /// </summary>
-    /// <returns>’†‰›Rect</returns>
+    /// <returns>ä¸­å¤®Rect</returns>
     private Rect GetCenterWindowRect()
     {
         Rect leftSplitterRect = GetLeftHorizontalSplitterRect();
@@ -183,9 +183,9 @@ public partial class CSE_CreateTools
     }
 
     /// <summary>
-    /// ‰E‘¤¶‰E•ªŠ„ƒo[Rect‚ğæ“¾‚·‚éB
+    /// å³å´å·¦å³åˆ†å‰²ãƒãƒ¼Rectã‚’å–å¾—ã™ã‚‹ã€‚
     /// </summary>
-    /// <returns>‰E‘¤•ªŠ„ƒo[Rect</returns>
+    /// <returns>å³å´åˆ†å‰²ãƒãƒ¼Rect</returns>
     private Rect GetRightHorizontalSplitterRect()
     {
         Rect centerRect = GetCenterWindowRect();
@@ -198,9 +198,9 @@ public partial class CSE_CreateTools
     }
 
     /// <summary>
-    /// ‰EƒEƒBƒ“ƒhƒERect‚ğæ“¾‚·‚éB
+    /// å³ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦Rectã‚’å–å¾—ã™ã‚‹ã€‚
     /// </summary>
-    /// <returns>‰ERect</returns>
+    /// <returns>å³Rect</returns>
     private Rect GetRightWindowRect()
     {
         Rect rightSplitterRect = GetRightHorizontalSplitterRect();
@@ -213,9 +213,9 @@ public partial class CSE_CreateTools
     }
 
     /// <summary>
-    /// ’†‰›ƒEƒBƒ“ƒhƒE‚Ì‰¡•‚ğæ“¾‚·‚éB
+    /// ä¸­å¤®ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã®æ¨ªå¹…ã‚’å–å¾—ã™ã‚‹ã€‚
     /// </summary>
-    /// <returns>’†‰›‰¡•</returns>
+    /// <returns>ä¸­å¤®æ¨ªå¹…</returns>
     private float GetCenterWindowWidth()
     {
         return GetHorizontalContentWidth() - m_LeftCurrentWidth - m_RightCurrentWidth;

@@ -1,9 +1,9 @@
 /*
 +=====================================
- ƒtƒ@ƒCƒ‹–¼ : CSE_CreateTools_Config.cs
- ŠT—v     : SCreateToolsƒc[ƒ‹‚Ìİ’è’lŠÇ—ƒNƒ‰ƒX
- ìÒ     : ƒˆƒVƒ‚ƒg ƒŠƒ‡ƒE
- —š—ğ     : 2026/04/22 V‹Kì¬
+ ãƒ•ã‚¡ã‚¤ãƒ«å : CSE_CreateTools_Config.cs
+ æ¦‚è¦     : SCreateToolsãƒ„ãƒ¼ãƒ«ã®è¨­å®šå€¤ç®¡ç†ã‚¯ãƒ©ã‚¹
+ ä½œè€…     : ãƒ¨ã‚·ãƒ¢ãƒˆ ãƒªãƒ§ã‚¦
+ å±¥æ­´     : 2026/04/22 æ–°è¦ä½œæˆ
 =====================================+
 */
 
@@ -11,82 +11,82 @@
 using UnityEngine;
 
 /// <summary>
-/// ƒc[ƒ‹ì¬ƒc[ƒ‹‚Ìİ’è’l‚ğ‚Ü‚Æ‚ß‚éƒNƒ‰ƒX
+/// ãƒ„ãƒ¼ãƒ«ä½œæˆãƒ„ãƒ¼ãƒ«ã®è¨­å®šå€¤ã‚’ã¾ã¨ã‚ã‚‹ã‚¯ãƒ©ã‚¹
 /// </summary>
-public partial class CSE_CreateTools
+public partial class CSED_CreateTools
 {
     /// <summary>
-    /// ‰ŠúƒEƒBƒ“ƒhƒE‰¡•
+    /// åˆæœŸã‚¦ã‚£ãƒ³ãƒ‰ã‚¦æ¨ªå¹…
     /// </summary>
     private const float c_WindowInitWidth = 1280.0f;
 
     /// <summary>
-    /// ‰ŠúƒEƒBƒ“ƒhƒE‚‚³
+    /// åˆæœŸã‚¦ã‚£ãƒ³ãƒ‰ã‚¦é«˜ã•
     /// </summary>
     private const float c_WindowInitHeight = 720.0f;
 
     /// <summary>
-    /// ƒEƒBƒ“ƒhƒEÅ¬‰¡•
+    /// ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦æœ€å°æ¨ªå¹…
     /// </summary>
     private const float c_WindowMinWidth = 960.0f;
 
     /// <summary>
-    /// ƒEƒBƒ“ƒhƒEÅ¬‚‚³
+    /// ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦æœ€å°é«˜ã•
     /// </summary>
     private const float c_WindowMinHeight = 540.0f;
 
     /// <summary>
-    /// ŠO‘¤—]”’
+    /// å¤–å´ä½™ç™½
     /// </summary>
     private const float c_Margin = 5.0f;
 
     /// <summary>
-    /// ¶‰E•ªŠ„ƒo[‚Ì•
+    /// å·¦å³åˆ†å‰²ãƒãƒ¼ã®å¹…
     /// </summary>
     private const float c_HorizontalSplitterWidth = 5.0f;
 
     /// <summary>
-    /// ã‰º•ªŠ„ƒo[‚Ì‚‚³
+    /// ä¸Šä¸‹åˆ†å‰²ãƒãƒ¼ã®é«˜ã•
     /// </summary>
     private const float c_VerticalSplitterHeight = 5.0f;
 
     /// <summary>
-    /// ¶ƒEƒBƒ“ƒhƒE‰Šú”ä—¦
+    /// å·¦ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦åˆæœŸæ¯”ç‡
     /// </summary>
     private const float c_LeftInitRatio = 0.20f;
 
     /// <summary>
-    /// ‰EƒEƒBƒ“ƒhƒE‰Šú”ä—¦
+    /// å³ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦åˆæœŸæ¯”ç‡
     /// </summary>
     private const float c_RightInitRatio = 0.20f;
 
     /// <summary>
-    /// ¶“à•”ãƒGƒŠƒA‰Šú”ä—¦
+    /// å·¦å†…éƒ¨ä¸Šã‚¨ãƒªã‚¢åˆæœŸæ¯”ç‡
     /// </summary>
     private const float c_LeftTopInitRatio = 0.50f;
 
     /// <summary>
-    /// ¶ƒEƒBƒ“ƒhƒEÅ¬‰¡•
+    /// å·¦ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦æœ€å°æ¨ªå¹…
     /// </summary>
     private const float c_LeftMinWidth = 120.0f;
 
     /// <summary>
-    /// ’†‰›ƒEƒBƒ“ƒhƒEÅ¬‰¡•
+    /// ä¸­å¤®ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦æœ€å°æ¨ªå¹…
     /// </summary>
     private const float c_CenterMinWidth = 250.0f;
 
     /// <summary>
-    /// ‰EƒEƒBƒ“ƒhƒEÅ¬‰¡•
+    /// å³ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦æœ€å°æ¨ªå¹…
     /// </summary>
     private const float c_RightMinWidth = 120.0f;
 
     /// <summary>
-    /// ¶ãƒGƒŠƒAÅ¬‚‚³
+    /// å·¦ä¸Šã‚¨ãƒªã‚¢æœ€å°é«˜ã•
     /// </summary>
     private const float c_LeftTopMinHeight = 80.0f;
 
     /// <summary>
-    /// ¶‰ºƒGƒŠƒAÅ¬‚‚³
+    /// å·¦ä¸‹ã‚¨ãƒªã‚¢æœ€å°é«˜ã•
     /// </summary>
     private const float c_LeftBottomMinHeight = 80.0f;
 }

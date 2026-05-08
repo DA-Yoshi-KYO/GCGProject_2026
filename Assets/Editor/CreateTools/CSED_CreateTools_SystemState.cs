@@ -1,9 +1,9 @@
 /*
 +=====================================
- ƒtƒ@ƒCƒ‹–¼ : CSE_CreateTools_SystemState.cs
- ŠT—v     : SCreateToolsƒc[ƒ‹‚ÌƒVƒXƒeƒ€ó‘ÔŠÇ—ƒNƒ‰ƒX
- ìÒ     : ƒˆƒVƒ‚ƒg ƒŠƒ‡ƒE
- —š—ğ     : 2026/04/22 V‹Kì¬
+ ãƒ•ã‚¡ã‚¤ãƒ«å : CSED_CreateTools_SystemState.cs
+ æ¦‚è¦     : SCreateToolsãƒ„ãƒ¼ãƒ«ã®ã‚·ã‚¹ãƒ†ãƒ çŠ¶æ…‹ç®¡ç†ã‚¯ãƒ©ã‚¹
+ ä½œè€…     : ãƒ¨ã‚·ãƒ¢ãƒˆ ãƒªãƒ§ã‚¦
+ å±¥æ­´     : 2026/04/22 æ–°è¦ä½œæˆ
 =====================================+
 */
 
@@ -11,57 +11,57 @@
 using UnityEngine;
 
 /// <summary>
-/// ƒc[ƒ‹ì¬ƒc[ƒ‹‚ÌƒVƒXƒeƒ€ó‘Ô‚ğ‚Ü‚Æ‚ß‚éƒNƒ‰ƒX
+/// ãƒ„ãƒ¼ãƒ«ä½œæˆãƒ„ãƒ¼ãƒ«ã®ã‚·ã‚¹ãƒ†ãƒ çŠ¶æ…‹ã‚’ã¾ã¨ã‚ã‚‹ã‚¯ãƒ©ã‚¹
 /// </summary>
-public partial class CSE_CreateTools
+public partial class CSED_CreateTools
 {
     /// <summary>
-    /// ¶ƒEƒBƒ“ƒhƒEŒ»İ‰¡•
+    /// å·¦ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ç¾åœ¨æ¨ªå¹…
     /// </summary>
     private float m_LeftCurrentWidth;
 
     /// <summary>
-    /// ‰EƒEƒBƒ“ƒhƒEŒ»İ‰¡•
+    /// å³ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ç¾åœ¨æ¨ªå¹…
     /// </summary>
     private float m_RightCurrentWidth;
 
     /// <summary>
-    /// ¶ãƒGƒŠƒAŒ»İ‚‚³
+    /// å·¦ä¸Šã‚¨ãƒªã‚¢ç¾åœ¨é«˜ã•
     /// </summary>
     private float m_LeftTopCurrentHeight;
 
     /// <summary>
-    /// ¶‰E•ªŠ„‰Šú‰»Ï‚İƒtƒ‰ƒO
+    /// å·¦å³åˆ†å‰²åˆæœŸåŒ–æ¸ˆã¿ãƒ•ãƒ©ã‚°
     /// </summary>
     private bool m_IsHorizontalInitialized;
 
     /// <summary>
-    /// ¶“à•”ã‰º•ªŠ„‰Šú‰»Ï‚İƒtƒ‰ƒO
+    /// å·¦å†…éƒ¨ä¸Šä¸‹åˆ†å‰²åˆæœŸåŒ–æ¸ˆã¿ãƒ•ãƒ©ã‚°
     /// </summary>
     private bool m_IsVerticalInitialized;
 
     /// <summary>
-    /// ¶‰E•ªŠ„‚Ì¶ƒo[‚ğƒhƒ‰ƒbƒO’†‚©
+    /// å·¦å³åˆ†å‰²ã®å·¦ãƒãƒ¼ã‚’ãƒ‰ãƒ©ãƒƒã‚°ä¸­ã‹
     /// </summary>
     private bool m_IsDraggingLeftHorizontal;
 
     /// <summary>
-    /// ¶‰E•ªŠ„‚Ì‰Eƒo[‚ğƒhƒ‰ƒbƒO’†‚©
+    /// å·¦å³åˆ†å‰²ã®å³ãƒãƒ¼ã‚’ãƒ‰ãƒ©ãƒƒã‚°ä¸­ã‹
     /// </summary>
     private bool m_IsDraggingRightHorizontal;
 
     /// <summary>
-    /// ¶“à•”ã‰ºƒo[‚ğƒhƒ‰ƒbƒO’†‚©
+    /// å·¦å†…éƒ¨ä¸Šä¸‹ãƒãƒ¼ã‚’ãƒ‰ãƒ©ãƒƒã‚°ä¸­ã‹
     /// </summary>
     private bool m_IsDraggingLeftVertical;
 
     /// <summary>
-    /// ‰¡•ûŒüƒhƒ‰ƒbƒO•â³’l
+    /// æ¨ªæ–¹å‘ãƒ‰ãƒ©ãƒƒã‚°è£œæ­£å€¤
     /// </summary>
     private float m_HorizontalDragOffset;
 
     /// <summary>
-    /// c•ûŒüƒhƒ‰ƒbƒO•â³’l
+    /// ç¸¦æ–¹å‘ãƒ‰ãƒ©ãƒƒã‚°è£œæ­£å€¤
     /// </summary>
     private float m_VerticalDragOffset;
 }
