@@ -3,7 +3,8 @@
  * ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
  *    大瀧蓮
  * ----------------------------------------------------------
- * 2026-04-26 | 初回作成：大瀧
+ * 2026-04-26 | 初回作成(大瀧)
+ * 2026-05-08 | リファクタリング(大瀧)
  */
 
 using UnityEngine;
@@ -99,7 +100,7 @@ public class RockGimmick : GimmickBase
 
             float angle = Vector3.Angle(normal, Vector3.up);
             float speed = Mathf.Sin(angle * Mathf.Deg2Rad) * slideSpeed;
-            if (angle < SlopeAngleLimit)
+            if (angle < slopeAngleLimit)
             {
                 //接地判定
                 //接地(滑らない床)は破壊
@@ -120,7 +121,7 @@ public class RockGimmick : GimmickBase
             //レイ判定
             if (Physics.Raycast(transform.position, flatForward.normalized, out check, raySideLength))
             {
-                if (HitBrokeAngle(check, flatForward, SlopeAngleLimit))
+                if (HitBrokeAngle(check, flatForward, slopeAngleLimit))
                 {
                     Hit();
                     gimmickState = GimmickState.Broken;
