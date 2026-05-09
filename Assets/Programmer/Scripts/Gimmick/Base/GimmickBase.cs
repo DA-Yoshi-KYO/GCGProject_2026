@@ -9,11 +9,7 @@
 // 当たり判定内に、敵がいた場合、攻撃力を与える
 //
 
-using System.Collections;
-using System.Collections.Generic;
-using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 public enum Gimmick
 {
@@ -46,7 +42,10 @@ public enum GimmickDirection
 }
 
 public class GimmickBase : MonoBehaviour
-{ 
+{
+    // ギミックのイメ－ジ画像
+    public Sprite gimmickImage;
+
     // 大きさ
     [Header("大きさ")]
     [Tooltip("X方向の大きさ"), Min(0)]
