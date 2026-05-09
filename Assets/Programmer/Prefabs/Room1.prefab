@@ -3017,7 +3017,6 @@ GameObject:
   m_Component:
   - component: {fileID: 674974207703170646}
   - component: {fileID: 1764202731203763484}
-  - component: {fileID: 1075178380076985343}
   m_Layer: 0
   m_Name: Floors
   m_TagString: Floor
@@ -3065,27 +3064,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gridDivision: {x: 11, y: 9}
---- !u!65 &1075178380076985343
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7226219283177099507}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 11, y: 1, z: 9}
-  m_Center: {x: 0, y: 0, z: 0}
+  gridOrigin: 0
 --- !u!1 &7666630875110365973
 GameObject:
   m_ObjectHideFlags: 0

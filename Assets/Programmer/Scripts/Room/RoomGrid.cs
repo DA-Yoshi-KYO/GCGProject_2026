@@ -17,7 +17,6 @@ public class RoomGrid : MonoBehaviour
 {
     [SerializeField] private Vector2Int gridDivision;
     public Vector2 gridSize { get; private set; } = new Vector2(1, 1);   // グリッド1マスの大きさ
-    private Renderer rendererMaterial; // グリッドのマテリアル
     List<List<GameObject>> gridGimmicks;
     GameObject[,] gridObjects;
     public enum GridOrigin
@@ -210,7 +209,8 @@ public class RoomGrid : MonoBehaviour
         ray.direction = Vector3.down;
         const float rayOriginY = 255f;
         ray.origin = new Vector3(spawnPos.x, rayOriginY, spawnPos.z);
-        RaycastHit[] hits = Physics.RaycastAll(ray, Mathf.Abs(rayOriginY - gameObject.transform.position.y));
+        RaycastHit[] hits = Physics.RaycastAll(ray, Mathf.Abs(rayOriginY - gameObject.transform.position.y), ~0,
+            QueryTriggerInteraction.Ignore);
         Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
         GameObject hitObject = null;
         foreach(var hitItem in hits)
@@ -223,7 +223,7 @@ public class RoomGrid : MonoBehaviour
             break;
         }
 
-        if (hitObject != null && hitObject != gameObject) spawnPos.y = hitObject.transform.position.y + hitObject.transform.lossyScale.y / 2.0f;
+        Debug.Log(hitObject.name);
         GameObject gimmickObject = Instantiate(gimmick.gameObject, spawnPos, Quaternion.identity);
         GimmickBase spawnGimmick = gimmickObject.GetComponent<GimmickBase>();
         spawnGimmick.roomGrid = this;

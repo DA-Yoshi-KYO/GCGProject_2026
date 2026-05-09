@@ -23,8 +23,9 @@ public class PlayerAction : MonoBehaviour
     public List<GameObject> gimmickKind;//所持しているギミックの種類
     
     private PlayerData playerData;
-    private GameObject currentRoom;
     GameObject interactObject = null;
+
+    Vector3 settingPos = Vector3.zero;  // 設置予定場所
 
     // Start is called before the first frame update
     void Start()
@@ -37,6 +38,8 @@ public class PlayerAction : MonoBehaviour
     void Update()
     {
         playerData = GetComponent<PlayerData>();
+        settingPos = CalculateGimmickSetPosition();
+
         //キー操作でUIのギミックの選択
         if (playerData.playerInput.Player.GimmickChangeRight.triggered)
         {
@@ -105,6 +108,8 @@ public class PlayerAction : MonoBehaviour
 
     private void SettingAction()
     {
+        if (settingPos.magnitude == float.PositiveInfinity) return;
+
         if (gimmickKind[currentGimmickIndex] == null)
         {
             Debug.LogError("選択されたギミックが見つかりません");
@@ -120,6 +125,7 @@ public class PlayerAction : MonoBehaviour
             Debug.Log("ソウルが不足しています");
             return;    // ソウルが足りない場合召喚しない
         }
+        GameObject currentRoom = playerData.currentRoomData.GetPlayerFloorData();
         if (currentRoom == null)
         {
             Debug.Log("この部屋にトラップは配置できません");
@@ -138,7 +144,10 @@ public class PlayerAction : MonoBehaviour
     //ギミックの設置位置を補正する計算：大瀧
     private Vector3 CalculateGimmickSetPosition()
     {
+        GameObject currentRoom = playerData.currentRoomData.GetPlayerFloorData();
+
         var roomGrid = currentRoom.GetComponent<RoomGrid>();
+        if (roomGrid == null) return Vector3.positiveInfinity;
         GimmickBase gimmick = gimmickKind[currentGimmickIndex].GetComponent<GimmickBase>();
 
         Vector3 settingPos = transform.position;
@@ -197,6 +206,9 @@ public class PlayerAction : MonoBehaviour
     //ギミックの設置予定位置の取得とデバッグ用ボックス描画
     private void DebugDrawGimmickSet()
     {
+        if (settingPos.magnitude == float.PositiveInfinity) return;
+        GameObject currentRoom = playerData.currentRoomData.GetPlayerFloorData();
+
         // デバッグ用のギミック設置位置描画
         if (currentRoom == null) { Debug.Log("currentRoomError_DDGS"); return; }
         if (gimmickKind.Count == 0) { Debug.Log("gimmickKind.Count_DDGS"); return; }
@@ -205,8 +217,7 @@ public class PlayerAction : MonoBehaviour
         GimmickBase gimmick = gimmickKind[currentGimmickIndex].GetComponent<GimmickBase>();
 
         // ギミックの設置位置を計算
-        Vector3 spawnPos = CalculateGimmickSetPosition();
-        if (spawnPos.magnitude == float.PositiveInfinity) return;
+        if (settingPos.magnitude == float.PositiveInfinity) return;
 
         // グリッドサイズ取得
         Vector3 gridSize = roomGrid.gridSize;
@@ -215,7 +226,8 @@ public class PlayerAction : MonoBehaviour
         float sizeX = gimmick.gimmickSizeX;
         float sizeY = gimmick.gimmickSizeY;
 
-        spawnPos = roomGrid.GimmickEvenNumberCorrection(spawnPos, roomGrid.GetGridFromPos(spawnPos), gimmick);
+        Vector2Int grid = roomGrid.GetGridFromPos(settingPos);
+        settingPos = roomGrid.GimmickEvenNumberCorrection(settingPos, grid, gimmick);
 
         // ===============================
         // LineRenderer生成
@@ -227,7 +239,7 @@ public class PlayerAction : MonoBehaviour
         line.useWorldSpace = true;
 
         // 色設定
-        bool canPlace = true;
+        bool canPlace = !roomGrid.IsGridOnGimmick(grid);
         line.startColor = canPlace ? Color.green : Color.red;
         line.endColor = canPlace ? Color.green : Color.red;
 
@@ -239,12 +251,12 @@ public class PlayerAction : MonoBehaviour
         float width = sizeX * gridSize.x;
         float depth = sizeY * gridSize.y;
 
-        float lineY = spawnPos.y + 0.1f;
+        float lineY = settingPos.y + 0.1f;
 
-        Vector3 p1 = new Vector3(spawnPos.x - width / 2f, lineY, spawnPos.z - depth / 2f);
-        Vector3 p2 = new Vector3(spawnPos.x - width / 2f, lineY, spawnPos.z + depth / 2f);
-        Vector3 p3 = new Vector3(spawnPos.x + width / 2f, lineY, spawnPos.z + depth / 2f);
-        Vector3 p4 = new Vector3(spawnPos.x + width / 2f, lineY, spawnPos.z - depth / 2f);
+        Vector3 p1 = new Vector3(settingPos.x - width / 2f, lineY, settingPos.z - depth / 2f);
+        Vector3 p2 = new Vector3(settingPos.x - width / 2f, lineY, settingPos.z + depth / 2f);
+        Vector3 p3 = new Vector3(settingPos.x + width / 2f, lineY, settingPos.z + depth / 2f);
+        Vector3 p4 = new Vector3(settingPos.x + width / 2f, lineY, settingPos.z - depth / 2f);
 
         // 外枠
         points.Add(p1); points.Add(p2);
@@ -253,8 +265,8 @@ public class PlayerAction : MonoBehaviour
         points.Add(p4); points.Add(p1);
 
         // 中心
-        points.Add(spawnPos);
-        points.Add(spawnPos + Vector3.up * 1.0f);
+        points.Add(settingPos);
+        points.Add(settingPos + Vector3.up * 1.0f);
 
         line.positionCount = points.Count;
         line.SetPositions(points.ToArray());
@@ -289,14 +301,6 @@ public class PlayerAction : MonoBehaviour
                     currentSoul = initSoul;
                 }
             }
-        }
-    }
-
-    private void OnTriggerEnter(Collider collision)
-    {
-        if (collision.gameObject.CompareTag("Floor"))
-        {
-            currentRoom = collision.gameObject;
         }
     }
 
