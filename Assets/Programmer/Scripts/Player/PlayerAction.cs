@@ -95,8 +95,12 @@ public class PlayerAction : MonoBehaviour
             }
         }
 
+#if UNITY_EDITOR
         //デバッグ：ギミックの設置位置描画
         DebugDrawGimmickSet();
+        // ソウル数などのデバッグコマンド
+        DebugCommand();
+#endif
     }
 
     private void SettingAction()
@@ -271,6 +275,20 @@ public class PlayerAction : MonoBehaviour
             if ((gimmick.gimmickState != GimmickState.Idle)) return;
 
             interactObject = other.gameObject;
+        }
+    }
+
+    void DebugCommand()
+    {
+        if (Input.GetKey(KeyCode.LeftShift))
+        {
+            if ((Input.GetKey(KeyCode.Space)))
+            {
+                if (Input.GetKeyDown(KeyCode.S))
+                {
+                    currentSoul = initSoul;
+                }
+            }
         }
     }
 
