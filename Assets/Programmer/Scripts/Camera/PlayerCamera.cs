@@ -16,12 +16,10 @@ public class PlayerCamera : MonoBehaviour
     private RoomCamera roomCamera;//部屋のカメラ
 
     private GameObject roomCameraObject;//部屋のカメラ
-    private GameObject upCameraObject;//上視点のカメラ
-
+    
     [HideInInspector] public Vector3 cameraForward = Vector3.zero;//カメラから見た方向
     [HideInInspector] public Vector3 cameraRight = Vector3.zero;//カメラの右方向ベクトル
 
-    [Header("上視点カメラの距離")][SerializeField] private float upDirection = 10.0f;    // 上視点カメラの距離
     [Header("透過するオブジェクトのレイヤー")][SerializeField] LayerMask obstacleLayer;  // 透過するオブジェクトのレイヤー
     [Header("透過する範囲")][Range(1.0f,10.0f)][SerializeField] float radius = 1.5f;     // 透過する範囲
     [Header("透過した後のα値")][Range(0.0f,1.0f)][SerializeField] float maskAlpha = 0.5f;  // 透過した後のα値
@@ -42,64 +40,12 @@ public class PlayerCamera : MonoBehaviour
         roomCameraObject.GetComponent<Camera>().enabled = true;
 
         roomCamera = roomCameraObject.GetComponent<RoomCamera>();
-
-        upCameraObject = GameObject.Find("UpCamera");
-        Vector3 upCameraPos = currentRoom.transform.position;
-        upCameraPos.y += upDirection;
-        upCameraObject.transform.position = upCameraPos;
-        upCameraObject.GetComponent<Camera>().enabled = false;
     }
 
     // Update is called once per frame
     void Update()
     {
-        //プレイヤーのモードによってカメラ切り替え
-        PlayerData.PlayerMode currentMode = playerData.currentMode;
-        if (currentMode != prevMode)
-        {
-            switch (currentMode)
-            {
-                case PlayerData.PlayerMode.Normal:
-                    roomCameraObject.GetComponent<Camera>().enabled = true;
-                    upCameraObject.GetComponent<Camera>().enabled = true;
-                    break;
-                case PlayerData.PlayerMode.Setting:
-                    roomCameraObject.GetComponent<Camera>().enabled = false;
-                    upCameraObject.GetComponent<Camera>().enabled = true;
-                    break;
-                default:
-                    break;
-            }
-        }
-
         //現在のカメラの処理
-        switch (currentMode)
-        {
-            case PlayerData.PlayerMode.Normal:
-                RoomCamera();
-                break;
-            case PlayerData.PlayerMode.Setting:
-                UpCamera();
-                break;
-            default:
-                break;
-        }
-
-        prevMode = currentMode;
-
-        // レイキャストによるオブジェクトの透過処理
-        RayCastTransparent();
-    }
-
-    private void LateUpdate()
-    {
-        //roomCameraObject.transform.LookAt(gameObject.transform.position);
-
-    }
-
-    //部屋のカメラ処理
-    private void RoomCamera()
-    {
         cameraRight = roomCameraObject.transform.right;
         cameraForward = roomCameraObject.transform.forward;
 
@@ -109,21 +55,16 @@ public class PlayerCamera : MonoBehaviour
         moveAmount.y = 0.0f;
 
         //カメラの移動の制限値
-        moveAmount.x = Mathf.Min(moveAmount.x, roomCamera.moveAmountLimit.x); 
-        moveAmount.x = Mathf.Max(moveAmount.x, -roomCamera.moveAmountLimit.x); 
+        moveAmount.x = Mathf.Min(moveAmount.x, roomCamera.moveAmountLimit.x);
+        moveAmount.x = Mathf.Max(moveAmount.x, -roomCamera.moveAmountLimit.x);
 
-        moveAmount.z = Mathf.Min(moveAmount.z, roomCamera.moveAmountLimit.z); 
-        moveAmount.z = Mathf.Max(moveAmount.z, -roomCamera.moveAmountLimit.z); 
+        moveAmount.z = Mathf.Min(moveAmount.z, roomCamera.moveAmountLimit.z);
+        moveAmount.z = Mathf.Max(moveAmount.z, -roomCamera.moveAmountLimit.z);
 
         roomCameraObject.transform.position = roomCamera.initPos - moveAmount;
 
-    }
-
-    //上視点のカメラ処理
-    private void UpCamera()
-    {
-        cameraRight = upCameraObject.transform.right;
-        cameraForward = upCameraObject.transform.up;
+        // レイキャストによるオブジェクトの透過処理
+        RayCastTransparent();
     }
 
     /// <summary>
@@ -140,10 +81,6 @@ public class PlayerCamera : MonoBehaviour
 
         if (playerData.currentMode == PlayerData.PlayerMode.Normal)
             roomCameraObject.GetComponent<Camera>().enabled = true;
-
-        Vector3 upCameraPos = currentRoom.transform.GetChild(0).Find("Center").transform.position;
-        upCameraPos.y += upDirection;
-        upCameraObject.transform.position = upCameraPos;
     }
 
     private void RayCastTransparent()
@@ -181,12 +118,6 @@ public class PlayerCamera : MonoBehaviour
 
             // マテリアルのパラメータを設定
             mpb.SetFloat("_EnableClip", 1);
-            Vector3 maskPos = playerPos;
-            const float adjustY = 1.0f;
-            maskPos.y += adjustY;
-            mpb.SetVector("_PlayerPos", maskPos);
-            mpb.SetFloat("_Radius", radius);
-            mpb.SetFloat("_MaskAlpha", maskAlpha);
             r.SetPropertyBlock(mpb);
 
             currentHits.Add(r);
