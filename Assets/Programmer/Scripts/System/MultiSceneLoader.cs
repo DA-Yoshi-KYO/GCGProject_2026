@@ -9,17 +9,22 @@
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 public class MultiSceneLoader : MonoBehaviour
 {
     [SerializeField]
     private SceneAsset[] sceneAssets;
 
-    void Start()
+    private IEnumerator Start()
     {
         foreach (var item in sceneAssets)
         {
-            SceneManager.LoadScene(item.name, LoadSceneMode.Additive);
+            yield return SceneManager.LoadSceneAsync(
+                item.name,
+                LoadSceneMode.Additive);
+
+            yield return null;
         }
     }
 

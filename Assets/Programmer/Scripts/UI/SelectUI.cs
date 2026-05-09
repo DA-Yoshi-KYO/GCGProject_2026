@@ -2,7 +2,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using UnityEditor;
 
 [RequireComponent(typeof(RectTransform))]
 public class GimmickSelectUI : MonoBehaviour
@@ -10,9 +9,6 @@ public class GimmickSelectUI : MonoBehaviour
     // ──────────────────────────────────────────
     //  Inspector 参照
     // ──────────────────────────────────────────
-    [Header("接続先")]
-    [Tooltip("プレイヤーオブジェクト")]
-    [SerializeField] private GameObject player;
     private PlayerAction playerAction;
     private PlayerData playerData;
 
@@ -59,11 +55,6 @@ public class GimmickSelectUI : MonoBehaviour
     // ──────────────────────────────────────────
     private void Start()
     {
-        
-        player = GameObject.Find("Player");
-        playerAction = SceneAsset.FindObjectOfType<PlayerAction>();
-        playerData = SceneAsset.FindObjectOfType<PlayerData>();
-
         ApplySlotSizes();
         ForceUpdateAll();
     }
@@ -73,7 +64,12 @@ public class GimmickSelectUI : MonoBehaviour
     // ──────────────────────────────────────────
     private void Update()
     {
-        if (playerAction == null || playerData == null) return;
+        if (playerAction == null || playerData == null)
+        {
+            GameObject player = GameObject.FindWithTag("Player");
+            playerAction = player.GetComponent<PlayerAction>();
+            playerData = player.GetComponent<PlayerData>();
+        }
 
         int idx = playerAction.currentGimmickIndex;
         int soul = playerAction.currentSoul;
@@ -111,7 +107,7 @@ public class GimmickSelectUI : MonoBehaviour
         // モードバッジ
         if (modeBadgeText != null)
         {
-            modeBadgeText.text = isSetting ? "設置モード" : "通常モード";
+            modeBadgeText.text = isSetting ? "SettingMode" : "NormalMode";
             modeBadgeText.color = isSetting ? colorSettingMode : colorNormalMode;
         }
 
@@ -138,7 +134,7 @@ public class GimmickSelectUI : MonoBehaviour
 
         // アイコンSprite：GimmickBase側にSpriteフィールドを追加するか、
         // SpriteRenderer / UIの子Imageから取得する運用を推奨。
-        slot.Setup(name, cost, null);
+        slot.Setup(name, cost, gb.gimmickImage);
         slot.SetSelected(isSelected, colorSelected, colorSide);
     }
 

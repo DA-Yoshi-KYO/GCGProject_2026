@@ -20,7 +20,7 @@ public class GimmickSlotItem : MonoBehaviour
     [Header("カラー設定")]
     [SerializeField] private Color bgSelected = new Color(0.95f, 0.82f, 0.28f, 0.15f);
     [SerializeField] private Color bgDefault = new Color(1f, 1f, 1f, 0.04f);
-    [SerializeField] private Color borderSelected = new Color(0.95f, 0.82f, 0.28f, 1f);
+    [SerializeField] private Color borderSelected = new Color(0.95f, 0.82f, 0.28f, 0.15f);
     [SerializeField] private Color borderDefault = new Color(0.42f, 0.35f, 0.17f, 1f);
 
     [Header("選択中の縁取り（Outline / Border Image）")]
