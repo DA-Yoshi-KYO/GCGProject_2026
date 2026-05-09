@@ -29,6 +29,7 @@ public class CS_RoomPlayerPosition : MonoBehaviour
 
     private GameObject playerInstance;
     private GameObject playerRoomData;
+    private GameObject playerFloorData;
 
     /// <summary>
     /// PlayerPrefabを取得します。
@@ -44,6 +45,11 @@ public class CS_RoomPlayerPosition : MonoBehaviour
     /// Playerが現在いるRoomCreatePointを取得します。
     /// </summary>
     public GameObject PlayerRoomData => playerRoomData;
+
+    /// <summary>
+    /// Playerが現在いる床を取得します。
+    /// </summary>
+    public GameObject PlayerFloorData => playerRoomData;
 
     /// <summary>
     /// StartPlayerPointにPlayerPrefabを生成します。
@@ -126,6 +132,7 @@ public class CS_RoomPlayerPosition : MonoBehaviour
         if (playerInstance == null)
         {
             playerRoomData = null;
+            playerFloorData = null;
 
             if (bool_IsDebugCurrentRoom)
             {
@@ -154,6 +161,7 @@ public class CS_RoomPlayerPosition : MonoBehaviour
         if (normalizedRoomCreatePoint == null)
         {
             playerRoomData = null;
+            playerFloorData = null;
             DebugCurrentRoomData();
             return;
         }
@@ -161,6 +169,9 @@ public class CS_RoomPlayerPosition : MonoBehaviour
         SetupRoomForPlayerCamera(normalizedRoomCreatePoint);
 
         playerRoomData = normalizedRoomCreatePoint;
+        // TODO: 部屋の情報も取得できるように(もっといい方法ある...？)
+        playerFloorData = playerRoomData.transform.GetComponentInChildren<RoomGrid>().gameObject;
+
         DebugCurrentRoomData();
     }
 
@@ -172,6 +183,16 @@ public class CS_RoomPlayerPosition : MonoBehaviour
     public GameObject GetPlayerRoomData()
     {
         return playerRoomData;
+    }
+
+    /// <summary>
+    /// Playerが現在いるRoomCreatePointを取得します。
+    /// PlayerActionなどギミックの設置位置決定用です。
+    /// </summary>
+    /// <returns>Playerが現在いるRoomCreatePoint。</returns>
+    public GameObject GetPlayerFloorData()
+    {
+        return playerFloorData;
     }
 
     /// <summary>
