@@ -203,6 +203,10 @@ public class PlayerAction : MonoBehaviour
         return spawnPos;
     }
 
+    // ===== staticで保持※デバッグ用=====
+    private LineRenderer line = null;
+    private Vector3[] points = new Vector3[10]; // 最大数
+
     //ギミックの設置予定位置の取得とデバッグ用ボックス描画
     private void DebugDrawGimmickSet()
     {
@@ -230,27 +234,55 @@ public class PlayerAction : MonoBehaviour
         settingPos = roomGrid.GimmickEvenNumberCorrection(settingPos, grid, gimmick);
 
         // ===============================
-        // LineRenderer生成
-        GameObject lineObj = new GameObject("GimmickGridRenderer_Temp");
-        LineRenderer line = lineObj.AddComponent<LineRenderer>();
+        // LineRenderer生成※初回のみ
+        if (line == null)
+        {
+            GameObject lineObj = new GameObject("GimmickGridRenderer_Debug");
+            line = lineObj.AddComponent<LineRenderer>();
+
+            line.material = new Material(Shader.Find("Sprites/Default"));
+            line.widthMultiplier = 0.03f;
+            line.useWorldSpace = true;
+        }
 
         line.material = new Material(Shader.Find("Sprites/Default"));
         line.widthMultiplier = 0.03f;
         line.useWorldSpace = true;
 
+        bool canPlace = true;
+
+        line.startColor = Color.green;
+        line.endColor = Color.green;
         // 色設定
-        bool canPlace = !roomGrid.IsGridOnGimmick(grid);
-        line.startColor = canPlace ? Color.green : Color.red;
-        line.endColor = canPlace ? Color.green : Color.red;
-
-        Object.Destroy(lineObj, 0.02f);
-
-        // ライン描画用のポイントを計算
-        List<Vector3> points = new List<Vector3>();
+        // 縦横サイズに合わせて判定を拡大
+        for (int sX = 0 ; sX < sizeX ; sX++)
+        {
+            for (int sY = 0 ; sY < sizeY ; sY++)
+            {
+                Vector3 checkPos;
+                //偶数だけX軸がズレるから一マス修正
+                if(sizeX % 2 == 0)
+                {
+                    checkPos.x = settingPos.x +(sX * gridSize.x) - (gridSize.x * sizeX / 2f);
+                }
+                else
+                {
+                    checkPos.x = settingPos.x + (sX * gridSize.x);
+                }
+                checkPos.y = 0;
+                checkPos.z = settingPos.z + (sY * gridSize.y);
+                canPlace = !roomGrid.IsGridOnGimmick(roomGrid.GetGridFromPos(checkPos));
+                // どこか一箇所でも置けない場所があれば赤色にする
+                if (!canPlace)
+                {
+                    line.startColor = Color.red;
+                    line.endColor = Color.red;
+                }
+            }
+        }
 
         float width = sizeX * gridSize.x;
         float depth = sizeY * gridSize.y;
-
         float lineY = settingPos.y + 0.1f;
 
         Vector3 p1 = new Vector3(settingPos.x - width / 2f, lineY, settingPos.z - depth / 2f);
@@ -258,18 +290,19 @@ public class PlayerAction : MonoBehaviour
         Vector3 p3 = new Vector3(settingPos.x + width / 2f, lineY, settingPos.z + depth / 2f);
         Vector3 p4 = new Vector3(settingPos.x + width / 2f, lineY, settingPos.z - depth / 2f);
 
-        // 外枠
-        points.Add(p1); points.Add(p2);
-        points.Add(p2); points.Add(p3);
-        points.Add(p3); points.Add(p4);
-        points.Add(p4); points.Add(p1);
+        // 配列入れ込み
+        int i = 0;
+        points[i++] = p1; points[i++] = p2;
+        points[i++] = p2; points[i++] = p3;
+        points[i++] = p3; points[i++] = p4;
+        points[i++] = p4; points[i++] = p1;
 
-        // 中心
-        points.Add(settingPos);
-        points.Add(settingPos + Vector3.up * 1.0f);
+        points[i++] = settingPos;
+        points[i++] = settingPos + Vector3.up * 1.0f;
 
-        line.positionCount = points.Count;
-        line.SetPositions(points.ToArray());
+        // 反映
+        line.positionCount = i;
+        line.SetPositions(points);
     }
 
     //ソウルの数を加算する関数

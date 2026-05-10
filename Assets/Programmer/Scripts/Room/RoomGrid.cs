@@ -258,12 +258,12 @@ public class RoomGrid : MonoBehaviour
         if ((int)sizeX % 2 == 0)
         {
             if (setPos.x <= spawnPos.x)
-                offsetX -= 1f * gridSizeX;   // 左に1マス 
+                offsetX -= gridSizeX;   // 左に1マス 
         }
         if ((int)sizeY % 2 == 0)
         {
             if (setPos.z <= spawnPos.z)
-                offsetY -= 1f * gridSizeY;   // 下に1マス
+                offsetY -= gridSizeY;   // 下に1マス
         }
         // ワールド座標に変換
         offsetX *= gridSizeX;
