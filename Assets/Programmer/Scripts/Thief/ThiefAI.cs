@@ -730,20 +730,89 @@ public class ThiefAI : MonoBehaviour
         }
 
         int randomIndex = 0;
+        int safetyCounter = 0; // 無限ループ対策の安全カウンター
+        bool hasUnvisitedNextRooms = HasUnvisitedNextRooms(); // 次の部屋候補の中に行ったことのない部屋があるかどうかを判定するフラグ
         while (true)
         {
-            // 接続している部屋の方向をランダムに選択
-            randomIndex = Random.Range(0, connectDirs.Count);
-
             CS_RoomMoveConnection nextRoom;
-            roomCreatePoint.TryGetConnection(connectDirs[randomIndex], out nextRoom);
 
-            if (!roomMemories.ContainsKey(nextRoom.TargetCreatePoint.GetComponentInChildren<RoomNode>())) break;
+            // 次の部屋候補の中に行ったことのない部屋がある場合
+            if (hasUnvisitedNextRooms)
+            {
+                // 接続している部屋の方向をランダムに選択
+                randomIndex = Random.Range(0, connectDirs.Count);
+
+                roomCreatePoint.TryGetConnection(connectDirs[randomIndex], out nextRoom);
+
+                // 次の部屋の記憶がない場合は、その方向を次の移動ポイントに設定してループを抜ける
+                if (!roomMemories.ContainsKey(nextRoom.TargetCreatePoint.GetComponentInChildren<RoomNode>())) break;
+            }
+            // 次の部屋候補の中に行ったことのない部屋がない場合
+            else
+            {
+                // 接続している部屋の方向をランダムに選択
+                randomIndex = Random.Range(0, connectDirs.Count);
+
+                roomCreatePoint.TryGetConnection(connectDirs[randomIndex], out nextRoom);
+
+                // その部屋の探索度がMAXでない場合は、その方向を次の移動ポイントに設定してループを抜ける
+                if (roomMemories.ContainsKey(nextRoom.TargetCreatePoint.GetComponentInChildren<RoomNode>()) &&
+                    roomMemories[nextRoom.TargetCreatePoint.GetComponentInChildren<RoomNode>()].explorationLevel < 100)
+                {
+                    break;
+                }
+            }
+
+            // 無限ループ対策
+            safetyCounter++;
+            if (safetyCounter > 50)
+            {
+                Debug.LogError("【泥棒】次の部屋の選択でループが多すぎます。ThiefAIのNextDoorElectionメソッドで、次に設定する移動ポイントを決定するロジックが正常に動作しない可能性があります。");
+                break;
+            }
         }
 
         // 選択した方向にあるドアの位置を次の移動ポイントに設定
         nextRoomMovePoint = currentRoom.GetDirectionWallToDoor(connectDirs[randomIndex]);
     }
+
+    /// <summary>
+    /// 次の部屋候補の中に行ったことのない部屋があるかどうかを判定する処理
+    /// </summary>
+    /// <returns>
+    /// true:次の部屋候補の中に行ったことのない部屋がある | false:次の部屋候補の中に行ったことのない部屋がない
+    /// </returns>
+    private bool HasUnvisitedNextRooms()
+    {
+        if (currentRoomObject == null)
+        {
+            FindNowRoomNode();
+            Debug.LogError("【泥棒】現在いる部屋のオブジェクトが見つかりませんでした。ThiefAIのHasUnvisitedNextRoomsメソッドで、次の部屋候補の中に行ったことのない部屋があるかどうかを判定する処理が正常に動作しない可能性があります。");
+            return false;
+        }
+        CS_RoomCreatePoint roomCreatePoint = currentRoomObject.transform.GetComponent<CS_RoomCreatePoint>();
+        if (roomCreatePoint == null)
+        {
+            Debug.LogError("【泥棒】現在いる部屋のRoomCreatePointが見つかりませんでした。ThiefAIのHasUnvisitedNextRoomsメソッドで、次の部屋候補の中に行ったことのない部屋があるかどうかを判定する処理が正常に動作しない可能性があります。");
+            return false;
+        }
+        // 現在いる部屋の接続している方向を取得
+        List<CSE_RoomDoorDirection> connectDirs = roomCreatePoint.GetConnectDirections();
+        if (connectDirs.Count == 0)
+        {
+            Debug.LogWarning("【泥棒】現在いる部屋の接続方向が見つかりませんでした。ThiefAIのHasUnvisitedNextRoomsメソッドで、次の部屋候補の中に行ったことのない部屋があるかどうかを判定する処理が正常に動作しない可能性があります。");
+            return false;
+        }
+        // 接続している部屋の中に行ったことのない部屋があるかどうかを判定
+        foreach (var dir in connectDirs)
+        {
+            CS_RoomMoveConnection nextRoom;
+            roomCreatePoint.TryGetConnection(dir, out nextRoom);
+            if (!roomMemories.ContainsKey(nextRoom.TargetCreatePoint.GetComponentInChildren<RoomNode>())) return true;
+        }
+        return false;
+    }
+
 
     /// <summary>
     /// 探索対象を強制的に変更する処理
