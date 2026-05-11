@@ -79,8 +79,7 @@ public class PlayerCamera : MonoBehaviour
         
         roomCamera = roomCameraObject.GetComponent<RoomCamera>();
 
-        if (playerData.currentMode == PlayerData.PlayerMode.Normal)
-            roomCameraObject.GetComponent<Camera>().enabled = true;
+        roomCameraObject.GetComponent<Camera>().enabled = true;
     }
 
     private void RayCastTransparent()
