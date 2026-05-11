@@ -37,7 +37,7 @@ public partial class CSED_CreateTools
         EnsureFieldDataList();
 
         string fieldName = CreateDefaultFieldName(f_fieldType);
-        CSED_CreateTools_FieldLayoutType fieldLayoutType = CreateDefaultFieldLayoutType(f_fieldType);
+        CSE_CreateTools_FieldLayoutType fieldLayoutType = CreateDefaultFieldLayoutType(f_fieldType);
 
         CSED_CreateTools_FieldData fieldData = new CSED_CreateTools_FieldData(
             f_fieldType,
@@ -45,6 +45,13 @@ public partial class CSED_CreateTools
             fieldLayoutType);
 
         m_FieldDataList.Add(fieldData);
+
+        m_SelectedFieldDataIndex = m_FieldDataList.Count - 1;
+
+        if (m_FieldDataReorderableList != null)
+        {
+            m_FieldDataReorderableList.index = m_SelectedFieldDataIndex;
+        }
 
         Debug.Log(
             "[CreateTools] 中央エリアに変数を追加しました : Type = "
@@ -114,6 +121,64 @@ public partial class CSED_CreateTools
 
             default:
                 return CSED_CreateTools_FieldLayoutType.InputField;
+        }
+    }
+
+    /// <summary>
+    /// 選択中Fieldデータを取得します。
+    /// </summary>
+    /// <param name="f_fieldData">取得したFieldデータ</param>
+    /// <returns>取得できた場合はtrue</returns>
+    private bool TryGetSelectedFieldData(out CSED_CreateTools_FieldData f_fieldData)
+    {
+        EnsureFieldDataList();
+
+        ClampSelectedFieldDataIndex();
+
+        if (m_SelectedFieldDataIndex < 0 || m_SelectedFieldDataIndex >= m_FieldDataList.Count)
+        {
+            f_fieldData = null;
+            return false;
+        }
+
+        f_fieldData = m_FieldDataList[m_SelectedFieldDataIndex];
+        return true;
+    }
+
+    /// <summary>
+    /// 選択中Field番号を設定します。
+    /// </summary>
+    /// <param name="f_index">選択するField番号</param>
+    private void SetSelectedFieldDataIndex(int f_index)
+    {
+        EnsureFieldDataList();
+
+        if (f_index < 0 || f_index >= m_FieldDataList.Count)
+        {
+            m_SelectedFieldDataIndex = -1;
+        }
+        else
+        {
+            m_SelectedFieldDataIndex = f_index;
+        }
+
+        Repaint();
+    }
+
+    /// <summary>
+    /// 選択中Field番号を有効範囲に収めます。
+    /// </summary>
+    private void ClampSelectedFieldDataIndex()
+    {
+        if (m_FieldDataList == null || m_FieldDataList.Count <= 0)
+        {
+            m_SelectedFieldDataIndex = -1;
+            return;
+        }
+
+        if (m_SelectedFieldDataIndex >= m_FieldDataList.Count)
+        {
+            m_SelectedFieldDataIndex = m_FieldDataList.Count - 1;
         }
     }
 }

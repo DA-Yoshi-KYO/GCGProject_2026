@@ -76,5 +76,15 @@ public partial class CSED_CreateTools
     /// 中央エリアのスクロール位置です。
     /// </summary>
     private Vector2 m_FieldCanvasScrollPosition;
+
+    /// <summary>
+    /// 現在選択中のField番号です。
+    /// </summary>
+    private int m_SelectedFieldDataIndex = -1;
+
+    /// <summary>
+    /// 左下Field詳細設定エリアのスクロール位置です。
+    /// </summary>
+    private Vector2 m_FieldInspectorScrollPosition;
 }
 #endif

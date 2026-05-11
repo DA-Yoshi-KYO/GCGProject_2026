@@ -6,6 +6,7 @@
  履歴     : 2026/04/20 新規作成
             2026/04/22 上下分割描画対応
             2026/05/08 左上エリアに変数パレット描画を追加
+            2026/05/08 左下エリアに選択中Field設定描画を追加
 =====================================+
 */
 
@@ -29,6 +30,7 @@ public partial class CSED_CreateTools
         DrawBlackFrame(bottomRect.x, bottomRect.y, bottomRect.width, bottomRect.height);
 
         DrawVariablePalette(topRect);
+        DrawFieldInspector(bottomRect);
     }
 }
 #endif
