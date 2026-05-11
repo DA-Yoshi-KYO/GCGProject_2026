@@ -31,6 +31,11 @@ public class CSED_CreateTools_FieldData
     public CSE_CreateTools_FieldLayoutType FieldLayoutType { get; set; }
 
     /// <summary>
+    /// Input Fieldなどで表示するタグ名です。
+    /// </summary>
+    public string TagName { get; set; }
+
+    /// <summary>
     /// 変数データを作成します。
     /// </summary>
     /// <param name="f_fieldType">変数の型</param>
@@ -44,6 +49,7 @@ public class CSED_CreateTools_FieldData
         FieldType = f_fieldType;
         FieldName = f_fieldName;
         FieldLayoutType = f_fieldLayoutType;
+        TagName = f_fieldName;
     }
 }
 #endif

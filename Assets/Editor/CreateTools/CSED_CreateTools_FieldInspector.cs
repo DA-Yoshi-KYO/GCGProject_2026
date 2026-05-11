@@ -4,6 +4,7 @@
  概要     : CreateToolsの左下に選択中Fieldの詳細設定を表示するクラス
  作者     : ヨシモト リョウ
  履歴     : 2026/05/08 新規作成
+            2026/05/11 InputField用設定の表示間隔と入力欄幅を調整
 =====================================+
 */
 
@@ -29,8 +30,32 @@ public partial class CSED_CreateTools
     /// <summary>
     /// Field詳細設定項目同士の余白です。
     /// </summary>
-    private const float c_FieldInspectorSpacing = 6.0f;
+    private const float c_FieldInspectorSpacing = 10.0f;
 
+    /// <summary>
+    /// Layout項目とLayout専用設定の間の余白です。
+    /// </summary>
+    private const float c_FieldInspectorLayoutBottomSpacing = 24.0f;
+
+    /// <summary>
+    /// Field詳細設定のラベル幅です。
+    /// </summary>
+    private const float c_FieldInspectorLabelWidth = 78.0f;
+
+    /// <summary>
+    /// ラベルと入力欄の間の余白です。
+    /// </summary>
+    private const float c_FieldInspectorLabelToInputSpacing = 14.0f;
+
+    /// <summary>
+    /// Field詳細設定の入力欄幅です。
+    /// </summary>
+    private const float c_FieldInspectorInputWidth = 120.0f;
+
+    /// <summary>
+    /// Field詳細設定の1行高さです。
+    /// </summary>
+    private const float c_FieldInspectorLineHeight = 18.0f;
 
     /// <summary>
     /// 左下エリアに選択中Fieldの詳細設定を描画します。
@@ -144,14 +169,11 @@ public partial class CSED_CreateTools
 
         GUILayout.Space(c_FieldInspectorSpacing + 4.0f);
 
-        float oldLabelWidth = EditorGUIUtility.labelWidth;
-        EditorGUIUtility.labelWidth = 60.0f;
-
         EditorGUI.BeginChangeCheck();
 
         CSE_CreateTools_FieldType beforeFieldType = f_fieldData.FieldType;
 
-        f_fieldData.FieldType = (CSE_CreateTools_FieldType)EditorGUILayout.EnumPopup(
+        f_fieldData.FieldType = DrawSmallFieldTypePopup(
             "Type",
             f_fieldData.FieldType);
 
@@ -162,22 +184,127 @@ public partial class CSED_CreateTools
 
         GUILayout.Space(c_FieldInspectorSpacing);
 
-        f_fieldData.FieldName = EditorGUILayout.TextField(
+        f_fieldData.FieldName = DrawSmallTextField(
             "Name",
             f_fieldData.FieldName);
 
         GUILayout.Space(c_FieldInspectorSpacing);
 
-        f_fieldData.FieldLayoutType = (CSE_CreateTools_FieldLayoutType)EditorGUILayout.EnumPopup(
+        f_fieldData.FieldLayoutType = DrawSmallFieldLayoutTypePopup(
             "Layout",
             f_fieldData.FieldLayoutType);
+
+        GUILayout.Space(c_FieldInspectorLayoutBottomSpacing);
+
+        if (f_fieldData.FieldLayoutType == CSE_CreateTools_FieldLayoutType.InputField)
+        {
+            DrawInputFieldLayoutSettings(f_fieldData);
+        }
 
         if (EditorGUI.EndChangeCheck())
         {
             Repaint();
         }
+    }
 
-        EditorGUIUtility.labelWidth = oldLabelWidth;
+    /// <summary>
+    /// Input Field用の詳細設定を描画します。
+    /// </summary>
+    /// <param name="f_fieldData">選択中Fieldデータ</param>
+    private void DrawInputFieldLayoutSettings(CSED_CreateTools_FieldData f_fieldData)
+    {
+        EditorGUILayout.LabelField("Input Field設定", EditorStyles.boldLabel);
+
+        GUILayout.Space(c_FieldInspectorSpacing);
+
+        f_fieldData.TagName = DrawSmallTextField(
+            "Tag Name",
+            f_fieldData.TagName);
+    }
+
+    /// <summary>
+    /// 小さめのTextFieldを描画します。
+    /// </summary>
+    /// <param name="f_label">表示ラベル</param>
+    /// <param name="f_value">現在の文字列</param>
+    /// <returns>入力後の文字列</returns>
+    private string DrawSmallTextField(string f_label, string f_value)
+    {
+        Rect baseRect = EditorGUILayout.GetControlRect(false, c_FieldInspectorLineHeight);
+
+        Rect labelRect = new Rect(
+            baseRect.x,
+            baseRect.y,
+            c_FieldInspectorLabelWidth,
+            baseRect.height);
+
+        Rect inputRect = new Rect(
+            baseRect.x + c_FieldInspectorLabelWidth + c_FieldInspectorLabelToInputSpacing,
+            baseRect.y,
+            c_FieldInspectorInputWidth,
+            baseRect.height);
+
+        EditorGUI.LabelField(labelRect, f_label);
+
+        return EditorGUI.TextField(inputRect, f_value);
+    }
+
+    /// <summary>
+    /// 小さめのFieldType用Popupを描画します。
+    /// </summary>
+    /// <param name="f_label">表示ラベル</param>
+    /// <param name="f_value">現在のFieldType</param>
+    /// <returns>選択後のFieldType</returns>
+    private CSE_CreateTools_FieldType DrawSmallFieldTypePopup(
+        string f_label,
+        CSE_CreateTools_FieldType f_value)
+    {
+        Rect baseRect = EditorGUILayout.GetControlRect(false, c_FieldInspectorLineHeight);
+
+        Rect labelRect = new Rect(
+            baseRect.x,
+            baseRect.y,
+            c_FieldInspectorLabelWidth,
+            baseRect.height);
+
+        Rect inputRect = new Rect(
+            baseRect.x + c_FieldInspectorLabelWidth + c_FieldInspectorLabelToInputSpacing,
+            baseRect.y,
+            c_FieldInspectorInputWidth,
+            baseRect.height);
+
+        EditorGUI.LabelField(labelRect, f_label);
+
+        return (CSE_CreateTools_FieldType)EditorGUI.EnumPopup(inputRect, f_value);
+    }
+
+    /// <summary>
+    /// 小さめのFieldLayoutType用Popupを描画します。
+    /// </summary>
+    /// <param name="f_label">表示ラベル</param>
+    /// <param name="f_value">現在のFieldLayoutType</param>
+    /// <returns>選択後のFieldLayoutType</returns>
+    private CSE_CreateTools_FieldLayoutType DrawSmallFieldLayoutTypePopup(
+        string f_label,
+        CSE_CreateTools_FieldLayoutType f_value)
+    {
+        Rect baseRect = EditorGUILayout.GetControlRect(false, c_FieldInspectorLineHeight);
+
+        Rect labelRect = new Rect(
+            baseRect.x,
+            baseRect.y,
+            c_FieldInspectorLabelWidth,
+            baseRect.height);
+
+        Rect inputRect = new Rect(
+            baseRect.x + c_FieldInspectorLabelWidth + c_FieldInspectorLabelToInputSpacing,
+            baseRect.y,
+            c_FieldInspectorInputWidth,
+            baseRect.height);
+
+        EditorGUI.LabelField(labelRect, f_label);
+
+        return (CSE_CreateTools_FieldLayoutType)EditorGUI.EnumPopup(inputRect, f_value);
     }
 }
 #endif
