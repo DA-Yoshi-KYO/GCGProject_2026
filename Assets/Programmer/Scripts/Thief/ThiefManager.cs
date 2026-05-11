@@ -20,8 +20,8 @@ using static WaveData;
 // 泥棒を生成するシステム
 public class ThiefManager : MonoBehaviour
 {
-    [SerializeField, Tooltip("泥棒のデータベース")]
-    private ThiefDataSO thiefDB;
+    [SerializeField, Tooltip("泥棒の種類共通パラメーターのデータベース")]
+    private CSS_ThiefCommonStatusData thiefCommonDB;
     [SerializeField, Tooltip("ステージごとのウェーブデータのデータベース")]
     private StageDataSO stageDataDB;
     [SerializeField, Tooltip("泥棒のプレハブ")]
@@ -32,9 +32,10 @@ public class ThiefManager : MonoBehaviour
     [Tooltip("敵の出入口のデータと、そこから生成された泥棒の数を管理する辞書")]
     private Dictionary<CS_RoomEnemyEntryPointData, int> spawnCount = new Dictionary<CS_RoomEnemyEntryPointData, int>();
 
-    [Tooltip("泥棒を生成する間隔の基本値")]
+    [SerializeField, Header("次の泥棒を生成するまでの感覚(秒)"), Tooltip("泥棒を生成する間隔の基本値")]
     private float createInterval = 1.0f;
-    private float firstCreateInterval = 5.0f; // 最初の生成間隔を保存する変数
+    [SerializeField, Header("最初の泥棒を生成するまでの時間(秒)"), Tooltip("最初の生成間隔")]
+    private float firstCreateInterval = 5.0f;
 
     private void Update()
     {
@@ -56,7 +57,7 @@ public class ThiefManager : MonoBehaviour
             // 出入口から 生成された泥棒の数が最大数に達している場合は、次の出入口の処理に移る
             if (spawnCount.ContainsKey(entry))
             {
-                if (spawnCount[entry] >= entry.MaxEnemySpawnCount) continue;
+                if (spawnCount[entry] >= entry.RoomEnemyEntryData.GetThiefStatusDataList().Count) continue;
             }
             else spawnCount.Add(entry, 0); // 新しい出入口を辞書に追加
 
@@ -95,33 +96,18 @@ public class ThiefManager : MonoBehaviour
             // 生成される初期部屋の取得
             RoomNode entryRoom = entry.RoomCreatePoint.transform.GetComponentInChildren<RoomNode>();
 
-            // TODO: 何かしらでタイプを取得
-            string typeName = "A";
-
-            // 泥棒のタイプに応じたデータを取得
-            ThiefTypeData typeData = new ThiefTypeData();
-            // 泥棒の種類間で共通のデータを取得
-            ThiefData commonData = thiefDB.commonData;
-
-            // 泥棒のデータベースから、泥棒のタイプに応じたデータを取得
-            for (int i = 0 ; i < thiefDB.thiefData.Length ; i++)
-            {
-                if (thiefDB.thiefData[i].typeName == typeName)
-                {
-                    typeData = thiefDB.thiefData[i];
-                    break;
-                }
-            }
-
             //泥棒の生成
             GameObject thief = GameObject.Instantiate(thiefPrefab);
 
-            /* 仮で実数変数でプレイヤー速度を用意 */
-            float playerSpeed = 5.0f;
+            // 基準となるプレイヤーの速度を取得
+            float playerSpeed = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerMove>().GetBasePlayerSpeed();
+
+            // 泥棒のタイプに応じたデータを取得
+            CSS_ThiefStatusData typeData = entry.RoomEnemyEntryData.GetThiefStatusDataList()[spawnCount[entry]];
 
             // 行動AIの設定
             ThiefAI thiefAI = thief.GetComponent<ThiefAI>();
-            thiefAI.Setting(typeData, commonData, playerSpeed, entryRoom, entryPoint);
+            thiefAI.Setting(typeData, thiefCommonDB, playerSpeed, entryRoom, entryPoint);
 
             // 視界システムの設定
             VisionSensor thiefView = thief.GetComponent<VisionSensor>();

@@ -6,7 +6,6 @@
  * 2026-04-24 | 初回作成
  * 
  */
-using UnityEditor.ShaderGraph;
 using UnityEngine;
 
 public class PlayerMove : MonoBehaviour
@@ -15,166 +14,122 @@ public class PlayerMove : MonoBehaviour
     [Header("移動速度（歩き）")][SerializeField] private float velocityWalk = 0.7f;//移動速度（歩き）
     [Header("移動速度（走り）")][SerializeField] private float velocityRun = 1.0f;//移動速度（走り）
     [Header("ジャンプ量")][SerializeField] private float jumpAmount = 2.5f;//ジャンプ量
+    [Header("重力")][SerializeField] private float gravity = -9.8f;//重力
+    [Header("空気抵抗")][Range(0, 1)][SerializeField] private float airResistance = 0.99f;//空気抵抗
     [Header("加速度")][SerializeField] private float accelartion = 10;//加速度
-    
+
+    private CharacterController controller;
+    private Vector3 velocity = Vector3.zero;
     private Rigidbody rb;
     private PlayerData playerData;  // プレイヤーのデータ
 
-    public Vector3 playerMoveAmount;//プレイヤーの移動量
-
     private float rotateSpeed = 10.0f;//回転のスピード
-
-    private int jumpCount = 1;//ジャンプできる回数
-
-    private Vector3 wallNormal;//壁の法線ベクトル
-    private bool touchingWall;//壁に当たっているかどうか
+    private float adjustControllerSpeed = 0.2f;//移動スピードの補正
+    private bool isJumping = false;
+    private bool isRunning = false;
 
     // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         playerData = GetComponent<PlayerData>();
-    }
-
-    // Update is called once per frame
-    void FixedUpdate()
-    {
-        //プレイヤーの動く方向に回転
-        Vector3 velocity = rb.velocity;
-
-        velocity.y = 0.0f;
-
-        velocity = velocity.normalized;
-        
-        if(velocity.magnitude > 0.1f)
-        {
-            Quaternion playerRotate = Quaternion.LookRotation(velocity);
-
-            rb.MoveRotation(Quaternion.Slerp(
-                rb.rotation, playerRotate, Time.fixedDeltaTime * rotateSpeed));
-        }
-
-        //カメラの方向
-        PlayerCamera playerCamera = GetComponent<PlayerCamera>();
-        Vector3 forward = playerCamera.cameraForward;
-        Vector3 right = playerCamera.cameraRight;
-        Vector2 forwardXZ = new Vector2(forward.x, forward.z);
-        Vector2 rightXZ = new Vector2(right.x, right.z);
-        forwardXZ = forwardXZ.normalized;
-        rightXZ = rightXZ.normalized;
-        forward = new Vector3(forwardXZ.x, 0.0f, forwardXZ.y);
-        right = new Vector3(rightXZ.x, 0.0f, rightXZ.y);
-
-        //プレイヤーの前方向
-        Vector3 playerForward = transform.forward;
-        
-        //壁に向かっているか判定
-        bool pushingIntoWall = false;
-        if (touchingWall)
-        {
-            float inputDot = Vector3.Dot(playerForward, wallNormal);
-            //プレイヤーが壁方向を向いている
-            if (inputDot < 0)
-            {
-                pushingIntoWall = true;
-            }
-        }
-
-        //移動
-        if (playerData.playerInput.Player.MoveForward.IsPressed() && !pushingIntoWall)
-        {
-            rb.AddForce(new Vector3(forward.x,0.0f, forward.z) * accelartion, ForceMode.Acceleration);
-        }
-        else if (playerData.playerInput.Player.MoveBack.IsPressed() && !pushingIntoWall)
-        {
-            rb.AddForce(new Vector3(-forward.x, 0.0f, -forward.z) * accelartion, ForceMode.Acceleration);
-        }
-
-        if (playerData.playerInput.Player.MoveLeft.IsPressed() && !pushingIntoWall)
-        {
-            rb.AddForce(new Vector3(-right.x, 0.0f, -right.z) * accelartion, ForceMode.Acceleration);
-        }
-        else if (playerData.playerInput.Player.MoveRight.IsPressed() && !pushingIntoWall)
-        {
-            rb.AddForce(new Vector3(right.x, 0.0f, right.z) * accelartion, ForceMode.Acceleration);
-        }
-
-        if (playerData.playerInput.Player.Dash.IsPressed() && !pushingIntoWall)
-        {
-            //走り
-            if (rb.velocity.magnitude > moveAmount * velocityRun)
-            {
-                rb.velocity = rb.velocity.normalized * (moveAmount * velocityRun);
-            }   
-        }
-        else
-        {
-            //歩き
-            if (rb.velocity.magnitude > moveAmount * velocityWalk)
-            {
-                rb.velocity = rb.velocity.normalized * (moveAmount * velocityWalk);
-            }
-        }
-
-        playerMoveAmount = rb.velocity;
+        controller = GetComponent<CharacterController>();
     }
 
     void Update()
     {
-        //ジャンプ
-        if (playerData.playerInput.Player.Jump.triggered && jumpCount > 0)
-        {
-            rb.AddForce(new Vector3(0.0f, 1.0f, 0.0f) * jumpAmount, ForceMode.Impulse);
-            jumpCount--;
-        }
+        Move();
     }
 
-    private void OnCollisionEnter(Collision collision)
+    private void Move()
     {
-        //床に接地している場合ジャンプ回数を戻す
-        foreach (ContactPoint contact in collision.contacts)
+        // 移動
         {
-            if (contact.normal.y > 0.5f)
+            float h = 0.0f;
+            float v = 0.0f;
+            //移動
+            if (playerData.playerInput.Player.MoveForward.IsPressed()) v = 1.0f;
+            else if (playerData.playerInput.Player.MoveBack.IsPressed()) v = -1.0f;
+
+            if (playerData.playerInput.Player.MoveRight.IsPressed()) h = 1.0f;
+            else if (playerData.playerInput.Player.MoveLeft.IsPressed()) h = -1.0f;
+
+            isRunning = playerData.playerInput.Player.Dash.IsPressed();
+
+            //カメラの方向
+            PlayerCamera playerCamera = GetComponent<PlayerCamera>();
+            // カメラ方向取得
+            Vector3 cameraForward = playerCamera.cameraForward;
+            Vector3 cameraRight = playerCamera.cameraRight;
+            cameraForward.y = 0;
+            cameraRight.y = 0;
+            cameraForward.Normalize();
+            cameraRight.Normalize();
+
+            Vector3 move = cameraForward * v + cameraRight * h;
+            move *= (moveAmount * adjustControllerSpeed) * (isRunning ? velocityRun : velocityWalk);
+
+            velocity = new Vector3(move.x, velocity.y, move.z);
+
+            if (move != Vector3.zero)
             {
-                jumpCount = 1;
+                Quaternion playerRotate = Quaternion.LookRotation(move);
+
+                rb.MoveRotation(Quaternion.Slerp(
+                    rb.rotation, playerRotate, Time.deltaTime * rotateSpeed));
             }
         }
-    }
 
-    private void OnCollisionStay(Collision collision)
-    {
-        touchingWall = false;
-
-        //ジャンプ中に物体に衝突した際に止まらないようにする処理
-        foreach (ContactPoint contact in collision.contacts)
+        // ジャンプ(問題発生中)
         {
-            Vector3 normal = contact.normal;
-
-            //床は処理しない
-            if (normal.y > 0.8f)
-                continue;
-
-            //壁に触れている
-            touchingWall = true;
-            wallNormal = normal;
-
-            Vector3 velocity = rb.velocity;
-
-            //壁に向かう成分
-            float wallSeekingComponent = Vector3.Dot(velocity, normal);
-
-            if (wallSeekingComponent < 0.0f)
+            if (controller.isGrounded &&
+                velocity.y < 0)
             {
-                //壁方向の力だけ削除
-                velocity -= normal * wallSeekingComponent;
+                velocity.y = -1f;
+
+                isJumping = false;
             }
 
-            rb.velocity = velocity;
+            // ジャンプ開始
+            if (Input.GetKeyDown(KeyCode.Space) &&
+                controller.isGrounded)
+            {
+                velocity.y =
+                    Mathf.Sqrt(
+                        (jumpAmount * adjustControllerSpeed) *
+                        -2f *
+                        gravity);
+
+                isJumping = true;
+            }
+
+            // 上昇終了（頂点）
+            if (isJumping &&
+                velocity.y <= 0)
+            {
+                isJumping = false;
+            }
+
+            // ジャンプ上昇中だけ空気抵抗
+            if (isJumping)
+            {
+                velocity.y *= airResistance;
+            }
+
+            // 重力
+            velocity.y +=
+                gravity * Time.deltaTime;
         }
+
+        controller.Move(velocity * Time.fixedDeltaTime);
     }
 
-    private void OnCollisionExit(Collision collision)
+    /// <summary>
+    /// 基準となるプレイヤーの移動速度を取得します。
+    /// </summary>
+    /// <returns>プレイヤーの移動速度</returns>
+    public float GetBasePlayerSpeed()
     {
-        touchingWall = false;
+        return moveAmount * velocityRun;
     }
 }

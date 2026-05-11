@@ -9,11 +9,7 @@
 // 当たり判定内に、敵がいた場合、攻撃力を与える
 //
 
-using System.Collections;
-using System.Collections.Generic;
-using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 public enum Gimmick
 {
@@ -46,7 +42,10 @@ public enum GimmickDirection
 }
 
 public class GimmickBase : MonoBehaviour
-{ 
+{
+    // ギミックのイメ－ジ画像
+    public Sprite gimmickImage;
+
     // 大きさ
     [Header("大きさ")]
     [Tooltip("X方向の大きさ"), Min(0)]
@@ -112,6 +111,10 @@ public class GimmickBase : MonoBehaviour
     [Header("調整用（プログラマー専用）")]
     [Tooltip("ギミックの大きさや位置を調整するための値"), Min(1)]
     public int Adjust;
+
+    [Header("範囲UI")]
+    [SerializeField] private GameObject InteractUI;
+    private GameObject pre_InteractUI = null;
 
     // ギミックのグリッド上の位置
     protected Vector2Int gimmickGridPos;
@@ -305,6 +308,32 @@ public class GimmickBase : MonoBehaviour
         return gimmick;
     }
 
+    private void OnTriggerStay(Collider other)
+    {
+        //接触している
+        if (other.gameObject.CompareTag("Player"))
+        {
+            if(pre_InteractUI == null)
+            {
+                pre_InteractUI = Instantiate(InteractUI);
+                pre_InteractUI.transform.position = gameObject.transform.position;
+                pre_InteractUI.transform.position += new Vector3(0, 1.5f, 0);
+            }
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        //接触していない
+        if (other.gameObject.CompareTag("Player"))
+        {
+            if(pre_InteractUI != null)
+            {
+                Destroy(pre_InteractUI);
+                pre_InteractUI = null;
+            }
+        }
+    }
 
     // ===============================================================================
 

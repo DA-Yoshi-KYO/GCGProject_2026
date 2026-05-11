@@ -6,6 +6,7 @@
  * ----------------------------------------------------------
  * 2026-04-21 | 初回作成
  * 2026-05-06 | 偶数サイズギミックにおけるグリッド位置の補正を追加：大瀧
+ * 2026-05-08 | リファクタリング(大瀧)
  * 
  */
 using System;
@@ -16,7 +17,6 @@ public class RoomGrid : MonoBehaviour
 {
     [SerializeField] private Vector2Int gridDivision;
     public Vector2 gridSize { get; private set; } = new Vector2(1, 1);   // グリッド1マスの大きさ
-    private Renderer rendererMaterial; // グリッドのマテリアル
     List<List<GameObject>> gridGimmicks;
     GameObject[,] gridObjects;
     public enum GridOrigin
@@ -30,18 +30,6 @@ public class RoomGrid : MonoBehaviour
 
     void Start()
     {
-        /*
-                rendererMaterial = GetComponent<Renderer>();
-                if (rendererMaterial != null)
-                {
-                    rendererMaterial.material.SetVector("_GridNum", new Vector4(gridDivision.x, gridDivision.y, 0, 0));
-                }
-                else        
-                {
-                    Debug.LogWarning("RoomGrid: Material not found on the GameObject.");
-                }
-        */
-
         // グリッド上のギミック情報を初期化
         gridGimmicks = new List<List<GameObject>>();
         for (int i = 0 ; i < gridDivision.y ; i++)  // グリッド[y][x]として保存
@@ -200,45 +188,17 @@ public class RoomGrid : MonoBehaviour
         if (IsGridOnGimmick(grid)) return false;
 
         Vector3 spawnPos = GetWorldPosFromGrid(grid);
-        if (spawnPos == Vector3.positiveInfinity) return false;
+        if (spawnPos.magnitude == float.PositiveInfinity) return false; 
 
-        // 大瀧編集部=========================
-        float sizeX = gimmick.gimmickSizeX;
-        float sizeY = gimmick.gimmickSizeY;
-
-        // グリッドサイズ
-        float gridSizeX = gridSize.x;
-        float gridSizeY = gridSize.y;
-    
-        // 半分オフセット
-        float offsetX = sizeX * 0.5f;
-        float offsetY = sizeY * 0.5f;
-
-        // 偶数サイズ補正（囲碁）
-        if ((int)sizeX % 2 == 0)
-        {
-            if (pos.x <= spawnPos.x)
-                offsetX -= 1f * gridSizeX;   // 左に1マス 
-        }
-        if ((int)sizeY % 2 == 0)
-        {
-            if (pos.z <= spawnPos.z)
-                offsetY -= 1f * gridSizeY;   // 下に1マス
-        }
-        // ワールド座標に変換
-        offsetX *= gridSizeX;
-        offsetY *= gridSizeY;
-
-        // 中心が grid に来るように補正
-        spawnPos.x += offsetX - (gridSizeX * 0.5f);
-        spawnPos.z += offsetY - (gridSizeY * 0.5f);
-        // ===================================
+        //偶数補正
+        spawnPos = GimmickEvenNumberCorrection(spawnPos, grid, gimmick);
 
         Ray ray = new Ray();
         ray.direction = Vector3.down;
         const float rayOriginY = 255f;
         ray.origin = new Vector3(spawnPos.x, rayOriginY, spawnPos.z);
-        RaycastHit[] hits = Physics.RaycastAll(ray, Mathf.Abs(rayOriginY - gameObject.transform.position.y));
+        RaycastHit[] hits = Physics.RaycastAll(ray, Mathf.Abs(rayOriginY - gameObject.transform.position.y), ~0,
+            QueryTriggerInteraction.Ignore);
         Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
         GameObject hitObject = null;
         foreach(var hitItem in hits)
@@ -251,7 +211,9 @@ public class RoomGrid : MonoBehaviour
             break;
         }
 
-        if (hitObject != null && hitObject != gameObject) spawnPos.y = hitObject.transform.position.y + hitObject.transform.lossyScale.y / 2.0f;
+        Debug.Log(hitObject.name);
+        spawnPos.y = hitObject.transform.position.y;
+        if (!hitObject.name.Contains("Floor")) spawnPos.y += hitObject.transform.localScale.y * 0.5f;
         GameObject gimmickObject = Instantiate(gimmick.gameObject, spawnPos, Quaternion.identity);
         GimmickBase spawnGimmick = gimmickObject.GetComponent<GimmickBase>();
         spawnGimmick.roomGrid = this;
@@ -260,6 +222,48 @@ public class RoomGrid : MonoBehaviour
         spawnGimmick.AdjustScaleToGrid();
 
         return true;
+    }
+
+    // ギミックが偶数サイズだった場合の補正用計算関数
+    // 概要：奇数はチェス型、偶数は囲碁型に配置します。
+    // 引数：Vector3 / オブジェクトの設置する位置※偶数補正前の値
+    // 戻値：Vector3 / 補正した値を返します。
+    public Vector3 GimmickEvenNumberCorrection(Vector3 setPos, Vector2Int setGrid, GimmickBase gimmick)
+    {
+        Vector2Int grid = setGrid;
+        Vector3 spawnPos = setPos;
+
+        float sizeX = gimmick.gimmickSizeX;
+        float sizeY = gimmick.gimmickSizeY;
+
+        // グリッドサイズ
+        float gridSizeX = gridSize.x;
+        float gridSizeY = gridSize.y;
+
+        // 半分オフセット
+        float offsetX = sizeX * 0.5f;
+        float offsetY = sizeY * 0.5f;
+
+        // 偶数サイズ補正（囲碁）
+        if ((int)sizeX % 2 == 0)
+        {
+            if (setPos.x <= spawnPos.x)
+                offsetX -= gridSizeX;   // 左に1マス 
+        }
+        if ((int)sizeY % 2 == 0)
+        {
+            if (setPos.z <= spawnPos.z)
+                offsetY -= gridSizeY;   // 下に1マス
+        }
+        // ワールド座標に変換
+        offsetX *= gridSizeX;
+        offsetY *= gridSizeY;
+
+        // 中心が grid に来るように補正
+        spawnPos.x += offsetX - (gridSizeX * 0.5f);
+        spawnPos.z += offsetY - (gridSizeY * 0.5f);
+
+        return spawnPos;
     }
 
     /// <summary>
