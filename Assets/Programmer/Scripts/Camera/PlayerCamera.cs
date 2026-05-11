@@ -13,7 +13,7 @@ public class PlayerCamera : MonoBehaviour
 {
     private PlayerData playerData;// プレイヤーのデータ
 
-    private RoomCamera roomCamera;//部屋のカメラ
+    [HideInInspector] public RoomCamera roomCamera;//部屋のカメラ
 
     private GameObject roomCameraObject;//部屋のカメラ
     
