@@ -4,7 +4,8 @@
  *    元浪梨緒
  * ----------------------------------------------------------
  * 2026-04-24 | 初回作成
- * 2026-04-30 | レイキャストによる透過処理の作成(ヨシダ)
+ * 2026-04-30 | レイキャストによる透過処理の作成(吉田)
+ * 2026-05-11 | カメラの遷移演出の作成(元浪)
  */
 using System.Collections;
 using System.Collections.Generic;
@@ -21,9 +22,10 @@ public class PlayerCamera : MonoBehaviour
 
     private GameObject currentRoom;//現在の部屋
 
-    private float rotateDuration = 5.0f;//回転にかける時間
+    [Header("カメラの遷移の回転にかける時間")][SerializeField] private float rotateDuration = 1.0f;//回転にかける時間
+    [Header("カメラの遷移の移動にかける時間")][SerializeField] private float moveDuration = 1.0f;//移動にかける時間
+    [Header("カメラの追従にかける時間")][SerializeField] float trackingTime = 0.5f;//追従にかける時間 
     private bool justOnce = false;//複数回実行しないように
-    [SerializeField]private float trackingTime = 0.5f;//追従にかける時間 
 
     [HideInInspector] public Vector3 cameraForward = Vector3.zero;//カメラから見た方向
     [HideInInspector] public Vector3 cameraRight = Vector3.zero;//カメラの右方向ベクトル
@@ -81,20 +83,9 @@ public class PlayerCamera : MonoBehaviour
     /// </summary>
     public IEnumerator OnRoomMove()
     {
-        //1フレームだけ待つ
-        yield return null;
-
         yield return StartCoroutine(TransitionCameraIn());
 
-        //カメラ切り替え
-        roomCameraObject.GetComponent<Camera>().enabled = false;
-
-        currentRoom = playerData.currentRoomData.GetPlayerRoomData();
-        roomCameraObject = currentRoom.transform.GetComponentInChildren<Camera>().gameObject;
-
-        roomCamera = roomCameraObject.GetComponent<RoomCamera>();
-
-        roomCameraObject.GetComponent<Camera>().enabled = true;
+        yield return StartCoroutine(TransitionCameraMove());
 
         yield return StartCoroutine(TransitionCameraOut());
     }
@@ -140,7 +131,7 @@ public class PlayerCamera : MonoBehaviour
         }
     }
 
-    //カメラの遷移移動処理
+    //==カメラの遷移移動処理==
     private IEnumerator TransitionCameraIn()
     {
         if (!justOnce)
@@ -203,4 +194,47 @@ public class PlayerCamera : MonoBehaviour
         justOnce = false;
     }
 
+    private IEnumerator TransitionCameraMove()
+    {
+        if (!justOnce)
+            justOnce = true;
+
+        //移動前の情報
+        Vector3 startPos = currentRoom.transform.position;
+        startPos.y += 10.0f;
+        Quaternion startRotate = Quaternion.Euler(90f, 180.0f, 0.0f);
+
+        //カメラ切り替え
+        roomCameraObject.GetComponent<Camera>().enabled = false;
+
+        currentRoom = playerData.currentRoomData.GetPlayerRoomData();
+        roomCameraObject = currentRoom.transform.GetComponentInChildren<Camera>().gameObject;
+
+        roomCamera = roomCameraObject.GetComponent<RoomCamera>();
+
+        roomCameraObject.GetComponent<Camera>().enabled = true;
+
+        //移動後の情報
+        Vector3 endPos = currentRoom.transform.position;
+        endPos.y += 10.0f;
+        Quaternion endRotate = Quaternion.Euler(90f, 180.0f, 0.0f);
+
+        float time = 0.0f;
+
+        while (time < moveDuration)
+        {
+            time += Time.deltaTime;
+            float t = Mathf.Clamp01(time / moveDuration);
+            t = Easing.EaseInOutCubic(t);
+
+            roomCameraObject.transform.position = Vector3.Lerp(startPos, endPos, t);
+            roomCameraObject.transform.rotation = Quaternion.Slerp(startRotate, endRotate, t);
+
+            yield return null;
+        }
+
+        justOnce = false;
+    }
+
+    //========================
 }
