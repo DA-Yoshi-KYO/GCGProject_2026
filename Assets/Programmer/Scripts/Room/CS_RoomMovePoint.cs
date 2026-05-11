@@ -389,7 +389,7 @@ public class CS_RoomMovePoint : MonoBehaviour
             return;
         }
 
-        StartCoroutine(playerCamera.OnRoomMove());
+        playerCamera.OnRoomMove();
     }
 
     /// <summary>
