@@ -30,18 +30,6 @@ public class RoomGrid : MonoBehaviour
 
     void Start()
     {
-        /*
-                rendererMaterial = GetComponent<Renderer>();
-                if (rendererMaterial != null)
-                {
-                    rendererMaterial.material.SetVector("_GridNum", new Vector4(gridDivision.x, gridDivision.y, 0, 0));
-                }
-                else        
-                {
-                    Debug.LogWarning("RoomGrid: Material not found on the GameObject.");
-                }
-        */
-
         // グリッド上のギミック情報を初期化
         gridGimmicks = new List<List<GameObject>>();
         for (int i = 0 ; i < gridDivision.y ; i++)  // グリッド[y][x]として保存
@@ -224,6 +212,8 @@ public class RoomGrid : MonoBehaviour
         }
 
         Debug.Log(hitObject.name);
+        spawnPos.y = hitObject.transform.position.y;
+        if (!hitObject.name.Contains("Floor")) spawnPos.y += hitObject.transform.localScale.y * 0.5f;
         GameObject gimmickObject = Instantiate(gimmick.gameObject, spawnPos, Quaternion.identity);
         GimmickBase spawnGimmick = gimmickObject.GetComponent<GimmickBase>();
         spawnGimmick.roomGrid = this;
