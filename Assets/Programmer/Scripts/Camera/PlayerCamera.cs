@@ -6,7 +6,9 @@
  * 2026-04-24 | 初回作成
  * 2026-04-30 | レイキャストによる透過処理の作成(ヨシダ)
  */
+using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public class PlayerCamera : MonoBehaviour
@@ -16,13 +18,19 @@ public class PlayerCamera : MonoBehaviour
     private RoomCamera roomCamera;//部屋のカメラ
 
     private GameObject roomCameraObject;//部屋のカメラ
-    
+
+    private GameObject currentRoom;//現在の部屋
+
+    private float rotateDuration = 5.0f;//回転にかける時間
+    private bool justOnce = false;//複数回実行しないように
+    [SerializeField]private float trackingTime = 0.5f;//追従にかける時間 
+
     [HideInInspector] public Vector3 cameraForward = Vector3.zero;//カメラから見た方向
     [HideInInspector] public Vector3 cameraRight = Vector3.zero;//カメラの右方向ベクトル
 
     [Header("透過するオブジェクトのレイヤー")][SerializeField] LayerMask obstacleLayer;  // 透過するオブジェクトのレイヤー
-    [Header("透過する範囲")][Range(1.0f,10.0f)][SerializeField] float radius = 1.5f;     // 透過する範囲
-    [Header("透過した後のα値")][Range(0.0f,1.0f)][SerializeField] float maskAlpha = 0.5f;  // 透過した後のα値
+    [Header("透過する範囲")][Range(1.0f, 10.0f)][SerializeField] float radius = 1.5f;     // 透過する範囲
+    [Header("透過した後のα値")][Range(0.0f, 1.0f)][SerializeField] float maskAlpha = 0.5f;  // 透過した後のα値
     Dictionary<Renderer, MaterialPropertyBlock> mpbCache = new Dictionary<Renderer, MaterialPropertyBlock>();   // マテリアルのプロパティ
     List<Renderer> currentHits = new List<Renderer>();  // レイキャストの結果衝突したRenderオブジェクトのリスト
 
@@ -34,7 +42,7 @@ public class PlayerCamera : MonoBehaviour
         playerData = GetComponent<PlayerData>();
 
         // 現在の部屋を取得し、カメラの初期化を行う
-        GameObject currentRoom = playerData.currentRoomData.GetPlayerRoomData();
+        currentRoom = playerData.currentRoomData.GetPlayerRoomData();
 
         roomCameraObject = currentRoom.transform.GetComponentInChildren<Camera>().gameObject;
         roomCameraObject.GetComponent<Camera>().enabled = true;
@@ -61,7 +69,8 @@ public class PlayerCamera : MonoBehaviour
         moveAmount.z = Mathf.Min(moveAmount.z, roomCamera.moveAmountLimit.z);
         moveAmount.z = Mathf.Max(moveAmount.z, -roomCamera.moveAmountLimit.z);
 
-        roomCameraObject.transform.position = roomCamera.initPos - moveAmount;
+        roomCameraObject.transform.position = 
+            Vector3.Lerp(roomCameraObject.transform.position, roomCamera.initPos - moveAmount, trackingTime * Time.deltaTime);
 
         // レイキャストによるオブジェクトの透過処理
         RayCastTransparent();
@@ -70,16 +79,24 @@ public class PlayerCamera : MonoBehaviour
     /// <summary>
     /// 部屋移動した際のカメラ情報更新
     /// </summary>
-    public void OnRoomMove()
+    public IEnumerator OnRoomMove()
     {
+        //1フレームだけ待つ
+        yield return null;
+
+        yield return StartCoroutine(TransitionCameraIn());
+
+        //カメラ切り替え
         roomCameraObject.GetComponent<Camera>().enabled = false;
 
-        GameObject currentRoom = playerData.currentRoomData.GetPlayerRoomData();
+        currentRoom = playerData.currentRoomData.GetPlayerRoomData();
         roomCameraObject = currentRoom.transform.GetComponentInChildren<Camera>().gameObject;
-        
+
         roomCamera = roomCameraObject.GetComponent<RoomCamera>();
 
         roomCameraObject.GetComponent<Camera>().enabled = true;
+
+        yield return StartCoroutine(TransitionCameraOut());
     }
 
     private void RayCastTransparent()
@@ -122,4 +139,68 @@ public class PlayerCamera : MonoBehaviour
             currentHits.Add(r);
         }
     }
+
+    //カメラの遷移移動処理
+    private IEnumerator TransitionCameraIn()
+    {
+        if (!justOnce)
+            justOnce = true;
+
+        //移動前の情報
+        Vector3 startPos = roomCameraObject.transform.position;
+        Quaternion startRotate = roomCameraObject.transform.rotation;
+
+        //移動後の情報
+        Vector3 endPos = currentRoom.transform.position;
+        endPos.y += 10.0f;
+        Quaternion endRotate = Quaternion.Euler(90f, 180.0f, 0.0f);
+
+        float time = 0.0f;
+
+        while (time < rotateDuration)
+        {
+            time += Time.deltaTime;
+            float t = Mathf.Clamp01(time / rotateDuration);
+            t = Easing.EaseInOutCubic(t);
+
+            roomCameraObject.transform.position = Vector3.Lerp(startPos, endPos, t);
+            roomCameraObject.transform.rotation = Quaternion.Slerp(startRotate, endRotate, t);
+
+            yield return null;
+        }
+
+        justOnce = false;
+    }
+
+    private IEnumerator TransitionCameraOut()
+    {
+        if (!justOnce)
+            justOnce = true;
+
+        //移動前の情報
+        Vector3 startPos = currentRoom.transform.position;
+        startPos.y += 10.0f;
+        Quaternion startRotate = Quaternion.Euler(90f, 180.0f, 0.0f);
+
+        //移動後の情報
+        Vector3 endPos = roomCamera.initPos;
+        Quaternion endRotate = roomCamera.initRotate;
+        
+        float time = 0.0f;
+
+        while (time < rotateDuration)
+        {
+            time += Time.deltaTime;
+            float t = Mathf.Clamp01(time / rotateDuration);
+            t = Easing.EaseInOutCubic(t);
+
+            roomCameraObject.transform.position = Vector3.Lerp(startPos, endPos, t);
+            roomCameraObject.transform.rotation = Quaternion.Slerp(startRotate, endRotate, t);
+
+            yield return null;
+        }
+
+        justOnce = false;
+    }
+
 }
