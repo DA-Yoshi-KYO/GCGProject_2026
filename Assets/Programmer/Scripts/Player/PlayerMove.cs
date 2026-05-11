@@ -43,6 +43,8 @@ public class PlayerMove : MonoBehaviour
 
     private void Move()
     {
+        if (Time.timeScale == 0) return;
+
         // 移動
         {
             float h = 0.0f;
