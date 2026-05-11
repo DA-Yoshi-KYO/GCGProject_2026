@@ -44,91 +44,93 @@ public class PlayerMove : MonoBehaviour
     {
         bool isSneaking = playerData.playerInput.Player.Sneak.IsPressed();
         // 移動
+        float h = 0.0f;
+        float v = 0.0f;
+        //移動
+        if (playerData.playerInput.Player.MoveForward.IsPressed()) v = 1.0f;
+        else if (playerData.playerInput.Player.MoveBack.IsPressed()) v = -1.0f;
+
+        if (playerData.playerInput.Player.MoveRight.IsPressed()) h = 1.0f;
+        else if (playerData.playerInput.Player.MoveLeft.IsPressed()) h = -1.0f;
+
+
+        //カメラの方向
+        PlayerCamera playerCamera = GetComponent<PlayerCamera>();
+        // カメラ方向取得
+        Vector3 cameraForward = playerCamera.cameraForward;
+        Vector3 cameraRight = playerCamera.cameraRight;
+        cameraForward.y = 0;
+        cameraRight.y = 0;
+        cameraForward.Normalize();
+        cameraRight.Normalize();
+
+        Vector3 move = cameraForward * v + cameraRight * h;
+        move *= (moveAmount * adjustControllerSpeed) * (isSneaking ? velocitySneak : velocityWalk);
+
+        velocity = new Vector3(move.x, velocity.y, move.z);
+
+        if (move != Vector3.zero)
         {
-            float h = 0.0f;
-            float v = 0.0f;
-            //移動
-            if (playerData.playerInput.Player.MoveForward.IsPressed()) v = 1.0f;
-            else if (playerData.playerInput.Player.MoveBack.IsPressed()) v = -1.0f;
+            Quaternion playerRotate = Quaternion.LookRotation(move);
 
-            if (playerData.playerInput.Player.MoveRight.IsPressed()) h = 1.0f;
-            else if (playerData.playerInput.Player.MoveLeft.IsPressed()) h = -1.0f;
-
-
-            //カメラの方向
-            PlayerCamera playerCamera = GetComponent<PlayerCamera>();
-            // カメラ方向取得
-            Vector3 cameraForward = playerCamera.cameraForward;
-            Vector3 cameraRight = playerCamera.cameraRight;
-            cameraForward.y = 0;
-            cameraRight.y = 0;
-            cameraForward.Normalize();
-            cameraRight.Normalize();
-
-            Vector3 move = cameraForward * v + cameraRight * h;
-            move *= (moveAmount * adjustControllerSpeed) * (isSneaking ? velocitySneak : velocityWalk);
-
-            velocity = new Vector3(move.x, velocity.y, move.z);
-
-            if (move != Vector3.zero)
-            {
-                Quaternion playerRotate = Quaternion.LookRotation(move);
-
-                rb.MoveRotation(Quaternion.Slerp(
-                    rb.rotation, playerRotate, Time.deltaTime * rotateSpeed));
-            }
+            rb.MoveRotation(Quaternion.Slerp(
+                rb.rotation, playerRotate, Time.deltaTime * rotateSpeed));
         }
 
-        // ジャンプ(問題発生中)
+        // ジャンプ
+        if (controller.isGrounded &&
+            velocity.y < 0)
         {
-            if (controller.isGrounded &&
-                velocity.y < 0)
-            {
-                velocity.y = -1f;
+            velocity.y = -1f;
 
-                isJumping = false;
-            }
-
-            // ジャンプ開始
-            if (Input.GetKeyDown(KeyCode.Space) &&
-                controller.isGrounded)
-            {
-                velocity.y =
-                    Mathf.Sqrt(
-                        (jumpAmount * adjustControllerSpeed) *
-                        -2f *
-                        gravity);
-
-                isJumping = true;
-            }
-
-            // 上昇終了（頂点）
-            if (isJumping &&
-                velocity.y <= 0)
-            {
-                isJumping = false;
-            }
-
-            // ジャンプ上昇中だけ空気抵抗
-            if (isJumping)
-            {
-                velocity.y *= airResistance;
-            }
-
-            // 重力
-            velocity.y +=
-                gravity * Time.deltaTime;
+            isJumping = false;
         }
+
+        // ジャンプ開始
+        if (Input.GetKeyDown(KeyCode.Space) &&
+            controller.isGrounded)
+        {
+            velocity.y =
+                Mathf.Sqrt(
+                    (jumpAmount * adjustControllerSpeed) *
+                    -2f *
+                    gravity);
+
+            isJumping = true;
+        }
+
+        // 上昇終了（頂点）
+        if (isJumping &&
+            velocity.y <= 0)
+        {
+            isJumping = false;
+        }
+
+        // ジャンプ上昇中だけ空気抵抗
+        if (isJumping)
+        {
+            velocity.y *= airResistance;
+        }
+
+        // 重力
+        velocity.y +=
+            gravity * Time.deltaTime;
 
         Vector3 dir = velocity;
         dir.y = 0.0f;
+        dir.Normalize();
 
-
-        if (isSneaking && CheckDownGround(dir.normalized, 0.3f))
+        if (isSneaking && CheckDownGround(dir, 0.3f) && controller.isGrounded)
         {
-            velocity = Vector3.zero;
+            velocity.x = 0f;
+            velocity.z = 0f;
+
+            // 崖端から離れる方向に少し押し戻す
+            Vector3 pushBack = -dir.normalized * 0.02f;
+            controller.Move(pushBack); // めり込み解消
+            return;
         }
-        
+
         controller.Move(velocity * Time.deltaTime);
     }
 
@@ -155,7 +157,8 @@ public class PlayerMove : MonoBehaviour
             255f,
             ~0,
             QueryTriggerInteraction.Ignore);
-
+        
+        
         bool isDown = transform.position.y - hit.point.y > 0.6f;
         Debug.DrawRay(
             checkPos,
