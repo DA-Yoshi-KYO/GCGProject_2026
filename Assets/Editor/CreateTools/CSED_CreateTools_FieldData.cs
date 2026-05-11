@@ -18,7 +18,7 @@ public class CSED_CreateTools_FieldData
     /// <summary>
     /// 変数の型です。
     /// </summary>
-    public CSE_CreateTools_FieldType FieldType { get; private set; }
+    public CSE_CreateTools_FieldType FieldType { get; set; }
 
     /// <summary>
     /// 変数名です。

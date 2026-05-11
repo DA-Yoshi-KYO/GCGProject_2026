@@ -143,13 +143,18 @@ public partial class CSED_CreateTools
 
         GUILayout.Space(c_FieldInspectorSpacing);
 
-        EditorGUI.BeginDisabledGroup(true);
-        {
-            EditorGUILayout.TextField("Type", GetFieldTypeDisplayName(f_fieldData.FieldType));
-        }
-        EditorGUI.EndDisabledGroup();
-
         EditorGUI.BeginChangeCheck();
+
+        CSE_CreateTools_FieldType beforeFieldType = f_fieldData.FieldType;
+
+        f_fieldData.FieldType = (CSE_CreateTools_FieldType)EditorGUILayout.EnumPopup(
+            "Type",
+            f_fieldData.FieldType);
+
+        if (beforeFieldType != f_fieldData.FieldType)
+        {
+            f_fieldData.FieldLayoutType = CreateDefaultFieldLayoutType(f_fieldData.FieldType);
+        }
 
         f_fieldData.FieldName = EditorGUILayout.TextField("Name", f_fieldData.FieldName);
 
