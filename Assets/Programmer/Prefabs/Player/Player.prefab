@@ -101,9 +101,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9793870f43c29fb46993bbdb59a0157c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveAmount: 5
-  velocityWalk: 0.7
-  velocityRun: 1
+  moveAmount: 3
+  velocitySneak: 0.6
   jumpAmount: 2
   gravity: -9.8
   airResistance: 1
@@ -139,7 +138,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cameraForward: {x: 0, y: 0, z: 0}
   cameraRight: {x: 0, y: 0, z: 0}
-  upDirection: 10
   obstacleLayer:
     serializedVersion: 2
     m_Bits: 2147483648

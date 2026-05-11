@@ -11,8 +11,8 @@ using UnityEngine;
 public class PlayerMove : MonoBehaviour
 {
     [Header("基礎の移動量")][SerializeField] private float moveAmount = 10.0f;//移動量
-    [Header("移動速度（歩き）")][SerializeField] private float velocityWalk = 0.7f;//移動速度（歩き）
-    [Header("移動速度（走り）")][SerializeField] private float velocityRun = 1.0f;//移動速度（走り）
+    private float velocityWalk = 1.0f;//移動速度（歩き）
+    [Header("移動速度（走り）")][SerializeField] private float velocitySneak = 0.6f;//移動速度（走り）
     [Header("ジャンプ量")][SerializeField] private float jumpAmount = 2.5f;//ジャンプ量
     [Header("重力")][SerializeField] private float gravity = -9.8f;//重力
     [Header("空気抵抗")][Range(0, 1)][SerializeField] private float airResistance = 0.99f;//空気抵抗
@@ -24,9 +24,8 @@ public class PlayerMove : MonoBehaviour
     private PlayerData playerData;  // プレイヤーのデータ
 
     private float rotateSpeed = 10.0f;//回転のスピード
-    private float adjustControllerSpeed = 0.2f;//移動スピードの補正
+    private float adjustControllerSpeed = 1;//移動スピードの補正
     private bool isJumping = false;
-    private bool isRunning = false;
 
     // Start is called before the first frame update
     void Start()
@@ -43,6 +42,7 @@ public class PlayerMove : MonoBehaviour
 
     private void Move()
     {
+        bool isSneaking = playerData.playerInput.Player.Sneak.IsPressed();
         // 移動
         {
             float h = 0.0f;
@@ -54,7 +54,6 @@ public class PlayerMove : MonoBehaviour
             if (playerData.playerInput.Player.MoveRight.IsPressed()) h = 1.0f;
             else if (playerData.playerInput.Player.MoveLeft.IsPressed()) h = -1.0f;
 
-            isRunning = playerData.playerInput.Player.Dash.IsPressed();
 
             //カメラの方向
             PlayerCamera playerCamera = GetComponent<PlayerCamera>();
@@ -67,7 +66,7 @@ public class PlayerMove : MonoBehaviour
             cameraRight.Normalize();
 
             Vector3 move = cameraForward * v + cameraRight * h;
-            move *= (moveAmount * adjustControllerSpeed) * (isRunning ? velocityRun : velocityWalk);
+            move *= (moveAmount * adjustControllerSpeed) * (isSneaking ? velocitySneak : velocityWalk);
 
             velocity = new Vector3(move.x, velocity.y, move.z);
 
@@ -121,7 +120,16 @@ public class PlayerMove : MonoBehaviour
                 gravity * Time.deltaTime;
         }
 
-        controller.Move(velocity * Time.fixedDeltaTime);
+        Vector3 dir = velocity;
+        dir.y = 0.0f;
+
+
+        if (isSneaking && CheckDownGround(dir.normalized, 0.3f))
+        {
+            velocity = Vector3.zero;
+        }
+        
+        controller.Move(velocity * Time.deltaTime);
     }
 
     /// <summary>
@@ -130,6 +138,30 @@ public class PlayerMove : MonoBehaviour
     /// <returns>プレイヤーの移動速度</returns>
     public float GetBasePlayerSpeed()
     {
-        return moveAmount * velocityRun;
+        return moveAmount * velocityWalk;
+    }
+   
+    private bool CheckDownGround(Vector3 dir, float length)
+    {
+        Vector3 checkPos = transform.position + dir * length;
+
+        checkPos.y += 0.1f;
+
+        RaycastHit hit;
+        bool hasGround = Physics.Raycast(
+            checkPos,
+            Vector3.down,
+            out hit,
+            255f,
+            ~0,
+            QueryTriggerInteraction.Ignore);
+
+        bool isDown = transform.position.y - hit.point.y > 0.6f;
+        Debug.DrawRay(
+            checkPos,
+            Vector3.down * 255f,
+            isDown ? Color.green : Color.red);
+
+        return isDown;
     }
 }

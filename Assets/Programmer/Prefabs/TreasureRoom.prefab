@@ -1066,7 +1066,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4934005738770322248}
-  - component: {fileID: 2612000234715686845}
+  - component: {fileID: 7099311165448826598}
   m_Layer: 0
   m_Name: Floors
   m_TagString: Untagged
@@ -1096,27 +1096,20 @@ Transform:
   - {fileID: 2697725458473052587}
   m_Father: {fileID: 8786406325980303803}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!65 &2612000234715686845
-BoxCollider:
+--- !u!114 &7099311165448826598
+MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4314200354522080157}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 9, y: 1, z: 6}
-  m_Center: {x: 0, y: 0, z: 3}
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe4d5e07842250146aabdd6b91d5d8bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gridDivision: {x: 9, y: 6}
+  gridOrigin: 3
 --- !u!1 &5154874773223552272
 GameObject:
   m_ObjectHideFlags: 0
