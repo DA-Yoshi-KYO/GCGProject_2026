@@ -24,12 +24,13 @@ public partial class CSED_CreateTools
     /// <summary>
     /// Field詳細設定パネル内の余白です。
     /// </summary>
-    private const float c_FieldInspectorContentPadding = 8.0f;
+    private const float c_FieldInspectorContentPadding = 12.0f;
 
     /// <summary>
     /// Field詳細設定項目同士の余白です。
     /// </summary>
     private const float c_FieldInspectorSpacing = 6.0f;
+
 
     /// <summary>
     /// 左下エリアに選択中Fieldの詳細設定を描画します。
@@ -141,7 +142,10 @@ public partial class CSED_CreateTools
             "Field " + (m_SelectedFieldDataIndex + 1).ToString(),
             EditorStyles.boldLabel);
 
-        GUILayout.Space(c_FieldInspectorSpacing);
+        GUILayout.Space(c_FieldInspectorSpacing + 4.0f);
+
+        float oldLabelWidth = EditorGUIUtility.labelWidth;
+        EditorGUIUtility.labelWidth = 60.0f;
 
         EditorGUI.BeginChangeCheck();
 
@@ -156,7 +160,13 @@ public partial class CSED_CreateTools
             f_fieldData.FieldLayoutType = CreateDefaultFieldLayoutType(f_fieldData.FieldType);
         }
 
-        f_fieldData.FieldName = EditorGUILayout.TextField("Name", f_fieldData.FieldName);
+        GUILayout.Space(c_FieldInspectorSpacing);
+
+        f_fieldData.FieldName = EditorGUILayout.TextField(
+            "Name",
+            f_fieldData.FieldName);
+
+        GUILayout.Space(c_FieldInspectorSpacing);
 
         f_fieldData.FieldLayoutType = (CSE_CreateTools_FieldLayoutType)EditorGUILayout.EnumPopup(
             "Layout",
@@ -166,6 +176,8 @@ public partial class CSED_CreateTools
         {
             Repaint();
         }
+
+        EditorGUIUtility.labelWidth = oldLabelWidth;
     }
 }
 #endif
