@@ -28,7 +28,7 @@ public class CSED_CreateTools_FieldData
     /// <summary>
     /// 表示レイアウト種別です。
     /// </summary>
-    public CSED_CreateTools_FieldLayoutType FieldLayoutType { get; set; }
+    public CSE_CreateTools_FieldLayoutType FieldLayoutType { get; set; }
 
     /// <summary>
     /// 変数データを作成します。
@@ -39,7 +39,7 @@ public class CSED_CreateTools_FieldData
     public CSED_CreateTools_FieldData(
         CSE_CreateTools_FieldType f_fieldType,
         string f_fieldName,
-        CSED_CreateTools_FieldLayoutType f_fieldLayoutType)
+        CSE_CreateTools_FieldLayoutType f_fieldLayoutType)
     {
         FieldType = f_fieldType;
         FieldName = f_fieldName;

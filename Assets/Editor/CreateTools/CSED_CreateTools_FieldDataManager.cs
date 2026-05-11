@@ -10,6 +10,7 @@
 
 #if UNITY_EDITOR
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 /// <summary>
@@ -100,27 +101,27 @@ public partial class CSED_CreateTools
     /// </summary>
     /// <param name="f_fieldType">変数の型</param>
     /// <returns>初期表示レイアウト</returns>
-    private CSED_CreateTools_FieldLayoutType CreateDefaultFieldLayoutType(CSE_CreateTools_FieldType f_fieldType)
+    private CSE_CreateTools_FieldLayoutType CreateDefaultFieldLayoutType(CSE_CreateTools_FieldType f_fieldType)
     {
         switch (f_fieldType)
         {
             case CSE_CreateTools_FieldType.Int:
-                return CSED_CreateTools_FieldLayoutType.InputField;
+                return CSE_CreateTools_FieldLayoutType.InputField;
 
             case CSE_CreateTools_FieldType.Float:
-                return CSED_CreateTools_FieldLayoutType.InputField;
+                return CSE_CreateTools_FieldLayoutType.InputField;
 
             case CSE_CreateTools_FieldType.String:
-                return CSED_CreateTools_FieldLayoutType.InputField;
+                return CSE_CreateTools_FieldLayoutType.InputField;
 
             case CSE_CreateTools_FieldType.Bool:
-                return CSED_CreateTools_FieldLayoutType.Toggle;
+                return CSE_CreateTools_FieldLayoutType.Toggle;
 
             case CSE_CreateTools_FieldType.List:
-                return CSED_CreateTools_FieldLayoutType.ReorderableList;
+                return CSE_CreateTools_FieldLayoutType.ReorderableList;
 
             default:
-                return CSED_CreateTools_FieldLayoutType.InputField;
+                return CSE_CreateTools_FieldLayoutType.InputField;
         }
     }
 
@@ -180,6 +181,72 @@ public partial class CSED_CreateTools
         {
             m_SelectedFieldDataIndex = m_FieldDataList.Count - 1;
         }
+    }
+
+    /// <summary>
+    /// 選択中のFieldデータを削除します。
+    /// </summary>
+    private void RemoveSelectedFieldData()
+    {
+        EnsureFieldDataList();
+
+        if (m_SelectedFieldDataIndex < 0 || m_SelectedFieldDataIndex >= m_FieldDataList.Count)
+        {
+            Debug.Log("[CreateTools] 削除できる選択中Fieldがありません。");
+            return;
+        }
+
+        string removedFieldName = m_FieldDataList[m_SelectedFieldDataIndex].FieldName;
+
+        m_FieldDataList.RemoveAt(m_SelectedFieldDataIndex);
+
+        ClampSelectedFieldDataIndex();
+
+        if (m_FieldDataReorderableList != null)
+        {
+            m_FieldDataReorderableList.index = m_SelectedFieldDataIndex;
+        }
+
+        Debug.Log("[CreateTools] 選択中Fieldを削除しました : " + removedFieldName);
+
+        Repaint();
+    }
+
+    /// <summary>
+    /// すべてのFieldデータを削除します。
+    /// </summary>
+    private void ClearAllFieldData()
+    {
+        EnsureFieldDataList();
+
+        if (m_FieldDataList.Count <= 0)
+        {
+            Debug.Log("[CreateTools] 削除できるFieldがありません。");
+            return;
+        }
+
+        bool isClear = EditorUtility.DisplayDialog(
+            "Field全削除",
+            "作業用エディター内のFieldをすべて削除しますか？",
+            "削除する",
+            "キャンセル");
+
+        if (isClear == false)
+        {
+            return;
+        }
+
+        m_FieldDataList.Clear();
+        m_SelectedFieldDataIndex = -1;
+
+        if (m_FieldDataReorderableList != null)
+        {
+            m_FieldDataReorderableList.index = -1;
+        }
+
+        Debug.Log("[CreateTools] すべてのFieldを削除しました。");
+
+        Repaint();
     }
 }
 #endif

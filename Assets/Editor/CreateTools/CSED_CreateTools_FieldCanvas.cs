@@ -37,7 +37,7 @@ public partial class CSED_CreateTools
     /// <summary>
     /// ReorderableListの1要素の高さです。
     /// </summary>
-    private const float c_FieldCanvasElementHeight = 78.0f;
+    private const float c_FieldCanvasElementHeight = 96.0f;
 
     /// <summary>
     /// 中央エリアのField並び替え用リストです。
@@ -126,14 +126,36 @@ public partial class CSED_CreateTools
     }
 
     /// <summary>
-    /// 中央エリアのタイトルを描画します。
+    /// 中央エリアのタイトルと操作ボタンを描画します。
     /// </summary>
     private void DrawFieldCanvasTitle()
     {
         GUIStyle titleStyle = new GUIStyle(EditorStyles.boldLabel);
         titleStyle.normal.textColor = Color.white;
 
-        EditorGUILayout.LabelField("作業用エディター", titleStyle);
+        EditorGUILayout.BeginHorizontal();
+        {
+            EditorGUILayout.LabelField("作業用エディター", titleStyle);
+
+            GUILayout.FlexibleSpace();
+
+            GUI.enabled = m_SelectedFieldDataIndex >= 0 && m_FieldDataList != null && m_SelectedFieldDataIndex < m_FieldDataList.Count;
+
+            if (GUILayout.Button("選択削除", GUILayout.Width(72.0f)))
+            {
+                RemoveSelectedFieldData();
+            }
+
+            GUI.enabled = m_FieldDataList != null && m_FieldDataList.Count > 0;
+
+            if (GUILayout.Button("全消し", GUILayout.Width(60.0f)))
+            {
+                ClearAllFieldData();
+            }
+
+            GUI.enabled = true;
+        }
+        EditorGUILayout.EndHorizontal();
     }
 
     /// <summary>
@@ -302,6 +324,15 @@ public partial class CSED_CreateTools
         Debug.Log("[CreateTools] Fieldの順番を変更しました。");
 
         Repaint();
+    }
+
+    /// <summary>
+    /// Fieldが選択されたときの処理を行います。
+    /// </summary>
+    /// <param name="f_list">選択されたReorderableList</param>
+    private void OnFieldCanvasSelected(ReorderableList f_list)
+    {
+        SetSelectedFieldDataIndex(f_list.index);
     }
 }
 #endif
