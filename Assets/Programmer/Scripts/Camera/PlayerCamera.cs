@@ -7,9 +7,7 @@
  * 2026-04-30 | レイキャストによる透過処理の作成(吉田)
  * 2026-05-11 | カメラの遷移演出の作成(元浪)
  */
-using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public class PlayerCamera : MonoBehaviour
@@ -24,8 +22,27 @@ public class PlayerCamera : MonoBehaviour
 
     [Header("カメラの遷移の回転にかける時間")][SerializeField] private float rotateDuration = 1.0f;//回転にかける時間
     [Header("カメラの遷移の移動にかける時間")][SerializeField] private float moveDuration = 1.0f;//移動にかける時間
-    [Header("カメラの追従にかける時間")][SerializeField] float trackingTime = 0.5f;//追従にかける時間 
-    private bool justOnce = false;//複数回実行しないように
+    [Header("カメラの追従にかける時間")][SerializeField] float trackingTime = 0.5f;//追従にかける時間
+
+    private float time = 0.0f;
+    struct TransitionCameraInfo
+    {
+        public Vector3 position;
+        public Quaternion rotation;
+    }
+    private TransitionCameraInfo prevTransform;    // 前のカメラ位置
+    private TransitionCameraInfo newTransform;     // 新しいカメラ位置
+    private enum TransitionCamera
+    {
+        None,
+        Start,
+        CameraIn,
+        CameraMove,
+        CameraOut,
+        End
+    }
+
+    private TransitionCamera transitionCamera = TransitionCamera.None;
 
     [HideInInspector] public Vector3 cameraForward = Vector3.zero;//カメラから見た方向
     [HideInInspector] public Vector3 cameraRight = Vector3.zero;//カメラの右方向ベクトル
@@ -35,8 +52,6 @@ public class PlayerCamera : MonoBehaviour
     [Header("透過した後のα値")][Range(0.0f, 1.0f)][SerializeField] float maskAlpha = 0.5f;  // 透過した後のα値
     Dictionary<Renderer, MaterialPropertyBlock> mpbCache = new Dictionary<Renderer, MaterialPropertyBlock>();   // マテリアルのプロパティ
     List<Renderer> currentHits = new List<Renderer>();  // レイキャストの結果衝突したRenderオブジェクトのリスト
-
-    private PlayerData.PlayerMode prevMode = PlayerData.PlayerMode.Normal;  // 切り替え感知用保存変数
 
     // Start is called before the first frame update
     void Start()
@@ -60,7 +75,7 @@ public class PlayerCamera : MonoBehaviour
         cameraForward = roomCameraObject.transform.forward;
 
         //プレイヤーに追従して移動
-        Vector3 moveAmount = playerData.currentRoomData.GetPlayerRoomData().transform.position - transform.position;
+        Vector3 moveAmount = currentRoom.transform.position - transform.position;
 
         moveAmount.y = 0.0f;
 
@@ -76,18 +91,35 @@ public class PlayerCamera : MonoBehaviour
 
         // レイキャストによるオブジェクトの透過処理
         RayCastTransparent();
+
+        switch (transitionCamera)
+        {
+            case TransitionCamera.None:
+                break;
+            case TransitionCamera.Start:
+                StartTransitionCamera();
+                break;
+            case TransitionCamera.CameraIn:
+                TransitionCameraIn();
+                break;
+            case TransitionCamera.CameraMove:
+                TransitionCameraMove();
+                break;
+            case TransitionCamera.CameraOut:
+                TransitionCameraOut();
+                break;
+            case TransitionCamera.End:
+                EndTransitionCamera();
+                break;
+        }
     }
 
     /// <summary>
     /// 部屋移動した際のカメラ情報更新
     /// </summary>
-    public IEnumerator OnRoomMove()
+    public void OnRoomMove()
     {
-        yield return StartCoroutine(TransitionCameraIn());
-
-        yield return StartCoroutine(TransitionCameraMove());
-
-        yield return StartCoroutine(TransitionCameraOut());
+        transitionCamera = TransitionCamera.Start;
     }
 
     private void RayCastTransparent()
@@ -132,109 +164,127 @@ public class PlayerCamera : MonoBehaviour
     }
 
     //==カメラの遷移移動処理==
-    private IEnumerator TransitionCameraIn()
+    private void StartTransitionCamera()
     {
-        if (!justOnce)
-            justOnce = true;
+        //更新を停止
+        Time.timeScale = 0.0f;
 
-        //移動前の情報
-        Vector3 startPos = roomCameraObject.transform.position;
-        Quaternion startRotate = roomCameraObject.transform.rotation;
+        //現在のカメラ情報を保存
+        prevTransform = new TransitionCameraInfo
+        {
+            position = roomCameraObject.transform.position,
+            rotation = roomCameraObject.transform.rotation
+        };
 
-        //移動後の情報
+        //終値点
         Vector3 endPos = currentRoom.transform.position;
         endPos.y += 10.0f;
         Quaternion endRotate = Quaternion.Euler(90f, 180.0f, 0.0f);
+        newTransform.position = endPos;
+        newTransform.rotation = endRotate;
 
-        float time = 0.0f;
+        transitionCamera = TransitionCamera.CameraIn;
 
-        while (time < rotateDuration)
-        {
-            time += Time.deltaTime;
-            float t = Mathf.Clamp01(time / rotateDuration);
-            t = Easing.EaseInOutCubic(t);
-
-            roomCameraObject.transform.position = Vector3.Lerp(startPos, endPos, t);
-            roomCameraObject.transform.rotation = Quaternion.Slerp(startRotate, endRotate, t);
-
-            yield return null;
-        }
-
-        justOnce = false;
+        time = 0.0f;
     }
 
-    private IEnumerator TransitionCameraOut()
+    private void TransitionCameraIn()
     {
-        if (!justOnce)
-            justOnce = true;
+        //移動処理
+        time += Time.unscaledDeltaTime;
+        float t = Mathf.Clamp01(time / rotateDuration);
+        t = Easing.EaseInOutCubic(t);
 
-        //移動前の情報
-        Vector3 startPos = currentRoom.transform.position;
-        startPos.y += 10.0f;
-        Quaternion startRotate = Quaternion.Euler(90f, 180.0f, 0.0f);
-
-        //移動後の情報
-        Vector3 endPos = roomCamera.initPos;
-        Quaternion endRotate = roomCamera.initRotate;
-        
-        float time = 0.0f;
-
-        while (time < rotateDuration)
+        roomCameraObject.transform.position = Vector3.Lerp(prevTransform.position, newTransform.position, t);
+        roomCameraObject.transform.rotation = Quaternion.Slerp(prevTransform.rotation, newTransform.rotation, t);
+    
+        //回転完了
+        if(time > rotateDuration)
         {
-            time += Time.deltaTime;
-            float t = Mathf.Clamp01(time / rotateDuration);
-            t = Easing.EaseInOutCubic(t);
+            //現在のカメラ情報を保存
+            prevTransform = newTransform;
 
-            roomCameraObject.transform.position = Vector3.Lerp(startPos, endPos, t);
-            roomCameraObject.transform.rotation = Quaternion.Slerp(startRotate, endRotate, t);
+            //終値点
+            GameObject newRoom = playerData.currentRoomData.GetPlayerRoomData();
+            Vector3 endPos = newRoom.transform.position;
+            endPos.y += 10.0f;
+            Quaternion endRotate = Quaternion.Euler(90f, 180.0f, 0.0f);
+            newTransform.position = endPos;
+            newTransform.rotation = endRotate;
 
-            yield return null;
+            transitionCamera = TransitionCamera.CameraMove;
+
+            time = 0.0f;
         }
-
-        justOnce = false;
     }
 
-    private IEnumerator TransitionCameraMove()
+    private void TransitionCameraMove()
     {
-        if (!justOnce)
-            justOnce = true;
+        time += Time.unscaledDeltaTime;
+        float t = Mathf.Clamp01(time / moveDuration);
+        t = Easing.EaseInOutCubic(t);
 
-        //移動前の情報
-        Vector3 startPos = currentRoom.transform.position;
-        startPos.y += 10.0f;
-        Quaternion startRotate = Quaternion.Euler(90f, 180.0f, 0.0f);
+        roomCameraObject.transform.position = Vector3.Lerp(prevTransform.position, newTransform.position, t);
+        roomCameraObject.transform.rotation = Quaternion.Slerp(prevTransform.rotation, newTransform.rotation, t);
 
-        //カメラ切り替え
+        if (time > moveDuration)
+        {
+            //現在の部屋を更新
+            GameObject newRoom = playerData.currentRoomData.GetPlayerRoomData();
+            GameObject newCamera = newRoom.transform.GetComponentInChildren<Camera>().gameObject;
+
+            //現在のカメラ情報を保存
+            prevTransform = newTransform;
+
+            //終値点
+            newTransform = new TransitionCameraInfo
+            {
+                position = newCamera.transform.position,
+                rotation = newCamera.transform.rotation
+            };
+
+            transitionCamera = TransitionCamera.CameraOut;
+
+            time = 0.0f;
+        }
+    }
+
+    private void TransitionCameraOut()
+    {
+        time += Time.unscaledDeltaTime;
+        float t = Mathf.Clamp01(time / rotateDuration);
+        t = Easing.EaseInOutCubic(t);
+
+        roomCameraObject.transform.position = Vector3.Lerp(prevTransform.position, newTransform.position, t);
+        roomCameraObject.transform.rotation = Quaternion.Slerp(prevTransform.rotation, newTransform.rotation, t);
+
+        if(time > rotateDuration)
+        {
+            time = 0.0f;
+
+            transitionCamera = TransitionCamera.End;
+        }
+    }
+
+
+    private void EndTransitionCamera()
+    {
+        //更新を再開
+        Time.timeScale = 1.0f;
+
+        // 動かした前のカメラを無効にして、元の位置に戻す
+        roomCamera = roomCameraObject.GetComponent<RoomCamera>();
         roomCameraObject.GetComponent<Camera>().enabled = false;
+        roomCameraObject.transform.position = roomCamera.initPos;
+        roomCameraObject.transform.rotation = roomCamera.initRotate;
 
+        // カメラを新しい部屋のカメラに切り替える
         currentRoom = playerData.currentRoomData.GetPlayerRoomData();
         roomCameraObject = currentRoom.transform.GetComponentInChildren<Camera>().gameObject;
-
         roomCamera = roomCameraObject.GetComponent<RoomCamera>();
-
         roomCameraObject.GetComponent<Camera>().enabled = true;
-
-        //移動後の情報
-        Vector3 endPos = currentRoom.transform.position;
-        endPos.y += 10.0f;
-        Quaternion endRotate = Quaternion.Euler(90f, 180.0f, 0.0f);
-
-        float time = 0.0f;
-
-        while (time < moveDuration)
-        {
-            time += Time.deltaTime;
-            float t = Mathf.Clamp01(time / moveDuration);
-            t = Easing.EaseInOutCubic(t);
-
-            roomCameraObject.transform.position = Vector3.Lerp(startPos, endPos, t);
-            roomCameraObject.transform.rotation = Quaternion.Slerp(startRotate, endRotate, t);
-
-            yield return null;
-        }
-
-        justOnce = false;
+       
+        transitionCamera = TransitionCamera.None;   // カメラの遷移終了
     }
-
     //========================
 }
