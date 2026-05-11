@@ -125,16 +125,24 @@ public class PlayerAction : MonoBehaviour
             Debug.Log("ソウルが不足しています");
             return;    // ソウルが足りない場合召喚しない
         }
-        GameObject currentRoom = playerData.currentRoomData.GetPlayerFloorData();
-        if (currentRoom == null)
+        GameObject currentRoom = playerData.currentRoomData.GetPlayerRoomData().transform.GetChild(0).gameObject;
+        string roomName = currentRoom.name;
+        bool isNotSettingRoom = roomName.Contains("Start") || roomName.Contains("Treasure");
+        Debug.Log(roomName);
+        if (currentRoom == null || isNotSettingRoom)
         {
             Debug.Log("この部屋にトラップは配置できません");
             return;    // 設置可能な部屋のみ設置する
         }
 
-        var roomGrid = currentRoom.GetComponent<RoomGrid>();
+        GameObject currentFloor = playerData.currentRoomData.GetPlayerFloorData();
+        var roomGrid = currentFloor.GetComponent<RoomGrid>();
 
         // グリッド配置
+        if (roomGrid == null)
+        {
+            Debug.LogError("この部屋の床にRoomGridがついていません");
+        }
         if (!roomGrid.SetGimmickInGrid(CalculateGimmickSetPosition(), gimmick)) return;
 
         //ソウルの消費
