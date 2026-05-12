@@ -146,12 +146,17 @@ public class ThiefAI : MonoBehaviour
         // 初期部屋の記憶を作成
         roomMemories[currentRoom] = new RoomMemory();
         roomMemories[currentRoom].FirstSetting();
-        roomMemories[currentRoom].explorationLevel = 100;
+        roomMemories[currentRoom].explorationLevel = currentRoom.initialExplorationLevel;
 
         // ナビメッシュエージェントの速度を設定
         navMeshAgent = GetComponent<NavMeshAgent>();
         navMeshAgent.baseOffset = 1.0f; // キャラクターの高さに合わせてオフセットを設定
         navMeshAgent.speed = this.walkSpeed;
+
+        // リジットボディの設定
+        Rigidbody rb = GetComponent<Rigidbody>();
+        rb.isKinematic = true; // ナビメッシュエージェントで移動させるため、リジットボディをキネマティックに設定
+        rb.useGravity = false; // 重力の影響を受けないようにする
 
         // 泥棒のリアクションを管理するコンポーネントを取得
         thiefReaction = GetComponent<ThiefReaction>();
@@ -203,10 +208,9 @@ public class ThiefAI : MonoBehaviour
                 NextDoorElection();
                 // 再取得してもnullの場合
                 if (nextRoomMovePoint == null) return;
+
+                navMeshAgent.SetDestination(nextRoomMovePoint.position);
             }
-
-            navMeshAgent.SetDestination(nextRoomMovePoint.position);
-
             return;
         }
 
@@ -228,19 +232,6 @@ public class ThiefAI : MonoBehaviour
             // 探索対象が未探索の場合
             else
             {
-                // 探索対象が走り状態になる標的オブジェクトのタイプリストに含まれている場合は、走り状態に切り替える
-                if (runTargetTypes.Contains(((VisionTarget)currentTarget).targetType))
-                {
-                    navMeshAgent.speed = runSpeed;
-                }
-                else
-                {
-                    navMeshAgent.speed = walkSpeed;
-                }
-
-                // 探索対象に向かって移動
-                navMeshAgent.SetDestination(currentTarget.transform.position);
-
                 // 探索対象に十分近づいたら、探索度を進める
                 if (Vector3.Distance(transform.position, currentTarget.transform.position) < ((VisionTarget)currentTarget).exploredDistanceThreshold)
                 {
@@ -636,6 +627,19 @@ public class ThiefAI : MonoBehaviour
                 }
             }
         }
+
+        // 探索対象が走り状態になる標的オブジェクトのタイプリストに含まれている場合は、走り状態に切り替える
+        if (runTargetTypes.Contains(((VisionTarget)currentTarget).targetType))
+        {
+            navMeshAgent.speed = runSpeed;
+        }
+        else
+        {
+            navMeshAgent.speed = walkSpeed;
+        }
+
+        // 探索対象に向かって移動
+        navMeshAgent.SetDestination(currentTarget.transform.position);
     }
 
     /// <summary>
@@ -699,6 +703,7 @@ public class ThiefAI : MonoBehaviour
         {
             roomMemories[currentRoom] = new RoomMemory();
             roomMemories[currentRoom].FirstSetting();
+            roomMemories[currentRoom].explorationLevel = currentRoom.initialExplorationLevel;
         }
     }
 
