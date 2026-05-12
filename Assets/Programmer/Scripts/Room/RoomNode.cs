@@ -21,6 +21,9 @@ public class RoomNode : MonoBehaviour
     [SerializeField, Header("壁の親オブジェクト")]
     private GameObject wallParent;
 
+    [Header("部屋の初期探索度"), Range(0,100)]
+    public int initialExplorationLevel = 0;
+
     // 部屋の移動ポイントを回る方向をギズモで表示する
     void OnDrawGizmos()
     {
