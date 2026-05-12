@@ -101,9 +101,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9793870f43c29fb46993bbdb59a0157c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveAmount: 5
-  velocityWalk: 0.7
-  velocityRun: 1
+  moveAmount: 3
+  velocitySneak: 0.6
   jumpAmount: 2
   gravity: -9.8
   airResistance: 1
@@ -137,9 +136,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc8e211bbc06d2b42be67cdf75126f91, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  roomCamera: {fileID: 0}
+  rotateDuration: 1
+  moveDuration: 1
+  trackingTime: 0.5
   cameraForward: {x: 0, y: 0, z: 0}
   cameraRight: {x: 0, y: 0, z: 0}
-  upDirection: 10
   obstacleLayer:
     serializedVersion: 2
     m_Bits: 2147483648
@@ -171,7 +173,7 @@ CharacterController:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 536870912
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
@@ -181,7 +183,7 @@ CharacterController:
   m_Radius: 0.5
   m_SlopeLimit: 45
   m_StepOffset: 0.3
-  m_SkinWidth: 0.08
+  m_SkinWidth: 0.05
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0.86, z: 0}
 --- !u!1001 &3415564462067734089
