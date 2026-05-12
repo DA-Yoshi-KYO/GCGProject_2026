@@ -22,6 +22,7 @@ public class PlayerMove : MonoBehaviour
     private Vector3 velocity = Vector3.zero;
     private Rigidbody rb;
     private PlayerData playerData;  // プレイヤーのデータ
+    private PlayerCamera playerCamera;  // プレイヤーのカメラ
 
     private float rotateSpeed = 10.0f;//回転のスピード
     private float adjustControllerSpeed = 1;//移動スピードの補正
@@ -32,6 +33,7 @@ public class PlayerMove : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         playerData = GetComponent<PlayerData>();
+        playerCamera = GetComponent<PlayerCamera>();
         controller = GetComponent<CharacterController>();
     }
 
@@ -45,20 +47,16 @@ public class PlayerMove : MonoBehaviour
         if (Time.timeScale == 0) return;
 
         bool isSneaking = playerData.playerInput.Player.Sneak.IsPressed();
-        // 移動
+
         float h = 0.0f;
         float v = 0.0f;
-        //移動
+
         if (playerData.playerInput.Player.MoveForward.IsPressed()) v = 1.0f;
         else if (playerData.playerInput.Player.MoveBack.IsPressed()) v = -1.0f;
 
         if (playerData.playerInput.Player.MoveRight.IsPressed()) h = 1.0f;
         else if (playerData.playerInput.Player.MoveLeft.IsPressed()) h = -1.0f;
 
-
-        //カメラの方向
-        PlayerCamera playerCamera = GetComponent<PlayerCamera>();
-        // カメラ方向取得
         Vector3 cameraForward = playerCamera.cameraForward;
         Vector3 cameraRight = playerCamera.cameraRight;
         cameraForward.y = 0;
@@ -66,72 +64,63 @@ public class PlayerMove : MonoBehaviour
         cameraForward.Normalize();
         cameraRight.Normalize();
 
-        Vector3 move = cameraForward * v + cameraRight * h;
-        move *= (moveAmount * adjustControllerSpeed) * (isSneaking ? velocitySneak : velocityWalk);
+        float speed = (moveAmount * adjustControllerSpeed) * (isSneaking ? velocitySneak : velocityWalk);
 
-        velocity = new Vector3(move.x, velocity.y, move.z);
+        // 入力を成分ごとに分解
+        Vector3 forwardMove = cameraForward * (v * speed);
+        Vector3 rightMove = cameraRight * (h * speed);
 
-        if (move != Vector3.zero)
+        Vector3 horizontalMove;
+
+        if (isSneaking && controller.isGrounded)
         {
-            Quaternion playerRotate = Quaternion.LookRotation(move);
+            horizontalMove = ResolveSneakMove(forwardMove, rightMove);
+        }
+        else
+        {
+            horizontalMove = forwardMove + rightMove;
+        }
+
+        velocity = new Vector3(horizontalMove.x, velocity.y, horizontalMove.z);
+
+        if (horizontalMove.sqrMagnitude > 0.0001f)
+        {
+            Quaternion playerRotate = Quaternion.LookRotation(horizontalMove);
 
             rb.MoveRotation(Quaternion.Slerp(
                 rb.rotation, playerRotate, Time.deltaTime * rotateSpeed));
         }
 
-        // ジャンプ
-        if (controller.isGrounded &&
-            velocity.y < 0)
+        // 接地
+        if (controller.isGrounded && velocity.y < 0)
         {
             velocity.y = -1f;
-
             isJumping = false;
         }
 
         // ジャンプ開始
-        if (Input.GetKeyDown(KeyCode.Space) &&
-            controller.isGrounded)
+        if (Input.GetKeyDown(KeyCode.Space) && controller.isGrounded)
         {
-            velocity.y =
-                Mathf.Sqrt(
-                    (jumpAmount * adjustControllerSpeed) *
-                    -2f *
-                    gravity);
+            velocity.y = Mathf.Sqrt(
+                (jumpAmount * adjustControllerSpeed) * -2f * gravity);
 
             isJumping = true;
         }
 
-        // 上昇終了（頂点）
-        if (isJumping &&
-            velocity.y <= 0)
+        // 上昇終了
+        if (isJumping && velocity.y <= 0)
         {
             isJumping = false;
         }
 
-        // ジャンプ上昇中だけ空気抵抗
+        // 上昇中の空気抵抗
         if (isJumping)
         {
             velocity.y *= airResistance;
         }
 
         // 重力
-        velocity.y +=
-            gravity * Time.deltaTime;
-
-        Vector3 dir = velocity;
-        dir.y = 0.0f;
-        dir.Normalize();
-
-        if (isSneaking && CheckDownGround(dir, 0.3f) && controller.isGrounded)
-        {
-            velocity.x = 0f;
-            velocity.z = 0f;
-
-            // 崖端から離れる方向に少し押し戻す
-            Vector3 pushBack = -dir.normalized * 0.02f;
-            controller.Move(pushBack); // めり込み解消
-            return;
-        }
+        velocity.y += gravity * Time.deltaTime;
 
         controller.Move(velocity * Time.deltaTime);
     }
@@ -169,4 +158,63 @@ public class PlayerMove : MonoBehaviour
 
         return isDown;
     }
+
+    private Vector3 ResolveSneakMove(Vector3 forwardMove, Vector3 rightMove)
+    {
+        Vector3 accepted = Vector3.zero;
+
+        // 斜め入力時は成分ごとに通す
+        if (forwardMove.sqrMagnitude >= rightMove.sqrMagnitude)
+        {
+            TryAddSneakComponent(ref accepted, forwardMove);
+            TryAddSneakComponent(ref accepted, rightMove);
+        }
+        else
+        {
+            TryAddSneakComponent(ref accepted, rightMove);
+            TryAddSneakComponent(ref accepted, forwardMove);
+        }
+
+        return accepted;
+    }
+
+    private void TryAddSneakComponent(ref Vector3 currentMove, Vector3 addMove)
+    {
+        if (addMove.sqrMagnitude <= 0.0001f) return;
+
+        if (HasGroundForMove(currentMove, addMove, 0.3f))
+        {
+            currentMove += addMove;
+        }
+    }
+
+    private bool HasGroundForMove(Vector3 currentMove, Vector3 addMove, float checkLength)
+    {
+        Vector3 dir = addMove.normalized;
+
+        // CharacterController の足元基準
+        Vector3 feet = controller.center + transform.position;
+        feet.y -= controller.height / 2;
+
+        // 既に通っている移動を足した先で判定
+        Vector3 checkPos = feet + currentMove * Time.deltaTime + dir * checkLength;
+        checkPos.y += 0.1f;
+
+        RaycastHit hit;
+        bool hasGround = Physics.Raycast(
+            checkPos,
+            Vector3.down,
+            out hit,
+            0.1f + 0.6f,
+            ~0,
+            QueryTriggerInteraction.Ignore);
+
+        Debug.DrawRay(
+            checkPos,
+            Vector3.down * (0.1f + 0.6f),
+            hasGround ? Color.red : Color.green);
+
+        return hasGround;
+    }
+
 }
