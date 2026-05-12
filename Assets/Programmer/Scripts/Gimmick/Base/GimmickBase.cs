@@ -54,6 +54,8 @@ public class GimmickBase : MonoBehaviour
     public float gimmickSizeY;
     [Tooltip("Z方向の大きさ"), Min(0)]
     public float gimmickSizeZ;
+    [Tooltip("拡縮率 / ％"), Min(0)]
+    public float gimmickScale = 100;
 
     // 命中範囲
     [Header("命中範囲")]
@@ -146,9 +148,9 @@ public class GimmickBase : MonoBehaviour
         float scaleX = targetSizeX / meshSize.x;
         float scaleZ = targetSizeZ / meshSize.z;
         float scaleY = (scaleX + scaleZ) / 2f;
-        scaleX = scaleX * Adjust;
-        scaleY = scaleY * Adjust;
-        scaleZ = scaleZ * Adjust;
+        scaleX = scaleX * gimmickScale / 100f;
+        scaleY = scaleY * gimmickScale / 100f;
+        scaleZ = scaleZ * gimmickScale / 100f;
 
         transform.localScale = new Vector3(scaleX, scaleY, scaleZ);
     }
