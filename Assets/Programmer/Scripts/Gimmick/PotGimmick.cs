@@ -83,6 +83,7 @@ public class PotGimmick : GimmickBase
         {
             //落下
             transform.position -= new Vector3(0, gravity, 0);
+            SetHitChecker(transform.position);
 
             Ray ray = new Ray(transform.position, Vector3.down);
             if (Physics.Raycast(ray, out RaycastHit hit, 1f))
