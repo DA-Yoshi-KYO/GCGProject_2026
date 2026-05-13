@@ -500,7 +500,7 @@ public partial class CSED_CreateTools
     }
 
     /// <summary>
-    /// プレビュー用のfloat初期値を取得します。
+    /// プレビュー用の通常初期値をfloatで取得します。
     /// </summary>
     /// <param name="f_fieldData">対象FieldData</param>
     /// <returns>float初期値</returns>
@@ -512,7 +512,31 @@ public partial class CSED_CreateTools
         }
 
         float result = 0.0f;
-        float.TryParse(f_fieldData.DefaultValueText, out result);
+
+        float.TryParse(
+            f_fieldData.DefaultValueText,
+            out result);
+
+        return result;
+    }
+
+    /// <summary>
+    /// プレビュー用のSlider最大値を取得します。
+    /// </summary>
+    /// <param name="f_fieldData">対象FieldData</param>
+    /// <returns>Slider最大値</returns>
+    private float GetPreviewSliderMaxValue(CSED_CreateTools_FieldData f_fieldData)
+    {
+        if (f_fieldData.IsSliderMaxValueNull)
+        {
+            return 100.0f;
+        }
+
+        float result = 100.0f;
+
+        float.TryParse(
+            f_fieldData.SliderMaxValueText,
+            out result);
 
         return result;
     }
@@ -558,20 +582,45 @@ public partial class CSED_CreateTools
     {
         string label = GetPreviewLabel(f_fieldData);
 
-        switch (f_fieldData.FieldType)
+        float minValue = GetPreviewSliderMinValue(f_fieldData);
+        float maxValue = GetPreviewSliderMaxValue(f_fieldData);
+        float defaultValue = GetPreviewFloatDefaultValue(f_fieldData);
+
+        if (maxValue < minValue)
         {
-            case CSE_CreateTools_FieldType.Int:
-                EditorGUILayout.IntSlider(label, 0, 0, 100);
-                break;
-
-            case CSE_CreateTools_FieldType.Float:
-                EditorGUILayout.Slider(label, 0.0f, 0.0f, 1.0f);
-                break;
-
-            default:
-                EditorGUILayout.Slider(label, 0.0f, 0.0f, 1.0f);
-                break;
+            float temp = minValue;
+            minValue = maxValue;
+            maxValue = temp;
         }
+
+        defaultValue = Mathf.Clamp(defaultValue, minValue, maxValue);
+
+        EditorGUILayout.Slider(
+            label,
+            defaultValue,
+            minValue,
+            maxValue);
+    }
+
+    /// <summary>
+    /// プレビュー用のSlider最小値を取得します。
+    /// </summary>
+    /// <param name="f_fieldData">対象FieldData</param>
+    /// <returns>Slider最小値</returns>
+    private float GetPreviewSliderMinValue(CSED_CreateTools_FieldData f_fieldData)
+    {
+        if (f_fieldData.IsSliderMinValueNull)
+        {
+            return 0.0f;
+        }
+
+        float result = 0.0f;
+
+        float.TryParse(
+            f_fieldData.SliderMinValueText,
+            out result);
+
+        return result;
     }
 
     /// <summary>
@@ -628,14 +677,13 @@ public partial class CSED_CreateTools
     }
 
     /// <summary>
-    /// プレビューで表示するラベル名を取得します。
+    /// プレビュー表示用のラベル名を取得します。
     /// </summary>
     /// <param name="f_fieldData">対象FieldData</param>
-    /// <returns>プレビュー表示用ラベル</returns>
+    /// <returns>プレビューに表示するラベル名</returns>
     private string GetPreviewLabel(CSED_CreateTools_FieldData f_fieldData)
     {
-        if (f_fieldData.FieldLayoutType == CSE_CreateTools_FieldLayoutType.InputField &&
-            string.IsNullOrEmpty(f_fieldData.TagName) == false)
+        if (string.IsNullOrEmpty(f_fieldData.TagName) == false)
         {
             return f_fieldData.TagName;
         }

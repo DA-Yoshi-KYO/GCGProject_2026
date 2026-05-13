@@ -323,6 +323,22 @@ public partial class CSED_CreateTools
 
         GUILayout.Space(c_FieldInspectorSectionTitleBottomSpacing);
 
+        f_fieldData.IsSliderMinValueNull = DrawSmallToggle(
+            "  Min Is Null",
+            f_fieldData.IsSliderMinValueNull);
+
+        GUILayout.Space(c_FieldInspectorRowSpacing);
+
+        EditorGUI.BeginDisabledGroup(f_fieldData.IsSliderMinValueNull);
+        {
+            f_fieldData.SliderMinValueText = DrawSmallTextField(
+                "  Slider Min Value",
+                f_fieldData.SliderMinValueText);
+        }
+        EditorGUI.EndDisabledGroup();
+
+        GUILayout.Space(c_FieldInspectorSectionTopSpacing);
+
         f_fieldData.IsSliderMaxValueNull = DrawSmallToggle(
             "  Max Is Null",
             f_fieldData.IsSliderMaxValueNull);

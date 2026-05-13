@@ -17,6 +17,16 @@
 public class CSED_CreateTools_FieldData
 {
     /// <summary>
+    /// Sliderの最小値をnull扱いにするかどうかです。
+    /// </summary>
+    public bool IsSliderMinValueNull { get; set; }
+
+    /// <summary>
+    /// Sliderの最小値です。
+    /// </summary>
+    public string SliderMinValueText { get; set; }
+
+    /// <summary>
     /// 変数の型です。
     /// </summary>
     public CSE_CreateTools_FieldType FieldType { get; set; }
@@ -91,6 +101,12 @@ public class CSED_CreateTools_FieldData
         FieldName = f_fieldName;
         FieldLayoutType = f_fieldLayoutType;
         TagName = f_fieldName;
+
+        IsSliderMinValueNull = true;
+        SliderMinValueText = string.Empty;
+
+        IsSliderMaxValueNull = true;
+        SliderMaxValueText = string.Empty;
 
         IsDefaultValueNull = true;
         DefaultValueText = string.Empty;
