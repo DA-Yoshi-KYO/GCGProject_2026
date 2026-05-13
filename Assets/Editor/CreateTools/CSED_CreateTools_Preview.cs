@@ -4,6 +4,7 @@
  概要     : CreateToolsの右側に作成後エディター見本を表示するクラス
  作者     : ヨシモト リョウ
  履歴     : 2026/05/13 新規作成
+            2026/05/13 黒背景上にUnity風の仮想EditorWindowを描画
 =====================================+
 */
 
@@ -17,12 +18,32 @@ using UnityEngine;
 public partial class CSED_CreateTools
 {
     /// <summary>
-    /// 黒枠からプレビューパネルまでの余白です。
+    /// 仮想EditorWindowの外側余白です。
     /// </summary>
-    private const float c_PreviewPanelMargin = 6.0f;
+    private const float c_PreviewWindowMargin = 24.0f;
 
     /// <summary>
-    /// プレビューパネル内の余白です。
+    /// 仮想EditorWindowのタイトルバー高さです。
+    /// </summary>
+    private const float c_PreviewTitleBarHeight = 22.0f;
+
+    /// <summary>
+    /// 仮想EditorWindowのタブ最小横幅です。
+    /// </summary>
+    private const float c_PreviewTabMinWidth = 72.0f;
+
+    /// <summary>
+    /// 仮想EditorWindowのタブ最大横幅です。
+    /// </summary>
+    private const float c_PreviewTabMaxWidth = 180.0f;
+
+    /// <summary>
+    /// 仮想EditorWindowのタブ内側横余白です。
+    /// </summary>
+    private const float c_PreviewTabHorizontalPadding = 18.0f;
+
+    /// <summary>
+    /// 仮想EditorWindowの中身余白です。
     /// </summary>
     private const float c_PreviewContentPadding = 10.0f;
 
@@ -44,20 +65,16 @@ public partial class CSED_CreateTools
     {
         EnsureFieldDataList();
 
-        Rect panelRect = GetPreviewPanelRect(f_areaRect);
+        Rect windowRect = GetPreviewEditorWindowRect(f_areaRect);
 
-        DrawPreviewPanel(panelRect);
+        DrawPreviewEditorWindowFrame(windowRect);
 
-        Rect contentRect = GetPreviewContentRect(panelRect);
+        Rect contentRect = GetPreviewEditorWindowContentRect(windowRect);
 
         GUILayout.BeginArea(contentRect);
         {
             m_PreviewScrollPosition = EditorGUILayout.BeginScrollView(m_PreviewScrollPosition);
             {
-                DrawPreviewTitle();
-
-                GUILayout.Space(c_PreviewSpacing);
-
                 if (m_FieldDataList.Count <= 0)
                 {
                     DrawPreviewEmptyMessage();
@@ -70,62 +87,288 @@ public partial class CSED_CreateTools
             EditorGUILayout.EndScrollView();
         }
         GUILayout.EndArea();
+
+        if (m_IsPreviewEditorSettingsOpen)
+        {
+            DrawPreviewEditorSettingsPanel(windowRect);
+        }
     }
 
     /// <summary>
-    /// プレビュー用の内側パネルRectを取得します。
+    /// 仮想EditorWindowのRectを取得します。
     /// </summary>
     /// <param name="f_areaRect">右側エリア全体のRect</param>
-    /// <returns>内側パネルRect</returns>
-    private Rect GetPreviewPanelRect(Rect f_areaRect)
+    /// <returns>仮想EditorWindowのRect</returns>
+    private Rect GetPreviewEditorWindowRect(Rect f_areaRect)
     {
         return new Rect(
-            f_areaRect.x + c_PreviewPanelMargin,
-            f_areaRect.y + c_PreviewPanelMargin,
-            Mathf.Max(0.0f, f_areaRect.width - (c_PreviewPanelMargin * 2.0f)),
-            Mathf.Max(0.0f, f_areaRect.height - (c_PreviewPanelMargin * 2.0f)));
+            f_areaRect.x + c_PreviewWindowMargin,
+            f_areaRect.y + c_PreviewWindowMargin,
+            Mathf.Max(160.0f, f_areaRect.width - (c_PreviewWindowMargin * 2.0f)),
+            Mathf.Max(160.0f, f_areaRect.height - (c_PreviewWindowMargin * 2.0f)));
     }
 
     /// <summary>
-    /// プレビュー用のコンテンツRectを取得します。
+    /// 仮想EditorWindowの中身Rectを取得します。
     /// </summary>
-    /// <param name="f_panelRect">内側パネルRect</param>
-    /// <returns>コンテンツRect</returns>
-    private Rect GetPreviewContentRect(Rect f_panelRect)
+    /// <param name="f_windowRect">仮想EditorWindowのRect</param>
+    /// <returns>仮想EditorWindowの中身Rect</returns>
+    private Rect GetPreviewEditorWindowContentRect(Rect f_windowRect)
     {
         return new Rect(
-            f_panelRect.x + c_PreviewContentPadding,
-            f_panelRect.y + c_PreviewContentPadding,
-            Mathf.Max(0.0f, f_panelRect.width - (c_PreviewContentPadding * 2.0f)),
-            Mathf.Max(0.0f, f_panelRect.height - (c_PreviewContentPadding * 2.0f)));
+            f_windowRect.x + c_PreviewContentPadding,
+            f_windowRect.y + c_PreviewTitleBarHeight + c_PreviewContentPadding,
+            Mathf.Max(0.0f, f_windowRect.width - (c_PreviewContentPadding * 2.0f)),
+            Mathf.Max(0.0f, f_windowRect.height - c_PreviewTitleBarHeight - (c_PreviewContentPadding * 2.0f)));
     }
 
     /// <summary>
-    /// プレビューの内側パネルを描画します。
+    /// 仮想EditorWindowの枠を描画します。
     /// </summary>
-    /// <param name="f_panelRect">内側パネルRect</param>
-    private void DrawPreviewPanel(Rect f_panelRect)
+    /// <param name="f_windowRect">仮想EditorWindowのRect</param>
+    private void DrawPreviewEditorWindowFrame(Rect f_windowRect)
     {
-        EditorGUI.DrawRect(f_panelRect, new Color(0.28f, 0.28f, 0.28f));
-
-        Rect innerRect = new Rect(
-            f_panelRect.x + 1.0f,
-            f_panelRect.y + 1.0f,
-            Mathf.Max(0.0f, f_panelRect.width - 2.0f),
-            Mathf.Max(0.0f, f_panelRect.height - 2.0f));
-
-        EditorGUI.DrawRect(innerRect, new Color(0.16f, 0.16f, 0.16f));
+        DrawPreviewWindowBody(f_windowRect);
+        DrawPreviewTitleBar(f_windowRect);
+        DrawPreviewTab(f_windowRect);
+        DrawPreviewWindowButtons(f_windowRect);
+        DrawPreviewWindowBorder(f_windowRect);
     }
 
     /// <summary>
-    /// プレビュータイトルを描画します。
+    /// 仮想EditorWindowの本体を描画します。
     /// </summary>
-    private void DrawPreviewTitle()
+    /// <param name="f_windowRect">仮想EditorWindowのRect</param>
+    private void DrawPreviewWindowBody(Rect f_windowRect)
     {
-        GUIStyle titleStyle = new GUIStyle(EditorStyles.boldLabel);
-        titleStyle.normal.textColor = Color.white;
+        EditorGUI.DrawRect(f_windowRect, new Color(0.18f, 0.18f, 0.18f));
+    }
 
-        EditorGUILayout.LabelField("作成後エディター見本", titleStyle);
+    /// <summary>
+    /// 仮想EditorWindowのタイトルバーを描画します。
+    /// </summary>
+    /// <param name="f_windowRect">仮想EditorWindowのRect</param>
+    private void DrawPreviewTitleBar(Rect f_windowRect)
+    {
+        Rect titleBarRect = new Rect(
+            f_windowRect.x,
+            f_windowRect.y,
+            f_windowRect.width,
+            c_PreviewTitleBarHeight);
+
+        EditorGUI.DrawRect(titleBarRect, new Color(0.13f, 0.13f, 0.13f));
+    }
+
+    /// <summary>
+    /// 仮想EditorWindowのタブを描画します。
+    /// </summary>
+    /// <param name="f_windowRect">仮想EditorWindowのRect</param>
+    private void DrawPreviewTab(Rect f_windowRect)
+    {
+        string titleName = GetPreviewEditorTitleName();
+
+        GUIStyle tabStyle = new GUIStyle(EditorStyles.label);
+        tabStyle.normal.textColor = new Color(0.82f, 0.82f, 0.82f);
+
+        float tabWidth = GetPreviewTabWidth(titleName, tabStyle, f_windowRect);
+
+        Rect tabRect = new Rect(
+            f_windowRect.x,
+            f_windowRect.y,
+            tabWidth,
+            c_PreviewTitleBarHeight);
+
+        EditorGUI.DrawRect(tabRect, new Color(0.22f, 0.22f, 0.22f));
+
+        Rect tabLabelRect = new Rect(
+            tabRect.x + 8.0f,
+            tabRect.y + 2.0f,
+            Mathf.Max(0.0f, tabRect.width - 16.0f),
+            tabRect.height);
+
+        EditorGUI.LabelField(tabLabelRect, titleName, tabStyle);
+    }
+
+    /// <summary>
+    /// 仮想EditorWindowのタブ横幅を取得します。
+    /// </summary>
+    /// <param name="f_titleName">タイトル名</param>
+    /// <param name="f_tabStyle">タブ文字スタイル</param>
+    /// <param name="f_windowRect">仮想EditorWindowのRect</param>
+    /// <returns>タブ横幅</returns>
+    private float GetPreviewTabWidth(
+        string f_titleName,
+        GUIStyle f_tabStyle,
+        Rect f_windowRect)
+    {
+        Vector2 titleSize = f_tabStyle.CalcSize(new GUIContent(f_titleName));
+
+        float preferredWidth = titleSize.x + c_PreviewTabHorizontalPadding;
+
+        float maxWidthByWindow = Mathf.Max(
+            c_PreviewTabMinWidth,
+            f_windowRect.width - 70.0f);
+
+        float tabMaxWidth = Mathf.Min(c_PreviewTabMaxWidth, maxWidthByWindow);
+
+        return Mathf.Clamp(
+            preferredWidth,
+            c_PreviewTabMinWidth,
+            tabMaxWidth);
+    }
+
+    /// <summary>
+    /// 右側プレビューの仮想EditorWindowタイトル名を取得します。
+    /// </summary>
+    /// <returns>仮想EditorWindowタイトル名</returns>
+    private string GetPreviewEditorTitleName()
+    {
+        if (string.IsNullOrEmpty(m_PreviewEditorTitleName))
+        {
+            return "Untitled";
+        }
+
+        return m_PreviewEditorTitleName;
+    }
+
+    /// <summary>
+    /// 仮想EditorWindowの右上ボタン風表示を描画します。
+    /// </summary>
+    /// <param name="f_windowRect">仮想EditorWindowのRect</param>
+    private void DrawPreviewWindowButtons(Rect f_windowRect)
+    {
+        GUIStyle buttonStyle = new GUIStyle(EditorStyles.label);
+        buttonStyle.alignment = TextAnchor.MiddleCenter;
+        buttonStyle.normal.textColor = new Color(0.82f, 0.82f, 0.82f);
+
+        Rect menuButtonRect = new Rect(
+            f_windowRect.xMax - 62.0f,
+            f_windowRect.y + 2.0f,
+            18.0f,
+            c_PreviewTitleBarHeight - 4.0f);
+
+        Rect maximizeButtonRect = new Rect(
+            f_windowRect.xMax - 40.0f,
+            f_windowRect.y + 2.0f,
+            18.0f,
+            c_PreviewTitleBarHeight - 4.0f);
+
+        Rect closeButtonRect = new Rect(
+            f_windowRect.xMax - 20.0f,
+            f_windowRect.y + 2.0f,
+            18.0f,
+            c_PreviewTitleBarHeight - 4.0f);
+
+        if (GUI.Button(menuButtonRect, "⋮", buttonStyle))
+        {
+            ShowPreviewEditorMenu();
+        }
+
+        EditorGUI.LabelField(maximizeButtonRect, "□", buttonStyle);
+        EditorGUI.LabelField(closeButtonRect, "×", buttonStyle);
+    }
+
+    /// <summary>
+    /// 右側プレビューの仮想EditorWindowメニューを表示します。
+    /// </summary>
+    private void ShowPreviewEditorMenu()
+    {
+        GenericMenu menu = new GenericMenu();
+
+        menu.AddItem(
+            new GUIContent("エディター設定"),
+            false,
+            OpenPreviewEditorSettings);
+
+        menu.ShowAsContext();
+    }
+
+    /// <summary>
+    /// 右側プレビューの仮想EditorWindow設定パネルを描画します。
+    /// </summary>
+    /// <param name="f_windowRect">仮想EditorWindowのRect</param>
+    private void DrawPreviewEditorSettingsPanel(Rect f_windowRect)
+    {
+        Rect panelRect = new Rect(
+            f_windowRect.x + 24.0f,
+            f_windowRect.y + c_PreviewTitleBarHeight + 24.0f,
+            Mathf.Min(280.0f, f_windowRect.width - 48.0f),
+            92.0f);
+
+        EditorGUI.DrawRect(panelRect, new Color(0.24f, 0.24f, 0.24f));
+
+        GUI.Box(panelRect, GUIContent.none);
+
+        GUILayout.BeginArea(new Rect(
+            panelRect.x + 10.0f,
+            panelRect.y + 8.0f,
+            panelRect.width - 20.0f,
+            panelRect.height - 16.0f));
+        {
+            EditorGUILayout.BeginHorizontal();
+            {
+                EditorGUILayout.LabelField("エディター設定", EditorStyles.boldLabel);
+
+                GUILayout.FlexibleSpace();
+
+                if (GUILayout.Button("×", GUILayout.Width(24.0f)))
+                {
+                    m_IsPreviewEditorSettingsOpen = false;
+                    Repaint();
+                }
+            }
+            EditorGUILayout.EndHorizontal();
+
+            GUILayout.Space(8.0f);
+
+            EditorGUI.BeginChangeCheck();
+
+            m_PreviewEditorTitleName = EditorGUILayout.TextField(
+                "Title Name",
+                m_PreviewEditorTitleName);
+
+            if (EditorGUI.EndChangeCheck())
+            {
+                Repaint();
+            }
+        }
+        GUILayout.EndArea();
+    }
+
+    /// <summary>
+    /// 右側プレビューのエディター設定を開きます。
+    /// </summary>
+    private void OpenPreviewEditorSettings()
+    {
+        m_IsPreviewEditorSettingsOpen = true;
+
+        Repaint();
+    }
+
+    /// <summary>
+    /// 仮想EditorWindowの枠線を描画します。
+    /// </summary>
+    /// <param name="f_windowRect">仮想EditorWindowのRect</param>
+    private void DrawPreviewWindowBorder(Rect f_windowRect)
+    {
+        Handles.BeginGUI();
+
+        Color oldColor = Handles.color;
+        Handles.color = new Color(0.32f, 0.32f, 0.32f);
+
+        Vector3 topLeft = new Vector3(f_windowRect.xMin, f_windowRect.yMin);
+        Vector3 topRight = new Vector3(f_windowRect.xMax, f_windowRect.yMin);
+        Vector3 bottomLeft = new Vector3(f_windowRect.xMin, f_windowRect.yMax);
+        Vector3 bottomRight = new Vector3(f_windowRect.xMax, f_windowRect.yMax);
+
+        Handles.DrawLine(topLeft, topRight);
+        Handles.DrawLine(topRight, bottomRight);
+        Handles.DrawLine(bottomRight, bottomLeft);
+        Handles.DrawLine(bottomLeft, topLeft);
+
+        Handles.color = oldColor;
+
+        Handles.EndGUI();
     }
 
     /// <summary>

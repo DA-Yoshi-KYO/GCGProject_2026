@@ -91,5 +91,15 @@ public partial class CSED_CreateTools
     /// 右側プレビューエリアのスクロール位置です。
     /// </summary>
     private Vector2 m_PreviewScrollPosition;
+
+    /// <summary>
+    /// 右側プレビューの仮想EditorWindowタイトル名です。
+    /// </summary>
+    private string m_PreviewEditorTitleName = "Test";
+
+    /// <summary>
+    /// 右側プレビューのエディター設定を表示中かどうかです。
+    /// </summary>
+    private bool m_IsPreviewEditorSettingsOpen;
 }
 #endif
