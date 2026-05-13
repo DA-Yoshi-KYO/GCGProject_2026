@@ -14,7 +14,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerAction : MonoBehaviour
+public class CS_PlayerAction : MonoBehaviour
 {
     [SerializeField] private int initSoul = 5;//初期のソウルの数
     [HideInInspector] public int currentSoul { private set; get; } = 0;//現在のソウルの数

@@ -8,7 +8,7 @@
  */
 using UnityEngine;
 
-public class PlayerMove : MonoBehaviour
+public class CS_PlayerMove : MonoBehaviour
 {
     [Header("基礎の移動量")][SerializeField] private float moveAmount = 10.0f;//移動量
     private float velocityWalk = 1.0f;//移動速度（歩き）
@@ -22,7 +22,7 @@ public class PlayerMove : MonoBehaviour
     private Vector3 velocity = Vector3.zero;
     private Rigidbody rb;
     private PlayerData playerData;  // プレイヤーのデータ
-    private PlayerCamera playerCamera;  // プレイヤーのカメラ
+    private CS_PlayerCamera playerCamera;  // プレイヤーのカメラ
 
     private float rotateSpeed = 10.0f;//回転のスピード
     private float adjustControllerSpeed = 1;//移動スピードの補正
@@ -33,7 +33,7 @@ public class PlayerMove : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         playerData = GetComponent<PlayerData>();
-        playerCamera = GetComponent<PlayerCamera>();
+        playerCamera = GetComponent<CS_PlayerCamera>();
         controller = GetComponent<CharacterController>();
     }
 

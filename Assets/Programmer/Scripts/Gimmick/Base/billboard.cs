@@ -5,8 +5,8 @@ using UnityEngine;
 public class billboard : MonoBehaviour
 {
     public GameObject Player;
-    private PlayerCamera playerCamera;
-    private RoomCamera roomCamera;
+    private CS_PlayerCamera playerCamera;
+    private CS_RoomCamera roomCamera;
     void Update()
     {
         if (Player == null)
@@ -15,7 +15,7 @@ public class billboard : MonoBehaviour
         }
         else
         {
-            playerCamera = Player.GetComponent<PlayerCamera>();
+            playerCamera = Player.GetComponent<CS_PlayerCamera>();
             roomCamera = playerCamera.roomCamera;
             transform.rotation = Quaternion.LookRotation(transform.position - roomCamera.transform.position);
         }
