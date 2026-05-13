@@ -6,6 +6,7 @@
  履歴     : 2026/05/08 新規作成
             2026/05/11 InputField用設定の表示間隔と入力欄幅を調整
             2026/05/13 選択中Field設定の行間ルールを統一
+            2026/05/13 Slider設定とDefault設定を追加
 =====================================+
 */
 
@@ -19,6 +20,17 @@ using UnityEngine;
 public partial class CSED_CreateTools
 {
     /// <summary>
+    /// Field詳細設定のスクロールバー想定幅です。
+    /// </summary>
+    private const float c_FieldInspectorScrollBarWidth = 16.0f;
+
+    /// <summary>
+    /// Field詳細設定の入力欄右側の余白です。
+    /// エディターパレットのボタン右端と揃えるための値です。
+    /// </summary>
+    private const float c_FieldInspectorInputRightGap = 10.0f;
+
+    /// <summary>
     /// 黒枠からField詳細設定パネルまでの余白です。
     /// </summary>
     private const float c_FieldInspectorPanelMargin = 6.0f;
@@ -26,7 +38,7 @@ public partial class CSED_CreateTools
     /// <summary>
     /// Field詳細設定パネル内の余白です。
     /// </summary>
-    private const float c_FieldInspectorContentPadding = 12.0f;
+    private const float c_FieldInspectorContentPadding = 8.0f;
 
     /// <summary>
     /// 通常項目同士の縦余白です。
@@ -51,17 +63,7 @@ public partial class CSED_CreateTools
     /// <summary>
     /// ラベルと入力欄の間の余白です。
     /// </summary>
-    private const float c_FieldInspectorLabelToInputSpacing = 14.0f;
-
-    /// <summary>
-    /// Field詳細設定の入力欄最小幅です。
-    /// </summary>
-    private const float c_FieldInspectorMinInputWidth = 120.0f;
-
-    /// <summary>
-    /// Field詳細設定の右側余白です。
-    /// </summary>
-    private const float c_FieldInspectorRightPadding = 8.0f;
+    private const float c_FieldInspectorLabelToInputSpacing = 8.0f;
 
     /// <summary>
     /// Field詳細設定の1行高さです。
@@ -112,21 +114,6 @@ public partial class CSED_CreateTools
             EditorGUILayout.EndScrollView();
         }
         GUILayout.EndArea();
-    }
-
-    /// <summary>
-    /// Field詳細設定の入力欄幅を取得します。
-    /// </summary>
-    /// <returns>入力欄幅</returns>
-    private float GetFieldInspectorInputWidth()
-    {
-        float inputWidth =
-            m_FieldInspectorCurrentContentWidth
-            - c_FieldInspectorLabelWidth
-            - c_FieldInspectorLabelToInputSpacing
-            - c_FieldInspectorRightPadding;
-
-        return Mathf.Max(c_FieldInspectorMinInputWidth, inputWidth);
     }
 
     /// <summary>
@@ -237,6 +224,11 @@ public partial class CSED_CreateTools
             GUILayout.Space(c_FieldInspectorSectionTopSpacing);
             DrawInputFieldLayoutSettings(f_fieldData);
         }
+        else if (f_fieldData.FieldLayoutType == CSE_CreateTools_FieldLayoutType.Slider)
+        {
+            GUILayout.Space(c_FieldInspectorSectionTopSpacing);
+            DrawSliderLayoutSettings(f_fieldData);
+        }
         else if (f_fieldData.FieldLayoutType == CSE_CreateTools_FieldLayoutType.MinMaxField)
         {
             GUILayout.Space(c_FieldInspectorSectionTopSpacing);
@@ -255,6 +247,19 @@ public partial class CSED_CreateTools
     /// <param name="f_fieldData">選択中Fieldデータ</param>
     private void DrawInputFieldLayoutSettings(CSED_CreateTools_FieldData f_fieldData)
     {
+        DrawInputFieldCommonSettings(f_fieldData);
+
+        GUILayout.Space(c_FieldInspectorSectionTopSpacing);
+
+        DrawDefaultValueSettings(f_fieldData);
+    }
+
+    /// <summary>
+    /// Input Field共通設定を描画します。
+    /// </summary>
+    /// <param name="f_fieldData">選択中Fieldデータ</param>
+    private void DrawInputFieldCommonSettings(CSED_CreateTools_FieldData f_fieldData)
+    {
         EditorGUILayout.LabelField("Input Field設定", EditorStyles.boldLabel);
 
         GUILayout.Space(c_FieldInspectorSectionTitleBottomSpacing);
@@ -262,10 +267,23 @@ public partial class CSED_CreateTools
         f_fieldData.TagName = DrawSmallTextField(
             "  Tag Name",
             f_fieldData.TagName);
+    }
+
+    /// <summary>
+    /// Slider用の詳細設定を描画します。
+    /// </summary>
+    /// <param name="f_fieldData">選択中Fieldデータ</param>
+    private void DrawSliderLayoutSettings(CSED_CreateTools_FieldData f_fieldData)
+    {
+        DrawInputFieldCommonSettings(f_fieldData);
 
         GUILayout.Space(c_FieldInspectorSectionTopSpacing);
 
         DrawDefaultValueSettings(f_fieldData);
+
+        GUILayout.Space(c_FieldInspectorSectionTopSpacing);
+
+        DrawSliderRangeSettings(f_fieldData);
     }
 
     /// <summary>
@@ -294,21 +312,46 @@ public partial class CSED_CreateTools
     }
 
     /// <summary>
+    /// Slider範囲設定を描画します。
+    /// </summary>
+    /// <param name="f_fieldData">選択中Fieldデータ</param>
+    private void DrawSliderRangeSettings(CSED_CreateTools_FieldData f_fieldData)
+    {
+        EditorGUILayout.LabelField("Slider Range設定", EditorStyles.boldLabel);
+
+        GUILayout.Space(c_FieldInspectorSectionTitleBottomSpacing);
+
+        f_fieldData.IsSliderMaxValueNull = DrawSmallToggle(
+            "  Max Is Null",
+            f_fieldData.IsSliderMaxValueNull);
+
+        GUILayout.Space(c_FieldInspectorRowSpacing);
+
+        EditorGUI.BeginDisabledGroup(f_fieldData.IsSliderMaxValueNull);
+        {
+            f_fieldData.SliderMaxValueText = DrawSmallTextField(
+                "  Slider Max Value",
+                f_fieldData.SliderMaxValueText);
+        }
+        EditorGUI.EndDisabledGroup();
+    }
+
+    /// <summary>
     /// Min Max Field用の詳細設定を描画します。
     /// </summary>
     /// <param name="f_fieldData">選択中Fieldデータ</param>
     private void DrawMinMaxFieldLayoutSettings(CSED_CreateTools_FieldData f_fieldData)
     {
-        EditorGUILayout.LabelField("Min Max Field設定", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField("  Min Max Field設定", EditorStyles.boldLabel);
 
         GUILayout.Space(c_FieldInspectorSectionTitleBottomSpacing);
 
-        EditorGUILayout.LabelField("Default Min", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField("  Default Min", EditorStyles.boldLabel);
 
         GUILayout.Space(c_FieldInspectorSectionTitleBottomSpacing);
 
         f_fieldData.IsDefaultMinValueNull = DrawSmallToggle(
-            "Min Is Null",
+            "  Min Is Null",
             f_fieldData.IsDefaultMinValueNull);
 
         GUILayout.Space(c_FieldInspectorRowSpacing);
@@ -316,19 +359,19 @@ public partial class CSED_CreateTools
         EditorGUI.BeginDisabledGroup(f_fieldData.IsDefaultMinValueNull);
         {
             f_fieldData.DefaultMinValueText = DrawSmallTextField(
-                "Min Value",
+                "  Min Value",
                 f_fieldData.DefaultMinValueText);
         }
         EditorGUI.EndDisabledGroup();
 
         GUILayout.Space(c_FieldInspectorSectionTopSpacing);
 
-        EditorGUILayout.LabelField("Default Max", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField("  Default Max", EditorStyles.boldLabel);
 
         GUILayout.Space(c_FieldInspectorSectionTitleBottomSpacing);
 
         f_fieldData.IsDefaultMaxValueNull = DrawSmallToggle(
-            "Max Is Null",
+            "  Max Is Null",
             f_fieldData.IsDefaultMaxValueNull);
 
         GUILayout.Space(c_FieldInspectorRowSpacing);
@@ -336,7 +379,7 @@ public partial class CSED_CreateTools
         EditorGUI.BeginDisabledGroup(f_fieldData.IsDefaultMaxValueNull);
         {
             f_fieldData.DefaultMaxValueText = DrawSmallTextField(
-                "Max Value",
+                "  Max Value",
                 f_fieldData.DefaultMaxValueText);
         }
         EditorGUI.EndDisabledGroup();
@@ -374,10 +417,24 @@ public partial class CSED_CreateTools
     /// <returns>入力項目Rect</returns>
     private Rect GetFieldInspectorInputRect(Rect f_rowRect)
     {
+        float inputX =
+            f_rowRect.x
+            + c_FieldInspectorLabelWidth
+            + c_FieldInspectorLabelToInputSpacing;
+
+        float targetRightX =
+            m_FieldInspectorCurrentContentWidth
+            - c_FieldInspectorScrollBarWidth
+            - c_FieldInspectorInputRightGap;
+
+        float inputWidth = Mathf.Max(
+            0.0f,
+            targetRightX - inputX);
+
         return new Rect(
-            f_rowRect.x + c_FieldInspectorLabelWidth + c_FieldInspectorLabelToInputSpacing,
+            inputX,
             f_rowRect.y,
-            GetFieldInspectorInputWidth(),
+            inputWidth,
             f_rowRect.height);
     }
 

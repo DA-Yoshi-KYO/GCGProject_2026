@@ -256,7 +256,7 @@ public partial class CSED_CreateTools
             valueX,
             currentY,
             boxRect.width,
-            " Variable Type",
+            "  Variable Type",
             GetFieldTypeDisplayName(fieldData.FieldType));
 
         currentY += lineHeight;
@@ -266,7 +266,7 @@ public partial class CSED_CreateTools
             valueX,
             currentY,
             boxRect.width,
-            " Variable Name",
+            "  Variable Name",
             fieldData.FieldName);
 
         currentY += lineHeight;
@@ -276,7 +276,7 @@ public partial class CSED_CreateTools
             valueX,
             currentY,
             boxRect.width,
-            " Layout",
+            "  Layout",
             fieldData.FieldLayoutType.ToString());
     }
 

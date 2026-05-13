@@ -5,6 +5,7 @@
  作者     : ヨシモト リョウ
  履歴     : 2026/05/08 新規作成
             2026/05/08 表示レイアウト情報を追加
+            2026/05/13 Default設定とSlider設定用データを追加
 =====================================+
 */
 
@@ -31,39 +32,49 @@ public class CSED_CreateTools_FieldData
     public CSE_CreateTools_FieldLayoutType FieldLayoutType { get; set; }
 
     /// <summary>
-    /// Input Fieldなどで表示するタグ名です。
+    /// Tag名です。
     /// </summary>
     public string TagName { get; set; }
 
     /// <summary>
     /// 通常初期値をnull扱いにするかどうかです。
     /// </summary>
-    public bool IsDefaultValueNull { get; set; } = true;
+    public bool IsDefaultValueNull { get; set; }
 
     /// <summary>
     /// 通常初期値です。
     /// </summary>
-    public string DefaultValueText { get; set; } = string.Empty;
+    public string DefaultValueText { get; set; }
 
     /// <summary>
     /// 最小初期値をnull扱いにするかどうかです。
     /// </summary>
-    public bool IsDefaultMinValueNull { get; set; } = true;
+    public bool IsDefaultMinValueNull { get; set; }
 
     /// <summary>
     /// 最小初期値です。
     /// </summary>
-    public string DefaultMinValueText { get; set; } = string.Empty;
+    public string DefaultMinValueText { get; set; }
 
     /// <summary>
     /// 最大初期値をnull扱いにするかどうかです。
     /// </summary>
-    public bool IsDefaultMaxValueNull { get; set; } = true;
+    public bool IsDefaultMaxValueNull { get; set; }
 
     /// <summary>
     /// 最大初期値です。
     /// </summary>
-    public string DefaultMaxValueText { get; set; } = string.Empty;
+    public string DefaultMaxValueText { get; set; }
+
+    /// <summary>
+    /// Sliderの最大値をnull扱いにするかどうかです。
+    /// </summary>
+    public bool IsSliderMaxValueNull { get; set; }
+
+    /// <summary>
+    /// Sliderの最大値です。
+    /// </summary>
+    public string SliderMaxValueText { get; set; }
 
     /// <summary>
     /// 変数データを作成します。
@@ -80,6 +91,18 @@ public class CSED_CreateTools_FieldData
         FieldName = f_fieldName;
         FieldLayoutType = f_fieldLayoutType;
         TagName = f_fieldName;
+
+        IsDefaultValueNull = true;
+        DefaultValueText = string.Empty;
+
+        IsDefaultMinValueNull = true;
+        DefaultMinValueText = string.Empty;
+
+        IsDefaultMaxValueNull = true;
+        DefaultMaxValueText = string.Empty;
+
+        IsSliderMaxValueNull = true;
+        SliderMaxValueText = string.Empty;
     }
 }
 #endif

@@ -89,5 +89,10 @@ public partial class CSED_CreateTools
     /// 左下エリア最小高さ
     /// </summary>
     private const float c_LeftBottomMinHeight = 80.0f;
+
+    /// <summary>
+    /// スクロールバーと入力項目欄の余白
+    /// </summary>
+    private const float c_LeftDownCenterMinWidth = 0.05f; 
 }
 #endif
