@@ -8,10 +8,10 @@
  */
 using UnityEngine;
 
-public class RoomCamera : MonoBehaviour
+public class CS_RoomCamera : MonoBehaviour
 {
-    [HideInInspector] public Vector3 initPos = Vector3.zero;//初期値のカメラの位置
-    [HideInInspector] public Quaternion initRotate;//初期値のカメラの回転
+    [HideInInspector] public Vector3 initPos { private set; get; } = Vector3.zero;//初期値のカメラの位置
+    [HideInInspector] public Quaternion initRotate { private set; get; } = Quaternion.identity;//初期値のカメラの回転
     [Header("移動量の制限値")]public Vector3 moveAmountLimit = Vector3.zero;//移動量制限値
 
     // Start is called before the first frame update

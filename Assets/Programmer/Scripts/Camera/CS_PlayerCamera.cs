@@ -11,11 +11,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerCamera : MonoBehaviour
+public class CS_PlayerCamera : MonoBehaviour
 {
     private PlayerData playerData;// プレイヤーのデータ
 
-    [HideInInspector] public RoomCamera roomCamera;//部屋のカメラ
+    [HideInInspector] public CS_RoomCamera roomCamera;//部屋のカメラ
 
     private GameObject roomCameraObject;//部屋のカメラ
 
@@ -68,7 +68,7 @@ public class PlayerCamera : MonoBehaviour
         roomCameraObject = currentRoom.transform.GetComponentInChildren<Camera>().gameObject;
         roomCameraObject.GetComponent<Camera>().enabled = true;
 
-        roomCamera = roomCameraObject.GetComponent<RoomCamera>();
+        roomCamera = roomCameraObject.GetComponent<CS_RoomCamera>();
     }
 
     // Update is called once per frame
@@ -285,7 +285,7 @@ public class PlayerCamera : MonoBehaviour
         Time.timeScale = 1.0f;
 
         // 動かした前のカメラを無効にして、元の位置に戻す
-        roomCamera = roomCameraObject.GetComponent<RoomCamera>();
+        roomCamera = roomCameraObject.GetComponent<CS_RoomCamera>();
         roomCameraObject.GetComponent<Camera>().enabled = false;
         roomCameraObject.transform.position = roomCamera.initPos;
         roomCameraObject.transform.rotation = roomCamera.initRotate;
@@ -293,7 +293,7 @@ public class PlayerCamera : MonoBehaviour
         // カメラを新しい部屋のカメラに切り替える
         currentRoom = playerData.currentRoomData.GetPlayerRoomData();
         roomCameraObject = currentRoom.transform.GetComponentInChildren<Camera>().gameObject;
-        roomCamera = roomCameraObject.GetComponent<RoomCamera>();
+        roomCamera = roomCameraObject.GetComponent<CS_RoomCamera>();
         roomCameraObject.GetComponent<Camera>().enabled = true;
        
         transitionCamera = TransitionCamera.None;   // カメラの遷移終了

@@ -10,9 +10,9 @@ using CriWare;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class PlayBGM : MonoBehaviour
+public class CS_PlayBGM : MonoBehaviour
 {
-    public BackGround_BGM_DataBase dataBase;//データベース
+    public SO_BackGround_BGM_DataBase dataBase;//データベース
     private BackGround_BGM_Data[] dataList;//データのリスト
 
     private CriAtomExPlayer playerInfo;//Player生成

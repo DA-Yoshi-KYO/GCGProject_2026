@@ -9,7 +9,7 @@ public class GimmickSelectUI : MonoBehaviour
     // ──────────────────────────────────────────
     //  Inspector 参照
     // ──────────────────────────────────────────
-    private PlayerAction playerAction;
+    private CS_PlayerAction playerAction;
     private PlayerData playerData;
 
     [Header("3枠スロット（固定）")]
@@ -67,7 +67,7 @@ public class GimmickSelectUI : MonoBehaviour
         if (playerAction == null || playerData == null)
         {
             GameObject player = GameObject.FindWithTag("Player");
-            playerAction = player.GetComponent<PlayerAction>();
+            playerAction = player.GetComponent<CS_PlayerAction>();
             playerData = player.GetComponent<PlayerData>();
         }
 

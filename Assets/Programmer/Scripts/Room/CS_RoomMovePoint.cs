@@ -381,7 +381,7 @@ public class CS_RoomMovePoint : MonoBehaviour
 
         SetupPlayerDataCurrentRoom(playerTransform);
 
-        PlayerCamera playerCamera = playerTransform.GetComponent<PlayerCamera>();
+        CS_PlayerCamera playerCamera = playerTransform.GetComponent<CS_PlayerCamera>();
 
         if (playerCamera == null)
         {
