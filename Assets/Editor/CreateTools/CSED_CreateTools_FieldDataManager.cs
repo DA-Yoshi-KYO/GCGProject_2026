@@ -54,14 +54,6 @@ public partial class CSED_CreateTools
             m_FieldDataReorderableList.index = m_SelectedFieldDataIndex;
         }
 
-        Debug.Log(
-            "[CreateTools] 中央エリアに変数を追加しました : Type = "
-            + GetFieldTypeDisplayName(f_fieldType)
-            + " / Name = "
-            + fieldName
-            + " / Layout = "
-            + fieldLayoutType);
-
         Repaint();
     }
 

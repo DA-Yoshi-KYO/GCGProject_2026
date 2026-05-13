@@ -86,5 +86,10 @@ public partial class CSED_CreateTools
     /// 左下Field詳細設定エリアのスクロール位置です。
     /// </summary>
     private Vector2 m_FieldInspectorScrollPosition;
+
+    /// <summary>
+    /// 右側プレビューエリアのスクロール位置です。
+    /// </summary>
+    private Vector2 m_PreviewScrollPosition;
 }
 #endif

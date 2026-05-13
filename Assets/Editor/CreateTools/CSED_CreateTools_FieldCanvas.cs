@@ -234,7 +234,7 @@ public partial class CSED_CreateTools
         GUI.Box(boxRect, GUIContent.none, EditorStyles.helpBox);
 
         float labelX = boxRect.x + 10.0f;
-        float valueX = boxRect.x + 80.0f;
+        float valueX = boxRect.x + 140.0f;
         float currentY = boxRect.y + 6.0f;
         float lineHeight = 18.0f;
 
@@ -256,7 +256,7 @@ public partial class CSED_CreateTools
             valueX,
             currentY,
             boxRect.width,
-            "Type",
+            "Variable Type",
             GetFieldTypeDisplayName(fieldData.FieldType));
 
         currentY += lineHeight;
@@ -266,7 +266,7 @@ public partial class CSED_CreateTools
             valueX,
             currentY,
             boxRect.width,
-            "Name",
+            "Variable Name",
             fieldData.FieldName);
 
         currentY += lineHeight;
@@ -302,13 +302,13 @@ public partial class CSED_CreateTools
         Rect labelRect = new Rect(
             f_labelX,
             f_y,
-            60.0f,
+            120.0f,
             lineHeight);
 
         Rect valueRect = new Rect(
             f_valueX,
             f_y,
-            Mathf.Max(0.0f, f_width - 100.0f),
+            Mathf.Max(0.0f, f_width - 160.0f),
             lineHeight);
 
         EditorGUI.LabelField(labelRect, f_label);

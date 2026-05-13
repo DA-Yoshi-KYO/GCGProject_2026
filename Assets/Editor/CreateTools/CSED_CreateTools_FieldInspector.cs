@@ -40,7 +40,7 @@ public partial class CSED_CreateTools
     /// <summary>
     /// Field詳細設定のラベル幅です。
     /// </summary>
-    private const float c_FieldInspectorLabelWidth = 78.0f;
+    private const float c_FieldInspectorLabelWidth = 110.0f;
 
     /// <summary>
     /// ラベルと入力欄の間の余白です。
@@ -48,14 +48,24 @@ public partial class CSED_CreateTools
     private const float c_FieldInspectorLabelToInputSpacing = 14.0f;
 
     /// <summary>
-    /// Field詳細設定の入力欄幅です。
+    /// Field詳細設定の入力欄最小幅です。
     /// </summary>
-    private const float c_FieldInspectorInputWidth = 120.0f;
+    private const float c_FieldInspectorMinInputWidth = 120.0f;
+
+    /// <summary>
+    /// Field詳細設定の右側余白です。
+    /// </summary>
+    private const float c_FieldInspectorRightPadding = 8.0f;
 
     /// <summary>
     /// Field詳細設定の1行高さです。
     /// </summary>
     private const float c_FieldInspectorLineHeight = 18.0f;
+
+    /// <summary>
+    /// Field詳細設定の現在のコンテンツ横幅です。
+    /// </summary>
+    private float m_FieldInspectorCurrentContentWidth;
 
     /// <summary>
     /// 左下エリアに選択中Fieldの詳細設定を描画します。
@@ -68,6 +78,8 @@ public partial class CSED_CreateTools
         DrawFieldInspectorPanel(panelRect);
 
         Rect contentRect = GetFieldInspectorContentRect(panelRect);
+
+        m_FieldInspectorCurrentContentWidth = contentRect.width;
 
         GUILayout.BeginArea(contentRect);
         {
@@ -89,6 +101,21 @@ public partial class CSED_CreateTools
             EditorGUILayout.EndScrollView();
         }
         GUILayout.EndArea();
+    }
+
+    /// <summary>
+    /// Field詳細設定の入力欄幅を取得します。
+    /// </summary>
+    /// <returns>入力欄幅</returns>
+    private float GetFieldInspectorInputWidth()
+    {
+        float inputWidth =
+            m_FieldInspectorCurrentContentWidth
+            - c_FieldInspectorLabelWidth
+            - c_FieldInspectorLabelToInputSpacing
+            - c_FieldInspectorRightPadding;
+
+        return Mathf.Max(c_FieldInspectorMinInputWidth, inputWidth);
     }
 
     /// <summary>
@@ -174,7 +201,7 @@ public partial class CSED_CreateTools
         CSE_CreateTools_FieldType beforeFieldType = f_fieldData.FieldType;
 
         f_fieldData.FieldType = DrawSmallFieldTypePopup(
-            "Type",
+            "Variable Type",
             f_fieldData.FieldType);
 
         if (beforeFieldType != f_fieldData.FieldType)
@@ -185,7 +212,7 @@ public partial class CSED_CreateTools
         GUILayout.Space(c_FieldInspectorSpacing);
 
         f_fieldData.FieldName = DrawSmallTextField(
-            "Name",
+            "Variable Name",
             f_fieldData.FieldName);
 
         GUILayout.Space(c_FieldInspectorSpacing);
@@ -241,7 +268,7 @@ public partial class CSED_CreateTools
         Rect inputRect = new Rect(
             baseRect.x + c_FieldInspectorLabelWidth + c_FieldInspectorLabelToInputSpacing,
             baseRect.y,
-            c_FieldInspectorInputWidth,
+            GetFieldInspectorInputWidth(),
             baseRect.height);
 
         EditorGUI.LabelField(labelRect, f_label);
@@ -270,7 +297,7 @@ public partial class CSED_CreateTools
         Rect inputRect = new Rect(
             baseRect.x + c_FieldInspectorLabelWidth + c_FieldInspectorLabelToInputSpacing,
             baseRect.y,
-            c_FieldInspectorInputWidth,
+            GetFieldInspectorInputWidth(),
             baseRect.height);
 
         EditorGUI.LabelField(labelRect, f_label);
@@ -299,7 +326,7 @@ public partial class CSED_CreateTools
         Rect inputRect = new Rect(
             baseRect.x + c_FieldInspectorLabelWidth + c_FieldInspectorLabelToInputSpacing,
             baseRect.y,
-            c_FieldInspectorInputWidth,
+            GetFieldInspectorInputWidth(),
             baseRect.height);
 
         EditorGUI.LabelField(labelRect, f_label);
