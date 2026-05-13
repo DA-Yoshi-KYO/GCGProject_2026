@@ -4,6 +4,7 @@
  *    元浪梨緒
  * ----------------------------------------------------------
  * 2026-05-07 | 初回作成
+ * 2026-05-13 | リファクタリング（元浪）
  */
 using UnityEngine;
 
@@ -18,11 +19,5 @@ public class RoomCamera : MonoBehaviour
     {
         initPos = transform.position;
         initRotate = transform.rotation;
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 }
