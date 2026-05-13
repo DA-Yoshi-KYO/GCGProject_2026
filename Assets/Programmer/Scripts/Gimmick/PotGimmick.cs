@@ -20,6 +20,11 @@ public class PotGimmick : GimmickBase
     [Tooltip("アクティブ状態の時間"), Min(0)]
     public float activeTime;
 
+    [Header("重力値")]
+    [Tooltip("主に落下時に使用"), Min(0)]
+    [SerializeField]
+    private float gravity;
+
     private bool isFall = false;  //落下中かどうか
     private float initPositionY;  //初期位置Y
     private bool isFirstUpdate = true;
@@ -77,7 +82,7 @@ public class PotGimmick : GimmickBase
         if (isFall)
         {
             //落下
-            transform.position -= new Vector3(0, 0.01f, 0);
+            transform.position -= new Vector3(0, gravity, 0);
 
             Ray ray = new Ray(transform.position, Vector3.down);
             if (Physics.Raycast(ray, out RaycastHit hit, 1f))
