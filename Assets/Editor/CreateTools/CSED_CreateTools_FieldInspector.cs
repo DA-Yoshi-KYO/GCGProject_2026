@@ -5,6 +5,7 @@
  作者     : ヨシモト リョウ
  履歴     : 2026/05/08 新規作成
             2026/05/11 InputField用設定の表示間隔と入力欄幅を調整
+            2026/05/13 選択中Field設定の行間ルールを統一
 =====================================+
 */
 
@@ -28,19 +29,24 @@ public partial class CSED_CreateTools
     private const float c_FieldInspectorContentPadding = 12.0f;
 
     /// <summary>
-    /// Field詳細設定項目同士の余白です。
+    /// 通常項目同士の縦余白です。
     /// </summary>
-    private const float c_FieldInspectorSpacing = 10.0f;
+    private const float c_FieldInspectorRowSpacing = 5.0f;
 
     /// <summary>
-    /// Layout項目とLayout専用設定の間の余白です。
+    /// セクション前の大きい縦余白です。
     /// </summary>
-    private const float c_FieldInspectorLayoutBottomSpacing = 24.0f;
+    private const float c_FieldInspectorSectionTopSpacing = 32.0f;
+
+    /// <summary>
+    /// セクション見出しと最初の項目の縦余白です。
+    /// </summary>
+    private const float c_FieldInspectorSectionTitleBottomSpacing = 12.0f;
 
     /// <summary>
     /// Field詳細設定のラベル幅です。
     /// </summary>
-    private const float c_FieldInspectorLabelWidth = 110.0f;
+    private const float c_FieldInspectorLabelWidth = 105.0f;
 
     /// <summary>
     /// ラベルと入力欄の間の余白です。
@@ -61,6 +67,11 @@ public partial class CSED_CreateTools
     /// Field詳細設定の1行高さです。
     /// </summary>
     private const float c_FieldInspectorLineHeight = 18.0f;
+
+    /// <summary>
+    /// Toggleの横幅です。
+    /// </summary>
+    private const float c_FieldInspectorToggleWidth = 18.0f;
 
     /// <summary>
     /// Field詳細設定の現在のコンテンツ横幅です。
@@ -87,7 +98,7 @@ public partial class CSED_CreateTools
             {
                 DrawFieldInspectorTitle();
 
-                GUILayout.Space(c_FieldInspectorSpacing);
+                GUILayout.Space(c_FieldInspectorRowSpacing);
 
                 if (TryGetSelectedFieldData(out CSED_CreateTools_FieldData fieldData) == false)
                 {
@@ -191,17 +202,17 @@ public partial class CSED_CreateTools
     private void DrawSelectedFieldInspector(CSED_CreateTools_FieldData f_fieldData)
     {
         EditorGUILayout.LabelField(
-            "Field " + (m_SelectedFieldDataIndex + 1).ToString(),
+            "Field" + (m_SelectedFieldDataIndex + 1).ToString(),
             EditorStyles.boldLabel);
 
-        GUILayout.Space(c_FieldInspectorSpacing + 4.0f);
+        GUILayout.Space(c_FieldInspectorRowSpacing);
 
         EditorGUI.BeginChangeCheck();
 
         CSE_CreateTools_FieldType beforeFieldType = f_fieldData.FieldType;
 
         f_fieldData.FieldType = DrawSmallFieldTypePopup(
-            "Variable Type",
+            "  Variable Type",
             f_fieldData.FieldType);
 
         if (beforeFieldType != f_fieldData.FieldType)
@@ -209,26 +220,26 @@ public partial class CSED_CreateTools
             f_fieldData.FieldLayoutType = CreateDefaultFieldLayoutType(f_fieldData.FieldType);
         }
 
-        GUILayout.Space(c_FieldInspectorSpacing);
+        GUILayout.Space(c_FieldInspectorRowSpacing);
 
         f_fieldData.FieldName = DrawSmallTextField(
-            "Variable Name",
+            "  Variable Name",
             f_fieldData.FieldName);
 
-        GUILayout.Space(c_FieldInspectorSpacing);
+        GUILayout.Space(c_FieldInspectorRowSpacing);
 
         f_fieldData.FieldLayoutType = DrawSmallFieldLayoutTypePopup(
-            "Layout",
+            "  Layout",
             f_fieldData.FieldLayoutType);
-
-        GUILayout.Space(c_FieldInspectorLayoutBottomSpacing);
 
         if (f_fieldData.FieldLayoutType == CSE_CreateTools_FieldLayoutType.InputField)
         {
+            GUILayout.Space(c_FieldInspectorSectionTopSpacing);
             DrawInputFieldLayoutSettings(f_fieldData);
         }
         else if (f_fieldData.FieldLayoutType == CSE_CreateTools_FieldLayoutType.MinMaxField)
         {
+            GUILayout.Space(c_FieldInspectorSectionTopSpacing);
             DrawMinMaxFieldLayoutSettings(f_fieldData);
         }
 
@@ -239,51 +250,6 @@ public partial class CSED_CreateTools
     }
 
     /// <summary>
-    /// Min Max Field用の詳細設定を描画します。
-    /// </summary>
-    /// <param name="f_fieldData">選択中Fieldデータ</param>
-    private void DrawMinMaxFieldLayoutSettings(CSED_CreateTools_FieldData f_fieldData)
-    {
-        EditorGUILayout.LabelField("Min Max Field設定", EditorStyles.boldLabel);
-
-        GUILayout.Space(c_FieldInspectorSpacing);
-
-        EditorGUILayout.LabelField("Default Min", EditorStyles.boldLabel);
-
-        GUILayout.Space(c_FieldInspectorSpacing);
-
-        f_fieldData.IsDefaultMinValueNull = DrawSmallToggle(
-            "Min Is Null",
-            f_fieldData.IsDefaultMinValueNull);
-
-        EditorGUI.BeginDisabledGroup(f_fieldData.IsDefaultMinValueNull);
-        {
-            f_fieldData.DefaultMinValueText = DrawSmallTextField(
-                "Min Value",
-                f_fieldData.DefaultMinValueText);
-        }
-        EditorGUI.EndDisabledGroup();
-
-        GUILayout.Space(c_FieldInspectorLayoutBottomSpacing);
-
-        EditorGUILayout.LabelField("Default Max", EditorStyles.boldLabel);
-
-        GUILayout.Space(c_FieldInspectorSpacing);
-
-        f_fieldData.IsDefaultMaxValueNull = DrawSmallToggle(
-            "Max Is Null",
-            f_fieldData.IsDefaultMaxValueNull);
-
-        EditorGUI.BeginDisabledGroup(f_fieldData.IsDefaultMaxValueNull);
-        {
-            f_fieldData.DefaultMaxValueText = DrawSmallTextField(
-                "Max Value",
-                f_fieldData.DefaultMaxValueText);
-        }
-        EditorGUI.EndDisabledGroup();
-    }
-
-    /// <summary>
     /// Input Field用の詳細設定を描画します。
     /// </summary>
     /// <param name="f_fieldData">選択中Fieldデータ</param>
@@ -291,13 +257,13 @@ public partial class CSED_CreateTools
     {
         EditorGUILayout.LabelField("Input Field設定", EditorStyles.boldLabel);
 
-        GUILayout.Space(c_FieldInspectorSpacing);
+        GUILayout.Space(c_FieldInspectorSectionTitleBottomSpacing);
 
         f_fieldData.TagName = DrawSmallTextField(
-            "Tag Name",
+            "  Tag Name",
             f_fieldData.TagName);
 
-        GUILayout.Space(c_FieldInspectorSpacing);
+        GUILayout.Space(c_FieldInspectorSectionTopSpacing);
 
         DrawDefaultValueSettings(f_fieldData);
     }
@@ -310,19 +276,109 @@ public partial class CSED_CreateTools
     {
         EditorGUILayout.LabelField("Default設定", EditorStyles.boldLabel);
 
-        GUILayout.Space(c_FieldInspectorSpacing);
+        GUILayout.Space(c_FieldInspectorSectionTitleBottomSpacing);
 
         f_fieldData.IsDefaultValueNull = DrawSmallToggle(
-            "Default Is Null",
+            "  Default Is Null",
             f_fieldData.IsDefaultValueNull);
+
+        GUILayout.Space(c_FieldInspectorRowSpacing);
 
         EditorGUI.BeginDisabledGroup(f_fieldData.IsDefaultValueNull);
         {
             f_fieldData.DefaultValueText = DrawSmallTextField(
-                "Default Value",
+                "  Default Value",
                 f_fieldData.DefaultValueText);
         }
         EditorGUI.EndDisabledGroup();
+    }
+
+    /// <summary>
+    /// Min Max Field用の詳細設定を描画します。
+    /// </summary>
+    /// <param name="f_fieldData">選択中Fieldデータ</param>
+    private void DrawMinMaxFieldLayoutSettings(CSED_CreateTools_FieldData f_fieldData)
+    {
+        EditorGUILayout.LabelField("Min Max Field設定", EditorStyles.boldLabel);
+
+        GUILayout.Space(c_FieldInspectorSectionTitleBottomSpacing);
+
+        EditorGUILayout.LabelField("Default Min", EditorStyles.boldLabel);
+
+        GUILayout.Space(c_FieldInspectorSectionTitleBottomSpacing);
+
+        f_fieldData.IsDefaultMinValueNull = DrawSmallToggle(
+            "Min Is Null",
+            f_fieldData.IsDefaultMinValueNull);
+
+        GUILayout.Space(c_FieldInspectorRowSpacing);
+
+        EditorGUI.BeginDisabledGroup(f_fieldData.IsDefaultMinValueNull);
+        {
+            f_fieldData.DefaultMinValueText = DrawSmallTextField(
+                "Min Value",
+                f_fieldData.DefaultMinValueText);
+        }
+        EditorGUI.EndDisabledGroup();
+
+        GUILayout.Space(c_FieldInspectorSectionTopSpacing);
+
+        EditorGUILayout.LabelField("Default Max", EditorStyles.boldLabel);
+
+        GUILayout.Space(c_FieldInspectorSectionTitleBottomSpacing);
+
+        f_fieldData.IsDefaultMaxValueNull = DrawSmallToggle(
+            "Max Is Null",
+            f_fieldData.IsDefaultMaxValueNull);
+
+        GUILayout.Space(c_FieldInspectorRowSpacing);
+
+        EditorGUI.BeginDisabledGroup(f_fieldData.IsDefaultMaxValueNull);
+        {
+            f_fieldData.DefaultMaxValueText = DrawSmallTextField(
+                "Max Value",
+                f_fieldData.DefaultMaxValueText);
+        }
+        EditorGUI.EndDisabledGroup();
+    }
+
+    /// <summary>
+    /// Field詳細設定の1行分のRectを取得します。
+    /// </summary>
+    /// <returns>1行分のRect</returns>
+    private Rect GetFieldInspectorRowRect()
+    {
+        return EditorGUILayout.GetControlRect(
+            false,
+            c_FieldInspectorLineHeight);
+    }
+
+    /// <summary>
+    /// Field詳細設定のラベルRectを取得します。
+    /// </summary>
+    /// <param name="f_rowRect">1行分のRect</param>
+    /// <returns>ラベルRect</returns>
+    private Rect GetFieldInspectorLabelRect(Rect f_rowRect)
+    {
+        return new Rect(
+            f_rowRect.x,
+            f_rowRect.y,
+            c_FieldInspectorLabelWidth,
+            f_rowRect.height);
+    }
+
+    /// <summary>
+    /// Field詳細設定の入力項目Rectを取得します。
+    /// </summary>
+    /// <param name="f_rowRect">1行分のRect</param>
+    /// <returns>入力項目Rect</returns>
+    private Rect GetFieldInspectorInputRect(Rect f_rowRect)
+    {
+        return new Rect(
+            f_rowRect.x + c_FieldInspectorLabelWidth + c_FieldInspectorLabelToInputSpacing,
+            f_rowRect.y,
+            GetFieldInspectorInputWidth(),
+            f_rowRect.height);
     }
 
     /// <summary>
@@ -333,19 +389,9 @@ public partial class CSED_CreateTools
     /// <returns>入力後の文字列</returns>
     private string DrawSmallTextField(string f_label, string f_value)
     {
-        Rect baseRect = EditorGUILayout.GetControlRect(false, c_FieldInspectorLineHeight);
-
-        Rect labelRect = new Rect(
-            baseRect.x,
-            baseRect.y,
-            c_FieldInspectorLabelWidth,
-            baseRect.height);
-
-        Rect inputRect = new Rect(
-            baseRect.x + c_FieldInspectorLabelWidth + c_FieldInspectorLabelToInputSpacing,
-            baseRect.y,
-            GetFieldInspectorInputWidth(),
-            baseRect.height);
+        Rect rowRect = GetFieldInspectorRowRect();
+        Rect labelRect = GetFieldInspectorLabelRect(rowRect);
+        Rect inputRect = GetFieldInspectorInputRect(rowRect);
 
         EditorGUI.LabelField(labelRect, f_label);
 
@@ -362,19 +408,9 @@ public partial class CSED_CreateTools
         string f_label,
         CSE_CreateTools_FieldType f_value)
     {
-        Rect baseRect = EditorGUILayout.GetControlRect(false, c_FieldInspectorLineHeight);
-
-        Rect labelRect = new Rect(
-            baseRect.x,
-            baseRect.y,
-            c_FieldInspectorLabelWidth,
-            baseRect.height);
-
-        Rect inputRect = new Rect(
-            baseRect.x + c_FieldInspectorLabelWidth + c_FieldInspectorLabelToInputSpacing,
-            baseRect.y,
-            GetFieldInspectorInputWidth(),
-            baseRect.height);
+        Rect rowRect = GetFieldInspectorRowRect();
+        Rect labelRect = GetFieldInspectorLabelRect(rowRect);
+        Rect inputRect = GetFieldInspectorInputRect(rowRect);
 
         EditorGUI.LabelField(labelRect, f_label);
 
@@ -391,19 +427,9 @@ public partial class CSED_CreateTools
         string f_label,
         CSE_CreateTools_FieldLayoutType f_value)
     {
-        Rect baseRect = EditorGUILayout.GetControlRect(false, c_FieldInspectorLineHeight);
-
-        Rect labelRect = new Rect(
-            baseRect.x,
-            baseRect.y,
-            c_FieldInspectorLabelWidth,
-            baseRect.height);
-
-        Rect inputRect = new Rect(
-            baseRect.x + c_FieldInspectorLabelWidth + c_FieldInspectorLabelToInputSpacing,
-            baseRect.y,
-            GetFieldInspectorInputWidth(),
-            baseRect.height);
+        Rect rowRect = GetFieldInspectorRowRect();
+        Rect labelRect = GetFieldInspectorLabelRect(rowRect);
+        Rect inputRect = GetFieldInspectorInputRect(rowRect);
 
         EditorGUI.LabelField(labelRect, f_label);
 
@@ -418,21 +444,15 @@ public partial class CSED_CreateTools
     /// <returns>変更後の値</returns>
     private bool DrawSmallToggle(string f_label, bool f_value)
     {
-        Rect controlRect = EditorGUILayout.GetControlRect(
-            false,
-            EditorGUIUtility.singleLineHeight);
-
-        Rect labelRect = new Rect(
-            controlRect.x,
-            controlRect.y,
-            c_FieldInspectorLabelWidth,
-            controlRect.height);
+        Rect rowRect = GetFieldInspectorRowRect();
+        Rect labelRect = GetFieldInspectorLabelRect(rowRect);
+        Rect inputRect = GetFieldInspectorInputRect(rowRect);
 
         Rect toggleRect = new Rect(
-            controlRect.x + c_FieldInspectorLabelWidth + c_FieldInspectorLabelToInputSpacing,
-            controlRect.y,
-            18.0f,
-            controlRect.height);
+            inputRect.x,
+            inputRect.y,
+            c_FieldInspectorToggleWidth,
+            inputRect.height);
 
         EditorGUI.LabelField(labelRect, f_label);
 
