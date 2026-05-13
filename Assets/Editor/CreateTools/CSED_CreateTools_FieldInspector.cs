@@ -100,7 +100,7 @@ public partial class CSED_CreateTools
             {
                 DrawFieldInspectorTitle();
 
-                GUILayout.Space(c_FieldInspectorRowSpacing);
+                GUILayout.Space(c_FieldInspectorSectionTitleBottomSpacing);
 
                 if (TryGetSelectedFieldData(out CSED_CreateTools_FieldData fieldData) == false)
                 {
@@ -234,6 +234,8 @@ public partial class CSED_CreateTools
             GUILayout.Space(c_FieldInspectorSectionTopSpacing);
             DrawMinMaxFieldLayoutSettings(f_fieldData);
         }
+
+        GUILayout.Space(c_FieldInspectorSectionTopSpacing);
 
         if (EditorGUI.EndChangeCheck())
         {
