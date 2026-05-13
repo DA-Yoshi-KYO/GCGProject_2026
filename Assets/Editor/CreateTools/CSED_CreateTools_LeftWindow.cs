@@ -29,7 +29,7 @@ public partial class CSED_CreateTools
         DrawBlackFrame(topRect.x, topRect.y, topRect.width, topRect.height);
         DrawBlackFrame(bottomRect.x, bottomRect.y, bottomRect.width, bottomRect.height);
 
-        DrawVariablePalette(topRect);
+        DrawEditorPalette(topRect);
         DrawFieldInspector(bottomRect);
     }
 }

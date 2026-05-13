@@ -164,7 +164,7 @@ public partial class CSED_CreateTools
     private void DrawFieldCanvasEmptyMessage()
     {
         EditorGUILayout.HelpBox(
-            "左上の変数パレットから型を選ぶと、ここにFieldが追加されます。",
+           "左上のエディターパレットから要素を選ぶと、ここに追加されます。",
             MessageType.Info);
     }
 
