@@ -80,6 +80,12 @@ public partial class CSED_CreateTools
             case CSE_CreateTools_FieldType.Bool:
                 return "newBoolField" + number.ToString("00");
 
+            case CSE_CreateTools_FieldType.ScriptableObject:
+                return "newScriptableObjectField" + number.ToString("00");
+
+            case CSE_CreateTools_FieldType.Script:
+                return "newScriptField" + number.ToString("00");
+
             case CSE_CreateTools_FieldType.List:
                 return "newListField" + number.ToString("00");
 

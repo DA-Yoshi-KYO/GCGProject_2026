@@ -35,6 +35,12 @@ public partial class CSED_CreateTools
             case CSE_CreateTools_FieldType.Bool:
                 return "bool";
 
+            case CSE_CreateTools_FieldType.ScriptableObject:
+                return "ScriptableObject";
+
+            case CSE_CreateTools_FieldType.Script:
+                return "Script";
+
             case CSE_CreateTools_FieldType.List:
                 return "List<T>";
 

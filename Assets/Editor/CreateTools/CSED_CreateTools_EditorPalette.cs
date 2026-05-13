@@ -98,6 +98,8 @@ public partial class CSED_CreateTools
                 DrawVariablePaletteButton(CSE_CreateTools_FieldType.Float, "float");
                 DrawVariablePaletteButton(CSE_CreateTools_FieldType.String, "string");
                 DrawVariablePaletteButton(CSE_CreateTools_FieldType.Bool, "bool");
+                DrawVariablePaletteButton(CSE_CreateTools_FieldType.ScriptableObject, "ScriptableObject");
+                DrawVariablePaletteButton(CSE_CreateTools_FieldType.Script, "Script");
                 DrawVariablePaletteButton(CSE_CreateTools_FieldType.List, "List<T>");
 
                 GUILayout.Space(c_EditorPaletteCategorySpacing);

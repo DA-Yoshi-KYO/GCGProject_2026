@@ -446,19 +446,27 @@ public partial class CSED_CreateTools
         switch (f_fieldData.FieldType)
         {
             case CSE_CreateTools_FieldType.Int:
-                EditorGUILayout.IntField(label, 0);
+                EditorGUILayout.IntField(
+                    label,
+                    GetPreviewIntDefaultValue(f_fieldData));
                 break;
 
             case CSE_CreateTools_FieldType.Float:
-                EditorGUILayout.FloatField(label, 0.0f);
+                EditorGUILayout.FloatField(
+                    label,
+                    GetPreviewFloatDefaultValue(f_fieldData));
                 break;
 
             case CSE_CreateTools_FieldType.Bool:
-                EditorGUILayout.Toggle(label, false);
+                EditorGUILayout.Toggle(
+                    label,
+                    GetPreviewBoolDefaultValue(f_fieldData));
                 break;
 
             case CSE_CreateTools_FieldType.String:
-                EditorGUILayout.TextField(label, string.Empty);
+                EditorGUILayout.TextField(
+                    label,
+                    GetPreviewStringDefaultValue(f_fieldData));
                 break;
 
             case CSE_CreateTools_FieldType.List:
@@ -466,9 +474,80 @@ public partial class CSED_CreateTools
                 break;
 
             default:
-                EditorGUILayout.TextField(label, string.Empty);
+                EditorGUILayout.TextField(
+                    label,
+                    GetPreviewStringDefaultValue(f_fieldData));
                 break;
         }
+    }
+
+    /// <summary>
+    /// プレビュー用のint初期値を取得します。
+    /// </summary>
+    /// <param name="f_fieldData">対象FieldData</param>
+    /// <returns>int初期値</returns>
+    private int GetPreviewIntDefaultValue(CSED_CreateTools_FieldData f_fieldData)
+    {
+        if (f_fieldData.IsDefaultValueNull)
+        {
+            return 0;
+        }
+
+        int result = 0;
+        int.TryParse(f_fieldData.DefaultValueText, out result);
+
+        return result;
+    }
+
+    /// <summary>
+    /// プレビュー用のfloat初期値を取得します。
+    /// </summary>
+    /// <param name="f_fieldData">対象FieldData</param>
+    /// <returns>float初期値</returns>
+    private float GetPreviewFloatDefaultValue(CSED_CreateTools_FieldData f_fieldData)
+    {
+        if (f_fieldData.IsDefaultValueNull)
+        {
+            return 0.0f;
+        }
+
+        float result = 0.0f;
+        float.TryParse(f_fieldData.DefaultValueText, out result);
+
+        return result;
+    }
+
+    /// <summary>
+    /// プレビュー用のbool初期値を取得します。
+    /// </summary>
+    /// <param name="f_fieldData">対象FieldData</param>
+    /// <returns>bool初期値</returns>
+    private bool GetPreviewBoolDefaultValue(CSED_CreateTools_FieldData f_fieldData)
+    {
+        if (f_fieldData.IsDefaultValueNull)
+        {
+            return false;
+        }
+
+        bool result = false;
+        bool.TryParse(f_fieldData.DefaultValueText, out result);
+
+        return result;
+    }
+
+    /// <summary>
+    /// プレビュー用のstring初期値を取得します。
+    /// </summary>
+    /// <param name="f_fieldData">対象FieldData</param>
+    /// <returns>string初期値</returns>
+    private string GetPreviewStringDefaultValue(CSED_CreateTools_FieldData f_fieldData)
+    {
+        if (f_fieldData.IsDefaultValueNull)
+        {
+            return string.Empty;
+        }
+
+        return f_fieldData.DefaultValueText;
     }
 
     /// <summary>

@@ -36,6 +36,36 @@ public class CSED_CreateTools_FieldData
     public string TagName { get; set; }
 
     /// <summary>
+    /// 通常初期値をnull扱いにするかどうかです。
+    /// </summary>
+    public bool IsDefaultValueNull { get; set; } = true;
+
+    /// <summary>
+    /// 通常初期値です。
+    /// </summary>
+    public string DefaultValueText { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 最小初期値をnull扱いにするかどうかです。
+    /// </summary>
+    public bool IsDefaultMinValueNull { get; set; } = true;
+
+    /// <summary>
+    /// 最小初期値です。
+    /// </summary>
+    public string DefaultMinValueText { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 最大初期値をnull扱いにするかどうかです。
+    /// </summary>
+    public bool IsDefaultMaxValueNull { get; set; } = true;
+
+    /// <summary>
+    /// 最大初期値です。
+    /// </summary>
+    public string DefaultMaxValueText { get; set; } = string.Empty;
+
+    /// <summary>
     /// 変数データを作成します。
     /// </summary>
     /// <param name="f_fieldType">変数の型</param>

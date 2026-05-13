@@ -227,11 +227,60 @@ public partial class CSED_CreateTools
         {
             DrawInputFieldLayoutSettings(f_fieldData);
         }
+        else if (f_fieldData.FieldLayoutType == CSE_CreateTools_FieldLayoutType.MinMaxField)
+        {
+            DrawMinMaxFieldLayoutSettings(f_fieldData);
+        }
 
         if (EditorGUI.EndChangeCheck())
         {
             Repaint();
         }
+    }
+
+    /// <summary>
+    /// Min Max Field用の詳細設定を描画します。
+    /// </summary>
+    /// <param name="f_fieldData">選択中Fieldデータ</param>
+    private void DrawMinMaxFieldLayoutSettings(CSED_CreateTools_FieldData f_fieldData)
+    {
+        EditorGUILayout.LabelField("Min Max Field設定", EditorStyles.boldLabel);
+
+        GUILayout.Space(c_FieldInspectorSpacing);
+
+        EditorGUILayout.LabelField("Default Min", EditorStyles.boldLabel);
+
+        GUILayout.Space(c_FieldInspectorSpacing);
+
+        f_fieldData.IsDefaultMinValueNull = DrawSmallToggle(
+            "Min Is Null",
+            f_fieldData.IsDefaultMinValueNull);
+
+        EditorGUI.BeginDisabledGroup(f_fieldData.IsDefaultMinValueNull);
+        {
+            f_fieldData.DefaultMinValueText = DrawSmallTextField(
+                "Min Value",
+                f_fieldData.DefaultMinValueText);
+        }
+        EditorGUI.EndDisabledGroup();
+
+        GUILayout.Space(c_FieldInspectorLayoutBottomSpacing);
+
+        EditorGUILayout.LabelField("Default Max", EditorStyles.boldLabel);
+
+        GUILayout.Space(c_FieldInspectorSpacing);
+
+        f_fieldData.IsDefaultMaxValueNull = DrawSmallToggle(
+            "Max Is Null",
+            f_fieldData.IsDefaultMaxValueNull);
+
+        EditorGUI.BeginDisabledGroup(f_fieldData.IsDefaultMaxValueNull);
+        {
+            f_fieldData.DefaultMaxValueText = DrawSmallTextField(
+                "Max Value",
+                f_fieldData.DefaultMaxValueText);
+        }
+        EditorGUI.EndDisabledGroup();
     }
 
     /// <summary>
@@ -247,6 +296,33 @@ public partial class CSED_CreateTools
         f_fieldData.TagName = DrawSmallTextField(
             "Tag Name",
             f_fieldData.TagName);
+
+        GUILayout.Space(c_FieldInspectorSpacing);
+
+        DrawDefaultValueSettings(f_fieldData);
+    }
+
+    /// <summary>
+    /// 通常初期値設定を描画します。
+    /// </summary>
+    /// <param name="f_fieldData">選択中Fieldデータ</param>
+    private void DrawDefaultValueSettings(CSED_CreateTools_FieldData f_fieldData)
+    {
+        EditorGUILayout.LabelField("Default設定", EditorStyles.boldLabel);
+
+        GUILayout.Space(c_FieldInspectorSpacing);
+
+        f_fieldData.IsDefaultValueNull = DrawSmallToggle(
+            "Default Is Null",
+            f_fieldData.IsDefaultValueNull);
+
+        EditorGUI.BeginDisabledGroup(f_fieldData.IsDefaultValueNull);
+        {
+            f_fieldData.DefaultValueText = DrawSmallTextField(
+                "Default Value",
+                f_fieldData.DefaultValueText);
+        }
+        EditorGUI.EndDisabledGroup();
     }
 
     /// <summary>
@@ -332,6 +408,35 @@ public partial class CSED_CreateTools
         EditorGUI.LabelField(labelRect, f_label);
 
         return (CSE_CreateTools_FieldLayoutType)EditorGUI.EnumPopup(inputRect, f_value);
+    }
+
+    /// <summary>
+    /// 小さいToggle入力欄を描画します。
+    /// </summary>
+    /// <param name="f_label">表示ラベル</param>
+    /// <param name="f_value">現在の値</param>
+    /// <returns>変更後の値</returns>
+    private bool DrawSmallToggle(string f_label, bool f_value)
+    {
+        Rect controlRect = EditorGUILayout.GetControlRect(
+            false,
+            EditorGUIUtility.singleLineHeight);
+
+        Rect labelRect = new Rect(
+            controlRect.x,
+            controlRect.y,
+            c_FieldInspectorLabelWidth,
+            controlRect.height);
+
+        Rect toggleRect = new Rect(
+            controlRect.x + c_FieldInspectorLabelWidth + c_FieldInspectorLabelToInputSpacing,
+            controlRect.y,
+            18.0f,
+            controlRect.height);
+
+        EditorGUI.LabelField(labelRect, f_label);
+
+        return EditorGUI.Toggle(toggleRect, f_value);
     }
 }
 #endif
