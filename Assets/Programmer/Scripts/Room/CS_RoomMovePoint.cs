@@ -445,7 +445,8 @@ public class CS_RoomMovePoint : MonoBehaviour
 
         if (thiefAI != null)
         {
-            thiefAI.WarpAction(targetTransform.position);
+            // TODO: 移動先の入口方向を第二引数に入れる
+            thiefAI.WarpAction(targetTransform.position, /*変更対象*/e_MoveDirection);
         }
     }
 
