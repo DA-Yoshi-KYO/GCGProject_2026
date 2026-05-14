@@ -100,7 +100,7 @@ public class ThiefManager : MonoBehaviour
             GameObject thief = GameObject.Instantiate(thiefPrefab);
 
             // 基準となるプレイヤーの速度を取得
-            float playerSpeed = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerMove>().GetBasePlayerSpeed();
+            float playerSpeed = GameObject.FindGameObjectWithTag("Player").GetComponent<CS_PlayerMove>().GetBasePlayerSpeed();
 
             // 泥棒のタイプに応じたデータを取得
             CSS_ThiefStatusData typeData = entry.RoomEnemyEntryData.GetThiefStatusDataList()[spawnCount[entry]];

@@ -671,7 +671,7 @@ public class ThiefAI : MonoBehaviour
             ChangeFace(ReactionSpriteType.Stun);
 
             // プレイヤーにソウルを入手させる
-            PlayerAction playerAction = GameObject.FindObjectOfType<PlayerAction>();
+            CS_PlayerAction playerAction = GameObject.FindObjectOfType<CS_PlayerAction>();
 
             // playerActionが見つかった場合は、ソウルを加算する処理を実行する。見つからない場合は、エラーログを出力する。
             if (playerAction != null)playerAction.AddSoul(soulDropCount);

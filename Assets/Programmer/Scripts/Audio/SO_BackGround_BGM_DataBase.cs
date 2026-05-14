@@ -4,7 +4,6 @@
  *    元浪梨緒
  * ----------------------------------------------------------
  * 2026-04-22 | 初回作成
- * 
  */
 
 using System;
@@ -35,7 +34,7 @@ public class BackGround_BGM_Data
 }
 
 [CreateAssetMenu(fileName = "BackGround_BGM_DataSO", menuName = "ScriptableObjects/BackGround_BGM_DataSO")]
-public class BackGround_BGM_DataBase : ScriptableObject
+public class SO_BackGround_BGM_DataBase : ScriptableObject
 {
     public BackGround_BGM_Data[] bgmDatas;
 }
