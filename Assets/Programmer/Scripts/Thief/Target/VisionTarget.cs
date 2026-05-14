@@ -31,4 +31,18 @@ public class VisionTarget : ThiefTarget
     [Header("探索済みとする距離")]
     [Tooltip("探索済みとする距離")]
     public float exploredDistanceThreshold;
+
+    [SerializeField, Header("ギズモを表示")]
+    private bool showGizmos = false;
+    [SerializeField, Header("ギズモの色")]
+    private Color gizmoColor = Color.yellow;
+
+    private void OnDrawGizmos()
+    {
+        if (!showGizmos) return;
+
+        // 探索済みとする距離をギズモで表示
+        Gizmos.color = gizmoColor;
+        Gizmos.DrawWireSphere(transform.position, exploredDistanceThreshold);
+    }
 }

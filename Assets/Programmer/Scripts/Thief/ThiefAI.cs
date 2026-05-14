@@ -63,10 +63,12 @@ public class ThiefAI : MonoBehaviour
     [Tooltip("部屋に関する記憶")]
     private Dictionary<RoomNode, RoomMemory> roomMemories;
 
+    [SerializeField, Header("現在の部屋の記憶")]// ########## デバッグ ##############
+    private RoomMemory currentRoomMemory;
+
     [Tooltip("視認オブジェクトの記憶")]
     private Dictionary<VisionTarget, VisionTargetMemory> visionTargetMemories;
 
-    [SerializeField]//("※※※※※デバック表示※※※※※")
     [Tooltip("探索対象")]
     private ThiefTarget currentTarget;
     public ThiefTarget CurrentTarget => currentTarget;
@@ -297,6 +299,10 @@ public class ThiefAI : MonoBehaviour
         heldTreasure = currentTarget.gameObject;
         currentTarget.gameObject.transform.parent = this.transform; // 泥棒の子オブジェクトにする
         currentTarget.GetComponent<Collider>().enabled = false; // 宝物のコライダーを無効にする
+        currentTarget.GetComponent<Rigidbody>().isKinematic = true; // 宝物のリジットボディをキネマティックにする
+        currentTarget.GetComponent<Rigidbody>().useGravity = false; // 宝物のリジットボディの重力を無効にする
+        currentTarget.GetComponent<Rigidbody>().velocity = Vector3.zero; // 宝物のリジットボディの速度をリセットする
+        currentTarget.gameObject.transform.localPosition = new Vector3(0.0f, this.transform.position.y, 0.0f); // 宝物の位置を泥棒の位置に合わせる
 
         // 状態を逃走に変更
         currentState = ThiefState.Escape;
@@ -305,23 +311,6 @@ public class ThiefAI : MonoBehaviour
         GameObject.FindObjectOfType<ThiefManager>().EraseTheMemoryToAllThief(currentTarget);
         // 探索対象をリセット
         currentTarget = null;
-
-        float distanceToTarget = Mathf.Infinity;
-        // 視認オブジェクトから移動ポイントにする場合は一番近いものを探索対象に設定
-        foreach (ThiefTarget target in currentRoom.movePoints)
-        {
-            if (target == null) continue;
-
-            // オブジェクトとの距離を計算
-            float distance = Vector3.Distance(transform.position, target.transform.position);
-            // より近いオブジェクトを探索対象に設定
-            if (distance < distanceToTarget)
-            {
-                distanceToTarget = distance;
-                currentTarget = target;
-            }
-            else continue;
-        }
     }
 
     // 逃走状態の行動
@@ -628,10 +617,17 @@ public class ThiefAI : MonoBehaviour
             }
         }
 
-        // 探索対象が走り状態になる標的オブジェクトのタイプリストに含まれている場合は、走り状態に切り替える
-        if (runTargetTypes.Contains(((VisionTarget)currentTarget).targetType))
+        if (currentTarget is VisionTarget)
         {
-            navMeshAgent.speed = runSpeed;
+            // 探索対象が走り状態になる標的オブジェクトのタイプリストに含まれている場合は、走り状態に切り替える
+            if (runTargetTypes.Contains(((VisionTarget)currentTarget).targetType))
+            {
+                navMeshAgent.speed = runSpeed;
+            }
+            else
+            {
+                navMeshAgent.speed = walkSpeed;
+            }
         }
         else
         {
@@ -705,6 +701,8 @@ public class ThiefAI : MonoBehaviour
             roomMemories[currentRoom].FirstSetting();
             roomMemories[currentRoom].explorationLevel = currentRoom.initialExplorationLevel;
         }
+
+        currentRoomMemory = roomMemories[currentRoom];
     }
 
     /// <summary>

@@ -10,6 +10,7 @@
 using System;
 using UnityEngine;
 
+[Serializable]
 public class VisionTargetMemory
 {
     [Header("探索進行度"), Tooltip("このターゲットの探索進行度")]
