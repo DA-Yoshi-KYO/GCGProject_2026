@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
@@ -5,8 +6,15 @@ using static FullScreenPassRendererFeature;
 
 public class CustomRenderPassFeature : ScriptableRendererFeature
 {
-    [SerializeField][Header("レンダーパスのイベント")] public RenderPassEvent renderPassEvent = RenderPassEvent.AfterRenderingPostProcessing;   // レンダーパスのイベント
-    [SerializeField][Header("使用するポストプロセスマテリアル")] public Material material = null;   // 使用するポストプロセスマテリアル
+    [SerializeField]
+    [Header("レンダーパスのイベント")]
+    public RenderPassEvent renderPassEvent = RenderPassEvent.AfterRenderingPostProcessing;
+
+    [SerializeField]
+    [Header("ポストプロセスのデータベース")]
+    public CSO_PostProcessStack postProcessStack;
+
+    Dictionary<CSO_PostProcessStack.EffectEntry, CustomRenderPass> passCache = new();
 
     class CustomRenderPass : ScriptableRenderPass
     {
@@ -15,19 +23,20 @@ public class CustomRenderPassFeature : ScriptableRendererFeature
         bool passCopyActiveColor;
         bool passBindDepthStencilAttachment;
         private RTHandle passCopiedColor;
-        private static MaterialPropertyBlock sharedPropertyBlock = new MaterialPropertyBlock();
+        private MaterialPropertyBlock propertyBlock = new MaterialPropertyBlock();
 
         public CustomRenderPass(string passName)
         {
             profilingSampler = new ProfilingSampler(passName);
         }
 
-        public void SetupMembers(Material material, int index, bool copyActiveColor, bool bindDepthStencilAttachment)
+        public void SetupMembers(Material material, int index, bool copyActiveColor, bool bindDepthStencilAttachment, MaterialPropertyBlock block)
         {
             passMaterial = material;
             passIndex = index;
             passCopyActiveColor = copyActiveColor;
             passBindDepthStencilAttachment = bindDepthStencilAttachment;
+            propertyBlock = block;
         }
 
         // This method is called before executing the render pass.
@@ -60,22 +69,17 @@ public class CustomRenderPassFeature : ScriptableRendererFeature
             Blitter.BlitTexture(cmd, sourceTexture, new Vector4(1, 1, 0, 0), 0.0f, false);
         }
 
-        private static void ExecuteMainPass(CommandBuffer cmd, RTHandle sourceTexture, Material material, int passIndex)
+        private void ExecuteMainPass(CommandBuffer cmd, RTHandle sourceTexture, Material material, int passIndex)
         {
-            sharedPropertyBlock.Clear();
             if (sourceTexture != null)
-                sharedPropertyBlock.SetTexture("_BlitTexture", sourceTexture);
+                propertyBlock.SetTexture("_BlitTexture", sourceTexture);
 
-            // We need to set the "_BlitScaleBias" uniform for user materials with shaders relying on core Blit.hlsl to work
-            sharedPropertyBlock.SetVector("_BlitScaleBias", new Vector4(1, 1, 0, 0));
+            propertyBlock.SetVector("_BlitScaleBias", new Vector4(1, 1, 0, 0));
 
-            cmd.DrawProcedural(Matrix4x4.identity, material, passIndex, MeshTopology.Triangles, 3, 1, sharedPropertyBlock);
+            cmd.DrawProcedural(Matrix4x4.identity, material, passIndex, MeshTopology.Triangles, 3, 1, propertyBlock);
         }
 
-        // Here you can implement the rendering logic.
-        // Use <c>ScriptableRenderContext</c> to issue drawing commands or execute command buffers
-        // https://docs.unity3d.com/ScriptReference/Rendering.ScriptableRenderContext.html
-        // You don't have to call ScriptableRenderContext.submit, the render pipeline will call it at specific points in the pipeline.
+        // ExecuteMainPassがインスタンスメソッドになったのでExecute側も修正
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
         {
             ref var cameraData = ref renderingData.cameraData;
@@ -94,6 +98,7 @@ public class CustomRenderPassFeature : ScriptableRendererFeature
                 else
                     CoreUtils.SetRenderTarget(cmd, cameraData.renderer.cameraColorTargetHandle);
 
+                // ✅ staticメソッドからインスタンスメソッドに変更
                 ExecuteMainPass(cmd, passCopyActiveColor ? passCopiedColor : null, passMaterial, passIndex);
             }
 
@@ -109,40 +114,50 @@ public class CustomRenderPassFeature : ScriptableRendererFeature
 
     CustomRenderPass scriptablePass;
 
-    /// <inheritdoc/>
     public override void Create()
     {
-        scriptablePass = new CustomRenderPass(name);
-
-        // Configures where the render pass should be injected.
-        scriptablePass.renderPassEvent = renderPassEvent;
+        passCache.Clear();
     }
 
-    // Here you can inject one or multiple render passes in the renderer.
-    // This method is called when setting up the renderer once per-camera.
+    private CustomRenderPass GetOrCreatePass(CSO_PostProcessStack.EffectEntry entry)
+    {
+        if (!passCache.TryGetValue(entry, out var pass))
+        {
+            pass = new CustomRenderPass(entry.material.name);
+            pass.renderPassEvent = renderPassEvent;
+            passCache[entry] = pass;
+        }
+        return pass;
+    }
+
     public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
     {
-        if (UniversalRenderer.IsOffscreenDepthTexture(in renderingData.cameraData) || renderingData.cameraData.cameraType == CameraType.Preview || renderingData.cameraData.cameraType == CameraType.Reflection)
+        if (UniversalRenderer.IsOffscreenDepthTexture(in renderingData.cameraData)
+            || renderingData.cameraData.cameraType == CameraType.Preview
+            || renderingData.cameraData.cameraType == CameraType.Reflection)
             return;
 
-        if (material == null)
+        if (postProcessStack == null)
         {
-            Debug.LogWarningFormat("The full screen feature \"{0}\" will not execute - no material is assigned. Please make sure a material is assigned for this feature on the renderer asset.", name);
+            Debug.LogWarningFormat("PostProcessStack が未設定です: {0}", name);
             return;
         }
 
-        if (0 >= material.passCount)
+        var stack = VolumeManager.instance.stack;
+
+        foreach (var effect in postProcessStack.effects)
         {
-            Debug.LogWarningFormat("The full screen feature \"{0}\" will not execute - the pass index is out of bounds for the material.", name);
-            return;
+            if (effect == null || effect.material == null) continue;
+            if (!effect.IsActive(stack)) continue;
+
+            // Volumeの値をPropertyBlockに書き込む
+            effect.Apply(stack);
+
+            var pass = GetOrCreatePass(effect);
+            pass.renderPassEvent = renderPassEvent;
+            pass.ConfigureInput(ScriptableRenderPassInput.None);
+            pass.SetupMembers(effect.material, 0, true, false, effect.PropertyBlock);
+            renderer.EnqueuePass(pass);
         }
-
-        scriptablePass.renderPassEvent = renderPassEvent;
-        scriptablePass.ConfigureInput(ScriptableRenderPassInput.None);
-        scriptablePass.SetupMembers(material, 0, true, false);
-
-        renderer.EnqueuePass(scriptablePass);
     }
 }
-
-
