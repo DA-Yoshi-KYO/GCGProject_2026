@@ -22,6 +22,7 @@
  * 
  */
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -56,7 +57,11 @@ public class ThiefAI : MonoBehaviour
         Stun    // 気絶
     }
 
-    
+    [Tooltip("泥棒のマテリアル")]
+    private Material thiefMaterial;
+    [Tooltip("泥棒のマテリアルのフェードアウトにかかる時間")]
+    private float fadeAfterStunTime;
+
     [Tooltip("現在いる部屋の情報")]
     private RoomNode currentRoom;
     private GameObject currentRoomObject;
@@ -170,6 +175,16 @@ public class ThiefAI : MonoBehaviour
 
     private void Start()
     {
+        fadeAfterStunTime = GameObject.FindObjectOfType<ThiefManager>().GetThiefCommonDB().fadeAfterStunTime;
+
+        thiefMaterial = GetComponent<Renderer>().material;
+        if (thiefMaterial == null)
+        {
+            Debug.LogError("ThiefAI: 泥棒のマテリアルが見つかりません。");
+        }
+        thiefMaterial.SetFloat("_DisappearTime", fadeAfterStunTime);
+        thiefMaterial.SetFloat("_Timer", fadeAfterStunTime);
+
         FindNowRoomNode();
     }
 
@@ -358,10 +373,16 @@ public class ThiefAI : MonoBehaviour
         // 経過時間が退場するまでの時間を超えた場合は、退場する処理を追加する
         if (elapsedTimeAfterStun >= exitAfterStunTime)
         {
-            // 退場する処理を追加する
-            Debug.Log("泥棒が退場");
-            
-            Destroy(gameObject);
+            thiefMaterial.SetFloat("_Timer", fadeAfterStunTime - (elapsedTimeAfterStun - exitAfterStunTime));
+
+            Transform faceTransform = this.transform.GetChild(0);
+            Vector3 facePos = faceTransform.position;
+            faceTransform.position = new Vector3(facePos.x, facePos.y + 0.01f * (elapsedTimeAfterStun - exitAfterStunTime), facePos.z);
+
+            if(thiefMaterial.GetFloat("_Timer") <= 0.0f)
+            {
+                Destroy(this.gameObject);
+            }
         }
     }
 
