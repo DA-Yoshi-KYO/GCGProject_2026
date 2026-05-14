@@ -25,6 +25,12 @@ public class VisionSensor : MonoBehaviour
     [Tooltip("障害物のレイヤー")]
     public LayerMask obstacleLayer;
 
+    [SerializeField, Header("ギズモを表示")]
+    private bool showGizmos = false;
+    [SerializeField, Header("ギズモの色")]
+    private Color gizmoColor = Color.yellow;
+
+
     // 視界の半径と角度を設定するメソッド
     public void Setting(float viewDistance, float viewAngle)
     {
@@ -90,7 +96,9 @@ public class VisionSensor : MonoBehaviour
     // ギズモを描画して視界を可視化
     void OnDrawGizmos()
     {
-        Gizmos.color = Color.yellow;
+        if (!showGizmos) return;
+
+        Gizmos.color = gizmoColor;
         Gizmos.DrawWireSphere(transform.position, viewDistance);
 
         Vector3 left = Quaternion.Euler(0, -viewAngle / 2, 0) * transform.forward;

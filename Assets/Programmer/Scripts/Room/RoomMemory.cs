@@ -6,10 +6,12 @@
  * 2026-04-19 | 初回作成
  * 
  */
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 // 部屋に関する記憶を管理するシステム
+[Serializable]
 public class RoomMemory
 {
     [Tooltip("部屋の探索度"), Range(0, 100)]
