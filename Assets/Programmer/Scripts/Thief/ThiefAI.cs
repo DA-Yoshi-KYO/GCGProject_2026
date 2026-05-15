@@ -922,6 +922,7 @@ public class ThiefAI : MonoBehaviour
     /// 指定した位置にワープする処理
     /// </summary>
     /// <param name="targetPos">指定位置</param>
+    /// <param name="entryDoorDir">入ってきたドアの方向</param>
     public void WarpAction(Vector3 targetPos, CSE_RoomDoorDirection entryDoorDir)
     {
         // 現在の経路をリセットして、ワープ後に新しい経路を計算させる
