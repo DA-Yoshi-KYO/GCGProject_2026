@@ -127,7 +127,6 @@ public class GimmickBase : MonoBehaviour
     {
     }
 
-
     /// <summary>
     /// ギミックの大きさを、グリッドの大きさに合わせて調整する関数
     /// </summary>

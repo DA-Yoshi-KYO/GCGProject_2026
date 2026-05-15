@@ -9,6 +9,7 @@
 
 using Unity.VisualScripting;
 using UnityEngine;
+using static UnityEditor.PlayerSettings;
 
 public class RockGimmick : GimmickBase
 {
@@ -62,18 +63,10 @@ public class RockGimmick : GimmickBase
         {
             isFirstActive = false;
             Vector2Int directionVec = GetDirectionVec();
-            Vector2Int hitCheckerGridPos = new Vector2Int(gimmickGridPos.x + directionVec.x, gimmickGridPos.y + directionVec.y);
 
             initPositionY = transform.position.y;
             velocity = Vector3.zero;
-            checker = Instantiate(hitCheckerPrefab);
-
-            // Trigger化（重要）
-            Collider col = checker.GetComponent<Collider>();
-            if (col != null) col.isTrigger = true;
         }
-
-        Hit();  //ヒットチェック
 
         // =========================
         // 斜面滑り
@@ -143,7 +136,6 @@ public class RockGimmick : GimmickBase
             {//レイが当たったら角度をチェック
                 if (HitBrokeAngle(check, velocity, slopeAngleLimit))
                 {//当たった面が一定値以上の斜面なら
-                    Hit();
                     gimmickState = GimmickState.Broken;
                 }
             }
@@ -153,6 +145,7 @@ public class RockGimmick : GimmickBase
         {//地面接触時
             Vector3 normal = hit.normal;
             Vector3 slopeDir = Vector3.ProjectOnPlane(Vector3.down, normal);
+            Vector3 pos = transform.position;
 
             //---------------
             // 地面判定
@@ -162,16 +155,16 @@ public class RockGimmick : GimmickBase
             {
                 //接地判定
                 //接地(滑らない床)は破壊※一定以上落下している場合のみ
-                Hit();
                 gimmickState = GimmickState.Broken;
             }
+            else if (hit.collider.CompareTag("Plane") || hit.collider.CompareTag("Untagged"))
+            {
+                // 滑り
+                pos += slopeDir * speed * Time.deltaTime;
 
-            Vector3 pos = transform.position;
-            // 滑り
-            pos += slopeDir * speed * Time.deltaTime;
-
-            // Yだけ補正
-            pos.y = hit.point.y + 0.5f;
+                // Yだけ補正
+                pos.y = hit.point.y + 0.4f;
+            }
             transform.position = new Vector3(pos.x, pos.y + debugUpdateOffset, pos.z);
         }
         else
@@ -182,6 +175,7 @@ public class RockGimmick : GimmickBase
             velocity.y -= gravity * Time.deltaTime;
             transform.position += velocity * Time.deltaTime;
         }
+        Hit();  //ヒットチェック
     }
 
     // =========================
@@ -189,7 +183,7 @@ public class RockGimmick : GimmickBase
     // =========================
     private void Hit()
     {
-        SetHitChecker(gimmickGridPos.x, gimmickGridPos.y);
+        SetHitChecker(transform.position);
     }
     // =========================
     // レイヒットオブジェクトの角度計算
