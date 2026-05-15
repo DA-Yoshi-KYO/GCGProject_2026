@@ -260,6 +260,43 @@ public class GimmickBase : MonoBehaviour
         hitChecker.transform.position = HitCheckerPos;
     }
 
+    protected void SetHitChecker(Vector3 WorldPos)
+    {
+        if (hitChecker == null)
+        {
+            hitChecker = Instantiate(hitCheckerPrefab);
+
+            HitChecker hit = hitChecker.GetComponent<HitChecker>();
+            if (hit != null)
+            {
+                hit.SetHitDamage(attackPower);
+                hit.SetEffectDamage(effectPower);
+                hit.HitLoop(gimmickType == GimmickType.Reusable);
+                hit.SetGimmick(gimmick);
+                hit.SetParentGameObject(gameObject);
+            }
+
+            // 当たり判定の大きさを設定
+            GameObject Effect = hitChecker.transform.Find("Effect").gameObject;
+            GameObject Hit = hitChecker.transform.Find("Hit").gameObject;
+
+            Vector3 EffectSize = new Vector3(effectRangeX * roomGrid.gridSize.x, effectRangeY * roomGrid.gridSize.y, effectRangeZ * roomGrid.gridSize.y);
+            Vector3 HitSize = new Vector3(hitRangeX * roomGrid.gridSize.x, hitRangeY * roomGrid.gridSize.y, hitRangeZ * roomGrid.gridSize.y);
+
+            EffectSize.x = EffectSize.x * (float)Adjust;
+            EffectSize.y = EffectSize.y * (float)Adjust;
+            EffectSize.z = EffectSize.z * (float)Adjust;
+
+            HitSize.x = HitSize.x * (float)Adjust;
+            HitSize.y = HitSize.y * (float)Adjust;
+            HitSize.z = HitSize.z * (float)Adjust;
+
+            Effect.transform.localScale = EffectSize;
+            Hit.transform.localScale = HitSize;
+        }
+        hitChecker.transform.position = WorldPos;
+    }
+
     /// <summary>
     /// 泥棒に対する当たり判定を削除する関数
     /// </summary>
@@ -280,13 +317,13 @@ public class GimmickBase : MonoBehaviour
         switch(gimmickDirection)
         {
             case GimmickDirection.Up:
-                return new Vector2Int(0, -1);
-            case GimmickDirection.Down:
                 return new Vector2Int(0, 1);
+            case GimmickDirection.Down:
+                return new Vector2Int(0, -1);
             case GimmickDirection.Left:
-                return new Vector2Int(-1, 0);
-            case GimmickDirection.Right:
                 return new Vector2Int(1, 0);
+            case GimmickDirection.Right:
+                return new Vector2Int(-1, 0);
             default:
                 return Vector2Int.zero;
         }
