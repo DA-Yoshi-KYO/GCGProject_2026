@@ -397,7 +397,7 @@ public partial class CSED_CreateTools
     private void DrawPreviewEmptyMessage()
     {
         EditorGUILayout.HelpBox(
-            "中央の作業用エディターにFieldを追加すると、ここに作成後の見本が表示されます。",
+            "中央の作業用エディターにFieldを追加すると、ここに作成後の見本が表示されます",
             MessageType.Info);
     }
 
@@ -449,10 +449,6 @@ public partial class CSED_CreateTools
 
             case CSE_CreateTools_FieldLayoutType.TextArea:
                 DrawPreviewTextArea(f_fieldData);
-                break;
-
-            case CSE_CreateTools_FieldLayoutType.ReorderableList:
-                DrawPreviewReorderableList(f_fieldData);
                 break;
 
             default:
@@ -1113,44 +1109,6 @@ public partial class CSED_CreateTools
         EditorGUILayout.TextArea(
             defaultValue,
             GUILayout.Height(64.0f));
-    }
-
-    /// <summary>
-    /// ReorderableListの見本を描画します。
-    /// </summary>
-    /// <param name="f_fieldData">描画対象FieldData</param>
-    private void DrawPreviewReorderableList(CSED_CreateTools_FieldData f_fieldData)
-    {
-        EnsureListDefaultElementValueList(f_fieldData);
-
-        EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-        {
-            EditorGUILayout.BeginHorizontal();
-            {
-                EditorGUILayout.LabelField(GetPreviewLabel(f_fieldData));
-
-                GUILayout.FlexibleSpace();
-
-                if (GUILayout.Button("+", GUILayout.Width(24.0f)))
-                {
-                    AddListDefaultElement(f_fieldData);
-                }
-
-                if (GUILayout.Button("-", GUILayout.Width(24.0f)))
-                {
-                    RemoveListDefaultElement(f_fieldData);
-                }
-            }
-            EditorGUILayout.EndHorizontal();
-
-            GUILayout.Space(4.0f);
-
-            for (int i = 0 ; i < f_fieldData.ListDefaultElementValueTextList.Count ; i++)
-            {
-                DrawPreviewListElementField(f_fieldData, i);
-            }
-        }
-        EditorGUILayout.EndVertical();
     }
 
     /// <summary>

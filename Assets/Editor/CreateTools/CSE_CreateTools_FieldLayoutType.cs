@@ -10,7 +10,7 @@
 #if UNITY_EDITOR
 
 /// <summary>
-/// CreateToolsで扱う表示レイアウト種別を定義する列挙型です。
+/// CreateToolsで扱うFieldの表示Layout種別です。
 /// </summary>
 public enum CSE_CreateTools_FieldLayoutType
 {
@@ -25,7 +25,7 @@ public enum CSE_CreateTools_FieldLayoutType
     Slider,
 
     /// <summary>
-    /// 最小値と最大値の入力欄です。
+    /// Min / Max入力欄です。
     /// </summary>
     MinMaxField,
 
@@ -37,11 +37,6 @@ public enum CSE_CreateTools_FieldLayoutType
     /// <summary>
     /// 複数行テキストです。
     /// </summary>
-    TextArea,
-
-    /// <summary>
-    /// 並び替え可能なList表示です。
-    /// </summary>
-    ReorderableList
+    TextArea
 }
 #endif

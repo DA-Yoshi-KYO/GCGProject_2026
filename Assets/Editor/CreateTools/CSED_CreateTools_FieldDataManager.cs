@@ -116,7 +116,7 @@ public partial class CSED_CreateTools
                 return CSE_CreateTools_FieldLayoutType.Toggle;
 
             case CSE_CreateTools_FieldType.List:
-                return CSE_CreateTools_FieldLayoutType.ReorderableList;
+                return CSE_CreateTools_FieldLayoutType.InputField;
 
             default:
                 return CSE_CreateTools_FieldLayoutType.InputField;

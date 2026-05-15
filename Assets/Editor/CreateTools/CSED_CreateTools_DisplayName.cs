@@ -73,9 +73,6 @@ public partial class CSED_CreateTools
             case CSE_CreateTools_FieldLayoutType.TextArea:
                 return "Text Area";
 
-            case CSE_CreateTools_FieldLayoutType.ReorderableList:
-                return "Reorderable List";
-
             default:
                 return "Unknown";
         }

@@ -118,6 +118,226 @@ public partial class CSED_CreateTools
     }
 
     /// <summary>
+    /// FieldTypeに応じて使用可能なLayoutTypeだけを表示するPopupを描画します。
+    /// </summary>
+    /// <param name="f_label">表示ラベル</param>
+    /// <param name="f_fieldData">対象FieldData</param>
+    /// <returns>選択後のLayoutType</returns>
+    private CSE_CreateTools_FieldLayoutType DrawSmallAllowedFieldLayoutTypePopup(
+        string f_label,
+        CSED_CreateTools_FieldData f_fieldData)
+    {
+        CSE_CreateTools_FieldLayoutType[] allowedLayoutTypes =
+            GetAllowedFieldLayoutTypes(f_fieldData);
+
+        string[] displayNames = new string[allowedLayoutTypes.Length];
+
+        for (int i = 0 ; i < allowedLayoutTypes.Length ; i++)
+        {
+            displayNames[i] = GetFieldLayoutTypeDisplayName(allowedLayoutTypes[i]);
+        }
+
+        int selectedIndex = 0;
+
+        for (int i = 0 ; i < allowedLayoutTypes.Length ; i++)
+        {
+            if (allowedLayoutTypes[i] == f_fieldData.FieldLayoutType)
+            {
+                selectedIndex = i;
+                break;
+            }
+        }
+
+        Rect rowRect = GetFieldInspectorRowRect();
+        Rect labelRect = GetFieldInspectorLabelRect(rowRect);
+        Rect inputRect = GetFieldInspectorInputRect(rowRect);
+
+        EditorGUI.LabelField(labelRect, f_label);
+
+        selectedIndex = EditorGUI.Popup(
+            inputRect,
+            selectedIndex,
+            displayNames);
+
+        return allowedLayoutTypes[selectedIndex];
+    }
+
+    /// <summary>
+    /// FieldDataで使用可能なLayoutType一覧を取得します。
+    /// </summary>
+    /// <param name="f_fieldData">対象FieldData</param>
+    /// <returns>使用可能なLayoutType一覧</returns>
+    private CSE_CreateTools_FieldLayoutType[] GetAllowedFieldLayoutTypes(CSED_CreateTools_FieldData f_fieldData)
+    {
+        CSE_CreateTools_FieldType targetFieldType = GetLayoutTargetFieldType(f_fieldData);
+
+        switch (targetFieldType)
+        {
+            case CSE_CreateTools_FieldType.Int:
+            case CSE_CreateTools_FieldType.Float:
+                return new CSE_CreateTools_FieldLayoutType[]
+                {
+                CSE_CreateTools_FieldLayoutType.InputField,
+                CSE_CreateTools_FieldLayoutType.Slider,
+                CSE_CreateTools_FieldLayoutType.MinMaxField
+                };
+
+            case CSE_CreateTools_FieldType.String:
+                return new CSE_CreateTools_FieldLayoutType[]
+                {
+                CSE_CreateTools_FieldLayoutType.InputField,
+                CSE_CreateTools_FieldLayoutType.TextArea
+                };
+
+            case CSE_CreateTools_FieldType.Bool:
+                return new CSE_CreateTools_FieldLayoutType[]
+                {
+                CSE_CreateTools_FieldLayoutType.Toggle
+                };
+
+            case CSE_CreateTools_FieldType.ScriptableObject:
+            case CSE_CreateTools_FieldType.Script:
+                return new CSE_CreateTools_FieldLayoutType[]
+                {
+                CSE_CreateTools_FieldLayoutType.InputField
+                };
+
+            default:
+                return new CSE_CreateTools_FieldLayoutType[]
+                {
+                CSE_CreateTools_FieldLayoutType.InputField
+                };
+        }
+    }
+
+    /// <summary>
+    /// LayoutTypeの表示名を取得します。
+    /// </summary>
+    /// <param name="f_layoutType">LayoutType</param>
+    /// <returns>表示名</returns>
+    private string GetFieldLayoutTypeDisplayName(CSE_CreateTools_FieldLayoutType f_layoutType)
+    {
+        switch (f_layoutType)
+        {
+            case CSE_CreateTools_FieldLayoutType.InputField:
+                return "Input Field";
+
+            case CSE_CreateTools_FieldLayoutType.Slider:
+                return "Slider";
+
+            case CSE_CreateTools_FieldLayoutType.MinMaxField:
+                return "Min Max Field";
+
+            case CSE_CreateTools_FieldLayoutType.Toggle:
+                return "Toggle";
+
+            case CSE_CreateTools_FieldLayoutType.TextArea:
+                return "Text Area";
+
+            default:
+                return "Unknown";
+        }
+    }
+
+    /// <summary>
+    /// FieldDataに対して現在のLayoutが使えるか確認し、不正なら初期Layoutに戻します。
+    /// </summary>
+    /// <param name="f_fieldData">対象FieldData</param>
+    private void NormalizeFieldLayoutType(CSED_CreateTools_FieldData f_fieldData)
+    {
+        if (IsAllowedFieldLayoutType(f_fieldData, f_fieldData.FieldLayoutType))
+        {
+            return;
+        }
+
+        f_fieldData.FieldLayoutType = GetDefaultAllowedFieldLayoutType(f_fieldData);
+    }
+
+    /// <summary>
+    /// FieldDataに対応した初期LayoutTypeを取得します。
+    /// </summary>
+    /// <param name="f_fieldData">対象FieldData</param>
+    /// <returns>初期LayoutType</returns>
+    private CSE_CreateTools_FieldLayoutType GetDefaultAllowedFieldLayoutType(CSED_CreateTools_FieldData f_fieldData)
+    {
+        CSE_CreateTools_FieldType targetFieldType = GetLayoutTargetFieldType(f_fieldData);
+
+        switch (targetFieldType)
+        {
+            case CSE_CreateTools_FieldType.Bool:
+                return CSE_CreateTools_FieldLayoutType.Toggle;
+
+            case CSE_CreateTools_FieldType.String:
+                return CSE_CreateTools_FieldLayoutType.InputField;
+
+            case CSE_CreateTools_FieldType.Int:
+            case CSE_CreateTools_FieldType.Float:
+                return CSE_CreateTools_FieldLayoutType.InputField;
+
+            case CSE_CreateTools_FieldType.ScriptableObject:
+            case CSE_CreateTools_FieldType.Script:
+                return CSE_CreateTools_FieldLayoutType.InputField;
+
+            default:
+                return CSE_CreateTools_FieldLayoutType.InputField;
+        }
+    }
+
+    /// <summary>
+    /// Layout判定に使うFieldTypeを取得します。
+    /// Listの場合はListの中身の型を使います。
+    /// </summary>
+    /// <param name="f_fieldData">対象FieldData</param>
+    /// <returns>Layout判定用FieldType</returns>
+    private CSE_CreateTools_FieldType GetLayoutTargetFieldType(CSED_CreateTools_FieldData f_fieldData)
+    {
+        if (f_fieldData.FieldType == CSE_CreateTools_FieldType.List)
+        {
+            return f_fieldData.ListElementFieldType;
+        }
+
+        return f_fieldData.FieldType;
+    }
+
+    /// <summary>
+    /// 指定したLayoutTypeがFieldDataで使用可能か判定します。
+    /// </summary>
+    /// <param name="f_fieldData">対象FieldData</param>
+    /// <param name="f_layoutType">判定するLayoutType</param>
+    /// <returns>使用可能ならtrue</returns>
+    private bool IsAllowedFieldLayoutType(
+        CSED_CreateTools_FieldData f_fieldData,
+        CSE_CreateTools_FieldLayoutType f_layoutType)
+    {
+        CSE_CreateTools_FieldType targetFieldType = GetLayoutTargetFieldType(f_fieldData);
+
+        switch (targetFieldType)
+        {
+            case CSE_CreateTools_FieldType.Int:
+            case CSE_CreateTools_FieldType.Float:
+                return
+                    f_layoutType == CSE_CreateTools_FieldLayoutType.InputField ||
+                    f_layoutType == CSE_CreateTools_FieldLayoutType.Slider ||
+                    f_layoutType == CSE_CreateTools_FieldLayoutType.MinMaxField;
+
+            case CSE_CreateTools_FieldType.String:
+                return
+                    f_layoutType == CSE_CreateTools_FieldLayoutType.InputField ||
+                    f_layoutType == CSE_CreateTools_FieldLayoutType.TextArea;
+
+            case CSE_CreateTools_FieldType.Bool:
+                return f_layoutType == CSE_CreateTools_FieldLayoutType.Toggle;
+
+            case CSE_CreateTools_FieldType.ScriptableObject:
+            case CSE_CreateTools_FieldType.Script:
+                return f_layoutType == CSE_CreateTools_FieldLayoutType.InputField;
+
+            default:
+                return f_layoutType == CSE_CreateTools_FieldLayoutType.InputField;
+        }
+    }
+
+    /// <summary>
     /// Field詳細設定用の内側パネルRectを取得します。
     /// </summary>
     /// <param name="f_areaRect">左下エリア全体のRect</param>
@@ -179,7 +399,7 @@ public partial class CSED_CreateTools
     private void DrawFieldInspectorEmptyMessage()
     {
         EditorGUILayout.HelpBox(
-            "中央のFieldをクリックすると、ここに詳細設定が表示されます。",
+            "中央のFieldをクリックすると、ここに詳細設定が表示されます",
             MessageType.Info);
     }
 
@@ -205,16 +425,23 @@ public partial class CSED_CreateTools
 
         if (beforeFieldType != f_fieldData.FieldType)
         {
-            f_fieldData.FieldLayoutType = CreateDefaultFieldLayoutType(f_fieldData.FieldType);
+            f_fieldData.FieldLayoutType = GetDefaultAllowedFieldLayoutType(f_fieldData);
         }
 
         if (f_fieldData.FieldType == CSE_CreateTools_FieldType.List)
         {
             GUILayout.Space(c_FieldInspectorRowSpacing);
 
+            CSE_CreateTools_FieldType beforeListElementFieldType = f_fieldData.ListElementFieldType;
+
             f_fieldData.ListElementFieldType = DrawSmallListElementFieldTypePopup(
                 "  List Type",
                 f_fieldData.ListElementFieldType);
+
+            if (beforeListElementFieldType != f_fieldData.ListElementFieldType)
+            {
+                f_fieldData.FieldLayoutType = GetDefaultAllowedFieldLayoutType(f_fieldData);
+            }
         }
 
         GUILayout.Space(c_FieldInspectorRowSpacing);
@@ -225,9 +452,11 @@ public partial class CSED_CreateTools
 
         GUILayout.Space(c_FieldInspectorRowSpacing);
 
-        f_fieldData.FieldLayoutType = DrawSmallFieldLayoutTypePopup(
+        NormalizeFieldLayoutType(f_fieldData);
+
+        f_fieldData.FieldLayoutType = DrawSmallAllowedFieldLayoutTypePopup(
             "  Layout",
-            f_fieldData.FieldLayoutType);
+            f_fieldData);
 
         if (f_fieldData.FieldLayoutType == CSE_CreateTools_FieldLayoutType.InputField)
         {
@@ -254,11 +483,6 @@ public partial class CSED_CreateTools
             GUILayout.Space(c_FieldInspectorSectionTopSpacing);
             DrawTextAreaLayoutSettings(f_fieldData);
         }
-        else if (f_fieldData.FieldLayoutType == CSE_CreateTools_FieldLayoutType.ReorderableList)
-        {
-            GUILayout.Space(c_FieldInspectorSectionTopSpacing);
-            DrawReorderableListLayoutSettings(f_fieldData);
-        }
 
         GUILayout.Space(c_FieldInspectorSectionTopSpacing);
 
@@ -274,13 +498,7 @@ public partial class CSED_CreateTools
     /// <param name="f_fieldData">選択中Fieldデータ</param>
     private void DrawTextAreaLayoutSettings(CSED_CreateTools_FieldData f_fieldData)
     {
-        EditorGUILayout.LabelField("Text Area設定", EditorStyles.boldLabel);
-
-        GUILayout.Space(c_FieldInspectorSectionTitleBottomSpacing);
-
-        f_fieldData.TagName = DrawSmallTextField(
-            "  Tag Name",
-            f_fieldData.TagName);
+        DrawInputFieldCommonSettings(f_fieldData);
 
         GUILayout.Space(c_FieldInspectorSectionTopSpacing);
 
@@ -575,6 +793,15 @@ public partial class CSED_CreateTools
 
         GUILayout.Space(c_FieldInspectorSectionTitleBottomSpacing);
 
+        DrawTagNameField(f_fieldData);
+    }
+
+    /// <summary>
+    /// Tag Name項目だけを描画します。
+    /// </summary>
+    /// <param name="f_fieldData">選択中Fieldデータ</param>
+    private void DrawTagNameField(CSED_CreateTools_FieldData f_fieldData)
+    {
         f_fieldData.TagName = DrawSmallTextField(
             "  Tag Name",
             f_fieldData.TagName);
@@ -745,6 +972,10 @@ public partial class CSED_CreateTools
     /// <param name="f_fieldData">選択中Fieldデータ</param>
     private void DrawMinMaxFieldLayoutSettings(CSED_CreateTools_FieldData f_fieldData)
     {
+        DrawInputFieldCommonSettings(f_fieldData);
+
+        GUILayout.Space(c_FieldInspectorSectionTopSpacing);
+
         if (f_fieldData.FieldType == CSE_CreateTools_FieldType.List)
         {
             DrawListDefaultValueSettingsByLayout(
@@ -753,10 +984,6 @@ public partial class CSED_CreateTools
 
             return;
         }
-
-        EditorGUILayout.LabelField("Min Max Field設定", EditorStyles.boldLabel);
-
-        GUILayout.Space(c_FieldInspectorSectionTitleBottomSpacing);
 
         EditorGUILayout.LabelField("Default Min", EditorStyles.boldLabel);
 
@@ -929,49 +1156,6 @@ public partial class CSED_CreateTools
     }
 
     /// <summary>
-    /// Reorderable List用の詳細設定を描画します。
-    /// </summary>
-    /// <param name="f_fieldData">選択中Fieldデータ</param>
-    private void DrawReorderableListLayoutSettings(CSED_CreateTools_FieldData f_fieldData)
-    {
-        EditorGUILayout.LabelField("Reorderable List設定", EditorStyles.boldLabel);
-
-        GUILayout.Space(c_FieldInspectorSectionTitleBottomSpacing);
-
-        f_fieldData.TagName = DrawSmallTextField(
-            "  Tag Name",
-            f_fieldData.TagName);
-
-        GUILayout.Space(c_FieldInspectorSectionTopSpacing);
-
-        DrawListDefaultValueSettings(f_fieldData);
-    }
-
-    /// <summary>
-    /// List用の初期値設定を描画します。
-    /// </summary>
-    /// <param name="f_fieldData">選択中Fieldデータ</param>
-    private void DrawListDefaultValueSettings(CSED_CreateTools_FieldData f_fieldData)
-    {
-        EnsureListDefaultElementValueList(f_fieldData);
-
-        EditorGUILayout.LabelField("Default設定", EditorStyles.boldLabel);
-
-        GUILayout.Space(c_FieldInspectorSectionTitleBottomSpacing);
-
-        DrawListElementCountControl(f_fieldData);
-
-        GUILayout.Space(c_FieldInspectorRowSpacing);
-
-        for (int i = 0 ; i < f_fieldData.ListDefaultElementValueTextList.Count ; i++)
-        {
-            DrawListDefaultElementValueField(f_fieldData, i);
-
-            GUILayout.Space(c_FieldInspectorRowSpacing);
-        }
-    }
-
-    /// <summary>
     /// List初期値リストを使用可能な状態にします。
     /// </summary>
     /// <param name="f_fieldData">対象FieldData</param>
@@ -1091,42 +1275,6 @@ public partial class CSED_CreateTools
             default:
                 return string.Empty;
         }
-    }
-
-    /// <summary>
-    /// Listの各要素初期値を描画します。
-    /// </summary>
-    /// <param name="f_fieldData">選択中Fieldデータ</param>
-    /// <param name="f_index">要素番号</param>
-    private void DrawListDefaultElementValueField(
-        CSED_CreateTools_FieldData f_fieldData,
-        int f_index)
-    {
-        if (f_index < 0 || f_index >= f_fieldData.ListDefaultElementValueTextList.Count)
-        {
-            return;
-        }
-
-        string label = "  Element " + f_index.ToString();
-
-        if (f_fieldData.ListElementFieldType == CSE_CreateTools_FieldType.Bool)
-        {
-            bool boolValue = false;
-
-            bool.TryParse(
-                f_fieldData.ListDefaultElementValueTextList[f_index],
-                out boolValue);
-
-            boolValue = DrawSmallToggle(label, boolValue);
-
-            f_fieldData.ListDefaultElementValueTextList[f_index] = boolValue.ToString();
-
-            return;
-        }
-
-        f_fieldData.ListDefaultElementValueTextList[f_index] = DrawSmallTextField(
-            label,
-            f_fieldData.ListDefaultElementValueTextList[f_index]);
     }
 
     /// <summary>
