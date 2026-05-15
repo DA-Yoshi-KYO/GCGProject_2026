@@ -18,6 +18,26 @@ using UnityEngine;
 public partial class CSED_CreateTools
 {
     /// <summary>
+    /// Min Max Fieldプレビューのラベル幅です。
+    /// </summary>
+    private const float c_PreviewMinMaxMainLabelWidth = 110.0f;
+
+    /// <summary>
+    /// Min / Max文字の幅です。
+    /// </summary>
+    private const float c_PreviewMinMaxSmallLabelWidth = 28.0f;
+
+    /// <summary>
+    /// Min Max Fieldプレビューの項目間余白です。
+    /// </summary>
+    private const float c_PreviewMinMaxSpacing = 6.0f;
+
+    /// <summary>
+    /// Min Max Fieldプレビューの最小入力欄幅です。
+    /// </summary>
+    private const float c_PreviewMinMaxMinFieldWidth = 35.0f;
+
+    /// <summary>
     /// 仮想EditorWindowの外側余白です。
     /// </summary>
     private const float c_PreviewWindowMargin = 24.0f;
@@ -554,7 +574,10 @@ public partial class CSED_CreateTools
         }
 
         bool result = false;
-        bool.TryParse(f_fieldData.DefaultValueText, out result);
+
+        bool.TryParse(
+            f_fieldData.DefaultValueText,
+            out result);
 
         return result;
     }
@@ -624,21 +647,123 @@ public partial class CSED_CreateTools
     }
 
     /// <summary>
-    /// MinMaxFieldの見本を描画します。
+    /// Min Max Fieldの見本を描画します。
     /// </summary>
     /// <param name="f_fieldData">描画対象のFieldData</param>
     private void DrawPreviewMinMaxField(CSED_CreateTools_FieldData f_fieldData)
     {
         string label = GetPreviewLabel(f_fieldData);
 
-        EditorGUILayout.LabelField(label);
+        float minValue = GetPreviewMinDefaultValue(f_fieldData);
+        float maxValue = GetPreviewMaxDefaultValue(f_fieldData);
 
-        EditorGUILayout.BeginHorizontal();
+        Rect rowRect = EditorGUILayout.GetControlRect(
+            false,
+            EditorGUIUtility.singleLineHeight);
+
+        float labelWidth = Mathf.Min(
+            c_PreviewMinMaxMainLabelWidth,
+            rowRect.width * 0.35f);
+
+        float valueAreaX =
+            rowRect.x
+            + labelWidth
+            + c_PreviewMinMaxSpacing;
+
+        float valueAreaWidth =
+            rowRect.width
+            - labelWidth
+            - c_PreviewMinMaxSpacing;
+
+        float valueFieldWidth =
+            (
+                valueAreaWidth
+                - c_PreviewMinMaxSmallLabelWidth
+                - c_PreviewMinMaxSmallLabelWidth
+                - (c_PreviewMinMaxSpacing * 3.0f)
+            ) * 0.5f;
+
+        valueFieldWidth = Mathf.Max(
+            c_PreviewMinMaxMinFieldWidth,
+            valueFieldWidth);
+
+        Rect labelRect = new Rect(
+            rowRect.x,
+            rowRect.y,
+            labelWidth,
+            rowRect.height);
+
+        Rect minLabelRect = new Rect(
+            valueAreaX,
+            rowRect.y,
+            c_PreviewMinMaxSmallLabelWidth,
+            rowRect.height);
+
+        Rect minValueRect = new Rect(
+            minLabelRect.xMax + c_PreviewMinMaxSpacing,
+            rowRect.y,
+            valueFieldWidth,
+            rowRect.height);
+
+        Rect maxLabelRect = new Rect(
+            minValueRect.xMax + c_PreviewMinMaxSpacing,
+            rowRect.y,
+            c_PreviewMinMaxSmallLabelWidth,
+            rowRect.height);
+
+        Rect maxValueRect = new Rect(
+            maxLabelRect.xMax + c_PreviewMinMaxSpacing,
+            rowRect.y,
+            valueFieldWidth,
+            rowRect.height);
+
+        EditorGUI.LabelField(labelRect, label);
+        EditorGUI.LabelField(minLabelRect, "Min");
+        EditorGUI.FloatField(minValueRect, minValue);
+        EditorGUI.LabelField(maxLabelRect, "Max");
+        EditorGUI.FloatField(maxValueRect, maxValue);
+    }
+
+    /// <summary>
+    /// プレビュー用のMin初期値を取得します。
+    /// </summary>
+    /// <param name="f_fieldData">対象FieldData</param>
+    /// <returns>Min初期値</returns>
+    private float GetPreviewMinDefaultValue(CSED_CreateTools_FieldData f_fieldData)
+    {
+        if (f_fieldData.IsDefaultMinValueNull)
         {
-            EditorGUILayout.FloatField("Min", 0.0f);
-            EditorGUILayout.FloatField("Max", 100.0f);
+            return 0.0f;
         }
-        EditorGUILayout.EndHorizontal();
+
+        float result = 0.0f;
+
+        float.TryParse(
+            f_fieldData.DefaultMinValueText,
+            out result);
+
+        return result;
+    }
+
+    /// <summary>
+    /// プレビュー用のMax初期値を取得します。
+    /// </summary>
+    /// <param name="f_fieldData">対象FieldData</param>
+    /// <returns>Max初期値</returns>
+    private float GetPreviewMaxDefaultValue(CSED_CreateTools_FieldData f_fieldData)
+    {
+        if (f_fieldData.IsDefaultMaxValueNull)
+        {
+            return 1.0f;
+        }
+
+        float result = 1.0f;
+
+        float.TryParse(
+            f_fieldData.DefaultMaxValueText,
+            out result);
+
+        return result;
     }
 
     /// <summary>
@@ -649,7 +774,9 @@ public partial class CSED_CreateTools
     {
         string label = GetPreviewLabel(f_fieldData);
 
-        EditorGUILayout.Toggle(label, false);
+        EditorGUILayout.Toggle(
+            label,
+            GetPreviewBoolDefaultValue(f_fieldData));
     }
 
     /// <summary>
@@ -659,21 +786,51 @@ public partial class CSED_CreateTools
     private void DrawPreviewTextArea(CSED_CreateTools_FieldData f_fieldData)
     {
         string label = GetPreviewLabel(f_fieldData);
+        string defaultValue = GetPreviewStringDefaultValue(f_fieldData);
 
         EditorGUILayout.LabelField(label);
-        EditorGUILayout.TextArea(string.Empty, GUILayout.Height(c_PreviewTextAreaHeight));
+
+        EditorGUILayout.TextArea(
+            defaultValue,
+            GUILayout.Height(64.0f));
     }
 
     /// <summary>
-    /// ReorderableList風の見本を描画します。
+    /// ReorderableListの見本を描画します。
     /// </summary>
     /// <param name="f_fieldData">描画対象のFieldData</param>
     private void DrawPreviewReorderableList(CSED_CreateTools_FieldData f_fieldData)
     {
         string label = GetPreviewLabel(f_fieldData);
+        int count = GetPreviewListDefaultCount(f_fieldData);
 
         EditorGUILayout.LabelField(label);
-        EditorGUILayout.HelpBox("Element 0\nElement 1", MessageType.None);
+
+        for (int i = 0 ; i < count ; i++)
+        {
+            EditorGUILayout.LabelField("Element " + i.ToString());
+        }
+    }
+
+    /// <summary>
+    /// プレビュー用のList初期要素数を取得します。
+    /// </summary>
+    /// <param name="f_fieldData">対象FieldData</param>
+    /// <returns>List初期要素数</returns>
+    private int GetPreviewListDefaultCount(CSED_CreateTools_FieldData f_fieldData)
+    {
+        if (f_fieldData.IsListDefaultCountNull)
+        {
+            return 2;
+        }
+
+        int result = 2;
+
+        int.TryParse(
+            f_fieldData.ListDefaultCountText,
+            out result);
+
+        return Mathf.Max(0, result);
     }
 
     /// <summary>

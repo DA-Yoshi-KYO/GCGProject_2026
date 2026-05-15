@@ -17,6 +17,16 @@
 public class CSED_CreateTools_FieldData
 {
     /// <summary>
+    /// Listの初期要素数をnull扱いにするかどうかです。
+    /// </summary>
+    public bool IsListDefaultCountNull { get; set; }
+
+    /// <summary>
+    /// Listの初期要素数です。
+    /// </summary>
+    public string ListDefaultCountText { get; set; }
+
+    /// <summary>
     /// Sliderの最小値をnull扱いにするかどうかです。
     /// </summary>
     public bool IsSliderMinValueNull { get; set; }
@@ -119,6 +129,9 @@ public class CSED_CreateTools_FieldData
 
         IsSliderMaxValueNull = true;
         SliderMaxValueText = string.Empty;
+
+        IsListDefaultCountNull = true;
+        ListDefaultCountText = string.Empty;
     }
 }
 #endif

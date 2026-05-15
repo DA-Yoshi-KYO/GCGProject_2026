@@ -234,6 +234,21 @@ public partial class CSED_CreateTools
             GUILayout.Space(c_FieldInspectorSectionTopSpacing);
             DrawMinMaxFieldLayoutSettings(f_fieldData);
         }
+        else if (f_fieldData.FieldLayoutType == CSE_CreateTools_FieldLayoutType.Toggle)
+        {
+            GUILayout.Space(c_FieldInspectorSectionTopSpacing);
+            DrawToggleLayoutSettings(f_fieldData);
+        }
+        else if (f_fieldData.FieldLayoutType == CSE_CreateTools_FieldLayoutType.TextArea)
+        {
+            GUILayout.Space(c_FieldInspectorSectionTopSpacing);
+            DrawTextAreaLayoutSettings(f_fieldData);
+        }
+        else if (f_fieldData.FieldLayoutType == CSE_CreateTools_FieldLayoutType.ReorderableList)
+        {
+            GUILayout.Space(c_FieldInspectorSectionTopSpacing);
+            DrawReorderableListLayoutSettings(f_fieldData);
+        }
 
         GUILayout.Space(c_FieldInspectorSectionTopSpacing);
 
@@ -241,6 +256,72 @@ public partial class CSED_CreateTools
         {
             Repaint();
         }
+    }
+
+    /// <summary>
+    /// Text Area用の詳細設定を描画します。
+    /// </summary>
+    /// <param name="f_fieldData">選択中Fieldデータ</param>
+    private void DrawTextAreaLayoutSettings(CSED_CreateTools_FieldData f_fieldData)
+    {
+        EditorGUILayout.LabelField("Text Area設定", EditorStyles.boldLabel);
+
+        GUILayout.Space(c_FieldInspectorSectionTitleBottomSpacing);
+
+        f_fieldData.TagName = DrawSmallTextField(
+            "  Tag Name",
+            f_fieldData.TagName);
+
+        GUILayout.Space(c_FieldInspectorSectionTopSpacing);
+
+        DrawDefaultTextAreaValueSettings(f_fieldData);
+    }
+
+    /// <summary>
+    /// Text Area用の初期値設定を描画します。
+    /// </summary>
+    /// <param name="f_fieldData">選択中Fieldデータ</param>
+    private void DrawDefaultTextAreaValueSettings(CSED_CreateTools_FieldData f_fieldData)
+    {
+        EditorGUILayout.LabelField("Default設定", EditorStyles.boldLabel);
+
+        GUILayout.Space(c_FieldInspectorSectionTitleBottomSpacing);
+
+        f_fieldData.IsDefaultValueNull = DrawSmallToggle(
+            "  Default Is Null",
+            f_fieldData.IsDefaultValueNull);
+
+        GUILayout.Space(c_FieldInspectorRowSpacing);
+
+        EditorGUI.BeginDisabledGroup(f_fieldData.IsDefaultValueNull);
+        {
+            f_fieldData.DefaultValueText = DrawSmallTextArea(
+                "  Default Value",
+                f_fieldData.DefaultValueText);
+        }
+        EditorGUI.EndDisabledGroup();
+    }
+
+    /// <summary>
+    /// 小さめのTextAreaを描画します。
+    /// </summary>
+    /// <param name="f_label">表示ラベル</param>
+    /// <param name="f_value">現在の文字列</param>
+    /// <returns>入力後の文字列</returns>
+    private string DrawSmallTextArea(string f_label, string f_value)
+    {
+        const float textAreaHeight = 64.0f;
+
+        Rect rowRect = EditorGUILayout.GetControlRect(
+            false,
+            textAreaHeight);
+
+        Rect labelRect = GetFieldInspectorLabelRect(rowRect);
+        Rect inputRect = GetFieldInspectorInputRect(rowRect);
+
+        EditorGUI.LabelField(labelRect, f_label);
+
+        return EditorGUI.TextArea(inputRect, f_value);
     }
 
     /// <summary>
@@ -286,6 +367,64 @@ public partial class CSED_CreateTools
         GUILayout.Space(c_FieldInspectorSectionTopSpacing);
 
         DrawSliderRangeSettings(f_fieldData);
+    }
+
+    /// <summary>
+    /// Toggle用の詳細設定を描画します。
+    /// </summary>
+    /// <param name="f_fieldData">選択中Fieldデータ</param>
+    private void DrawToggleLayoutSettings(CSED_CreateTools_FieldData f_fieldData)
+    {
+        DrawInputFieldCommonSettings(f_fieldData);
+
+        GUILayout.Space(c_FieldInspectorSectionTopSpacing);
+
+        DrawDefaultBoolValueSettings(f_fieldData);
+    }
+
+    /// <summary>
+    /// bool用の通常初期値設定を描画します。
+    /// </summary>
+    /// <param name="f_fieldData">選択中Fieldデータ</param>
+    private void DrawDefaultBoolValueSettings(CSED_CreateTools_FieldData f_fieldData)
+    {
+        EditorGUILayout.LabelField("Default設定", EditorStyles.boldLabel);
+
+        GUILayout.Space(c_FieldInspectorSectionTitleBottomSpacing);
+
+        f_fieldData.IsDefaultValueNull = DrawSmallToggle(
+            "  Default Is Null",
+            f_fieldData.IsDefaultValueNull);
+
+        GUILayout.Space(c_FieldInspectorRowSpacing);
+
+        EditorGUI.BeginDisabledGroup(f_fieldData.IsDefaultValueNull);
+        {
+            bool boolValue = GetFieldDataDefaultBoolValue(f_fieldData);
+
+            boolValue = DrawSmallToggle(
+                "  Default Value",
+                boolValue);
+
+            f_fieldData.DefaultValueText = boolValue.ToString();
+        }
+        EditorGUI.EndDisabledGroup();
+    }
+
+    /// <summary>
+    /// FieldDataのDefaultValueTextをboolとして取得します。
+    /// </summary>
+    /// <param name="f_fieldData">対象FieldData</param>
+    /// <returns>bool値</returns>
+    private bool GetFieldDataDefaultBoolValue(CSED_CreateTools_FieldData f_fieldData)
+    {
+        bool result = false;
+
+        bool.TryParse(
+            f_fieldData.DefaultValueText,
+            out result);
+
+        return result;
     }
 
     /// <summary>
@@ -532,6 +671,41 @@ public partial class CSED_CreateTools
         EditorGUI.LabelField(labelRect, f_label);
 
         return EditorGUI.Toggle(toggleRect, f_value);
+    }
+
+    /// <summary>
+    /// Reorderable List用の詳細設定を描画します。
+    /// </summary>
+    /// <param name="f_fieldData">選択中Fieldデータ</param>
+    private void DrawReorderableListLayoutSettings(CSED_CreateTools_FieldData f_fieldData)
+    {
+        EditorGUILayout.LabelField("Reorderable List設定", EditorStyles.boldLabel);
+
+        GUILayout.Space(c_FieldInspectorSectionTitleBottomSpacing);
+
+        f_fieldData.TagName = DrawSmallTextField(
+            "  Tag Name",
+            f_fieldData.TagName);
+
+        GUILayout.Space(c_FieldInspectorSectionTopSpacing);
+
+        EditorGUILayout.LabelField("List設定", EditorStyles.boldLabel);
+
+        GUILayout.Space(c_FieldInspectorSectionTitleBottomSpacing);
+
+        f_fieldData.IsListDefaultCountNull = DrawSmallToggle(
+            "  Count Is Null",
+            f_fieldData.IsListDefaultCountNull);
+
+        GUILayout.Space(c_FieldInspectorRowSpacing);
+
+        EditorGUI.BeginDisabledGroup(f_fieldData.IsListDefaultCountNull);
+        {
+            f_fieldData.ListDefaultCountText = DrawSmallTextField(
+                "  Default Count",
+                f_fieldData.ListDefaultCountText);
+        }
+        EditorGUI.EndDisabledGroup();
     }
 }
 #endif
