@@ -26,6 +26,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Analytics;
 
 // 泥棒のAIシステム
 [RequireComponent(typeof(NavMeshAgent))]
@@ -72,6 +73,7 @@ public class ThiefAI : MonoBehaviour
     [Tooltip("視認オブジェクトの記憶")]
     private Dictionary<VisionTarget, VisionTargetMemory> visionTargetMemories;
 
+    [SerializeField, Header("デバック項目")]// ########## デバッグ ##############
     [Tooltip("探索対象")]
     private ThiefTarget currentTarget;
     public ThiefTarget CurrentTarget => currentTarget;
@@ -125,7 +127,7 @@ public class ThiefAI : MonoBehaviour
     private Transform firstEntryPoint; // 最初に入ってきたドアの位置(逃走ルートの最終目的位置)
 
     [Tooltip("帰宅ルート")]
-    private List<Transform> escapeRoute;
+    private List<Transform> moveRoute;
 
 
     // 泥棒の耐久力と移動速度を設定するメソッド
@@ -238,6 +240,22 @@ public class ThiefAI : MonoBehaviour
         RecognizeObjects();
 
         ChangeFace(ReactionSpriteType.Normal);
+
+        // 現在の探索対象がプレイヤーである場合は、距離判定をして、一定距離以内であればプレイヤーに向かって移動する処理を追加する
+        if (currentTarget != null && currentTarget is PlayerTarget)
+        {
+            // 距離判定
+            VisionSensor visionSensor = GetComponent<VisionSensor>();
+            if (Vector3.Distance(transform.position, currentTarget.transform.position) < visionSensor.viewDistance)
+            {
+                navMeshAgent.SetDestination(currentTarget.transform.position);
+            }
+            else
+            {
+                currentTarget = null;
+            }
+            return;
+        }
 
         // 探索対象がない場合や、探索度が次の部屋に移動するための閾値を超えている場合は、次の部屋に移動するための処理を追加する
         if (isNextRoomMovePointDecided || roomMemories[currentRoom].explorationLevel >= nextRoomSearchThreshold)
@@ -372,13 +390,13 @@ public class ThiefAI : MonoBehaviour
     private void Escape()
     {
         // ルートが未構築なら構築する
-        if (escapeRoute == null || escapeRoute.Count == 0)
+        if (moveRoute == null || moveRoute.Count == 0)
         {
             EscapeRoute(); // ここで escapeRoute が埋まる＆ nextRoomMovePoint も先頭が入る想定
         }
 
         // それでも無いなら、何らかの理由でルートが作れなかった
-        if (escapeRoute == null || escapeRoute.Count == 0)
+        if (moveRoute == null || moveRoute.Count == 0)
         {
             // フォールバック（暫定）：従来の movePoints 逃走などに戻したい場合はここに書く
             Debug.LogWarning("【泥棒】Escape: escapeRoute が空のため移動できません。");
@@ -386,11 +404,11 @@ public class ThiefAI : MonoBehaviour
         }
 
         // 次に向かうドア
-        Transform door = escapeRoute[0];
+        Transform door = moveRoute[0];
         if (door == null)
         {
             // 参照切れ対策：無効な要素を捨てて次へ
-            escapeRoute.RemoveAt(0);
+            moveRoute.RemoveAt(0);
             return;
         }
 
@@ -447,17 +465,18 @@ public class ThiefAI : MonoBehaviour
     {
         // 視界内オブジェクトを取得
         List<ThiefTarget> visionTargets = this.GetComponent<VisionSensor>().Scan();
-        
+
+        // 現在の部屋の記憶がない場合は新たに作成
+        if (roomMemories[currentRoom] == null)
+        {
+            roomMemories[currentRoom] = new RoomMemory();
+            roomMemories[currentRoom].FirstSetting();
+        }
+
         bool isNewObjectRecognized = false; // 新たに視認したオブジェクトがあるかどうかを判定するフラグ
         // 視認したオブジェクトを記憶に保存
         foreach (ThiefTarget target in visionTargets)
         {
-            // 現在の部屋の記憶がない場合は新たに作成
-            if (roomMemories[currentRoom] == null)
-            {
-                roomMemories[currentRoom] = new RoomMemory();
-                roomMemories[currentRoom].FirstSetting();
-            }
 
             // 現在の部屋の記憶に認識しているオブジェクトのリストがない場合は新たに作成
             if (roomMemories[currentRoom].recognizedObjects == null) roomMemories[currentRoom].recognizedObjects = new List<ThiefTarget>();
@@ -482,6 +501,22 @@ public class ThiefAI : MonoBehaviour
                 continue;
             }
             
+
+            if (target is PlayerTarget)
+            {
+                // 現在の探索対象が宝物である場合は、プレイヤーを探索対象に設定しない
+                if (currentTarget is VisionTarget && ((VisionTarget)currentTarget).targetType == VisionTarget.TargetType.Treasure)
+                {
+                    continue; 
+                }
+                // 現在の探索対象が宝物でない場合は、プレイヤーを探索対象に設定する
+                else
+                {
+                    currentTarget = target;
+                }
+
+                continue;
+            }
 
             // 新しいオブジェクトを記憶に追加
             roomMemories[currentRoom].recognizedObjects.Add(target);
@@ -623,14 +658,6 @@ public class ThiefAI : MonoBehaviour
                             }
                             break;
                     }
-                }
-                else if (entry is PlayerTarget)
-                {
-                    // 宝物を探索対象にしている場合は、スキップ
-                    if (currentTarget is VisionTarget vt && vt.targetType == VisionTarget.TargetType.Treasure) continue;
-                    // 空の宝箱型の罠を探索対象にしている場合は、スキップ
-                    if (currentTarget is TrapTarget tt && tt.gimmickScript.gimmick == Gimmick.EmptyChest) continue;
-
                 }
                 else if (entry is TrapTarget)
                 {
@@ -1034,12 +1061,12 @@ public class ThiefAI : MonoBehaviour
         {
             // ワープする = ドアを通過した
             // escapeRouteの先頭が次の移動ポイントになる想定なので、先頭を削除して次の移動ポイントを設定する
-            if (escapeRoute != null && escapeRoute.Count > 0)
+            if (moveRoute != null && moveRoute.Count > 0)
             {
-                escapeRoute.RemoveAt(0);
-                if (escapeRoute.Count > 0)
+                moveRoute.RemoveAt(0);
+                if (moveRoute.Count > 0)
                 {
-                    nextRoomMovePoint = escapeRoute[0];
+                    nextRoomMovePoint = moveRoute[0];
                     isNextRoomMovePointDecided = true;
                 }
                 else
@@ -1075,13 +1102,13 @@ public class ThiefAI : MonoBehaviour
         }
 
         // リスト初期化
-        if (escapeRoute == null) escapeRoute = new List<Transform>();
-        escapeRoute.Clear();
+        if (moveRoute == null) moveRoute = new List<Transform>();
+        moveRoute.Clear();
 
         // 最終目的地（最初に入ってきた入口）を末尾に追加
         if (firstEntryPoint != null)
         {
-            escapeRoute.Add(firstEntryPoint);
+            moveRoute.Add(firstEntryPoint);
         }
         else
         {
@@ -1208,13 +1235,13 @@ public class ThiefAI : MonoBehaviour
                 continue;
             }
 
-            escapeRoute.Add(doorTr);
+            moveRoute.Add(doorTr);
         }
 
         // ついでに「次に向かうドア」を nextRoomMovePoint に入れておく（既存仕様と互換）
-        if (escapeRoute.Count > 0)
+        if (moveRoute.Count > 0)
         {
-            nextRoomMovePoint = escapeRoute[0];
+            nextRoomMovePoint = moveRoute[0];
             isNextRoomMovePointDecided = true;
         }
     }

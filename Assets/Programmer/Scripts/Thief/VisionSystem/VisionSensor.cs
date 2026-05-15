@@ -58,7 +58,11 @@ public class VisionSensor : MonoBehaviour
                 target = hit.GetComponent<TrapTarget>();
                 if (target == null)
                 {
-                    continue; // VisionTargetもTrapTargetもない場合はスキップ
+                    target = hit.GetComponent<PlayerTarget>();
+                    if (target == null)
+                    {
+                        continue; // VisionTargetもTrapTargetもPlayerTargetもない場合はスキップ
+                    }
                 }
             }
 
