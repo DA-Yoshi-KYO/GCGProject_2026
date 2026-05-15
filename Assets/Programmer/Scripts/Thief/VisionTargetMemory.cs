@@ -19,4 +19,8 @@ public class VisionTargetMemory
     [Header("探索済みかどうか")]
     [Tooltip("探索済みかどうか")]
     public bool isExplored;
+
+    [Header("探索している人")]
+    [Tooltip("探索している人")]
+    public GameObject searchThief;
 }
