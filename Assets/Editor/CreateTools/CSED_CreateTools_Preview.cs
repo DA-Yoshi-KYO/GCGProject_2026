@@ -418,11 +418,17 @@ public partial class CSED_CreateTools
     }
 
     /// <summary>
-    /// FieldDataのレイアウト種別に応じたプレビューを描画します。
+    /// Fieldのプレビューを描画します。
     /// </summary>
     /// <param name="f_fieldData">描画対象のFieldData</param>
     private void DrawPreviewField(CSED_CreateTools_FieldData f_fieldData)
     {
+        if (f_fieldData.FieldType == CSE_CreateTools_FieldType.List)
+        {
+            DrawPreviewListByLayout(f_fieldData);
+            return;
+        }
+
         switch (f_fieldData.FieldLayoutType)
         {
             case CSE_CreateTools_FieldLayoutType.InputField:
@@ -453,6 +459,320 @@ public partial class CSED_CreateTools
                 DrawPreviewInputField(f_fieldData);
                 break;
         }
+    }
+
+    /// <summary>
+    /// List型のプレビューをLayoutに応じて描画します。
+    /// </summary>
+    /// <param name="f_fieldData">描画対象FieldData</param>
+    private void DrawPreviewListByLayout(CSED_CreateTools_FieldData f_fieldData)
+    {
+        EnsureListDefaultElementValueList(f_fieldData);
+
+        EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+        {
+            EditorGUILayout.BeginHorizontal();
+            {
+                EditorGUILayout.LabelField(GetPreviewLabel(f_fieldData));
+
+                GUILayout.FlexibleSpace();
+
+                if (GUILayout.Button("-", GUILayout.Width(24.0f)))
+                {
+                    RemoveListDefaultElement(f_fieldData);
+                }
+
+                if (GUILayout.Button("+", GUILayout.Width(24.0f)))
+                {
+                    AddListDefaultElement(f_fieldData);
+                }
+            }
+            EditorGUILayout.EndHorizontal();
+
+            GUILayout.Space(4.0f);
+
+            for (int i = 0 ; i < f_fieldData.ListDefaultElementValueTextList.Count ; i++)
+            {
+                DrawPreviewListElementByLayout(f_fieldData, i);
+            }
+        }
+        EditorGUILayout.EndVertical();
+    }
+
+    /// <summary>
+    /// Listの各要素をLayoutに応じて描画します。
+    /// </summary>
+    /// <param name="f_fieldData">描画対象FieldData</param>
+    /// <param name="f_index">要素番号</param>
+    private void DrawPreviewListElementByLayout(
+        CSED_CreateTools_FieldData f_fieldData,
+        int f_index)
+    {
+        if (f_index < 0 || f_index >= f_fieldData.ListDefaultElementValueTextList.Count)
+        {
+            return;
+        }
+
+        if (f_fieldData.FieldLayoutType == CSE_CreateTools_FieldLayoutType.Slider)
+        {
+            DrawPreviewListSliderElement(f_fieldData, f_index);
+            return;
+        }
+
+        if (f_fieldData.FieldLayoutType == CSE_CreateTools_FieldLayoutType.MinMaxField)
+        {
+            DrawPreviewListMinMaxElement(f_fieldData, f_index);
+            return;
+        }
+
+        if (f_fieldData.FieldLayoutType == CSE_CreateTools_FieldLayoutType.Toggle)
+        {
+            DrawPreviewListToggleElement(f_fieldData, f_index);
+            return;
+        }
+
+        if (f_fieldData.FieldLayoutType == CSE_CreateTools_FieldLayoutType.TextArea)
+        {
+            DrawPreviewListTextAreaElement(f_fieldData, f_index);
+            return;
+        }
+
+        DrawPreviewListInputFieldElement(f_fieldData, f_index);
+    }
+
+    /// <summary>
+    /// ListのMinMaxField要素を描画します。
+    /// </summary>
+    /// <param name="f_fieldData">描画対象FieldData</param>
+    /// <param name="f_index">要素番号</param>
+    private void DrawPreviewListMinMaxElement(
+        CSED_CreateTools_FieldData f_fieldData,
+        int f_index)
+    {
+        EnsureListDefaultElementValueList(f_fieldData);
+
+        if (f_index < 0 ||
+            f_index >= f_fieldData.ListDefaultMinValueTextList.Count ||
+            f_index >= f_fieldData.ListDefaultMaxValueTextList.Count)
+        {
+            return;
+        }
+
+        Rect rowRect = EditorGUILayout.GetControlRect(
+            false,
+            EditorGUIUtility.singleLineHeight);
+
+        float mainLabelWidth = 110.0f;
+        float smallLabelWidth = 28.0f;
+        float spacing = 6.0f;
+
+        float valueAreaX =
+            rowRect.x
+            + mainLabelWidth
+            + spacing;
+
+        float valueAreaWidth =
+            rowRect.width
+            - mainLabelWidth
+            - spacing;
+
+        float fieldWidth =
+            (valueAreaWidth
+            - smallLabelWidth
+            - smallLabelWidth
+            - (spacing * 3.0f)) * 0.5f;
+
+        fieldWidth = Mathf.Max(30.0f, fieldWidth);
+
+        Rect elementLabelRect = new Rect(
+            rowRect.x,
+            rowRect.y,
+            mainLabelWidth,
+            rowRect.height);
+
+        Rect minLabelRect = new Rect(
+            valueAreaX,
+            rowRect.y,
+            smallLabelWidth,
+            rowRect.height);
+
+        Rect minValueRect = new Rect(
+            minLabelRect.xMax + spacing,
+            rowRect.y,
+            fieldWidth,
+            rowRect.height);
+
+        Rect maxLabelRect = new Rect(
+            minValueRect.xMax + spacing,
+            rowRect.y,
+            smallLabelWidth,
+            rowRect.height);
+
+        Rect maxValueRect = new Rect(
+            maxLabelRect.xMax + spacing,
+            rowRect.y,
+            fieldWidth,
+            rowRect.height);
+
+        EditorGUI.LabelField(
+            elementLabelRect,
+            "Element " + f_index.ToString());
+
+        EditorGUI.LabelField(minLabelRect, "Min");
+
+        f_fieldData.ListDefaultMinValueTextList[f_index] = EditorGUI.TextField(
+            minValueRect,
+            f_fieldData.ListDefaultMinValueTextList[f_index]);
+
+        EditorGUI.LabelField(maxLabelRect, "Max");
+
+        f_fieldData.ListDefaultMaxValueTextList[f_index] = EditorGUI.TextField(
+            maxValueRect,
+            f_fieldData.ListDefaultMaxValueTextList[f_index]);
+    }
+
+    /// <summary>
+    /// ListのInputField要素を描画します。
+    /// </summary>
+    /// <param name="f_fieldData">描画対象FieldData</param>
+    /// <param name="f_index">要素番号</param>
+    private void DrawPreviewListInputFieldElement(
+        CSED_CreateTools_FieldData f_fieldData,
+        int f_index)
+    {
+        string label = "Element " + f_index.ToString();
+
+        switch (f_fieldData.ListElementFieldType)
+        {
+            case CSE_CreateTools_FieldType.Int:
+                {
+                    int value = 0;
+
+                    int.TryParse(
+                        f_fieldData.ListDefaultElementValueTextList[f_index],
+                        out value);
+
+                    value = EditorGUILayout.IntField(label, value);
+
+                    f_fieldData.ListDefaultElementValueTextList[f_index] = value.ToString();
+                    break;
+                }
+
+            case CSE_CreateTools_FieldType.Float:
+                {
+                    float value = 0.0f;
+
+                    float.TryParse(
+                        f_fieldData.ListDefaultElementValueTextList[f_index],
+                        out value);
+
+                    value = EditorGUILayout.FloatField(label, value);
+
+                    f_fieldData.ListDefaultElementValueTextList[f_index] = value.ToString();
+                    break;
+                }
+
+            case CSE_CreateTools_FieldType.Bool:
+                {
+                    bool value = false;
+
+                    bool.TryParse(
+                        f_fieldData.ListDefaultElementValueTextList[f_index],
+                        out value);
+
+                    value = EditorGUILayout.Toggle(label, value);
+
+                    f_fieldData.ListDefaultElementValueTextList[f_index] = value.ToString();
+                    break;
+                }
+
+            default:
+                {
+                    f_fieldData.ListDefaultElementValueTextList[f_index] =
+                        EditorGUILayout.TextField(
+                            label,
+                            f_fieldData.ListDefaultElementValueTextList[f_index]);
+
+                    break;
+                }
+        }
+    }
+
+    /// <summary>
+    /// ListのToggle要素を描画します。
+    /// </summary>
+    /// <param name="f_fieldData">描画対象FieldData</param>
+    /// <param name="f_index">要素番号</param>
+    private void DrawPreviewListToggleElement(
+        CSED_CreateTools_FieldData f_fieldData,
+        int f_index)
+    {
+        string label = "Element " + f_index.ToString();
+
+        bool value = false;
+
+        bool.TryParse(
+            f_fieldData.ListDefaultElementValueTextList[f_index],
+            out value);
+
+        value = EditorGUILayout.Toggle(label, value);
+
+        f_fieldData.ListDefaultElementValueTextList[f_index] = value.ToString();
+    }
+
+    /// <summary>
+    /// ListのTextArea要素を描画します。
+    /// </summary>
+    /// <param name="f_fieldData">描画対象FieldData</param>
+    /// <param name="f_index">要素番号</param>
+    private void DrawPreviewListTextAreaElement(
+        CSED_CreateTools_FieldData f_fieldData,
+        int f_index)
+    {
+        EditorGUILayout.LabelField("Element " + f_index.ToString());
+
+        f_fieldData.ListDefaultElementValueTextList[f_index] =
+            EditorGUILayout.TextArea(
+                f_fieldData.ListDefaultElementValueTextList[f_index],
+                GUILayout.Height(48.0f));
+    }
+
+    /// <summary>
+    /// ListのSlider要素を描画します。
+    /// </summary>
+    /// <param name="f_fieldData">描画対象FieldData</param>
+    /// <param name="f_index">要素番号</param>
+    private void DrawPreviewListSliderElement(
+        CSED_CreateTools_FieldData f_fieldData,
+        int f_index)
+    {
+        string label = "Element " + f_index.ToString();
+
+        float minValue = GetPreviewSliderMinValue(f_fieldData);
+        float maxValue = GetPreviewSliderMaxValue(f_fieldData);
+
+        if (maxValue < minValue)
+        {
+            float temp = minValue;
+            minValue = maxValue;
+            maxValue = temp;
+        }
+
+        float value = 0.0f;
+
+        float.TryParse(
+            f_fieldData.ListDefaultElementValueTextList[f_index],
+            out value);
+
+        value = Mathf.Clamp(value, minValue, maxValue);
+
+        value = EditorGUILayout.Slider(
+            label,
+            value,
+            minValue,
+            maxValue);
+
+        f_fieldData.ListDefaultElementValueTextList[f_index] = value.ToString();
     }
 
     /// <summary>
@@ -798,17 +1118,109 @@ public partial class CSED_CreateTools
     /// <summary>
     /// ReorderableListの見本を描画します。
     /// </summary>
-    /// <param name="f_fieldData">描画対象のFieldData</param>
+    /// <param name="f_fieldData">描画対象FieldData</param>
     private void DrawPreviewReorderableList(CSED_CreateTools_FieldData f_fieldData)
     {
-        string label = GetPreviewLabel(f_fieldData);
-        int count = GetPreviewListDefaultCount(f_fieldData);
+        EnsureListDefaultElementValueList(f_fieldData);
 
-        EditorGUILayout.LabelField(label);
-
-        for (int i = 0 ; i < count ; i++)
+        EditorGUILayout.BeginVertical(EditorStyles.helpBox);
         {
-            EditorGUILayout.LabelField("Element " + i.ToString());
+            EditorGUILayout.BeginHorizontal();
+            {
+                EditorGUILayout.LabelField(GetPreviewLabel(f_fieldData));
+
+                GUILayout.FlexibleSpace();
+
+                if (GUILayout.Button("+", GUILayout.Width(24.0f)))
+                {
+                    AddListDefaultElement(f_fieldData);
+                }
+
+                if (GUILayout.Button("-", GUILayout.Width(24.0f)))
+                {
+                    RemoveListDefaultElement(f_fieldData);
+                }
+            }
+            EditorGUILayout.EndHorizontal();
+
+            GUILayout.Space(4.0f);
+
+            for (int i = 0 ; i < f_fieldData.ListDefaultElementValueTextList.Count ; i++)
+            {
+                DrawPreviewListElementField(f_fieldData, i);
+            }
+        }
+        EditorGUILayout.EndVertical();
+    }
+
+    /// <summary>
+    /// ReorderableListプレビューの各要素を描画します。
+    /// </summary>
+    /// <param name="f_fieldData">描画対象FieldData</param>
+    /// <param name="f_index">要素番号</param>
+    private void DrawPreviewListElementField(
+        CSED_CreateTools_FieldData f_fieldData,
+        int f_index)
+    {
+        if (f_index < 0 || f_index >= f_fieldData.ListDefaultElementValueTextList.Count)
+        {
+            return;
+        }
+
+        string label = "Element " + f_index.ToString();
+
+        switch (f_fieldData.ListElementFieldType)
+        {
+            case CSE_CreateTools_FieldType.Int:
+                {
+                    int value = 0;
+
+                    int.TryParse(
+                        f_fieldData.ListDefaultElementValueTextList[f_index],
+                        out value);
+
+                    value = EditorGUILayout.IntField(label, value);
+
+                    f_fieldData.ListDefaultElementValueTextList[f_index] = value.ToString();
+                    break;
+                }
+
+            case CSE_CreateTools_FieldType.Float:
+                {
+                    float value = 0.0f;
+
+                    float.TryParse(
+                        f_fieldData.ListDefaultElementValueTextList[f_index],
+                        out value);
+
+                    value = EditorGUILayout.FloatField(label, value);
+
+                    f_fieldData.ListDefaultElementValueTextList[f_index] = value.ToString();
+                    break;
+                }
+
+            case CSE_CreateTools_FieldType.Bool:
+                {
+                    bool value = false;
+
+                    bool.TryParse(
+                        f_fieldData.ListDefaultElementValueTextList[f_index],
+                        out value);
+
+                    value = EditorGUILayout.Toggle(label, value);
+
+                    f_fieldData.ListDefaultElementValueTextList[f_index] = value.ToString();
+                    break;
+                }
+
+            default:
+                {
+                    f_fieldData.ListDefaultElementValueTextList[f_index] =
+                        EditorGUILayout.TextField(
+                            label,
+                            f_fieldData.ListDefaultElementValueTextList[f_index]);
+                    break;
+                }
         }
     }
 

@@ -11,11 +11,41 @@
 
 #if UNITY_EDITOR
 
+using System.Collections.Generic;
+
 /// <summary>
 /// CreateToolsで扱う変数1つ分のデータです。
 /// </summary>
 public class CSED_CreateTools_FieldData
 {
+    /// <summary>
+    /// Listの初期値をnull扱いにするかどうかです。
+    /// trueの場合、全要素のDefault値をnull扱いにします。
+    /// </summary>
+    public bool IsListDefaultValueNull { get; set; }
+
+    /// <summary>
+    /// ListのMin初期値リストです。
+    /// MinMaxField用です。
+    /// </summary>
+    public List<string> ListDefaultMinValueTextList { get; set; }
+
+    /// <summary>
+    /// ListのMax初期値リストです。
+    /// MinMaxField用です。
+    /// </summary>
+    public List<string> ListDefaultMaxValueTextList { get; set; }
+
+    /// <summary>
+    /// Listの初期要素値リストです。
+    /// </summary>
+    public List<string> ListDefaultElementValueTextList { get; set; }
+
+    /// <summary>
+    /// List型の中身の型です。
+    /// </summary>
+    public CSE_CreateTools_FieldType ListElementFieldType { get; set; }
+
     /// <summary>
     /// Listの初期要素数をnull扱いにするかどうかです。
     /// </summary>
@@ -112,11 +142,12 @@ public class CSED_CreateTools_FieldData
         FieldLayoutType = f_fieldLayoutType;
         TagName = f_fieldName;
 
-        IsSliderMinValueNull = true;
-        SliderMinValueText = string.Empty;
+        ListElementFieldType = CSE_CreateTools_FieldType.String;
+        ListDefaultElementValueTextList = new List<string>();
+        ListDefaultMinValueTextList = new List<string>();
+        ListDefaultMaxValueTextList = new List<string>();
 
-        IsSliderMaxValueNull = true;
-        SliderMaxValueText = string.Empty;
+        IsListDefaultValueNull = true;
 
         IsDefaultValueNull = true;
         DefaultValueText = string.Empty;
@@ -126,6 +157,9 @@ public class CSED_CreateTools_FieldData
 
         IsDefaultMaxValueNull = true;
         DefaultMaxValueText = string.Empty;
+
+        IsSliderMinValueNull = true;
+        SliderMinValueText = string.Empty;
 
         IsSliderMaxValueNull = true;
         SliderMaxValueText = string.Empty;

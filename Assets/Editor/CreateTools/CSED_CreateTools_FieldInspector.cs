@@ -11,6 +11,7 @@
 */
 
 #if UNITY_EDITOR
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -207,6 +208,15 @@ public partial class CSED_CreateTools
             f_fieldData.FieldLayoutType = CreateDefaultFieldLayoutType(f_fieldData.FieldType);
         }
 
+        if (f_fieldData.FieldType == CSE_CreateTools_FieldType.List)
+        {
+            GUILayout.Space(c_FieldInspectorRowSpacing);
+
+            f_fieldData.ListElementFieldType = DrawSmallListElementFieldTypePopup(
+                "  List Type",
+                f_fieldData.ListElementFieldType);
+        }
+
         GUILayout.Space(c_FieldInspectorRowSpacing);
 
         f_fieldData.FieldName = DrawSmallTextField(
@@ -274,7 +284,16 @@ public partial class CSED_CreateTools
 
         GUILayout.Space(c_FieldInspectorSectionTopSpacing);
 
-        DrawDefaultTextAreaValueSettings(f_fieldData);
+        if (f_fieldData.FieldType == CSE_CreateTools_FieldType.List)
+        {
+            DrawListDefaultValueSettingsByLayout(
+                f_fieldData,
+                CSE_CreateTools_FieldLayoutType.TextArea);
+        }
+        else
+        {
+            DrawDefaultTextAreaValueSettings(f_fieldData);
+        }
     }
 
     /// <summary>
@@ -334,8 +353,217 @@ public partial class CSED_CreateTools
 
         GUILayout.Space(c_FieldInspectorSectionTopSpacing);
 
-        DrawDefaultValueSettings(f_fieldData);
+        if (f_fieldData.FieldType == CSE_CreateTools_FieldType.List)
+        {
+            DrawListDefaultValueSettingsByLayout(
+                f_fieldData,
+                CSE_CreateTools_FieldLayoutType.InputField);
+        }
+        else
+        {
+            DrawDefaultValueSettings(f_fieldData);
+        }
     }
+
+    /// <summary>
+    /// List用の初期値設定をLayoutに応じて描画します。
+    /// </summary>
+    /// <param name="f_fieldData">選択中Fieldデータ</param>
+    /// <param name="f_layoutType">適用するLayout</param>
+    private void DrawListDefaultValueSettingsByLayout(
+        CSED_CreateTools_FieldData f_fieldData,
+        CSE_CreateTools_FieldLayoutType f_layoutType)
+    {
+        EnsureListDefaultElementValueList(f_fieldData);
+
+        EditorGUILayout.LabelField("Default設定", EditorStyles.boldLabel);
+
+        GUILayout.Space(c_FieldInspectorSectionTitleBottomSpacing);
+
+        DrawListElementCountControl(f_fieldData);
+
+        GUILayout.Space(c_FieldInspectorRowSpacing);
+
+        f_fieldData.IsListDefaultValueNull = DrawSmallToggle(
+            "  Default Is Null",
+            f_fieldData.IsListDefaultValueNull);
+
+        GUILayout.Space(c_FieldInspectorRowSpacing);
+
+        EditorGUI.BeginDisabledGroup(f_fieldData.IsListDefaultValueNull);
+        {
+            for (int i = 0 ; i < f_fieldData.ListDefaultElementValueTextList.Count ; i++)
+            {
+                DrawListDefaultElementByLayout(f_fieldData, f_layoutType, i);
+
+                GUILayout.Space(c_FieldInspectorRowSpacing);
+            }
+        }
+        EditorGUI.EndDisabledGroup();
+    }
+
+    /// <summary>
+    /// Listの各要素初期値をLayoutに応じて描画します。
+    /// </summary>
+    /// <param name="f_fieldData">選択中Fieldデータ</param>
+    /// <param name="f_layoutType">適用するLayout</param>
+    /// <param name="f_index">要素番号</param>
+    private void DrawListDefaultElementByLayout(
+        CSED_CreateTools_FieldData f_fieldData,
+        CSE_CreateTools_FieldLayoutType f_layoutType,
+        int f_index)
+    {
+        if (f_index < 0 || f_index >= f_fieldData.ListDefaultElementValueTextList.Count)
+        {
+            return;
+        }
+
+        if (f_layoutType == CSE_CreateTools_FieldLayoutType.MinMaxField)
+        {
+            DrawListDefaultMinMaxElement(f_fieldData, f_index);
+            return;
+        }
+
+        if (f_layoutType == CSE_CreateTools_FieldLayoutType.Toggle)
+        {
+            DrawListDefaultToggleElement(f_fieldData, f_index);
+            return;
+        }
+
+        if (f_layoutType == CSE_CreateTools_FieldLayoutType.TextArea)
+        {
+            DrawListDefaultTextAreaElement(f_fieldData, f_index);
+            return;
+        }
+
+        DrawListDefaultSingleValueElement(f_fieldData, f_index);
+    }
+
+    /// <summary>
+    /// Listの単一値要素を描画します。
+    /// </summary>
+    /// <param name="f_fieldData">選択中Fieldデータ</param>
+    /// <param name="f_index">要素番号</param>
+    private void DrawListDefaultSingleValueElement(
+        CSED_CreateTools_FieldData f_fieldData,
+        int f_index)
+    {
+        f_fieldData.ListDefaultElementValueTextList[f_index] = DrawSmallTextField(
+            "  Element " + f_index.ToString(),
+            f_fieldData.ListDefaultElementValueTextList[f_index]);
+    }
+
+    /// <summary>
+    /// ListのToggle要素を描画します。
+    /// </summary>
+    /// <param name="f_fieldData">選択中Fieldデータ</param>
+    /// <param name="f_index">要素番号</param>
+    private void DrawListDefaultToggleElement(
+        CSED_CreateTools_FieldData f_fieldData,
+        int f_index)
+    {
+        bool value = false;
+
+        bool.TryParse(
+            f_fieldData.ListDefaultElementValueTextList[f_index],
+            out value);
+
+        value = DrawSmallToggle(
+            "  Element " + f_index.ToString(),
+            value);
+
+        f_fieldData.ListDefaultElementValueTextList[f_index] = value.ToString();
+    }
+
+    /// <summary>
+    /// ListのTextArea要素を描画します。
+    /// </summary>
+    /// <param name="f_fieldData">選択中Fieldデータ</param>
+    /// <param name="f_index">要素番号</param>
+    private void DrawListDefaultTextAreaElement(
+        CSED_CreateTools_FieldData f_fieldData,
+        int f_index)
+    {
+        f_fieldData.ListDefaultElementValueTextList[f_index] = DrawSmallTextArea(
+            "  Element " + f_index.ToString(),
+            f_fieldData.ListDefaultElementValueTextList[f_index]);
+    }
+
+    /// <summary>
+    /// ListのMinMax要素を描画します。
+    /// </summary>
+    /// <param name="f_fieldData">選択中Fieldデータ</param>
+    /// <param name="f_index">要素番号</param>
+    private void DrawListDefaultMinMaxElement(
+        CSED_CreateTools_FieldData f_fieldData,
+        int f_index)
+    {
+        EnsureListDefaultElementValueList(f_fieldData);
+
+        if (f_index < 0 ||
+            f_index >= f_fieldData.ListDefaultMinValueTextList.Count ||
+            f_index >= f_fieldData.ListDefaultMaxValueTextList.Count)
+        {
+            return;
+        }
+
+        Rect rowRect = GetFieldInspectorRowRect();
+        Rect labelRect = GetFieldInspectorLabelRect(rowRect);
+        Rect inputRect = GetFieldInspectorInputRect(rowRect);
+
+        float smallLabelWidth = 26.0f;
+        float spacing = 4.0f;
+
+        float fieldWidth =
+            (inputRect.width
+            - smallLabelWidth
+            - smallLabelWidth
+            - (spacing * 3.0f)) * 0.5f;
+
+        fieldWidth = Mathf.Max(24.0f, fieldWidth);
+
+        Rect minLabelRect = new Rect(
+            inputRect.x,
+            inputRect.y,
+            smallLabelWidth,
+            inputRect.height);
+
+        Rect minValueRect = new Rect(
+            minLabelRect.xMax + spacing,
+            inputRect.y,
+            fieldWidth,
+            inputRect.height);
+
+        Rect maxLabelRect = new Rect(
+            minValueRect.xMax + spacing,
+            inputRect.y,
+            smallLabelWidth,
+            inputRect.height);
+
+        Rect maxValueRect = new Rect(
+            maxLabelRect.xMax + spacing,
+            inputRect.y,
+            fieldWidth,
+            inputRect.height);
+
+        EditorGUI.LabelField(
+            labelRect,
+            "  Element " + f_index.ToString());
+
+        EditorGUI.LabelField(minLabelRect, "Min");
+
+        f_fieldData.ListDefaultMinValueTextList[f_index] = EditorGUI.TextField(
+            minValueRect,
+            f_fieldData.ListDefaultMinValueTextList[f_index]);
+
+        EditorGUI.LabelField(maxLabelRect, "Max");
+
+        f_fieldData.ListDefaultMaxValueTextList[f_index] = EditorGUI.TextField(
+            maxValueRect,
+            f_fieldData.ListDefaultMaxValueTextList[f_index]);
+    }
+
+
 
     /// <summary>
     /// Input Field共通設定を描画します。
@@ -362,7 +590,16 @@ public partial class CSED_CreateTools
 
         GUILayout.Space(c_FieldInspectorSectionTopSpacing);
 
-        DrawDefaultValueSettings(f_fieldData);
+        if (f_fieldData.FieldType == CSE_CreateTools_FieldType.List)
+        {
+            DrawListDefaultValueSettingsByLayout(
+                f_fieldData,
+                CSE_CreateTools_FieldLayoutType.Slider);
+        }
+        else
+        {
+            DrawDefaultValueSettings(f_fieldData);
+        }
 
         GUILayout.Space(c_FieldInspectorSectionTopSpacing);
 
@@ -379,7 +616,16 @@ public partial class CSED_CreateTools
 
         GUILayout.Space(c_FieldInspectorSectionTopSpacing);
 
-        DrawDefaultBoolValueSettings(f_fieldData);
+        if (f_fieldData.FieldType == CSE_CreateTools_FieldType.List)
+        {
+            DrawListDefaultValueSettingsByLayout(
+                f_fieldData,
+                CSE_CreateTools_FieldLayoutType.Toggle);
+        }
+        else
+        {
+            DrawDefaultBoolValueSettings(f_fieldData);
+        }
     }
 
     /// <summary>
@@ -499,11 +745,20 @@ public partial class CSED_CreateTools
     /// <param name="f_fieldData">選択中Fieldデータ</param>
     private void DrawMinMaxFieldLayoutSettings(CSED_CreateTools_FieldData f_fieldData)
     {
-        EditorGUILayout.LabelField("  Min Max Field設定", EditorStyles.boldLabel);
+        if (f_fieldData.FieldType == CSE_CreateTools_FieldType.List)
+        {
+            DrawListDefaultValueSettingsByLayout(
+                f_fieldData,
+                CSE_CreateTools_FieldLayoutType.MinMaxField);
+
+            return;
+        }
+
+        EditorGUILayout.LabelField("Min Max Field設定", EditorStyles.boldLabel);
 
         GUILayout.Space(c_FieldInspectorSectionTitleBottomSpacing);
 
-        EditorGUILayout.LabelField("  Default Min", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField("Default Min", EditorStyles.boldLabel);
 
         GUILayout.Space(c_FieldInspectorSectionTitleBottomSpacing);
 
@@ -523,7 +778,7 @@ public partial class CSED_CreateTools
 
         GUILayout.Space(c_FieldInspectorSectionTopSpacing);
 
-        EditorGUILayout.LabelField("  Default Max", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField("Default Max", EditorStyles.boldLabel);
 
         GUILayout.Space(c_FieldInspectorSectionTitleBottomSpacing);
 
@@ -689,23 +944,293 @@ public partial class CSED_CreateTools
 
         GUILayout.Space(c_FieldInspectorSectionTopSpacing);
 
-        EditorGUILayout.LabelField("List設定", EditorStyles.boldLabel);
+        DrawListDefaultValueSettings(f_fieldData);
+    }
+
+    /// <summary>
+    /// List用の初期値設定を描画します。
+    /// </summary>
+    /// <param name="f_fieldData">選択中Fieldデータ</param>
+    private void DrawListDefaultValueSettings(CSED_CreateTools_FieldData f_fieldData)
+    {
+        EnsureListDefaultElementValueList(f_fieldData);
+
+        EditorGUILayout.LabelField("Default設定", EditorStyles.boldLabel);
 
         GUILayout.Space(c_FieldInspectorSectionTitleBottomSpacing);
 
-        f_fieldData.IsListDefaultCountNull = DrawSmallToggle(
-            "  Count Is Null",
-            f_fieldData.IsListDefaultCountNull);
+        DrawListElementCountControl(f_fieldData);
 
         GUILayout.Space(c_FieldInspectorRowSpacing);
 
-        EditorGUI.BeginDisabledGroup(f_fieldData.IsListDefaultCountNull);
+        for (int i = 0 ; i < f_fieldData.ListDefaultElementValueTextList.Count ; i++)
         {
-            f_fieldData.ListDefaultCountText = DrawSmallTextField(
-                "  Default Count",
-                f_fieldData.ListDefaultCountText);
+            DrawListDefaultElementValueField(f_fieldData, i);
+
+            GUILayout.Space(c_FieldInspectorRowSpacing);
         }
-        EditorGUI.EndDisabledGroup();
+    }
+
+    /// <summary>
+    /// List初期値リストを使用可能な状態にします。
+    /// </summary>
+    /// <param name="f_fieldData">対象FieldData</param>
+    private void EnsureListDefaultElementValueList(CSED_CreateTools_FieldData f_fieldData)
+    {
+        if (f_fieldData.ListDefaultElementValueTextList == null)
+        {
+            f_fieldData.ListDefaultElementValueTextList = new List<string>();
+        }
+
+        if (f_fieldData.ListDefaultMinValueTextList == null)
+        {
+            f_fieldData.ListDefaultMinValueTextList = new List<string>();
+        }
+
+        if (f_fieldData.ListDefaultMaxValueTextList == null)
+        {
+            f_fieldData.ListDefaultMaxValueTextList = new List<string>();
+        }
+
+        while (f_fieldData.ListDefaultMinValueTextList.Count < f_fieldData.ListDefaultElementValueTextList.Count)
+        {
+            f_fieldData.ListDefaultMinValueTextList.Add("0");
+        }
+
+        while (f_fieldData.ListDefaultMaxValueTextList.Count < f_fieldData.ListDefaultElementValueTextList.Count)
+        {
+            f_fieldData.ListDefaultMaxValueTextList.Add("1");
+        }
+
+        while (f_fieldData.ListDefaultMinValueTextList.Count > f_fieldData.ListDefaultElementValueTextList.Count)
+        {
+            f_fieldData.ListDefaultMinValueTextList.RemoveAt(f_fieldData.ListDefaultMinValueTextList.Count - 1);
+        }
+
+        while (f_fieldData.ListDefaultMaxValueTextList.Count > f_fieldData.ListDefaultElementValueTextList.Count)
+        {
+            f_fieldData.ListDefaultMaxValueTextList.RemoveAt(f_fieldData.ListDefaultMaxValueTextList.Count - 1);
+        }
+    }
+
+    /// <summary>
+    /// List初期値要素を追加します。
+    /// </summary>
+    /// <param name="f_fieldData">対象FieldData</param>
+    private void AddListDefaultElement(CSED_CreateTools_FieldData f_fieldData)
+    {
+        EnsureListDefaultElementValueList(f_fieldData);
+
+        f_fieldData.ListDefaultElementValueTextList.Add(
+            CreateDefaultListElementValue(f_fieldData.ListElementFieldType));
+
+        f_fieldData.ListDefaultMinValueTextList.Add("0");
+        f_fieldData.ListDefaultMaxValueTextList.Add("1");
+
+        Repaint();
+    }
+
+    /// <summary>
+    /// <summary>
+    /// List初期値要素を末尾から削除します。
+    /// </summary>
+    /// <param name="f_fieldData">対象FieldData</param>
+    private void RemoveListDefaultElement(CSED_CreateTools_FieldData f_fieldData)
+    {
+        EnsureListDefaultElementValueList(f_fieldData);
+
+        if (f_fieldData.ListDefaultElementValueTextList.Count <= 0)
+        {
+            return;
+        }
+
+        int removeIndex = f_fieldData.ListDefaultElementValueTextList.Count - 1;
+
+        f_fieldData.ListDefaultElementValueTextList.RemoveAt(removeIndex);
+
+        if (removeIndex < f_fieldData.ListDefaultMinValueTextList.Count)
+        {
+            f_fieldData.ListDefaultMinValueTextList.RemoveAt(removeIndex);
+        }
+
+        if (removeIndex < f_fieldData.ListDefaultMaxValueTextList.Count)
+        {
+            f_fieldData.ListDefaultMaxValueTextList.RemoveAt(removeIndex);
+        }
+
+        Repaint();
+    }
+
+    /// <summary>
+    /// List要素型に応じた初期値文字列を作成します。
+    /// </summary>
+    /// <param name="f_fieldType">List要素型</param>
+    /// <returns>初期値文字列</returns>
+    private string CreateDefaultListElementValue(CSE_CreateTools_FieldType f_fieldType)
+    {
+        switch (f_fieldType)
+        {
+            case CSE_CreateTools_FieldType.Int:
+                return "0";
+
+            case CSE_CreateTools_FieldType.Float:
+                return "0";
+
+            case CSE_CreateTools_FieldType.Bool:
+                return "False";
+
+            case CSE_CreateTools_FieldType.String:
+                return string.Empty;
+
+            case CSE_CreateTools_FieldType.ScriptableObject:
+                return string.Empty;
+
+            case CSE_CreateTools_FieldType.Script:
+                return string.Empty;
+
+            default:
+                return string.Empty;
+        }
+    }
+
+    /// <summary>
+    /// Listの各要素初期値を描画します。
+    /// </summary>
+    /// <param name="f_fieldData">選択中Fieldデータ</param>
+    /// <param name="f_index">要素番号</param>
+    private void DrawListDefaultElementValueField(
+        CSED_CreateTools_FieldData f_fieldData,
+        int f_index)
+    {
+        if (f_index < 0 || f_index >= f_fieldData.ListDefaultElementValueTextList.Count)
+        {
+            return;
+        }
+
+        string label = "  Element " + f_index.ToString();
+
+        if (f_fieldData.ListElementFieldType == CSE_CreateTools_FieldType.Bool)
+        {
+            bool boolValue = false;
+
+            bool.TryParse(
+                f_fieldData.ListDefaultElementValueTextList[f_index],
+                out boolValue);
+
+            boolValue = DrawSmallToggle(label, boolValue);
+
+            f_fieldData.ListDefaultElementValueTextList[f_index] = boolValue.ToString();
+
+            return;
+        }
+
+        f_fieldData.ListDefaultElementValueTextList[f_index] = DrawSmallTextField(
+            label,
+            f_fieldData.ListDefaultElementValueTextList[f_index]);
+    }
+
+    /// <summary>
+    /// Listの要素数変更UIを描画します。
+    /// </summary>
+    /// <param name="f_fieldData">選択中Fieldデータ</param>
+    private void DrawListElementCountControl(CSED_CreateTools_FieldData f_fieldData)
+    {
+        Rect rowRect = GetFieldInspectorRowRect();
+        Rect labelRect = GetFieldInspectorLabelRect(rowRect);
+        Rect inputRect = GetFieldInspectorInputRect(rowRect);
+
+        float buttonWidth = 24.0f;
+        float countWidth = 40.0f;
+        float spacing = 4.0f;
+
+        Rect minusRect = new Rect(
+            inputRect.x,
+            inputRect.y,
+            buttonWidth,
+            inputRect.height);
+
+        Rect countRect = new Rect(
+            minusRect.xMax + spacing,
+            inputRect.y,
+            countWidth,
+            inputRect.height);
+
+        Rect plusRect = new Rect(
+            countRect.xMax + spacing,
+            inputRect.y,
+            buttonWidth,
+            inputRect.height);
+
+        EditorGUI.LabelField(labelRect, "  Element Count");
+
+        if (GUI.Button(minusRect, "-"))
+        {
+            RemoveListDefaultElement(f_fieldData);
+        }
+
+        EditorGUI.LabelField(
+            countRect,
+            f_fieldData.ListDefaultElementValueTextList.Count.ToString());
+
+        if (GUI.Button(plusRect, "+"))
+        {
+            AddListDefaultElement(f_fieldData);
+        }
+    }
+
+    /// <summary>
+    /// Listの中身の型を選択するPopupを描画します。
+    /// </summary>
+    /// <param name="f_label">表示ラベル</param>
+    /// <param name="f_value">現在のList中身の型</param>
+    /// <returns>選択後のList中身の型</returns>
+    private CSE_CreateTools_FieldType DrawSmallListElementFieldTypePopup(
+        string f_label,
+        CSE_CreateTools_FieldType f_value)
+    {
+        string[] displayNames =
+        {
+        "int",
+        "float",
+        "string",
+        "bool",
+        "ScriptableObject",
+        "Script"
+    };
+
+        CSE_CreateTools_FieldType[] values =
+        {
+        CSE_CreateTools_FieldType.Int,
+        CSE_CreateTools_FieldType.Float,
+        CSE_CreateTools_FieldType.String,
+        CSE_CreateTools_FieldType.Bool,
+        CSE_CreateTools_FieldType.ScriptableObject,
+        CSE_CreateTools_FieldType.Script
+    };
+
+        int selectedIndex = 0;
+
+        for (int i = 0 ; i < values.Length ; i++)
+        {
+            if (values[i] == f_value)
+            {
+                selectedIndex = i;
+                break;
+            }
+        }
+
+        Rect rowRect = GetFieldInspectorRowRect();
+        Rect labelRect = GetFieldInspectorLabelRect(rowRect);
+        Rect inputRect = GetFieldInspectorInputRect(rowRect);
+
+        EditorGUI.LabelField(labelRect, f_label);
+
+        selectedIndex = EditorGUI.Popup(
+            inputRect,
+            selectedIndex,
+            displayNames);
+
+        return values[selectedIndex];
     }
 }
 #endif

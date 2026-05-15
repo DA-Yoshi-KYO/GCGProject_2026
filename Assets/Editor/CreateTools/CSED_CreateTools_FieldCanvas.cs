@@ -257,7 +257,7 @@ public partial class CSED_CreateTools
             currentY,
             boxRect.width,
             "  Variable Type",
-            GetFieldTypeDisplayName(fieldData.FieldType));
+            GetFieldCanvasFieldTypeDisplayName(fieldData));
 
         currentY += lineHeight;
 
@@ -278,6 +278,21 @@ public partial class CSED_CreateTools
             boxRect.width,
             "  Layout",
             fieldData.FieldLayoutType.ToString());
+    }
+
+    /// <summary>
+    /// 中央表示用のField型名を取得します。
+    /// </summary>
+    /// <param name="f_fieldData">FieldData</param>
+    /// <returns>中央表示用の型名</returns>
+    private string GetFieldCanvasFieldTypeDisplayName(CSED_CreateTools_FieldData f_fieldData)
+    {
+        if (f_fieldData.FieldType == CSE_CreateTools_FieldType.List)
+        {
+            return "List<" + GetFieldTypeDisplayName(f_fieldData.ListElementFieldType) + ">";
+        }
+
+        return GetFieldTypeDisplayName(f_fieldData.FieldType);
     }
 
     /// <summary>
