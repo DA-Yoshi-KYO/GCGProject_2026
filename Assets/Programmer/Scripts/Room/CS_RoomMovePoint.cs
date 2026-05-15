@@ -445,7 +445,7 @@ public class CS_RoomMovePoint : MonoBehaviour
 
         if (thiefAI != null)
         {
-            thiefAI.WarpAction(targetTransform.position);
+            thiefAI.WarpAction(targetTransform.position, targetTransform.parent.GetComponent<CS_RoomMovePoint>().e_MoveDirection);
         }
     }
 

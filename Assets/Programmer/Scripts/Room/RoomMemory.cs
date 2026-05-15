@@ -20,11 +20,16 @@ public class RoomMemory
     public int dangerLevel;
     [Tooltip("認識したオブジェクトの情報リスト")]
     public List<ThiefTarget> recognizedObjects;
+    [Tooltip("選ばなかったドアの方向情報")]
+    public List<CSE_RoomDoorDirection> unchosenDoors;
+    [Tooltip("入ってきたドアの方向情報")]
+    public CSE_RoomDoorDirection enteredDoorDirection;
 
     public void FirstSetting()
     {
         explorationLevel = 0;
         dangerLevel = 0;
         recognizedObjects = new List<ThiefTarget>();
+        unchosenDoors = new List<CSE_RoomDoorDirection>();
     }
 }
