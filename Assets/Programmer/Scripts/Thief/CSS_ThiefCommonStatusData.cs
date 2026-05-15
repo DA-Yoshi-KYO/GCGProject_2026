@@ -22,6 +22,14 @@ public class CSS_ThiefCommonStatusData : ScriptableObject
     [Tooltip("泥棒が警戒状態の継続時間"), Min(0)]
     public int alertTime;
 
+    [Header("攻撃命中後の気絶時間(秒)")]
+    [Tooltip("泥棒が攻撃を受けた後の気絶時間"),Min(0)]
+    public int stunTime;
+
+    [Header("攻撃命中後の無敵時間(秒)")]
+    [Tooltip("泥棒が攻撃を受けた後の無敵時間"),Min(0)]
+    public int invincibleTime;
+
     [Header("気絶した後に退場するまでの間隔(秒)")]
     [Tooltip("泥棒が気絶した後に退場するまでの間隔"), Min(0)]
     public int exitAfterStunTime;
