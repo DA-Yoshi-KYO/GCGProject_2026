@@ -100,6 +100,8 @@ public class ThiefManager : MonoBehaviour
             //泥棒の生成
             GameObject thief = GameObject.Instantiate(thiefPrefab);
 
+            thief.name = "Thief_" + thiefParent.transform.childCount;
+
             // 基準となるプレイヤーの速度を取得
             float playerSpeed = GameObject.FindGameObjectWithTag("Player").GetComponent<CS_PlayerMove>().GetBasePlayerSpeed();
 
