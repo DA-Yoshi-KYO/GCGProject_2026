@@ -21,12 +21,23 @@ public class RoomNode : MonoBehaviour
     [SerializeField, Header("壁の親オブジェクト")]
     private GameObject wallParent;
 
+    [Header("部屋の初期探索度"), Range(0,100)]
+    public int initialExplorationLevel = 0;
+
+    [SerializeField, Header("ギズモを表示")]
+    private bool showGizmos = false;
+    [SerializeField, Header("ギズモの色")]
+    private Color gizmoColor = Color.green;
+
+
     // 部屋の移動ポイントを回る方向をギズモで表示する
     void OnDrawGizmos()
     {
+            if (!showGizmos) return;
+
         if (movePoints.Count == 0)
             return;
-        Gizmos.color = Color.green;
+        Gizmos.color = gizmoColor;
         for (int i = 0; i < movePoints.Count; i++)
         {
             if (movePoints[i] == null)
@@ -58,7 +69,7 @@ public class RoomNode : MonoBehaviour
         {
             case CSE_RoomDoorDirection.Right:
                 {
-                    Transform rightWall = wallParent.transform.Find("Righ");
+                    Transform rightWall = wallParent.transform.Find("Right");
 
                     wallChilds = rightWall.GetComponentsInChildren<Transform>();
                 }

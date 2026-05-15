@@ -216,12 +216,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ffa5d34ad5ff3ed4dbf3b2fb96be98ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gimmickImage: {fileID: 21300000, guid: ef0a22a2a0e100b40ab966865b36c4d0, type: 3}
   gimmickSizeX: 1
   gimmickSizeY: 1
+  gimmickSizeZ: 1
+  gimmickScale: 50
   hitRangeX: 1
   hitRangeY: 1
+  hitRangeZ: 1
   effectRangeX: 3
-  effectRangeY: 3
+  effectRangeY: 2
+  effectRangeZ: 3
   requiredSoul: 1
   attackPower: 2
   effectPower: 1
@@ -232,8 +237,11 @@ MonoBehaviour:
   gimmickType: 0
   gimmick: 1
   gimmickState: 0
-  Adjust: 10
+  Adjust: 1
+  InteractUI: {fileID: 1696712630574914250, guid: daeb11669dd903946a24d89b6bedd87b,
+    type: 3}
   activeTime: 10
+  gravity: 0.1
 --- !u!136 &6548285118755774186
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -249,7 +257,7 @@ CapsuleCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2

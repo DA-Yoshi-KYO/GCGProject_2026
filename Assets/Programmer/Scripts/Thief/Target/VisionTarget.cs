@@ -4,6 +4,7 @@
  *    宇留野 陸斗
  * ----------------------------------------------------------
  * 2026-04-19 | 初回作成
+ * 2026-05-07 | 探索度を記憶システムに移動
  * 
  */
 using UnityEngine;
@@ -31,6 +32,20 @@ public class VisionTarget : ThiefTarget
     [Tooltip("探索済みとする距離")]
     public float exploredDistanceThreshold;
 
-    [Header("探索進行度"), Tooltip("このターゲットの探索進行度")]
-    public float explorationProgress = 0.0f;
+    [SerializeField, Header("ギズモを表示")]
+    private bool showGizmos = false;
+    [SerializeField, Header("ギズモの色")]
+    private Color gizmoColor = Color.yellow;
+
+    [SerializeField, Header("このオブジェクトを探索している敵")]
+    public GameObject searchThief;
+
+    private void OnDrawGizmos()
+    {
+        if (!showGizmos) return;
+
+        // 探索済みとする距離をギズモで表示
+        Gizmos.color = gizmoColor;
+        Gizmos.DrawWireSphere(transform.position, exploredDistanceThreshold);
+    }
 }

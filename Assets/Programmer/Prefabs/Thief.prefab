@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 4791684058368851407}
   - component: {fileID: 6990849704172034852}
   - component: {fileID: 8524563052370467757}
+  - component: {fileID: 7788051665123145142}
   - component: {fileID: 2397976880975647507}
   m_Layer: 29
   m_Name: Thief
@@ -170,7 +171,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 63810e3420c0a4647858515094300534, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  viewDistance: 10
+  viewDistance: 3
   viewAngle: 120
   targetLayer:
     serializedVersion: 2
@@ -178,6 +179,20 @@ MonoBehaviour:
   obstacleLayer:
     serializedVersion: 2
     m_Bits: 2147483648
+  showGizmos: 1
+  gizmoColor: {r: 1, g: 0.015686274, b: 0.86302555, a: 1}
+--- !u!114 &7788051665123145142
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 729670991071759003}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 993676fd7ed0e8346a451f088ef903c8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!195 &2397976880975647507
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -186,7 +201,7 @@ NavMeshAgent:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 729670991071759003}
   m_Enabled: 1
-  m_AgentTypeID: 0
+  m_AgentTypeID: -1372625422
   m_Radius: 0.5
   m_Speed: 3.5
   m_Acceleration: 8

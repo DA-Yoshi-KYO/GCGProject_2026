@@ -659,12 +659,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b642a7b47aff10346aec93217521a535, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gimmickImage: {fileID: 21300000, guid: 32ae138774dc419408dce89e5094adb4, type: 3}
   gimmickSizeX: 1
   gimmickSizeY: 1
+  gimmickSizeZ: 1
   hitRangeX: 2
   hitRangeY: 2
-  effectRangeX: 100
-  effectRangeY: 100
+  hitRangeZ: 2
+  effectRangeX: 6
+  effectRangeY: 2
+  effectRangeZ: 6
   requiredSoul: 1
   attackPower: 0
   effectPower: 0
@@ -675,8 +679,8 @@ MonoBehaviour:
   gimmickType: 1
   gimmick: 3
   gimmickState: 0
-  Adjust: 10
-  durability: 50
+  Adjust: 1
+  durability: 10
 --- !u!114 &2817741669643907525
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -689,7 +693,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee003987777810640bc67fb600e99a3c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isExplored: 0
   alertValue: 0
   gimmickScript: {fileID: 0}
 --- !u!1 &8166555190473919733

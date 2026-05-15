@@ -9,11 +9,7 @@
 // 当たり判定内に、敵がいた場合、攻撃力を与える
 //
 
-using System.Collections;
-using System.Collections.Generic;
-using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 public enum Gimmick
 {
@@ -46,13 +42,20 @@ public enum GimmickDirection
 }
 
 public class GimmickBase : MonoBehaviour
-{ 
+{
+    // ギミックのイメ－ジ画像
+    public Sprite gimmickImage;
+
     // 大きさ
     [Header("大きさ")]
     [Tooltip("X方向の大きさ"), Min(0)]
     public float gimmickSizeX;
     [Tooltip("Y方向の大きさ"), Min(0)]
     public float gimmickSizeY;
+    [Tooltip("Z方向の大きさ"), Min(0)]
+    public float gimmickSizeZ;
+    [Tooltip("拡縮率 / ％"), Min(0)]
+    public float gimmickScale = 100;
 
     // 命中範囲
     [Header("命中範囲")]
@@ -60,6 +63,8 @@ public class GimmickBase : MonoBehaviour
     public float hitRangeX;
     [Tooltip("Y方向の命中範囲"), Min(0)]
     public float hitRangeY;
+    [Tooltip("Z方向の命中範囲"), Min(0)]
+    public float hitRangeZ;
 
     // 効果範囲
     [Header("効果範囲")]
@@ -67,6 +72,8 @@ public class GimmickBase : MonoBehaviour
     public float effectRangeX;
     [Tooltip("Y方向の効果範囲"), Min(0)]
     public float effectRangeY;
+    [Tooltip("Z方向の効果範囲"), Min(0)]
+    public float effectRangeZ;
 
     // 必要なソウル数
     [Header("必要ソウル数")]
@@ -107,6 +114,10 @@ public class GimmickBase : MonoBehaviour
     [Tooltip("ギミックの大きさや位置を調整するための値"), Min(1)]
     public int Adjust;
 
+    [Header("範囲UI")]
+    [SerializeField] private GameObject InteractUI;
+    private GameObject pre_InteractUI = null;
+
     // ギミックのグリッド上の位置
     protected Vector2Int gimmickGridPos;
 
@@ -115,7 +126,6 @@ public class GimmickBase : MonoBehaviour
     private void Start()
     {
     }
-
 
     /// <summary>
     /// ギミックの大きさを、グリッドの大きさに合わせて調整する関数
@@ -132,14 +142,14 @@ public class GimmickBase : MonoBehaviour
         Vector3 meshSize = meshFilter.sharedMesh.bounds.size;
 
         float targetSizeX = gimmickSizeX * roomGrid.gridSize.x;
-        float targetSizeZ = gimmickSizeY * roomGrid.gridSize.y;
+        float targetSizeZ = gimmickSizeZ * roomGrid.gridSize.y;
 
         float scaleX = targetSizeX / meshSize.x;
         float scaleZ = targetSizeZ / meshSize.z;
         float scaleY = (scaleX + scaleZ) / 2f;
-        scaleX = scaleX * Adjust;
-        scaleY = scaleY * Adjust;
-        scaleZ = scaleZ * Adjust;
+        scaleX = scaleX * gimmickScale / 100f;
+        scaleY = scaleY * gimmickScale / 100f;
+        scaleZ = scaleZ * gimmickScale / 100f;
 
         transform.localScale = new Vector3(scaleX, scaleY, scaleZ);
     }
@@ -214,8 +224,8 @@ public class GimmickBase : MonoBehaviour
             GameObject Effect = hitChecker.transform.Find("Effect").gameObject;
             GameObject Hit = hitChecker.transform.Find("Hit").gameObject;
 
-            Vector3 EffectSize = new Vector3(effectRangeX * roomGrid.gridSize.x,1, effectRangeY * roomGrid.gridSize.y);
-            Vector3 HitSize = new Vector3(hitRangeX * roomGrid.gridSize.x, 1, hitRangeY * roomGrid.gridSize.y);
+            Vector3 EffectSize = new Vector3(effectRangeX * roomGrid.gridSize.x,effectRangeY * roomGrid.gridSize.y, effectRangeZ * roomGrid.gridSize.y);
+            Vector3 HitSize = new Vector3(hitRangeX * roomGrid.gridSize.x, hitRangeY * roomGrid.gridSize.y, hitRangeZ * roomGrid.gridSize.y);
             
             EffectSize.x = EffectSize.x * (float)Adjust;
             EffectSize.y = EffectSize.y * (float)Adjust;
@@ -243,10 +253,47 @@ public class GimmickBase : MonoBehaviour
         }
 
         HitCheckerPos.x = HitCheckerPos.x * (float)Adjust;
-        HitCheckerPos.y = HitCheckerPos.y * (float)Adjust;
+        HitCheckerPos.y = (HitCheckerPos.y * (float)Adjust) + ((effectRangeY * roomGrid.gridSize.y) / 2.0f);
         HitCheckerPos.z = HitCheckerPos.z * (float)Adjust;
 
         hitChecker.transform.position = HitCheckerPos;
+    }
+
+    protected void SetHitChecker(Vector3 WorldPos)
+    {
+        if (hitChecker == null)
+        {
+            hitChecker = Instantiate(hitCheckerPrefab);
+
+            HitChecker hit = hitChecker.GetComponent<HitChecker>();
+            if (hit != null)
+            {
+                hit.SetHitDamage(attackPower);
+                hit.SetEffectDamage(effectPower);
+                hit.HitLoop(gimmickType == GimmickType.Reusable);
+                hit.SetGimmick(gimmick);
+                hit.SetParentGameObject(gameObject);
+            }
+
+            // 当たり判定の大きさを設定
+            GameObject Effect = hitChecker.transform.Find("Effect").gameObject;
+            GameObject Hit = hitChecker.transform.Find("Hit").gameObject;
+
+            Vector3 EffectSize = new Vector3(effectRangeX * roomGrid.gridSize.x, effectRangeY * roomGrid.gridSize.y, effectRangeZ * roomGrid.gridSize.y);
+            Vector3 HitSize = new Vector3(hitRangeX * roomGrid.gridSize.x, hitRangeY * roomGrid.gridSize.y, hitRangeZ * roomGrid.gridSize.y);
+
+            EffectSize.x = EffectSize.x * (float)Adjust;
+            EffectSize.y = EffectSize.y * (float)Adjust;
+            EffectSize.z = EffectSize.z * (float)Adjust;
+
+            HitSize.x = HitSize.x * (float)Adjust;
+            HitSize.y = HitSize.y * (float)Adjust;
+            HitSize.z = HitSize.z * (float)Adjust;
+
+            Effect.transform.localScale = EffectSize;
+            Hit.transform.localScale = HitSize;
+        }
+        hitChecker.transform.position = WorldPos;
     }
 
     /// <summary>
@@ -269,13 +316,13 @@ public class GimmickBase : MonoBehaviour
         switch(gimmickDirection)
         {
             case GimmickDirection.Up:
-                return new Vector2Int(0, -1);
-            case GimmickDirection.Down:
                 return new Vector2Int(0, 1);
+            case GimmickDirection.Down:
+                return new Vector2Int(0, -1);
             case GimmickDirection.Left:
-                return new Vector2Int(-1, 0);
-            case GimmickDirection.Right:
                 return new Vector2Int(1, 0);
+            case GimmickDirection.Right:
+                return new Vector2Int(-1, 0);
             default:
                 return Vector2Int.zero;
         }
@@ -299,6 +346,32 @@ public class GimmickBase : MonoBehaviour
         return gimmick;
     }
 
+    private void OnTriggerStay(Collider other)
+    {
+        //接触している
+        if (other.gameObject.CompareTag("Player"))
+        {
+            if(pre_InteractUI == null)
+            {
+                pre_InteractUI = Instantiate(InteractUI);
+                pre_InteractUI.transform.position = gameObject.transform.position;
+                pre_InteractUI.transform.position += new Vector3(0, 1.5f, 0);
+            }
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        //接触していない
+        if (other.gameObject.CompareTag("Player"))
+        {
+            if(pre_InteractUI != null)
+            {
+                Destroy(pre_InteractUI);
+                pre_InteractUI = null;
+            }
+        }
+    }
 
     // ===============================================================================
 
