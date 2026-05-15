@@ -41,7 +41,7 @@ public class CS_PlayerAction : MonoBehaviour
         settingPos = CalculateGimmickSetPosition();
 
         //キー操作でUIのギミックの選択
-        if (playerData.playerInput.Player.GimmickChangeRight.triggered)
+        if (playerData.customInputAction.Player.GimmickChangeRight.triggered)
         {
             currentGimmickIndex++;
 
@@ -50,7 +50,7 @@ public class CS_PlayerAction : MonoBehaviour
 
             Debug.Log("現在選択中のギミック：" + gimmickKind[currentGimmickIndex].name);
         }
-        else if(playerData.playerInput.Player.GimmickChangeLeft.triggered)
+        else if(playerData.customInputAction.Player.GimmickChangeLeft.triggered)
         {
             currentGimmickIndex--;
 
@@ -64,7 +64,7 @@ public class CS_PlayerAction : MonoBehaviour
         //モードの切り替え
         if (interactObject == null)
         {
-            if (playerData.playerInput.Player.Interact.triggered)
+            if (playerData.customInputAction.Player.Interact.triggered)
             {
                 switch (playerData.currentMode)
                 {
@@ -81,14 +81,14 @@ public class CS_PlayerAction : MonoBehaviour
             }
 
             //設置モードのキャンセル
-            if (playerData.playerInput.Player.InteractCancel.triggered)
+            if (playerData.customInputAction.Player.InteractCancel.triggered)
             {
                 playerData.currentMode = PlayerData.PlayerMode.Normal;
             }
         }
         else
         {
-            if (playerData.playerInput.Player.Interact.triggered)
+            if (playerData.customInputAction.Player.Interact.triggered)
             {
                 //ギミックの情報を取得
                 GimmickBase gimmick = interactObject.GetComponent<GimmickBase>();
