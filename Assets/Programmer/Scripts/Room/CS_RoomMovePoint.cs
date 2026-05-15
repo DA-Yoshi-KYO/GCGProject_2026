@@ -381,7 +381,7 @@ public class CS_RoomMovePoint : MonoBehaviour
 
         SetupPlayerDataCurrentRoom(playerTransform);
 
-        PlayerCamera playerCamera = playerTransform.GetComponent<PlayerCamera>();
+        CS_PlayerCamera playerCamera = playerTransform.GetComponent<CS_PlayerCamera>();
 
         if (playerCamera == null)
         {
@@ -445,7 +445,7 @@ public class CS_RoomMovePoint : MonoBehaviour
 
         if (thiefAI != null)
         {
-            thiefAI.WarpAction(targetTransform.position);
+            thiefAI.WarpAction(targetTransform.position, targetTransform.parent.GetComponent<CS_RoomMovePoint>().e_MoveDirection);
         }
     }
 

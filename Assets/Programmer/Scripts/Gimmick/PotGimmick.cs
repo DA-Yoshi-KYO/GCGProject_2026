@@ -11,6 +11,7 @@
 // ・当たり判定の大きさは、HitRangeX, HitRangeY
 
 
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PotGimmick : GimmickBase
@@ -19,6 +20,13 @@ public class PotGimmick : GimmickBase
     [Tooltip("アクティブ状態の時間"), Min(0)]
     public float activeTime;
 
+    [Header("重力値")]
+    [Tooltip("主に落下時に使用"), Min(0)]
+    [SerializeField]
+    private float gravity;
+
+    private bool isFall = false;  //落下中かどうか
+    private float initPositionY;  //初期位置Y
     private bool isFirstUpdate = true;
     protected override void IdleUpdate()
     {
@@ -32,8 +40,65 @@ public class PotGimmick : GimmickBase
             Vector2Int directionVec = GetDirectionVec();
             Vector2Int hitCheckerGridPos = new Vector2Int(gimmickGridPos.x + directionVec.x, gimmickGridPos.y + directionVec.y);
             SetHitChecker(hitCheckerGridPos.x, hitCheckerGridPos.y);
+
+            //インタラクトされた方向に地面があるか確認
+            //原点をギミックの方向にずらして、下方にレイを飛ばす
+            //インタラクト時転がす
+            float interactVecX = 0f;
+            float interactVecZ = 0f;
+            if (gimmickDirection == GimmickDirection.Up)
+            {//Z+
+                interactVecZ = -roomGrid.gridSize.x;
+            }
+            else if (gimmickDirection == GimmickDirection.Down)
+            {//Z-
+                interactVecZ = roomGrid.gridSize.x;
+            }
+            else if (gimmickDirection == GimmickDirection.Left)
+            {//X-
+                interactVecX = roomGrid.gridSize.x;
+            }
+            else if (gimmickDirection == GimmickDirection.Right)
+            {//X+
+                interactVecX = -roomGrid.gridSize.x;
+            }
+            Vector3 rayOrigin = transform.position + new Vector3(interactVecX, transform.position.y, interactVecZ);
+            Ray ray = new Ray(rayOrigin, Vector3.down);
+            if (Physics.Raycast(ray, out RaycastHit hit, 0.5f))
+            {
+                //地面がある場合は、ギミックをアクティブ状態にする
+                activeTime = 10f; //アクティブ状態の時間を設定
+            }
+            else
+            {
+                isFall = true;
+                //地面がない場合は、そこに落下させてから壊す
+                //落下地点に移動
+                rayOrigin.y = transform.position.y;
+                transform.position = rayOrigin;
+            }
         }
-            activeTime -= Time.deltaTime;
+
+        if (isFall)
+        {
+            //落下
+            transform.position -= new Vector3(0, gravity, 0);
+            SetHitChecker(transform.position);
+
+            Ray ray = new Ray(transform.position, Vector3.down);
+            if (Physics.Raycast(ray, out RaycastHit hit, 1f))
+            {
+                //地面に当たったら破壊
+                if (hit.distance <= 0.1f)
+                {//破壊時チェックヒット
+                    Vector2Int directionVec = GetDirectionVec();
+                    Vector2Int hitCheckerGridPos = new Vector2Int(gimmickGridPos.x + directionVec.x, gimmickGridPos.y + directionVec.y);
+                    SetHitChecker(hitCheckerGridPos.x, hitCheckerGridPos.y);
+                    gimmickState = GimmickState.Broken;
+                }
+            }
+        }
+        activeTime -= Time.deltaTime;
         if (activeTime <= 0)
         {
             gimmickState = GimmickState.Broken;

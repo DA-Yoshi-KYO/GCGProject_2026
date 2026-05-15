@@ -570,8 +570,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5f329b7558a39c4fa1657932571bdef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  initPos: {x: 0, y: 0, z: 0}
-  initRotate: {x: 0, y: 0, z: 0, w: 0}
   moveAmountLimit: {x: 2, y: 0, z: 2}
 --- !u!1 &1641671617837833836
 GameObject:
@@ -1065,7 +1063,9 @@ MonoBehaviour:
   - {fileID: 3916013322716216219}
   isListDown: 1
   wallParent: {fileID: 3617585991974069615}
-  initialExplorationLevel: 92
+  initialExplorationLevel: 100
+  showGizmos: 0
+  gizmoColor: {r: 0, g: 1, b: 0, a: 1}
 --- !u!114 &1012175028093544800
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2317,6 +2317,8 @@ MonoBehaviour:
   targetType: 1
   explorationValue: 25
   exploredDistanceThreshold: 2
+  showGizmos: 0
+  gizmoColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
 --- !u!1 &5151126713982863859
 GameObject:
   m_ObjectHideFlags: 0
@@ -3583,6 +3585,8 @@ MonoBehaviour:
   targetType: 1
   explorationValue: 25
   exploredDistanceThreshold: 2
+  showGizmos: 0
+  gizmoColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
 --- !u!1 &8275842282831769397
 GameObject:
   m_ObjectHideFlags: 0

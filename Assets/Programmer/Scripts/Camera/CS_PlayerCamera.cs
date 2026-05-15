@@ -6,15 +6,16 @@
  * 2026-04-24 | 初回作成
  * 2026-04-30 | レイキャストによる透過処理の作成(吉田)
  * 2026-05-11 | カメラの遷移演出の作成(元浪)
+ * 2026-05-13 | リファクタリング（元浪）
  */
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerCamera : MonoBehaviour
+public class CS_PlayerCamera : MonoBehaviour
 {
     private PlayerData playerData;// プレイヤーのデータ
 
-    [HideInInspector] public RoomCamera roomCamera;//部屋のカメラ
+    [HideInInspector] public CS_RoomCamera roomCamera;//部屋のカメラ
 
     private GameObject roomCameraObject;//部屋のカメラ
 
@@ -22,9 +23,10 @@ public class PlayerCamera : MonoBehaviour
 
     [Header("カメラの遷移の回転にかける時間")][SerializeField] private float rotateDuration = 1.0f;//回転にかける時間
     [Header("カメラの遷移の移動にかける時間")][SerializeField] private float moveDuration = 1.0f;//移動にかける時間
-    [Header("カメラの追従にかける時間")][SerializeField] float trackingTime = 0.5f;//追従にかける時間
+    [Header("カメラの追従にかける時間")][SerializeField] private float trackingTime = 0.5f;//追従にかける時間
 
-    private float time = 0.0f;
+    private float time = 0.0f;//時間
+
     struct TransitionCameraInfo
     {
         public Vector3 position;
@@ -32,6 +34,8 @@ public class PlayerCamera : MonoBehaviour
     }
     private TransitionCameraInfo prevTransform;    // 前のカメラ位置
     private TransitionCameraInfo newTransform;     // 新しいカメラ位置
+
+    //カメラの遷移演出の状態
     private enum TransitionCamera
     {
         None,
@@ -64,7 +68,7 @@ public class PlayerCamera : MonoBehaviour
         roomCameraObject = currentRoom.transform.GetComponentInChildren<Camera>().gameObject;
         roomCameraObject.GetComponent<Camera>().enabled = true;
 
-        roomCamera = roomCameraObject.GetComponent<RoomCamera>();
+        roomCamera = roomCameraObject.GetComponent<CS_RoomCamera>();
     }
 
     // Update is called once per frame
@@ -92,6 +96,7 @@ public class PlayerCamera : MonoBehaviour
         // レイキャストによるオブジェクトの透過処理
         RayCastTransparent();
 
+        //カメラの遷移演出の処理
         switch (transitionCamera)
         {
             case TransitionCamera.None:
@@ -163,7 +168,9 @@ public class PlayerCamera : MonoBehaviour
         }
     }
 
-    //==カメラの遷移移動処理==
+    //==カメラの遷移の演出の処理==
+
+    //他の更新の停止と現在の部屋のカメラ情報の保持
     private void StartTransitionCamera()
     {
         //更新を停止
@@ -188,6 +195,7 @@ public class PlayerCamera : MonoBehaviour
         time = 0.0f;
     }
 
+    //現在の部屋のカメラの回転移動処理
     private void TransitionCameraIn()
     {
         //移動処理
@@ -218,6 +226,7 @@ public class PlayerCamera : MonoBehaviour
         }
     }
 
+    //現在の部屋から次の部屋へのカメラの移動処理
     private void TransitionCameraMove()
     {
         time += Time.unscaledDeltaTime;
@@ -249,8 +258,10 @@ public class PlayerCamera : MonoBehaviour
         }
     }
 
+    //次の部屋のカメラの回転移動処理
     private void TransitionCameraOut()
     {
+        //移動処理
         time += Time.unscaledDeltaTime;
         float t = Mathf.Clamp01(time / rotateDuration);
         t = Easing.EaseInOutCubic(t);
@@ -258,7 +269,8 @@ public class PlayerCamera : MonoBehaviour
         roomCameraObject.transform.position = Vector3.Lerp(prevTransform.position, newTransform.position, t);
         roomCameraObject.transform.rotation = Quaternion.Slerp(prevTransform.rotation, newTransform.rotation, t);
 
-        if(time > rotateDuration)
+        //回転完了
+        if (time > rotateDuration)
         {
             time = 0.0f;
 
@@ -266,14 +278,14 @@ public class PlayerCamera : MonoBehaviour
         }
     }
 
-
+    //他の更新を再開とカメラの次の部屋のカメラの切り替え処理
     private void EndTransitionCamera()
     {
         //更新を再開
         Time.timeScale = 1.0f;
 
         // 動かした前のカメラを無効にして、元の位置に戻す
-        roomCamera = roomCameraObject.GetComponent<RoomCamera>();
+        roomCamera = roomCameraObject.GetComponent<CS_RoomCamera>();
         roomCameraObject.GetComponent<Camera>().enabled = false;
         roomCameraObject.transform.position = roomCamera.initPos;
         roomCameraObject.transform.rotation = roomCamera.initRotate;
@@ -281,7 +293,7 @@ public class PlayerCamera : MonoBehaviour
         // カメラを新しい部屋のカメラに切り替える
         currentRoom = playerData.currentRoomData.GetPlayerRoomData();
         roomCameraObject = currentRoom.transform.GetComponentInChildren<Camera>().gameObject;
-        roomCamera = roomCameraObject.GetComponent<RoomCamera>();
+        roomCamera = roomCameraObject.GetComponent<CS_RoomCamera>();
         roomCameraObject.GetComponent<Camera>().enabled = true;
        
         transitionCamera = TransitionCamera.None;   // カメラの遷移終了

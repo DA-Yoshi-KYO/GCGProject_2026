@@ -22,6 +22,7 @@
  * 
  */
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -56,17 +57,23 @@ public class ThiefAI : MonoBehaviour
         Stun    // 気絶
     }
 
-    
+    [Tooltip("泥棒のマテリアル")]
+    private Material thiefMaterial;
+    [Tooltip("泥棒のマテリアルのフェードアウトにかかる時間")]
+    private float fadeAfterStunTime;
+
     [Tooltip("現在いる部屋の情報")]
     private RoomNode currentRoom;
     private GameObject currentRoomObject;
     [Tooltip("部屋に関する記憶")]
     private Dictionary<RoomNode, RoomMemory> roomMemories;
 
+    [SerializeField, Header("現在の部屋の記憶")]// ########## デバッグ ##############
+    private RoomMemory currentRoomMemory;
+
     [Tooltip("視認オブジェクトの記憶")]
     private Dictionary<VisionTarget, VisionTargetMemory> visionTargetMemories;
 
-    [SerializeField]//("※※※※※デバック表示※※※※※")
     [Tooltip("探索対象")]
     private ThiefTarget currentTarget;
     public ThiefTarget CurrentTarget => currentTarget;
@@ -168,6 +175,16 @@ public class ThiefAI : MonoBehaviour
 
     private void Start()
     {
+        fadeAfterStunTime = GameObject.FindObjectOfType<ThiefManager>().GetThiefCommonDB().fadeAfterStunTime;
+
+        thiefMaterial = GetComponent<Renderer>().material;
+        if (thiefMaterial == null)
+        {
+            Debug.LogError("ThiefAI: 泥棒のマテリアルが見つかりません。");
+        }
+        thiefMaterial.SetFloat("_DisappearTime", fadeAfterStunTime);
+        thiefMaterial.SetFloat("_Timer", fadeAfterStunTime);
+
         FindNowRoomNode();
     }
 
@@ -297,6 +314,10 @@ public class ThiefAI : MonoBehaviour
         heldTreasure = currentTarget.gameObject;
         currentTarget.gameObject.transform.parent = this.transform; // 泥棒の子オブジェクトにする
         currentTarget.GetComponent<Collider>().enabled = false; // 宝物のコライダーを無効にする
+        currentTarget.GetComponent<Rigidbody>().isKinematic = true; // 宝物のリジットボディをキネマティックにする
+        currentTarget.GetComponent<Rigidbody>().useGravity = false; // 宝物のリジットボディの重力を無効にする
+        currentTarget.GetComponent<Rigidbody>().velocity = Vector3.zero; // 宝物のリジットボディの速度をリセットする
+        currentTarget.gameObject.transform.localPosition = new Vector3(0.0f, this.transform.position.y, 0.0f); // 宝物の位置を泥棒の位置に合わせる
 
         // 状態を逃走に変更
         currentState = ThiefState.Escape;
@@ -305,23 +326,6 @@ public class ThiefAI : MonoBehaviour
         GameObject.FindObjectOfType<ThiefManager>().EraseTheMemoryToAllThief(currentTarget);
         // 探索対象をリセット
         currentTarget = null;
-
-        float distanceToTarget = Mathf.Infinity;
-        // 視認オブジェクトから移動ポイントにする場合は一番近いものを探索対象に設定
-        foreach (ThiefTarget target in currentRoom.movePoints)
-        {
-            if (target == null) continue;
-
-            // オブジェクトとの距離を計算
-            float distance = Vector3.Distance(transform.position, target.transform.position);
-            // より近いオブジェクトを探索対象に設定
-            if (distance < distanceToTarget)
-            {
-                distanceToTarget = distance;
-                currentTarget = target;
-            }
-            else continue;
-        }
     }
 
     // 逃走状態の行動
@@ -369,10 +373,16 @@ public class ThiefAI : MonoBehaviour
         // 経過時間が退場するまでの時間を超えた場合は、退場する処理を追加する
         if (elapsedTimeAfterStun >= exitAfterStunTime)
         {
-            // 退場する処理を追加する
-            Debug.Log("泥棒が退場");
-            
-            Destroy(gameObject);
+            thiefMaterial.SetFloat("_Timer", fadeAfterStunTime - (elapsedTimeAfterStun - exitAfterStunTime));
+
+            Transform faceTransform = this.transform.GetChild(0);
+            Vector3 facePos = faceTransform.position;
+            faceTransform.position = new Vector3(facePos.x, facePos.y + 0.01f * (elapsedTimeAfterStun - exitAfterStunTime), facePos.z);
+
+            if(thiefMaterial.GetFloat("_Timer") <= 0.0f)
+            {
+                Destroy(this.gameObject);
+            }
         }
     }
 
@@ -628,10 +638,17 @@ public class ThiefAI : MonoBehaviour
             }
         }
 
-        // 探索対象が走り状態になる標的オブジェクトのタイプリストに含まれている場合は、走り状態に切り替える
-        if (runTargetTypes.Contains(((VisionTarget)currentTarget).targetType))
+        if (currentTarget is VisionTarget)
         {
-            navMeshAgent.speed = runSpeed;
+            // 探索対象が走り状態になる標的オブジェクトのタイプリストに含まれている場合は、走り状態に切り替える
+            if (runTargetTypes.Contains(((VisionTarget)currentTarget).targetType))
+            {
+                navMeshAgent.speed = runSpeed;
+            }
+            else
+            {
+                navMeshAgent.speed = walkSpeed;
+            }
         }
         else
         {
@@ -675,7 +692,7 @@ public class ThiefAI : MonoBehaviour
             ChangeFace(ReactionSpriteType.Stun);
 
             // プレイヤーにソウルを入手させる
-            PlayerAction playerAction = GameObject.FindObjectOfType<PlayerAction>();
+            CS_PlayerAction playerAction = GameObject.FindObjectOfType<CS_PlayerAction>();
 
             // playerActionが見つかった場合は、ソウルを加算する処理を実行する。見つからない場合は、エラーログを出力する。
             if (playerAction != null)playerAction.AddSoul(soulDropCount);
@@ -705,6 +722,8 @@ public class ThiefAI : MonoBehaviour
             roomMemories[currentRoom].FirstSetting();
             roomMemories[currentRoom].explorationLevel = currentRoom.initialExplorationLevel;
         }
+
+        currentRoomMemory = roomMemories[currentRoom];
     }
 
     /// <summary>
@@ -734,47 +753,41 @@ public class ThiefAI : MonoBehaviour
             return;
         }
 
-        int randomIndex = 0;
-        int safetyCounter = 0; // 無限ループ対策の安全カウンター
+        // 入ってきたドアをリストから除外
+        // もし行ったことのない部屋がある場合は行ったことのある方向をリストから除外
         bool hasUnvisitedNextRooms = HasUnvisitedNextRooms(); // 次の部屋候補の中に行ったことのない部屋があるかどうかを判定するフラグ
-        while (true)
+        for (int i = 0 ; i < connectDirs.Count ; i++)
         {
-            CS_RoomMoveConnection nextRoom;
-
-            // 次の部屋候補の中に行ったことのない部屋がある場合
+            // 入ってきたドアの方向と同じ方向がある場合は、リストから除外
+            if (connectDirs[i] == roomMemories[currentRoom].enteredDoorDirection)
+            {
+                connectDirs.RemoveAt(i);
+                i--;
+                continue;
+            }
+            // 次の部屋候補の中に行ったことのない部屋がある場合は、行ったことのある方向があればリストから除外
             if (hasUnvisitedNextRooms)
             {
-                // 接続している部屋の方向をランダムに選択
-                randomIndex = Random.Range(0, connectDirs.Count);
-
-                roomCreatePoint.TryGetConnection(connectDirs[randomIndex], out nextRoom);
-
-                // 次の部屋の記憶がない場合は、その方向を次の移動ポイントに設定してループを抜ける
-                if (!roomMemories.ContainsKey(nextRoom.TargetCreatePoint.GetComponentInChildren<RoomNode>())) break;
-            }
-            // 次の部屋候補の中に行ったことのない部屋がない場合
-            else
-            {
-                // 接続している部屋の方向をランダムに選択
-                randomIndex = Random.Range(0, connectDirs.Count);
-
-                roomCreatePoint.TryGetConnection(connectDirs[randomIndex], out nextRoom);
-
-                // その部屋の探索度がMAXでない場合は、その方向を次の移動ポイントに設定してループを抜ける
-                if (roomMemories.ContainsKey(nextRoom.TargetCreatePoint.GetComponentInChildren<RoomNode>()) &&
-                    roomMemories[nextRoom.TargetCreatePoint.GetComponentInChildren<RoomNode>()].explorationLevel < 100)
+                CS_RoomMoveConnection nextRoom;
+                roomCreatePoint.TryGetConnection(connectDirs[i], out nextRoom);
+                if (roomMemories.ContainsKey(nextRoom.TargetCreatePoint.GetComponentInChildren<RoomNode>()))
                 {
-                    break;
+                    connectDirs.RemoveAt(i);
+                    i--;
+                    continue;
                 }
             }
+        }
 
-            // 無限ループ対策
-            safetyCounter++;
-            if (safetyCounter > 50)
-            {
-                Debug.LogError("【泥棒】次の部屋の選択でループが多すぎます。ThiefAIのNextDoorElectionメソッドで、次に設定する移動ポイントを決定するロジックが正常に動作しない可能性があります。");
-                break;
-            }
+        // 接続している部屋の方向をランダムに選択
+        int randomIndex = Random.Range(0, connectDirs.Count);
+
+        // 選択しなかった方向のドアを記憶
+        for (int i = 0 ; i < connectDirs.Count ; i++)
+        {
+            if (i == randomIndex) continue;
+
+            roomMemories[currentRoom].unchosenDoors.Add(connectDirs[i]);
         }
 
         // 選択した方向にあるドアの位置を次の移動ポイントに設定
@@ -817,7 +830,6 @@ public class ThiefAI : MonoBehaviour
         }
         return false;
     }
-
 
     /// <summary>
     /// 探索対象を強制的に変更する処理
@@ -910,7 +922,8 @@ public class ThiefAI : MonoBehaviour
     /// 指定した位置にワープする処理
     /// </summary>
     /// <param name="targetPos">指定位置</param>
-    public void WarpAction(Vector3 targetPos)
+    /// <param name="entryDoorDir">入ってきたドアの方向</param>
+    public void WarpAction(Vector3 targetPos, CSE_RoomDoorDirection entryDoorDir)
     {
         // 現在の経路をリセットして、ワープ後に新しい経路を計算させる
         navMeshAgent.ResetPath(); 
@@ -919,6 +932,8 @@ public class ThiefAI : MonoBehaviour
 
         transform.position = targetPos;
         FindNowRoomNode();
+
+        roomMemories[currentRoom].enteredDoorDirection = entryDoorDir;
 
         isNextRoomMovePointDecided = false;
         nextRoomMovePoint = null;
