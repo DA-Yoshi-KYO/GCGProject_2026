@@ -72,7 +72,6 @@ public class ThiefAI : MonoBehaviour
     [Tooltip("視認オブジェクトの記憶")]
     private Dictionary<VisionTarget, VisionTargetMemory> visionTargetMemories;
 
-    [SerializeField, Header("デバック項目")]// ########## デバッグ ##############
     [Tooltip("探索対象")]
     private ThiefTarget currentTarget;
     public ThiefTarget CurrentTarget => currentTarget;
@@ -93,6 +92,14 @@ public class ThiefAI : MonoBehaviour
 
     [Tooltip("泥棒が探索するのにかかる秒数")]
     private int searchTime;
+
+    [Tooltip("攻撃を受けた後の気絶時間")]
+    private float damageStunTime;
+
+    [Tooltip("攻撃を受けた後の無敵時間")]
+    private float invincibleTime;
+    [Tooltip("無敵時間の現在残り時間")]
+    private float remainingInvincibleTime;
 
     [Tooltip("気絶後に退場するまでの時間")]
     private int exitAfterStunTime;
@@ -136,6 +143,9 @@ public class ThiefAI : MonoBehaviour
         searchTime = typedata.searchTime;
 
         exitAfterStunTime = data.exitAfterStunTime;
+        damageStunTime = data.stunTime;
+        invincibleTime = data.invincibleTime;
+        remainingInvincibleTime = 0.0f;
 
         // 初期状態を探索に設定
         currentState = ThiefState.Explore;
@@ -189,6 +199,20 @@ public class ThiefAI : MonoBehaviour
 
     private void Update()
     {
+        // 無敵時間の経過を管理
+        // 気絶状態のときは無敵時間の経過を管理しない（気絶状態のときは攻撃を受けない想定のため）
+        if (remainingInvincibleTime > 0)
+        {
+            if (currentState != ThiefState.Stunned)
+            {
+                remainingInvincibleTime -= Time.deltaTime;
+                if (remainingInvincibleTime <= 0)
+                {
+                    remainingInvincibleTime = 0;
+                }
+            }
+        }
+
         // 現在の状態に応じた行動を実行
         switch (currentState)
         {
@@ -385,18 +409,33 @@ public class ThiefAI : MonoBehaviour
 
         // 経過時間を加算
         elapsedTimeAfterStun += Time.deltaTime;
-        // 経過時間が退場するまでの時間を超えた場合は、退場する処理を追加する
-        if (elapsedTimeAfterStun >= exitAfterStunTime)
+
+        // 耐久値が残っている場合は、気絶時間が経過したら無敵時間を付与して、状態を探索に戻す
+        if (durability > 0)
         {
-            thiefMaterial.SetFloat("_Timer", fadeAfterStunTime - (elapsedTimeAfterStun - exitAfterStunTime));
-
-            Transform faceTransform = this.transform.GetChild(0);
-            Vector3 facePos = faceTransform.position;
-            faceTransform.position = new Vector3(facePos.x, facePos.y + 0.01f * (elapsedTimeAfterStun - exitAfterStunTime), facePos.z);
-
-            if(thiefMaterial.GetFloat("_Timer") <= 0.0f)
+            // 経過時間が気絶時間を超えた場合は、耐久力を減少させて、状態を探索に戻す
+            if (elapsedTimeAfterStun >= damageStunTime)
             {
-                Destroy(this.gameObject);
+                currentState = ThiefState.Explore; // 状態を探索に戻す
+                navMeshAgent.isStopped = false; // ナビメッシュエージェントを再開させる
+            }
+        }
+        // 耐久力が0以下の場合は、時間経過後に退場する
+        else
+        {
+            // 経過時間が退場するまでの時間を超えた場合は、退場する処理を追加する
+            if (elapsedTimeAfterStun >= exitAfterStunTime)
+            {
+                thiefMaterial.SetFloat("_Timer", fadeAfterStunTime - (elapsedTimeAfterStun - exitAfterStunTime));
+
+                Transform faceTransform = this.transform.GetChild(0);
+                Vector3 facePos = faceTransform.position;
+                faceTransform.position = new Vector3(facePos.x, facePos.y + 0.01f * (elapsedTimeAfterStun - exitAfterStunTime), facePos.z);
+
+                if (thiefMaterial.GetFloat("_Timer") <= 0.0f)
+                {
+                    Destroy(this.gameObject);
+                }
             }
         }
     }
@@ -705,11 +744,16 @@ public class ThiefAI : MonoBehaviour
     }
 
     /// <summary>
-    ///  耐久値を減らす処理
+    /// 耐久値を減らす処理
     /// </summary>
     /// <param name="damage">与える減少値</param>
     public void TakeDamage(int damage, Gimmick type)
     {
+        if (remainingInvincibleTime > 0)
+        {
+            return;
+        }
+
         durability -= damage;
 
         switch (type)
@@ -726,15 +770,19 @@ public class ThiefAI : MonoBehaviour
                 break;
         }
 
+        currentState = ThiefState.Stunned; // 状態を気絶に変更
+        elapsedTimeAfterStun = 0.0f; // 気絶時間の経過時間をリセット
+
+        remainingInvincibleTime = invincibleTime; // 無敵時間を付与
+
+        // 泥棒の表情を気絶の表情に変更する処理を追加する
+        ChangeFace(ReactionSpriteType.Stun);
+
 
         // 耐久力が0以下になった場合は、耐久力を0に補正して気絶状態にする
         if (durability <= 0)
         {
             durability = 0;
-            currentState = ThiefState.Stunned;
-
-            // 泥棒の表情を気絶の表情に変更する処理を追加する
-            ChangeFace(ReactionSpriteType.Stun);
 
             // プレイヤーにソウルを入手させる
             CS_PlayerAction playerAction = GameObject.FindObjectOfType<CS_PlayerAction>();
@@ -1179,6 +1227,5 @@ public class ThiefAI : MonoBehaviour
     {
         TakeDamage(1, Gimmick.Pot);
     }
-
 }
 
