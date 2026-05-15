@@ -37,6 +37,9 @@ public class VisionTarget : ThiefTarget
     [SerializeField, Header("ギズモの色")]
     private Color gizmoColor = Color.yellow;
 
+    [SerializeField, Header("このオブジェクトを探索している敵")]
+    public GameObject searchThief;
+
     private void OnDrawGizmos()
     {
         if (!showGizmos) return;
