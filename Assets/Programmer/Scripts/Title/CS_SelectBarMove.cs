@@ -4,6 +4,7 @@
  *    元浪梨緒
  * ----------------------------------------------------------
  * 2026-05-15 | 初回作成
+ * 2026-05-17 | SE再生処理追加
  */
 using UnityEngine;
 
@@ -15,11 +16,15 @@ public class CS_SelectBarMove : MonoBehaviour
     private CustomInputAction inputActions;
     private int currentButton = 0;
 
+    private CS_BackGround_PlaySE backGround_PlaySE;
+
     // Start is called before the first frame update
     void Start()
     {
         inputActions = new CustomInputAction();
         inputActions.SelectBar.Enable();
+
+        backGround_PlaySE = GetComponent<CS_BackGround_PlaySE>();
     }
 
     // Update is called once per frame
@@ -28,6 +33,7 @@ public class CS_SelectBarMove : MonoBehaviour
         //現在選択しているボタンの移動処理
         if(inputActions.SelectBar.MoveUp.triggered)
         {
+            backGround_PlaySE.PlaySE("SelectBar");
             currentButton--;
             if(currentButton < 0)
             {
@@ -37,6 +43,7 @@ public class CS_SelectBarMove : MonoBehaviour
 
         if(inputActions.SelectBar.MoveDown.triggered)
         {
+            backGround_PlaySE.PlaySE("SelectBar");
             currentButton++;
             if(currentButton >= buttonList.Length)
             {
@@ -54,6 +61,7 @@ public class CS_SelectBarMove : MonoBehaviour
         //決定ボタンでシーン遷移
         if(inputActions.SelectBar.Decision.triggered)
         {
+            backGround_PlaySE.PlaySE("Decision");
             string sceneName = "";
             switch(currentButton)
             {

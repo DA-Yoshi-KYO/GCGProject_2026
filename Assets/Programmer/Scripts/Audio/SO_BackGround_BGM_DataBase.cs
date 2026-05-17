@@ -9,29 +9,26 @@
 using System;
 using UnityEngine;
 
-[Serializable]
+//シーンの名前
 public enum SceneName
 {
     TitleScene,
     StageSelectScene,
-    CriWare,
-    Shading,
-    CreateRoom,
-    CreateThiefScene,
-    MainScene,
-    BootStrap,
-};
+}
 
-public enum CueName
+//バックグランド用のBGMのキューの名前
+public enum BackGround_BGM_CueName
 {
-    Cat,
+    InGameBGM,
+    SelectBGM,
+    TitleBGM,
 };
 
 [Serializable]
 public class BackGround_BGM_Data
 {
     [Header("再生するシーン名")] public SceneName sceneName;//再生するシーン
-    [Header("再生音源")] public CueName cueName;//キュー
+    [Header("再生音源")] public BackGround_BGM_CueName cueName;//キュー
     [Header("音量")] public float volume;//音量
 }
 
