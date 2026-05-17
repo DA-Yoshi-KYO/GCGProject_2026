@@ -246,7 +246,8 @@ public class ThiefAI : MonoBehaviour
         {
             // 距離判定
             VisionSensor visionSensor = GetComponent<VisionSensor>();
-            if (Vector3.Distance(transform.position, currentTarget.transform.position) < visionSensor.viewDistance)
+            int distanceToPlayer = (int)Vector3.Distance(transform.position, currentTarget.transform.position);
+            if (distanceToPlayer <= visionSensor.viewDistance)
             {
                 navMeshAgent.SetDestination(currentTarget.transform.position);
             }
@@ -528,6 +529,13 @@ public class ThiefAI : MonoBehaviour
 
         // 新たに視認したオブジェクトを記憶に保存した後、探索対象を決定する処理を追加する
         if(isNewObjectRecognized)DecideTarget();
+
+        // 次の部屋に移動するためのポイントが設定されている場合は、削除する
+        if (nextRoomMovePoint != null)
+        {
+            nextRoomMovePoint = null;
+            isNextRoomMovePointDecided = false;
+        }
     }
 
     /// <summary>
