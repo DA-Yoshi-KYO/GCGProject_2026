@@ -15,6 +15,8 @@ MonoBehaviour:
   components:
   - {fileID: 6841497771746947718}
   - {fileID: 3723878518068787522}
+  - {fileID: 6821852986204494588}
+  - {fileID: 6586736762422708154}
 --- !u!114 &3723878518068787522
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -38,6 +40,53 @@ MonoBehaviour:
     m_OverrideState: 1
     m_Value: 0.0062
   isTimeUpdate:
+    m_OverrideState: 1
+    m_Value: 0
+--- !u!114 &6586736762422708154
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 899c54efeace73346a0a16faa3afe726, type: 3}
+  m_Name: Vignette
+  m_EditorClassIdentifier: 
+  active: 0
+  color:
+    m_OverrideState: 1
+    m_Value: {r: 1, g: 0, b: 0.90620184, a: 1}
+  center:
+    m_OverrideState: 1
+    m_Value: {x: 0.5, y: 0.5}
+  intensity:
+    m_OverrideState: 1
+    m_Value: 0.371
+  smoothness:
+    m_OverrideState: 1
+    m_Value: 0.12
+  rounded:
+    m_OverrideState: 1
+    m_Value: 0
+--- !u!114 &6821852986204494588
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57e1ecdb884bc1241a956964a2a88178, type: 3}
+  m_Name: CSV_FilmGrainVolume
+  m_EditorClassIdentifier: 
+  active: 0
+  isEnabled:
+    m_OverrideState: 1
+    m_Value: 1
+  intensity:
     m_OverrideState: 1
     m_Value: 0
 --- !u!114 &6841497771746947718
