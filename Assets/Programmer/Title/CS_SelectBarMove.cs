@@ -1,6 +1,11 @@
-using UnityEngine.UI;
+/* ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+ *    選択バーの処理の作成
+ * ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+ *    元浪梨緒
+ * ----------------------------------------------------------
+ * 2026-05-15 | 初回作成
+ */
 using UnityEngine;
-using System.Linq.Expressions;
 
 public class CS_SelectBarMove : MonoBehaviour
 {

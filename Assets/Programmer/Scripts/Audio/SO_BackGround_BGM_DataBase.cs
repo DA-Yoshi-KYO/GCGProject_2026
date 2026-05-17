@@ -12,6 +12,8 @@ using UnityEngine;
 [Serializable]
 public enum SceneName
 {
+    TitleScene,
+    StageSelectScene,
     CriWare,
     Shading,
     CreateRoom,

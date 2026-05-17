@@ -10,7 +10,7 @@ using CriWare;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class CS_PlayBGM : MonoBehaviour
+public class CS_BackGround_PlayBGM : MonoBehaviour
 {
     public SO_BackGround_BGM_DataBase dataBase;//データベース
     private BackGround_BGM_Data[] dataList;//データのリスト
@@ -19,8 +19,6 @@ public class CS_PlayBGM : MonoBehaviour
     private CriAtomExAcb[] criAtomExAcbsList;//CueSheet
 
     private string currentScene;//現在のシーン
-
-    private bool endBGM = false;//BGM終了判定
 
     private void Awake()
     {
@@ -34,47 +32,18 @@ public class CS_PlayBGM : MonoBehaviour
         playerInfo = new CriAtomExPlayer();
         criAtomExAcbsList = new CriAtomExAcb[dataList.Length];
 
-        //終了判定
-        endBGM = false;
-
-        //シーン更新
-        SceneManager.activeSceneChanged += OnActiveSceneChanged;
+        //BGMの設定と再生
+        SettingBGM();
     }
 
     public void Start()
     {
-        playerInfo.Prepare();
-        playerInfo.Start();
     }
 
     // Update is called once per frame
-    void FixedUpdate()
+    void Update()
     {
-    }
 
-    //シーン更新
-    void OnActiveSceneChanged(Scene prevScene, Scene nextScene)
-    {
-        //再生終了
-        if (playerInfo.GetStatus() == CriAtomExPlayer.Status.Playing)
-        {
-            playerInfo.Stop();
-        }
-
-        //現在のシーンと次のシーンが違うとき
-        if (currentScene != nextScene.name)
-        {
-            currentScene = nextScene.name;
-        }
-
-        //終了判定
-        if (endBGM)
-        {
-            endBGM = true;
-        }
-
-        //BGM設定
-        SettingBGM();
     }
 
     //BGM設定
@@ -87,6 +56,8 @@ public class CS_PlayBGM : MonoBehaviour
                 playerInfo.SetCue(criAtomExAcbsList[0], dataList[i].cueName.ToString());
                 playerInfo.SetVolume(dataList[i].volume);
                 playerInfo.Loop(true);
+                playerInfo.Prepare();
+                playerInfo.Start();
             }
         }
     }
