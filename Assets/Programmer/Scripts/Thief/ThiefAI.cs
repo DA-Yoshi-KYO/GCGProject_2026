@@ -693,11 +693,14 @@ public class ThiefAI : MonoBehaviour
             // 前回の探索対象がThiefTargetの派生クラスかどうか(前回が移動ポイントでない場合)
             if (currentTarget == null || currentTarget is VisionTarget || currentTarget is TrapTarget || currentTarget is PlayerTarget)
             {
-
-                if (currentTarget != null && (VisionTarget)currentTarget)
+                // 前回の探索対象が視認オブジェクト(VisionTarget)の場合は、探索対象をリセットする
+                if (currentTarget != null)
                 {
-                    ((VisionTarget)currentTarget).searchThief = null; // 現在の探索対象の探索している人をリセットする
-                    currentTarget = null;
+                    if ((VisionTarget)currentTarget)
+                    {
+                        ((VisionTarget)currentTarget).searchThief = null;
+                        currentTarget = null;
+                    }
                 }
                 // 視認オブジェクトから移動ポイントにする場合は一番近いものを探索対象に設定
                 foreach (ThiefTarget target in currentRoom.movePoints)
