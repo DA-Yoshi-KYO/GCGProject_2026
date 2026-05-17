@@ -24,7 +24,7 @@ public class CS_SelectBarMove : MonoBehaviour
         inputActions = new CustomInputAction();
         inputActions.SelectBar.Enable();
 
-        backGround_PlaySE = GetComponent<CS_BackGround_PlaySE>();
+        backGround_PlaySE = GameObject.Find("SE").GetComponent<CS_BackGround_PlaySE>();
     }
 
     // Update is called once per frame
