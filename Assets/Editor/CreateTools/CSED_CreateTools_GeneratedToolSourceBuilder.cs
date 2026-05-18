@@ -20,9 +20,12 @@ public partial class CSED_CreateTools
     /// <summary>
     /// 生成EditorWindowのソースコードを作成します。
     /// </summary>
-    /// <param name="f_className">生成するクラス名</param>
+    /// <param name="f_className">生成するEditorWindowクラス名</param>
+    /// <param name="f_dataClassName">生成するScriptableObjectクラス名</param>
     /// <returns>生成ソースコード</returns>
-    private string CreateGeneratedEditorToolSource(string f_className)
+    private string CreateGeneratedEditorToolSource(
+        string f_className,
+        string f_dataClassName)
     {
         StringBuilder builder = new StringBuilder();
 
@@ -58,6 +61,7 @@ public partial class CSED_CreateTools
         builder.AppendLine("        window.minSize = new Vector2(360.0f, 240.0f);");
         builder.AppendLine("    }");
         builder.AppendLine();
+
         builder.AppendLine("    /// <summary>");
         builder.AppendLine("    /// GUIを描画します。");
         builder.AppendLine("    /// </summary>");
@@ -65,8 +69,13 @@ public partial class CSED_CreateTools
         builder.AppendLine("    {");
 
         AppendGeneratedOnGui(builder);
+        AppendGeneratedCreateScriptableObjectButton(builder);
 
         builder.AppendLine("    }");
+        builder.AppendLine();
+
+        AppendGeneratedCreateScriptableObjectMembers(builder, f_dataClassName);
+
         builder.AppendLine("}");
         builder.AppendLine("#endif");
 
@@ -675,6 +684,102 @@ public partial class CSED_CreateTools
         float value = f_defaultValue;
         float.TryParse(f_text, out value);
         return value;
+    }
+
+    /// <summary>
+    /// 生成EditorWindowにScriptableObject作成ボタンを追加します。
+    /// </summary>
+    /// <param name="f_builder">StringBuilder</param>
+    private void AppendGeneratedCreateScriptableObjectButton(StringBuilder f_builder)
+    {
+        f_builder.AppendLine("        GUILayout.Space(12.0f);");
+        f_builder.AppendLine("        EditorGUILayout.LabelField(\"Create Asset\", EditorStyles.boldLabel);");
+        f_builder.AppendLine();
+        f_builder.AppendLine("        m_AssetFileName = EditorGUILayout.TextField(\"Asset Name\", m_AssetFileName);");
+        f_builder.AppendLine("        m_AssetOutputFolderPath = EditorGUILayout.TextField(\"Asset Folder\", m_AssetOutputFolderPath);");
+        f_builder.AppendLine();
+        f_builder.AppendLine("        if (GUILayout.Button(\"Create ScriptableObject\", GUILayout.Height(28.0f)))");
+        f_builder.AppendLine("        {");
+        f_builder.AppendLine("            CreateScriptableObjectAsset();");
+        f_builder.AppendLine("        }");
+    }
+
+    /// <summary>
+    /// 生成EditorWindowにScriptableObject作成用メンバーを追加します。
+    /// </summary>
+    /// <param name="f_builder">StringBuilder</param>
+    /// <param name="f_dataClassName">生成するScriptableObjectクラス名</param>
+    private void AppendGeneratedCreateScriptableObjectMembers(
+        StringBuilder f_builder,
+        string f_dataClassName)
+    {
+        f_builder.AppendLine("    /// <summary>");
+        f_builder.AppendLine("    /// 作成するScriptableObjectアセット名です。");
+        f_builder.AppendLine("    /// </summary>");
+        f_builder.AppendLine("    private string m_AssetFileName = \"NewData\";");
+        f_builder.AppendLine();
+
+        f_builder.AppendLine("    /// <summary>");
+        f_builder.AppendLine("    /// ScriptableObjectアセットの保存先です。");
+        f_builder.AppendLine("    /// </summary>");
+        f_builder.AppendLine("    private string m_AssetOutputFolderPath = \"" + EscapeString(m_GeneratedAssetOutputFolderPath) + "\";");
+        f_builder.AppendLine();
+
+        f_builder.AppendLine("    /// <summary>");
+        f_builder.AppendLine("    /// ScriptableObjectアセットを作成します。");
+        f_builder.AppendLine("    /// </summary>");
+        f_builder.AppendLine("    private void CreateScriptableObjectAsset()");
+        f_builder.AppendLine("    {");
+        f_builder.AppendLine("        if (System.IO.Directory.Exists(m_AssetOutputFolderPath) == false)");
+        f_builder.AppendLine("        {");
+        f_builder.AppendLine("            System.IO.Directory.CreateDirectory(m_AssetOutputFolderPath);");
+        f_builder.AppendLine("        }");
+        f_builder.AppendLine();
+
+        f_builder.AppendLine("        " + f_dataClassName + " asset = CreateInstance<" + f_dataClassName + ">();");
+
+        AppendGeneratedAssignScriptableObjectValues(f_builder, "asset");
+
+        f_builder.AppendLine();
+        f_builder.AppendLine("        string assetPath = AssetDatabase.GenerateUniqueAssetPath(");
+        f_builder.AppendLine("            System.IO.Path.Combine(m_AssetOutputFolderPath, m_AssetFileName + \".asset\"));");
+        f_builder.AppendLine();
+        f_builder.AppendLine("        AssetDatabase.CreateAsset(asset, assetPath);");
+        f_builder.AppendLine("        AssetDatabase.SaveAssets();");
+        f_builder.AppendLine("        AssetDatabase.Refresh();");
+        f_builder.AppendLine("        Selection.activeObject = asset;");
+        f_builder.AppendLine("    }");
+    }
+
+    /// <summary>
+    /// 生成EditorWindowの入力値をScriptableObjectへ代入する処理を追加します。
+    /// </summary>
+    /// <param name="f_builder">StringBuilder</param>
+    /// <param name="f_assetVariableName">代入先アセット変数名</param>
+    private void AppendGeneratedAssignScriptableObjectValues(
+        StringBuilder f_builder,
+        string f_assetVariableName)
+    {
+        if (m_FieldDataList == null)
+        {
+            return;
+        }
+
+        for (int i = 0 ; i < m_FieldDataList.Count ; i++)
+        {
+            CSED_CreateTools_FieldData fieldData = m_FieldDataList[i];
+
+            string variableName = CreateGeneratedVariableName(fieldData.FieldName, i);
+
+            if (fieldData.FieldType == CSE_CreateTools_FieldType.List)
+            {
+                f_builder.AppendLine("        " + f_assetVariableName + "." + variableName + " = new " + GetGeneratedFieldTypeName(fieldData) + "(" + variableName + ");");
+            }
+            else
+            {
+                f_builder.AppendLine("        " + f_assetVariableName + "." + variableName + " = " + variableName + ";");
+            }
+        }
     }
 }
 #endif

@@ -28,25 +28,28 @@ public partial class CSED_CreateTools
         GUILayout.Space(6.0f);
 
         m_GeneratedToolClassName = EditorGUILayout.TextField(
-            "Class Name",
+            "Editor Class",
             m_GeneratedToolClassName);
+
+        m_GeneratedScriptableObjectClassName = EditorGUILayout.TextField(
+            "Data Class",
+            m_GeneratedScriptableObjectClassName);
 
         m_GeneratedToolMenuPath = EditorGUILayout.TextField(
             "Menu Path",
             m_GeneratedToolMenuPath);
 
-        EditorGUILayout.BeginHorizontal();
-        {
-            m_GeneratedToolOutputFolderPath = EditorGUILayout.TextField(
-                "Output Folder",
-                m_GeneratedToolOutputFolderPath);
+        m_GeneratedToolOutputFolderPath = EditorGUILayout.TextField(
+            "Editor Script Folder",
+            m_GeneratedToolOutputFolderPath);
 
-            if (GUILayout.Button("...", GUILayout.Width(28.0f)))
-            {
-                SelectGeneratedToolOutputFolder();
-            }
-        }
-        EditorGUILayout.EndHorizontal();
+        m_GeneratedScriptableObjectOutputFolderPath = EditorGUILayout.TextField(
+            "Data Script Folder",
+            m_GeneratedScriptableObjectOutputFolderPath);
+
+        m_GeneratedAssetOutputFolderPath = EditorGUILayout.TextField(
+            "Asset Save Folder",
+            m_GeneratedAssetOutputFolderPath);
 
         GUILayout.Space(8.0f);
 

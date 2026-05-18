@@ -18,6 +18,21 @@ using UnityEngine;
 public partial class CSED_CreateTools
 {
     /// <summary>
+    /// 生成するScriptableObjectクラス名です。
+    /// </summary>
+    private string m_GeneratedScriptableObjectClassName = "CSS_NewToolData";
+
+    /// <summary>
+    /// 生成するScriptableObjectスクリプトの出力先フォルダです。
+    /// </summary>
+    private string m_GeneratedScriptableObjectOutputFolderPath = "Assets/Programmer/Scripts/GeneratedData";
+
+    /// <summary>
+    /// 生成されたEditorToolから作成するScriptableObjectアセットの保存先です。
+    /// </summary>
+    private string m_GeneratedAssetOutputFolderPath = "Assets/ScriptableObject/GeneratedData";
+
+    /// <summary>
     /// 生成するEditorWindowのタイトルです。
     /// </summary>
     private string m_GeneratedToolWindowTitle = "New Tool";
