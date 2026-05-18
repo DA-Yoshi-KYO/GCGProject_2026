@@ -14,18 +14,8 @@ using UnityEngine;
 public class CSS_NewToolData : ScriptableObject
 {
     /// <summary>
-    /// n_numです。
+    /// newIntField01です。
     /// </summary>
-    public int n_num;
-
-    /// <summary>
-    /// f_EnemySpeedです。
-    /// </summary>
-    public float f_EnemySpeed;
-
-    /// <summary>
-    /// lg_WeaponListです。
-    /// </summary>
-    public List<GameObject> lg_WeaponList;
+    public int newIntField01;
 
 }

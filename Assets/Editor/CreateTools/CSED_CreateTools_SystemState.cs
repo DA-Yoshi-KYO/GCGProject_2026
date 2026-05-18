@@ -25,12 +25,12 @@ public partial class CSED_CreateTools
     /// <summary>
     /// 生成するScriptableObjectスクリプトの出力先フォルダです。
     /// </summary>
-    private string m_GeneratedScriptableObjectOutputFolderPath = "Assets/Programmer/Scripts/GeneratedData";
+    private string m_GeneratedScriptableObjectOutputFolderPath = "Assets/Programmer/Scripts/CreateTools";
 
     /// <summary>
     /// 生成されたEditorToolから作成するScriptableObjectアセットの保存先です。
     /// </summary>
-    private string m_GeneratedAssetOutputFolderPath = "Assets/ScriptableObject/GeneratedData";
+    private string m_GeneratedAssetOutputFolderPath = "Assets/Programmer/ScriptableObject/CreateTools";
 
     /// <summary>
     /// 生成するEditorWindowのタイトルです。
@@ -45,12 +45,12 @@ public partial class CSED_CreateTools
     /// <summary>
     /// 生成したEditorWindowを表示するUnityメニューパスです。
     /// </summary>
-    private string m_GeneratedToolMenuPath = "Tools/Generated/New Tool";
+    private string m_GeneratedToolMenuPath = "Tools/New Tool";
 
     /// <summary>
     /// 生成するEditorWindowスクリプトの出力先フォルダです。
     /// </summary>
-    private string m_GeneratedToolOutputFolderPath = "Assets/Editor/GeneratedCreateTools";
+    private string m_GeneratedToolOutputFolderPath = "Assets/Editor/CreateTools/New Tools";
 
     /// <summary>
     /// 左ウィンドウ現在横幅です。

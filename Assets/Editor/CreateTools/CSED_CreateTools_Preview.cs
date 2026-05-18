@@ -18,6 +18,16 @@ using UnityEngine;
 public partial class CSED_CreateTools
 {
     /// <summary>
+    /// 生成後エディターで最初に表示するAsset名です。
+    /// </summary>
+    private string m_GeneratedDefaultAssetName = "NewData";
+
+    /// <summary>
+    /// 生成後エディターで最初に表示するAsset保存先フォルダです。
+    /// </summary>
+    private string m_GeneratedDefaultAssetFolder = "Assets/Programmer/ScriptableObject";
+
+    /// <summary>
     /// Min Max Fieldプレビューのラベル幅です。
     /// </summary>
     private const float c_PreviewMinMaxMainLabelWidth = 110.0f;
@@ -313,7 +323,7 @@ public partial class CSED_CreateTools
             f_windowRect.x + 24.0f,
             f_windowRect.y + c_PreviewTitleBarHeight + 24.0f,
             Mathf.Min(360.0f, f_windowRect.width - 48.0f),
-            250.0f);
+            330.0f);
 
         EditorGUI.DrawRect(panelRect, new Color(0.24f, 0.24f, 0.24f));
 
@@ -353,12 +363,36 @@ public partial class CSED_CreateTools
 
             DrawGeneratedToolSettingFields();
 
+            GUILayout.Space(12.0f);
+
+            DrawGeneratedDefaultAssetSettingFields();
+
+            GUILayout.Space(12.0f);
+
+            DrawGeneratedToolCreateButton();
+
             if (EditorGUI.EndChangeCheck())
             {
                 Repaint();
             }
         }
         GUILayout.EndArea();
+    }
+
+    /// <summary>
+    /// 生成後エディターのCreate Asset初期設定を描画します。
+    /// </summary>
+    private void DrawGeneratedDefaultAssetSettingFields()
+    {
+        EditorGUILayout.LabelField("Default設定", EditorStyles.boldLabel);
+
+        m_GeneratedDefaultAssetName = EditorGUILayout.TextField(
+            "  Default Asset Name",
+            m_GeneratedDefaultAssetName);
+
+        m_GeneratedDefaultAssetFolder = EditorGUILayout.TextField(
+            "  Default Asset Folder",
+            m_GeneratedDefaultAssetFolder);
     }
 
     /// <summary>

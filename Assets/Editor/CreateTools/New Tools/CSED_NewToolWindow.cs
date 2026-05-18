@@ -1,4 +1,4 @@
-/*
+﻿/*
 +=====================================
  ファイル名 : CSED_NewToolWindow.cs
  概要     : CreateToolsから自動生成されたEditorWindow
@@ -18,28 +18,14 @@ using UnityEngine;
 public class CSED_NewToolWindow : EditorWindow
 {
     /// <summary>
-    /// n_numです。
+    /// newIntField01です。
     /// </summary>
-    private int n_num = 0;
-
-    /// <summary>
-    /// f_EnemySpeedです。
-    /// </summary>
-    private float f_EnemySpeed = 0.0f;
-
-    /// <summary>
-    /// lg_WeaponListです。
-    /// </summary>
-    private List<GameObject> lg_WeaponList = new List<GameObject>()
-    {
-        null,
-        null
-    };
+    private int newIntField01 = 0;
 
     /// <summary>
     /// メニューからウィンドウを開きます。
     /// </summary>
-    [MenuItem("Tools/Generated/New Tool")]
+    [MenuItem("Tools/New Tool")]
     public static void ShowWindow()
     {
         CSED_NewToolWindow window = GetWindow<CSED_NewToolWindow>("Test");
@@ -51,34 +37,7 @@ public class CSED_NewToolWindow : EditorWindow
     /// </summary>
     private void OnGUI()
     {
-        n_num = EditorGUILayout.IntField("敵の数", n_num);
-        GUILayout.Space(6.0f);
-
-        f_EnemySpeed = EditorGUILayout.Slider("敵のスピード", f_EnemySpeed, 0.0f, 0.0f);
-        GUILayout.Space(6.0f);
-
-        EditorGUILayout.LabelField("敵の武器リスト", EditorStyles.boldLabel);
-
-        EditorGUILayout.BeginHorizontal();
-        {
-            if (GUILayout.Button("-", GUILayout.Width(24.0f)) && lg_WeaponList.Count > 0)
-            {
-                lg_WeaponList.RemoveAt(lg_WeaponList.Count - 1);
-            }
-
-            EditorGUILayout.LabelField(lg_WeaponList.Count.ToString(), GUILayout.Width(32.0f));
-
-            if (GUILayout.Button("+", GUILayout.Width(24.0f)))
-            {
-                lg_WeaponList.Add(null);
-            }
-        }
-        EditorGUILayout.EndHorizontal();
-
-        for (int i = 0; i < lg_WeaponList.Count; i++)
-        {
-            lg_WeaponList[i] = (GameObject)EditorGUILayout.ObjectField("Element " + i.ToString(), lg_WeaponList[i], typeof(GameObject), false);
-        }
+        newIntField01 = EditorGUILayout.IntField("newIntField01", newIntField01);
         GUILayout.Space(6.0f);
 
         GUILayout.Space(12.0f);
@@ -91,18 +50,17 @@ public class CSED_NewToolWindow : EditorWindow
         {
             CreateScriptableObjectAsset();
         }
-
     }
 
     /// <summary>
     /// 作成するScriptableObjectアセット名です。
     /// </summary>
-    private string m_AssetFileName = "NewData";
+    private string m_AssetFileName = "テストですはい";
 
     /// <summary>
     /// ScriptableObjectアセットの保存先です。
     /// </summary>
-    private string m_AssetOutputFolderPath = "Assets/ScriptableObject/GeneratedData";
+    private string m_AssetOutputFolderPath = "Assets/ProgrammerTestProject";
 
     /// <summary>
     /// ScriptableObjectアセットを作成します。
@@ -115,9 +73,7 @@ public class CSED_NewToolWindow : EditorWindow
         }
 
         CSS_NewToolData asset = CreateInstance<CSS_NewToolData>();
-        asset.n_num = n_num;
-        asset.f_EnemySpeed = f_EnemySpeed;
-        asset.lg_WeaponList = new List<GameObject>(lg_WeaponList);
+        asset.newIntField01 = newIntField01;
 
         string assetPath = AssetDatabase.GenerateUniqueAssetPath(
             System.IO.Path.Combine(m_AssetOutputFolderPath, m_AssetFileName + ".asset"));

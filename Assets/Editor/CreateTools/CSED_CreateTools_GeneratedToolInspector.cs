@@ -25,34 +25,34 @@ public partial class CSED_CreateTools
     {
         EditorGUILayout.LabelField("Tool生成設定", EditorStyles.boldLabel);
 
-        GUILayout.Space(6.0f);
+        GUILayout.Space(4.0f);
 
         m_GeneratedToolClassName = EditorGUILayout.TextField(
-            "Editor Class",
+            "  Editor Class",
             m_GeneratedToolClassName);
 
         m_GeneratedScriptableObjectClassName = EditorGUILayout.TextField(
-            "Data Class",
+            "  Data Class",
             m_GeneratedScriptableObjectClassName);
 
         m_GeneratedToolMenuPath = EditorGUILayout.TextField(
-            "Menu Path",
+            "  Menu Path",
             m_GeneratedToolMenuPath);
 
         m_GeneratedToolOutputFolderPath = EditorGUILayout.TextField(
-            "Editor Script Folder",
+            "  Editor Script Folder",
             m_GeneratedToolOutputFolderPath);
 
         m_GeneratedScriptableObjectOutputFolderPath = EditorGUILayout.TextField(
-            "Data Script Folder",
+            "  Data Script Folder",
             m_GeneratedScriptableObjectOutputFolderPath);
+    }
 
-        m_GeneratedAssetOutputFolderPath = EditorGUILayout.TextField(
-            "Asset Save Folder",
-            m_GeneratedAssetOutputFolderPath);
-
-        GUILayout.Space(8.0f);
-
+    /// <summary>
+    /// EditorTool作成ボタンを描画します。
+    /// </summary>
+    private void DrawGeneratedToolCreateButton()
+    {
         EditorGUI.BeginDisabledGroup(CanCreateGeneratedTool() == false);
         {
             if (GUILayout.Button("Create Editor Tool", GUILayout.Height(26.0f)))

@@ -716,13 +716,13 @@ public partial class CSED_CreateTools
         f_builder.AppendLine("    /// <summary>");
         f_builder.AppendLine("    /// 作成するScriptableObjectアセット名です。");
         f_builder.AppendLine("    /// </summary>");
-        f_builder.AppendLine("    private string m_AssetFileName = \"NewData\";");
+        f_builder.AppendLine("    private string m_AssetFileName = \"" + EscapeString(m_GeneratedDefaultAssetName) + "\";");
         f_builder.AppendLine();
 
         f_builder.AppendLine("    /// <summary>");
         f_builder.AppendLine("    /// ScriptableObjectアセットの保存先です。");
         f_builder.AppendLine("    /// </summary>");
-        f_builder.AppendLine("    private string m_AssetOutputFolderPath = \"" + EscapeString(m_GeneratedAssetOutputFolderPath) + "\";");
+        f_builder.AppendLine("    private string m_AssetOutputFolderPath = \"" + EscapeString(m_GeneratedDefaultAssetFolder) + "\";");
         f_builder.AppendLine();
 
         f_builder.AppendLine("    /// <summary>");
