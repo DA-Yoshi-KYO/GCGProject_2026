@@ -779,8 +779,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5f329b7558a39c4fa1657932571bdef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  initPos: {x: 0, y: 0, z: 0}
-  initRotate: {x: 0, y: 0, z: 0, w: 0}
   moveAmountLimit: {x: 2, y: 0, z: 1}
 --- !u!1 &3103337749361889214
 GameObject:
@@ -1366,7 +1364,7 @@ GameObject:
   - component: {fileID: 478706909077933487}
   m_Layer: 0
   m_Name: TreasureRoom
-  m_TagString: Untagged
+  m_TagString: TreasureRoom
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1409,6 +1407,8 @@ MonoBehaviour:
   isListDown: 1
   wallParent: {fileID: 7181220201979692501}
   initialExplorationLevel: 6
+  showGizmos: 0
+  gizmoColor: {r: 0, g: 1, b: 0, a: 1}
 --- !u!114 &1697750543316784099
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2033,6 +2033,9 @@ MonoBehaviour:
   targetType: 0
   explorationValue: 25
   exploredDistanceThreshold: 2
+  showGizmos: 0
+  gizmoColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  searchThief: {fileID: 0}
 --- !u!1 &7500543308148856756
 GameObject:
   m_ObjectHideFlags: 0
@@ -2188,6 +2191,9 @@ MonoBehaviour:
   targetType: 0
   explorationValue: 25
   exploredDistanceThreshold: 2
+  showGizmos: 0
+  gizmoColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  searchThief: {fileID: 0}
 --- !u!1 &7724511018269847718
 GameObject:
   m_ObjectHideFlags: 0
@@ -2309,6 +2315,9 @@ MonoBehaviour:
   targetType: 0
   explorationValue: 25
   exploredDistanceThreshold: 2
+  showGizmos: 0
+  gizmoColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  searchThief: {fileID: 0}
 --- !u!1 &7749292480896702505
 GameObject:
   m_ObjectHideFlags: 0
@@ -2566,6 +2575,9 @@ MonoBehaviour:
   targetType: 0
   explorationValue: 25
   exploredDistanceThreshold: 2
+  showGizmos: 0
+  gizmoColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  searchThief: {fileID: 0}
 --- !u!1 &8039562111224994728
 GameObject:
   m_ObjectHideFlags: 0
@@ -2946,6 +2958,9 @@ MonoBehaviour:
   targetType: 0
   explorationValue: 25
   exploredDistanceThreshold: 2
+  showGizmos: 0
+  gizmoColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  searchThief: {fileID: 0}
 --- !u!1 &9019751016720515215
 GameObject:
   m_ObjectHideFlags: 0

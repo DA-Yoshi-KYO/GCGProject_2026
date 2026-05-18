@@ -24,6 +24,7 @@
  * 2026-05-17 | DecideTarget内のキャストエラーの不具合を修正
  * 
  */
+using HoudiniEngineUnity;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
@@ -125,7 +126,7 @@ public class ThiefAI : MonoBehaviour
     private RoomNode firstRoom;
     private Transform firstEntryPoint; // 最初に入ってきたドアの位置(逃走ルートの最終目的位置)
 
-    [Tooltip("帰宅ルート")]
+    [Tooltip("移動ルート")]
     private List<Transform> moveRoute;
 
 
@@ -253,6 +254,43 @@ public class ThiefAI : MonoBehaviour
             else
             {
                 currentTarget = null;
+            }
+            return;
+        }
+
+        // moveRouteが設定されている場合は、moveRouteに沿って移動する処理を追加する
+        if (moveRoute != null && moveRoute.Count > 0)
+        {
+            // プレイヤーや宝物、標的にする罠などが視認できている場合は、moveRouteをクリアして、そちらに向かう処理を追加する
+            if (currentTarget is PlayerTarget || currentTarget is TrapTarget || currentTarget is VisionTarget)
+            {
+                if (currentTarget is VisionTarget)
+                {
+                    if (((VisionTarget)currentTarget).targetType == VisionTarget.TargetType.Treasure)
+                    {
+                        moveRoute.Clear();
+                        return;
+                    }
+                }
+                else
+                {
+                    moveRoute.Clear();
+                    return;
+                }
+            }
+
+            Transform nextPoint = moveRoute[0];
+            if (nextPoint == null)
+            {
+                // 参照切れ対策：無効な要素を捨てて次へ
+                moveRoute.RemoveAt(0);
+                return;
+            }
+            navMeshAgent.SetDestination(nextPoint.position);
+            // 次のポイントに十分近づいたら、次のポイントへ
+            if (Vector3.Distance(transform.position, nextPoint.position) < 1.0f)
+            {
+                moveRoute.RemoveAt(0);
             }
             return;
         }
@@ -392,14 +430,13 @@ public class ThiefAI : MonoBehaviour
         // ルートが未構築なら構築する
         if (moveRoute == null || moveRoute.Count == 0)
         {
-            EscapeRoute(); // ここで moveRoute が埋まる想定
+            ConstructionRoute(firstEntryPoint); // ここで moveRoute が埋まる想定
         }
 
         // それでも無いなら、何らかの理由でルートが作れなかった
         if (moveRoute == null || moveRoute.Count == 0)
         {
-            // フォールバック（暫定）：従来の movePoints 逃走などに戻したい場合はここに書く
-            Debug.LogWarning("【泥棒】Escape: escapeRoute が空のため移動できません。");
+            Debug.LogWarning("【泥棒】Escape: moveRoute が空のため移動できません。");
             return;
         }
 
@@ -436,20 +473,6 @@ public class ThiefAI : MonoBehaviour
             navMeshAgent.isStopped = false;
             navMeshAgent.SetDestination(door.position);
         }
-    }
-
-    /// <summary>
-    /// 帰宅(逃走)ルートを構築する
-    /// </summary>
-    private void EscapeRoute()
-    {
-        if (firstEntryPoint == null)
-        {
-            Debug.LogWarning("【泥棒】EscapeRoute: firstEntryPoint が nullのためルート構築できません。");
-            return;
-        }
-
-        ConstructionRoute(firstEntryPoint);
     }
 
     // 気絶状態の行動
@@ -890,7 +913,7 @@ public class ThiefAI : MonoBehaviour
     }
 
     /// <summary>
-    /// 次に設定する移動ポイントを決定するロジック
+    /// 現在いる部屋の接続している方向を取得して、次に探索する部屋に行くための移動ポイントを決定する処理
     /// </summary>
     private void NextDoorElection()
     {
@@ -919,21 +942,66 @@ public class ThiefAI : MonoBehaviour
         // 入ってきたドアをリストから除外
         // もし行ったことのない部屋がある場合は行ったことのある方向をリストから除外
         bool hasUnvisitedNextRooms = HasUnvisitedNextRooms(); // 次の部屋候補の中に行ったことのない部屋があるかどうかを判定するフラグ
-        for (int i = 0 ; i < connectDirs.Count ; i++)
+
+        // 次の部屋候補の中に行ったことのない部屋がある場合
+        if (hasUnvisitedNextRooms)
         {
-            // 入ってきたドアの方向と同じ方向がある場合は、リストから除外
-            if (connectDirs[i] == roomMemories[currentRoom].enteredDoorDirection)
+            for (int i = 0 ; i < connectDirs.Count ; i++)
             {
-                connectDirs.RemoveAt(i);
-                i--;
-                continue;
-            }
-            // 次の部屋候補の中に行ったことのない部屋がある場合は、行ったことのある方向があればリストから除外
-            if (hasUnvisitedNextRooms)
-            {
+                // 入ってきたドアの方向と同じ方向がある場合は、リストから除外
+                if (connectDirs[i] == roomMemories[currentRoom].enteredDoorDirection)
+                {
+                    connectDirs.RemoveAt(i);
+                    i--;
+                    continue;
+                }
+                // 行ったことのある方向をリストから除外
                 CS_RoomMoveConnection nextRoom;
                 roomCreatePoint.TryGetConnection(connectDirs[i], out nextRoom);
                 if (roomMemories.ContainsKey(nextRoom.TargetCreatePoint.GetComponentInChildren<RoomNode>()))
+                {
+                    connectDirs.RemoveAt(i);
+                    i--;
+                    continue;
+                }
+            }
+        }
+        // 次の部屋候補の中に行ったことのない部屋がない場合は、今までに行ったことのあるすべての部屋で選ばなかった方向をリストに追加
+        else
+        {
+            connectDirs.Clear();
+            // 今までに行ったことのあるすべての部屋で選ばなかった方向をリストに追加
+            foreach (var room in roomMemories)
+            {
+                foreach (var dir in room.Value.unchosenDoors)
+                {
+                    if (!connectDirs.Contains(dir)) connectDirs.Add(dir);
+                }
+            }
+        }
+
+        // 宝部屋判定
+        bool hasTreasureRoom = false;
+        foreach (var dir in connectDirs)
+        {
+            CS_RoomMoveConnection nextRoom;
+            roomCreatePoint.TryGetConnection(dir, out nextRoom);
+
+            if (nextRoom.TargetCreatePoint.GetComponentInChildren<RoomNode>().transform.tag == "TreasureRoom")
+            {
+                hasTreasureRoom = true;
+                break;
+            }
+        }
+        // 宝部屋がある場合は、宝部屋以外の方向をリストから除外
+        if (hasTreasureRoom)
+        {
+            for (int i = 0 ; i < connectDirs.Count ; i++)
+            {
+                CS_RoomMoveConnection nextRoom;
+                roomCreatePoint.TryGetConnection(connectDirs[i], out nextRoom);
+
+                if (nextRoom.TargetCreatePoint.GetComponentInChildren<RoomNode>().transform.tag != "TreasureRoom")
                 {
                     connectDirs.RemoveAt(i);
                     i--;
@@ -945,13 +1013,52 @@ public class ThiefAI : MonoBehaviour
         // 接続している部屋の方向をランダムに選択
         int randomIndex = Random.Range(0, connectDirs.Count);
 
-        // 選択しなかった方向のドアを記憶
-        for (int i = 0 ; i < connectDirs.Count ; i++)
+        if (hasUnvisitedNextRooms)
         {
-            if (i == randomIndex) continue;
+            // 選択しなかった方向のドアを記憶
+            for (int i = 0 ; i < connectDirs.Count ; i++)
+            {
+                if (i == randomIndex) continue;
 
-            roomMemories[currentRoom].unchosenDoors.Add(connectDirs[i]);
+                roomMemories[currentRoom].unchosenDoors.Add(connectDirs[i]);
+            }
         }
+        else
+        {
+            // 選択した方向のドアを記憶から削除
+            bool isRemoved = false; // 選択した方向のドアを記憶から削除したかどうかを判定するフラグ
+            RoomNode targetRoomNode = null;
+            foreach (var room in roomMemories)
+            {
+                foreach (var dir in room.Value.unchosenDoors)
+                {
+                    if (dir == connectDirs[randomIndex])
+                    {
+                        // どの部屋のドアかを記憶
+                        targetRoomNode = room.Key;
+                        // 記憶から選択した方向のドアを削除
+                        room.Value.unchosenDoors.Remove(dir);
+                        // 選択した方向のドアを記憶から削除したフラグを立てる
+                        isRemoved = true;
+                        break;
+                    }
+                }
+                if (isRemoved) break;
+            }
+
+            // 選択したドアの位置を取得
+            Transform targetDoorPos = targetRoomNode.GetDirectionWallToDoor(connectDirs[randomIndex]);
+
+            if (targetDoorPos == null)
+            {
+                Debug.LogError("【泥棒】選択したドアの位置が見つかりませんでした。ThiefAIのNextDoorElectionメソッドで、次に設定する移動ポイントを決定するロジックが正常に動作しない可能性があります。");
+                return;
+            }
+
+            // ドアの位置を最終目的位置としてルートを構築
+            ConstructionRoute(targetDoorPos);
+        }
+
 
         // 選択した方向にあるドアの位置を次の移動ポイントに設定
         nextRoomMovePoint = currentRoom.GetDirectionWallToDoor(connectDirs[randomIndex]);
