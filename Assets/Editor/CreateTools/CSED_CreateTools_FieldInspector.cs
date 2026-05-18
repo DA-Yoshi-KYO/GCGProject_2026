@@ -197,9 +197,10 @@ public partial class CSED_CreateTools
 
             case CSE_CreateTools_FieldType.ScriptableObject:
             case CSE_CreateTools_FieldType.Script:
+            case CSE_CreateTools_FieldType.GameObject:
                 return new CSE_CreateTools_FieldLayoutType[]
                 {
-                CSE_CreateTools_FieldLayoutType.InputField
+                CSE_CreateTools_FieldLayoutType.Select
                 };
 
             default:
@@ -234,6 +235,9 @@ public partial class CSED_CreateTools
             case CSE_CreateTools_FieldLayoutType.TextArea:
                 return "Text Area";
 
+            case CSE_CreateTools_FieldLayoutType.Select:
+                return "Select";
+
             default:
                 return "Unknown";
         }
@@ -267,16 +271,10 @@ public partial class CSED_CreateTools
             case CSE_CreateTools_FieldType.Bool:
                 return CSE_CreateTools_FieldLayoutType.Toggle;
 
-            case CSE_CreateTools_FieldType.String:
-                return CSE_CreateTools_FieldLayoutType.InputField;
-
-            case CSE_CreateTools_FieldType.Int:
-            case CSE_CreateTools_FieldType.Float:
-                return CSE_CreateTools_FieldLayoutType.InputField;
-
             case CSE_CreateTools_FieldType.ScriptableObject:
             case CSE_CreateTools_FieldType.Script:
-                return CSE_CreateTools_FieldLayoutType.InputField;
+            case CSE_CreateTools_FieldType.GameObject:
+                return CSE_CreateTools_FieldLayoutType.Select;
 
             default:
                 return CSE_CreateTools_FieldLayoutType.InputField;
@@ -330,7 +328,8 @@ public partial class CSED_CreateTools
 
             case CSE_CreateTools_FieldType.ScriptableObject:
             case CSE_CreateTools_FieldType.Script:
-                return f_layoutType == CSE_CreateTools_FieldLayoutType.InputField;
+            case CSE_CreateTools_FieldType.GameObject:
+                return f_layoutType == CSE_CreateTools_FieldLayoutType.Select;
 
             default:
                 return f_layoutType == CSE_CreateTools_FieldLayoutType.InputField;
@@ -444,6 +443,15 @@ public partial class CSED_CreateTools
             }
         }
 
+        if (ShouldShowScriptableObjectTypeField(f_fieldData))
+        {
+            GUILayout.Space(c_FieldInspectorRowSpacing);
+
+            f_fieldData.ScriptableObjectTypeScript = DrawSmallScriptableObjectTypeField(
+                "  ScriptableObject Type",
+                f_fieldData.ScriptableObjectTypeScript);
+        }
+
         GUILayout.Space(c_FieldInspectorRowSpacing);
 
         f_fieldData.FieldName = DrawSmallTextField(
@@ -483,6 +491,11 @@ public partial class CSED_CreateTools
             GUILayout.Space(c_FieldInspectorSectionTopSpacing);
             DrawTextAreaLayoutSettings(f_fieldData);
         }
+        else if (f_fieldData.FieldLayoutType == CSE_CreateTools_FieldLayoutType.Select)
+        {
+            GUILayout.Space(c_FieldInspectorSectionTopSpacing);
+            DrawSelectLayoutSettings(f_fieldData);
+        }
 
         GUILayout.Space(c_FieldInspectorSectionTopSpacing);
 
@@ -490,6 +503,180 @@ public partial class CSED_CreateTools
         {
             Repaint();
         }
+    }
+
+    /// <summary>
+    /// Select用の詳細設定を描画します。
+    /// </summary>
+    /// <param name="f_fieldData">選択中Fieldデータ</param>
+    private void DrawSelectLayoutSettings(CSED_CreateTools_FieldData f_fieldData)
+    {
+        EditorGUILayout.LabelField("Select設定", EditorStyles.boldLabel);
+
+        GUILayout.Space(c_FieldInspectorSectionTitleBottomSpacing);
+
+        f_fieldData.TagName = DrawSmallTextField(
+            "  Tag Name",
+            f_fieldData.TagName);
+
+        GUILayout.Space(c_FieldInspectorSectionTopSpacing);
+
+        if (f_fieldData.FieldType == CSE_CreateTools_FieldType.List)
+        {
+            DrawListDefaultValueSettingsByLayout(
+                f_fieldData,
+                CSE_CreateTools_FieldLayoutType.Select);
+
+            return;
+        }
+
+        DrawDefaultSelectValueSettings(f_fieldData);
+    }
+
+    /// <summary>
+    /// Select用の初期値設定を描画します。
+    /// </summary>
+    /// <param name="f_fieldData">選択中Fieldデータ</param>
+    private void DrawDefaultSelectValueSettings(CSED_CreateTools_FieldData f_fieldData)
+    {
+        EditorGUILayout.LabelField("Default設定", EditorStyles.boldLabel);
+
+        GUILayout.Space(c_FieldInspectorSectionTitleBottomSpacing);
+
+        f_fieldData.IsDefaultValueNull = DrawSmallToggle(
+            "  Default Is Null",
+            f_fieldData.IsDefaultValueNull);
+
+        GUILayout.Space(c_FieldInspectorRowSpacing);
+
+        EditorGUI.BeginDisabledGroup(f_fieldData.IsDefaultValueNull);
+        {
+            if (f_fieldData.FieldType == CSE_CreateTools_FieldType.ScriptableObject)
+            {
+                f_fieldData.DefaultScriptableObjectValue = DrawSmallScriptableObjectDefaultField(
+                    "  Default Value",
+                    f_fieldData);
+            }
+            else if (f_fieldData.FieldType == CSE_CreateTools_FieldType.Script)
+            {
+                f_fieldData.DefaultScriptValue = DrawSmallScriptDefaultField(
+                    "  Default Value",
+                    f_fieldData.DefaultScriptValue);
+            }
+            else if (f_fieldData.FieldType == CSE_CreateTools_FieldType.GameObject)
+            {
+                f_fieldData.DefaultGameObjectValue = DrawSmallGameObjectDefaultField(
+                    "  Default Value",
+                    f_fieldData.DefaultGameObjectValue);
+            }
+        }
+        EditorGUI.EndDisabledGroup();
+    }
+
+    /// <summary>
+    /// GameObject用の初期値ObjectFieldを描画します。
+    /// </summary>
+    /// <param name="f_label">表示ラベル</param>
+    /// <param name="f_value">現在のGameObject</param>
+    /// <returns>選択後のGameObject</returns>
+    private GameObject DrawSmallGameObjectDefaultField(
+        string f_label,
+        GameObject f_value)
+    {
+        Rect rowRect = GetFieldInspectorRowRect();
+        Rect labelRect = GetFieldInspectorLabelRect(rowRect);
+        Rect inputRect = GetFieldInspectorInputRect(rowRect);
+
+        EditorGUI.LabelField(labelRect, f_label);
+
+        return (GameObject)EditorGUI.ObjectField(
+            inputRect,
+            f_value,
+            typeof(GameObject),
+            false);
+    }
+
+    /// <summary>
+    /// MonoScriptがScriptableObject継承クラスか判定します。
+    /// </summary>
+    /// <param name="f_script">確認するMonoScript</param>
+    /// <returns>ScriptableObject継承ならtrue</returns>
+    private bool IsScriptableObjectMonoScript(MonoScript f_script)
+    {
+        if (f_script == null)
+        {
+            return false;
+        }
+
+        System.Type scriptType = f_script.GetClass();
+
+        if (scriptType == null)
+        {
+            return false;
+        }
+
+        return typeof(ScriptableObject).IsAssignableFrom(scriptType);
+    }
+
+    /// <summary>
+    /// ScriptableObject継承スクリプトを選択するFieldを描画します。
+    /// </summary>
+    /// <param name="f_label">表示ラベル</param>
+    /// <param name="f_value">現在のMonoScript</param>
+    /// <returns>選択後のMonoScript</returns>
+    private MonoScript DrawSmallScriptableObjectTypeField(
+        string f_label,
+        MonoScript f_value)
+    {
+        Rect rowRect = GetFieldInspectorRowRect();
+        Rect labelRect = GetFieldInspectorLabelRect(rowRect);
+        Rect inputRect = GetFieldInspectorInputRect(rowRect);
+
+        EditorGUI.LabelField(labelRect, f_label);
+
+        MonoScript selectedScript = (MonoScript)EditorGUI.ObjectField(
+            inputRect,
+            f_value,
+            typeof(MonoScript),
+            false);
+
+        if (selectedScript == null)
+        {
+            return null;
+        }
+
+        if (IsScriptableObjectMonoScript(selectedScript))
+        {
+            return selectedScript;
+        }
+
+        EditorUtility.DisplayDialog(
+            "ScriptableObject Type Error",
+            "ScriptableObjectを継承しているスクリプトだけ選択できます。",
+            "OK");
+
+        return f_value;
+    }
+
+    /// <summary>
+    /// ScriptableObject Type項目を表示するか判定します。
+    /// </summary>
+    /// <param name="f_fieldData">対象FieldData</param>
+    /// <returns>表示する場合true</returns>
+    private bool ShouldShowScriptableObjectTypeField(CSED_CreateTools_FieldData f_fieldData)
+    {
+        if (f_fieldData.FieldType == CSE_CreateTools_FieldType.ScriptableObject)
+        {
+            return true;
+        }
+
+        if (f_fieldData.FieldType == CSE_CreateTools_FieldType.List &&
+            f_fieldData.ListElementFieldType == CSE_CreateTools_FieldType.ScriptableObject)
+        {
+            return true;
+        }
+
+        return false;
     }
 
     /// <summary>
@@ -532,11 +719,97 @@ public partial class CSED_CreateTools
 
         EditorGUI.BeginDisabledGroup(f_fieldData.IsDefaultValueNull);
         {
-            f_fieldData.DefaultValueText = DrawSmallTextArea(
-                "  Default Value",
-                f_fieldData.DefaultValueText);
+            if (f_fieldData.FieldType == CSE_CreateTools_FieldType.ScriptableObject)
+            {
+                f_fieldData.DefaultScriptableObjectValue = DrawSmallScriptableObjectDefaultField(
+                    "  Default Value",
+                    f_fieldData);
+            }
+            else
+            {
+                f_fieldData.DefaultValueText = DrawSmallTextField(
+                    "  Default Value",
+                    f_fieldData.DefaultValueText);
+            }
         }
         EditorGUI.EndDisabledGroup();
+    }
+
+    /// <summary>
+    /// ScriptableObject用の初期値ObjectFieldを描画します。
+    /// </summary>
+    /// <param name="f_label">表示ラベル</param>
+    /// <param name="f_fieldData">対象FieldData</param>
+    /// <returns>選択後のScriptableObject</returns>
+    private ScriptableObject DrawSmallScriptableObjectDefaultField(
+        string f_label,
+        CSED_CreateTools_FieldData f_fieldData)
+    {
+        Rect rowRect = GetFieldInspectorRowRect();
+        Rect labelRect = GetFieldInspectorLabelRect(rowRect);
+        Rect inputRect = GetFieldInspectorInputRect(rowRect);
+
+        EditorGUI.LabelField(labelRect, f_label);
+
+        System.Type targetType = GetSelectedScriptableObjectType(f_fieldData);
+
+        UnityEngine.Object selectedObject = EditorGUI.ObjectField(
+            inputRect,
+            f_fieldData.DefaultScriptableObjectValue,
+            targetType,
+            false);
+
+        return selectedObject as ScriptableObject;
+    }
+
+    /// <summary>
+    /// Script用の初期値ObjectFieldを描画します。
+    /// </summary>
+    /// <param name="f_label">表示ラベル</param>
+    /// <param name="f_value">現在のScript</param>
+    /// <returns>選択後のScript</returns>
+    private MonoScript DrawSmallScriptDefaultField(
+        string f_label,
+        MonoScript f_value)
+    {
+        Rect rowRect = GetFieldInspectorRowRect();
+        Rect labelRect = GetFieldInspectorLabelRect(rowRect);
+        Rect inputRect = GetFieldInspectorInputRect(rowRect);
+
+        EditorGUI.LabelField(labelRect, f_label);
+
+        return (MonoScript)EditorGUI.ObjectField(
+            inputRect,
+            f_value,
+            typeof(MonoScript),
+            false);
+    }
+
+    /// <summary>
+    /// 選択中のScriptableObject型を取得します。
+    /// </summary>
+    /// <param name="f_fieldData">対象FieldData</param>
+    /// <returns>ScriptableObject型</returns>
+    private System.Type GetSelectedScriptableObjectType(CSED_CreateTools_FieldData f_fieldData)
+    {
+        if (f_fieldData.ScriptableObjectTypeScript == null)
+        {
+            return typeof(ScriptableObject);
+        }
+
+        System.Type scriptType = f_fieldData.ScriptableObjectTypeScript.GetClass();
+
+        if (scriptType == null)
+        {
+            return typeof(ScriptableObject);
+        }
+
+        if (typeof(ScriptableObject).IsAssignableFrom(scriptType) == false)
+        {
+            return typeof(ScriptableObject);
+        }
+
+        return scriptType;
     }
 
     /// <summary>
@@ -621,17 +894,18 @@ public partial class CSED_CreateTools
     }
 
     /// <summary>
-    /// Listの各要素初期値をLayoutに応じて描画します。
+    /// ListのDefault要素をLayoutに応じて描画します。
     /// </summary>
     /// <param name="f_fieldData">選択中Fieldデータ</param>
-    /// <param name="f_layoutType">適用するLayout</param>
+    /// <param name="f_layoutType">Layout種別</param>
     /// <param name="f_index">要素番号</param>
     private void DrawListDefaultElementByLayout(
         CSED_CreateTools_FieldData f_fieldData,
         CSE_CreateTools_FieldLayoutType f_layoutType,
         int f_index)
     {
-        if (f_index < 0 || f_index >= f_fieldData.ListDefaultElementValueTextList.Count)
+        if (f_index < 0 ||
+            f_index >= f_fieldData.ListDefaultElementValueTextList.Count)
         {
             return;
         }
@@ -654,7 +928,81 @@ public partial class CSED_CreateTools
             return;
         }
 
+        if (f_layoutType == CSE_CreateTools_FieldLayoutType.Select)
+        {
+            DrawListDefaultSelectElement(f_fieldData, f_index);
+            return;
+        }
+
         DrawListDefaultSingleValueElement(f_fieldData, f_index);
+    }
+
+    /// <summary>
+    /// ListのSelect要素を描画します。
+    /// </summary>
+    /// <param name="f_fieldData">選択中Fieldデータ</param>
+    /// <param name="f_index">要素番号</param>
+    private void DrawListDefaultSelectElement(
+        CSED_CreateTools_FieldData f_fieldData,
+        int f_index)
+    {
+        EnsureListDefaultElementValueList(f_fieldData);
+
+        if (f_fieldData.ListDefaultObjectValueList == null)
+        {
+            return;
+        }
+
+        if (f_index < 0 ||
+            f_index >= f_fieldData.ListDefaultObjectValueList.Count)
+        {
+            return;
+        }
+
+        Rect rowRect = GetFieldInspectorRowRect();
+        Rect labelRect = GetFieldInspectorLabelRect(rowRect);
+        Rect inputRect = GetFieldInspectorInputRect(rowRect);
+
+        EditorGUI.LabelField(
+            labelRect,
+            "  Element " + f_index.ToString());
+
+        if (f_fieldData.ListElementFieldType == CSE_CreateTools_FieldType.ScriptableObject)
+        {
+            System.Type targetType = GetSelectedScriptableObjectType(f_fieldData);
+
+            f_fieldData.ListDefaultObjectValueList[f_index] = EditorGUI.ObjectField(
+                inputRect,
+                f_fieldData.ListDefaultObjectValueList[f_index],
+                targetType,
+                false);
+
+            return;
+        }
+
+        if (f_fieldData.ListElementFieldType == CSE_CreateTools_FieldType.Script)
+        {
+            f_fieldData.ListDefaultObjectValueList[f_index] = EditorGUI.ObjectField(
+                inputRect,
+                f_fieldData.ListDefaultObjectValueList[f_index],
+                typeof(MonoScript),
+                false);
+
+            return;
+        }
+
+        if (f_fieldData.ListElementFieldType == CSE_CreateTools_FieldType.GameObject)
+        {
+            f_fieldData.ListDefaultObjectValueList[f_index] = EditorGUI.ObjectField(
+                inputRect,
+                f_fieldData.ListDefaultObjectValueList[f_index],
+                typeof(GameObject),
+                false);
+
+            return;
+        }
+
+        EditorGUI.LabelField(inputRect, "Select未対応Type");
     }
 
     /// <summary>
@@ -1155,6 +1503,7 @@ public partial class CSED_CreateTools
         return EditorGUI.Toggle(toggleRect, f_value);
     }
 
+
     /// <summary>
     /// List初期値リストを使用可能な状態にします。
     /// </summary>
@@ -1174,6 +1523,21 @@ public partial class CSED_CreateTools
         if (f_fieldData.ListDefaultMaxValueTextList == null)
         {
             f_fieldData.ListDefaultMaxValueTextList = new List<string>();
+        }
+
+        if (f_fieldData.ListDefaultObjectValueList == null)
+        {
+            f_fieldData.ListDefaultObjectValueList = new List<UnityEngine.Object>();
+        }
+
+        while (f_fieldData.ListDefaultObjectValueList.Count < f_fieldData.ListDefaultElementValueTextList.Count)
+        {
+            f_fieldData.ListDefaultObjectValueList.Add(null);
+        }
+
+        while (f_fieldData.ListDefaultObjectValueList.Count > f_fieldData.ListDefaultElementValueTextList.Count)
+        {
+            f_fieldData.ListDefaultObjectValueList.RemoveAt(f_fieldData.ListDefaultObjectValueList.Count - 1);
         }
 
         while (f_fieldData.ListDefaultMinValueTextList.Count < f_fieldData.ListDefaultElementValueTextList.Count)
@@ -1197,10 +1561,6 @@ public partial class CSED_CreateTools
         }
     }
 
-    /// <summary>
-    /// List初期値要素を追加します。
-    /// </summary>
-    /// <param name="f_fieldData">対象FieldData</param>
     private void AddListDefaultElement(CSED_CreateTools_FieldData f_fieldData)
     {
         EnsureListDefaultElementValueList(f_fieldData);
@@ -1208,8 +1568,7 @@ public partial class CSED_CreateTools
         f_fieldData.ListDefaultElementValueTextList.Add(
             CreateDefaultListElementValue(f_fieldData.ListElementFieldType));
 
-        f_fieldData.ListDefaultMinValueTextList.Add("0");
-        f_fieldData.ListDefaultMaxValueTextList.Add("1");
+        f_fieldData.ListDefaultObjectValueList.Add(null);
 
         Repaint();
     }
@@ -1232,14 +1591,9 @@ public partial class CSED_CreateTools
 
         f_fieldData.ListDefaultElementValueTextList.RemoveAt(removeIndex);
 
-        if (removeIndex < f_fieldData.ListDefaultMinValueTextList.Count)
+        if (removeIndex < f_fieldData.ListDefaultObjectValueList.Count)
         {
-            f_fieldData.ListDefaultMinValueTextList.RemoveAt(removeIndex);
-        }
-
-        if (removeIndex < f_fieldData.ListDefaultMaxValueTextList.Count)
-        {
-            f_fieldData.ListDefaultMaxValueTextList.RemoveAt(removeIndex);
+            f_fieldData.ListDefaultObjectValueList.RemoveAt(removeIndex);
         }
 
         Repaint();
@@ -1270,6 +1624,9 @@ public partial class CSED_CreateTools
                 return string.Empty;
 
             case CSE_CreateTools_FieldType.Script:
+                return string.Empty;
+
+            case CSE_CreateTools_FieldType.GameObject:
                 return string.Empty;
 
             default:
@@ -1327,6 +1684,7 @@ public partial class CSED_CreateTools
     }
 
     /// <summary>
+    /// <summary>
     /// Listの中身の型を選択するPopupを描画します。
     /// </summary>
     /// <param name="f_label">表示ラベル</param>
@@ -1343,7 +1701,8 @@ public partial class CSED_CreateTools
         "string",
         "bool",
         "ScriptableObject",
-        "Script"
+        "Script",
+        "GameObject"
     };
 
         CSE_CreateTools_FieldType[] values =
@@ -1353,7 +1712,8 @@ public partial class CSED_CreateTools
         CSE_CreateTools_FieldType.String,
         CSE_CreateTools_FieldType.Bool,
         CSE_CreateTools_FieldType.ScriptableObject,
-        CSE_CreateTools_FieldType.Script
+        CSE_CreateTools_FieldType.Script,
+        CSE_CreateTools_FieldType.GameObject
     };
 
         int selectedIndex = 0;

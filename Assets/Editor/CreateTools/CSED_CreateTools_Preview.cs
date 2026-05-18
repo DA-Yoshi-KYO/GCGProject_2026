@@ -451,12 +451,97 @@ public partial class CSED_CreateTools
                 DrawPreviewTextArea(f_fieldData);
                 break;
 
+            case CSE_CreateTools_FieldLayoutType.Select:
+                DrawPreviewSelect(f_fieldData);
+                break;
+
             default:
                 DrawPreviewInputField(f_fieldData);
                 break;
         }
     }
 
+    /// <summary>
+    /// Selectの見本を描画します。
+    /// </summary>
+    /// <param name="f_fieldData">描画対象FieldData</param>
+    private void DrawPreviewSelect(CSED_CreateTools_FieldData f_fieldData)
+    {
+        string label = GetPreviewLabel(f_fieldData);
+
+        if (f_fieldData.FieldType == CSE_CreateTools_FieldType.ScriptableObject)
+        {
+            DrawPreviewScriptableObjectSelect(label, f_fieldData);
+            return;
+        }
+
+        if (f_fieldData.FieldType == CSE_CreateTools_FieldType.Script)
+        {
+            DrawPreviewScriptSelect(label, f_fieldData);
+            return;
+        }
+
+        if (f_fieldData.FieldType == CSE_CreateTools_FieldType.GameObject)
+        {
+            DrawPreviewGameObjectSelect(label, f_fieldData);
+            return;
+        }
+
+        EditorGUILayout.LabelField(label, "Select未対応Type");
+    }
+
+    /// <summary>
+    /// GameObject選択の見本を描画します。
+    /// </summary>
+    /// <param name="f_label">表示ラベル</param>
+    /// <param name="f_fieldData">描画対象FieldData</param>
+    private void DrawPreviewGameObjectSelect(
+        string f_label,
+        CSED_CreateTools_FieldData f_fieldData)
+    {
+        f_fieldData.DefaultGameObjectValue = (GameObject)EditorGUILayout.ObjectField(
+            f_label,
+            f_fieldData.DefaultGameObjectValue,
+            typeof(GameObject),
+            false);
+    }
+
+    /// <summary>
+    /// ScriptableObject選択の見本を描画します。
+    /// </summary>
+    /// <param name="f_label">表示ラベル</param>
+    /// <param name="f_fieldData">描画対象FieldData</param>
+    private void DrawPreviewScriptableObjectSelect(
+        string f_label,
+        CSED_CreateTools_FieldData f_fieldData)
+    {
+        System.Type targetType = GetSelectedScriptableObjectType(f_fieldData);
+
+        UnityEngine.Object selectedObject = EditorGUILayout.ObjectField(
+            f_label,
+            f_fieldData.DefaultScriptableObjectValue,
+            targetType,
+            false);
+
+        f_fieldData.DefaultScriptableObjectValue = selectedObject as ScriptableObject;
+    }
+
+
+    /// <summary>
+    /// Script選択の見本を描画します。
+    /// </summary>
+    /// <param name="f_label">表示ラベル</param>
+    /// <param name="f_fieldData">描画対象FieldData</param>
+    private void DrawPreviewScriptSelect(
+        string f_label,
+        CSED_CreateTools_FieldData f_fieldData)
+    {
+        f_fieldData.DefaultScriptValue = (MonoScript)EditorGUILayout.ObjectField(
+            f_label,
+            f_fieldData.DefaultScriptValue,
+            typeof(MonoScript),
+            false);
+    }
     /// <summary>
     /// List型のプレビューをLayoutに応じて描画します。
     /// </summary>
@@ -533,7 +618,69 @@ public partial class CSED_CreateTools
             return;
         }
 
+        if (f_fieldData.FieldLayoutType == CSE_CreateTools_FieldLayoutType.Select)
+        {
+            DrawPreviewListSelectElement(f_fieldData, f_index);
+            return;
+        }
+
         DrawPreviewListInputFieldElement(f_fieldData, f_index);
+    }
+
+    /// <summary>
+    /// ListのSelect要素を描画します。
+    /// </summary>
+    /// <param name="f_fieldData">描画対象FieldData</param>
+    /// <param name="f_index">要素番号</param>
+    private void DrawPreviewListSelectElement(
+        CSED_CreateTools_FieldData f_fieldData,
+        int f_index)
+    {
+        EnsureListDefaultElementValueList(f_fieldData);
+
+        if (f_index < 0 || f_index >= f_fieldData.ListDefaultObjectValueList.Count)
+        {
+            return;
+        }
+
+        string label = "Element " + f_index.ToString();
+
+        if (f_fieldData.ListElementFieldType == CSE_CreateTools_FieldType.ScriptableObject)
+        {
+            System.Type targetType = GetSelectedScriptableObjectType(f_fieldData);
+
+            f_fieldData.ListDefaultObjectValueList[f_index] = EditorGUILayout.ObjectField(
+                label,
+                f_fieldData.ListDefaultObjectValueList[f_index],
+                targetType,
+                false);
+
+            return;
+        }
+
+        if (f_fieldData.ListElementFieldType == CSE_CreateTools_FieldType.Script)
+        {
+            f_fieldData.ListDefaultObjectValueList[f_index] = EditorGUILayout.ObjectField(
+                label,
+                f_fieldData.ListDefaultObjectValueList[f_index],
+                typeof(MonoScript),
+                false);
+
+            return;
+        }
+
+        if (f_fieldData.ListElementFieldType == CSE_CreateTools_FieldType.GameObject)
+        {
+            f_fieldData.ListDefaultObjectValueList[f_index] = EditorGUILayout.ObjectField(
+                label,
+                f_fieldData.ListDefaultObjectValueList[f_index],
+                typeof(GameObject),
+                false);
+
+            return;
+        }
+
+        EditorGUILayout.LabelField(label, "Select未対応Type");
     }
 
     /// <summary>

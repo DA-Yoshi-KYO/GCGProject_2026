@@ -37,6 +37,11 @@ public enum CSE_CreateTools_FieldLayoutType
     /// <summary>
     /// 複数行テキストです。
     /// </summary>
-    TextArea
+    TextArea,
+
+    /// <summary>
+    /// 候補から選択するタイプのレイアウトです。
+    /// </summary>
+    Select
 }
 #endif

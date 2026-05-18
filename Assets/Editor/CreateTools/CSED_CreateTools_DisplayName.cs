@@ -41,7 +41,10 @@ public partial class CSED_CreateTools
             case CSE_CreateTools_FieldType.Script:
                 return "Script";
 
-            case CSE_CreateTools_FieldType.List:
+            case CSE_CreateTools_FieldType.GameObject:
+                return "GameObject";
+
+            case CSE_CreateTools_FieldType.List: 
                 return "List<T>";
 
             default:

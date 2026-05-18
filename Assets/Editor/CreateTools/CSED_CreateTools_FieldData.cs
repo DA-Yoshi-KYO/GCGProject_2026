@@ -11,6 +11,9 @@
 
 #if UNITY_EDITOR
 
+
+using UnityEditor;
+using UnityEngine;
 using System.Collections.Generic;
 
 /// <summary>
@@ -18,6 +21,32 @@ using System.Collections.Generic;
 /// </summary>
 public class CSED_CreateTools_FieldData
 {
+    /// <summary>
+    /// 初期値として設定するGameObjectです。
+    /// </summary>
+    public GameObject DefaultGameObjectValue { get; set; }
+
+    /// <summary>
+    /// ListのObject初期値リストです。
+    /// ScriptableObject / Script 用です。
+    /// </summary>
+    public List<UnityEngine.Object> ListDefaultObjectValueList { get; set; }
+
+    /// <summary>
+    /// 初期値として設定するScriptファイルです。
+    /// </summary>
+    public MonoScript DefaultScriptValue { get; set; }
+
+    /// <summary>
+    /// ScriptableObject型として使用するスクリプトです。
+    /// </summary>
+    public MonoScript ScriptableObjectTypeScript { get; set; }
+
+    /// <summary>
+    /// 初期値として設定するScriptableObjectアセットです。
+    /// </summary>
+    public ScriptableObject DefaultScriptableObjectValue { get; set; }
+
     /// <summary>
     /// Listの初期値をnull扱いにするかどうかです。
     /// trueの場合、全要素のDefault値をnull扱いにします。
@@ -146,6 +175,12 @@ public class CSED_CreateTools_FieldData
         ListDefaultElementValueTextList = new List<string>();
         ListDefaultMinValueTextList = new List<string>();
         ListDefaultMaxValueTextList = new List<string>();
+        ListDefaultObjectValueList = new List<UnityEngine.Object>();
+
+        ScriptableObjectTypeScript = null;
+        DefaultScriptableObjectValue = null;
+        DefaultScriptValue = null;
+        DefaultGameObjectValue = null;
 
         IsListDefaultValueNull = true;
 
@@ -167,5 +202,7 @@ public class CSED_CreateTools_FieldData
         IsListDefaultCountNull = true;
         ListDefaultCountText = string.Empty;
     }
+
+
 }
 #endif

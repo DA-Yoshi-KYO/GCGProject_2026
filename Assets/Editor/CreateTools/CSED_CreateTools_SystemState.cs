@@ -11,12 +11,23 @@
 #if UNITY_EDITOR
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 
 /// <summary>
 /// CreateToolsのシステム状態をまとめるクラスです。
 /// </summary>
 public partial class CSED_CreateTools
 {
+    /// <summary>
+    /// ScriptableObject型として使用するスクリプトです。
+    /// </summary>
+    public MonoScript ScriptableObjectTypeScript { get; set; }
+
+    /// <summary>
+    /// 初期値として設定するScriptableObjectアセットです。
+    /// </summary>
+    public ScriptableObject DefaultScriptableObjectValue { get; set; }
+
     /// <summary>
     /// 左ウィンドウ現在横幅です。
     /// </summary>

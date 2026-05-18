@@ -31,6 +31,11 @@ public enum CSE_CreateTools_FieldType
     Script,
 
     /// <summary>
+    /// GameObject型です。
+    /// </summary>
+    GameObject,
+
+    /// <summary>
     /// List型です。
     /// </summary>
     List
