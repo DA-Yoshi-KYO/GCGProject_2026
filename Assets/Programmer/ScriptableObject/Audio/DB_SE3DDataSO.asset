@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea0118cbf14d065469300ccb09d60cc6, type: 3}
+  m_Name: DB_SE3DDataSO
+  m_EditorClassIdentifier: 
+  seDatas:
+  - situation: PlayerWalkNormal
+    audioClip: {fileID: 8300000, guid: 78128abc4b72c9042bd9668ea0fee91b, type: 3}
+    volume: 1
+    audioMixerGroup:
+    - {fileID: -8415375543701046544, guid: 14355cf5183a3d84b956067123018296, type: 2}
+    audioMixerSnapshot:
+    - {fileID: 24500006, guid: 14355cf5183a3d84b956067123018296, type: 2}
+  - situation: PlayerWalkReverb
+    audioClip: {fileID: 8300000, guid: 78128abc4b72c9042bd9668ea0fee91b, type: 3}
+    volume: 1
+    audioMixerGroup:
+    - {fileID: -1226411138578654961, guid: 14355cf5183a3d84b956067123018296, type: 2}
+    audioMixerSnapshot:
+    - {fileID: 7302809386422976832, guid: 14355cf5183a3d84b956067123018296, type: 2}
