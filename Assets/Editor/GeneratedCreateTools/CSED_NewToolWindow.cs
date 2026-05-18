@@ -8,6 +8,7 @@
 */
 
 #if UNITY_EDITOR
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -17,12 +18,17 @@ using UnityEngine;
 public class CSED_NewToolWindow : EditorWindow
 {
     /// <summary>
+    /// newIntField01です。
+    /// </summary>
+    private int newIntField01 = 0;
+
+    /// <summary>
     /// メニューからウィンドウを開きます。
     /// </summary>
     [MenuItem("Tools/Generated/New Tool")]
     public static void ShowWindow()
     {
-        CSED_NewToolWindow window = GetWindow<CSED_NewToolWindow>("New Tool");
+        CSED_NewToolWindow window = GetWindow<CSED_NewToolWindow>("Test");
         window.minSize = new Vector2(360.0f, 240.0f);
     }
 
@@ -31,7 +37,9 @@ public class CSED_NewToolWindow : EditorWindow
     /// </summary>
     private void OnGUI()
     {
-        EditorGUILayout.LabelField("New Tool", EditorStyles.boldLabel);
+        newIntField01 = EditorGUILayout.IntField("newIntField01", newIntField01);
+        GUILayout.Space(6.0f);
+
     }
 }
 #endif

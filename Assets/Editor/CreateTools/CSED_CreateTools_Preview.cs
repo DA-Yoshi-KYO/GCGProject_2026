@@ -312,8 +312,8 @@ public partial class CSED_CreateTools
         Rect panelRect = new Rect(
             f_windowRect.x + 24.0f,
             f_windowRect.y + c_PreviewTitleBarHeight + 24.0f,
-            Mathf.Min(280.0f, f_windowRect.width - 48.0f),
-            92.0f);
+            Mathf.Min(360.0f, f_windowRect.width - 48.0f),
+            250.0f);
 
         EditorGUI.DrawRect(panelRect, new Color(0.24f, 0.24f, 0.24f));
 
@@ -346,6 +346,12 @@ public partial class CSED_CreateTools
             m_PreviewEditorTitleName = EditorGUILayout.TextField(
                 "Title Name",
                 m_PreviewEditorTitleName);
+
+            m_GeneratedToolWindowTitle = m_PreviewEditorTitleName;
+
+            GUILayout.Space(12.0f);
+
+            DrawGeneratedToolSettingFields();
 
             if (EditorGUI.EndChangeCheck())
             {
