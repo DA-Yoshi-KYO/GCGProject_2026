@@ -11,7 +11,6 @@
 #if UNITY_EDITOR
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
 
 /// <summary>
 /// CreateToolsのシステム状態をまとめるクラスです。
@@ -19,14 +18,24 @@ using UnityEditor;
 public partial class CSED_CreateTools
 {
     /// <summary>
-    /// ScriptableObject型として使用するスクリプトです。
+    /// 生成するEditorWindowのタイトルです。
     /// </summary>
-    public MonoScript ScriptableObjectTypeScript { get; set; }
+    private string m_GeneratedToolWindowTitle = "New Tool";
 
     /// <summary>
-    /// 初期値として設定するScriptableObjectアセットです。
+    /// 生成するEditorWindowのクラス名です。
     /// </summary>
-    public ScriptableObject DefaultScriptableObjectValue { get; set; }
+    private string m_GeneratedToolClassName = "CSED_NewToolWindow";
+
+    /// <summary>
+    /// 生成したEditorWindowを表示するUnityメニューパスです。
+    /// </summary>
+    private string m_GeneratedToolMenuPath = "Tools/Generated/New Tool";
+
+    /// <summary>
+    /// 生成するEditorWindowスクリプトの出力先フォルダです。
+    /// </summary>
+    private string m_GeneratedToolOutputFolderPath = "Assets/Editor/GeneratedCreateTools";
 
     /// <summary>
     /// 左ウィンドウ現在横幅です。
