@@ -16,7 +16,7 @@ public class CS_SelectBarMove : MonoBehaviour
     private CustomInputAction inputActions;
     private int currentButton = 0;
 
-    private CS_BackGround_PlaySE backGround_PlaySE;
+    private CS_BackGroundPlaySE backGroundPlaySE;
 
     // Start is called before the first frame update
     void Start()
@@ -24,7 +24,7 @@ public class CS_SelectBarMove : MonoBehaviour
         inputActions = new CustomInputAction();
         inputActions.SelectBar.Enable();
 
-        backGround_PlaySE = GameObject.Find("SE").GetComponent<CS_BackGround_PlaySE>();
+        backGroundPlaySE = GameObject.Find("SE").GetComponent<CS_BackGroundPlaySE>();
     }
 
     // Update is called once per frame
@@ -33,7 +33,7 @@ public class CS_SelectBarMove : MonoBehaviour
         //現在選択しているボタンの移動処理
         if(inputActions.SelectBar.MoveUp.triggered)
         {
-            backGround_PlaySE.PlaySE("SelectBar");
+            backGroundPlaySE.PlaySE("SelectBar");
             currentButton--;
             if(currentButton < 0)
             {
@@ -43,7 +43,7 @@ public class CS_SelectBarMove : MonoBehaviour
 
         if(inputActions.SelectBar.MoveDown.triggered)
         {
-            backGround_PlaySE.PlaySE("SelectBar");
+            backGroundPlaySE.PlaySE("SelectBar");
             currentButton++;
             if(currentButton >= buttonList.Length)
             {
@@ -61,7 +61,7 @@ public class CS_SelectBarMove : MonoBehaviour
         //決定ボタンでシーン遷移
         if(inputActions.SelectBar.Decision.triggered)
         {
-            backGround_PlaySE.PlaySE("Decision");
+            backGroundPlaySE.PlaySE("Decision");
             string sceneName = "";
             switch(currentButton)
             {
