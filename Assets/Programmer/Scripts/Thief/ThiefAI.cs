@@ -26,6 +26,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Analytics;
 
 // 泥棒のAIシステム
 [RequireComponent(typeof(NavMeshAgent))]
@@ -94,6 +95,14 @@ public class ThiefAI : MonoBehaviour
     [Tooltip("泥棒が探索するのにかかる秒数")]
     private int searchTime;
 
+    [Tooltip("攻撃を受けた後の気絶時間")]
+    private float damageStunTime;
+
+    [Tooltip("攻撃を受けた後の無敵時間")]
+    private float invincibleTime;
+    [Tooltip("無敵時間の現在残り時間")]
+    private float remainingInvincibleTime;
+
     [Tooltip("気絶後に退場するまでの時間")]
     private int exitAfterStunTime;
     [Tooltip("気絶後の経過時間")]
@@ -118,7 +127,7 @@ public class ThiefAI : MonoBehaviour
     private Transform firstEntryPoint; // 最初に入ってきたドアの位置(逃走ルートの最終目的位置)
 
     [Tooltip("帰宅ルート")]
-    private List<Transform> escapeRoute;
+    private List<Transform> moveRoute;
 
 
     // 泥棒の耐久力と移動速度を設定するメソッド
@@ -136,6 +145,9 @@ public class ThiefAI : MonoBehaviour
         searchTime = typedata.searchTime;
 
         exitAfterStunTime = data.exitAfterStunTime;
+        damageStunTime = data.stunTime;
+        invincibleTime = data.invincibleTime;
+        remainingInvincibleTime = 0.0f;
 
         // 初期状態を探索に設定
         currentState = ThiefState.Explore;
@@ -189,6 +201,20 @@ public class ThiefAI : MonoBehaviour
 
     private void Update()
     {
+        // 無敵時間の経過を管理
+        // 気絶状態のときは無敵時間の経過を管理しない（気絶状態のときは攻撃を受けない想定のため）
+        if (remainingInvincibleTime > 0)
+        {
+            if (currentState != ThiefState.Stunned)
+            {
+                remainingInvincibleTime -= Time.deltaTime;
+                if (remainingInvincibleTime <= 0)
+                {
+                    remainingInvincibleTime = 0;
+                }
+            }
+        }
+
         // 現在の状態に応じた行動を実行
         switch (currentState)
         {
@@ -214,6 +240,23 @@ public class ThiefAI : MonoBehaviour
         RecognizeObjects();
 
         ChangeFace(ReactionSpriteType.Normal);
+
+        // 現在の探索対象がプレイヤーである場合は、距離判定をして、一定距離以内であればプレイヤーに向かって移動する処理を追加する
+        if (currentTarget != null && currentTarget is PlayerTarget)
+        {
+            // 距離判定
+            VisionSensor visionSensor = GetComponent<VisionSensor>();
+            int distanceToPlayer = (int)Vector3.Distance(transform.position, currentTarget.transform.position);
+            if (distanceToPlayer <= visionSensor.viewDistance)
+            {
+                navMeshAgent.SetDestination(currentTarget.transform.position);
+            }
+            else
+            {
+                currentTarget = null;
+            }
+            return;
+        }
 
         // 探索対象がない場合や、探索度が次の部屋に移動するための閾値を超えている場合は、次の部屋に移動するための処理を追加する
         if (isNextRoomMovePointDecided || roomMemories[currentRoom].explorationLevel >= nextRoomSearchThreshold)
@@ -348,13 +391,13 @@ public class ThiefAI : MonoBehaviour
     private void Escape()
     {
         // ルートが未構築なら構築する
-        if (escapeRoute == null || escapeRoute.Count == 0)
+        if (moveRoute == null || moveRoute.Count == 0)
         {
             EscapeRoute(); // ここで escapeRoute が埋まる＆ nextRoomMovePoint も先頭が入る想定
         }
 
         // それでも無いなら、何らかの理由でルートが作れなかった
-        if (escapeRoute == null || escapeRoute.Count == 0)
+        if (moveRoute == null || moveRoute.Count == 0)
         {
             // フォールバック（暫定）：従来の movePoints 逃走などに戻したい場合はここに書く
             Debug.LogWarning("【泥棒】Escape: escapeRoute が空のため移動できません。");
@@ -362,11 +405,11 @@ public class ThiefAI : MonoBehaviour
         }
 
         // 次に向かうドア
-        Transform door = escapeRoute[0];
+        Transform door = moveRoute[0];
         if (door == null)
         {
             // 参照切れ対策：無効な要素を捨てて次へ
-            escapeRoute.RemoveAt(0);
+            moveRoute.RemoveAt(0);
             return;
         }
 
@@ -385,18 +428,33 @@ public class ThiefAI : MonoBehaviour
 
         // 経過時間を加算
         elapsedTimeAfterStun += Time.deltaTime;
-        // 経過時間が退場するまでの時間を超えた場合は、退場する処理を追加する
-        if (elapsedTimeAfterStun >= exitAfterStunTime)
+
+        // 耐久値が残っている場合は、気絶時間が経過したら無敵時間を付与して、状態を探索に戻す
+        if (durability > 0)
         {
-            thiefMaterial.SetFloat("_Timer", fadeAfterStunTime - (elapsedTimeAfterStun - exitAfterStunTime));
-
-            Transform faceTransform = this.transform.GetChild(0);
-            Vector3 facePos = faceTransform.position;
-            faceTransform.position = new Vector3(facePos.x, facePos.y + 0.01f * (elapsedTimeAfterStun - exitAfterStunTime), facePos.z);
-
-            if(thiefMaterial.GetFloat("_Timer") <= 0.0f)
+            // 経過時間が気絶時間を超えた場合は、耐久力を減少させて、状態を探索に戻す
+            if (elapsedTimeAfterStun >= damageStunTime)
             {
-                Destroy(this.gameObject);
+                currentState = ThiefState.Explore; // 状態を探索に戻す
+                navMeshAgent.isStopped = false; // ナビメッシュエージェントを再開させる
+            }
+        }
+        // 耐久力が0以下の場合は、時間経過後に退場する
+        else
+        {
+            // 経過時間が退場するまでの時間を超えた場合は、退場する処理を追加する
+            if (elapsedTimeAfterStun >= exitAfterStunTime)
+            {
+                thiefMaterial.SetFloat("_Timer", fadeAfterStunTime - (elapsedTimeAfterStun - exitAfterStunTime));
+
+                Transform faceTransform = this.transform.GetChild(0);
+                Vector3 facePos = faceTransform.position;
+                faceTransform.position = new Vector3(facePos.x, facePos.y + 0.01f * (elapsedTimeAfterStun - exitAfterStunTime), facePos.z);
+
+                if (thiefMaterial.GetFloat("_Timer") <= 0.0f)
+                {
+                    Destroy(this.gameObject);
+                }
             }
         }
     }
@@ -408,17 +466,18 @@ public class ThiefAI : MonoBehaviour
     {
         // 視界内オブジェクトを取得
         List<ThiefTarget> visionTargets = this.GetComponent<VisionSensor>().Scan();
-        
+
+        // 現在の部屋の記憶がない場合は新たに作成
+        if (roomMemories[currentRoom] == null)
+        {
+            roomMemories[currentRoom] = new RoomMemory();
+            roomMemories[currentRoom].FirstSetting();
+        }
+
         bool isNewObjectRecognized = false; // 新たに視認したオブジェクトがあるかどうかを判定するフラグ
         // 視認したオブジェクトを記憶に保存
         foreach (ThiefTarget target in visionTargets)
         {
-            // 現在の部屋の記憶がない場合は新たに作成
-            if (roomMemories[currentRoom] == null)
-            {
-                roomMemories[currentRoom] = new RoomMemory();
-                roomMemories[currentRoom].FirstSetting();
-            }
 
             // 現在の部屋の記憶に認識しているオブジェクトのリストがない場合は新たに作成
             if (roomMemories[currentRoom].recognizedObjects == null) roomMemories[currentRoom].recognizedObjects = new List<ThiefTarget>();
@@ -444,6 +503,22 @@ public class ThiefAI : MonoBehaviour
             }
             
 
+            if (target is PlayerTarget)
+            {
+                // 現在の探索対象が宝物である場合は、プレイヤーを探索対象に設定しない
+                if (currentTarget is VisionTarget && ((VisionTarget)currentTarget).targetType == VisionTarget.TargetType.Treasure)
+                {
+                    continue; 
+                }
+                // 現在の探索対象が宝物でない場合は、プレイヤーを探索対象に設定する
+                else
+                {
+                    currentTarget = target;
+                }
+
+                continue;
+            }
+
             // 新しいオブジェクトを記憶に追加
             roomMemories[currentRoom].recognizedObjects.Add(target);
             // 記憶領域の作成
@@ -454,6 +529,13 @@ public class ThiefAI : MonoBehaviour
 
         // 新たに視認したオブジェクトを記憶に保存した後、探索対象を決定する処理を追加する
         if(isNewObjectRecognized)DecideTarget();
+
+        // 次の部屋に移動するためのポイントが設定されている場合は、削除する
+        if (nextRoomMovePoint != null)
+        {
+            nextRoomMovePoint = null;
+            isNextRoomMovePointDecided = false;
+        }
     }
 
     /// <summary>
@@ -585,14 +667,6 @@ public class ThiefAI : MonoBehaviour
                             break;
                     }
                 }
-                else if (entry is PlayerTarget)
-                {
-                    // 宝物を探索対象にしている場合は、スキップ
-                    if (currentTarget is VisionTarget vt && vt.targetType == VisionTarget.TargetType.Treasure) continue;
-                    // 空の宝箱型の罠を探索対象にしている場合は、スキップ
-                    if (currentTarget is TrapTarget tt && tt.gimmickScript.gimmick == Gimmick.EmptyChest) continue;
-
-                }
                 else if (entry is TrapTarget)
                 {
                     // 宝物を探索対象にしている場合は、スキップ
@@ -619,11 +693,14 @@ public class ThiefAI : MonoBehaviour
             // 前回の探索対象がThiefTargetの派生クラスかどうか(前回が移動ポイントでない場合)
             if (currentTarget == null || currentTarget is VisionTarget || currentTarget is TrapTarget || currentTarget is PlayerTarget)
             {
-
-                if (currentTarget != null && (VisionTarget)currentTarget)
+                // 前回の探索対象が視認オブジェクト(VisionTarget)の場合は、探索対象をリセットする
+                if (currentTarget != null)
                 {
-                    ((VisionTarget)currentTarget).searchThief = null; // 現在の探索対象の探索している人をリセットする
-                    currentTarget = null;
+                    if ((VisionTarget)currentTarget)
+                    {
+                        ((VisionTarget)currentTarget).searchThief = null;
+                        currentTarget = null;
+                    }
                 }
                 // 視認オブジェクトから移動ポイントにする場合は一番近いものを探索対象に設定
                 foreach (ThiefTarget target in currentRoom.movePoints)
@@ -705,11 +782,16 @@ public class ThiefAI : MonoBehaviour
     }
 
     /// <summary>
-    ///  耐久値を減らす処理
+    /// 耐久値を減らす処理
     /// </summary>
     /// <param name="damage">与える減少値</param>
     public void TakeDamage(int damage, Gimmick type)
     {
+        if (remainingInvincibleTime > 0)
+        {
+            return;
+        }
+
         durability -= damage;
 
         switch (type)
@@ -726,15 +808,19 @@ public class ThiefAI : MonoBehaviour
                 break;
         }
 
+        currentState = ThiefState.Stunned; // 状態を気絶に変更
+        elapsedTimeAfterStun = 0.0f; // 気絶時間の経過時間をリセット
+
+        remainingInvincibleTime = invincibleTime; // 無敵時間を付与
+
+        // 泥棒の表情を気絶の表情に変更する処理を追加する
+        ChangeFace(ReactionSpriteType.Stun);
+
 
         // 耐久力が0以下になった場合は、耐久力を0に補正して気絶状態にする
         if (durability <= 0)
         {
             durability = 0;
-            currentState = ThiefState.Stunned;
-
-            // 泥棒の表情を気絶の表情に変更する処理を追加する
-            ChangeFace(ReactionSpriteType.Stun);
 
             // プレイヤーにソウルを入手させる
             CS_PlayerAction playerAction = GameObject.FindObjectOfType<CS_PlayerAction>();
@@ -986,12 +1072,12 @@ public class ThiefAI : MonoBehaviour
         {
             // ワープする = ドアを通過した
             // escapeRouteの先頭が次の移動ポイントになる想定なので、先頭を削除して次の移動ポイントを設定する
-            if (escapeRoute != null && escapeRoute.Count > 0)
+            if (moveRoute != null && moveRoute.Count > 0)
             {
-                escapeRoute.RemoveAt(0);
-                if (escapeRoute.Count > 0)
+                moveRoute.RemoveAt(0);
+                if (moveRoute.Count > 0)
                 {
-                    nextRoomMovePoint = escapeRoute[0];
+                    nextRoomMovePoint = moveRoute[0];
                     isNextRoomMovePointDecided = true;
                 }
                 else
@@ -1027,13 +1113,13 @@ public class ThiefAI : MonoBehaviour
         }
 
         // リスト初期化
-        if (escapeRoute == null) escapeRoute = new List<Transform>();
-        escapeRoute.Clear();
+        if (moveRoute == null) moveRoute = new List<Transform>();
+        moveRoute.Clear();
 
         // 最終目的地（最初に入ってきた入口）を末尾に追加
         if (firstEntryPoint != null)
         {
-            escapeRoute.Add(firstEntryPoint);
+            moveRoute.Add(firstEntryPoint);
         }
         else
         {
@@ -1160,13 +1246,13 @@ public class ThiefAI : MonoBehaviour
                 continue;
             }
 
-            escapeRoute.Add(doorTr);
+            moveRoute.Add(doorTr);
         }
 
         // ついでに「次に向かうドア」を nextRoomMovePoint に入れておく（既存仕様と互換）
-        if (escapeRoute.Count > 0)
+        if (moveRoute.Count > 0)
         {
-            nextRoomMovePoint = escapeRoute[0];
+            nextRoomMovePoint = moveRoute[0];
             isNextRoomMovePointDecided = true;
         }
     }
@@ -1179,6 +1265,5 @@ public class ThiefAI : MonoBehaviour
     {
         TakeDamage(1, Gimmick.Pot);
     }
-
 }
 

@@ -46,16 +46,16 @@ public class CS_PlayerMove : MonoBehaviour
     {
         if (Time.timeScale == 0) return;
 
-        bool isSneaking = playerData.playerInput.Player.Sneak.IsPressed();
+        bool isSneaking = playerData.customInputAction.Player.Sneak.IsPressed();
 
         float h = 0.0f;
         float v = 0.0f;
 
-        if (playerData.playerInput.Player.MoveForward.IsPressed()) v = 1.0f;
-        else if (playerData.playerInput.Player.MoveBack.IsPressed()) v = -1.0f;
+        if (playerData.customInputAction.Player.MoveForward.IsPressed()) v = 1.0f;
+        else if (playerData.customInputAction.Player.MoveBack.IsPressed()) v = -1.0f;
 
-        if (playerData.playerInput.Player.MoveRight.IsPressed()) h = 1.0f;
-        else if (playerData.playerInput.Player.MoveLeft.IsPressed()) h = -1.0f;
+        if (playerData.customInputAction.Player.MoveRight.IsPressed()) h = 1.0f;
+        else if (playerData.customInputAction.Player.MoveLeft.IsPressed()) h = -1.0f;
 
         Vector3 cameraForward = playerCamera.cameraForward;
         Vector3 cameraRight = playerCamera.cameraRight;

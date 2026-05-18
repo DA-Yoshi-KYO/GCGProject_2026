@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class PlayerData : MonoBehaviour
 {
-    [HideInInspector] public PlayerInput playerInput { private set; get; }
+    [HideInInspector] public CustomInputAction customInputAction { private set; get; }
     [HideInInspector] public CS_RoomPlayerPosition currentRoomData { private set; get; }
 
     //プレイヤーのモード
@@ -15,13 +15,13 @@ public class PlayerData : MonoBehaviour
 
     void Awake()
     {
-        playerInput = new PlayerInput();
-        playerInput.Player.Enable();
+        customInputAction = new CustomInputAction();
+        customInputAction.Player.Enable();
         currentRoomData = GameObject.Find("RoomManager").GetComponent<CS_RoomPlayerPosition>();
     }
 
     private void OnDestroy()
     {
-        playerInput.Player.Disable();
+        customInputAction.Player.Disable();
     }
 }

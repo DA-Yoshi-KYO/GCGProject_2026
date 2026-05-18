@@ -7,9 +7,7 @@
  * 2026-05-08 | リファクタリング(大瀧)
  */
 
-using Unity.VisualScripting;
 using UnityEngine;
-using static UnityEditor.PlayerSettings;
 
 public class RockGimmick : GimmickBase
 {
@@ -163,9 +161,12 @@ public class RockGimmick : GimmickBase
                 pos += slopeDir * speed * Time.deltaTime;
 
                 // Yだけ補正
+                // 斜面の角度から補正値を計算
+                float angleCorrection;
+                angleCorrection = gravity / 3.141592f + angle / (3.141592f * 2f);
                 pos.y = hit.point.y + 0.4f;
+                transform.position = new Vector3(pos.x, pos.y + debugUpdateOffset, pos.z);
             }
-            transform.position = new Vector3(pos.x, pos.y + debugUpdateOffset, pos.z);
         }
         else
         {
