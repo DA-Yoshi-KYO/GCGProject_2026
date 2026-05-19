@@ -16,7 +16,7 @@ public class Option : MonoBehaviour
 
     private bool _isOptionUIActive = false; // OptionUIがアクティブかどうか
 
-    private PlayerInput _input;
+    private CustomInputAction _input;
 
     private GameObject _prevOption;
 
@@ -58,7 +58,7 @@ public class Option : MonoBehaviour
         }
 
         // Input生成
-        _input = new PlayerInput();
+        _input = new CustomInputAction();
 
         // Option入力のトリガー登録
         _input.Player.Option.performed += OnOption;

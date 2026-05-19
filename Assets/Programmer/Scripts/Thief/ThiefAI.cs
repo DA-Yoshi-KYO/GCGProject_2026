@@ -21,12 +21,13 @@
  * 2026-05-07 | CS_RoomEnemyEntryPointDataを用いた初期部屋の設定の記載
  * 2026-05-08 | 初期部屋の入ってきたドアの位置を保存する処理の記載
  * 2026-05-15 | 同じ部屋の中で、他者が探索しているオブジェクトを探索対象にしないようにする処理を追加
+ * 2026-05-17 | DecideTarget内のキャストエラーの不具合を修正
  * 
  */
+using HoudiniEngineUnity;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.Analytics;
 
 // 泥棒のAIシステム
 [RequireComponent(typeof(NavMeshAgent))]
@@ -73,7 +74,6 @@ public class ThiefAI : MonoBehaviour
     [Tooltip("視認オブジェクトの記憶")]
     private Dictionary<VisionTarget, VisionTargetMemory> visionTargetMemories;
 
-    [SerializeField, Header("デバック項目")]// ########## デバッグ ##############
     [Tooltip("探索対象")]
     private ThiefTarget currentTarget;
     public ThiefTarget CurrentTarget => currentTarget;
@@ -126,7 +126,7 @@ public class ThiefAI : MonoBehaviour
     private RoomNode firstRoom;
     private Transform firstEntryPoint; // 最初に入ってきたドアの位置(逃走ルートの最終目的位置)
 
-    [Tooltip("帰宅ルート")]
+    [Tooltip("移動ルート")]
     private List<Transform> moveRoute;
 
 
@@ -246,13 +246,51 @@ public class ThiefAI : MonoBehaviour
         {
             // 距離判定
             VisionSensor visionSensor = GetComponent<VisionSensor>();
-            if (Vector3.Distance(transform.position, currentTarget.transform.position) < visionSensor.viewDistance)
+            int distanceToPlayer = (int)Vector3.Distance(transform.position, currentTarget.transform.position);
+            if (distanceToPlayer <= visionSensor.viewDistance)
             {
                 navMeshAgent.SetDestination(currentTarget.transform.position);
             }
             else
             {
                 currentTarget = null;
+            }
+            return;
+        }
+
+        // moveRouteが設定されている場合は、moveRouteに沿って移動する処理を追加する
+        if (moveRoute != null && moveRoute.Count > 0)
+        {
+            // プレイヤーや宝物、標的にする罠などが視認できている場合は、moveRouteをクリアして、そちらに向かう処理を追加する
+            if (currentTarget is PlayerTarget || currentTarget is TrapTarget || currentTarget is VisionTarget)
+            {
+                if (currentTarget is VisionTarget)
+                {
+                    if (((VisionTarget)currentTarget).targetType == VisionTarget.TargetType.Treasure)
+                    {
+                        moveRoute.Clear();
+                        return;
+                    }
+                }
+                else
+                {
+                    moveRoute.Clear();
+                    return;
+                }
+            }
+
+            Transform nextPoint = moveRoute[0];
+            if (nextPoint == null)
+            {
+                // 参照切れ対策：無効な要素を捨てて次へ
+                moveRoute.RemoveAt(0);
+                return;
+            }
+            navMeshAgent.SetDestination(nextPoint.position);
+            // 次のポイントに十分近づいたら、次のポイントへ
+            if (Vector3.Distance(transform.position, nextPoint.position) < 1.0f)
+            {
+                moveRoute.RemoveAt(0);
             }
             return;
         }
@@ -292,9 +330,9 @@ public class ThiefAI : MonoBehaviour
                 // 現在の探索対象が他者にも探索されているオブジェクトである場合は、探索対象をリセットして、次の探索対象を決定する
                 if (visionTargetMemories[((VisionTarget)currentTarget)].searchThief != null && visionTargetMemories[((VisionTarget)currentTarget)].searchThief != this.gameObject)
                 {
-                    Debug.Log("【"+ this.gameObject.name +"】Explore: 探索対象 " + currentTarget.name + " は" + ((VisionTarget)currentTarget).searchThief.gameObject.name + "が探索しているため、探索対象をリセットします。");
+                    Debug.Log("【" + this.gameObject.name + "】Explore: 探索対象 " + currentTarget.name + " は" + ((VisionTarget)currentTarget).searchThief.gameObject.name + "が探索しているため、探索対象をリセットします。");
 
-                    
+
                     currentTarget = null;
                     return;
                 }
@@ -392,14 +430,13 @@ public class ThiefAI : MonoBehaviour
         // ルートが未構築なら構築する
         if (moveRoute == null || moveRoute.Count == 0)
         {
-            EscapeRoute(); // ここで escapeRoute が埋まる＆ nextRoomMovePoint も先頭が入る想定
+            ConstructionRoute(firstEntryPoint); // ここで moveRoute が埋まる想定
         }
 
         // それでも無いなら、何らかの理由でルートが作れなかった
         if (moveRoute == null || moveRoute.Count == 0)
         {
-            // フォールバック（暫定）：従来の movePoints 逃走などに戻したい場合はここに書く
-            Debug.LogWarning("【泥棒】Escape: escapeRoute が空のため移動できません。");
+            Debug.LogWarning("【泥棒】Escape: moveRoute が空のため移動できません。");
             return;
         }
 
@@ -409,12 +446,33 @@ public class ThiefAI : MonoBehaviour
         {
             // 参照切れ対策：無効な要素を捨てて次へ
             moveRoute.RemoveAt(0);
+            isNextRoomMovePointDecided = false; // 次の部屋に移動するためのポイントを決定していない状態に戻す
+            return;
+        }
+
+        // ドアに十分近づいたら、次のドアへ
+        if (Vector3.Distance(transform.position, door.position) < 1.0f)
+        {
+            moveRoute.RemoveAt(0);
+            isNextRoomMovePointDecided = false; // 次の部屋に移動するためのポイントを決定していない状態に戻す
+
+            // ルート上のドアを全て通過した場合は、脱出完了で削除する
+            if (moveRoute.Count == 0)
+            {
+                Debug.Log("【泥棒】Escape: 脱出ルート上のドアを全て通過し、脱出された");
+                Destroy(this.gameObject);
+                return;
+            }
+
             return;
         }
 
         // ドアへ移動
-        navMeshAgent.isStopped = false;
-        navMeshAgent.SetDestination(door.position);
+        if (!isNextRoomMovePointDecided)
+        {
+            navMeshAgent.isStopped = false;
+            navMeshAgent.SetDestination(door.position);
+        }
     }
 
     // 気絶状態の行動
@@ -489,7 +547,7 @@ public class ThiefAI : MonoBehaviour
             }
             if (isAlreadyRecognized)
             {
-                if(target is VisionTarget)
+                if (target is VisionTarget)
                 {
                     // 既に記憶しているオブジェクトが視認オブジェクト(VisionTarget)の場合は、探索している人がいるかどうかの情報を更新する
                     if (visionTargetMemories.ContainsKey((VisionTarget)target))
@@ -500,14 +558,14 @@ public class ThiefAI : MonoBehaviour
 
                 continue;
             }
-            
+
 
             if (target is PlayerTarget)
             {
                 // 現在の探索対象が宝物である場合は、プレイヤーを探索対象に設定しない
                 if (currentTarget is VisionTarget && ((VisionTarget)currentTarget).targetType == VisionTarget.TargetType.Treasure)
                 {
-                    continue; 
+                    continue;
                 }
                 // 現在の探索対象が宝物でない場合は、プレイヤーを探索対象に設定する
                 else
@@ -521,13 +579,20 @@ public class ThiefAI : MonoBehaviour
             // 新しいオブジェクトを記憶に追加
             roomMemories[currentRoom].recognizedObjects.Add(target);
             // 記憶領域の作成
-            if(target is VisionTarget)visionTargetMemories[((VisionTarget)target)] = new VisionTargetMemory();
+            if (target is VisionTarget) visionTargetMemories[((VisionTarget)target)] = new VisionTargetMemory();
 
             isNewObjectRecognized = true; // 新たに視認したオブジェクトがある場合はフラグを立てる
         }
 
         // 新たに視認したオブジェクトを記憶に保存した後、探索対象を決定する処理を追加する
-        if(isNewObjectRecognized)DecideTarget();
+        if (isNewObjectRecognized) DecideTarget();
+
+        // 次の部屋に移動するためのポイントが設定されている場合は、削除する
+        if (nextRoomMovePoint != null)
+        {
+            nextRoomMovePoint = null;
+            isNextRoomMovePointDecided = false;
+        }
     }
 
     /// <summary>
@@ -594,7 +659,7 @@ public class ThiefAI : MonoBehaviour
                                 {
                                     // 現在の探索対象が宝物でない場合は、問答無用で宝物を探索対象に設定
                                     if (((VisionTarget)currentTarget).targetType != VisionTarget.TargetType.Treasure)
-                                    {                                      
+                                    {
                                         currentTarget = entry;
                                         break;
                                     }
@@ -685,11 +750,14 @@ public class ThiefAI : MonoBehaviour
             // 前回の探索対象がThiefTargetの派生クラスかどうか(前回が移動ポイントでない場合)
             if (currentTarget == null || currentTarget is VisionTarget || currentTarget is TrapTarget || currentTarget is PlayerTarget)
             {
-
-                if (currentTarget != null && (VisionTarget)currentTarget)
+                // 前回の探索対象が視認オブジェクト(VisionTarget)の場合は、探索対象をリセットする
+                if (currentTarget != null)
                 {
-                    ((VisionTarget)currentTarget).searchThief = null; // 現在の探索対象の探索している人をリセットする
-                    currentTarget = null;
+                    if ((VisionTarget)currentTarget)
+                    {
+                        ((VisionTarget)currentTarget).searchThief = null;
+                        currentTarget = null;
+                    }
                 }
                 // 視認オブジェクトから移動ポイントにする場合は一番近いものを探索対象に設定
                 foreach (ThiefTarget target in currentRoom.movePoints)
@@ -815,7 +883,7 @@ public class ThiefAI : MonoBehaviour
             CS_PlayerAction playerAction = GameObject.FindObjectOfType<CS_PlayerAction>();
 
             // playerActionが見つかった場合は、ソウルを加算する処理を実行する。見つからない場合は、エラーログを出力する。
-            if (playerAction != null)playerAction.AddSoul(soulDropCount);
+            if (playerAction != null) playerAction.AddSoul(soulDropCount);
             else Debug.LogError("PlayerActionが見つかりませんでした。ThiefAIのTakeDamageメソッドで、プレイヤーにソウルを入手させる処理が正常に動作しない可能性があります。");
         }
     }
@@ -845,7 +913,7 @@ public class ThiefAI : MonoBehaviour
     }
 
     /// <summary>
-    /// 次に設定する移動ポイントを決定するロジック
+    /// 現在いる部屋の接続している方向を取得して、次に探索する部屋に行くための移動ポイントを決定する処理
     /// </summary>
     private void NextDoorElection()
     {
@@ -874,21 +942,66 @@ public class ThiefAI : MonoBehaviour
         // 入ってきたドアをリストから除外
         // もし行ったことのない部屋がある場合は行ったことのある方向をリストから除外
         bool hasUnvisitedNextRooms = HasUnvisitedNextRooms(); // 次の部屋候補の中に行ったことのない部屋があるかどうかを判定するフラグ
-        for (int i = 0 ; i < connectDirs.Count ; i++)
+
+        // 次の部屋候補の中に行ったことのない部屋がある場合
+        if (hasUnvisitedNextRooms)
         {
-            // 入ってきたドアの方向と同じ方向がある場合は、リストから除外
-            if (connectDirs[i] == roomMemories[currentRoom].enteredDoorDirection)
+            for (int i = 0 ; i < connectDirs.Count ; i++)
             {
-                connectDirs.RemoveAt(i);
-                i--;
-                continue;
-            }
-            // 次の部屋候補の中に行ったことのない部屋がある場合は、行ったことのある方向があればリストから除外
-            if (hasUnvisitedNextRooms)
-            {
+                // 入ってきたドアの方向と同じ方向がある場合は、リストから除外
+                if (connectDirs[i] == roomMemories[currentRoom].enteredDoorDirection)
+                {
+                    connectDirs.RemoveAt(i);
+                    i--;
+                    continue;
+                }
+                // 行ったことのある方向をリストから除外
                 CS_RoomMoveConnection nextRoom;
                 roomCreatePoint.TryGetConnection(connectDirs[i], out nextRoom);
                 if (roomMemories.ContainsKey(nextRoom.TargetCreatePoint.GetComponentInChildren<RoomNode>()))
+                {
+                    connectDirs.RemoveAt(i);
+                    i--;
+                    continue;
+                }
+            }
+        }
+        // 次の部屋候補の中に行ったことのない部屋がない場合は、今までに行ったことのあるすべての部屋で選ばなかった方向をリストに追加
+        else
+        {
+            connectDirs.Clear();
+            // 今までに行ったことのあるすべての部屋で選ばなかった方向をリストに追加
+            foreach (var room in roomMemories)
+            {
+                foreach (var dir in room.Value.unchosenDoors)
+                {
+                    if (!connectDirs.Contains(dir)) connectDirs.Add(dir);
+                }
+            }
+        }
+
+        // 宝部屋判定
+        bool hasTreasureRoom = false;
+        foreach (var dir in connectDirs)
+        {
+            CS_RoomMoveConnection nextRoom;
+            roomCreatePoint.TryGetConnection(dir, out nextRoom);
+
+            if (nextRoom.TargetCreatePoint.GetComponentInChildren<RoomNode>().transform.tag == "TreasureRoom")
+            {
+                hasTreasureRoom = true;
+                break;
+            }
+        }
+        // 宝部屋がある場合は、宝部屋以外の方向をリストから除外
+        if (hasTreasureRoom)
+        {
+            for (int i = 0 ; i < connectDirs.Count ; i++)
+            {
+                CS_RoomMoveConnection nextRoom;
+                roomCreatePoint.TryGetConnection(connectDirs[i], out nextRoom);
+
+                if (nextRoom.TargetCreatePoint.GetComponentInChildren<RoomNode>().transform.tag != "TreasureRoom")
                 {
                     connectDirs.RemoveAt(i);
                     i--;
@@ -900,13 +1013,52 @@ public class ThiefAI : MonoBehaviour
         // 接続している部屋の方向をランダムに選択
         int randomIndex = Random.Range(0, connectDirs.Count);
 
-        // 選択しなかった方向のドアを記憶
-        for (int i = 0 ; i < connectDirs.Count ; i++)
+        if (hasUnvisitedNextRooms)
         {
-            if (i == randomIndex) continue;
+            // 選択しなかった方向のドアを記憶
+            for (int i = 0 ; i < connectDirs.Count ; i++)
+            {
+                if (i == randomIndex) continue;
 
-            roomMemories[currentRoom].unchosenDoors.Add(connectDirs[i]);
+                roomMemories[currentRoom].unchosenDoors.Add(connectDirs[i]);
+            }
         }
+        else
+        {
+            // 選択した方向のドアを記憶から削除
+            bool isRemoved = false; // 選択した方向のドアを記憶から削除したかどうかを判定するフラグ
+            RoomNode targetRoomNode = null;
+            foreach (var room in roomMemories)
+            {
+                foreach (var dir in room.Value.unchosenDoors)
+                {
+                    if (dir == connectDirs[randomIndex])
+                    {
+                        // どの部屋のドアかを記憶
+                        targetRoomNode = room.Key;
+                        // 記憶から選択した方向のドアを削除
+                        room.Value.unchosenDoors.Remove(dir);
+                        // 選択した方向のドアを記憶から削除したフラグを立てる
+                        isRemoved = true;
+                        break;
+                    }
+                }
+                if (isRemoved) break;
+            }
+
+            // 選択したドアの位置を取得
+            Transform targetDoorPos = targetRoomNode.GetDirectionWallToDoor(connectDirs[randomIndex]);
+
+            if (targetDoorPos == null)
+            {
+                Debug.LogError("【泥棒】選択したドアの位置が見つかりませんでした。ThiefAIのNextDoorElectionメソッドで、次に設定する移動ポイントを決定するロジックが正常に動作しない可能性があります。");
+                return;
+            }
+
+            // ドアの位置を最終目的位置としてルートを構築
+            ConstructionRoute(targetDoorPos);
+        }
+
 
         // 選択した方向にあるドアの位置を次の移動ポイントに設定
         nextRoomMovePoint = currentRoom.GetDirectionWallToDoor(connectDirs[randomIndex]);
@@ -965,7 +1117,7 @@ public class ThiefAI : MonoBehaviour
     /// <param name="obj">指定オブジェクト</param>
     public void EraseTheMemory(ThiefTarget obj)
     {
-        foreach(var room in roomMemories)
+        foreach (var room in roomMemories)
         {
             // 指定のオブジェクトに関する記憶がない場合はスキップ
             if (room.Value.recognizedObjects == null) continue;
@@ -1043,7 +1195,7 @@ public class ThiefAI : MonoBehaviour
     public void WarpAction(Vector3 targetPos, CSE_RoomDoorDirection entryDoorDir)
     {
         // 現在の経路をリセットして、ワープ後に新しい経路を計算させる
-        navMeshAgent.ResetPath(); 
+        navMeshAgent.ResetPath();
         // NavMeshAgentのWarpメソッドを使用して、指定した位置にワープする
         navMeshAgent.Warp(targetPos);
 
@@ -1055,204 +1207,341 @@ public class ThiefAI : MonoBehaviour
         isNextRoomMovePointDecided = false;
         nextRoomMovePoint = null;
         currentTarget = null;
+    }
 
-        // 現在の状態が逃走状態の場合
-        if (currentState == ThiefState.Escape)
+    /// <summary>
+    /// ルートを構築する処理
+    /// </summary>
+    /// <param name="end">ルートの終点</param>
+    private void ConstructionRoute(Transform end)
+    {
+        // -------- 前提チェック --------
+        // currentRoom が取れていない場合はルート構築できない
+        if (currentRoom == null)
         {
-            // ワープする = ドアを通過した
-            // escapeRouteの先頭が次の移動ポイントになる想定なので、先頭を削除して次の移動ポイントを設定する
-            if (moveRoute != null && moveRoute.Count > 0)
+            Debug.LogWarning("【泥棒】ConstructionRoute: currentRoom が nullです。");
+            return;
+        }
+        // 終点が無い場合もルート構築できない
+        if (end == null)
+        {
+            Debug.LogWarning("【泥棒】ConstructionRoute: end が nullです。");
+            return;
+        }
+
+        // --------ルートリストの初期化 --------
+        //既存のルートが残っていると誤動作するので毎回クリアする
+        if (moveRoute == null) moveRoute = new List<Transform>();
+        moveRoute.Clear();
+
+        // -------- 終点が属する部屋(endRoom)を特定 --------
+        // end は Transformなので、その Transform が属する RoomCreatePoint を Raycast 等で取得し、
+        //そこから RoomNode を引き当てる
+        RoomNode endRoom = null;
+        try
+        {
+            GameObject endRoomObj = CS_RoomCreatePointRaycast.GetRayRoomCreatePoint(end.gameObject);
+            if (endRoomObj != null)
             {
-                moveRoute.RemoveAt(0);
-                if (moveRoute.Count > 0)
+                endRoom = endRoomObj.GetComponentInChildren<RoomNode>();
+            }
+        }
+        catch
+        {
+            // Raycast実装やシーン状態によって例外が起きる可能性があるため、ここでは握りつぶす
+            // （取得できない場合はフォールバックを行う）
+        }
+
+        //取得できなかった場合のフォールバック：firstRoom を終点部屋とみなす
+        // （通常は firstEntryPoint が firstRoom にある想定のため、ここで破綻しにくくする）
+        if (endRoom == null)
+        {
+            endRoom = firstRoom;
+        }
+
+        //それでも取れない場合は中断
+        if (endRoom == null)
+        {
+            Debug.LogWarning("【泥棒】ConstructionRoute: 終点部屋(endRoom)を特定できません。");
+            return;
+        }
+
+        // -------- A*探索の準備 --------
+        // open : 探索候補ノード（まだ確定していない）
+        // closed : 確定済みノード（これ以上更新しない）
+        // bestG : 各部屋(RoomNode)に到達する最小コスト(G)の記録
+        var open = new List<RouteNode>();
+        var closed = new HashSet<RoomNode>();
+        var bestG = new Dictionary<RoomNode, float>();
+
+        // 開始ノード：現在部屋
+        // - G:開始なので0
+        // - H:ヒューリスティック（ここでは部屋座標間距離）
+        RouteNode start = new RouteNode(currentRoom, null, null, 0f, Heuristic(currentRoom, endRoom));
+        open.Add(start);
+        bestG[currentRoom] = 0f;
+
+        // 終点到達時にここへ入る
+        RouteNode goal = null;
+
+        // -------- A*探索 --------
+        // open が空になるまで探索（=到達不可）
+        while (open.Count > 0)
+        {
+            // open の中から、評価値 F = G + H が最小のノードを選ぶ
+            // ※優先度付きキューではなく線形探索（部屋数が少ない前提）
+            int bestIndex = 0;
+            float bestF = open[0].F;
+            for (int i = 1 ; i < open.Count ; i++)
+            {
+                float f = open[i].F;
+                if (f < bestF)
                 {
-                    nextRoomMovePoint = moveRoute[0];
-                    isNextRoomMovePointDecided = true;
+                    bestF = f;
+                    bestIndex = i;
+                }
+            }
+
+            // 最小Fのノードを current として取り出す
+            RouteNode current = open[bestIndex];
+            open.RemoveAt(bestIndex);
+
+            // 終点部屋に到達したら探索終了
+            if (current.Room == endRoom)
+            {
+                goal = current;
+                break;
+            }
+
+            // 確定済みに追加
+            closed.Add(current.Room);
+
+            // 現在部屋から行ける隣接部屋を列挙
+            foreach (var edge in GetNeighbors(current.Room))
+            {
+                // 隣接が取得できない場合はスキップ
+                if (edge.NextRoom == null) continue;
+
+                // 「行ったことのある部屋のみ」を通る（記憶に無い部屋は通らない）
+                if (!roomMemories.ContainsKey(edge.NextRoom)) continue;
+
+                // closed に入っている部屋は再評価しない
+                if (closed.Contains(edge.NextRoom)) continue;
+
+                // Gコスト更新：現在までのコスト + 隣接へ行くコスト
+                float tentativeG = current.G + edge.Cost;
+
+                //既に「より良い経路(Gが小さい)」が記録されているなら更新しない
+                float recordedG;
+                if (bestG.TryGetValue(edge.NextRoom, out recordedG) && tentativeG >= recordedG)
+                {
+                    continue;
+                }
+
+                // この部屋への最良Gを更新
+                bestG[edge.NextRoom] = tentativeG;
+
+                // open 内に同じ部屋が存在するか確認（あれば親などを更新、なければ追加）
+                RouteNode exist = null;
+                for (int i = 0 ; i < open.Count ; i++)
+                {
+                    if (open[i].Room == edge.NextRoom)
+                    {
+                        exist = open[i];
+                        break;
+                    }
+                }
+
+                // ヒューリスティック（終点までの推定距離）
+                float h = Heuristic(edge.NextRoom, endRoom);
+
+                if (exist != null)
+                {
+                    //既存ノード更新
+                    // Parent :どの部屋から来たか
+                    // ViaDoor: Parent -> exist.Room に行くために通るドア(Parent側)
+                    exist.Parent = current;
+                    exist.ViaDoor = edge.Door;
+                    exist.G = tentativeG;
+                    exist.H = h;
                 }
                 else
                 {
-                    isNextRoomMovePointDecided = false;
-                    nextRoomMovePoint = null;
-                    Debug.Log("【泥棒】逃走完了");
-                    Destroy(gameObject);
+                    // 新規ノード追加
+                    open.Add(new RouteNode(edge.NextRoom, current, edge.Door, tentativeG, h));
                 }
             }
+        }
+
+        // -------- 探索結果の判定 --------
+        // goal が null のままなら到達できなかった（もしくは訪問済み制限で経路が作れなかった）
+        if (goal == null)
+        {
+            Debug.LogWarning("【泥棒】ConstructionRoute:ルート構築に失敗（到達不可 or 訪問済み部屋が不足） 現在:" + currentRoom.name + " 終点:" + endRoom.name);
+            return;
+        }
+
+        // --------ルート復元（goalから startへ親を辿る） --------
+        // goalから Parent を辿る形で復元すると「逆順」になるため、いったんreversedDoors に積んでから反転します。
+        // moveRoute に入れるのは「各部屋から次の部屋へ行くために通るドア(Transform)」です。
+        var reversedDoors = new List<Transform>();
+        RouteNode node = goal;
+        while (node != null && node.Parent != null)
+        {
+            // node.ViaDoor は「node.Parent.Roomから node.Room に行くためのドア(Parent側)」
+            if (node.ViaDoor != null)
+            {
+                reversedDoors.Add(node.ViaDoor);
+            }
+            node = node.Parent;
+        }
+
+        // start -> goal の順になるように reverseして moveRouteへ設定
+        for (int i = reversedDoors.Count -1 ; i >=0 ; i--)
+        {
+            moveRoute.Add(reversedDoors[i]);
+        }
+
+        // -------- 最終目的地(end)をルート末尾に追加 --------
+        if (end != null)
+        {
+            // 二重追加を避ける（既に末尾がendなら追加しない）
+            if (moveRoute.Count ==0 || moveRoute[moveRoute.Count -1] != end)
+            {
+                moveRoute.Add(end);
+            }
+        }
+    }
+
+    // --- ConstructionRoute 用の補助 ---
+
+    /// <summary>
+    /// A* 探索で扱う「部屋ノード」情報。
+    ///
+    /// - Room : このノードが表す部屋
+    /// - Parent :ひとつ前に辿ってきたノード（経路復元用）
+    /// - ViaDoor: Parent.Room -> Room に入るために通過する「Parent側のドア」
+    /// - G/H/F : A* のコスト（G=実コスト, H=推定, F=評価値）
+    ///
+    /// NOTE:
+    /// - RoomNode 自体はシーン上の参照なので、探索の都合に合わせた情報はここに保持する。
+    /// - sealed にすることで継承拡張を防ぎ、用途を固定しておく。
+    /// </summary>
+    private sealed class RouteNode
+    {
+        /// <summary>この探索ノードが表す部屋</summary>
+        public RoomNode Room;
+
+        /// <summary>ひとつ前のノード（経路復元に使用）</summary>
+        public RouteNode Parent;
+
+        /// <summary>
+        /// Parent.Room -> Room に行く時に通過する「Parent側」のドア。
+        /// moveRouteにはこのドアTransformを並べる。
+        /// </summary>
+        public Transform ViaDoor;
+
+        /// <summary>開始から現在部屋までの実コスト</summary>
+        public float G;
+
+        /// <summary>現在部屋から終点部屋までの推定コスト</summary>
+        public float H;
+
+        /// <summary>評価値（小さいほど優先度が高い）</summary>
+        public float F => G + H;
+
+        public RouteNode(RoomNode room, RouteNode parent, Transform viaDoor, float g, float h)
+        {
+            Room = room;
+            Parent = parent;
+            ViaDoor = viaDoor;
+            G = g;
+            H = h;
         }
     }
 
     /// <summary>
-    /// 逃走ルートを構築する処理
+    /// 「ある部屋から隣接部屋へ移動する」ための辺情報。
+    ///
+    /// - NextRoom : 接続先の部屋
+    /// - Door : from側（現在部屋側）に存在するドア Transform
+    /// - Cost : 隣接部屋へ移動するコスト（ここでは部屋中心間距離）
     /// </summary>
-    /// <remarks>
-    /// currentRoom から firstRoom まで、部屋接続(隣接)を BFS で探索してルート(部屋列)を復元する。
-    /// ルート上で通る各ドアの Transform を `escapeRoute` に順番に保存する。
-    /// </remarks>
-    private void EscapeRoute()
+    private struct NeighborEdge
     {
-        // 前提チェック
-        if (currentRoom == null)
+        public RoomNode NextRoom;
+        public Transform Door;
+        public float Cost;
+
+        public NeighborEdge(RoomNode nextRoom, Transform door, float cost)
         {
-            Debug.LogWarning("【泥棒】EscapeRoute: currentRoom が null です。");
-            return;
-        }
-        if (firstRoom == null)
-        {
-            Debug.LogWarning("【泥棒】EscapeRoute: firstRoom が null です。Setting() で entryRoom を設定しているか確認してください。");
-            return;
-        }
-
-        // リスト初期化
-        if (moveRoute == null) moveRoute = new List<Transform>();
-        moveRoute.Clear();
-
-        // 最終目的地（最初に入ってきた入口）を末尾に追加
-        if (firstEntryPoint != null)
-        {
-            moveRoute.Add(firstEntryPoint);
-        }
-        else
-        {
-            Debug.LogWarning("【泥棒】EscapeRoute: firstEntryPoint が null のため最終目的地を追加できません。entry時に設定しているか確認してください。");
-        }
-
-        // 既に最初の部屋にいるなら、帰宅ルート不要
-        if (currentRoom == firstRoom)
-        {
-            isNextRoomMovePointDecided = false;
-            nextRoomMovePoint = null;
-            return;
-        }
-
-        // BFS 用
-        var queue = new Queue<RoomNode>();
-        var visited = new HashSet<RoomNode>();
-        var parent = new Dictionary<RoomNode, RoomNode>();
-
-        queue.Enqueue(currentRoom);
-        visited.Add(currentRoom);
-        parent[currentRoom] = null;
-
-        bool found = false;
-
-        // currentRoom から firstRoom を探索
-        while (queue.Count > 0)
-        {
-            RoomNode room = queue.Dequeue();
-            if (room == null) continue;
-
-            if (room == firstRoom)
-            {
-                found = true;
-                break;
-            }
-
-            Transform createPointTr = room.gameObject.transform.parent;
-            if (createPointTr == null) continue;
-
-            CS_RoomCreatePoint roomCreatePoint = createPointTr.GetComponent<CS_RoomCreatePoint>();
-            if (roomCreatePoint == null) continue;
-
-            for (int i = 0 ; i < 4 ; i++)
-            {
-                CS_RoomMoveConnection connection;
-                if (!roomCreatePoint.TryGetConnection((CSE_RoomDoorDirection)i, out connection)) continue;
-                if (connection == null || connection.TargetCreatePoint == null) continue;
-
-                RoomNode adjacentRoom = connection.TargetCreatePoint.gameObject.GetComponentInChildren<RoomNode>();
-                if (adjacentRoom == null) continue;
-
-                if (visited.Contains(adjacentRoom)) continue;
-
-                visited.Add(adjacentRoom);
-                parent[adjacentRoom] = room;
-                queue.Enqueue(adjacentRoom);
-            }
-        }
-
-        if (!found)
-        {
-            Debug.LogWarning("【泥棒】EscapeRoute: firstRoom までのルートが見つかりませんでした。");
-            return;
-        }
-
-        // 経路復元: currentRoom -> ... -> firstRoom
-        var pathRooms = new List<RoomNode>();
-        RoomNode cur = firstRoom;
-        while (cur != null)
-        {
-            pathRooms.Add(cur);
-            parent.TryGetValue(cur, out cur);
-        }
-        pathRooms.Reverse(); // currentRoom が先頭になる
-
-        if (pathRooms.Count < 2)
-        {
-            Debug.LogWarning("【泥棒】EscapeRoute: 復元した経路が不正です。");
-            return;
-        }
-
-        // 部屋列から「通るドア列(escapeRoute)」を作る
-        for (int idx = 0 ; idx < pathRooms.Count - 1 ; idx++)
-        {
-            RoomNode fromRoom = pathRooms[idx];
-            RoomNode toRoom = pathRooms[idx + 1];
-            if (fromRoom == null || toRoom == null) continue;
-
-            Transform fromCreatePointTr = fromRoom.gameObject.transform.parent;
-            if (fromCreatePointTr == null) continue;
-
-            CS_RoomCreatePoint fromCreatePoint = fromCreatePointTr.GetComponent<CS_RoomCreatePoint>();
-            if (fromCreatePoint == null) continue;
-
-            CSE_RoomDoorDirection? dirToNext = null;
-
-            // fromRoom 側の接続を見て、toRoom に繋がる方向を特定
-            for (int d = 0 ; d < 4 ; d++)
-            {
-                CS_RoomMoveConnection connection;
-                if (!fromCreatePoint.TryGetConnection((CSE_RoomDoorDirection)d, out connection)) continue;
-                if (connection == null || connection.TargetCreatePoint == null) continue;
-
-                RoomNode adjacentRoom = connection.TargetCreatePoint.gameObject.GetComponentInChildren<RoomNode>();
-                if (adjacentRoom == toRoom)
-                {
-                    dirToNext = (CSE_RoomDoorDirection)d;
-                    break;
-                }
-            }
-
-            if (dirToNext == null)
-            {
-                Debug.LogWarning("【泥棒】EscapeRoute: 次の部屋への接続方向を特定できませんでした。");
-                continue;
-            }
-
-            // NextDoorElection() と同様に、RoomNode からドアTransformを取得して保存
-            Transform doorTr = fromRoom.GetDirectionWallToDoor(dirToNext.Value);
-            if (doorTr == null)
-            {
-                Debug.LogWarning("【泥棒】EscapeRoute: ドア Transform の取得に失敗しました。");
-                continue;
-            }
-
-            moveRoute.Add(doorTr);
-        }
-
-        // ついでに「次に向かうドア」を nextRoomMovePoint に入れておく（既存仕様と互換）
-        if (moveRoute.Count > 0)
-        {
-            nextRoomMovePoint = moveRoute[0];
-            isNextRoomMovePointDecided = true;
+            NextRoom = nextRoom;
+            Door = door;
+            Cost = cost;
         }
     }
 
-    //////////////////////////////////////////////////////////////////
-    /// デバック用の処理
-
-    [ContextMenu("ダメージを与える")]
-    private void DebugTakeDamage()
+    /// <summary>
+    /// 指定した部屋から、接続している隣接部屋の一覧（辺）を列挙する。
+    ///
+    ///取得元：
+    /// - `RoomNode` が属する `CS_RoomCreatePoint`から接続方向を取得
+    /// - `TryGetConnection`で相手側 `RoomNode` を取得
+    /// - `RoomNode.GetDirectionWallToDoor`で from側のドアTransformを取得
+    ///
+    /// NOTE:
+    /// -ここでは「行ったことがある部屋」制限は掛けない（ConstructionRoute側で判定）。
+    /// - 接続が壊れている・参照が取れないケースは `yield break/continue`で安全側に倒す。
+    /// </summary>
+    private IEnumerable<NeighborEdge> GetNeighbors(RoomNode from)
     {
-        TakeDamage(1, Gimmick.Pot);
+        if (from == null) yield break;
+
+        // RoomNode は RoomCreatePoint の子として配置されている前提
+        var createPoint = from.transform.parent != null ? from.transform.parent.GetComponent<CS_RoomCreatePoint>() : null;
+        if (createPoint == null) yield break;
+
+        // 接続しているドア方向（Right/Left/Front/Back）
+        List<CSE_RoomDoorDirection> dirs = createPoint.GetConnectDirections();
+        if (dirs == null) yield break;
+
+        foreach (var dir in dirs)
+        {
+            // from側のドアTransform（後で moveRoute に積むのはこの Transform）
+            Transform door = from.GetDirectionWallToDoor(dir);
+
+            // 接続先 RoomNode
+            CS_RoomMoveConnection connection;
+            if (!createPoint.TryGetConnection(dir, out connection) || connection == null || connection.TargetCreatePoint == null) continue;
+
+            RoomNode nextRoom = connection.TargetCreatePoint.GetComponentInChildren<RoomNode>();
+            if (nextRoom == null) continue;
+
+            // コスト：部屋中心間の距離（取得できなければ1 とする）
+            float cost = 1f;
+            try
+            {
+                cost = Vector3.Distance(from.transform.position, nextRoom.transform.position);
+            }
+            catch
+            {
+                cost = 1f;
+            }
+
+            yield return new NeighborEdge(nextRoom, door, cost);
+        }
+    }
+
+    /// <summary>
+    /// A* のヒューリスティック関数。
+    ///
+    ///ここでは「部屋同士の直線距離」を推定コストとして使用する。
+    /// - ドア位置ではなく部屋の Transform 座標を使うため、厳密な移動距離とは一致しない。
+    /// -ただし部屋移動の大まかな近さを示せるため、探索効率は上がる。
+    /// </summary>
+    private float Heuristic(RoomNode a, RoomNode b)
+    {
+        if (a == null || b == null) return 0f;
+        return Vector3.Distance(a.transform.position, b.transform.position);
     }
 }
-
