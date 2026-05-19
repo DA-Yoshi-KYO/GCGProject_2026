@@ -18,9 +18,9 @@ using UnityEngine;
 public class CSED_NewToolWindow : EditorWindow, IHasCustomMenu
 {
     /// <summary>
-    /// newIntField01です。
+    /// 高級車です。
     /// </summary>
-    private int newIntField01 = 0;
+    private int 高級車 = 0;
 
     /// <summary>
     /// メニューからウィンドウを開きます。
@@ -58,7 +58,7 @@ public class CSED_NewToolWindow : EditorWindow, IHasCustomMenu
     /// </summary>
     private void OnGUI()
     {
-        newIntField01 = EditorGUILayout.IntField("newIntField01", newIntField01);
+        高級車 = EditorGUILayout.IntField("newIntField01", 高級車);
         GUILayout.Space(6.0f);
 
         GUILayout.Space(12.0f);
@@ -144,7 +144,7 @@ public class CSED_NewToolWindow : EditorWindow, IHasCustomMenu
         }
 
         CSS_NewToolData asset = CreateInstance<CSS_NewToolData>();
-        asset.newIntField01 = newIntField01;
+        asset.高級車 = 高級車;
 
         string assetPath = AssetDatabase.GenerateUniqueAssetPath(
             System.IO.Path.Combine(m_AssetOutputFolderPath, m_AssetFileName + ".asset"));
