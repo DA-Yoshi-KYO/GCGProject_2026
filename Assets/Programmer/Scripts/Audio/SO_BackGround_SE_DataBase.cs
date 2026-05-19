@@ -9,22 +9,22 @@
 using System;
 using UnityEngine;
 
-public enum BackGrond_SE_CueName
+public enum BackGrondSECueName
 {
     Cusor,
     Decision,
 };
 
 [Serializable]
-public class BackGround_SE_Data
+public class BackGroundSEData
 {
     [Header("再生する場面")] public string situation;//再生するシーン
-    [Header("再生音源")] public BackGrond_SE_CueName cueName;//キュー
+    [Header("再生音源")] public BackGrondSECueName cueName;//キュー
     [Header("音量")] public float volume;//音量
 }
 
-[CreateAssetMenu(fileName = "BackGround_SE_DataSO", menuName = "ScriptableObjects/BackGround_SE_DataSO")]
-public class SO_BackGround_SE_DataBase : ScriptableObject
+[CreateAssetMenu(fileName = "BackGroundSEDataSO", menuName = "ScriptableObjects/BackGroundSEDataSO")]
+public class SO_BackGroundSEDataBase : ScriptableObject
 {
-    public BackGround_SE_Data[] seDatas;
+    public BackGroundSEData[] seDatas;
 }

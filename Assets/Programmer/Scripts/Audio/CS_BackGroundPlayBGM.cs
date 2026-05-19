@@ -10,10 +10,9 @@ using CriWare;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class CS_BackGround_PlayBGM : MonoBehaviour
+public class CS_BackGroundPlayBGM : MonoBehaviour
 {
-    [SerializeField]private SO_BackGround_BGM_DataBase dataBase;//データベース
-    private BackGround_BGM_Data[] dataList;//データのリスト
+    [SerializeField]private SO_BackGroundBGMDataBase dataBase;//データベース
 
     private CriAtomExPlayer playerInfo;//Player生成
     private CriAtomExAcb[] criAtomExAcbsList;//CueSheet
@@ -22,15 +21,12 @@ public class CS_BackGround_PlayBGM : MonoBehaviour
 
     private void Awake()
     {
-        //全てのデータ受け取る
-        dataList = dataBase.bgmDatas;
-
         //現在のシーン更新
         currentScene = SceneManager.GetActiveScene().name;
 
         ////初期化
         playerInfo = new CriAtomExPlayer();
-        criAtomExAcbsList = new CriAtomExAcb[dataList.Length];
+        criAtomExAcbsList = new CriAtomExAcb[dataBase.bgmDatas.Length];
 
         //BGMの設定と再生
         SettingBGM();
@@ -49,12 +45,12 @@ public class CS_BackGround_PlayBGM : MonoBehaviour
     //BGM設定
     private void SettingBGM()
     {
-        for (int i = 0 ; i < dataList.Length; ++i)
+        for (int i = 0 ; i < dataBase.bgmDatas.Length; ++i)
         {
-            if (currentScene == dataList[i].sceneName.ToString())
+            if (currentScene == dataBase.bgmDatas[i].sceneName.ToString())
             {
-                playerInfo.SetCue(criAtomExAcbsList[0], dataList[i].cueName.ToString());
-                playerInfo.SetVolume(dataList[i].volume);
+                playerInfo.SetCue(criAtomExAcbsList[0], dataBase.bgmDatas[i].cueName.ToString());
+                playerInfo.SetVolume(dataBase.bgmDatas[i].volume);
                 playerInfo.Loop(true);
                 playerInfo.Prepare();
                 playerInfo.Start();
