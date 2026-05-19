@@ -14,7 +14,6 @@
  */
 using System.Collections.Generic;
 using UnityEngine;
-using static WaveData;
 
 
 // 泥棒を生成するシステム
@@ -115,10 +114,6 @@ public class ThiefManager : MonoBehaviour
             // 視界システムの設定
             VisionSensor thiefView = thief.GetComponent<VisionSensor>();
             thiefView.Setting(typeData.viewDistance, typeData.viewAngle);
-
-            // リアクションスの設定
-            ThiefReaction thiefReaction = thief.GetComponent<ThiefReaction>();
-            thiefReaction.RegisterReaction(typeData.reactionSprites);
 
             // --- 泥棒をthiefParentの子オブジェクトに設定
             thief.transform.parent = thiefParent.transform;
