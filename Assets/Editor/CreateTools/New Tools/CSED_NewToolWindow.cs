@@ -1,9 +1,9 @@
-/*
+﻿/*
 +=====================================
  ファイル名 : CSED_NewToolWindow.cs
  概要     : CreateToolsから自動生成されたEditorWindow
  作者     : ヨシモト リョウ
- 履歴     : 2026/05/18 CreateToolsから自動生成
+ 履歴     : 2026/05/19 CreateToolsから自動生成
 =====================================+
 */
 
@@ -82,19 +82,30 @@ public class CSED_NewToolWindow : EditorWindow, IHasCustomMenu
             return;
         }
 
-        GUILayout.Space(8.0f);
+        Rect panelRect = new Rect(
+            24.0f,
+            48.0f,
+            Mathf.Min(360.0f, position.width - 48.0f),
+            118.0f);
 
-        EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+        EditorGUI.DrawRect(panelRect, new Color(0.24f, 0.24f, 0.24f));
+        GUI.Box(panelRect, GUIContent.none);
+
+        GUILayout.BeginArea(new Rect(
+            panelRect.x + 10.0f,
+            panelRect.y + 8.0f,
+            panelRect.width - 20.0f,
+            panelRect.height - 16.0f));
         {
             EditorGUILayout.BeginHorizontal();
             {
                 EditorGUILayout.LabelField("Create Asset Settings", EditorStyles.boldLabel);
-
                 GUILayout.FlexibleSpace();
 
                 if (GUILayout.Button("×", GUILayout.Width(24.0f)))
                 {
                     m_IsCreateAssetSettingsOpen = false;
+                    Repaint();
                 }
             }
             EditorGUILayout.EndHorizontal();
@@ -104,7 +115,7 @@ public class CSED_NewToolWindow : EditorWindow, IHasCustomMenu
             m_AssetFileName = EditorGUILayout.TextField("Asset Name", m_AssetFileName);
             m_AssetOutputFolderPath = EditorGUILayout.TextField("Asset Folder", m_AssetOutputFolderPath);
         }
-        EditorGUILayout.EndVertical();
+        GUILayout.EndArea();
     }
 
     /// <summary>

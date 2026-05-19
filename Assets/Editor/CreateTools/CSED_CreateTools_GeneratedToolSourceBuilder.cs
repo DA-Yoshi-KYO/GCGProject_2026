@@ -805,29 +805,46 @@ public partial class CSED_CreateTools
         f_builder.AppendLine("            return;");
         f_builder.AppendLine("        }");
         f_builder.AppendLine();
-        f_builder.AppendLine("        GUILayout.Space(8.0f);");
+
+        f_builder.AppendLine("        Rect panelRect = new Rect(");
+        f_builder.AppendLine("            24.0f,");
+        f_builder.AppendLine("            48.0f,");
+        f_builder.AppendLine("            Mathf.Min(360.0f, position.width - 48.0f),");
+        f_builder.AppendLine("            118.0f);");
         f_builder.AppendLine();
-        f_builder.AppendLine("        EditorGUILayout.BeginVertical(EditorStyles.helpBox);");
+
+        f_builder.AppendLine("        EditorGUI.DrawRect(panelRect, new Color(0.24f, 0.24f, 0.24f));");
+        f_builder.AppendLine("        GUI.Box(panelRect, GUIContent.none);");
+        f_builder.AppendLine();
+
+        f_builder.AppendLine("        GUILayout.BeginArea(new Rect(");
+        f_builder.AppendLine("            panelRect.x + 10.0f,");
+        f_builder.AppendLine("            panelRect.y + 8.0f,");
+        f_builder.AppendLine("            panelRect.width - 20.0f,");
+        f_builder.AppendLine("            panelRect.height - 16.0f));");
         f_builder.AppendLine("        {");
         f_builder.AppendLine("            EditorGUILayout.BeginHorizontal();");
         f_builder.AppendLine("            {");
         f_builder.AppendLine("                EditorGUILayout.LabelField(\"Create Asset Settings\", EditorStyles.boldLabel);");
-        f_builder.AppendLine();
         f_builder.AppendLine("                GUILayout.FlexibleSpace();");
         f_builder.AppendLine();
+
         f_builder.AppendLine("                if (GUILayout.Button(\"×\", GUILayout.Width(24.0f)))");
         f_builder.AppendLine("                {");
         f_builder.AppendLine("                    m_IsCreateAssetSettingsOpen = false;");
+        f_builder.AppendLine("                    Repaint();");
         f_builder.AppendLine("                }");
         f_builder.AppendLine("            }");
         f_builder.AppendLine("            EditorGUILayout.EndHorizontal();");
         f_builder.AppendLine();
+
         f_builder.AppendLine("            GUILayout.Space(6.0f);");
         f_builder.AppendLine();
+
         f_builder.AppendLine("            m_AssetFileName = EditorGUILayout.TextField(\"Asset Name\", m_AssetFileName);");
         f_builder.AppendLine("            m_AssetOutputFolderPath = EditorGUILayout.TextField(\"Asset Folder\", m_AssetOutputFolderPath);");
         f_builder.AppendLine("        }");
-        f_builder.AppendLine("        EditorGUILayout.EndVertical();");
+        f_builder.AppendLine("        GUILayout.EndArea();");
         f_builder.AppendLine("    }");
         f_builder.AppendLine();
     }
