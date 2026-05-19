@@ -66,5 +66,26 @@ public partial class CSED_CreateTools
 
         return f_text.Replace("\\", "\\\\").Replace("\"", "\\\"");
     }
+
+    /// <summary>
+    /// ファイルヘッダーコメント用の文字列を取得します。
+    /// </summary>
+    /// <param name="f_text">入力文字列</param>
+    /// <param name="f_defaultText">空だった場合の初期文字列</param>
+    /// <returns>ヘッダーコメント用文字列</returns>
+    private string GetGeneratedHeaderCommentText(
+        string f_text,
+        string f_defaultText)
+    {
+        if (string.IsNullOrEmpty(f_text))
+        {
+            return f_defaultText;
+        }
+
+        return f_text
+            .Replace("\r", string.Empty)
+            .Replace("\n", " ")
+            .Replace("*/", string.Empty);
+    }
 }
 #endif

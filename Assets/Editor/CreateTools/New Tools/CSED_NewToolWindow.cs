@@ -1,4 +1,4 @@
-﻿/*
+/*
 +=====================================
  ファイル名 : CSED_NewToolWindow.cs
  概要     : CreateToolsから自動生成されたEditorWindow
@@ -15,7 +15,7 @@ using UnityEngine;
 /// <summary>
 /// CreateToolsから自動生成されたEditorWindowです。
 /// </summary>
-public class CSED_NewToolWindow : EditorWindow
+public class CSED_NewToolWindow : EditorWindow, IHasCustomMenu
 {
     /// <summary>
     /// newIntField01です。
@@ -33,6 +33,27 @@ public class CSED_NewToolWindow : EditorWindow
     }
 
     /// <summary>
+    /// EditorWindow右上メニューに項目を追加します。
+    /// </summary>
+    /// <param name="f_menu">追加先メニュー</param>
+    public void AddItemsToMenu(GenericMenu f_menu)
+    {
+        f_menu.AddItem(
+            new GUIContent("Create Asset Settings"),
+            false,
+            OpenCreateAssetSettings);
+    }
+
+    /// <summary>
+    /// Create Asset設定を開きます。
+    /// </summary>
+    private void OpenCreateAssetSettings()
+    {
+        m_IsCreateAssetSettingsOpen = true;
+        Repaint();
+    }
+
+    /// <summary>
     /// GUIを描画します。
     /// </summary>
     private void OnGUI()
@@ -43,24 +64,63 @@ public class CSED_NewToolWindow : EditorWindow
         GUILayout.Space(12.0f);
         EditorGUILayout.LabelField("Create Asset", EditorStyles.boldLabel);
 
-        m_AssetFileName = EditorGUILayout.TextField("Asset Name", m_AssetFileName);
-        m_AssetOutputFolderPath = EditorGUILayout.TextField("Asset Folder", m_AssetOutputFolderPath);
-
         if (GUILayout.Button("Create ScriptableObject", GUILayout.Height(28.0f)))
         {
             CreateScriptableObjectAsset();
         }
+
+        DrawCreateAssetSettingsPanel();
     }
+
+    /// <summary>
+    /// Create Asset設定パネルを描画します。
+    /// </summary>
+    private void DrawCreateAssetSettingsPanel()
+    {
+        if (m_IsCreateAssetSettingsOpen == false)
+        {
+            return;
+        }
+
+        GUILayout.Space(8.0f);
+
+        EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+        {
+            EditorGUILayout.BeginHorizontal();
+            {
+                EditorGUILayout.LabelField("Create Asset Settings", EditorStyles.boldLabel);
+
+                GUILayout.FlexibleSpace();
+
+                if (GUILayout.Button("×", GUILayout.Width(24.0f)))
+                {
+                    m_IsCreateAssetSettingsOpen = false;
+                }
+            }
+            EditorGUILayout.EndHorizontal();
+
+            GUILayout.Space(6.0f);
+
+            m_AssetFileName = EditorGUILayout.TextField("Asset Name", m_AssetFileName);
+            m_AssetOutputFolderPath = EditorGUILayout.TextField("Asset Folder", m_AssetOutputFolderPath);
+        }
+        EditorGUILayout.EndVertical();
+    }
+
+    /// <summary>
+    /// Create Asset設定を開いているかどうかです。
+    /// </summary>
+    private bool m_IsCreateAssetSettingsOpen = false;
 
     /// <summary>
     /// 作成するScriptableObjectアセット名です。
     /// </summary>
-    private string m_AssetFileName = "テストですはい";
+    private string m_AssetFileName = "NewData";
 
     /// <summary>
     /// ScriptableObjectアセットの保存先です。
     /// </summary>
-    private string m_AssetOutputFolderPath = "Assets/ProgrammerTestProject";
+    private string m_AssetOutputFolderPath = "Assets/Programmer/ScriptableObject";
 
     /// <summary>
     /// ScriptableObjectアセットを作成します。

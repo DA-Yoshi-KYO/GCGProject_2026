@@ -1,4 +1,4 @@
-﻿/*
+/*
 +=====================================
  ファイル名 : CSS_NewToolData.cs
  概要     : CreateToolsから自動生成されたScriptableObjectデータ

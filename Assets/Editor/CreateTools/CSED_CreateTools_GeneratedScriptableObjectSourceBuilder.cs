@@ -27,9 +27,15 @@ public partial class CSED_CreateTools
         builder.AppendLine("/*");
         builder.AppendLine("+=====================================");
         builder.AppendLine(" ファイル名 : " + f_className + ".cs");
-        builder.AppendLine(" 概要     : CreateToolsから自動生成されたScriptableObjectデータ");
-        builder.AppendLine(" 作者     : ヨシモト リョウ");
-        builder.AppendLine(" 履歴     : 2026/05/18 CreateToolsから自動生成");
+        builder.AppendLine(" 概要     : " + GetGeneratedHeaderCommentText(
+            m_GeneratedDataHeaderContents,
+            "CreateToolsから自動生成されたScriptableObjectデータ"));
+        builder.AppendLine(" 作者     : " + GetGeneratedHeaderCommentText(
+            m_GeneratedHeaderAuthorName,
+            "ヨシモト リョウ"));
+        builder.AppendLine(" 履歴     : " + GetGeneratedHeaderCommentText(
+            m_GeneratedHeaderHistoryDate,
+            System.DateTime.Now.ToString("yyyy/MM/dd")) + " CreateToolsから自動生成");
         builder.AppendLine("=====================================+");
         builder.AppendLine("*/");
         builder.AppendLine();

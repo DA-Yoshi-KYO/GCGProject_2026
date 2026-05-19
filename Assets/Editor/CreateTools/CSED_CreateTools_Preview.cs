@@ -28,6 +28,26 @@ public partial class CSED_CreateTools
     private string m_GeneratedDefaultAssetFolder = "Assets/Programmer/ScriptableObject";
 
     /// <summary>
+    /// 生成ファイルヘッダーに出力する作者名です。
+    /// </summary>
+    private string m_GeneratedHeaderAuthorName = "ヨシモト リョウ";
+
+    /// <summary>
+    /// 生成ファイルヘッダーに出力する履歴日付です。
+    /// </summary>
+    private string m_GeneratedHeaderHistoryDate = System.DateTime.Now.ToString("yyyy/MM/dd");
+
+    /// <summary>
+    /// 生成EditorWindowファイルの概要です。
+    /// </summary>
+    private string m_GeneratedEditorHeaderContents = "CreateToolsから自動生成されたEditorWindow";
+
+    /// <summary>
+    /// 生成ScriptableObjectファイルの概要です。
+    /// </summary>
+    private string m_GeneratedDataHeaderContents = "CreateToolsから自動生成されたScriptableObjectデータ";
+
+    /// <summary>
     /// Min Max Fieldプレビューのラベル幅です。
     /// </summary>
     private const float c_PreviewMinMaxMainLabelWidth = 110.0f;
@@ -122,6 +142,30 @@ public partial class CSED_CreateTools
         {
             DrawPreviewEditorSettingsPanel(windowRect);
         }
+    }
+
+    /// <summary>
+    /// 生成ファイルヘッダー設定を描画します。
+    /// </summary>
+    private void DrawGeneratedHeaderSettingFields()
+    {
+        EditorGUILayout.LabelField("Header設定", EditorStyles.boldLabel);
+
+        m_GeneratedHeaderAuthorName = EditorGUILayout.TextField(
+            "  Author Name",
+            m_GeneratedHeaderAuthorName);
+
+        m_GeneratedHeaderHistoryDate = EditorGUILayout.TextField(
+            "  History Date",
+            m_GeneratedHeaderHistoryDate);
+
+        m_GeneratedEditorHeaderContents = EditorGUILayout.TextField(
+            "  Editor Contents",
+            m_GeneratedEditorHeaderContents);
+
+        m_GeneratedDataHeaderContents = EditorGUILayout.TextField(
+            "  Data Contents",
+            m_GeneratedDataHeaderContents);
     }
 
     /// <summary>
@@ -323,7 +367,7 @@ public partial class CSED_CreateTools
             f_windowRect.x + 24.0f,
             f_windowRect.y + c_PreviewTitleBarHeight + 24.0f,
             Mathf.Min(360.0f, f_windowRect.width - 48.0f),
-            330.0f);
+            430.0f);
 
         EditorGUI.DrawRect(panelRect, new Color(0.24f, 0.24f, 0.24f));
 
@@ -358,6 +402,10 @@ public partial class CSED_CreateTools
                 m_PreviewEditorTitleName);
 
             m_GeneratedToolWindowTitle = m_PreviewEditorTitleName;
+
+            GUILayout.Space(12.0f);
+
+            DrawGeneratedHeaderSettingFields();
 
             GUILayout.Space(12.0f);
 

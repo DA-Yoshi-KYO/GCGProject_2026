@@ -32,9 +32,15 @@ public partial class CSED_CreateTools
         builder.AppendLine("/*");
         builder.AppendLine("+=====================================");
         builder.AppendLine(" ファイル名 : " + f_className + ".cs");
-        builder.AppendLine(" 概要     : CreateToolsから自動生成されたEditorWindow");
-        builder.AppendLine(" 作者     : ヨシモト リョウ");
-        builder.AppendLine(" 履歴     : 2026/05/18 CreateToolsから自動生成");
+        builder.AppendLine(" 概要     : " + GetGeneratedHeaderCommentText(
+            m_GeneratedEditorHeaderContents,
+            "CreateToolsから自動生成されたEditorWindow"));
+        builder.AppendLine(" 作者     : " + GetGeneratedHeaderCommentText(
+            m_GeneratedHeaderAuthorName,
+            "ヨシモト リョウ"));
+        builder.AppendLine(" 履歴     : " + GetGeneratedHeaderCommentText(
+            m_GeneratedHeaderHistoryDate,
+            System.DateTime.Now.ToString("yyyy/MM/dd")) + " CreateToolsから自動生成");
         builder.AppendLine("=====================================+");
         builder.AppendLine("*/");
         builder.AppendLine();
@@ -46,7 +52,7 @@ public partial class CSED_CreateTools
         builder.AppendLine("/// <summary>");
         builder.AppendLine("/// CreateToolsから自動生成されたEditorWindowです。");
         builder.AppendLine("/// </summary>");
-        builder.AppendLine("public class " + f_className + " : EditorWindow");
+        builder.AppendLine("public class " + f_className + " : EditorWindow, IHasCustomMenu");
         builder.AppendLine("{");
 
         AppendGeneratedFieldVariables(builder);
@@ -63,6 +69,29 @@ public partial class CSED_CreateTools
         builder.AppendLine();
 
         builder.AppendLine("    /// <summary>");
+        builder.AppendLine("    /// EditorWindow右上メニューに項目を追加します。");
+        builder.AppendLine("    /// </summary>");
+        builder.AppendLine("    /// <param name=\"f_menu\">追加先メニュー</param>");
+        builder.AppendLine("    public void AddItemsToMenu(GenericMenu f_menu)");
+        builder.AppendLine("    {");
+        builder.AppendLine("        f_menu.AddItem(");
+        builder.AppendLine("            new GUIContent(\"Create Asset Settings\"),");
+        builder.AppendLine("            false,");
+        builder.AppendLine("            OpenCreateAssetSettings);");
+        builder.AppendLine("    }");
+        builder.AppendLine();
+
+        builder.AppendLine("    /// <summary>");
+        builder.AppendLine("    /// Create Asset設定を開きます。");
+        builder.AppendLine("    /// </summary>");
+        builder.AppendLine("    private void OpenCreateAssetSettings()");
+        builder.AppendLine("    {");
+        builder.AppendLine("        m_IsCreateAssetSettingsOpen = true;");
+        builder.AppendLine("        Repaint();");
+        builder.AppendLine("    }");
+        builder.AppendLine();
+
+        builder.AppendLine("    /// <summary>");
         builder.AppendLine("    /// GUIを描画します。");
         builder.AppendLine("    /// </summary>");
         builder.AppendLine("    private void OnGUI()");
@@ -73,6 +102,8 @@ public partial class CSED_CreateTools
 
         builder.AppendLine("    }");
         builder.AppendLine();
+
+        AppendGeneratedCreateAssetSettingsPanel(builder);
 
         AppendGeneratedCreateScriptableObjectMembers(builder, f_dataClassName);
 
@@ -695,13 +726,14 @@ public partial class CSED_CreateTools
         f_builder.AppendLine("        GUILayout.Space(12.0f);");
         f_builder.AppendLine("        EditorGUILayout.LabelField(\"Create Asset\", EditorStyles.boldLabel);");
         f_builder.AppendLine();
-        f_builder.AppendLine("        m_AssetFileName = EditorGUILayout.TextField(\"Asset Name\", m_AssetFileName);");
-        f_builder.AppendLine("        m_AssetOutputFolderPath = EditorGUILayout.TextField(\"Asset Folder\", m_AssetOutputFolderPath);");
-        f_builder.AppendLine();
+
         f_builder.AppendLine("        if (GUILayout.Button(\"Create ScriptableObject\", GUILayout.Height(28.0f)))");
         f_builder.AppendLine("        {");
         f_builder.AppendLine("            CreateScriptableObjectAsset();");
         f_builder.AppendLine("        }");
+        f_builder.AppendLine();
+
+        f_builder.AppendLine("        DrawCreateAssetSettingsPanel();");
     }
 
     /// <summary>
@@ -713,6 +745,12 @@ public partial class CSED_CreateTools
         StringBuilder f_builder,
         string f_dataClassName)
     {
+        f_builder.AppendLine("    /// <summary>");
+        f_builder.AppendLine("    /// Create Asset設定を開いているかどうかです。");
+        f_builder.AppendLine("    /// </summary>");
+        f_builder.AppendLine("    private bool m_IsCreateAssetSettingsOpen = false;");
+        f_builder.AppendLine();
+
         f_builder.AppendLine("    /// <summary>");
         f_builder.AppendLine("    /// 作成するScriptableObjectアセット名です。");
         f_builder.AppendLine("    /// </summary>");
@@ -749,6 +787,49 @@ public partial class CSED_CreateTools
         f_builder.AppendLine("        AssetDatabase.Refresh();");
         f_builder.AppendLine("        Selection.activeObject = asset;");
         f_builder.AppendLine("    }");
+    }
+
+    /// <summary>
+    /// 生成EditorWindowにCreate Asset設定パネルを追加します。
+    /// </summary>
+    /// <param name="f_builder">StringBuilder</param>
+    private void AppendGeneratedCreateAssetSettingsPanel(StringBuilder f_builder)
+    {
+        f_builder.AppendLine("    /// <summary>");
+        f_builder.AppendLine("    /// Create Asset設定パネルを描画します。");
+        f_builder.AppendLine("    /// </summary>");
+        f_builder.AppendLine("    private void DrawCreateAssetSettingsPanel()");
+        f_builder.AppendLine("    {");
+        f_builder.AppendLine("        if (m_IsCreateAssetSettingsOpen == false)");
+        f_builder.AppendLine("        {");
+        f_builder.AppendLine("            return;");
+        f_builder.AppendLine("        }");
+        f_builder.AppendLine();
+        f_builder.AppendLine("        GUILayout.Space(8.0f);");
+        f_builder.AppendLine();
+        f_builder.AppendLine("        EditorGUILayout.BeginVertical(EditorStyles.helpBox);");
+        f_builder.AppendLine("        {");
+        f_builder.AppendLine("            EditorGUILayout.BeginHorizontal();");
+        f_builder.AppendLine("            {");
+        f_builder.AppendLine("                EditorGUILayout.LabelField(\"Create Asset Settings\", EditorStyles.boldLabel);");
+        f_builder.AppendLine();
+        f_builder.AppendLine("                GUILayout.FlexibleSpace();");
+        f_builder.AppendLine();
+        f_builder.AppendLine("                if (GUILayout.Button(\"×\", GUILayout.Width(24.0f)))");
+        f_builder.AppendLine("                {");
+        f_builder.AppendLine("                    m_IsCreateAssetSettingsOpen = false;");
+        f_builder.AppendLine("                }");
+        f_builder.AppendLine("            }");
+        f_builder.AppendLine("            EditorGUILayout.EndHorizontal();");
+        f_builder.AppendLine();
+        f_builder.AppendLine("            GUILayout.Space(6.0f);");
+        f_builder.AppendLine();
+        f_builder.AppendLine("            m_AssetFileName = EditorGUILayout.TextField(\"Asset Name\", m_AssetFileName);");
+        f_builder.AppendLine("            m_AssetOutputFolderPath = EditorGUILayout.TextField(\"Asset Folder\", m_AssetOutputFolderPath);");
+        f_builder.AppendLine("        }");
+        f_builder.AppendLine("        EditorGUILayout.EndVertical();");
+        f_builder.AppendLine("    }");
+        f_builder.AppendLine();
     }
 
     /// <summary>
