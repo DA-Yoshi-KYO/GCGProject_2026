@@ -9,6 +9,8 @@
  *            | このスクリプタブルオブジェクトは、種類感共通の定数値を管理するためのものに変更 
  * 
  */
+using System.Collections.Generic;
+using UnityEditor.Timeline.Actions;
 using UnityEngine;
 
 // ScriptableObjectとして定義することで、Unityエディタ上でデータを管理できるようにする
@@ -37,4 +39,12 @@ public class CSS_ThiefCommonStatusData : ScriptableObject
     [Header("気絶した後のフェード時間(秒)")]
     [Tooltip("泥棒が気絶した後のフェード時間"), Min(0)]
     public int fadeAfterStunTime;
+
+    [Header("泥棒のリアクションスプライトリスト")]
+    [Tooltip("泥棒のリアクションスプライトリスト")]
+    public List<Sprite> reactionSprites;
+
+    [Header("泥棒のリアクションUI用スプライトリスト")]
+    [Tooltip("泥棒のリアクションUI用スプライトリスト")]
+    public List<Sprite> reactionUISprites;
 }

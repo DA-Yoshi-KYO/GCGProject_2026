@@ -22,9 +22,9 @@
  * 2026-05-08 | 初期部屋の入ってきたドアの位置を保存する処理の記載
  * 2026-05-15 | 同じ部屋の中で、他者が探索しているオブジェクトを探索対象にしないようにする処理を追加
  * 2026-05-17 | DecideTarget内のキャストエラーの不具合を修正
+ * 2026-05-18 | A*アルゴリズムを用いて帰宅ルートを構築するロジックを追加
  * 
  */
-using HoudiniEngineUnity;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
@@ -70,6 +70,11 @@ public class ThiefAI : MonoBehaviour
     private GameObject currentRoomObject;
     [Tooltip("部屋に関する記憶")]
     private Dictionary<RoomNode, RoomMemory> roomMemories;
+
+    /// <summary>
+    /// デバッグ表示用：部屋の記憶(全ての部屋分)を取得する
+    /// </summary>
+    public IReadOnlyDictionary<RoomNode, RoomMemory> RoomMemories => roomMemories;
 
     [Tooltip("視認オブジェクトの記憶")]
     private Dictionary<VisionTarget, VisionTargetMemory> visionTargetMemories;
@@ -178,6 +183,9 @@ public class ThiefAI : MonoBehaviour
 
         // 泥棒のリアクションを管理するコンポーネントを取得
         thiefReaction = GetComponent<ThiefReaction>();
+        thiefReaction.RegisterReaction(data.reactionUISprites);
+
+        reactionSprites = data.reactionSprites;
 
         // 最初の部屋と入ってきたドアの位置を保存
         firstRoom = entryRoom;
@@ -844,10 +852,7 @@ public class ThiefAI : MonoBehaviour
     /// <param name="damage">与える減少値</param>
     public void TakeDamage(int damage, Gimmick type)
     {
-        if (remainingInvincibleTime > 0)
-        {
-            return;
-        }
+        if (remainingInvincibleTime > 0) return;
 
         durability -= damage;
 
