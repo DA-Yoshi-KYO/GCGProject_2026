@@ -128,7 +128,7 @@ public class RockGimmick : GimmickBase
             Vector3 rayXYOrigin = new Vector3(transform.position.x, transform.position.y - 1.3f, transform.position.z);
             // レイデバッグ
             Debug.DrawRay(rayXYOrigin, velocity * raySideLength, Color.yellow);
-            Debug.Log(rayXYOrigin);
+            //Debug.Log(rayXYOrigin);
             //レイ判定
             if (Physics.Raycast(rayXYOrigin, velocity, out check, raySideLength))
             {//レイが当たったら角度をチェック
