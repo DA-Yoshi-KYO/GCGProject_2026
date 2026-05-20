@@ -55,7 +55,7 @@ public class ThiefReaction : MonoBehaviour
             parentThiefReaction = new GameObject("ParentThiefReaction");
             parentThiefReaction.transform.SetParent(canvas.transform);
             parentThiefReaction.transform.AddComponent<RectTransform>();
-            parentThiefReaction.gameObject.GetComponent<RectTransform>().localPosition = new Vector3(-530, 250, 0);
+            parentThiefReaction.gameObject.GetComponent<RectTransform>().localPosition = new Vector3(-550, 0, 0);
         }
         else parentThiefReaction = parent.gameObject;
     }
@@ -70,6 +70,33 @@ public class ThiefReaction : MonoBehaviour
             if (!reactionObjects.ContainsKey(key)) continue; // 途中で消された保険
 
             reactionObjects[key] -= Time.deltaTime;
+
+            // 最初の0.5秒で左から右にスライドインアニメーション
+            float slideTime = 0.5f;
+            if (reactionObjects[key] > reactionDisplayTime - slideTime)
+            {
+                float slideProgress = (reactionDisplayTime - reactionObjects[key]) / slideTime;
+                Vector3 startPos = key.transform.localPosition;
+                key.transform.localPosition = new Vector3(Mathf.Lerp(startPos.x, 100.0f, slideProgress), startPos.y, startPos.z);
+            }
+
+            // 最後の0.5秒でその位置から上にスライドアウトアニメーション
+            if (reactionObjects[key] < slideTime)
+            {
+                float slideProgress = (slideTime - reactionObjects[key]) / slideTime;
+                Vector3 startPos = key.transform.localPosition;
+                key.transform.localPosition = new Vector3(startPos.x, startPos.y + 1.0f, startPos.z);
+
+                // フェードアウトアニメーション
+                Image image = key.GetComponent<Image>();
+                if (image != null)
+                {
+                    Color color = image.color;
+                    color.a = Mathf.Lerp(1.0f, 0.0f, slideProgress);
+                    image.color = color;
+                }
+            }
+
             if (reactionObjects[key] <= 0f)
             {
                 reactionObjects.Remove(key);
@@ -103,8 +130,8 @@ public class ThiefReaction : MonoBehaviour
         GameObject reactionUI = new GameObject("ThiefReaction");
         reactionUI.transform.SetParent(parentThiefReaction.transform);
         // 子オブジェクトの一番上に配置
-        reactionUI.transform.localPosition = Vector3.zero;
-        reactionUI.transform.localScale = new Vector3(2.0f, 2.0f, 2.0f);
+        reactionUI.transform.localScale = new Vector3(4.0f, 3.0f, 1.0f);
+        reactionUI.transform.localPosition = new Vector3(-100.0f, 0.0f + (parentThiefReaction.transform.childCount * 50.0f), 0.0f);
 
         // UIにImageコンポーネントを追加してスプライトを設定
         Image imageUI = reactionUI.AddComponent<Image>();
