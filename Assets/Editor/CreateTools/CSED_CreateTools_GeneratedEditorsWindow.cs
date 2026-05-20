@@ -116,10 +116,116 @@ public class CSED_CreateTools_GeneratedEditorsWindow : EditorWindow
                 {
                     PingGeneratedDataScript(f_record);
                 }
+
+                if (GUILayout.Button("Delete", GUILayout.Height(24.0f)))
+                {
+                    DeleteGeneratedEditorRecord(f_record);
+                    GUIUtility.ExitGUI();
+                }
             }
             EditorGUILayout.EndHorizontal();
         }
         EditorGUILayout.EndVertical();
+    }
+
+    /// <summary>
+    /// 生成済みEditorに関係するファイルとアセットを削除します。
+    /// </summary>
+    /// <param name="f_record">削除対象の生成済みEditor情報</param>
+    private void DeleteGeneratedEditorRecord(CSED_CreateTools_GeneratedEditorRecord f_record)
+    {
+        if (f_record == null)
+        {
+            return;
+        }
+
+        bool isDelete = EditorUtility.DisplayDialog(
+            "Delete Generated Editor",
+            "このEditorに関係するデータを削除します。\n\n"
+            + "・生成されたEditorスクリプト\n"
+            + "・生成されたScriptableObjectスクリプト\n"
+            + "・この型で作成されたScriptableObjectアセット\n"
+            + "・Generated Editors一覧の登録情報\n\n"
+            + "この操作は元に戻せません。\n本当に削除しますか？",
+            "削除する",
+            "キャンセル");
+
+        if (isDelete == false)
+        {
+            return;
+        }
+
+        DeleteGeneratedScriptableObjectAssets(f_record);
+        DeleteAssetIfExists(f_record.editorScriptPath);
+        DeleteAssetIfExists(f_record.dataScriptPath);
+        RemoveGeneratedEditorRecord(f_record);
+
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+
+        Repaint();
+    }
+
+    /// <summary>
+    /// 生成されたScriptableObject型で作成されたアセットを削除します。
+    /// </summary>
+    /// <param name="f_record">削除対象の生成済みEditor情報</param>
+    private void DeleteGeneratedScriptableObjectAssets(CSED_CreateTools_GeneratedEditorRecord f_record)
+    {
+        if (string.IsNullOrEmpty(f_record.dataClassName))
+        {
+            return;
+        }
+
+        string[] assetGuids = AssetDatabase.FindAssets("t:" + f_record.dataClassName);
+
+        for (int i = 0 ; i < assetGuids.Length ; i++)
+        {
+            string assetPath = AssetDatabase.GUIDToAssetPath(assetGuids[i]);
+
+            DeleteAssetIfExists(assetPath);
+        }
+    }
+
+    /// <summary>
+    /// 指定パスのAssetが存在する場合に削除します。
+    /// </summary>
+    /// <param name="f_assetPath">削除対象Assetパス</param>
+    private void DeleteAssetIfExists(string f_assetPath)
+    {
+        if (string.IsNullOrEmpty(f_assetPath))
+        {
+            return;
+        }
+
+        UnityEngine.Object asset =
+            AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(f_assetPath);
+
+        if (asset == null)
+        {
+            return;
+        }
+
+        AssetDatabase.DeleteAsset(f_assetPath);
+    }
+
+    /// <summary>
+    /// Generated Editors一覧から指定Recordを削除します。
+    /// </summary>
+    /// <param name="f_record">削除対象Record</param>
+    private void RemoveGeneratedEditorRecord(CSED_CreateTools_GeneratedEditorRecord f_record)
+    {
+        CSS_CreateToolsGeneratedEditorList editorList =
+            LoadOrCreateGeneratedEditorList();
+
+        if (editorList == null || editorList.generatedEditorRecordList == null)
+        {
+            return;
+        }
+
+        editorList.generatedEditorRecordList.Remove(f_record);
+
+        EditorUtility.SetDirty(editorList);
     }
 
     /// <summary>
