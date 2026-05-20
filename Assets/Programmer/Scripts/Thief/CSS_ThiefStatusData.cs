@@ -47,8 +47,4 @@ public class CSS_ThiefStatusData : ScriptableObject
     [Header("次の部屋探索に切り替える探索度")]
     [Tooltip("次の部屋探索に切り替える探索度の閾値"), Range(0, 100)]
     public int nextRoomSearchThreshold;
-
-    [Header("泥棒のリアクションスプライトリスト")]
-    [Tooltip("泥棒のリアクションスプライトリスト")]
-    public List<Sprite> reactionSprites;
 }
