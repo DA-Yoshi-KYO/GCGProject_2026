@@ -78,24 +78,43 @@ public class CSED_CreateTools_GeneratedEditorsWindow : EditorWindow
     {
         EditorGUILayout.BeginVertical(EditorStyles.helpBox);
         {
-            EditorGUILayout.LabelField(f_record.titleName, EditorStyles.boldLabel);
-            EditorGUILayout.LabelField("Editor Class", f_record.editorClassName);
-            EditorGUILayout.LabelField("Data Class", f_record.dataClassName);
-            EditorGUILayout.LabelField("Menu Path", f_record.menuPath);
-            EditorGUILayout.LabelField("Created", f_record.createdDate);
+            EditorGUILayout.LabelField(
+                GetDisplayText(f_record.titleName, "Untitled"),
+                EditorStyles.boldLabel);
+
+            EditorGUILayout.LabelField(
+                "エディター名",
+                GetDisplayText(f_record.titleName, "Untitled"));
+
+            EditorGUILayout.LabelField(
+                "制作者",
+                GetDisplayText(f_record.authorName, "未設定"));
+
+            EditorGUILayout.LabelField(
+                "作成日時",
+                GetDisplayText(f_record.createdDate, "未設定"));
+
+            EditorGUILayout.LabelField(
+                "更新日時",
+                GetDisplayText(f_record.updatedDate, "未設定"));
 
             GUILayout.Space(4.0f);
 
             EditorGUILayout.BeginHorizontal();
             {
-                if (GUILayout.Button("Open Editor", GUILayout.Height(24.0f)))
+                if (GUILayout.Button("Load", GUILayout.Height(24.0f)))
                 {
-                    OpenGeneratedEditorWindow(f_record);
+                    CSED_CreateTools.OpenAndLoadGeneratedEditorRecord(f_record);
                 }
 
-                if (GUILayout.Button("Ping Script", GUILayout.Width(90.0f), GUILayout.Height(24.0f)))
+                if (GUILayout.Button("Editor Script", GUILayout.Height(24.0f)))
                 {
                     PingGeneratedEditorScript(f_record);
+                }
+
+                if (GUILayout.Button("Data Script", GUILayout.Height(24.0f)))
+                {
+                    PingGeneratedDataScript(f_record);
                 }
             }
             EditorGUILayout.EndHorizontal();
@@ -104,66 +123,67 @@ public class CSED_CreateTools_GeneratedEditorsWindow : EditorWindow
     }
 
     /// <summary>
-    /// 生成済みEditorWindowを開きます。
-    /// </summary>
-    /// <param name="f_record">生成済みEditor情報</param>
-    private void OpenGeneratedEditorWindow(CSED_CreateTools_GeneratedEditorRecord f_record)
-    {
-        Type editorWindowType = FindTypeByName(f_record.editorClassName);
-
-        if (editorWindowType == null)
-        {
-            EditorUtility.DisplayDialog(
-                "Open Editor Error",
-                "EditorWindowクラスが見つかりません。\nUnityのコンパイル完了後にもう一度試してください。\n\n" + f_record.editorClassName,
-                "OK");
-
-            return;
-        }
-
-        EditorWindow window = GetWindow(editorWindowType, false, f_record.titleName);
-        window.Show();
-    }
-
-    /// <summary>
-    /// 指定名のTypeを現在読み込まれているAssemblyから探します。
-    /// </summary>
-    /// <param name="f_typeName">探すType名</param>
-    /// <returns>見つかったType</returns>
-    private Type FindTypeByName(string f_typeName)
-    {
-        System.Reflection.Assembly[] assemblies =
-            AppDomain.CurrentDomain.GetAssemblies();
-
-        for (int i = 0 ; i < assemblies.Length ; i++)
-        {
-            Type type = assemblies[i].GetType(f_typeName);
-
-            if (type != null)
-            {
-                return type;
-            }
-        }
-
-        return null;
-    }
-
-    /// <summary>
     /// 生成済みEditorスクリプトをProject上で選択します。
     /// </summary>
     /// <param name="f_record">生成済みEditor情報</param>
     private void PingGeneratedEditorScript(CSED_CreateTools_GeneratedEditorRecord f_record)
     {
-        UnityEngine.Object scriptAsset =
+        UnityEngine.Object editorScriptAsset =
             AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(f_record.editorScriptPath);
 
-        if (scriptAsset == null)
+        if (editorScriptAsset == null)
         {
+            EditorUtility.DisplayDialog(
+                "Ping Editor Script Error",
+                "Editorスクリプトが見つかりません。\n\n" + f_record.editorScriptPath,
+                "OK");
+
             return;
         }
 
-        Selection.activeObject = scriptAsset;
-        EditorGUIUtility.PingObject(scriptAsset);
+        Selection.activeObject = editorScriptAsset;
+        EditorGUIUtility.PingObject(editorScriptAsset);
+    }
+
+    /// <summary>
+    /// 生成済みScriptableObjectスクリプトをProject上で選択します。
+    /// </summary>
+    /// <param name="f_record">生成済みEditor情報</param>
+    private void PingGeneratedDataScript(CSED_CreateTools_GeneratedEditorRecord f_record)
+    {
+        UnityEngine.Object dataScriptAsset =
+            AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(f_record.dataScriptPath);
+
+        if (dataScriptAsset == null)
+        {
+            EditorUtility.DisplayDialog(
+                "Ping Data Script Error",
+                "ScriptableObjectスクリプトが見つかりません。\n\n" + f_record.dataScriptPath,
+                "OK");
+
+            return;
+        }
+
+        Selection.activeObject = dataScriptAsset;
+        EditorGUIUtility.PingObject(dataScriptAsset);
+    }
+
+    /// <summary>
+    /// 表示用文字列を取得します。
+    /// </summary>
+    /// <param name="f_text">表示したい文字列</param>
+    /// <param name="f_defaultText">空の場合の表示文字列</param>
+    /// <returns>表示用文字列</returns>
+    private string GetDisplayText(
+        string f_text,
+        string f_defaultText)
+    {
+        if (string.IsNullOrEmpty(f_text))
+        {
+            return f_defaultText;
+        }
+
+        return f_text;
     }
 
     /// <summary>

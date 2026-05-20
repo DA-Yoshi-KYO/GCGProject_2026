@@ -3,7 +3,7 @@
  ファイル名 : CSED_NewToolWindow.cs
  概要     : CreateToolsから自動生成されたEditorWindow
  作者     : ヨシモト リョウ
- 履歴     : 2026/05/19 CreateToolsから自動生成
+ 履歴     : 2026/05/20 CreateToolsから自動生成
 =====================================+
 */
 
@@ -18,9 +18,49 @@ using UnityEngine;
 public class CSED_NewToolWindow : EditorWindow, IHasCustomMenu
 {
     /// <summary>
+    /// n_Enemyです。
+    /// </summary>
+    private int n_Enemy = 0;
+
+    /// <summary>
     /// newIntField01です。
     /// </summary>
     private int newIntField01 = 0;
+
+    /// <summary>
+    /// newIntField03です。
+    /// </summary>
+    private int newIntField03 = 0;
+
+    /// <summary>
+    /// newIntField04です。
+    /// </summary>
+    private int newIntField04 = 0;
+
+    /// <summary>
+    /// newIntField05です。
+    /// </summary>
+    private int newIntField05 = 0;
+
+    /// <summary>
+    /// newIntField06です。
+    /// </summary>
+    private int newIntField06 = 0;
+
+    /// <summary>
+    /// newIntField07です。
+    /// </summary>
+    private int newIntField07 = 0;
+
+    /// <summary>
+    /// newField08です。
+    /// </summary>
+    private GameObject newField08 = null;
+
+    /// <summary>
+    /// newField09です。
+    /// </summary>
+    private GameObject newField09 = null;
 
     /// <summary>
     /// メニューからウィンドウを開きます。
@@ -49,8 +89,7 @@ public class CSED_NewToolWindow : EditorWindow, IHasCustomMenu
     /// </summary>
     private void OpenCreateAssetSettings()
     {
-        m_IsCreateAssetSettingsOpen = true;
-        Repaint();
+        CreateAssetSettingsWindow.Open(this);
     }
 
     /// <summary>
@@ -58,7 +97,31 @@ public class CSED_NewToolWindow : EditorWindow, IHasCustomMenu
     /// </summary>
     private void OnGUI()
     {
+        n_Enemy = EditorGUILayout.IntField("敵", n_Enemy);
+        GUILayout.Space(6.0f);
+
         newIntField01 = EditorGUILayout.IntField("newIntField01", newIntField01);
+        GUILayout.Space(6.0f);
+
+        newIntField03 = EditorGUILayout.IntField("newIntField03", newIntField03);
+        GUILayout.Space(6.0f);
+
+        newIntField04 = EditorGUILayout.IntField("newIntField04", newIntField04);
+        GUILayout.Space(6.0f);
+
+        newIntField05 = EditorGUILayout.IntField("newIntField05", newIntField05);
+        GUILayout.Space(6.0f);
+
+        newIntField06 = EditorGUILayout.IntField("newIntField06", newIntField06);
+        GUILayout.Space(6.0f);
+
+        newIntField07 = EditorGUILayout.IntField("newIntField07", newIntField07);
+        GUILayout.Space(6.0f);
+
+        newField08 = (GameObject)EditorGUILayout.ObjectField("newField08", newField08, typeof(GameObject), false);
+        GUILayout.Space(6.0f);
+
+        newField09 = (GameObject)EditorGUILayout.ObjectField("newField09", newField09, typeof(GameObject), false);
         GUILayout.Space(6.0f);
 
         GUILayout.Space(12.0f);
@@ -68,60 +131,7 @@ public class CSED_NewToolWindow : EditorWindow, IHasCustomMenu
         {
             CreateScriptableObjectAsset();
         }
-
-        DrawCreateAssetSettingsPanel();
     }
-
-    /// <summary>
-    /// Create Asset設定パネルを描画します。
-    /// </summary>
-    private void DrawCreateAssetSettingsPanel()
-    {
-        if (m_IsCreateAssetSettingsOpen == false)
-        {
-            return;
-        }
-
-        Rect panelRect = new Rect(
-            24.0f,
-            48.0f,
-            Mathf.Min(360.0f, position.width - 48.0f),
-            118.0f);
-
-        EditorGUI.DrawRect(panelRect, new Color(0.24f, 0.24f, 0.24f));
-        GUI.Box(panelRect, GUIContent.none);
-
-        GUILayout.BeginArea(new Rect(
-            panelRect.x + 10.0f,
-            panelRect.y + 8.0f,
-            panelRect.width - 20.0f,
-            panelRect.height - 16.0f));
-        {
-            EditorGUILayout.BeginHorizontal();
-            {
-                EditorGUILayout.LabelField("Create Asset Settings", EditorStyles.boldLabel);
-                GUILayout.FlexibleSpace();
-
-                if (GUILayout.Button("×", GUILayout.Width(24.0f)))
-                {
-                    m_IsCreateAssetSettingsOpen = false;
-                    Repaint();
-                }
-            }
-            EditorGUILayout.EndHorizontal();
-
-            GUILayout.Space(6.0f);
-
-            m_AssetFileName = EditorGUILayout.TextField("Asset Name", m_AssetFileName);
-            m_AssetOutputFolderPath = EditorGUILayout.TextField("Asset Folder", m_AssetOutputFolderPath);
-        }
-        GUILayout.EndArea();
-    }
-
-    /// <summary>
-    /// Create Asset設定を開いているかどうかです。
-    /// </summary>
-    private bool m_IsCreateAssetSettingsOpen = false;
 
     /// <summary>
     /// 作成するScriptableObjectアセット名です。
@@ -144,7 +154,15 @@ public class CSED_NewToolWindow : EditorWindow, IHasCustomMenu
         }
 
         CSS_NewToolData asset = CreateInstance<CSS_NewToolData>();
+        asset.n_Enemy = n_Enemy;
         asset.newIntField01 = newIntField01;
+        asset.newIntField03 = newIntField03;
+        asset.newIntField04 = newIntField04;
+        asset.newIntField05 = newIntField05;
+        asset.newIntField06 = newIntField06;
+        asset.newIntField07 = newIntField07;
+        asset.newField08 = newField08;
+        asset.newField09 = newField09;
 
         string assetPath = AssetDatabase.GenerateUniqueAssetPath(
             System.IO.Path.Combine(m_AssetOutputFolderPath, m_AssetFileName + ".asset"));
@@ -154,5 +172,58 @@ public class CSED_NewToolWindow : EditorWindow, IHasCustomMenu
         AssetDatabase.Refresh();
         Selection.activeObject = asset;
     }
+
+    /// <summary>
+    /// Create Asset設定専用のEditorWindowです。
+    /// </summary>
+    private class CreateAssetSettingsWindow : EditorWindow
+    {
+        /// <summary>
+        /// 設定対象のEditorWindowです。
+        /// </summary>
+        private CSED_NewToolWindow m_OwnerWindow;
+
+        /// <summary>
+        /// Create Asset設定Windowを開きます。
+        /// </summary>
+        /// <param name="f_ownerWindow">設定対象のEditorWindow</param>
+        public static void Open(CSED_NewToolWindow f_ownerWindow)
+        {
+            CreateAssetSettingsWindow window = CreateInstance<CreateAssetSettingsWindow>();
+            window.titleContent = new GUIContent("Create Asset Settings");
+            window.m_OwnerWindow = f_ownerWindow;
+            window.minSize = new Vector2(360.0f, 120.0f);
+            window.position = new Rect(
+                f_ownerWindow.position.x + 40.0f,
+                f_ownerWindow.position.y + 40.0f,
+                360.0f,
+                120.0f);
+            window.ShowUtility();
+        }
+
+        /// <summary>
+        /// GUIを描画します。
+        /// </summary>
+        private void OnGUI()
+        {
+            if (m_OwnerWindow == null)
+            {
+                EditorGUILayout.HelpBox("設定対象のEditorWindowが見つかりません。", MessageType.Warning);
+                return;
+            }
+
+            EditorGUILayout.LabelField("Create Asset Settings", EditorStyles.boldLabel);
+            GUILayout.Space(6.0f);
+
+            m_OwnerWindow.m_AssetFileName = EditorGUILayout.TextField("Asset Name", m_OwnerWindow.m_AssetFileName);
+            m_OwnerWindow.m_AssetOutputFolderPath = EditorGUILayout.TextField("Asset Folder", m_OwnerWindow.m_AssetOutputFolderPath);
+
+            if (GUI.changed)
+            {
+                m_OwnerWindow.Repaint();
+            }
+        }
+    }
+
 }
 #endif

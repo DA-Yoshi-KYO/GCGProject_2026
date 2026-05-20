@@ -92,16 +92,18 @@ public partial class CSED_CreateTools
 
             GUILayout.Space(4.0f);
 
+            GUILayout.Space(4.0f);
+
             EditorGUILayout.BeginHorizontal();
             {
-                if (GUILayout.Button("Open Editor", GUILayout.Height(24.0f)))
-                {
-                    OpenGeneratedEditorWindow(f_record);
-                }
-
-                if (GUILayout.Button("Ping Script", GUILayout.Width(90.0f), GUILayout.Height(24.0f)))
+                if (GUILayout.Button("Editor Script", GUILayout.Height(24.0f)))
                 {
                     PingGeneratedEditorScript(f_record);
+                }
+
+                if (GUILayout.Button("Data Script", GUILayout.Height(24.0f)))
+                {
+                    PingGeneratedDataScript(f_record);
                 }
             }
             EditorGUILayout.EndHorizontal();
@@ -110,49 +112,26 @@ public partial class CSED_CreateTools
     }
 
     /// <summary>
-    /// 生成済みEditorWindowを開きます。
+    /// 生成済みScriptableObjectスクリプトをProject上で選択します。
     /// </summary>
     /// <param name="f_record">生成済みEditor情報</param>
-    private void OpenGeneratedEditorWindow(CSED_CreateTools_GeneratedEditorRecord f_record)
+    private void PingGeneratedDataScript(CSED_CreateTools_GeneratedEditorRecord f_record)
     {
-        Type editorWindowType = FindTypeByName(f_record.editorClassName);
+        UnityEngine.Object dataScriptAsset =
+            AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(f_record.dataScriptPath);
 
-        if (editorWindowType == null)
+        if (dataScriptAsset == null)
         {
             EditorUtility.DisplayDialog(
-                "Open Editor Error",
-                "EditorWindowクラスが見つかりません。\nUnityのコンパイル完了後にもう一度試してください。\n\n"
-                + f_record.editorClassName,
+                "Ping Data Script Error",
+                "ScriptableObjectスクリプトが見つかりません。\n\n" + f_record.dataScriptPath,
                 "OK");
 
             return;
         }
 
-        EditorWindow window = GetWindow(editorWindowType, false, f_record.titleName);
-        window.Show();
-    }
-
-    /// <summary>
-    /// 指定名のTypeを現在読み込まれているAssemblyから探します。
-    /// </summary>
-    /// <param name="f_typeName">探すType名</param>
-    /// <returns>見つかったType</returns>
-    private Type FindTypeByName(string f_typeName)
-    {
-        System.Reflection.Assembly[] assemblies =
-            AppDomain.CurrentDomain.GetAssemblies();
-
-        for (int i = 0 ; i < assemblies.Length ; i++)
-        {
-            Type type = assemblies[i].GetType(f_typeName);
-
-            if (type != null)
-            {
-                return type;
-            }
-        }
-
-        return null;
+        Selection.activeObject = dataScriptAsset;
+        EditorGUIUtility.PingObject(dataScriptAsset);
     }
 
     /// <summary>

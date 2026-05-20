@@ -86,8 +86,7 @@ public partial class CSED_CreateTools
         builder.AppendLine("    /// </summary>");
         builder.AppendLine("    private void OpenCreateAssetSettings()");
         builder.AppendLine("    {");
-        builder.AppendLine("        m_IsCreateAssetSettingsOpen = true;");
-        builder.AppendLine("        Repaint();");
+        builder.AppendLine("        CreateAssetSettingsWindow.Open(this);");
         builder.AppendLine("    }");
         builder.AppendLine();
 
@@ -103,9 +102,9 @@ public partial class CSED_CreateTools
         builder.AppendLine("    }");
         builder.AppendLine();
 
-        AppendGeneratedCreateAssetSettingsPanel(builder);
-
         AppendGeneratedCreateScriptableObjectMembers(builder, f_dataClassName);
+
+        AppendGeneratedCreateAssetSettingsWindow(builder, f_className);
 
         builder.AppendLine("}");
         builder.AppendLine("#endif");
@@ -731,9 +730,74 @@ public partial class CSED_CreateTools
         f_builder.AppendLine("        {");
         f_builder.AppendLine("            CreateScriptableObjectAsset();");
         f_builder.AppendLine("        }");
+    }
+
+    /// <summary>
+    /// 生成EditorWindowにCreate Asset設定用の別EditorWindowを追加します。
+    /// </summary>
+    /// <param name="f_builder">StringBuilder</param>
+    /// <param name="f_className">生成するEditorWindowクラス名</param>
+    private void AppendGeneratedCreateAssetSettingsWindow(
+        StringBuilder f_builder,
+        string f_className)
+    {
+        f_builder.AppendLine("    /// <summary>");
+        f_builder.AppendLine("    /// Create Asset設定専用のEditorWindowです。");
+        f_builder.AppendLine("    /// </summary>");
+        f_builder.AppendLine("    private class CreateAssetSettingsWindow : EditorWindow");
+        f_builder.AppendLine("    {");
+        f_builder.AppendLine("        /// <summary>");
+        f_builder.AppendLine("        /// 設定対象のEditorWindowです。");
+        f_builder.AppendLine("        /// </summary>");
+        f_builder.AppendLine("        private " + f_className + " m_OwnerWindow;");
         f_builder.AppendLine();
 
-        f_builder.AppendLine("        DrawCreateAssetSettingsPanel();");
+        f_builder.AppendLine("        /// <summary>");
+        f_builder.AppendLine("        /// Create Asset設定Windowを開きます。");
+        f_builder.AppendLine("        /// </summary>");
+        f_builder.AppendLine("        /// <param name=\"f_ownerWindow\">設定対象のEditorWindow</param>");
+        f_builder.AppendLine("        public static void Open(" + f_className + " f_ownerWindow)");
+        f_builder.AppendLine("        {");
+        f_builder.AppendLine("            CreateAssetSettingsWindow window = CreateInstance<CreateAssetSettingsWindow>();");
+        f_builder.AppendLine("            window.titleContent = new GUIContent(\"Create Asset Settings\");");
+        f_builder.AppendLine("            window.m_OwnerWindow = f_ownerWindow;");
+        f_builder.AppendLine("            window.minSize = new Vector2(360.0f, 120.0f);");
+        f_builder.AppendLine("            window.position = new Rect(");
+        f_builder.AppendLine("                f_ownerWindow.position.x + 40.0f,");
+        f_builder.AppendLine("                f_ownerWindow.position.y + 40.0f,");
+        f_builder.AppendLine("                360.0f,");
+        f_builder.AppendLine("                120.0f);");
+        f_builder.AppendLine("            window.ShowUtility();");
+        f_builder.AppendLine("        }");
+        f_builder.AppendLine();
+
+        f_builder.AppendLine("        /// <summary>");
+        f_builder.AppendLine("        /// GUIを描画します。");
+        f_builder.AppendLine("        /// </summary>");
+        f_builder.AppendLine("        private void OnGUI()");
+        f_builder.AppendLine("        {");
+        f_builder.AppendLine("            if (m_OwnerWindow == null)");
+        f_builder.AppendLine("            {");
+        f_builder.AppendLine("                EditorGUILayout.HelpBox(\"設定対象のEditorWindowが見つかりません。\", MessageType.Warning);");
+        f_builder.AppendLine("                return;");
+        f_builder.AppendLine("            }");
+        f_builder.AppendLine();
+
+        f_builder.AppendLine("            EditorGUILayout.LabelField(\"Create Asset Settings\", EditorStyles.boldLabel);");
+        f_builder.AppendLine("            GUILayout.Space(6.0f);");
+        f_builder.AppendLine();
+
+        f_builder.AppendLine("            m_OwnerWindow.m_AssetFileName = EditorGUILayout.TextField(\"Asset Name\", m_OwnerWindow.m_AssetFileName);");
+        f_builder.AppendLine("            m_OwnerWindow.m_AssetOutputFolderPath = EditorGUILayout.TextField(\"Asset Folder\", m_OwnerWindow.m_AssetOutputFolderPath);");
+        f_builder.AppendLine();
+
+        f_builder.AppendLine("            if (GUI.changed)");
+        f_builder.AppendLine("            {");
+        f_builder.AppendLine("                m_OwnerWindow.Repaint();");
+        f_builder.AppendLine("            }");
+        f_builder.AppendLine("        }");
+        f_builder.AppendLine("    }");
+        f_builder.AppendLine();
     }
 
     /// <summary>
@@ -745,12 +809,6 @@ public partial class CSED_CreateTools
         StringBuilder f_builder,
         string f_dataClassName)
     {
-        f_builder.AppendLine("    /// <summary>");
-        f_builder.AppendLine("    /// Create Asset設定を開いているかどうかです。");
-        f_builder.AppendLine("    /// </summary>");
-        f_builder.AppendLine("    private bool m_IsCreateAssetSettingsOpen = false;");
-        f_builder.AppendLine();
-
         f_builder.AppendLine("    /// <summary>");
         f_builder.AppendLine("    /// 作成するScriptableObjectアセット名です。");
         f_builder.AppendLine("    /// </summary>");
@@ -786,65 +844,6 @@ public partial class CSED_CreateTools
         f_builder.AppendLine("        AssetDatabase.SaveAssets();");
         f_builder.AppendLine("        AssetDatabase.Refresh();");
         f_builder.AppendLine("        Selection.activeObject = asset;");
-        f_builder.AppendLine("    }");
-    }
-
-    /// <summary>
-    /// 生成EditorWindowにCreate Asset設定パネルを追加します。
-    /// </summary>
-    /// <param name="f_builder">StringBuilder</param>
-    private void AppendGeneratedCreateAssetSettingsPanel(StringBuilder f_builder)
-    {
-        f_builder.AppendLine("    /// <summary>");
-        f_builder.AppendLine("    /// Create Asset設定パネルを描画します。");
-        f_builder.AppendLine("    /// </summary>");
-        f_builder.AppendLine("    private void DrawCreateAssetSettingsPanel()");
-        f_builder.AppendLine("    {");
-        f_builder.AppendLine("        if (m_IsCreateAssetSettingsOpen == false)");
-        f_builder.AppendLine("        {");
-        f_builder.AppendLine("            return;");
-        f_builder.AppendLine("        }");
-        f_builder.AppendLine();
-
-        f_builder.AppendLine("        Rect panelRect = new Rect(");
-        f_builder.AppendLine("            24.0f,");
-        f_builder.AppendLine("            48.0f,");
-        f_builder.AppendLine("            Mathf.Min(360.0f, position.width - 48.0f),");
-        f_builder.AppendLine("            118.0f);");
-        f_builder.AppendLine();
-
-        f_builder.AppendLine("        EditorGUI.DrawRect(panelRect, new Color(0.24f, 0.24f, 0.24f));");
-        f_builder.AppendLine("        GUI.Box(panelRect, GUIContent.none);");
-        f_builder.AppendLine();
-
-        f_builder.AppendLine("        GUILayout.BeginArea(new Rect(");
-        f_builder.AppendLine("            panelRect.x + 10.0f,");
-        f_builder.AppendLine("            panelRect.y + 8.0f,");
-        f_builder.AppendLine("            panelRect.width - 20.0f,");
-        f_builder.AppendLine("            panelRect.height - 16.0f));");
-        f_builder.AppendLine("        {");
-        f_builder.AppendLine("            EditorGUILayout.BeginHorizontal();");
-        f_builder.AppendLine("            {");
-        f_builder.AppendLine("                EditorGUILayout.LabelField(\"Create Asset Settings\", EditorStyles.boldLabel);");
-        f_builder.AppendLine("                GUILayout.FlexibleSpace();");
-        f_builder.AppendLine();
-
-        f_builder.AppendLine("                if (GUILayout.Button(\"×\", GUILayout.Width(24.0f)))");
-        f_builder.AppendLine("                {");
-        f_builder.AppendLine("                    m_IsCreateAssetSettingsOpen = false;");
-        f_builder.AppendLine("                    Repaint();");
-        f_builder.AppendLine("                }");
-        f_builder.AppendLine("            }");
-        f_builder.AppendLine("            EditorGUILayout.EndHorizontal();");
-        f_builder.AppendLine();
-
-        f_builder.AppendLine("            GUILayout.Space(6.0f);");
-        f_builder.AppendLine();
-
-        f_builder.AppendLine("            m_AssetFileName = EditorGUILayout.TextField(\"Asset Name\", m_AssetFileName);");
-        f_builder.AppendLine("            m_AssetOutputFolderPath = EditorGUILayout.TextField(\"Asset Folder\", m_AssetOutputFolderPath);");
-        f_builder.AppendLine("        }");
-        f_builder.AppendLine("        GUILayout.EndArea();");
         f_builder.AppendLine("    }");
         f_builder.AppendLine();
     }

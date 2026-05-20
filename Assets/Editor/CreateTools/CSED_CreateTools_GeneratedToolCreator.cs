@@ -91,26 +91,43 @@ public partial class CSED_CreateTools
     {
         CSS_CreateToolsGeneratedEditorList editorList = LoadOrCreateGeneratedEditorList();
 
+        string nowDate = System.DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss");
+
         CSED_CreateTools_GeneratedEditorRecord record =
             new CSED_CreateTools_GeneratedEditorRecord();
 
         record.titleName = m_GeneratedToolWindowTitle;
+        record.authorName = m_GeneratedHeaderAuthorName;
         record.editorClassName = f_editorClassName;
         record.dataClassName = f_dataClassName;
         record.menuPath = m_GeneratedToolMenuPath;
         record.editorScriptPath = f_editorScriptPath;
         record.dataScriptPath = f_dataScriptPath;
-        record.createdDate = System.DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss");
+
+        record.headerHistoryDate = m_GeneratedHeaderHistoryDate;
+        record.editorHeaderContents = m_GeneratedEditorHeaderContents;
+        record.dataHeaderContents = m_GeneratedDataHeaderContents;
+        record.defaultAssetName = m_GeneratedDefaultAssetName;
+        record.defaultAssetFolder = m_GeneratedDefaultAssetFolder;
+        record.fieldSaveDataList = CreateCurrentFieldDataSaveDataList();
 
         int sameIndex = editorList.generatedEditorRecordList.FindIndex(
             item => item.editorClassName == f_editorClassName);
 
         if (sameIndex >= 0)
         {
+            record.createdDate = editorList.generatedEditorRecordList[sameIndex].createdDate;
+
+            if (string.IsNullOrEmpty(record.createdDate))
+            {
+                record.createdDate = nowDate;
+            }
+
             editorList.generatedEditorRecordList[sameIndex] = record;
         }
         else
         {
+            record.createdDate = nowDate;
             editorList.generatedEditorRecordList.Add(record);
         }
 
