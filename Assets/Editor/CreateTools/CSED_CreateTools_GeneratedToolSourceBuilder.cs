@@ -65,6 +65,8 @@ public partial class CSED_CreateTools
         builder.AppendLine("    {");
         builder.AppendLine("        " + f_className + " window = GetWindow<" + f_className + ">(\"" + EscapeString(m_GeneratedToolWindowTitle) + "\");");
         builder.AppendLine("        window.minSize = new Vector2(360.0f, 240.0f);");
+        builder.AppendLine("        " + f_className + "_CreatedAssetsWindow.OpenWindow();");
+        builder.AppendLine("        window.Focus();");
         builder.AppendLine("    }");
         builder.AppendLine();
 
@@ -78,6 +80,15 @@ public partial class CSED_CreateTools
         builder.AppendLine("            new GUIContent(\"Create Asset Settings\"),");
         builder.AppendLine("            false,");
         builder.AppendLine("            OpenCreateAssetSettings);");
+        builder.AppendLine("    }");
+        builder.AppendLine();
+
+        builder.AppendLine("    /// <summary>");
+        builder.AppendLine("    /// 作成済みAsset一覧Windowを開きます。");
+        builder.AppendLine("    /// </summary>");
+        builder.AppendLine("    private void OpenCreatedAssetsWindow()");
+        builder.AppendLine("    {");
+        builder.AppendLine("        " + f_className + "_CreatedAssetsWindow.OpenWindow();");
         builder.AppendLine("    }");
         builder.AppendLine();
 
@@ -102,11 +113,14 @@ public partial class CSED_CreateTools
         builder.AppendLine("    }");
         builder.AppendLine();
 
-        AppendGeneratedCreateScriptableObjectMembers(builder, f_dataClassName);
+        AppendGeneratedCreateScriptableObjectMembers(builder, f_dataClassName, f_className);
 
         AppendGeneratedCreateAssetSettingsWindow(builder, f_className);
 
         builder.AppendLine("}");
+
+        AppendGeneratedCreatedAssetsWindow(builder, f_className, f_dataClassName);
+
         builder.AppendLine("#endif");
 
         return builder.ToString();
@@ -805,9 +819,11 @@ public partial class CSED_CreateTools
     /// </summary>
     /// <param name="f_builder">StringBuilder</param>
     /// <param name="f_dataClassName">生成するScriptableObjectクラス名</param>
+    /// <param name="f_className">生成するEditorWindowクラス名</param>
     private void AppendGeneratedCreateScriptableObjectMembers(
         StringBuilder f_builder,
-        string f_dataClassName)
+        string f_dataClassName,
+        string f_className)
     {
         f_builder.AppendLine("    /// <summary>");
         f_builder.AppendLine("    /// 作成するScriptableObjectアセット名です。");
@@ -844,7 +860,414 @@ public partial class CSED_CreateTools
         f_builder.AppendLine("        AssetDatabase.SaveAssets();");
         f_builder.AppendLine("        AssetDatabase.Refresh();");
         f_builder.AppendLine("        Selection.activeObject = asset;");
+        f_builder.AppendLine("        " + f_className + "_CreatedAssetsWindow.RepaintOpenedWindows();");
         f_builder.AppendLine("    }");
+        f_builder.AppendLine();
+    }
+
+    /// <summary>
+    /// 生成EditorWindowに作成済みScriptableObject一覧Windowを追加します。
+    /// </summary>
+    /// <param name="f_builder">StringBuilder</param>
+    /// <param name="f_className">生成するEditorWindowクラス名</param>
+    /// <param name="f_dataClassName">生成するScriptableObjectクラス名</param>
+    private void AppendGeneratedCreatedAssetsWindow(
+        StringBuilder f_builder,
+        string f_className,
+        string f_dataClassName)
+    {
+        string assetWindowClassName = f_className + "_CreatedAssetsWindow";
+
+        f_builder.AppendLine();
+        f_builder.AppendLine("/// <summary>");
+        f_builder.AppendLine("/// " + f_dataClassName + "で作成されたScriptableObject一覧を表示するEditorWindowです。");
+        f_builder.AppendLine("/// </summary>");
+        f_builder.AppendLine("public class " + assetWindowClassName + " : EditorWindow");
+        f_builder.AppendLine("{");
+
+        f_builder.AppendLine("    /// <summary>");
+        f_builder.AppendLine("    /// Asset一覧のスクロール位置です。");
+        f_builder.AppendLine("    /// </summary>");
+        f_builder.AppendLine("    private Vector2 m_AssetListScrollPosition;");
+        f_builder.AppendLine();
+
+        f_builder.AppendLine("    /// <summary>");
+        f_builder.AppendLine("    /// 表示用にキャッシュしたAssetパス一覧です。");
+        f_builder.AppendLine("    /// </summary>");
+        f_builder.AppendLine("    private List<string> m_CachedAssetPathList = new List<string>();");
+        f_builder.AppendLine();
+
+        f_builder.AppendLine("    /// <summary>");
+        f_builder.AppendLine("    /// Assetごとの設定表示状態です。");
+        f_builder.AppendLine("    /// </summary>");
+        f_builder.AppendLine("    private Dictionary<string, bool> m_AssetFoldoutStateDictionary = new Dictionary<string, bool>();");
+        f_builder.AppendLine();
+
+        f_builder.AppendLine("    /// <summary>");
+        f_builder.AppendLine("    /// Created Assetsウィンドウを開きます。");
+        f_builder.AppendLine("    /// </summary>");
+        f_builder.AppendLine("    public static void OpenWindow()");
+        f_builder.AppendLine("    {");
+        f_builder.AppendLine("        " + assetWindowClassName + " window = GetWindow<" + assetWindowClassName + ">(");
+        f_builder.AppendLine("            \"Created Assets\",");
+        f_builder.AppendLine("            false,");
+        f_builder.AppendLine("            typeof(" + f_className + "));");
+        f_builder.AppendLine();
+        f_builder.AppendLine("        window.minSize = new Vector2(420.0f, 300.0f);");
+        f_builder.AppendLine("    }");
+        f_builder.AppendLine();
+
+        f_builder.AppendLine("    /// <summary>");
+        f_builder.AppendLine("    /// 開いているCreated Assetsウィンドウを再描画します。");
+        f_builder.AppendLine("    /// </summary>");
+        f_builder.AppendLine("    public static void RepaintOpenedWindows()");
+        f_builder.AppendLine("    {");
+        f_builder.AppendLine("        " + assetWindowClassName + "[] windows = Resources.FindObjectsOfTypeAll<" + assetWindowClassName + ">();");
+        f_builder.AppendLine();
+        f_builder.AppendLine("        for (int i = 0; i < windows.Length; i++)");
+        f_builder.AppendLine("        {");
+        f_builder.AppendLine("            windows[i].RefreshAssetPathList();");
+        f_builder.AppendLine("            windows[i].Repaint();");
+        f_builder.AppendLine("        }");
+        f_builder.AppendLine("    }");
+        f_builder.AppendLine();
+
+        f_builder.AppendLine("    /// <summary>");
+        f_builder.AppendLine("    /// Window有効化時にAsset一覧を更新します。");
+        f_builder.AppendLine("    /// </summary>");
+        f_builder.AppendLine("    private void OnEnable()");
+        f_builder.AppendLine("    {");
+        f_builder.AppendLine("        RefreshAssetPathList();");
+        f_builder.AppendLine("    }");
+        f_builder.AppendLine();
+
+        f_builder.AppendLine("    /// <summary>");
+        f_builder.AppendLine("    /// Asset一覧を更新します。");
+        f_builder.AppendLine("    /// </summary>");
+        f_builder.AppendLine("    private void RefreshAssetPathList()");
+        f_builder.AppendLine("    {");
+        f_builder.AppendLine("        m_CachedAssetPathList.Clear();");
+        f_builder.AppendLine();
+        f_builder.AppendLine("        string[] assetGuids = AssetDatabase.FindAssets(\"t:\" + nameof(" + f_dataClassName + "));");
+        f_builder.AppendLine();
+        f_builder.AppendLine("        for (int i = 0; i < assetGuids.Length; i++)");
+        f_builder.AppendLine("        {");
+        f_builder.AppendLine("            string assetPath = AssetDatabase.GUIDToAssetPath(assetGuids[i]);");
+        f_builder.AppendLine("            m_CachedAssetPathList.Add(assetPath);");
+        f_builder.AppendLine("        }");
+        f_builder.AppendLine();
+        f_builder.AppendLine("        m_CachedAssetPathList.Sort(CompareAssetPathByNaturalName);");
+        f_builder.AppendLine("    }");
+        f_builder.AppendLine();
+
+        f_builder.AppendLine("    /// <summary>");
+        f_builder.AppendLine("    /// GUIを描画します。");
+        f_builder.AppendLine("    /// </summary>");
+        f_builder.AppendLine("    private void OnGUI()");
+        f_builder.AppendLine("    {");
+        f_builder.AppendLine("        DrawCreatedAssetList();");
+        f_builder.AppendLine("    }");
+        f_builder.AppendLine();
+
+        f_builder.AppendLine("    /// <summary>");
+        f_builder.AppendLine("    /// 作成済みAsset一覧を描画します。");
+        f_builder.AppendLine("    /// </summary>");
+        f_builder.AppendLine("    private void DrawCreatedAssetList()");
+        f_builder.AppendLine("    {");
+        f_builder.AppendLine("        EditorGUILayout.BeginHorizontal();");
+        f_builder.AppendLine("        {");
+        f_builder.AppendLine("            EditorGUILayout.LabelField(\"Created ScriptableObjects\", EditorStyles.boldLabel);");
+        f_builder.AppendLine();
+        f_builder.AppendLine("            GUILayout.FlexibleSpace();");
+        f_builder.AppendLine();
+        f_builder.AppendLine("            if (GUILayout.Button(\"Refresh\", GUILayout.Width(80.0f), GUILayout.Height(20.0f)))");
+        f_builder.AppendLine("            {");
+        f_builder.AppendLine("                RefreshAssetPathList();");
+        f_builder.AppendLine("            }");
+        f_builder.AppendLine("        }");
+        f_builder.AppendLine("        EditorGUILayout.EndHorizontal();");
+        f_builder.AppendLine();
+        f_builder.AppendLine("        if (m_CachedAssetPathList.Count <= 0)");
+        f_builder.AppendLine("        {");
+        f_builder.AppendLine("            EditorGUILayout.HelpBox(\"まだ作成済みAssetがありません。\", MessageType.Info);");
+        f_builder.AppendLine("            return;");
+        f_builder.AppendLine("        }");
+        f_builder.AppendLine();
+        f_builder.AppendLine("        m_AssetListScrollPosition = EditorGUILayout.BeginScrollView(m_AssetListScrollPosition);");
+        f_builder.AppendLine("        {");
+        f_builder.AppendLine("            for (int i = 0; i < m_CachedAssetPathList.Count; i++)");
+        f_builder.AppendLine("            {");
+        f_builder.AppendLine("                string assetPath = m_CachedAssetPathList[i];");
+        f_builder.AppendLine("                " + f_dataClassName + " asset = AssetDatabase.LoadAssetAtPath<" + f_dataClassName + ">(assetPath);");
+        f_builder.AppendLine();
+        f_builder.AppendLine("                if (asset == null)");
+        f_builder.AppendLine("                {");
+        f_builder.AppendLine("                    continue;");
+        f_builder.AppendLine("                }");
+        f_builder.AppendLine();
+        f_builder.AppendLine("                DrawCreatedAssetListItem(asset, assetPath);");
+        f_builder.AppendLine("                GUILayout.Space(10.0f);");
+        f_builder.AppendLine("            }");
+        f_builder.AppendLine("        }");
+        f_builder.AppendLine("        EditorGUILayout.EndScrollView();");
+        f_builder.AppendLine("    }");
+        f_builder.AppendLine();
+
+        f_builder.AppendLine("    /// <summary>");
+        f_builder.AppendLine("    /// AssetパスをAsset名の自然順で比較します。");
+        f_builder.AppendLine("    /// </summary>");
+        f_builder.AppendLine("    /// <param name=\"f_leftPath\">左側Assetパス</param>");
+        f_builder.AppendLine("    /// <param name=\"f_rightPath\">右側Assetパス</param>");
+        f_builder.AppendLine("    /// <returns>比較結果</returns>");
+        f_builder.AppendLine("    private int CompareAssetPathByNaturalName(string f_leftPath, string f_rightPath)");
+        f_builder.AppendLine("    {");
+        f_builder.AppendLine("        string leftName = System.IO.Path.GetFileNameWithoutExtension(f_leftPath);");
+        f_builder.AppendLine("        string rightName = System.IO.Path.GetFileNameWithoutExtension(f_rightPath);");
+        f_builder.AppendLine();
+        f_builder.AppendLine("        int nameCompare = CompareNaturalText(leftName, rightName);");
+        f_builder.AppendLine();
+        f_builder.AppendLine("        if (nameCompare != 0)");
+        f_builder.AppendLine("        {");
+        f_builder.AppendLine("            return nameCompare;");
+        f_builder.AppendLine("        }");
+        f_builder.AppendLine();
+        f_builder.AppendLine("        return string.Compare(f_leftPath, f_rightPath, System.StringComparison.OrdinalIgnoreCase);");
+        f_builder.AppendLine("    }");
+        f_builder.AppendLine();
+
+        f_builder.AppendLine("    /// <summary>");
+        f_builder.AppendLine("    /// 文字列を自然順で比較します。");
+        f_builder.AppendLine("    /// a1, a2, a10 のように数字部分を数値として比較します。");
+        f_builder.AppendLine("    /// </summary>");
+        f_builder.AppendLine("    /// <param name=\"f_leftText\">左側文字列</param>");
+        f_builder.AppendLine("    /// <param name=\"f_rightText\">右側文字列</param>");
+        f_builder.AppendLine("    /// <returns>比較結果</returns>");
+        f_builder.AppendLine("    private int CompareNaturalText(string f_leftText, string f_rightText)");
+        f_builder.AppendLine("    {");
+        f_builder.AppendLine("        int leftIndex = 0;");
+        f_builder.AppendLine("        int rightIndex = 0;");
+        f_builder.AppendLine();
+        f_builder.AppendLine("        while (leftIndex < f_leftText.Length && rightIndex < f_rightText.Length)");
+        f_builder.AppendLine("        {");
+        f_builder.AppendLine("            char leftChar = f_leftText[leftIndex];");
+        f_builder.AppendLine("            char rightChar = f_rightText[rightIndex];");
+        f_builder.AppendLine();
+        f_builder.AppendLine("            if (char.IsDigit(leftChar) && char.IsDigit(rightChar))");
+        f_builder.AppendLine("            {");
+        f_builder.AppendLine("                int numberCompare = CompareNaturalNumberPart(f_leftText, ref leftIndex, f_rightText, ref rightIndex);");
+        f_builder.AppendLine();
+        f_builder.AppendLine("                if (numberCompare != 0)");
+        f_builder.AppendLine("                {");
+        f_builder.AppendLine("                    return numberCompare;");
+        f_builder.AppendLine("                }");
+        f_builder.AppendLine();
+        f_builder.AppendLine("                continue;");
+        f_builder.AppendLine("            }");
+        f_builder.AppendLine();
+        f_builder.AppendLine("            int charCompare = string.Compare(");
+        f_builder.AppendLine("                leftChar.ToString(),");
+        f_builder.AppendLine("                rightChar.ToString(),");
+        f_builder.AppendLine("                true,");
+        f_builder.AppendLine("                System.Globalization.CultureInfo.GetCultureInfo(\"ja-JP\"));");
+        f_builder.AppendLine();
+        f_builder.AppendLine("            if (charCompare != 0)");
+        f_builder.AppendLine("            {");
+        f_builder.AppendLine("                return charCompare;");
+        f_builder.AppendLine("            }");
+        f_builder.AppendLine();
+        f_builder.AppendLine("            leftIndex++;");
+        f_builder.AppendLine("            rightIndex++;");
+        f_builder.AppendLine("        }");
+        f_builder.AppendLine();
+        f_builder.AppendLine("        return f_leftText.Length.CompareTo(f_rightText.Length);");
+        f_builder.AppendLine("    }");
+        f_builder.AppendLine();
+
+        f_builder.AppendLine("    /// <summary>");
+        f_builder.AppendLine("    /// 文字列内の数字部分を数値として比較します。");
+        f_builder.AppendLine("    /// </summary>");
+        f_builder.AppendLine("    /// <param name=\"f_leftText\">左側文字列</param>");
+        f_builder.AppendLine("    /// <param name=\"f_leftIndex\">左側現在位置</param>");
+        f_builder.AppendLine("    /// <param name=\"f_rightText\">右側文字列</param>");
+        f_builder.AppendLine("    /// <param name=\"f_rightIndex\">右側現在位置</param>");
+        f_builder.AppendLine("    /// <returns>比較結果</returns>");
+        f_builder.AppendLine("    private int CompareNaturalNumberPart(");
+        f_builder.AppendLine("        string f_leftText,");
+        f_builder.AppendLine("        ref int f_leftIndex,");
+        f_builder.AppendLine("        string f_rightText,");
+        f_builder.AppendLine("        ref int f_rightIndex)");
+        f_builder.AppendLine("    {");
+        f_builder.AppendLine("        long leftNumber = ReadNaturalNumber(f_leftText, ref f_leftIndex);");
+        f_builder.AppendLine("        long rightNumber = ReadNaturalNumber(f_rightText, ref f_rightIndex);");
+        f_builder.AppendLine();
+        f_builder.AppendLine("        return leftNumber.CompareTo(rightNumber);");
+        f_builder.AppendLine("    }");
+        f_builder.AppendLine();
+
+        f_builder.AppendLine("    /// <summary>");
+        f_builder.AppendLine("    /// 文字列内の数字部分を読み取ります。");
+        f_builder.AppendLine("    /// </summary>");
+        f_builder.AppendLine("    /// <param name=\"f_text\">対象文字列</param>");
+        f_builder.AppendLine("    /// <param name=\"f_index\">現在位置</param>");
+        f_builder.AppendLine("    /// <returns>読み取った数値</returns>");
+        f_builder.AppendLine("    private long ReadNaturalNumber(string f_text, ref int f_index)");
+        f_builder.AppendLine("    {");
+        f_builder.AppendLine("        long number = 0;");
+        f_builder.AppendLine();
+        f_builder.AppendLine("        while (f_index < f_text.Length && char.IsDigit(f_text[f_index]))");
+        f_builder.AppendLine("        {");
+        f_builder.AppendLine("            number = number * 10 + (f_text[f_index] - '0');");
+        f_builder.AppendLine("            f_index++;");
+        f_builder.AppendLine("        }");
+        f_builder.AppendLine();
+        f_builder.AppendLine("        return number;");
+        f_builder.AppendLine("    }");
+        f_builder.AppendLine();
+
+        f_builder.AppendLine("    /// <summary>");
+        f_builder.AppendLine("    /// Asset一覧の1項目を描画します。");
+        f_builder.AppendLine("    /// </summary>");
+        f_builder.AppendLine("    /// <param name=\"f_asset\">対象Asset</param>");
+        f_builder.AppendLine("    /// <param name=\"f_assetPath\">対象Assetパス</param>");
+        f_builder.AppendLine("    private void DrawCreatedAssetListItem(" + f_dataClassName + " f_asset, string f_assetPath)");
+        f_builder.AppendLine("    {");
+        f_builder.AppendLine("        EditorGUILayout.BeginVertical(EditorStyles.helpBox);");
+        f_builder.AppendLine("        {");
+        f_builder.AppendLine("            EditorGUILayout.LabelField(f_asset.name, EditorStyles.boldLabel);");
+        f_builder.AppendLine();
+        f_builder.AppendLine("            EditorGUILayout.BeginHorizontal();");
+        f_builder.AppendLine("            {");
+        f_builder.AppendLine("                EditorGUILayout.LabelField(\"Path\", GUILayout.Width(36.0f));");
+        f_builder.AppendLine("                EditorGUILayout.TextField(f_assetPath);");
+        f_builder.AppendLine();
+        f_builder.AppendLine("                string foldoutButtonText = IsAssetFoldoutOpened(f_assetPath) ? \"▼\" : \"▶\";");
+        f_builder.AppendLine();
+        f_builder.AppendLine("                if (GUILayout.Button(foldoutButtonText, GUILayout.Width(24.0f), GUILayout.Height(20.0f)))");
+        f_builder.AppendLine("                {");
+        f_builder.AppendLine("                    ToggleAssetFoldout(f_assetPath);");
+        f_builder.AppendLine("                }");
+        f_builder.AppendLine();
+        f_builder.AppendLine("                if (GUILayout.Button(\"Select\", GUILayout.Width(80.0f), GUILayout.Height(20.0f)))");
+        f_builder.AppendLine("                {");
+        f_builder.AppendLine("                    SelectAsset(f_asset);");
+        f_builder.AppendLine("                }");
+        f_builder.AppendLine("            }");
+        f_builder.AppendLine("            EditorGUILayout.EndHorizontal();");
+        f_builder.AppendLine();
+        f_builder.AppendLine("            if (IsAssetFoldoutOpened(f_assetPath))");
+        f_builder.AppendLine("            {");
+        f_builder.AppendLine("                GUILayout.Space(4.0f);");
+        f_builder.AppendLine("                DrawCreatedAssetSettings(f_asset, f_assetPath);");
+        f_builder.AppendLine("            }");
+        f_builder.AppendLine("        }");
+        f_builder.AppendLine("        EditorGUILayout.EndVertical();");
+        f_builder.AppendLine("    }");
+        f_builder.AppendLine();
+
+        f_builder.AppendLine("    /// <summary>");
+        f_builder.AppendLine("    /// Asset設定表示状態を切り替えます。");
+        f_builder.AppendLine("    /// </summary>");
+        f_builder.AppendLine("    /// <param name=\"f_assetPath\">対象Assetパス</param>");
+        f_builder.AppendLine("    private void ToggleAssetFoldout(string f_assetPath)");
+        f_builder.AppendLine("    {");
+        f_builder.AppendLine("        if (m_AssetFoldoutStateDictionary.ContainsKey(f_assetPath) == false)");
+        f_builder.AppendLine("        {");
+        f_builder.AppendLine("            m_AssetFoldoutStateDictionary.Add(f_assetPath, true);");
+        f_builder.AppendLine("            return;");
+        f_builder.AppendLine("        }");
+        f_builder.AppendLine();
+        f_builder.AppendLine("        m_AssetFoldoutStateDictionary[f_assetPath] = !m_AssetFoldoutStateDictionary[f_assetPath];");
+        f_builder.AppendLine("    }");
+        f_builder.AppendLine();
+
+        f_builder.AppendLine("    /// <summary>");
+        f_builder.AppendLine("    /// Asset設定表示状態を取得します。");
+        f_builder.AppendLine("    /// </summary>");
+        f_builder.AppendLine("    /// <param name=\"f_assetPath\">対象Assetパス</param>");
+        f_builder.AppendLine("    /// <returns>表示中ならtrue</returns>");
+        f_builder.AppendLine("    private bool IsAssetFoldoutOpened(string f_assetPath)");
+        f_builder.AppendLine("    {");
+        f_builder.AppendLine("        if (m_AssetFoldoutStateDictionary.ContainsKey(f_assetPath) == false)");
+        f_builder.AppendLine("        {");
+        f_builder.AppendLine("            return false;");
+        f_builder.AppendLine("        }");
+        f_builder.AppendLine();
+        f_builder.AppendLine("        return m_AssetFoldoutStateDictionary[f_assetPath];");
+        f_builder.AppendLine("    }");
+        f_builder.AppendLine();
+
+        f_builder.AppendLine("    /// <summary>");
+        f_builder.AppendLine("    /// 作成済みAssetの設定項目を描画します。");
+        f_builder.AppendLine("    /// </summary>");
+        f_builder.AppendLine("    /// <param name=\"f_asset\">対象Asset</param>");
+        f_builder.AppendLine("    /// <param name=\"f_assetPath\">対象Assetパス</param>");
+        f_builder.AppendLine("    private void DrawCreatedAssetSettings(" + f_dataClassName + " f_asset, string f_assetPath)");
+        f_builder.AppendLine("    {");
+        f_builder.AppendLine("        GUILayout.Space(4.0f);");
+        f_builder.AppendLine();
+        f_builder.AppendLine("        EditorGUI.BeginChangeCheck();");
+        f_builder.AppendLine("        string newAssetName = EditorGUILayout.DelayedTextField(\"Asset Name\", f_asset.name);");
+        f_builder.AppendLine();
+        f_builder.AppendLine("        if (EditorGUI.EndChangeCheck())");
+        f_builder.AppendLine("        {");
+        f_builder.AppendLine("            if (string.IsNullOrEmpty(newAssetName) == false && newAssetName != f_asset.name)");
+        f_builder.AppendLine("            {");
+        f_builder.AppendLine("                string renameError = AssetDatabase.RenameAsset(f_assetPath, newAssetName);");
+        f_builder.AppendLine();
+        f_builder.AppendLine("                if (string.IsNullOrEmpty(renameError))");
+        f_builder.AppendLine("                {");
+        f_builder.AppendLine("                    AssetDatabase.SaveAssets();");
+        f_builder.AppendLine("                    AssetDatabase.Refresh();");
+        f_builder.AppendLine("                    RefreshAssetPathList();");
+        f_builder.AppendLine("                    Repaint();");
+        f_builder.AppendLine("                    GUIUtility.ExitGUI();");
+        f_builder.AppendLine("                }");
+        f_builder.AppendLine("                else");
+        f_builder.AppendLine("                {");
+        f_builder.AppendLine("                    EditorUtility.DisplayDialog(\"Rename Asset Error\", renameError, \"OK\");");
+        f_builder.AppendLine("                }");
+        f_builder.AppendLine("            }");
+        f_builder.AppendLine("        }");
+        f_builder.AppendLine();
+        f_builder.AppendLine("        SerializedObject serializedObject = new SerializedObject(f_asset);");
+        f_builder.AppendLine("        SerializedProperty property = serializedObject.GetIterator();");
+        f_builder.AppendLine();
+        f_builder.AppendLine("        serializedObject.Update();");
+        f_builder.AppendLine();
+        f_builder.AppendLine("        bool enterChildren = true;");
+        f_builder.AppendLine();
+        f_builder.AppendLine("        while (property.NextVisible(enterChildren))");
+        f_builder.AppendLine("        {");
+        f_builder.AppendLine("            enterChildren = false;");
+        f_builder.AppendLine();
+        f_builder.AppendLine("            if (property.name == \"m_Script\")");
+        f_builder.AppendLine("            {");
+        f_builder.AppendLine("                continue;");
+        f_builder.AppendLine("            }");
+        f_builder.AppendLine();
+        f_builder.AppendLine("            EditorGUILayout.PropertyField(property, true);");
+        f_builder.AppendLine("        }");
+        f_builder.AppendLine();
+        f_builder.AppendLine("        if (serializedObject.ApplyModifiedProperties())");
+        f_builder.AppendLine("        {");
+        f_builder.AppendLine("            EditorUtility.SetDirty(f_asset);");
+        f_builder.AppendLine("            AssetDatabase.SaveAssets();");
+        f_builder.AppendLine("        }");
+        f_builder.AppendLine();
+        f_builder.AppendLine("        GUILayout.Space(10.0f);");
+        f_builder.AppendLine("    }");
+        f_builder.AppendLine();
+
+        f_builder.AppendLine("    /// <summary>");
+        f_builder.AppendLine("    /// AssetをProject上で選択します。");
+        f_builder.AppendLine("    /// </summary>");
+        f_builder.AppendLine("    /// <param name=\"f_asset\">選択するAsset</param>");
+        f_builder.AppendLine("    private void SelectAsset(" + f_dataClassName + " f_asset)");
+        f_builder.AppendLine("    {");
+        f_builder.AppendLine("        Selection.activeObject = f_asset;");
+        f_builder.AppendLine("        EditorGUIUtility.PingObject(f_asset);");
+        f_builder.AppendLine("    }");
+        f_builder.AppendLine("}");
         f_builder.AppendLine();
     }
 
