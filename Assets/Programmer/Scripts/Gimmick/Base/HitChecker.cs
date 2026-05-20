@@ -151,6 +151,11 @@ public class HitChecker : MonoBehaviour
                         {
                             case Gimmick.Pot:
                                 EnemyDame(effectEnemies[i].gameObject, effectDamage);
+                                Debug.Log("EffectDamage_Pot");
+                                break;
+                            case Gimmick.IronBall:
+                                EnemyDame(effectEnemies[i].gameObject, effectDamage);
+                                Debug.Log("EffectDamage_IronBall");
                                 break;
                             case Gimmick.EmptyChest:
                                 EnemyCharm(effectEnemies[i].gameObject);
@@ -172,6 +177,11 @@ public class HitChecker : MonoBehaviour
                     {
                         case Gimmick.Pot:
                             EnemyDame(enemy, hitDamage);
+                            Debug.Log("HitDamage_Pot");
+                            break;
+                        case Gimmick.IronBall:
+                            EnemyDame(enemy, hitDamage);
+                            Debug.Log("HitDamage_IronBall");
                             break;
                         case Gimmick.EmptyChest:
                             EnemyCharm(enemy);

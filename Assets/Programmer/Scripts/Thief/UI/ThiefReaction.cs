@@ -15,7 +15,7 @@ using UnityEngine.UI;
 // 泥棒のリアクションを管理するクラス
 public class ThiefReaction : MonoBehaviour
 {
-    [Tooltip("リアクションに使用するスプライトリスト")]
+    [SerializeField,Header("リアクションに使用するスプライトリスト"), Tooltip("リアクションに使用するスプライトリスト")]
     private List<Sprite> reactionSprites = new List<Sprite>();
 
     [Tooltip("作成したリアクションオブジェクトを格納するリスト")]// リアクションオブジェクトと表示タイマーを格納する辞書
