@@ -14,8 +14,8 @@ using UnityEngine;
 public class CSS_NewToolData : ScriptableObject
 {
     /// <summary>
-    /// 高級車です。
+    /// newIntField01です。
     /// </summary>
-    public int 高級車;
+    public int newIntField01;
 
 }

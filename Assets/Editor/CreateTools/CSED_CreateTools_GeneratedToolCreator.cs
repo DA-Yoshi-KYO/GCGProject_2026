@@ -59,6 +59,12 @@ public partial class CSED_CreateTools
             CreateGeneratedScriptableObjectSource(safeDataClassName),
             Encoding.UTF8);
 
+        SaveGeneratedEditorRecord(
+            safeEditorClassName,
+            safeDataClassName,
+            editorOutputFilePath,
+            dataOutputFilePath);
+
         AssetDatabase.Refresh();
 
         EditorUtility.DisplayDialog(
@@ -68,6 +74,80 @@ public partial class CSED_CreateTools
             + "\n"
             + dataOutputFilePath,
             "OK");
+    }
+
+    /// <summary>
+    /// 生成したEditor情報を一覧アセットへ保存します。
+    /// </summary>
+    /// <param name="f_editorClassName">EditorWindowクラス名</param>
+    /// <param name="f_dataClassName">ScriptableObjectクラス名</param>
+    /// <param name="f_editorScriptPath">EditorWindowスクリプトパス</param>
+    /// <param name="f_dataScriptPath">ScriptableObjectスクリプトパス</param>
+    private void SaveGeneratedEditorRecord(
+        string f_editorClassName,
+        string f_dataClassName,
+        string f_editorScriptPath,
+        string f_dataScriptPath)
+    {
+        CSS_CreateToolsGeneratedEditorList editorList = LoadOrCreateGeneratedEditorList();
+
+        CSED_CreateTools_GeneratedEditorRecord record =
+            new CSED_CreateTools_GeneratedEditorRecord();
+
+        record.titleName = m_GeneratedToolWindowTitle;
+        record.editorClassName = f_editorClassName;
+        record.dataClassName = f_dataClassName;
+        record.menuPath = m_GeneratedToolMenuPath;
+        record.editorScriptPath = f_editorScriptPath;
+        record.dataScriptPath = f_dataScriptPath;
+        record.createdDate = System.DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss");
+
+        int sameIndex = editorList.generatedEditorRecordList.FindIndex(
+            item => item.editorClassName == f_editorClassName);
+
+        if (sameIndex >= 0)
+        {
+            editorList.generatedEditorRecordList[sameIndex] = record;
+        }
+        else
+        {
+            editorList.generatedEditorRecordList.Add(record);
+        }
+
+        EditorUtility.SetDirty(editorList);
+        AssetDatabase.SaveAssets();
+    }
+
+    /// <summary>
+    /// 生成済みEditor一覧アセットを読み込みます。
+    /// 存在しない場合は作成します。
+    /// </summary>
+    /// <returns>生成済みEditor一覧アセット</returns>
+    private CSS_CreateToolsGeneratedEditorList LoadOrCreateGeneratedEditorList()
+    {
+        const string assetPath = "Assets/Editor/CreateTools/CSS_CreateToolsGeneratedEditorList.asset";
+
+        CSS_CreateToolsGeneratedEditorList editorList =
+            AssetDatabase.LoadAssetAtPath<CSS_CreateToolsGeneratedEditorList>(assetPath);
+
+        if (editorList != null)
+        {
+            return editorList;
+        }
+
+        string folderPath = System.IO.Path.GetDirectoryName(assetPath);
+
+        if (System.IO.Directory.Exists(folderPath) == false)
+        {
+            System.IO.Directory.CreateDirectory(folderPath);
+        }
+
+        editorList = CreateInstance<CSS_CreateToolsGeneratedEditorList>();
+
+        AssetDatabase.CreateAsset(editorList, assetPath);
+        AssetDatabase.SaveAssets();
+
+        return editorList;
     }
 
     /// <summary>
