@@ -98,17 +98,21 @@ public partial class CSED_CreateTools
 
         record.titleName = m_GeneratedToolWindowTitle;
         record.authorName = m_GeneratedHeaderAuthorName;
+
         record.editorClassName = f_editorClassName;
         record.dataClassName = f_dataClassName;
         record.menuPath = m_GeneratedToolMenuPath;
+
         record.editorScriptPath = f_editorScriptPath;
         record.dataScriptPath = f_dataScriptPath;
 
         record.headerHistoryDate = m_GeneratedHeaderHistoryDate;
         record.editorHeaderContents = m_GeneratedEditorHeaderContents;
         record.dataHeaderContents = m_GeneratedDataHeaderContents;
+
         record.defaultAssetName = m_GeneratedDefaultAssetName;
         record.defaultAssetFolder = m_GeneratedDefaultAssetFolder;
+
         record.fieldSaveDataList = CreateCurrentFieldDataSaveDataList();
 
         int sameIndex = editorList.generatedEditorRecordList.FindIndex(
@@ -116,18 +120,25 @@ public partial class CSED_CreateTools
 
         if (sameIndex >= 0)
         {
-            record.createdDate = editorList.generatedEditorRecordList[sameIndex].createdDate;
+            CSED_CreateTools_GeneratedEditorRecord oldRecord =
+                editorList.generatedEditorRecordList[sameIndex];
+
+            record.createdDate = oldRecord.createdDate;
 
             if (string.IsNullOrEmpty(record.createdDate))
             {
                 record.createdDate = nowDate;
             }
 
+            record.updatedDate = nowDate;
+
             editorList.generatedEditorRecordList[sameIndex] = record;
         }
         else
         {
             record.createdDate = nowDate;
+            record.updatedDate = nowDate;
+
             editorList.generatedEditorRecordList.Add(record);
         }
 
