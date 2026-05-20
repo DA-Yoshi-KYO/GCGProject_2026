@@ -1,7 +1,7 @@
 ﻿/*
 +=====================================
  ファイル名 : CSED_Gimmic.cs
- 概要     : CreateToolsから自動生成されたEditorWindow
+ 概要     : ギミック
  作者     : ヨシモト リョウ
  履歴     : 2026/05/20 CreateToolsから自動生成
 =====================================+
@@ -23,19 +23,24 @@ public class CSED_Gimmic : EditorWindow, IHasCustomMenu
     private string s_gimmickName = string.Empty;
 
     /// <summary>
-    /// f_rangeXです。
+    /// n_gimmickRangeXです。
     /// </summary>
-    private float f_rangeX = 1.0f;
+    private int n_gimmickRangeX = 1;
 
     /// <summary>
-    /// f_rangeYです。
+    /// n_gimmickRangeYです。
     /// </summary>
-    private float f_rangeY = 1.0f;
+    private int n_gimmickRangeY = 1;
 
     /// <summary>
     /// n_gimmickDamegです。
     /// </summary>
-    private float n_gimmickDameg = 0.0f;
+    private int n_gimmickDameg = 1;
+
+    /// <summary>
+    /// メイン画面のスクロール位置です。
+    /// </summary>
+    private Vector2 m_MainScrollPosition;
 
     /// <summary>
     /// メニューからウィンドウを開きます。
@@ -82,16 +87,18 @@ public class CSED_Gimmic : EditorWindow, IHasCustomMenu
     /// </summary>
     private void OnGUI()
     {
+        m_MainScrollPosition = EditorGUILayout.BeginScrollView(m_MainScrollPosition);
+        {
         s_gimmickName = EditorGUILayout.TextField("ギミック名", s_gimmickName);
         GUILayout.Space(6.0f);
 
-        f_rangeX = EditorGUILayout.Slider("ギミック範囲_X", f_rangeX, 1.0f, 10.0f);
+        n_gimmickRangeX = EditorGUILayout.IntSlider("ギミック範囲X", n_gimmickRangeX, 0, 0);
         GUILayout.Space(6.0f);
 
-        f_rangeY = EditorGUILayout.Slider("ギミック範囲_Y", f_rangeY, 1.0f, 10.0f);
+        n_gimmickRangeY = EditorGUILayout.IntSlider("ギミック範囲Y", n_gimmickRangeY, 0, 0);
         GUILayout.Space(6.0f);
 
-        n_gimmickDameg = EditorGUILayout.FloatField("ギミックダメージ(振れ幅)", n_gimmickDameg);
+        n_gimmickDameg = EditorGUILayout.IntField("ギミックダメージ", n_gimmickDameg);
         GUILayout.Space(6.0f);
 
         GUILayout.Space(12.0f);
@@ -101,6 +108,8 @@ public class CSED_Gimmic : EditorWindow, IHasCustomMenu
         {
             CreateScriptableObjectAsset();
         }
+        }
+        EditorGUILayout.EndScrollView();
     }
 
     /// <summary>
@@ -125,8 +134,8 @@ public class CSED_Gimmic : EditorWindow, IHasCustomMenu
 
         CSS_Gimmic asset = CreateInstance<CSS_Gimmic>();
         asset.s_gimmickName = s_gimmickName;
-        asset.f_rangeX = f_rangeX;
-        asset.f_rangeY = f_rangeY;
+        asset.n_gimmickRangeX = n_gimmickRangeX;
+        asset.n_gimmickRangeY = n_gimmickRangeY;
         asset.n_gimmickDameg = n_gimmickDameg;
 
         string assetPath = AssetDatabase.GenerateUniqueAssetPath(

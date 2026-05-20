@@ -58,6 +58,12 @@ public partial class CSED_CreateTools
         AppendGeneratedFieldVariables(builder);
 
         builder.AppendLine("    /// <summary>");
+        builder.AppendLine("    /// メイン画面のスクロール位置です。");
+        builder.AppendLine("    /// </summary>");
+        builder.AppendLine("    private Vector2 m_MainScrollPosition;");
+        builder.AppendLine();
+
+        builder.AppendLine("    /// <summary>");
         builder.AppendLine("    /// メニューからウィンドウを開きます。");
         builder.AppendLine("    /// </summary>");
         builder.AppendLine("    [MenuItem(\"" + EscapeString(m_GeneratedToolMenuPath) + "\")]");
@@ -106,10 +112,14 @@ public partial class CSED_CreateTools
         builder.AppendLine("    /// </summary>");
         builder.AppendLine("    private void OnGUI()");
         builder.AppendLine("    {");
+        builder.AppendLine("        m_MainScrollPosition = EditorGUILayout.BeginScrollView(m_MainScrollPosition);");
+        builder.AppendLine("        {");
 
         AppendGeneratedOnGui(builder);
         AppendGeneratedCreateScriptableObjectButton(builder);
 
+        builder.AppendLine("        }");
+        builder.AppendLine("        EditorGUILayout.EndScrollView();");
         builder.AppendLine("    }");
         builder.AppendLine();
 
@@ -124,6 +134,88 @@ public partial class CSED_CreateTools
         builder.AppendLine("#endif");
 
         return builder.ToString();
+    }
+
+    /// <summary>
+    /// 生成対象Fieldが単体MinMaxFieldか判定します。
+    /// </summary>
+    /// <param name="f_fieldData">確認するFieldData</param>
+    /// <returns>単体MinMaxFieldの場合はtrue</returns>
+    private bool IsGeneratedSingleMinMaxField(CSED_CreateTools_FieldData f_fieldData)
+    {
+        return
+            f_fieldData.FieldType != CSE_CreateTools_FieldType.List &&
+            f_fieldData.FieldLayoutType == CSE_CreateTools_FieldLayoutType.MinMaxField;
+    }
+
+    /// <summary>
+    /// Min用変数名を取得します。
+    /// </summary>
+    /// <param name="f_baseVariableName">元の変数名</param>
+    /// <returns>Min用変数名</returns>
+    private string CreateGeneratedMinVariableName(string f_baseVariableName)
+    {
+        return f_baseVariableName + "Min";
+    }
+
+    /// <summary>
+    /// Max用変数名を取得します。
+    /// </summary>
+    /// <param name="f_baseVariableName">元の変数名</param>
+    /// <returns>Max用変数名</returns>
+    private string CreateGeneratedMaxVariableName(string f_baseVariableName)
+    {
+        return f_baseVariableName + "Max";
+    }
+
+    /// <summary>
+    /// MinMaxField用のMin初期値文字列を取得します。
+    /// </summary>
+    /// <param name="f_fieldData">FieldData</param>
+    /// <returns>Min初期値文字列</returns>
+    private string GetGeneratedMinDefaultValueText(CSED_CreateTools_FieldData f_fieldData)
+    {
+        if (f_fieldData.FieldType == CSE_CreateTools_FieldType.Int)
+        {
+            if (f_fieldData.IsDefaultMinValueNull)
+            {
+                return "0";
+            }
+
+            return GetGeneratedIntText(f_fieldData.DefaultMinValueText);
+        }
+
+        if (f_fieldData.IsDefaultMinValueNull)
+        {
+            return "0.0f";
+        }
+
+        return GetGeneratedFloatText(f_fieldData.DefaultMinValueText);
+    }
+
+    /// <summary>
+    /// MinMaxField用のMax初期値文字列を取得します。
+    /// </summary>
+    /// <param name="f_fieldData">FieldData</param>
+    /// <returns>Max初期値文字列</returns>
+    private string GetGeneratedMaxDefaultValueText(CSED_CreateTools_FieldData f_fieldData)
+    {
+        if (f_fieldData.FieldType == CSE_CreateTools_FieldType.Int)
+        {
+            if (f_fieldData.IsDefaultMaxValueNull)
+            {
+                return "0";
+            }
+
+            return GetGeneratedIntText(f_fieldData.DefaultMaxValueText);
+        }
+
+        if (f_fieldData.IsDefaultMaxValueNull)
+        {
+            return "0.0f";
+        }
+
+        return GetGeneratedFloatText(f_fieldData.DefaultMaxValueText);
     }
 
     /// <summary>
@@ -144,6 +236,26 @@ public partial class CSED_CreateTools
             string variableName = CreateGeneratedVariableName(fieldData.FieldName, i);
             string typeName = GetGeneratedFieldTypeName(fieldData);
             string defaultValue = GetGeneratedDefaultValueText(fieldData);
+
+            if (IsGeneratedSingleMinMaxField(fieldData))
+            {
+                string minVariableName = CreateGeneratedMinVariableName(variableName);
+                string maxVariableName = CreateGeneratedMaxVariableName(variableName);
+
+                f_builder.AppendLine("    /// <summary>");
+                f_builder.AppendLine("    /// " + minVariableName + "です。");
+                f_builder.AppendLine("    /// </summary>");
+                f_builder.AppendLine("    private " + typeName + " " + minVariableName + " = " + GetGeneratedMinDefaultValueText(fieldData) + ";");
+                f_builder.AppendLine();
+
+                f_builder.AppendLine("    /// <summary>");
+                f_builder.AppendLine("    /// " + maxVariableName + "です。");
+                f_builder.AppendLine("    /// </summary>");
+                f_builder.AppendLine("    private " + typeName + " " + maxVariableName + " = " + GetGeneratedMaxDefaultValueText(fieldData) + ";");
+                f_builder.AppendLine();
+
+                continue;
+            }
 
             f_builder.AppendLine("    /// <summary>");
             f_builder.AppendLine("    /// " + variableName + "です。");
@@ -198,6 +310,12 @@ public partial class CSED_CreateTools
         string f_variableName,
         string f_labelName)
     {
+        if (f_fieldData.FieldLayoutType == CSE_CreateTools_FieldLayoutType.MinMaxField)
+        {
+            AppendGeneratedMinMaxFieldOnGui(f_builder, f_fieldData, f_variableName, f_labelName);
+            return;
+        }
+
         if (f_fieldData.FieldLayoutType == CSE_CreateTools_FieldLayoutType.Slider)
         {
             AppendGeneratedSliderOnGui(f_builder, f_fieldData, f_variableName, f_labelName);
@@ -224,6 +342,59 @@ public partial class CSED_CreateTools
         }
 
         AppendGeneratedInputFieldOnGui(f_builder, f_fieldData, f_variableName, f_labelName);
+    }
+
+    /// <summary>
+    /// MinMaxFieldのOnGUI描画処理を追加します。
+    /// </summary>
+    /// <param name="f_builder">StringBuilder</param>
+    /// <param name="f_fieldData">FieldData</param>
+    /// <param name="f_variableName">変数名</param>
+    /// <param name="f_labelName">表示名</param>
+    private void AppendGeneratedMinMaxFieldOnGui(
+        StringBuilder f_builder,
+        CSED_CreateTools_FieldData f_fieldData,
+        string f_variableName,
+        string f_labelName)
+    {
+        string minVariableName = CreateGeneratedMinVariableName(f_variableName);
+        string maxVariableName = CreateGeneratedMaxVariableName(f_variableName);
+
+        f_builder.AppendLine("        {");
+        f_builder.AppendLine("            Rect minMaxRowRect = EditorGUILayout.GetControlRect(false, EditorGUIUtility.singleLineHeight);");
+        f_builder.AppendLine();
+        f_builder.AppendLine("            float minMaxMainLabelWidth = 120.0f;");
+        f_builder.AppendLine("            float minMaxSmallLabelWidth = 28.0f;");
+        f_builder.AppendLine("            float minMaxSpacing = 6.0f;");
+        f_builder.AppendLine();
+        f_builder.AppendLine("            float minMaxValueAreaX = minMaxRowRect.x + minMaxMainLabelWidth + minMaxSpacing;");
+        f_builder.AppendLine("            float minMaxValueAreaWidth = minMaxRowRect.width - minMaxMainLabelWidth - minMaxSpacing;");
+        f_builder.AppendLine("            float minMaxFieldWidth = (minMaxValueAreaWidth - minMaxSmallLabelWidth - minMaxSmallLabelWidth - (minMaxSpacing * 3.0f)) * 0.5f;");
+        f_builder.AppendLine("            minMaxFieldWidth = Mathf.Max(35.0f, minMaxFieldWidth);");
+        f_builder.AppendLine();
+        f_builder.AppendLine("            Rect minMaxLabelRect = new Rect(minMaxRowRect.x, minMaxRowRect.y, minMaxMainLabelWidth, minMaxRowRect.height);");
+        f_builder.AppendLine("            Rect minLabelRect = new Rect(minMaxValueAreaX, minMaxRowRect.y, minMaxSmallLabelWidth, minMaxRowRect.height);");
+        f_builder.AppendLine("            Rect minValueRect = new Rect(minLabelRect.xMax + minMaxSpacing, minMaxRowRect.y, minMaxFieldWidth, minMaxRowRect.height);");
+        f_builder.AppendLine("            Rect maxLabelRect = new Rect(minValueRect.xMax + minMaxSpacing, minMaxRowRect.y, minMaxSmallLabelWidth, minMaxRowRect.height);");
+        f_builder.AppendLine("            Rect maxValueRect = new Rect(maxLabelRect.xMax + minMaxSpacing, minMaxRowRect.y, minMaxFieldWidth, minMaxRowRect.height);");
+        f_builder.AppendLine();
+        f_builder.AppendLine("            EditorGUI.LabelField(minMaxLabelRect, \"" + EscapeString(f_labelName) + "\");");
+        f_builder.AppendLine("            EditorGUI.LabelField(minLabelRect, \"Min\");");
+
+        if (f_fieldData.FieldType == CSE_CreateTools_FieldType.Int)
+        {
+            f_builder.AppendLine("            " + minVariableName + " = EditorGUI.IntField(minValueRect, " + minVariableName + ");");
+            f_builder.AppendLine("            EditorGUI.LabelField(maxLabelRect, \"Max\");");
+            f_builder.AppendLine("            " + maxVariableName + " = EditorGUI.IntField(maxValueRect, " + maxVariableName + ");");
+        }
+        else
+        {
+            f_builder.AppendLine("            " + minVariableName + " = EditorGUI.FloatField(minValueRect, " + minVariableName + ");");
+            f_builder.AppendLine("            EditorGUI.LabelField(maxLabelRect, \"Max\");");
+            f_builder.AppendLine("            " + maxVariableName + " = EditorGUI.FloatField(maxValueRect, " + maxVariableName + ");");
+        }
+
+        f_builder.AppendLine("        }");
     }
 
     /// <summary>
@@ -1290,6 +1461,17 @@ public partial class CSED_CreateTools
             CSED_CreateTools_FieldData fieldData = m_FieldDataList[i];
 
             string variableName = CreateGeneratedVariableName(fieldData.FieldName, i);
+
+            if (IsGeneratedSingleMinMaxField(fieldData))
+            {
+                string minVariableName = CreateGeneratedMinVariableName(variableName);
+                string maxVariableName = CreateGeneratedMaxVariableName(variableName);
+
+                f_builder.AppendLine("        " + f_assetVariableName + "." + minVariableName + " = " + minVariableName + ";");
+                f_builder.AppendLine("        " + f_assetVariableName + "." + maxVariableName + " = " + maxVariableName + ";");
+
+                continue;
+            }
 
             if (fieldData.FieldType == CSE_CreateTools_FieldType.List)
             {

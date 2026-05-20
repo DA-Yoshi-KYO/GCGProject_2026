@@ -77,6 +77,26 @@ public partial class CSED_CreateTools
             string typeName = GetGeneratedFieldTypeName(fieldData);
             string variableName = CreateGeneratedVariableName(fieldData.FieldName, i);
 
+            if (IsGeneratedSingleMinMaxField(fieldData))
+            {
+                string minVariableName = CreateGeneratedMinVariableName(variableName);
+                string maxVariableName = CreateGeneratedMaxVariableName(variableName);
+
+                f_builder.AppendLine("    /// <summary>");
+                f_builder.AppendLine("    /// " + minVariableName + "です。");
+                f_builder.AppendLine("    /// </summary>");
+                f_builder.AppendLine("    public " + typeName + " " + minVariableName + ";");
+                f_builder.AppendLine();
+
+                f_builder.AppendLine("    /// <summary>");
+                f_builder.AppendLine("    /// " + maxVariableName + "です。");
+                f_builder.AppendLine("    /// </summary>");
+                f_builder.AppendLine("    public " + typeName + " " + maxVariableName + ";");
+                f_builder.AppendLine();
+
+                continue;
+            }
+
             f_builder.AppendLine("    /// <summary>");
             f_builder.AppendLine("    /// " + variableName + "です。");
             f_builder.AppendLine("    /// </summary>");

@@ -1,7 +1,7 @@
 ﻿/*
 +=====================================
  ファイル名 : CSS_Gimmic.cs
- 概要     : CreateToolsから自動生成されたScriptableObjectデータ
+ 概要     : ギミック
  作者     : ヨシモト リョウ
  履歴     : 2026/05/20 CreateToolsから自動生成
 =====================================+
@@ -19,18 +19,18 @@ public class CSS_Gimmic : ScriptableObject
     public string s_gimmickName;
 
     /// <summary>
-    /// f_rangeXです。
+    /// n_gimmickRangeXです。
     /// </summary>
-    public float f_rangeX;
+    public int n_gimmickRangeX;
 
     /// <summary>
-    /// f_rangeYです。
+    /// n_gimmickRangeYです。
     /// </summary>
-    public float f_rangeY;
+    public int n_gimmickRangeY;
 
     /// <summary>
     /// n_gimmickDamegです。
     /// </summary>
-    public float n_gimmickDameg;
+    public int n_gimmickDameg;
 
 }
