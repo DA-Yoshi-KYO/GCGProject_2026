@@ -71,8 +71,11 @@ public class RockGimmick : GimmickBase
             isFirstActive = false;
             Vector2Int directionVec = GetDirectionVec();
 
-            initPositionY = transform.position.y;
+            initPositionY = transform.position.y + debugIdleOffset;
             velocity = Vector3.zero;
+
+            CS_PlayerAction playerAction = GameObject.FindObjectOfType<CS_PlayerAction>();
+            playerAction.SettingGimmickDirection(this);
         }
 
         // =========================
@@ -126,10 +129,12 @@ public class RockGimmick : GimmickBase
             {//X+
                 velocity = Vector3.left * rollSpeed;
             }
-            transform.position += velocity * Time.deltaTime;
-            //！！デバッグ用応急処置！！//
-            transform.position = new Vector3(transform.position.x, transform.position.y + debugIdleOffset, transform.position.z);
-
+            if (hit.collider.CompareTag("Plane") || hit.collider.CompareTag("Untagged"))
+            {
+                transform.position += velocity * Time.deltaTime;
+                //！！デバッグ用応急処置！！//
+                transform.position = new Vector3(transform.position.x, transform.position.y + debugIdleOffset, transform.position.z);
+            }
             //---------------
             // 壁判定
             // XZ方向にレイを飛ばす
@@ -143,7 +148,10 @@ public class RockGimmick : GimmickBase
             {//レイが当たったら角度をチェック
                 if (HitBrokeAngle(check, velocity, slopeAngleLimit))
                 {//当たった面が一定値以上の斜面なら
-                    gimmickState = GimmickState.Broken;
+                    if (hit.collider.CompareTag("Plane") || hit.collider.CompareTag("Untagged"))
+                    {
+                        gimmickState = GimmickState.Broken;
+                    }
                 }
             }
         }
