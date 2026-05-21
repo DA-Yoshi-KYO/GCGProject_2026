@@ -19,14 +19,25 @@ public class CS_PlayerAction : MonoBehaviour
 {
     [SerializeField] private int initSoul = 5;//初期のソウルの数
     [SerializeField] private float switchInteract = 1f;//ギミックの起動へ切り替る為に必要な長押しの時間
+    [SerializeField] private GameObject interactField = null;//インタラクトの範囲を示すフィールド
+    [SerializeField] private float interactSpeed = 1f;//インタラクトの速度(interactSpeed秒で範囲が1になる)
+    [System.Serializable]
+    public struct InteractSyllinder
+    {
+        public float radius;
+        public float height;
+    }
+    [SerializeField] private InteractSyllinder interactMin = new InteractSyllinder { radius = 3f, height = 3f };//インタラクトの範囲の最小値
+    [SerializeField] private InteractSyllinder interactMax = new InteractSyllinder { radius = 5f, height = 5f };//インタラクトの範囲の最大値
     [HideInInspector] public int currentSoul { private set; get; } = 0;//現在のソウルの数
     [HideInInspector] public int currentGimmickIndex { private set; get; } = 0;//現在選択しているギミック
 
     public List<GameObject> gimmickKind;//所持しているギミックの種類
     
     private PlayerData playerData;
-    GameObject interactObject = null;
     float interactTime = 0.0f;
+    Vector3 interactScale = Vector3.zero;
+    bool isInteracting = false;
 
     Vector3 settingPos = Vector3.zero;  // 設置予定場所
 
@@ -45,6 +56,8 @@ public class CS_PlayerAction : MonoBehaviour
         playerData.customInputAction.Player.Interact.canceled += OnInteract;
 
         playerData.customInputAction.Player.InteractCancel.started += OnCancel;
+
+        interactField.GetComponent<Renderer>().enabled = false;
     }
 
     // Update is called once per frame
@@ -52,57 +65,22 @@ public class CS_PlayerAction : MonoBehaviour
     {
         settingPos = CalculateGimmickSetPosition();
 
-        //モードの切り替え
-        // TODO: 長押しで範囲内のギミックの起動を行うように修正
-        if (interactObject != null)
+        if (isInteracting)
         {
-            if (playerData.customInputAction.Player.Interact.triggered)
+            interactTime += Time.deltaTime * interactSpeed;
+            // インタラクト範囲の拡大
+            if (interactTime >= switchInteract)
             {
-                //ギミックの情報を取得
-                GimmickBase gimmick = interactObject.GetComponent<GimmickBase>();
-                if ((gimmick.gimmickState != GimmickState.Idle)) return;
-
-                // インタラクト方向を設定※ギミックとの位置関係で判定（対角線で四分割：三角形×4）
-                Vector3 gimmickPos = gimmick.transform.position;
-                Vector3 toPlayer = transform.position - gimmickPos;
-                float dx = toPlayer.x;
-                float dz = toPlayer.z;
-
-                // 三角形境界は z = ±x なので絶対値で比較する
-                float adx = Mathf.Abs(dx);
-                float adz = Mathf.Abs(dz);
-                const float eps = 1e-5f; // 同値判定の小さな余裕
-
-                if (dz > adx + eps)
-                {
-                    // プレイヤーがギミックの「前（+Z）側の三角形」：Up
-                    gimmick.SetGimmickDirection(GimmickDirection.Up);
-                }
-                else if (-dz > adx + eps)
-                {
-                    // プレイヤーがギミックの「後（-Z）側の三角形」：Down
-                    gimmick.SetGimmickDirection(GimmickDirection.Down);
-                }
-                else if (dx > adz + eps)
-                {
-                    // プレイヤーがギミックの「右（+X）側の三角形」：Right
-                    gimmick.SetGimmickDirection(GimmickDirection.Right);
-                }
-                else if (-dx > adz + eps)
-                {
-                    // プレイヤーがギミックの「左（-X）側の三角形」：Left
-                    gimmick.SetGimmickDirection(GimmickDirection.Left);
-                }
-                else
-                {
-                    // 厳密な境界上（対角線上）に居る場合のフォールバック：
-                    // X/Z の絶対値で優勢側を使う（斜め真正面は Z 優先）
-                    if (adz >= adx) gimmick.SetGimmickDirection(dz >= 0f ? GimmickDirection.Up : GimmickDirection.Down);
-                    else gimmick.SetGimmickDirection(dx >= 0f ? GimmickDirection.Right : GimmickDirection.Left);
-                }
-                //ギミックをアクティブにする
-                Debug.Log($"ギミック：" + interactObject.name + "がアクティブになりました");
-                gimmick.ActivateGimmick();
+                interactScale.x = Mathf.Max(interactTime - switchInteract, 0f) + interactMin.radius;
+                interactScale.y = Mathf.Max(interactTime - switchInteract, 0f) + interactMin.height;
+                interactScale.z = Mathf.Max(interactTime - switchInteract, 0f) + interactMin.radius;
+                interactScale.x = Mathf.Min(interactScale.x, interactMax.radius);
+                interactScale.y = Mathf.Min(interactScale.y, interactMax.height);
+                interactScale.z = Mathf.Min(interactScale.z, interactMax.radius);
+                interactField.transform.localScale = interactScale;
+                Vector3 interactPos = transform.position;
+                interactPos.y += interactScale.y * 0.5f; // フィールドが地面に接するように位置を調整
+                interactField.transform.position = interactPos;
             }
         }
 
@@ -128,10 +106,18 @@ public class CS_PlayerAction : MonoBehaviour
 
     private void OnInteract(InputAction.CallbackContext context)
     {
-        if (context.started) interactTime = 0.0f;
-        else if (context.performed) interactTime += Time.deltaTime;
+        Debug.Log("Interact: " + context.phase);
+        if (context.started)
+        {
+            interactTime = 0.0f;
+            interactField.GetComponent<Renderer>().enabled = true;
+            
+            interactField.transform.localScale = Vector3.zero;
+            isInteracting = true;
+        }
         else if (context.canceled)
         {
+            isInteracting = false;
             if (interactTime < switchInteract)
             {
                 // 短押しは設置の処理を行う
@@ -151,6 +137,70 @@ public class CS_PlayerAction : MonoBehaviour
             else
             {
                 // 長押しはギミックの起動を行う
+                interactField.GetComponent<Renderer>().enabled = false;
+                Collider[] hits = Physics.OverlapSphere(
+                    interactField.transform.position,
+                    interactScale.x * 0.5f
+                );
+                foreach (Collider hit in hits)
+                {
+                    //ギミックの情報を取得
+                    Vector3 pos = hit.transform.position;
+
+                    float y = Mathf.Abs(pos.y - interactField.transform.position.y);
+
+                    // 球と高さを使うことで疑似的に円柱の当たり判定にする
+                    if (y > interactScale.y * 0.5f)
+                    {
+                        continue;
+                    }
+
+                    GimmickBase gimmick = hit.GetComponent<GimmickBase>();
+                    if (gimmick == null) continue;
+                    if (gimmick.gimmickState != GimmickState.Idle) continue;
+
+                    // インタラクト方向を設定※ギミックとの位置関係で判定（対角線で四分割：三角形×4）
+                    Vector3 gimmickPos = gimmick.transform.position;
+                    Vector3 toPlayer = transform.position - gimmickPos;
+                    float dx = toPlayer.x;
+                    float dz = toPlayer.z;
+
+                    // 三角形境界は z = ±x なので絶対値で比較する
+                    float adx = Mathf.Abs(dx);
+                    float adz = Mathf.Abs(dz);
+                    const float eps = 1e-5f; // 同値判定の小さな余裕
+
+                    if (dz > adx + eps)
+                    {
+                        // プレイヤーがギミックの「前（+Z）側の三角形」：Up
+                        gimmick.SetGimmickDirection(GimmickDirection.Up);
+                    }
+                    else if (-dz > adx + eps)
+                    {
+                        // プレイヤーがギミックの「後（-Z）側の三角形」：Down
+                        gimmick.SetGimmickDirection(GimmickDirection.Down);
+                    }
+                    else if (dx > adz + eps)
+                    {
+                        // プレイヤーがギミックの「右（+X）側の三角形」：Right
+                        gimmick.SetGimmickDirection(GimmickDirection.Right);
+                    }
+                    else if (-dx > adz + eps)
+                    {
+                        // プレイヤーがギミックの「左（-X）側の三角形」：Left
+                        gimmick.SetGimmickDirection(GimmickDirection.Left);
+                    }
+                    else
+                    {
+                        // 厳密な境界上（対角線上）に居る場合のフォールバック：
+                        // X/Z の絶対値で優勢側を使う（斜め真正面は Z 優先）
+                        if (adz >= adx) gimmick.SetGimmickDirection(dz >= 0f ? GimmickDirection.Up : GimmickDirection.Down);
+                        else gimmick.SetGimmickDirection(dx >= 0f ? GimmickDirection.Right : GimmickDirection.Left);
+                    }
+                    //ギミックをアクティブにする
+                    Debug.Log($"ギミック：" + hit.name + "がアクティブになりました");
+                    gimmick.ActivateGimmick();
+                }
             }
         }
 
@@ -410,18 +460,6 @@ public class CS_PlayerAction : MonoBehaviour
         currentSoul += addnum;
     }
 
-    private void OnTriggerStay(Collider other)
-    {
-        //接触している
-        if (other.gameObject.CompareTag("Gimmick"))
-        {
-            GimmickBase gimmick = other.gameObject.GetComponent<GimmickBase>();
-            if ((gimmick.gimmickState != GimmickState.Idle)) return;
-
-            interactObject = other.gameObject;
-        }
-    }
-
     void DebugCommand()
     {
         if (Input.GetKey(KeyCode.LeftShift))
@@ -433,14 +471,6 @@ public class CS_PlayerAction : MonoBehaviour
                     currentSoul = initSoul;
                 }
             }
-        }
-    }
-
-    private void OnTriggerExit(Collider collision)
-    {
-        if (collision.gameObject.CompareTag("Gimmick"))
-        {
-            interactObject = null;
         }
     }
 }

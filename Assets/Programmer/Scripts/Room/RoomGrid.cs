@@ -203,7 +203,6 @@ public class RoomGrid : MonoBehaviour
         GameObject hitObject = null;
         foreach(var hitItem in hits)
         {
-            Debug.Log(hitItem.transform.gameObject.name);
             if (hitItem.transform.CompareTag("Player")) continue;
             if (hitItem.transform.CompareTag("Thief")) continue;
 
@@ -211,7 +210,6 @@ public class RoomGrid : MonoBehaviour
             break;
         }
 
-        Debug.Log(hitObject.name);
         spawnPos.y = hitObject.transform.position.y;
         if (!hitObject.name.Contains("Floor")) spawnPos.y += hitObject.transform.localScale.y * 0.5f;
         GameObject gimmickObject = Instantiate(gimmick.gameObject, spawnPos, Quaternion.identity);
