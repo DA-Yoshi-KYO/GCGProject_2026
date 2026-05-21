@@ -47,4 +47,9 @@ public class CSS_ThiefCommonStatusData : ScriptableObject
     [Header("泥棒のリアクションUI用スプライトリスト")]
     [Tooltip("泥棒のリアクションUI用スプライトリスト")]
     public List<Sprite> reactionUISprites;
+
+    [Header("DangerZone")]
+    [Tooltip("罠発動で生成される DangerZone の残存時間(秒)")]
+    [Min(0)]
+    public float dangerZoneDuration =5f;
 }

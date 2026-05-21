@@ -134,6 +134,13 @@ public class ThiefAI : MonoBehaviour
     [Tooltip("移動ルート")]
     private List<Transform> moveRoute;
 
+    [Header("DangerZone Avoidance")]
+    [SerializeField, Tooltip("DangerZone を考慮して移動するためのコンポーネント。未設定なら同一GameObjectから取得")]
+    private SmartNavAgent smartNavAgent;
+
+    [SerializeField, Tooltip("この泥棒が回避する DangerZone の zoneID 一覧")]
+    private List<int> avoidZoneIDs = new List<int>();
+
 
     // 泥棒の耐久力と移動速度を設定するメソッド
     public void Setting(CSS_ThiefStatusData typedata, CSS_ThiefCommonStatusData data, float playerSpeed, RoomNode entryRoom, Transform entryPoint)
@@ -173,8 +180,15 @@ public class ThiefAI : MonoBehaviour
 
         // ナビメッシュエージェントの速度を設定
         navMeshAgent = GetComponent<NavMeshAgent>();
-        navMeshAgent.baseOffset = 1.0f; // キャラクターの高さに合わせてオフセットを設定
+        navMeshAgent.baseOffset =1.0f; // キャラクターの高さに合わせてオフセットを設定
         navMeshAgent.speed = this.walkSpeed;
+
+        // SmartNavAgent を初期化（存在すれば DangerZone 回避を有効化）
+        if (smartNavAgent == null) smartNavAgent = GetComponent<SmartNavAgent>();
+        if (smartNavAgent != null)
+        {
+            smartNavAgent.SetAvoidZoneIDs(avoidZoneIDs);
+        }
 
         // リジットボディの設定
         Rigidbody rb = GetComponent<Rigidbody>();
@@ -257,7 +271,7 @@ public class ThiefAI : MonoBehaviour
             int distanceToPlayer = (int)Vector3.Distance(transform.position, currentTarget.transform.position);
             if (distanceToPlayer <= visionSensor.viewDistance)
             {
-                navMeshAgent.SetDestination(currentTarget.transform.position);
+                MoveTo(currentTarget.transform.position);
             }
             else
             {
@@ -338,7 +352,7 @@ public class ThiefAI : MonoBehaviour
                 // 現在の探索対象が他者にも探索されているオブジェクトである場合は、探索対象をリセットして、次の探索対象を決定する
                 if (visionTargetMemories[((VisionTarget)currentTarget)].searchThief != null && visionTargetMemories[((VisionTarget)currentTarget)].searchThief != this.gameObject)
                 {
-                    Debug.Log("【" + this.gameObject.name + "】Explore: 探索対象 " + currentTarget.name + " は" + ((VisionTarget)currentTarget).searchThief.gameObject.name + "が探索しているため、探索対象をリセットします。");
+                    //Debug.Log("【" + this.gameObject.name + "】Explore: 探索対象 " + currentTarget.name + " は" + ((VisionTarget)currentTarget).searchThief.gameObject.name + "が探索しているため、探索対象をリセットします。");
 
 
                     currentTarget = null;
@@ -396,7 +410,7 @@ public class ThiefAI : MonoBehaviour
         else
         {
             // 探索対象に向かって移動
-            navMeshAgent.SetDestination(currentTarget.transform.position);
+            MoveTo(currentTarget.transform.position);
 
             // 探索対象に十分近づいたら、次の探索対象を決定
             if (Vector3.Distance(transform.position, currentTarget.transform.position) < 2.0f)
@@ -479,7 +493,7 @@ public class ThiefAI : MonoBehaviour
         if (!isNextRoomMovePointDecided)
         {
             navMeshAgent.isStopped = false;
-            navMeshAgent.SetDestination(door.position);
+            MoveTo(door.position);
         }
     }
 
@@ -581,6 +595,13 @@ public class ThiefAI : MonoBehaviour
                     currentTarget = target;
                 }
 
+                // 次の部屋に移動するためのポイントが設定されている場合は、削除する
+                if (nextRoomMovePoint != null)
+                {
+                    nextRoomMovePoint = null;
+                    isNextRoomMovePointDecided = false;
+                }
+
                 continue;
             }
 
@@ -594,13 +615,6 @@ public class ThiefAI : MonoBehaviour
 
         // 新たに視認したオブジェクトを記憶に保存した後、探索対象を決定する処理を追加する
         if (isNewObjectRecognized) DecideTarget();
-
-        // 次の部屋に移動するためのポイントが設定されている場合は、削除する
-        if (nextRoomMovePoint != null)
-        {
-            nextRoomMovePoint = null;
-            isNextRoomMovePointDecided = false;
-        }
     }
 
     /// <summary>
@@ -843,7 +857,7 @@ public class ThiefAI : MonoBehaviour
         }
 
         // 探索対象に向かって移動
-        navMeshAgent.SetDestination(currentTarget.transform.position);
+        MoveTo(currentTarget.transform.position);
     }
 
     /// <summary>
@@ -1025,8 +1039,21 @@ public class ThiefAI : MonoBehaviour
             {
                 if (i == randomIndex) continue;
 
+                // 重複確認
+                foreach (var unchosenDoor in roomMemories[currentRoom].unchosenDoors)
+                {
+                    if (connectDirs[i] == unchosenDoor)
+                    {
+                        // すでに記憶している選択しなかった方向のドアの場合は、重複して記憶しないようにスキップする
+                        continue;
+                    }
+                }
+
                 roomMemories[currentRoom].unchosenDoors.Add(connectDirs[i]);
             }
+
+            // 選択した方向にあるドアの位置を次の移動ポイントに設定
+            nextRoomMovePoint = currentRoom.GetDirectionWallToDoor(connectDirs[randomIndex]);
         }
         else
         {
@@ -1063,10 +1090,6 @@ public class ThiefAI : MonoBehaviour
             // ドアの位置を最終目的位置としてルートを構築
             ConstructionRoute(targetDoorPos);
         }
-
-
-        // 選択した方向にあるドアの位置を次の移動ポイントに設定
-        nextRoomMovePoint = currentRoom.GetDirectionWallToDoor(connectDirs[randomIndex]);
     }
 
     /// <summary>
@@ -1402,7 +1425,7 @@ public class ThiefAI : MonoBehaviour
         }
 
         // start -> goal の順になるように reverseして moveRouteへ設定
-        for (int i = reversedDoors.Count -1 ; i >=0 ; i--)
+        for (int i = reversedDoors.Count - 1 ; i >= 0 ; i--)
         {
             moveRoute.Add(reversedDoors[i]);
         }
@@ -1411,7 +1434,7 @@ public class ThiefAI : MonoBehaviour
         if (end != null)
         {
             // 二重追加を避ける（既に末尾がendなら追加しない）
-            if (moveRoute.Count ==0 || moveRoute[moveRoute.Count -1] != end)
+            if (moveRoute.Count == 0 || moveRoute[moveRoute.Count - 1] != end)
             {
                 moveRoute.Add(end);
             }
@@ -1548,5 +1571,36 @@ public class ThiefAI : MonoBehaviour
     {
         if (a == null || b == null) return 0f;
         return Vector3.Distance(a.transform.position, b.transform.position);
+    }
+
+    /// <summary>
+    /// 移動要求を統一する。SmartNavAgent がある場合は DangerZone を考慮して移動する。
+    /// </summary>
+    private void MoveTo(Vector3 destination)
+    {
+        if (smartNavAgent != null)
+        {
+            smartNavAgent.MoveTo(destination);
+        }
+        else if (navMeshAgent != null)
+        {
+            navMeshAgent.SetDestination(destination);
+        }
+    }
+
+    /// <summary>
+    ///罠発動などで「この泥棒が回避する DangerZone」を動的に追加する。
+    /// </summary>
+    public void AddAvoidZoneID(int zoneID)
+    {
+        if (avoidZoneIDs == null) avoidZoneIDs = new List<int>();
+        if (!avoidZoneIDs.Contains(zoneID)) avoidZoneIDs.Add(zoneID);
+
+        // SmartNavAgent がある場合は即時反映
+        if (smartNavAgent == null) smartNavAgent = GetComponent<SmartNavAgent>();
+        if (smartNavAgent != null)
+        {
+            smartNavAgent.SetAvoidZoneIDs(avoidZoneIDs);
+        }
     }
 }
