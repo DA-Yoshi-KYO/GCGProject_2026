@@ -4,6 +4,7 @@
  *    元浪梨緒
  * ----------------------------------------------------------
  * 2026-05-17 | 初回作成
+ * 2026-05-20 | 音源の追加
  */
 
 using System;
@@ -13,6 +14,9 @@ public enum BackGrondSECueName
 {
     Cusor,
     Decision,
+    Cancel,
+    WinJingle,
+    LoseJingle,
 };
 
 [Serializable]
