@@ -13,10 +13,12 @@
  */
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class CS_PlayerAction : MonoBehaviour
 {
     [SerializeField] private int initSoul = 5;//初期のソウルの数
+    [SerializeField] private float switchInteract = 1f;//ギミックの起動へ切り替る為に必要な長押しの時間
     [HideInInspector] public int currentSoul { private set; get; } = 0;//現在のソウルの数
     [HideInInspector] public int currentGimmickIndex { private set; get; } = 0;//現在選択しているギミック
 
@@ -24,6 +26,7 @@ public class CS_PlayerAction : MonoBehaviour
     
     private PlayerData playerData;
     GameObject interactObject = null;
+    float interactTime = 0.0f;
 
     Vector3 settingPos = Vector3.zero;  // 設置予定場所
 
@@ -32,61 +35,26 @@ public class CS_PlayerAction : MonoBehaviour
     {
         //現在のソウルの数
         currentSoul = initSoul;
+        playerData = GetComponent<PlayerData>();
+
+        // インプットアクションの登録
+        playerData.customInputAction.Player.GimmickChange.started += OnSelect;
+
+        playerData.customInputAction.Player.Interact.started += OnInteract;
+        playerData.customInputAction.Player.Interact.performed += OnInteract;
+        playerData.customInputAction.Player.Interact.canceled += OnInteract;
+
+        playerData.customInputAction.Player.InteractCancel.started += OnCancel;
     }
 
     // Update is called once per frame
     void Update()
     {
-        playerData = GetComponent<PlayerData>();
         settingPos = CalculateGimmickSetPosition();
 
-        //キー操作でUIのギミックの選択
-        if (playerData.customInputAction.Player.GimmickChangeRight.triggered)
-        {
-            currentGimmickIndex++;
-
-            if (currentGimmickIndex >= gimmickKind.Count)
-                currentGimmickIndex = 0;
-
-            Debug.Log("現在選択中のギミック：" + gimmickKind[currentGimmickIndex].name);
-        }
-        else if(playerData.customInputAction.Player.GimmickChangeLeft.triggered)
-        {
-            currentGimmickIndex--;
-
-            if (currentGimmickIndex < 0)
-                currentGimmickIndex = gimmickKind.Count - 1;
-
-            Debug.Log("現在選択中のギミック：" + gimmickKind[currentGimmickIndex].name);
-        }
-
-
         //モードの切り替え
-        if (interactObject == null)
-        {
-            if (playerData.customInputAction.Player.Interact.triggered)
-            {
-                switch (playerData.currentMode)
-                {
-                    case PlayerData.PlayerMode.Normal:
-                        playerData.currentMode = PlayerData.PlayerMode.Setting;
-                        break;
-                    case PlayerData.PlayerMode.Setting:
-                        SettingAction();
-                        playerData.currentMode = PlayerData.PlayerMode.Normal;
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            //設置モードのキャンセル
-            if (playerData.customInputAction.Player.InteractCancel.triggered)
-            {
-                playerData.currentMode = PlayerData.PlayerMode.Normal;
-            }
-        }
-        else
+        // TODO: 長押しで範囲内のギミックの起動を行うように修正
+        if (interactObject != null)
         {
             if (playerData.customInputAction.Player.Interact.triggered)
             {
@@ -144,6 +112,54 @@ public class CS_PlayerAction : MonoBehaviour
         // ソウル数などのデバッグコマンド
         DebugCommand();
 #endif
+    }
+
+    private void OnSelect(InputAction.CallbackContext context)
+    {
+        float contextValue = context.ReadValue<float>();
+
+        //キー操作でUIのギミックの選択
+        if (contextValue == 1) currentGimmickIndex++;
+        else if (contextValue == -1) currentGimmickIndex--;
+        currentGimmickIndex = (currentGimmickIndex % gimmickKind.Count + gimmickKind.Count) % gimmickKind.Count;
+
+        Debug.Log("現在選択中のギミック：" + gimmickKind[currentGimmickIndex].name);
+    }
+
+    private void OnInteract(InputAction.CallbackContext context)
+    {
+        if (context.started) interactTime = 0.0f;
+        else if (context.performed) interactTime += Time.deltaTime;
+        else if (context.canceled)
+        {
+            if (interactTime < switchInteract)
+            {
+                // 短押しは設置の処理を行う
+                switch (playerData.currentMode)
+                {
+                    case PlayerData.PlayerMode.Normal:
+                        playerData.currentMode = PlayerData.PlayerMode.Setting;
+                        break;
+                    case PlayerData.PlayerMode.Setting:
+                        SettingAction();
+                        playerData.currentMode = PlayerData.PlayerMode.Normal;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            else
+            {
+                // 長押しはギミックの起動を行う
+            }
+        }
+
+    }
+
+    private void OnCancel(InputAction.CallbackContext context)
+    {
+        // キャンセル操作があった場合、現在のモードをノーマルに戻す
+        playerData.currentMode = PlayerData.PlayerMode.Normal;
     }
 
     private void SettingAction()

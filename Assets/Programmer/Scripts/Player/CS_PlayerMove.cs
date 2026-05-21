@@ -7,6 +7,7 @@
  * 
  */
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class CS_PlayerMove : MonoBehaviour
 {
@@ -19,6 +20,7 @@ public class CS_PlayerMove : MonoBehaviour
     [Header("加速度")][SerializeField] private float accelartion = 10;//加速度
 
     private CharacterController controller;
+    private Vector2 inputDirection = Vector2.zero;
     private Vector3 velocity = Vector3.zero;
     private Rigidbody rb;
     private PlayerData playerData;  // プレイヤーのデータ
@@ -27,6 +29,7 @@ public class CS_PlayerMove : MonoBehaviour
     private float rotateSpeed = 10.0f;//回転のスピード
     private float adjustControllerSpeed = 1;//移動スピードの補正
     private bool isJumping = false;
+    private bool isSneaking = false;
 
     private float audioTime = 100.0f;
 
@@ -41,6 +44,17 @@ public class CS_PlayerMove : MonoBehaviour
         controller = GetComponent<CharacterController>();
 
         playSE3D = GameObject.Find("3DSE").GetComponent<CS_3DPlaySE>();
+
+        // インプットアクションの登録
+        playerData.customInputAction.Player.Move.started += OnMove;
+        playerData.customInputAction.Player.Move.performed += OnMove;
+        playerData.customInputAction.Player.Move.canceled += OnMove;
+
+        playerData.customInputAction.Player.Jump.started += OnJumo;
+
+        playerData.customInputAction.Player.Sneak.started += OnSneak;
+        playerData.customInputAction.Player.Sneak.performed += OnSneak;
+        playerData.customInputAction.Player.Sneak.canceled += OnSneak;
     }
 
     void Update()
@@ -52,24 +66,8 @@ public class CS_PlayerMove : MonoBehaviour
     {
         if (Time.timeScale == 0) return;
 
-        bool isSneaking = playerData.customInputAction.Player.Sneak.IsPressed();
-
-        float h = 0.0f;
-        float v = 0.0f;
-
-        if (playerData.customInputAction.Player.MoveForward.IsPressed())
-        {
-            v = 1.0f;
-        }
-        else if (playerData.customInputAction.Player.MoveBack.IsPressed())
-        {
-            v = -1.0f;
-        }
-        if (playerData.customInputAction.Player.MoveRight.IsPressed()) h = 1.0f;
-        else if (playerData.customInputAction.Player.MoveLeft.IsPressed()) h = -1.0f;
-
         //移動の足音の処理
-        if(v != 0.0f || h != 0.0f)
+        if(inputDirection.x != 0.0f || inputDirection.y != 0.0f)
         {
             if (playSE3D.GetAudioLength("PlayerWalkNormal") < audioTime)
             {
@@ -88,8 +86,8 @@ public class CS_PlayerMove : MonoBehaviour
         float speed = (moveAmount * adjustControllerSpeed) * (isSneaking ? velocitySneak : velocityWalk);
 
         // 入力を成分ごとに分解
-        Vector3 forwardMove = cameraForward * (v * speed);
-        Vector3 rightMove = cameraRight * (h * speed);
+        Vector3 forwardMove = cameraForward * (inputDirection.y * speed);
+        Vector3 rightMove = cameraRight * (inputDirection.x * speed);
 
         Vector3 horizontalMove;
 
@@ -121,15 +119,6 @@ public class CS_PlayerMove : MonoBehaviour
             isJumping = false;
         }
 
-        // ジャンプ開始
-        if (Input.GetKeyDown(KeyCode.Space) && controller.isGrounded)
-        {
-            velocity.y = Mathf.Sqrt(
-                (jumpAmount * adjustControllerSpeed) * -2f * gravity);
-
-            isJumping = true;
-        }
-
         // 上昇終了
         if (isJumping && velocity.y <= 0)
         {
@@ -157,31 +146,6 @@ public class CS_PlayerMove : MonoBehaviour
         return moveAmount * velocityWalk;
     }
    
-    private bool CheckDownGround(Vector3 dir, float length)
-    {
-        Vector3 checkPos = transform.position + dir * length;
-
-        checkPos.y += 0.1f;
-
-        RaycastHit hit;
-        bool hasGround = Physics.Raycast(
-            checkPos,
-            Vector3.down,
-            out hit,
-            255f,
-            ~0,
-            QueryTriggerInteraction.Ignore);
-        
-        
-        bool isDown = transform.position.y - hit.point.y > 0.6f;
-        Debug.DrawRay(
-            checkPos,
-            Vector3.down * 255f,
-            isDown ? Color.green : Color.red);
-
-        return isDown;
-    }
-
     private Vector3 ResolveSneakMove(Vector3 forwardMove, Vector3 rightMove)
     {
         Vector3 accepted = Vector3.zero;
@@ -240,4 +204,23 @@ public class CS_PlayerMove : MonoBehaviour
         return hasGround;
     }
 
+    private void OnMove(InputAction.CallbackContext context)
+    {
+        inputDirection = context.ReadValue<Vector2>();
+    }
+
+    private void OnJumo(InputAction.CallbackContext context)
+    {
+        if (controller.isGrounded)
+        {
+            velocity.y = jumpAmount;
+            isJumping = true;
+        }
+    }
+
+    private void OnSneak(InputAction.CallbackContext context)
+    {
+        if (context.canceled) isSneaking = false;
+        else isSneaking = true;
+    }
 }
