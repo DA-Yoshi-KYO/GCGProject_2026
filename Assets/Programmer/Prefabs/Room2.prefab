@@ -490,8 +490,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5f329b7558a39c4fa1657932571bdef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  initPos: {x: 0, y: 0, z: 0}
-  initRotate: {x: 0, y: 0, z: 0, w: 0}
   moveAmountLimit: {x: 1, y: 0, z: 3}
 --- !u!1 &975860319341583218
 GameObject:
@@ -929,6 +927,9 @@ MonoBehaviour:
   targetType: 1
   explorationValue: 25
   exploredDistanceThreshold: 2
+  showGizmos: 0
+  gizmoColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  searchThief: {fileID: 0}
 --- !u!1 &1336120936815881944
 GameObject:
   m_ObjectHideFlags: 0
@@ -2070,6 +2071,9 @@ MonoBehaviour:
   - {fileID: 7144002024808906324}
   isListDown: 0
   wallParent: {fileID: 5949731453789947978}
+  initialExplorationLevel: 0
+  showGizmos: 0
+  gizmoColor: {r: 0, g: 1, b: 0, a: 1}
 --- !u!114 &5182794933244888468
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2293,6 +2297,9 @@ MonoBehaviour:
   targetType: 1
   explorationValue: 25
   exploredDistanceThreshold: 2
+  showGizmos: 0
+  gizmoColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  searchThief: {fileID: 0}
 --- !u!1 &3742999284937551594
 GameObject:
   m_ObjectHideFlags: 0
@@ -2532,6 +2539,9 @@ MonoBehaviour:
   targetType: 1
   explorationValue: 25
   exploredDistanceThreshold: 2
+  showGizmos: 0
+  gizmoColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  searchThief: {fileID: 0}
 --- !u!1 &3801901823359002202
 GameObject:
   m_ObjectHideFlags: 0
@@ -3736,6 +3746,9 @@ MonoBehaviour:
   targetType: 1
   explorationValue: 25
   exploredDistanceThreshold: 2
+  showGizmos: 0
+  gizmoColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  searchThief: {fileID: 0}
 --- !u!1 &7514203087035846732
 GameObject:
   m_ObjectHideFlags: 0
