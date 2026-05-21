@@ -35,6 +35,15 @@ public class RockGimmick : GimmickBase
     [SerializeField]
     private float rollSpeed = 0.6f;       // 平面の転がり速度
 
+    [Header("DangerZone")]
+    [SerializeField, Tooltip("破壊時に生成する DangerZone prefab")]
+    private DangerZone dangerZonePrefab;
+
+    [SerializeField, Tooltip("泥棒のLayer。未設定なら全レイヤー")]
+    private LayerMask thiefLayer;
+
+    private bool isDangerZoneSpawned;
+
     //デバッグ用！！！！
     Vector3 startPos;
     bool isStart = false;
@@ -204,6 +213,25 @@ public class RockGimmick : GimmickBase
     protected override void BrokenUpdate()
     {
         DeleteHitChecker();
+
+        //破壊時に1回だけ生成
+        if (!isDangerZoneSpawned)
+        {
+            isDangerZoneSpawned = true;
+
+            if (dangerZonePrefab != null)
+            {
+                CSS_ThiefCommonStatusData common = null;
+                var thiefManager = GameObject.FindObjectOfType<ThiefManager>();
+                if (thiefManager != null) common = thiefManager.GetThiefCommonDB();
+
+                DangerZoneSpawner.SpawnAndRegisterFromGimmick(dangerZonePrefab, transform.position, this, common, thiefLayer);
+            }
+            else
+            {
+                Debug.LogWarning("RockGimmick: dangerZonePrefab が未設定です。", this);
+            }
+        }
 
         if (checker != null)
             Destroy(checker);
