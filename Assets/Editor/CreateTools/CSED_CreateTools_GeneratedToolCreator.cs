@@ -204,7 +204,7 @@ public partial class CSED_CreateTools
 
                 AppendIdentifierErrorMessage(
                     errorMessageBuilder,
-                    "Field " + (i + 1).ToString() + " Variable Name",
+                    "Field " + (i + 1).ToString() + " 変数名",
                     fieldData.FieldName);
             }
         }
@@ -217,7 +217,7 @@ public partial class CSED_CreateTools
         EditorUtility.DisplayDialog(
             "Create Editor Tool Error",
             "生成できない名前が含まれています。\n\n"
-            + "Editor Class / Data Class / Variable Name には、\n"
+            + "Editor Class / Data Class / 変数名 には、\n"
             + "半角英字・半角数字・アンダースコアのみ使用できます。\n"
             + "また、先頭に数字は使用できません。\n\n"
             + errorMessageBuilder.ToString(),

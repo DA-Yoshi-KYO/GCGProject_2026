@@ -43,8 +43,6 @@ public class CSED_CreateTools_GeneratedEditorsWindow : EditorWindow
     /// </summary>
     private void OnGUI()
     {
-        EditorGUILayout.LabelField("Generated Editors", EditorStyles.boldLabel);
-
         GUILayout.Space(8.0f);
 
         CSS_CreateToolsGeneratedEditorList editorList =

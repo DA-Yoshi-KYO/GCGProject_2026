@@ -1,4 +1,4 @@
-﻿#if UNITY_EDITOR
+#if UNITY_EDITOR
 #pragma warning disable CS0162
 #pragma warning disable CS0067
 #pragma warning disable CS0649

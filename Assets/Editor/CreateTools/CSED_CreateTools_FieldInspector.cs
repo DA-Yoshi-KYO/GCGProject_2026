@@ -419,7 +419,7 @@ public partial class CSED_CreateTools
         CSE_CreateTools_FieldType beforeFieldType = f_fieldData.FieldType;
 
         f_fieldData.FieldType = DrawSmallFieldTypePopup(
-            "  Variable Type",
+            "  変数",
             f_fieldData.FieldType);
 
         if (beforeFieldType != f_fieldData.FieldType)
@@ -455,7 +455,7 @@ public partial class CSED_CreateTools
         GUILayout.Space(c_FieldInspectorRowSpacing);
 
         f_fieldData.FieldName = DrawSmallTextField(
-            "  Variable Name",
+            "  変数名",
             f_fieldData.FieldName);
 
         GUILayout.Space(c_FieldInspectorRowSpacing);
@@ -463,7 +463,7 @@ public partial class CSED_CreateTools
         NormalizeFieldLayoutType(f_fieldData);
 
         f_fieldData.FieldLayoutType = DrawSmallAllowedFieldLayoutTypePopup(
-            "  Layout",
+            "  表示方法",
             f_fieldData);
 
         if (f_fieldData.FieldLayoutType == CSE_CreateTools_FieldLayoutType.InputField)

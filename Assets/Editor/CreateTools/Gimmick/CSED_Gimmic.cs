@@ -92,10 +92,10 @@ public class CSED_Gimmic : EditorWindow, IHasCustomMenu
         s_gimmickName = EditorGUILayout.TextField("ギミック名", s_gimmickName);
         GUILayout.Space(6.0f);
 
-        n_gimmickRangeX = EditorGUILayout.IntSlider("ギミック範囲X", n_gimmickRangeX, 0, 0);
+        n_gimmickRangeX = EditorGUILayout.IntSlider("ギミック範囲X", n_gimmickRangeX, 1, 10);
         GUILayout.Space(6.0f);
 
-        n_gimmickRangeY = EditorGUILayout.IntSlider("ギミック範囲Y", n_gimmickRangeY, 0, 0);
+        n_gimmickRangeY = EditorGUILayout.IntSlider("ギミック範囲Y", n_gimmickRangeY, 1, 10);
         GUILayout.Space(6.0f);
 
         n_gimmickDameg = EditorGUILayout.IntField("ギミックダメージ", n_gimmickDameg);
