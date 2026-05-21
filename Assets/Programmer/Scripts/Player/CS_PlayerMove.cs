@@ -51,6 +51,10 @@ public class CS_PlayerMove : MonoBehaviour
         playerData.customInputAction.Player.Move.canceled += OnMove;
 
         playerData.customInputAction.Player.Jump.started += OnJumo;
+
+        playerData.customInputAction.Player.Sneak.started += OnSneak;
+        playerData.customInputAction.Player.Sneak.performed += OnSneak;
+        playerData.customInputAction.Player.Sneak.canceled += OnSneak;
     }
 
     void Update()
@@ -142,31 +146,6 @@ public class CS_PlayerMove : MonoBehaviour
         return moveAmount * velocityWalk;
     }
    
-    private bool CheckDownGround(Vector3 dir, float length)
-    {
-        Vector3 checkPos = transform.position + dir * length;
-
-        checkPos.y += 0.1f;
-
-        RaycastHit hit;
-        bool hasGround = Physics.Raycast(
-            checkPos,
-            Vector3.down,
-            out hit,
-            255f,
-            ~0,
-            QueryTriggerInteraction.Ignore);
-        
-        
-        bool isDown = transform.position.y - hit.point.y > 0.6f;
-        Debug.DrawRay(
-            checkPos,
-            Vector3.down * 255f,
-            isDown ? Color.green : Color.red);
-
-        return isDown;
-    }
-
     private Vector3 ResolveSneakMove(Vector3 forwardMove, Vector3 rightMove)
     {
         Vector3 accepted = Vector3.zero;
@@ -241,6 +220,7 @@ public class CS_PlayerMove : MonoBehaviour
 
     private void OnSneak(InputAction.CallbackContext context)
     {
-        isSneaking = playerData.customInputAction.Player.Sneak.IsPressed();
+        if (context.canceled) isSneaking = false;
+        else isSneaking = true;
     }
 }
