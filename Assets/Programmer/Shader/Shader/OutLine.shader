@@ -11,8 +11,8 @@ Shader "Custom/Outline"
         Tags
         {
             "RenderPipeline"="UniversalPipeline"
-            "RenderType"="Opaque"
-            "Queue"="Geometry"
+            "RenderType"="Transparent"
+            "Queue"="Transparent"
         }
 
         Pass
@@ -20,11 +20,11 @@ Shader "Custom/Outline"
             Name "Outline"
 
             Cull Front
-            ZWrite On
+            ZWrite Off
             ZTest LEqual
+            Blend SrcAlpha OneMinusSrcAlpha
 
             HLSLPROGRAM
-
             #pragma vertex vert
             #pragma fragment frag
 
