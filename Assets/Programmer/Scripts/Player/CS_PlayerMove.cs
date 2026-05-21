@@ -7,6 +7,7 @@
  * 
  */
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class CS_PlayerMove : MonoBehaviour
 {
@@ -19,6 +20,7 @@ public class CS_PlayerMove : MonoBehaviour
     [Header("加速度")][SerializeField] private float accelartion = 10;//加速度
 
     private CharacterController controller;
+    private Vector2 inputDirection = Vector2.zero;
     private Vector3 velocity = Vector3.zero;
     private Rigidbody rb;
     private PlayerData playerData;  // プレイヤーのデータ
@@ -27,6 +29,7 @@ public class CS_PlayerMove : MonoBehaviour
     private float rotateSpeed = 10.0f;//回転のスピード
     private float adjustControllerSpeed = 1;//移動スピードの補正
     private bool isJumping = false;
+    private bool isSneaking = false;
 
     private float audioTime = 100.0f;
 
@@ -41,6 +44,13 @@ public class CS_PlayerMove : MonoBehaviour
         controller = GetComponent<CharacterController>();
 
         playSE3D = GameObject.Find("3DSE").GetComponent<CS_3DPlaySE>();
+
+        // インプットアクションの登録
+        playerData.customInputAction.Player.Move.started += OnMove;
+        playerData.customInputAction.Player.Move.performed += OnMove;
+        playerData.customInputAction.Player.Move.canceled += OnMove;
+
+        playerData.customInputAction.Player.Jump.started += OnJumo;
     }
 
     void Update()
@@ -52,24 +62,8 @@ public class CS_PlayerMove : MonoBehaviour
     {
         if (Time.timeScale == 0) return;
 
-        bool isSneaking = playerData.customInputAction.Player.Sneak.IsPressed();
-
-        float h = 0.0f;
-        float v = 0.0f;
-
-        if (playerData.customInputAction.Player.MoveForward.IsPressed())
-        {
-            v = 1.0f;
-        }
-        else if (playerData.customInputAction.Player.MoveBack.IsPressed())
-        {
-            v = -1.0f;
-        }
-        if (playerData.customInputAction.Player.MoveRight.IsPressed()) h = 1.0f;
-        else if (playerData.customInputAction.Player.MoveLeft.IsPressed()) h = -1.0f;
-
         //移動の足音の処理
-        if(v != 0.0f || h != 0.0f)
+        if(inputDirection.x != 0.0f || inputDirection.y != 0.0f)
         {
             if (playSE3D.GetAudioLength("PlayerWalkNormal") < audioTime)
             {
@@ -88,8 +82,8 @@ public class CS_PlayerMove : MonoBehaviour
         float speed = (moveAmount * adjustControllerSpeed) * (isSneaking ? velocitySneak : velocityWalk);
 
         // 入力を成分ごとに分解
-        Vector3 forwardMove = cameraForward * (v * speed);
-        Vector3 rightMove = cameraRight * (h * speed);
+        Vector3 forwardMove = cameraForward * (inputDirection.y * speed);
+        Vector3 rightMove = cameraRight * (inputDirection.x * speed);
 
         Vector3 horizontalMove;
 
@@ -119,15 +113,6 @@ public class CS_PlayerMove : MonoBehaviour
         {
             velocity.y = -1f;
             isJumping = false;
-        }
-
-        // ジャンプ開始
-        if (Input.GetKeyDown(KeyCode.Space) && controller.isGrounded)
-        {
-            velocity.y = Mathf.Sqrt(
-                (jumpAmount * adjustControllerSpeed) * -2f * gravity);
-
-            isJumping = true;
         }
 
         // 上昇終了
@@ -240,4 +225,22 @@ public class CS_PlayerMove : MonoBehaviour
         return hasGround;
     }
 
+    private void OnMove(InputAction.CallbackContext context)
+    {
+        inputDirection = context.ReadValue<Vector2>();
+    }
+
+    private void OnJumo(InputAction.CallbackContext context)
+    {
+        if (controller.isGrounded)
+        {
+            velocity.y = jumpAmount;
+            isJumping = true;
+        }
+    }
+
+    private void OnSneak(InputAction.CallbackContext context)
+    {
+        isSneaking = playerData.customInputAction.Player.Sneak.IsPressed();
+    }
 }

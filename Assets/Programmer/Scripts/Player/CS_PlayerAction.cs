@@ -13,6 +13,7 @@
  */
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class CS_PlayerAction : MonoBehaviour
 {
@@ -32,33 +33,19 @@ public class CS_PlayerAction : MonoBehaviour
     {
         //現在のソウルの数
         currentSoul = initSoul;
+        playerData = GetComponent<PlayerData>();
+
+        // インプットアクションの登録
+        playerData.customInputAction.Player.GimmickChange.started += OnSelect;
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        playerData = GetComponent<PlayerData>();
         settingPos = CalculateGimmickSetPosition();
 
-        //キー操作でUIのギミックの選択
-        if (playerData.customInputAction.Player.GimmickChangeRight.triggered)
-        {
-            currentGimmickIndex++;
 
-            if (currentGimmickIndex >= gimmickKind.Count)
-                currentGimmickIndex = 0;
-
-            Debug.Log("現在選択中のギミック：" + gimmickKind[currentGimmickIndex].name);
-        }
-        else if(playerData.customInputAction.Player.GimmickChangeLeft.triggered)
-        {
-            currentGimmickIndex--;
-
-            if (currentGimmickIndex < 0)
-                currentGimmickIndex = gimmickKind.Count - 1;
-
-            Debug.Log("現在選択中のギミック：" + gimmickKind[currentGimmickIndex].name);
-        }
 
 
         //モードの切り替え
@@ -144,6 +131,18 @@ public class CS_PlayerAction : MonoBehaviour
         // ソウル数などのデバッグコマンド
         DebugCommand();
 #endif
+    }
+
+    private void OnSelect(InputAction.CallbackContext context)
+    {
+        float contextValue = context.ReadValue<float>();
+
+        //キー操作でUIのギミックの選択
+        if (contextValue == 1) currentGimmickIndex++;
+        else if (contextValue == -1) currentGimmickIndex--;
+        currentGimmickIndex = (currentGimmickIndex % gimmickKind.Count + gimmickKind.Count) % gimmickKind.Count;
+
+        Debug.Log("現在選択中のギミック：" + gimmickKind[currentGimmickIndex].name);
     }
 
     private void SettingAction()

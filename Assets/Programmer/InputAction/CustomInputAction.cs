@@ -93,42 +93,6 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
             ""id"": ""2ef4cf07-b5a4-40dc-ada3-5d09406f6cb5"",
             ""actions"": [
                 {
-                    ""name"": ""MoveForward"",
-                    ""type"": ""Button"",
-                    ""id"": ""08bda41e-a05e-4908-a1f9-66e2fe59d5a1"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
-                    ""name"": ""MoveBack"",
-                    ""type"": ""Button"",
-                    ""id"": ""f0cee576-5663-4b24-bdec-48aeb2fac3c0"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
-                    ""name"": ""MoveLeft"",
-                    ""type"": ""Button"",
-                    ""id"": ""cc14a822-02ce-4fe4-b717-8e2bee5fc67b"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
-                    ""name"": ""MoveRight"",
-                    ""type"": ""Button"",
-                    ""id"": ""9a44c6e8-1e46-4923-8688-fb8176c2a2f0"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
                     ""name"": ""Sneak"",
                     ""type"": ""Button"",
                     ""id"": ""63c76556-58dd-4d6c-a06d-497a2e24e7ea"",
@@ -156,24 +120,6 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""GimmickChangeLeft"",
-                    ""type"": ""Button"",
-                    ""id"": ""32db36d5-b121-47a6-a902-72fd4699cddb"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
-                    ""name"": ""GimmickChangeRight"",
-                    ""type"": ""Button"",
-                    ""id"": ""f11610e9-720c-49ee-9459-d9fe637a2461"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
                     ""name"": ""Jump"",
                     ""type"": ""Button"",
                     ""id"": ""0a72905c-b9b0-4ead-8068-a685caae1c0e"",
@@ -190,47 +136,32 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Move"",
+                    ""type"": ""Value"",
+                    ""id"": ""e81cb5b0-3054-41fa-8096-36df07f99ab1"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""GimmickChange"",
+                    ""type"": ""Value"",
+                    ""id"": ""a79a562f-1c0e-41c1-8712-12bb47a2fa2b"",
+                    ""expectedControlType"": ""Axis"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
                 {
                     ""name"": """",
-                    ""id"": ""9f5cb62a-979e-48d9-8a8b-dfdfc0186d07"",
-                    ""path"": ""<Keyboard>/s"",
-                    ""interactions"": ""Press"",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""MoveBack"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""c9fced9d-b067-448a-8bfd-3c7c78d279b1"",
-                    ""path"": ""<Keyboard>/a"",
-                    ""interactions"": ""Press"",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""MoveLeft"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""1134129f-b2ea-4fe6-8b38-3db9bdc8e6bc"",
-                    ""path"": ""<Keyboard>/d"",
-                    ""interactions"": ""Press"",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""MoveRight"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
                     ""id"": ""fac054b6-71b6-4639-9a74-f0dd4e10e5ed"",
                     ""path"": ""<Keyboard>/f"",
-                    ""interactions"": ""Tap"",
+                    ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Interact"",
@@ -239,23 +170,12 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""ea087d72-dcc0-4a78-bb1f-867dd9afb2f5"",
-                    ""path"": ""<Keyboard>/leftArrow"",
-                    ""interactions"": ""Tap"",
+                    ""id"": ""a2d4397b-a883-4d69-a586-2a460ca91049"",
+                    ""path"": ""<XInputController>/buttonSouth"",
+                    ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""GimmickChangeLeft"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""26feca9c-fc89-4eed-a18e-5ff6d05c0c7c"",
-                    ""path"": ""<Keyboard>/rightArrow"",
-                    ""interactions"": ""Tap"",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""GimmickChangeRight"",
+                    ""action"": ""Interact"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -263,7 +183,18 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
                     ""name"": """",
                     ""id"": ""f71632f5-df11-48cd-9d25-b406b372e5ab"",
                     ""path"": ""<Keyboard>/space"",
-                    ""interactions"": ""Tap"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Jump"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""5ea0d971-f462-4c4c-8a91-38e4b55e775a"",
+                    ""path"": ""<XInputController>/buttonEast"",
+                    ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Jump"",
@@ -283,12 +214,12 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""197854dc-1fd4-4f5b-bf54-8fb281e92670"",
-                    ""path"": ""<Keyboard>/w"",
-                    ""interactions"": ""Press"",
+                    ""id"": ""84d5adc0-871c-4057-85c6-5d475578614b"",
+                    ""path"": ""<XInputController>/buttonWest"",
+                    ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""MoveForward"",
+                    ""action"": ""InteractCancel"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -296,7 +227,18 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
                     ""name"": """",
                     ""id"": ""2a098889-2046-460e-8e6a-e463aef50f58"",
                     ""path"": ""<Keyboard>/shift"",
-                    ""interactions"": ""Press"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Sneak"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""60bbe99c-9101-49e3-bba2-4c5558c6aa9b"",
+                    ""path"": ""<Gamepad>/leftStickPress"",
+                    ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Sneak"",
@@ -313,6 +255,149 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
                     ""action"": ""Option"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""7a1e28c0-7e0a-44f3-91c9-dac8920c9550"",
+                    ""path"": ""<Gamepad>/start"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Option"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""2D Vector"",
+                    ""id"": ""cd7f2014-67f0-43fd-9368-e99fc76f2972"",
+                    ""path"": ""2DVector"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Move"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""up"",
+                    ""id"": ""88ba8dcd-02a4-4a0d-8fe0-dfc82b3c3dba"",
+                    ""path"": ""<Keyboard>/w"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""down"",
+                    ""id"": ""e103ecbb-1f29-400e-9c47-c43e853eec40"",
+                    ""path"": ""<Keyboard>/s"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""left"",
+                    ""id"": ""e7d9925a-32d5-4e72-aec2-959f49f81769"",
+                    ""path"": ""<Keyboard>/a"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""right"",
+                    ""id"": ""fcaa5432-e6ef-43f0-810b-c368530c4269"",
+                    ""path"": ""<Keyboard>/d"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""6d32da56-64ff-4ff5-8b22-08ce5ed3b9c5"",
+                    ""path"": ""<Gamepad>/leftStick"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""1D Axis"",
+                    ""id"": ""e9abef55-3af6-41f2-84f1-52217035c96e"",
+                    ""path"": ""1DAxis"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""GimmickChange"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""negative"",
+                    ""id"": ""7362ce08-ba33-4235-84fc-554dff0c38d2"",
+                    ""path"": ""<Keyboard>/leftArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""GimmickChange"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""positive"",
+                    ""id"": ""47456f56-a144-4081-9d61-6e243ddb0d5c"",
+                    ""path"": ""<Keyboard>/rightArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""GimmickChange"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""1D Axis"",
+                    ""id"": ""5a79d738-b7c6-49d9-a7af-b15370cdfe34"",
+                    ""path"": ""1DAxis"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""GimmickChange"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""negative"",
+                    ""id"": ""ff809729-590c-4d6f-b5a2-89709b37e752"",
+                    ""path"": ""<Gamepad>/dpad/left"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""GimmickChange"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""positive"",
+                    ""id"": ""6db76db4-feba-4c3b-a295-efdaadc7b6c8"",
+                    ""path"": ""<Gamepad>/dpad/right"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""GimmickChange"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
                 }
             ]
         },
@@ -523,17 +608,13 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
 }");
         // Player
         m_Player = asset.FindActionMap("Player", throwIfNotFound: true);
-        m_Player_MoveForward = m_Player.FindAction("MoveForward", throwIfNotFound: true);
-        m_Player_MoveBack = m_Player.FindAction("MoveBack", throwIfNotFound: true);
-        m_Player_MoveLeft = m_Player.FindAction("MoveLeft", throwIfNotFound: true);
-        m_Player_MoveRight = m_Player.FindAction("MoveRight", throwIfNotFound: true);
         m_Player_Sneak = m_Player.FindAction("Sneak", throwIfNotFound: true);
         m_Player_Interact = m_Player.FindAction("Interact", throwIfNotFound: true);
         m_Player_InteractCancel = m_Player.FindAction("InteractCancel", throwIfNotFound: true);
-        m_Player_GimmickChangeLeft = m_Player.FindAction("GimmickChangeLeft", throwIfNotFound: true);
-        m_Player_GimmickChangeRight = m_Player.FindAction("GimmickChangeRight", throwIfNotFound: true);
         m_Player_Jump = m_Player.FindAction("Jump", throwIfNotFound: true);
         m_Player_Option = m_Player.FindAction("Option", throwIfNotFound: true);
+        m_Player_Move = m_Player.FindAction("Move", throwIfNotFound: true);
+        m_Player_GimmickChange = m_Player.FindAction("GimmickChange", throwIfNotFound: true);
         // SelectBar
         m_SelectBar = asset.FindActionMap("SelectBar", throwIfNotFound: true);
         m_SelectBar_MoveUp = m_SelectBar.FindAction("MoveUp", throwIfNotFound: true);
@@ -626,17 +707,13 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
     // Player
     private readonly InputActionMap m_Player;
     private List<IPlayerActions> m_PlayerActionsCallbackInterfaces = new List<IPlayerActions>();
-    private readonly InputAction m_Player_MoveForward;
-    private readonly InputAction m_Player_MoveBack;
-    private readonly InputAction m_Player_MoveLeft;
-    private readonly InputAction m_Player_MoveRight;
     private readonly InputAction m_Player_Sneak;
     private readonly InputAction m_Player_Interact;
     private readonly InputAction m_Player_InteractCancel;
-    private readonly InputAction m_Player_GimmickChangeLeft;
-    private readonly InputAction m_Player_GimmickChangeRight;
     private readonly InputAction m_Player_Jump;
     private readonly InputAction m_Player_Option;
+    private readonly InputAction m_Player_Move;
+    private readonly InputAction m_Player_GimmickChange;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
     /// </summary>
@@ -648,22 +725,6 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
         /// Construct a new instance of the input action map wrapper class.
         /// </summary>
         public PlayerActions(@CustomInputAction wrapper) { m_Wrapper = wrapper; }
-        /// <summary>
-        /// Provides access to the underlying input action "Player/MoveForward".
-        /// </summary>
-        public InputAction @MoveForward => m_Wrapper.m_Player_MoveForward;
-        /// <summary>
-        /// Provides access to the underlying input action "Player/MoveBack".
-        /// </summary>
-        public InputAction @MoveBack => m_Wrapper.m_Player_MoveBack;
-        /// <summary>
-        /// Provides access to the underlying input action "Player/MoveLeft".
-        /// </summary>
-        public InputAction @MoveLeft => m_Wrapper.m_Player_MoveLeft;
-        /// <summary>
-        /// Provides access to the underlying input action "Player/MoveRight".
-        /// </summary>
-        public InputAction @MoveRight => m_Wrapper.m_Player_MoveRight;
         /// <summary>
         /// Provides access to the underlying input action "Player/Sneak".
         /// </summary>
@@ -677,14 +738,6 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
         /// </summary>
         public InputAction @InteractCancel => m_Wrapper.m_Player_InteractCancel;
         /// <summary>
-        /// Provides access to the underlying input action "Player/GimmickChangeLeft".
-        /// </summary>
-        public InputAction @GimmickChangeLeft => m_Wrapper.m_Player_GimmickChangeLeft;
-        /// <summary>
-        /// Provides access to the underlying input action "Player/GimmickChangeRight".
-        /// </summary>
-        public InputAction @GimmickChangeRight => m_Wrapper.m_Player_GimmickChangeRight;
-        /// <summary>
         /// Provides access to the underlying input action "Player/Jump".
         /// </summary>
         public InputAction @Jump => m_Wrapper.m_Player_Jump;
@@ -692,6 +745,14 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Player/Option".
         /// </summary>
         public InputAction @Option => m_Wrapper.m_Player_Option;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/Move".
+        /// </summary>
+        public InputAction @Move => m_Wrapper.m_Player_Move;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/GimmickChange".
+        /// </summary>
+        public InputAction @GimmickChange => m_Wrapper.m_Player_GimmickChange;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -718,18 +779,6 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
         {
             if (instance == null || m_Wrapper.m_PlayerActionsCallbackInterfaces.Contains(instance)) return;
             m_Wrapper.m_PlayerActionsCallbackInterfaces.Add(instance);
-            @MoveForward.started += instance.OnMoveForward;
-            @MoveForward.performed += instance.OnMoveForward;
-            @MoveForward.canceled += instance.OnMoveForward;
-            @MoveBack.started += instance.OnMoveBack;
-            @MoveBack.performed += instance.OnMoveBack;
-            @MoveBack.canceled += instance.OnMoveBack;
-            @MoveLeft.started += instance.OnMoveLeft;
-            @MoveLeft.performed += instance.OnMoveLeft;
-            @MoveLeft.canceled += instance.OnMoveLeft;
-            @MoveRight.started += instance.OnMoveRight;
-            @MoveRight.performed += instance.OnMoveRight;
-            @MoveRight.canceled += instance.OnMoveRight;
             @Sneak.started += instance.OnSneak;
             @Sneak.performed += instance.OnSneak;
             @Sneak.canceled += instance.OnSneak;
@@ -739,18 +788,18 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
             @InteractCancel.started += instance.OnInteractCancel;
             @InteractCancel.performed += instance.OnInteractCancel;
             @InteractCancel.canceled += instance.OnInteractCancel;
-            @GimmickChangeLeft.started += instance.OnGimmickChangeLeft;
-            @GimmickChangeLeft.performed += instance.OnGimmickChangeLeft;
-            @GimmickChangeLeft.canceled += instance.OnGimmickChangeLeft;
-            @GimmickChangeRight.started += instance.OnGimmickChangeRight;
-            @GimmickChangeRight.performed += instance.OnGimmickChangeRight;
-            @GimmickChangeRight.canceled += instance.OnGimmickChangeRight;
             @Jump.started += instance.OnJump;
             @Jump.performed += instance.OnJump;
             @Jump.canceled += instance.OnJump;
             @Option.started += instance.OnOption;
             @Option.performed += instance.OnOption;
             @Option.canceled += instance.OnOption;
+            @Move.started += instance.OnMove;
+            @Move.performed += instance.OnMove;
+            @Move.canceled += instance.OnMove;
+            @GimmickChange.started += instance.OnGimmickChange;
+            @GimmickChange.performed += instance.OnGimmickChange;
+            @GimmickChange.canceled += instance.OnGimmickChange;
         }
 
         /// <summary>
@@ -762,18 +811,6 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
         /// <seealso cref="PlayerActions" />
         private void UnregisterCallbacks(IPlayerActions instance)
         {
-            @MoveForward.started -= instance.OnMoveForward;
-            @MoveForward.performed -= instance.OnMoveForward;
-            @MoveForward.canceled -= instance.OnMoveForward;
-            @MoveBack.started -= instance.OnMoveBack;
-            @MoveBack.performed -= instance.OnMoveBack;
-            @MoveBack.canceled -= instance.OnMoveBack;
-            @MoveLeft.started -= instance.OnMoveLeft;
-            @MoveLeft.performed -= instance.OnMoveLeft;
-            @MoveLeft.canceled -= instance.OnMoveLeft;
-            @MoveRight.started -= instance.OnMoveRight;
-            @MoveRight.performed -= instance.OnMoveRight;
-            @MoveRight.canceled -= instance.OnMoveRight;
             @Sneak.started -= instance.OnSneak;
             @Sneak.performed -= instance.OnSneak;
             @Sneak.canceled -= instance.OnSneak;
@@ -783,18 +820,18 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
             @InteractCancel.started -= instance.OnInteractCancel;
             @InteractCancel.performed -= instance.OnInteractCancel;
             @InteractCancel.canceled -= instance.OnInteractCancel;
-            @GimmickChangeLeft.started -= instance.OnGimmickChangeLeft;
-            @GimmickChangeLeft.performed -= instance.OnGimmickChangeLeft;
-            @GimmickChangeLeft.canceled -= instance.OnGimmickChangeLeft;
-            @GimmickChangeRight.started -= instance.OnGimmickChangeRight;
-            @GimmickChangeRight.performed -= instance.OnGimmickChangeRight;
-            @GimmickChangeRight.canceled -= instance.OnGimmickChangeRight;
             @Jump.started -= instance.OnJump;
             @Jump.performed -= instance.OnJump;
             @Jump.canceled -= instance.OnJump;
             @Option.started -= instance.OnOption;
             @Option.performed -= instance.OnOption;
             @Option.canceled -= instance.OnOption;
+            @Move.started -= instance.OnMove;
+            @Move.performed -= instance.OnMove;
+            @Move.canceled -= instance.OnMove;
+            @GimmickChange.started -= instance.OnGimmickChange;
+            @GimmickChange.performed -= instance.OnGimmickChange;
+            @GimmickChange.canceled -= instance.OnGimmickChange;
         }
 
         /// <summary>
@@ -1072,34 +1109,6 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
     public interface IPlayerActions
     {
         /// <summary>
-        /// Method invoked when associated input action "MoveForward" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
-        /// </summary>
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnMoveForward(InputAction.CallbackContext context);
-        /// <summary>
-        /// Method invoked when associated input action "MoveBack" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
-        /// </summary>
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnMoveBack(InputAction.CallbackContext context);
-        /// <summary>
-        /// Method invoked when associated input action "MoveLeft" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
-        /// </summary>
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnMoveLeft(InputAction.CallbackContext context);
-        /// <summary>
-        /// Method invoked when associated input action "MoveRight" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
-        /// </summary>
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnMoveRight(InputAction.CallbackContext context);
-        /// <summary>
         /// Method invoked when associated input action "Sneak" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
         /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
@@ -1121,20 +1130,6 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnInteractCancel(InputAction.CallbackContext context);
         /// <summary>
-        /// Method invoked when associated input action "GimmickChangeLeft" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
-        /// </summary>
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnGimmickChangeLeft(InputAction.CallbackContext context);
-        /// <summary>
-        /// Method invoked when associated input action "GimmickChangeRight" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
-        /// </summary>
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnGimmickChangeRight(InputAction.CallbackContext context);
-        /// <summary>
         /// Method invoked when associated input action "Jump" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
         /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
@@ -1148,6 +1143,20 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnOption(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Move" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnMove(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "GimmickChange" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnGimmickChange(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "SelectBar" which allows adding and removing callbacks.
