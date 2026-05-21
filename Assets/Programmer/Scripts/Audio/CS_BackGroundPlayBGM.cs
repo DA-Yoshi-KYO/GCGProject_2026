@@ -19,6 +19,8 @@ public class CS_BackGroundPlayBGM : MonoBehaviour
 
     private string currentScene;//現在のシーン
 
+    private float maxVolume = 0.0f;
+
     private void Awake()
     {
         //現在のシーン更新
@@ -50,11 +52,24 @@ public class CS_BackGroundPlayBGM : MonoBehaviour
             if (currentScene == dataBase.bgmDatas[i].sceneName.ToString())
             {
                 playerInfo.SetCue(criAtomExAcbsList[0], dataBase.bgmDatas[i].cueName.ToString());
-                playerInfo.SetVolume(dataBase.bgmDatas[i].volume);
+                maxVolume = dataBase.bgmDatas[i].volume;
                 playerInfo.Loop(true);
                 playerInfo.Prepare();
                 playerInfo.Start();
             }
         }
     }
+
+    public void BGMFadeOut(float time, float fadeDuration)
+    {
+        float volume = Mathf.Lerp(maxVolume, 0.0f, time / fadeDuration);
+        CriAtom.SetCategoryVolume("CategoryBGM", volume);
+    }
+
+    public void BGMFadeIn(float time, float fadeDuration)
+    {
+        float volume = Mathf.Lerp(0.0f, maxVolume, time / fadeDuration);
+        CriAtom.SetCategoryVolume("CategoryBGM", volume);
+    }
+
 }

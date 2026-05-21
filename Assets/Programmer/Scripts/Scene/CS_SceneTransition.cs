@@ -16,15 +16,21 @@ public class CS_SceneTransition : MonoBehaviour
     [Header("フェードにかける時間")][SerializeField] private float fadeDuration = 1.0f;//フェードにかける時間
     private bool transition = false;//遷移したかどうか
 
+    private bool fadeOut = false;//フェードアウトしたかどうか
+
+    private CS_BackGroundPlayBGM backGroundPlayBGM;
+
     // Start is called before the first frame update
     void Start()
     {
         fadeImage = GameObject.Find("Fade").GetComponent<Image>();
+        backGroundPlayBGM = GameObject.Find("BGM").GetComponent<CS_BackGroundPlayBGM>();
 
         fadeImage.color = new Color(fadeImage.color.r, fadeImage.color.g, fadeImage.color.b, 1.0f);
         fadeImage.raycastTarget = false;
 
-        //フェードアウト
+        //フェードイン
+        fadeOut = false;
         StartCoroutine(FadeProcessing(0.0f));
     }
 
@@ -47,7 +53,8 @@ public class CS_SceneTransition : MonoBehaviour
     {
         transition = true;
 
-        //フェードイン
+        //フェードアウト
+        fadeOut = true;
         yield return StartCoroutine(FadeProcessing(1.0f));
 
         //シーンの切り替え
@@ -68,6 +75,15 @@ public class CS_SceneTransition : MonoBehaviour
             time += Time.deltaTime;
             float alpha = Mathf.Lerp(startAlpha, targetAlpha, time / fadeDuration);
             fadeImage.color = new Color(fadeImage.color.r, fadeImage.color.g, fadeImage.color.b, alpha);
+
+            if (fadeOut)
+            {
+                backGroundPlayBGM.BGMFadeOut(time, fadeDuration);
+            }
+            else
+            {
+                backGroundPlayBGM.BGMFadeIn(time, fadeDuration);
+            }
 
             yield return null;
         }
