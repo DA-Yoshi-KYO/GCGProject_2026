@@ -46,6 +46,10 @@ public class CO_ThiefStatusData : ScriptableObject
     [Tooltip("泥棒が倒されたときにドロップするソウルの数"), Min(0)]
     public int soulDropCount;
 
+    [Header("プレイヤーを追跡する時間(秒)")]
+    [Tooltip("泥棒がプレイヤーを追跡する時間(秒)"), Min(0)]
+    public int pursuitTime;
+
     [Header("視界に関する項目")]
     [Tooltip("泥棒の視界の半径"), Min(0)]
     public float viewDistance;

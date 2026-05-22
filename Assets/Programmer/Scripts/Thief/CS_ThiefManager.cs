@@ -62,6 +62,10 @@ public class CS_ThiefManager : MonoBehaviour
             // 出入口から 生成された泥棒の数が最大数に達している場合は、次の出入口の処理に移る
             if (spawnCount.ContainsKey(entry))
             {
+                // NULLチェック
+                if (entry.RoomEnemyEntryData == null) continue;
+                if (entry.RoomEnemyEntryData.GetThiefStatusDataList() == null) continue;
+
                 if (spawnCount[entry] >= entry.RoomEnemyEntryData.GetThiefStatusDataList().Count) continue;
             }
             else spawnCount.Add(entry, 0); // 新しい出入口を辞書に追加
