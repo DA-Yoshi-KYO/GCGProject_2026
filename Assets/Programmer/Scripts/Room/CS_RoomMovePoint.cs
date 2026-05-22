@@ -244,12 +244,12 @@ public class CS_RoomMovePoint : MonoBehaviour
     }
 
     /// <summary>
-    /// CompareTagを使わずにタグ名を確認します。
-    /// 未定義タグ名でも例外を出さないためです。
+    /// CompareTagを使わずにTag Nameを確認します。
+    /// 未定義Tag Nameでも例外を出さないためです。
     /// </summary>
     /// <param name="targetObject">確認対象GameObject。</param>
-    /// <param name="tagName">確認するタグ名。</param>
-    /// <returns>タグ名が一致する場合はtrue。</returns>
+    /// <param name="tagName">確認するTag Name。</param>
+    /// <returns>Tag Nameが一致する場合はtrue。</returns>
     private bool IsTagName(GameObject targetObject, string tagName)
     {
         if (targetObject == null)
