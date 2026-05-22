@@ -43,7 +43,7 @@ public class CS_PlayerMove : MonoBehaviour
         playerCamera = GetComponent<CS_PlayerCamera>();
         controller = GetComponent<CharacterController>();
 
-        playSE3D = GameObject.Find("3DSE").GetComponent<CS_3DPlaySE>();
+        //playSE3D = GameObject.Find("3DSE").GetComponent<CS_3DPlaySE>();
 
         // インプットアクションの登録
         playerData.customInputAction.Player.Move.started += OnMove;
@@ -69,10 +69,13 @@ public class CS_PlayerMove : MonoBehaviour
         //移動の足音の処理
         if(inputDirection.x != 0.0f || inputDirection.y != 0.0f)
         {
-            if (playSE3D.GetAudioLength("PlayerWalkNormal") < audioTime)
+            if (playSE3D)
             {
-                audioTime = 0.0f;
-                playSE3D.PlayOneShotSE("PlayerWalkNormal", transform.position, "Walk", CS_3DPlaySE.SEMode.Normal);
+                if (playSE3D.GetAudioLength("PlayerWalkNormal") < audioTime)
+                {
+                    audioTime = 0.0f;
+                    playSE3D.PlayOneShotSE("PlayerWalkNormal", transform.position, "Walk", CS_3DPlaySE.SEMode.Normal);
+                }
             }
         }
 
