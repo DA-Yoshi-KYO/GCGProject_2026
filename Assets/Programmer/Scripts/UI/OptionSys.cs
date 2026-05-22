@@ -213,8 +213,8 @@ public class OptionSys : MonoBehaviour
 
     public void SetSE(float volume)
     {
-            _option.SetSEVolume(volume);
-            Debug.Log($"SE Volume set to {volume}");
+        _option.SetSEVolume(volume);
+        Debug.Log($"SE Volume set to {volume}");
     }
 
 }

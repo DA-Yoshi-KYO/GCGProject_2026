@@ -33,7 +33,7 @@ public class CS_SelectBarMove : MonoBehaviour
         //現在選択しているボタンの移動処理
         if(inputActions.SelectBar.MoveUp.triggered)
         {
-            backGroundPlaySE.PlaySE("SelectBar");
+            backGroundPlaySE.PlaySE("Cusor");
             currentButton--;
             if(currentButton < 0)
             {
@@ -43,7 +43,7 @@ public class CS_SelectBarMove : MonoBehaviour
 
         if(inputActions.SelectBar.MoveDown.triggered)
         {
-            backGroundPlaySE.PlaySE("SelectBar");
+            backGroundPlaySE.PlaySE("Cusor");
             currentButton++;
             if(currentButton >= buttonList.Length)
             {
@@ -67,8 +67,10 @@ public class CS_SelectBarMove : MonoBehaviour
             {
                 case 0:
                     sceneName = "StageSelectScene";
+                    GetComponent<CS_SceneTransition>().StartSceneTransition(sceneName);
                     break;
                 case 1:
+                    Option.Instance.OpenOptionUI();
                     break;
                 case 2:
 #if UNITY_EDITOR
@@ -78,7 +80,6 @@ public class CS_SelectBarMove : MonoBehaviour
 #endif
                     break;
             }
-            GetComponent<CS_SceneTransition>().StartSceneTransition(sceneName);
         }
     }
 
