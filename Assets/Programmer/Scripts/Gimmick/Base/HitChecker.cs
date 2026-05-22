@@ -24,6 +24,9 @@ public class HitChecker : MonoBehaviour
     private Gimmick gimmick;
     GameObject parentGameObject;
 
+    // 既にダメージを与えた敵を保存
+    private HashSet<GameObject> damagedEnemies = new HashSet<GameObject>();
+
     /// <summary>
     /// 当たり判定の処理をループさせるかどうか
     /// </summary>
@@ -111,19 +114,31 @@ public class HitChecker : MonoBehaviour
     /// <param name="damage"></param>
     private void EnemyDame(GameObject enemy, int damage)
     {
-        ThiefAI thiefAI = enemy.GetComponent<ThiefAI>();
+        // =====================================================
+        // 一度ダメージを与えた敵には再度当てない
+        // =====================================================
+        if (damagedEnemies.Contains(enemy))
+        {
+            return;
+        }
+
+        CS_ThiefAI thiefAI = enemy.GetComponent<CS_ThiefAI>();
+
         if (thiefAI != null)
         {
-            thiefAI.TakeDamage(effectDamage, gimmick);
+            thiefAI.TakeDamage(damage, gimmick);
+
+            // ダメージ済み登録
+            damagedEnemies.Add(enemy);
         }
     }
 
     private void EnemyCharm(GameObject enemy)
     {
-        ThiefAI thiefAI = enemy.GetComponent<ThiefAI>();
+        CS_ThiefAI thiefAI = enemy.GetComponent<CS_ThiefAI>();
         if (thiefAI != null)
         {
-            TrapTarget trapTarget = parentGameObject.GetComponent<TrapTarget>();
+            CS_TrapTarget trapTarget = parentGameObject.GetComponent<CS_TrapTarget>();
             if (trapTarget != null)
             {
                 thiefAI.SetTarget(trapTarget);
@@ -132,63 +147,80 @@ public class HitChecker : MonoBehaviour
     }
     private void FixedUpdate()
     {
-        if(firstUpdate || isLoop)
+        if (firstUpdate || isLoop)
         {
             firstUpdate = false;
 
-            Collider[] hitEnemies = GetHitEnemies();
-            Collider[] effectEnemies = GetEffectEnemies();
+            Collider[] hitEnemies =
+                GetHitEnemies();
 
+            Collider[] effectEnemies =
+                GetEffectEnemies();
 
-            for(int i = 0; i < effectEnemies.Length; i++)
+            // =====================================================
+            // 効果範囲
+            // =====================================================
+            for (int i = 0 ; i < effectEnemies.Length ; i++)
             {
-                for(int j = 0; j < hitEnemies.Length; j++)
+                bool isHitEnemy = false;
+
+                // hitEnemies に含まれているか確認
+                for (int j = 0 ; j < hitEnemies.Length ; j++)
                 {
-                    // 効果範囲内のみの敵に対する処理
-                    if (effectEnemies[i] != hitEnemies[j])
+                    if (effectEnemies[i] == hitEnemies[j])
                     {
-                        switch(gimmick)
-                        {
-                            case Gimmick.Pot:
-                                EnemyDame(effectEnemies[i].gameObject, effectDamage);
-                                Debug.Log("EffectDamage_Pot");
-                                break;
-                            case Gimmick.IronBall:
-                                EnemyDame(effectEnemies[i].gameObject, effectDamage);
-                                Debug.Log("EffectDamage_IronBall");
-                                break;
-                            case Gimmick.EmptyChest:
-                                EnemyCharm(effectEnemies[i].gameObject);
-                                Debug.Log("EffectCharm");
-                                break;
-                        }
+                        isHitEnemy = true;
+                        break;
+                    }
+                }
+
+                // hit範囲にいない敵のみ
+                if (!isHitEnemy)
+                {
+                    GameObject enemy =
+                        effectEnemies[i].gameObject;
+
+                    switch (gimmick)
+                    {
+                        case Gimmick.Pot:
+                            EnemyDame(enemy, effectDamage);
+                            break;
+                        case Gimmick.IronBall:
+                            EnemyDame(enemy, effectDamage);
+                            break;
+                        case Gimmick.EmptyChest:
+                            EnemyCharm(enemy);
+                            break;
                     }
                 }
             }
 
-            // 命中範囲内の敵に対する処理
+            // =====================================================
+            // 命中範囲
+            // =====================================================
             for (int i = 0 ; i < hitEnemies.Length ; i++)
             {
+
                 GameObject enemy = hitEnemies[i].gameObject;
-                ThiefAI thiefAI = enemy.GetComponent<ThiefAI>();
+                CS_ThiefAI thiefAI = enemy.GetComponent<CS_ThiefAI>();
                 if (thiefAI != null)
                 {
-                    switch(gimmick)
+                    switch (gimmick)
                     {
                         case Gimmick.Pot:
                             EnemyDame(enemy, hitDamage);
-                            Debug.Log("HitDamage_Pot");
                             break;
                         case Gimmick.IronBall:
                             EnemyDame(enemy, hitDamage);
-                            Debug.Log("HitDamage_IronBall");
                             break;
                         case Gimmick.EmptyChest:
                             EnemyCharm(enemy);
-                            EmptyChestGimmick emptyChestGimmick = parentGameObject.GetComponent<EmptyChestGimmick>();
-                            if(emptyChestGimmick != null)
+                            EmptyChestGimmick emptyChestGimmick =
+                                parentGameObject.GetComponent<EmptyChestGimmick>();
+                            if (emptyChestGimmick != null)
                             {
                                 emptyChestGimmick.Durability_Value_Decreased();
+
                                 Debug.Log("Durability decreased");
                             }
                             break;

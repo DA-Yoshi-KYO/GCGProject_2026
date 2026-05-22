@@ -4,11 +4,16 @@
  *    宇留野 陸斗
  * ----------------------------------------------------------
  * 2026-05-21 | 初回作成
+ * 2026-05-22 | ファイル名を変更（DangerZone.cs → CS_DangerZone.cs）
+ *            | クラス名を変更（DangerZone → CS_DangerZone）
  * 
  */
 using UnityEngine;
 
-public sealed class DangerZone : MonoBehaviour
+/// <summary>
+/// 危険地帯クラス
+/// </summary>
+public sealed class CS_DangerZone : MonoBehaviour
 {
     [SerializeField, Tooltip("危険エリア半径")]
     private float radius = 5f;
@@ -25,26 +30,36 @@ public sealed class DangerZone : MonoBehaviour
 
     public Vector3 Position => transform.position;
 
+    [Tooltip("残り時間")]
     private float remaining;
 
+    /// <summary>
+    /// DangerZoneManager に登録。生存時間がある場合は残り時間を初期化。
+    /// </summary>
     private void OnEnable()
     {
-        if (DangerZoneManager.Instance != null)
+        if (CS_DangerZoneManager.Instance != null)
         {
-            DangerZoneManager.Instance.Register(this);
+            CS_DangerZoneManager.Instance.Register(this);
         }
 
         remaining = duration;
     }
 
+    /// <summary>
+    /// DangerZoneManager から登録解除。
+    /// </summary>
     private void OnDisable()
     {
-        if (DangerZoneManager.Instance != null)
+        if (CS_DangerZoneManager.Instance != null)
         {
-            DangerZoneManager.Instance.Unregister(this);
+            CS_DangerZoneManager.Instance.Unregister(this);
         }
     }
 
+    /// <summary>
+    /// 生存時間がある場合は残り時間を減算し、0以下になったら自動で破棄。
+    /// </summary>
     private void Update()
     {
         if (duration <= 0f) return;
@@ -79,6 +94,9 @@ public sealed class DangerZone : MonoBehaviour
         remaining = this.duration;
     }
 
+    /// <summary>
+    /// Gizmosで危険エリアを可視化。選択中でなくても表示。
+    /// </summary>
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.red;

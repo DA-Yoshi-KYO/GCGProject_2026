@@ -4,6 +4,8 @@
  *    宇留野 陸斗
  * ----------------------------------------------------------
  * 2026-05-19 | 初回作成 
+ * 2026-05-22 | ファイル名を変更（ThiefDebugRoomMemoryTab.cs → CSED_ThiefDebugRoomMemoryTab.cs）
+ *            | クラス名を変更（ThiefDebugRoomMemoryTab → CSED_ThiefDebugRoomMemoryTab）
  *　
  */
 using UnityEditor;
@@ -16,27 +18,20 @@ using System.Reflection;
 /// <summary>
 /// 部屋に関する記憶デバック用
 /// </summary>
-internal sealed class ThiefDebugRoomMemoryTab
+internal sealed class CSED_ThiefDebugRoomMemoryTab
 {
-    // =====================================================================
-    // フィールド
-    // =====================================================================
-
-    // 対象（泥棒AIコンポーネント）リスト
+    [Tooltip("対象（泥棒AIコンポーネント）リスト")]
     private readonly List<MonoBehaviour> targets = new List<MonoBehaviour>();
 
-    // targets内の選択中index（-1は未選択）
+    [Tooltip("targets内の選択中index（-1は未選択）")]
     private int selectedTargetIndex = -1;
 
-    //追加用ObjectField
+    [Tooltip("対象追加用のObjectField")]
     private MonoBehaviour addTarget;
 
-    //ルームごとの「詳細表示」を保持（RoomInstanceID -> bool）
+    [Tooltip("ルームごとの「詳細表示」を保持（RoomInstanceID -> bool）")]
     private readonly Dictionary<int, bool> detailToggles = new Dictionary<int, bool>();
 
-    // =====================================================================
-    // メイン描画
-    // =====================================================================
 
     /// <summary>
     /// タブ全体描画
@@ -60,10 +55,6 @@ internal sealed class ThiefDebugRoomMemoryTab
         // 選択中対象のメモリ表示
         DrawRoomMemoriesArea();
     }
-
-    // =====================================================================
-    // 対象リスト UI
-    // =====================================================================
 
     /// <summary>
     /// 対象（泥棒AI）をリストに追加するUI
@@ -105,7 +96,7 @@ internal sealed class ThiefDebugRoomMemoryTab
             if (GUILayout.Button("シーンから泥棒AIを収集"))
             {
                 // 型名から泥棒AI型を探して収集
-                var thiefAiType = FindTypeByName("ThiefAI");
+                var thiefAiType = FindTypeByName("CS_ThiefAI");
                 if (thiefAiType == null)
                 {
                     EditorGUILayout.HelpBox("泥棒AI型が見つかりません。", MessageType.Warning);
@@ -217,10 +208,6 @@ internal sealed class ThiefDebugRoomMemoryTab
         else selectedTargetIndex = Mathf.Clamp(selectedTargetIndex,0, targets.Count -1);
     }
 
-    // =====================================================================
-    // roomMemories 表示
-    // =====================================================================
-
     /// <summary>
     /// 選択中の泥棒AIが保持している roomMemories を一覧表示する
     /// </summary>
@@ -305,9 +292,6 @@ internal sealed class ThiefDebugRoomMemoryTab
                 }
             }
 
-            // =====================================================================
-            //ルーム表示（指定レイアウト寄せ）
-            // =====================================================================
             using (new EditorGUILayout.VerticalScope("box"))
             {
                 // ヘッダー行
@@ -413,10 +397,6 @@ internal sealed class ThiefDebugRoomMemoryTab
 
         return value + "%";
     }
-
-    // =====================================================================
-    // Reflection Helpers
-    // =====================================================================
 
     /// <summary>
     /// 指定名のプロパティ値を取得する

@@ -24,7 +24,7 @@ public class CSS_RoomEnemyEntryData : ScriptableObject
 
     [Header("出現候補の盗賊データ")]
     [SerializeField]
-    private List<CSS_ThiefStatusData> list_ThiefStatusData = new List<CSS_ThiefStatusData>();
+    private List<CO_ThiefStatusData> list_ThiefStatusData = new List<CO_ThiefStatusData>();
 
     /// <summary>
     /// この敵出入口から出現できる敵の最大数を取得します。
@@ -49,7 +49,7 @@ public class CSS_RoomEnemyEntryData : ScriptableObject
     /// 出現候補の盗賊データリストを取得します。
     /// </summary>
     /// <returns>盗賊データリスト。</returns>
-    public IReadOnlyList<CSS_ThiefStatusData> GetThiefStatusDataList()
+    public IReadOnlyList<CO_ThiefStatusData> GetThiefStatusDataList()
     {
         return list_ThiefStatusData;
     }
@@ -73,7 +73,7 @@ public class CSS_RoomEnemyEntryData : ScriptableObject
     /// </summary>
     /// <param name="int_Index">取得したい番号。</param>
     /// <returns>盗賊データ。取得できない場合はnull。</returns>
-    public CSS_ThiefStatusData GetThiefStatusData(int int_Index)
+    public CO_ThiefStatusData GetThiefStatusData(int int_Index)
     {
         if (list_ThiefStatusData == null)
         {

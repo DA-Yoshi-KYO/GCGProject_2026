@@ -17,7 +17,7 @@ using UnityEngine.InputSystem;
 
 public class CS_PlayerAction : MonoBehaviour
 {
-    [SerializeField] private int initSoul = 5;//初期のソウルの数
+    //[SerializeField] private int initSoul = 5;//初期のソウルの数
     [SerializeField] private float switchInteract = 1f;//ギミックの起動へ切り替る為に必要な長押しの時間
     [SerializeField] private GameObject interactField = null;//インタラクトの範囲を示すフィールド
     [SerializeField] private float interactSpeed = 1f;//インタラクトの速度(interactSpeed秒で範囲が1になる)
@@ -45,7 +45,7 @@ public class CS_PlayerAction : MonoBehaviour
     void Start()
     {
         //現在のソウルの数
-        currentSoul = initSoul;
+        //currentSoul = initSoul;
         playerData = GetComponent<PlayerData>();
 
         // インプットアクションの登録
@@ -88,7 +88,7 @@ public class CS_PlayerAction : MonoBehaviour
         //デバッグ：ギミックの設置位置描画
         DebugDrawGimmickSet();
         // ソウル数などのデバッグコマンド
-        DebugCommand();
+        //DebugCommand();
 #endif
     }
 
@@ -159,44 +159,6 @@ public class CS_PlayerAction : MonoBehaviour
                     if (gimmick == null) continue;
                     if (gimmick.gimmickState != GimmickState.Idle) continue;
 
-                    // インタラクト方向を設定※ギミックとの位置関係で判定（対角線で四分割：三角形×4）
-                    Vector3 gimmickPos = gimmick.transform.position;
-                    Vector3 toPlayer = transform.position - gimmickPos;
-                    float dx = toPlayer.x;
-                    float dz = toPlayer.z;
-
-                    // 三角形境界は z = ±x なので絶対値で比較する
-                    float adx = Mathf.Abs(dx);
-                    float adz = Mathf.Abs(dz);
-                    const float eps = 1e-5f; // 同値判定の小さな余裕
-
-                    if (dz > adx + eps)
-                    {
-                        // プレイヤーがギミックの「前（+Z）側の三角形」：Up
-                        gimmick.SetGimmickDirection(GimmickDirection.Up);
-                    }
-                    else if (-dz > adx + eps)
-                    {
-                        // プレイヤーがギミックの「後（-Z）側の三角形」：Down
-                        gimmick.SetGimmickDirection(GimmickDirection.Down);
-                    }
-                    else if (dx > adz + eps)
-                    {
-                        // プレイヤーがギミックの「右（+X）側の三角形」：Right
-                        gimmick.SetGimmickDirection(GimmickDirection.Right);
-                    }
-                    else if (-dx > adz + eps)
-                    {
-                        // プレイヤーがギミックの「左（-X）側の三角形」：Left
-                        gimmick.SetGimmickDirection(GimmickDirection.Left);
-                    }
-                    else
-                    {
-                        // 厳密な境界上（対角線上）に居る場合のフォールバック：
-                        // X/Z の絶対値で優勢側を使う（斜め真正面は Z 優先）
-                        if (adz >= adx) gimmick.SetGimmickDirection(dz >= 0f ? GimmickDirection.Up : GimmickDirection.Down);
-                        else gimmick.SetGimmickDirection(dx >= 0f ? GimmickDirection.Right : GimmickDirection.Left);
-                    }
                     //ギミックをアクティブにする
                     Debug.Log($"ギミック：" + hit.name + "がアクティブになりました");
                     gimmick.ActivateGimmick();
@@ -226,11 +188,11 @@ public class CS_PlayerAction : MonoBehaviour
         {
             Debug.LogError("選択されたギミックにGimmickBaseコンポーネントが付いていません"); return;
         }
-        if (currentSoul - gimmick.requiredSoul < 0)
-        {
-            Debug.Log("ソウルが不足しています");
-            return;    // ソウルが足りない場合召喚しない
-        }
+        //if (currentSoul - gimmick.requiredSoul < 0)
+        //{
+        //    Debug.Log("ソウルが不足しています");
+        //    return;    // ソウルが足りない場合召喚しない
+        //}
         GameObject currentRoom = playerData.currentRoomData.GetPlayerRoomData().transform.GetChild(0).gameObject;
         string roomName = currentRoom.name;
         bool isNotSettingRoom = roomName.Contains("Start") || roomName.Contains("Treasure");
@@ -252,7 +214,53 @@ public class CS_PlayerAction : MonoBehaviour
         if (!roomGrid.SetGimmickInGrid(CalculateGimmickSetPosition(), gimmick)) return;
 
         //ソウルの消費
-        currentSoul -= gimmick.requiredSoul;
+        //currentSoul -= gimmick.requiredSoul;
+    }
+
+    public void SettingGimmickDirection(GimmickBase gimmick)
+    {
+        // インタラクト方向を設定※ギミックとの位置関係で判定（対角線で四分割：三角形×4）
+        Vector3 gimmickPos = CalculateGimmickSetPosition();
+        Vector3 toPlayer = transform.position - gimmickPos;
+        float dx = toPlayer.x;
+        float dz = toPlayer.z;
+
+        // 三角形境界は z = ±x なので絶対値で比較する
+        float adx = Mathf.Abs(dx);
+        float adz = Mathf.Abs(dz);
+        const float eps = 1e-5f; // 同値判定の小さな余裕
+
+        if (dz > adx + eps)
+        {
+            // プレイヤーがギミックの「前（+Z）側の三角形」：Up
+            gimmick.SetGimmickDirection(GimmickDirection.Up);
+            Debug.Log("Up");
+        }
+        else if (-dz > adx + eps)
+        {
+            // プレイヤーがギミックの「後（-Z）側の三角形」：Down
+            gimmick.SetGimmickDirection(GimmickDirection.Down);
+            Debug.Log("Down");
+        }
+        else if (dx > adz + eps)
+        {
+            // プレイヤーがギミックの「右（+X）側の三角形」：Right
+            gimmick.SetGimmickDirection(GimmickDirection.Right);
+            Debug.Log("Right");
+        }
+        else if (-dx > adz + eps)
+        {
+            // プレイヤーがギミックの「左（-X）側の三角形」：Left
+            gimmick.SetGimmickDirection(GimmickDirection.Left);
+            Debug.Log("Left");
+        }
+        else
+        {
+            // 厳密な境界上（対角線上）に居る場合のフォールバック：
+            // X/Z の絶対値で優勢側を使う（斜め真正面は Z 優先）
+            if (adz >= adx) gimmick.SetGimmickDirection(dz >= 0f ? GimmickDirection.Up : GimmickDirection.Down);
+            else gimmick.SetGimmickDirection(dx >= 0f ? GimmickDirection.Right : GimmickDirection.Left);
+        }
     }
 
     //ギミックの設置位置を補正する計算：大瀧
@@ -457,20 +465,20 @@ public class CS_PlayerAction : MonoBehaviour
     //ソウルの数を加算する関数
     public void AddSoul(int addnum)
     {
-        currentSoul += addnum;
+        //currentSoul += addnum;
     }
 
-    void DebugCommand()
-    {
-        if (Input.GetKey(KeyCode.LeftShift))
-        {
-            if ((Input.GetKey(KeyCode.Space)))
-            {
-                if (Input.GetKeyDown(KeyCode.S))
-                {
-                    currentSoul = initSoul;
-                }
-            }
-        }
-    }
+    //void DebugCommand()
+    //{
+    //    if (Input.GetKey(KeyCode.LeftShift))
+    //    {
+    //        if ((Input.GetKey(KeyCode.Space)))
+    //        {
+    //            if (Input.GetKeyDown(KeyCode.S))
+    //            {
+    //                currentSoul = initSoul;
+    //            }
+    //        }
+    //    }
+    //}
 }

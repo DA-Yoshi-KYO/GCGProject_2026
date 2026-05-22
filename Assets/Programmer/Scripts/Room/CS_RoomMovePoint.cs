@@ -441,7 +441,7 @@ public class CS_RoomMovePoint : MonoBehaviour
             return;
         }
 
-        ThiefAI thiefAI = thiefTransform.GetComponent<ThiefAI>();
+        CS_ThiefAI thiefAI = thiefTransform.GetComponent<CS_ThiefAI>();
 
         if (thiefAI != null)
         {

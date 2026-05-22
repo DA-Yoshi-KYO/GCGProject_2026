@@ -4,6 +4,8 @@
  *    宇留野 陸斗
  * ----------------------------------------------------------
  * 2026-05-19 | 初回作成 
+ * 2026-05-22 | ファイル名を変更（ThiefDebugDamageTab.cs → CSED_ThiefDebugDamageTab.cs）
+ *            | クラス名を変更（ThiefDebugDamageTab → CSED_ThiefDebugDamageTab）
  *　
  */
 using UnityEditor;
@@ -14,22 +16,21 @@ using System.Collections.Generic;
 /// <summary>
 /// ダメージデバックタブ用
 /// </summary>
-internal sealed class ThiefDebugDamageTab
+internal sealed class CSED_ThiefDebugDamageTab
 {
-    // 対象（泥棒AIコンポーネント）リスト
+    [Tooltip("対象（泥棒AIコンポーネント）リスト")]
     private readonly List<MonoBehaviour> targets = new List<MonoBehaviour>();
 
-    // targets内の選択中index（-1は未選択）
+    [Tooltip("対象リスト内の選択中index（-1は未選択）")]
     private int selectedTargetIndex = -1;
 
-    //追加用ObjectField
+    [Tooltip("追加用ObjectField")]
     private MonoBehaviour addTarget;
 
-    // 与えるダメージ量
+    [Tooltip("与えるダメージ量")]
     private int damageAmount = 1;
 
-    // ダメージを与える種別（表示用に enum名を文字列保持）
-    //例：Pot / IronBall
+    [Tooltip("ダメージを与えるギミック種類")]
     private string damageReactionTypeName = "Pot";
 
     /// <summary>
@@ -94,7 +95,7 @@ internal sealed class ThiefDebugDamageTab
         {
             if (GUILayout.Button("シーンから泥棒AIを収集"))
             {
-                var thiefAiType = FindTypeByName("ThiefAI");
+                var thiefAiType = FindTypeByName("CS_ThiefAI");
                 if (thiefAiType == null)
                 {
                     EditorGUILayout.HelpBox("泥棒AI型が見つかりません。", MessageType.Warning);
@@ -275,7 +276,7 @@ internal sealed class ThiefDebugDamageTab
     private void TryInvokeTakeDamage(MonoBehaviour thief)
     {
         if (thief == null) return;
-        if (thief.GetType().Name != "ThiefAI") return;
+        if (thief.GetType().Name != "CS_ThiefAI") return;
 
         // Gimmick enum を取得
         var gimmickEnumType = FindTypeByName("Gimmick");
