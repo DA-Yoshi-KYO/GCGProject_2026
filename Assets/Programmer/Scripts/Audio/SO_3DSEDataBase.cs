@@ -16,7 +16,6 @@ public class SE3DData
 {
     [Header("再生する場面")] public string situation;
     [Header("再生音源")] public AudioClip audioClip;
-    [Header("音量")] public float volume;
     [Header("AudioMixcerGroupのコンポーネント")] public AudioMixerGroup[] audioMixerGroup;
     [Header("スナップショットのコンポーネント")] public AudioMixerSnapshot[] audioMixerSnapshot;
 }
