@@ -4,6 +4,7 @@
  *    元浪梨緒
  * ----------------------------------------------------------
  * 2026-04-22 | 初回作成
+ * 2026-05-20 | 音源の追加
  */
 
 using System;
@@ -20,9 +21,10 @@ public enum SceneName
 //バックグランド用のBGMのキューの名前
 public enum BackGroundBGMCueName
 {
-    InGameBGM,
-    SelectBGM,
     TitleBGM,
+    SelectBGM,
+    InGameBGM,
+    ThiefEscapeBGM,
 };
 
 [Serializable]
@@ -30,7 +32,6 @@ public class BackGroundBGMData
 {
     [Header("再生するシーン名")] public SceneName sceneName;//再生するシーン
     [Header("再生音源")] public BackGroundBGMCueName cueName;//キュー
-    [Header("音量")] public float volume;//音量
 }
 
 [CreateAssetMenu(fileName = "BackGroundBGMDataSO", menuName = "ScriptableObjects/BackGroundBGMDataSO")]

@@ -13,17 +13,31 @@
  */
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class CS_PlayerAction : MonoBehaviour
 {
-    [SerializeField] private int initSoul = 5;//初期のソウルの数
+    //[SerializeField] private int initSoul = 5;//初期のソウルの数
+    [SerializeField] private float switchInteract = 1f;//ギミックの起動へ切り替る為に必要な長押しの時間
+    [SerializeField] private GameObject interactField = null;//インタラクトの範囲を示すフィールド
+    [SerializeField] private float interactSpeed = 1f;//インタラクトの速度(interactSpeed秒で範囲が1になる)
+    [System.Serializable]
+    public struct InteractSyllinder
+    {
+        public float radius;
+        public float height;
+    }
+    [SerializeField] private InteractSyllinder interactMin = new InteractSyllinder { radius = 3f, height = 3f };//インタラクトの範囲の最小値
+    [SerializeField] private InteractSyllinder interactMax = new InteractSyllinder { radius = 5f, height = 5f };//インタラクトの範囲の最大値
     [HideInInspector] public int currentSoul { private set; get; } = 0;//現在のソウルの数
     [HideInInspector] public int currentGimmickIndex { private set; get; } = 0;//現在選択しているギミック
 
     public List<GameObject> gimmickKind;//所持しているギミックの種類
     
     private PlayerData playerData;
-    GameObject interactObject = null;
+    float interactTime = 0.0f;
+    Vector3 interactScale = Vector3.zero;
+    bool isInteracting = false;
 
     Vector3 settingPos = Vector3.zero;  // 設置予定場所
 
@@ -31,41 +45,82 @@ public class CS_PlayerAction : MonoBehaviour
     void Start()
     {
         //現在のソウルの数
-        currentSoul = initSoul;
+        //currentSoul = initSoul;
+        playerData = GetComponent<PlayerData>();
+
+        // インプットアクションの登録
+        playerData.customInputAction.Player.GimmickChange.started += OnSelect;
+
+        playerData.customInputAction.Player.Interact.started += OnInteract;
+        playerData.customInputAction.Player.Interact.performed += OnInteract;
+        playerData.customInputAction.Player.Interact.canceled += OnInteract;
+
+        playerData.customInputAction.Player.InteractCancel.started += OnCancel;
+
+        interactField.GetComponent<Renderer>().enabled = false;
     }
 
     // Update is called once per frame
     void Update()
     {
-        playerData = GetComponent<PlayerData>();
         settingPos = CalculateGimmickSetPosition();
 
-        //キー操作でUIのギミックの選択
-        if (playerData.customInputAction.Player.GimmickChangeRight.triggered)
+        if (isInteracting)
         {
-            currentGimmickIndex++;
-
-            if (currentGimmickIndex >= gimmickKind.Count)
-                currentGimmickIndex = 0;
-
-            Debug.Log("現在選択中のギミック：" + gimmickKind[currentGimmickIndex].name);
-        }
-        else if(playerData.customInputAction.Player.GimmickChangeLeft.triggered)
-        {
-            currentGimmickIndex--;
-
-            if (currentGimmickIndex < 0)
-                currentGimmickIndex = gimmickKind.Count - 1;
-
-            Debug.Log("現在選択中のギミック：" + gimmickKind[currentGimmickIndex].name);
-        }
-
-
-        //モードの切り替え
-        if (interactObject == null)
-        {
-            if (playerData.customInputAction.Player.Interact.triggered)
+            interactTime += Time.deltaTime * interactSpeed;
+            // インタラクト範囲の拡大
+            if (interactTime >= switchInteract)
             {
+                interactScale.x = Mathf.Max(interactTime - switchInteract, 0f) + interactMin.radius;
+                interactScale.y = Mathf.Max(interactTime - switchInteract, 0f) + interactMin.height;
+                interactScale.z = Mathf.Max(interactTime - switchInteract, 0f) + interactMin.radius;
+                interactScale.x = Mathf.Min(interactScale.x, interactMax.radius);
+                interactScale.y = Mathf.Min(interactScale.y, interactMax.height);
+                interactScale.z = Mathf.Min(interactScale.z, interactMax.radius);
+                interactField.transform.localScale = interactScale;
+                Vector3 interactPos = transform.position;
+                interactPos.y += interactScale.y * 0.5f; // フィールドが地面に接するように位置を調整
+                interactField.transform.position = interactPos;
+            }
+        }
+
+#if UNITY_EDITOR
+        //デバッグ：ギミックの設置位置描画
+        DebugDrawGimmickSet();
+        // ソウル数などのデバッグコマンド
+        //DebugCommand();
+#endif
+    }
+
+    private void OnSelect(InputAction.CallbackContext context)
+    {
+        float contextValue = context.ReadValue<float>();
+
+        //キー操作でUIのギミックの選択
+        if (contextValue == 1) currentGimmickIndex++;
+        else if (contextValue == -1) currentGimmickIndex--;
+        currentGimmickIndex = (currentGimmickIndex % gimmickKind.Count + gimmickKind.Count) % gimmickKind.Count;
+
+        Debug.Log("現在選択中のギミック：" + gimmickKind[currentGimmickIndex].name);
+    }
+
+    private void OnInteract(InputAction.CallbackContext context)
+    {
+        Debug.Log("Interact: " + context.phase);
+        if (context.started)
+        {
+            interactTime = 0.0f;
+            interactField.GetComponent<Renderer>().enabled = true;
+            
+            interactField.transform.localScale = Vector3.zero;
+            isInteracting = true;
+        }
+        else if (context.canceled)
+        {
+            isInteracting = false;
+            if (interactTime < switchInteract)
+            {
+                // 短押しは設置の処理を行う
                 switch (playerData.currentMode)
                 {
                     case PlayerData.PlayerMode.Normal:
@@ -79,71 +134,44 @@ public class CS_PlayerAction : MonoBehaviour
                         break;
                 }
             }
-
-            //設置モードのキャンセル
-            if (playerData.customInputAction.Player.InteractCancel.triggered)
+            else
             {
-                playerData.currentMode = PlayerData.PlayerMode.Normal;
-            }
-        }
-        else
-        {
-            if (playerData.customInputAction.Player.Interact.triggered)
-            {
-                //ギミックの情報を取得
-                GimmickBase gimmick = interactObject.GetComponent<GimmickBase>();
-                if ((gimmick.gimmickState != GimmickState.Idle)) return;
+                // 長押しはギミックの起動を行う
+                interactField.GetComponent<Renderer>().enabled = false;
+                Collider[] hits = Physics.OverlapSphere(
+                    interactField.transform.position,
+                    interactScale.x * 0.5f
+                );
+                foreach (Collider hit in hits)
+                {
+                    //ギミックの情報を取得
+                    Vector3 pos = hit.transform.position;
 
-                // インタラクト方向を設定※ギミックとの位置関係で判定（対角線で四分割：三角形×4）
-                Vector3 gimmickPos = gimmick.transform.position;
-                Vector3 toPlayer = transform.position - gimmickPos;
-                float dx = toPlayer.x;
-                float dz = toPlayer.z;
+                    float y = Mathf.Abs(pos.y - interactField.transform.position.y);
 
-                // 三角形境界は z = ±x なので絶対値で比較する
-                float adx = Mathf.Abs(dx);
-                float adz = Mathf.Abs(dz);
-                const float eps = 1e-5f; // 同値判定の小さな余裕
+                    // 球と高さを使うことで疑似的に円柱の当たり判定にする
+                    if (y > interactScale.y * 0.5f)
+                    {
+                        continue;
+                    }
 
-                if (dz > adx + eps)
-                {
-                    // プレイヤーがギミックの「前（+Z）側の三角形」：Up
-                    gimmick.SetGimmickDirection(GimmickDirection.Up);
+                    GimmickBase gimmick = hit.GetComponent<GimmickBase>();
+                    if (gimmick == null) continue;
+                    if (gimmick.gimmickState != GimmickState.Idle) continue;
+
+                    //ギミックをアクティブにする
+                    Debug.Log($"ギミック：" + hit.name + "がアクティブになりました");
+                    gimmick.ActivateGimmick();
                 }
-                else if (-dz > adx + eps)
-                {
-                    // プレイヤーがギミックの「後（-Z）側の三角形」：Down
-                    gimmick.SetGimmickDirection(GimmickDirection.Down);
-                }
-                else if (dx > adz + eps)
-                {
-                    // プレイヤーがギミックの「右（+X）側の三角形」：Right
-                    gimmick.SetGimmickDirection(GimmickDirection.Right);
-                }
-                else if (-dx > adz + eps)
-                {
-                    // プレイヤーがギミックの「左（-X）側の三角形」：Left
-                    gimmick.SetGimmickDirection(GimmickDirection.Left);
-                }
-                else
-                {
-                    // 厳密な境界上（対角線上）に居る場合のフォールバック：
-                    // X/Z の絶対値で優勢側を使う（斜め真正面は Z 優先）
-                    if (adz >= adx) gimmick.SetGimmickDirection(dz >= 0f ? GimmickDirection.Up : GimmickDirection.Down);
-                    else gimmick.SetGimmickDirection(dx >= 0f ? GimmickDirection.Right : GimmickDirection.Left);
-                }
-                //ギミックをアクティブにする
-                Debug.Log($"ギミック：" + interactObject.name + "がアクティブになりました");
-                gimmick.ActivateGimmick();
             }
         }
 
-#if UNITY_EDITOR
-        //デバッグ：ギミックの設置位置描画
-        DebugDrawGimmickSet();
-        // ソウル数などのデバッグコマンド
-        DebugCommand();
-#endif
+    }
+
+    private void OnCancel(InputAction.CallbackContext context)
+    {
+        // キャンセル操作があった場合、現在のモードをノーマルに戻す
+        playerData.currentMode = PlayerData.PlayerMode.Normal;
     }
 
     private void SettingAction()
@@ -160,11 +188,11 @@ public class CS_PlayerAction : MonoBehaviour
         {
             Debug.LogError("選択されたギミックにGimmickBaseコンポーネントが付いていません"); return;
         }
-        if (currentSoul - gimmick.requiredSoul < 0)
-        {
-            Debug.Log("ソウルが不足しています");
-            return;    // ソウルが足りない場合召喚しない
-        }
+        //if (currentSoul - gimmick.requiredSoul < 0)
+        //{
+        //    Debug.Log("ソウルが不足しています");
+        //    return;    // ソウルが足りない場合召喚しない
+        //}
         GameObject currentRoom = playerData.currentRoomData.GetPlayerRoomData().transform.GetChild(0).gameObject;
         string roomName = currentRoom.name;
         bool isNotSettingRoom = roomName.Contains("Start") || roomName.Contains("Treasure");
@@ -186,7 +214,53 @@ public class CS_PlayerAction : MonoBehaviour
         if (!roomGrid.SetGimmickInGrid(CalculateGimmickSetPosition(), gimmick)) return;
 
         //ソウルの消費
-        currentSoul -= gimmick.requiredSoul;
+        //currentSoul -= gimmick.requiredSoul;
+    }
+
+    public void SettingGimmickDirection(GimmickBase gimmick)
+    {
+        // インタラクト方向を設定※ギミックとの位置関係で判定（対角線で四分割：三角形×4）
+        Vector3 gimmickPos = CalculateGimmickSetPosition();
+        Vector3 toPlayer = transform.position - gimmickPos;
+        float dx = toPlayer.x;
+        float dz = toPlayer.z;
+
+        // 三角形境界は z = ±x なので絶対値で比較する
+        float adx = Mathf.Abs(dx);
+        float adz = Mathf.Abs(dz);
+        const float eps = 1e-5f; // 同値判定の小さな余裕
+
+        if (dz > adx + eps)
+        {
+            // プレイヤーがギミックの「前（+Z）側の三角形」：Up
+            gimmick.SetGimmickDirection(GimmickDirection.Up);
+            Debug.Log("Up");
+        }
+        else if (-dz > adx + eps)
+        {
+            // プレイヤーがギミックの「後（-Z）側の三角形」：Down
+            gimmick.SetGimmickDirection(GimmickDirection.Down);
+            Debug.Log("Down");
+        }
+        else if (dx > adz + eps)
+        {
+            // プレイヤーがギミックの「右（+X）側の三角形」：Right
+            gimmick.SetGimmickDirection(GimmickDirection.Right);
+            Debug.Log("Right");
+        }
+        else if (-dx > adz + eps)
+        {
+            // プレイヤーがギミックの「左（-X）側の三角形」：Left
+            gimmick.SetGimmickDirection(GimmickDirection.Left);
+            Debug.Log("Left");
+        }
+        else
+        {
+            // 厳密な境界上（対角線上）に居る場合のフォールバック：
+            // X/Z の絶対値で優勢側を使う（斜め真正面は Z 優先）
+            if (adz >= adx) gimmick.SetGimmickDirection(dz >= 0f ? GimmickDirection.Up : GimmickDirection.Down);
+            else gimmick.SetGimmickDirection(dx >= 0f ? GimmickDirection.Right : GimmickDirection.Left);
+        }
     }
 
     //ギミックの設置位置を補正する計算：大瀧
@@ -391,40 +465,20 @@ public class CS_PlayerAction : MonoBehaviour
     //ソウルの数を加算する関数
     public void AddSoul(int addnum)
     {
-        currentSoul += addnum;
+        //currentSoul += addnum;
     }
 
-    private void OnTriggerStay(Collider other)
-    {
-        //接触している
-        if (other.gameObject.CompareTag("Gimmick"))
-        {
-            GimmickBase gimmick = other.gameObject.GetComponent<GimmickBase>();
-            if ((gimmick.gimmickState != GimmickState.Idle)) return;
-
-            interactObject = other.gameObject;
-        }
-    }
-
-    void DebugCommand()
-    {
-        if (Input.GetKey(KeyCode.LeftShift))
-        {
-            if ((Input.GetKey(KeyCode.Space)))
-            {
-                if (Input.GetKeyDown(KeyCode.S))
-                {
-                    currentSoul = initSoul;
-                }
-            }
-        }
-    }
-
-    private void OnTriggerExit(Collider collision)
-    {
-        if (collision.gameObject.CompareTag("Gimmick"))
-        {
-            interactObject = null;
-        }
-    }
+    //void DebugCommand()
+    //{
+    //    if (Input.GetKey(KeyCode.LeftShift))
+    //    {
+    //        if ((Input.GetKey(KeyCode.Space)))
+    //        {
+    //            if (Input.GetKeyDown(KeyCode.S))
+    //            {
+    //                currentSoul = initSoul;
+    //            }
+    //        }
+    //    }
+    //}
 }

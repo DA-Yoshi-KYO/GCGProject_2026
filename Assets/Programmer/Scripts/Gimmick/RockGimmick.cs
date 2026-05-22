@@ -7,6 +7,7 @@
  * 2026-05-08 | リファクタリング(大瀧)
  */
 
+using System.Collections.Generic;
 using UnityEngine;
 
 public class RockGimmick : GimmickBase
@@ -35,6 +36,15 @@ public class RockGimmick : GimmickBase
     [SerializeField]
     private float rollSpeed = 0.6f;       // 平面の転がり速度
 
+    [Header("DangerZone")]
+    [SerializeField, Tooltip("破壊時に生成する DangerZone prefab")]
+    private CS_DangerZone dangerZonePrefab;
+
+    [SerializeField, Tooltip("泥棒のLayer。未設定なら全レイヤー")]
+    private LayerMask thiefLayer;
+
+    private bool isDangerZoneSpawned;
+
     //デバッグ用！！！！
     Vector3 startPos;
     bool isStart = false;
@@ -62,7 +72,7 @@ public class RockGimmick : GimmickBase
             isFirstActive = false;
             Vector2Int directionVec = GetDirectionVec();
 
-            initPositionY = transform.position.y;
+            initPositionY = transform.position.y + debugIdleOffset;
             velocity = Vector3.zero;
         }
 
@@ -101,11 +111,11 @@ public class RockGimmick : GimmickBase
             }
 
             //インタラクト時転がす
-            if (gimmickDirection == GimmickDirection.Up)
+            if (gimmickDirection == GimmickDirection.Down)
             {//Z+
                 velocity = Vector3.back * rollSpeed;
             }
-            else if (gimmickDirection == GimmickDirection.Down)
+            else if (gimmickDirection == GimmickDirection.Up)
             {//Z-
                 velocity = Vector3.forward * rollSpeed;
             }
@@ -120,12 +130,11 @@ public class RockGimmick : GimmickBase
             transform.position += velocity * Time.deltaTime;
             //！！デバッグ用応急処置！！//
             transform.position = new Vector3(transform.position.x, transform.position.y + debugIdleOffset, transform.position.z);
-
             //---------------
             // 壁判定
             // XZ方向にレイを飛ばす
             // 大岩自体が大きいため前後左右レイを少し下に調整
-            Vector3 rayXYOrigin = new Vector3(transform.position.x, transform.position.y - 1.3f, transform.position.z);
+            Vector3 rayXYOrigin = new Vector3(transform.position.x, transform.position.y - 1f, transform.position.z);
             // レイデバッグ
             Debug.DrawRay(rayXYOrigin, velocity * raySideLength, Color.yellow);
             //Debug.Log(rayXYOrigin);
@@ -134,7 +143,10 @@ public class RockGimmick : GimmickBase
             {//レイが当たったら角度をチェック
                 if (HitBrokeAngle(check, velocity, slopeAngleLimit))
                 {//当たった面が一定値以上の斜面なら
-                    gimmickState = GimmickState.Broken;
+                    if (hit.collider.CompareTag("Plane") || hit.collider.CompareTag("Untagged"))
+                    {
+                        gimmickState = GimmickState.Broken;
+                    }
                 }
             }
         }
@@ -164,7 +176,14 @@ public class RockGimmick : GimmickBase
                 // 斜面の角度から補正値を計算
                 float angleCorrection;
                 angleCorrection = gravity / 3.141592f + angle / (3.141592f * 2f);
-                pos.y = hit.point.y + 0.4f;
+                if (angle < 5f)
+                {
+                    pos.y = hit.point.y + 0.5f;
+                }
+                else
+                {
+                    pos.y = hit.point.y + 0.4f;
+                }
                 transform.position = new Vector3(pos.x, pos.y + debugUpdateOffset, pos.z);
             }
         }
@@ -204,6 +223,25 @@ public class RockGimmick : GimmickBase
     protected override void BrokenUpdate()
     {
         DeleteHitChecker();
+
+        //破壊時に1回だけ生成
+        if (!isDangerZoneSpawned)
+        {
+            isDangerZoneSpawned = true;
+
+            if (dangerZonePrefab != null)
+            {
+                CO_ThiefCommonStatusData common = null;
+                var thiefManager = GameObject.FindObjectOfType<CS_ThiefManager>();
+                if (thiefManager != null) common = thiefManager.GetThiefCommonDB();
+
+                CS_DangerZoneSpawner.SpawnAndRegisterFromGimmick(dangerZonePrefab, transform.position, this, common, thiefLayer);
+            }
+            else
+            {
+                Debug.LogWarning("RockGimmick: dangerZonePrefab が未設定です。", this);
+            }
+        }
 
         if (checker != null)
             Destroy(checker);

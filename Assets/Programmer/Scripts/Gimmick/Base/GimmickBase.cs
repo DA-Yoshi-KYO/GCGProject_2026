@@ -9,6 +9,7 @@
 // 当たり判定内に、敵がいた場合、攻撃力を与える
 //
 
+using System.Collections.Generic;
 using UnityEngine;
 
 public enum Gimmick
@@ -22,6 +23,7 @@ public enum Gimmick
 public enum GimmickState
 {
     Idle,
+    Search,
     Active,
     Cooldown,
     Broken,
@@ -110,21 +112,30 @@ public class GimmickBase : MonoBehaviour
     [Header("ギミックの状態")]
     public GimmickState gimmickState;
 
+    [Header("泥棒検知")]
+    [SerializeField] private GameObject search;
+    [Tooltip("泥棒を検知する範囲"), Min(0)]
+    [SerializeField] protected int searchGridRange;
+    [Header("敵のレイヤー")]
+    public LayerMask enemyLayer;
+
     [Header("調整用（プログラマー専用）")]
     [Tooltip("ギミックの大きさや位置を調整するための値"), Min(1)]
     public int Adjust;
-
-    [Header("範囲UI")]
-    [SerializeField] private GameObject InteractUI;
-    private GameObject pre_InteractUI = null;
 
     // ギミックのグリッド上の位置
     protected Vector2Int gimmickGridPos;
 
     private GameObject hitChecker;
+    private BoxCollider searchColliderX;
+    private BoxCollider searchColliderZ;
 
     private void Start()
     {
+        GameObject X = search.transform.Find("X").gameObject;
+        GameObject Z = search.transform.Find("Z").gameObject;
+        searchColliderX = X.GetComponent<BoxCollider>();
+        searchColliderZ = Z.GetComponent<BoxCollider>();
     }
 
     /// <summary>
@@ -152,6 +163,21 @@ public class GimmickBase : MonoBehaviour
         scaleZ = scaleZ * gimmickScale / 100f;
 
         transform.localScale = new Vector3(scaleX, scaleY, scaleZ);
+
+        Vector3 Set = search.transform.position;
+        Set.y = 0.0f;
+        search.transform.position = Set;
+
+        GameObject X = search.transform.Find("X").gameObject;
+        GameObject Z = search.transform.Find("Z").gameObject;
+        Vector3 searchX = X.transform.localScale;
+        Vector3 searchZ = Z.transform.localScale;
+        // X軸に対する当たり判定の大きさを設定
+        searchX.x = searchGridRange * roomGrid.gridSize.x;
+        // Z軸に対する当たり判定の大きさを設定
+        searchZ.z = searchGridRange * roomGrid.gridSize.y;
+        X.transform.localScale = searchX;
+        Z.transform.localScale = searchZ;
     }
 
     /// <summary>
@@ -161,10 +187,9 @@ public class GimmickBase : MonoBehaviour
     {
         if (gimmickState == GimmickState.Idle)
         {
-            gimmickState = GimmickState.Active;
+            gimmickState = GimmickState.Search;
         }
     }
-
 
     /// <summary>
     /// グリッド座標からワールド座標に変換して、ギミックの位置を設定する
@@ -173,11 +198,6 @@ public class GimmickBase : MonoBehaviour
     public void SetGimmickPos(Vector2Int gridPos)
     {
         gimmickGridPos = gridPos;
-        //Vector3 newWorldPos = roomGrid.GetWorldPosFromGrid(gridPos);
-        //newWorldPos.x = newWorldPos.x * (float)Adjust;
-        //newWorldPos.y = newWorldPos.y * (float)Adjust;
-        //newWorldPos.z = newWorldPos.z * (float)Adjust;
-        //transform.position = newWorldPos;
     }
 
     /// <summary>
@@ -259,6 +279,10 @@ public class GimmickBase : MonoBehaviour
         hitChecker.transform.position = HitCheckerPos;
     }
 
+    /// <summary>
+    /// 泥棒に対する当たり判定を設定する関数（ワールド座標版）
+    /// </summary>
+    /// <param name="WorldPos">ワールド座標</param>
     protected void SetHitChecker(Vector3 WorldPos)
     {
         if (hitChecker == null)
@@ -346,33 +370,22 @@ public class GimmickBase : MonoBehaviour
         return gimmick;
     }
 
-    private void OnTriggerStay(Collider other)
+    /// <summary>
+    /// BoxColliderを使用して、命中範囲内の敵を検出する関数
+    /// </summary>
+    /// <param name="box">検出範囲のBoxCollider</param>
+    /// <returns>検出された敵のコライダー配列</returns>
+    private Collider[] OverlapBoxCollider(BoxCollider box)
     {
-        //接触している
-        if (other.gameObject.CompareTag("Player"))
-        {
-            if(pre_InteractUI == null)
-            {
-                pre_InteractUI = Instantiate(InteractUI);
-                pre_InteractUI.transform.position = gameObject.transform.position;
-                pre_InteractUI.transform.position += new Vector3(0, 1.5f, 0);
-            }
-        }
-    }
+        if (box == null) return new Collider[0];
 
-    private void OnTriggerExit(Collider other)
-    {
-        //接触していない
-        if (other.gameObject.CompareTag("Player"))
-        {
-            if(pre_InteractUI != null)
-            {
-                Destroy(pre_InteractUI);
-                pre_InteractUI = null;
-            }
-        }
-    }
+        // コライダーのワールド座標でのCenter・Size・回転を取得
+        Vector3 worldCenter = box.transform.TransformPoint(box.center);
+        Vector3 worldHalfExtents = Vector3.Scale(box.size * 0.5f, box.transform.lossyScale);
+        Quaternion worldRotation = box.transform.rotation;
 
+        return Physics.OverlapBox(worldCenter, worldHalfExtents, worldRotation, enemyLayer);
+    }
     // ===============================================================================
 
     private void FixedUpdate()
@@ -382,6 +395,10 @@ public class GimmickBase : MonoBehaviour
             case GimmickState.Idle:
                 // Idle状態の処理
                 IdleUpdate();
+                break;
+            case GimmickState.Search:
+            // Search状態の処理
+                SearchUpdate();
                 break;
             case GimmickState.Active:
                 // Active状態の処理
@@ -397,17 +414,64 @@ public class GimmickBase : MonoBehaviour
                 break;
         }
     }
-
     protected virtual void IdleUpdate()
     {
         // Idle状態の処理
     }
+    protected virtual void SearchUpdate()
+    {
+        gimmickState = GimmickState.Active;
 
+        // Collider内の泥棒を検知する処理
+        Collider[] hitsX = OverlapBoxCollider(searchColliderX);
+        Collider[] hitsZ = OverlapBoxCollider(searchColliderZ);
+
+        // X軸・Z軸の検知結果を結合
+        List<Collider> allHits = new List<Collider>(hitsX);
+        foreach (var col in hitsZ)
+        {
+            if (!allHits.Contains(col))
+                allHits.Add(col);
+        }
+
+        Debug.Log("Detected " + allHits.Count + " enemies in search area.");
+        if (allHits.Count == 0) return;
+
+        // 最も近い敵を探す
+        float minDist = float.MaxValue;
+        Transform nearestEnemy = null;
+
+        foreach (var col in allHits)
+        {
+            float dist = Vector3.Distance(transform.position, col.transform.position);
+            if (dist < minDist)
+            {
+                minDist = dist;
+                nearestEnemy = col.transform;
+            }
+        }
+
+        Debug.Log("Nearest enemy: " + (nearestEnemy != null ? nearestEnemy.name : "None") + ", Distance: " + minDist);
+        if (nearestEnemy == null) return;
+
+        // 自身から敵への方向ベクトル（XZ平面）
+        Vector3 diff = nearestEnemy.position - transform.position;
+
+        if (Mathf.Abs(diff.x) >= Mathf.Abs(diff.z))
+        {
+            gimmickDirection = diff.x >= 0f ? GimmickDirection.Left : GimmickDirection.Right;
+        }
+        else
+        {
+            gimmickDirection = diff.z >= 0f ? GimmickDirection.Up : GimmickDirection.Down;
+        }
+        Debug.Log("Detected enemy: " + nearestEnemy.name + ", Direction: " + gimmickDirection);
+
+    }
     protected virtual void ActiveUpdate()
     {
         // Active状態の処理
     }
-
     protected virtual void CooldownUpdate()
     {
         // Cooldown状態の処理

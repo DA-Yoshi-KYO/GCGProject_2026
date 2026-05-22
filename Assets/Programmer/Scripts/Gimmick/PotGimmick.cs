@@ -25,12 +25,26 @@ public class PotGimmick : GimmickBase
     [SerializeField]
     private float gravity;
 
-    private bool isFall = false;  //落下中かどうか
-    private float initPositionY;  //初期位置Y
+    [Header("DangerZone")]
+    [SerializeField, Tooltip("破壊時に生成する DangerZone prefab")]
+    private CS_DangerZone dangerZonePrefab;
+
+    [SerializeField, Tooltip("泥棒のLayer。未設定なら全レイヤー")]
+    private LayerMask thiefLayer;
+
+    private bool isFall = false;
+    private float initPositionY;
     private bool isFirstUpdate = true;
+    private bool isDangerZoneSpawned;
     protected override void IdleUpdate()
     {
     }
+
+    protected override void SearchUpdate()
+    {
+        Debug.Log("PotGimmick: SearchUpdate called", this);
+        base.SearchUpdate();
+    }   
 
     protected override void ActiveUpdate()
     {
@@ -107,6 +121,26 @@ public class PotGimmick : GimmickBase
 
     protected override void BrokenUpdate()
     {
+        //破壊時に1回だけ生成
+        if (!isDangerZoneSpawned)
+        {
+            isDangerZoneSpawned = true;
+
+            if (dangerZonePrefab != null)
+            {
+                // ThiefCommonDBから残存時間を取得
+                CO_ThiefCommonStatusData common = null;
+                var thiefManager = GameObject.FindObjectOfType<CS_ThiefManager>();
+                if (thiefManager != null) common = thiefManager.GetThiefCommonDB();
+
+                CS_DangerZoneSpawner.SpawnAndRegisterFromGimmick(dangerZonePrefab, transform.position, this, common, thiefLayer);
+            }
+            else
+            {
+                Debug.LogWarning("PotGimmick: dangerZonePrefab が未設定です。", this);
+            }
+        }
+
         isFirstUpdate = true;
         DeleteHitChecker();
         Destroy(gameObject);

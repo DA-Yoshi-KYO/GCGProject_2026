@@ -167,7 +167,7 @@ public class CS_RoomEnemyEntryPointTestReader : MonoBehaviour
         //
         // このリストには、
         // この出入口から出現する可能性がある盗賊のステータスデータ。
-        IReadOnlyList<CSS_ThiefStatusData> list_ThiefStatusData =
+        IReadOnlyList<CO_ThiefStatusData> list_ThiefStatusData =
             cs_RoomEnemyEntryData.GetThiefStatusDataList();
 
         // 盗賊データリスト自体がnullの場合は、
@@ -192,7 +192,7 @@ public class CS_RoomEnemyEntryPointTestReader : MonoBehaviour
         for (int i = 0 ; i < list_ThiefStatusData.Count ; i++)
         {
             // 盗賊データを1件取得します。
-            CSS_ThiefStatusData cs_ThiefStatusData = list_ThiefStatusData[i];
+            CO_ThiefStatusData cs_ThiefStatusData = list_ThiefStatusData[i];
 
             // リストの中にnullが入っている場合、
             // その番号だけ警告を出して次のデータへ進みます。

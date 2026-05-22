@@ -19,7 +19,7 @@ public class CS_RoomEnemyEntryPointCollector : MonoBehaviour
     [SerializeField]
     private Transform tr_RoomCreatePointsRoot;
 
-    [Header("RoomCreatePointタグ名")]
+    [Header("RoomCreatePointTag Name")]
     [SerializeField]
     private string str_RoomCreatePointTag = "RoomCreatePoint";
 
