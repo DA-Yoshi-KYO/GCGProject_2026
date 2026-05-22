@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 public class OptionSys : MonoBehaviour
 {
-    [SerializeField] private string MangerName = "GameOptionManager";
+    [SerializeField] private string ManagerName = "GameOptionManager";
 
     [SerializeField] private GameObject UI;
     [SerializeField] private GameObject VolumeUI;
@@ -27,7 +27,7 @@ public class OptionSys : MonoBehaviour
 
     private void Awake()
     {
-        _optionManager = GameObject.Find(MangerName);
+        _optionManager = GameObject.Find(ManagerName);
 
         if (_optionManager == null)
         {
