@@ -4,16 +4,20 @@
  *    宇留野 陸斗
  * ----------------------------------------------------------
  * 2026-04-19 | 初回作成
+ * 2026-05-22 | ファイル名を変更（RoomNode.cs → CS_RoomNode.cs）
+ *            | クラス名を変更（RoomNode → CS_RoomNode）
  * 
  */
 using System.Collections.Generic;
 using UnityEngine;
 
-// 部屋の情報を管理するクラス
-public class RoomNode : MonoBehaviour
+/// <summary>
+/// 部屋の情報を管理するクラス
+/// </summary>
+public class CS_RoomNode : MonoBehaviour
 {
     [Tooltip("部屋の移動ポイントリスト")]
-    public List<ThiefTarget> movePoints;
+    public List<CS_ThiefTarget> movePoints;
 
     [Tooltip("移動ポイントの回り方")]
     public bool isListDown = true;// trueなら右回り、falseなら左回り
@@ -30,7 +34,9 @@ public class RoomNode : MonoBehaviour
     private Color gizmoColor = Color.green;
 
 
-    // 部屋の移動ポイントを回る方向をギズモで表示する
+    /// <summary>
+    /// 移動ポイントをギズモで表示する
+    /// </summary>
     void OnDrawGizmos()
     {
             if (!showGizmos) return;

@@ -4,6 +4,8 @@
  *    宇留野 陸斗
  * ----------------------------------------------------------
  * 2026-04-30 | 初回作成
+ * 2026-05-22 | ファイル名を変更（CS_ThiefReaction.cs → CS_ThiefReaction.cs）
+ *            | クラス名を変更（CS_ThiefReaction → CS_ThiefReaction）
  * 
  */
 using System.Collections.Generic;
@@ -12,8 +14,10 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
-// 泥棒のリアクションを管理するクラス
-public class ThiefReaction : MonoBehaviour
+/// <summary>
+/// 泥棒のリアクションを管理するクラス
+/// </summary>
+public class CS_ThiefReaction : MonoBehaviour
 {
     [SerializeField,Header("リアクションに使用するスプライトリスト"), Tooltip("リアクションに使用するスプライトリスト")]
     private List<Sprite> reactionSprites = new List<Sprite>();
@@ -34,7 +38,9 @@ public class ThiefReaction : MonoBehaviour
     [Tooltip("リアクションを表示する時間")]
     private const float reactionDisplayTime = 2.0f;
 
-
+    /// <summary>
+    /// 初期化処理(リアクションのUIの親オブジェクトをCanvas内に作成する処理)
+    /// </summary>
     private void Start()
     {
         // Canvasを取得
@@ -60,6 +66,9 @@ public class ThiefReaction : MonoBehaviour
         else parentThiefReaction = parent.gameObject;
     }
 
+    /// <summary>
+    /// 毎フレーム、リアクションオブジェクトの表示時間を減算し、0以下になったらオブジェクトを破棄する処理
+    /// </summary>
     private void Update()
     {
         if (reactionObjects.Count == 0) return;

@@ -23,16 +23,21 @@
  * 2026-05-15 | 同じ部屋の中で、他者が探索しているオブジェクトを探索対象にしないようにする処理を追加
  * 2026-05-17 | DecideTarget内のキャストエラーの不具合を修正
  * 2026-05-18 | A*アルゴリズムを用いて帰宅ルートを構築するロジックを追加
+ * 2026-05-21 | CS_SmartNavAgentを用いた危険地帯を考慮した移動処理の追加
+ * 2026-05-22 | ファイル名を変更（ThiefAI.cs → CS_ThiefAI.cs）
+ *            | クラス名を変更（ThiefAI → CS_ThiefAI）
  * 
  */
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-// 泥棒のAIシステム
+/// <summary>
+/// 泥棒の行動を管理するクラスです。
+/// </summary>
 [RequireComponent(typeof(NavMeshAgent))]
-[RequireComponent(typeof(VisionSensor))]
-public class ThiefAI : MonoBehaviour
+[RequireComponent(typeof(CS_VisionSensor))]
+public class CS_ThiefAI : MonoBehaviour
 {
     [Tooltip("泥棒の行動状態を定義する列挙型")]
     private enum ThiefState
@@ -66,22 +71,22 @@ public class ThiefAI : MonoBehaviour
     private float fadeAfterStunTime;
 
     [Tooltip("現在いる部屋の情報")]
-    private RoomNode currentRoom;
+    private CS_RoomNode currentRoom;
     private GameObject currentRoomObject;
     [Tooltip("部屋に関する記憶")]
-    private Dictionary<RoomNode, RoomMemory> roomMemories;
+    private Dictionary<CS_RoomNode, CS_RoomMemory> roomMemories;
 
     /// <summary>
     /// デバッグ表示用：部屋の記憶(全ての部屋分)を取得する
     /// </summary>
-    public IReadOnlyDictionary<RoomNode, RoomMemory> RoomMemories => roomMemories;
+    public IReadOnlyDictionary<CS_RoomNode, CS_RoomMemory> RoomMemories => roomMemories;
 
     [Tooltip("視認オブジェクトの記憶")]
-    private Dictionary<VisionTarget, VisionTargetMemory> visionTargetMemories;
+    private Dictionary<CS_VisionTarget, CS_VisionTargetMemory> visionTargetMemories;
 
     [Tooltip("探索対象")]
-    private ThiefTarget currentTarget;
-    public ThiefTarget CurrentTarget => currentTarget;
+    private CS_ThiefTarget currentTarget;
+    public CS_ThiefTarget CurrentTarget => currentTarget;
 
     [Tooltip("次の部屋に移動するための移動ポイント")]
     private Transform nextRoomMovePoint;
@@ -117,7 +122,7 @@ public class ThiefAI : MonoBehaviour
     private int soulDropCount;
 
     [Tooltip("走り状態になる標的オブジェクトのタイプリスト")]
-    private List<VisionTarget.TargetType> runTargetTypes;
+    private List<CS_VisionTarget.TargetType> runTargetTypes;
 
     [Tooltip("次の部屋探索に切り替える探索度の閾値")]
     private int nextRoomSearchThreshold;
@@ -125,28 +130,35 @@ public class ThiefAI : MonoBehaviour
     [Tooltip("ナビメッシュエージェント")]
     private NavMeshAgent navMeshAgent;
     [Tooltip("泥棒のリアクションを管理するコンポーネント")]
-    private ThiefReaction thiefReaction;
+    private CS_ThiefReaction thiefReaction;
 
     [Tooltip("最初の部屋のオブジェクト")]
-    private RoomNode firstRoom;
-    private Transform firstEntryPoint; // 最初に入ってきたドアの位置(逃走ルートの最終目的位置)
+    private CS_RoomNode firstRoom;
+    [Tooltip("最初の部屋の入ってきたドアの位置")]
+    private Transform firstEntryPoint;
 
     [Tooltip("移動ルート")]
     private List<Transform> moveRoute;
 
     [Header("DangerZone Avoidance")]
     [SerializeField, Tooltip("DangerZone を考慮して移動するためのコンポーネント。未設定なら同一GameObjectから取得")]
-    private SmartNavAgent smartNavAgent;
+    private CS_SmartNavAgent smartNavAgent;
 
     [SerializeField, Tooltip("この泥棒が回避する DangerZone の zoneID 一覧")]
     private List<int> avoidZoneIDs = new List<int>();
 
 
-    // 泥棒の耐久力と移動速度を設定するメソッド
-    public void Setting(CSS_ThiefStatusData typedata, CSS_ThiefCommonStatusData data, float playerSpeed, RoomNode entryRoom, Transform entryPoint)
+    /// <summary>
+    /// 泥棒のステータスを設定する処理
+    /// </summary>
+    /// <param name="typedata">泥棒のタイプごとのステータスデータ</param>
+    /// <param name="data">泥棒の共通ステータスデータ</param>
+    /// <param name="playerSpeed">プレイヤーの移動速度（泥棒の移動速度をプレイヤーの移動速度に対する倍率で設定するため）</param>
+    /// <param name="entryRoom">最初に入ってくる部屋のオブジェクト</param>
+    /// <param name="entryPoint">最初に入ってくるドアの位置</param>
+    public void Setting(CO_ThiefStatusData typedata, CO_ThiefCommonStatusData data, float playerSpeed, CS_RoomNode entryRoom, Transform entryPoint)
     {
         /*未実装、未設定　*///data.jumpHeight;
-        /*未設定、未設定　*///data.alertTime;
 
         durability = typedata.durability;
         walkSpeed = playerSpeed * typedata.walkSpeedMultiplier;
@@ -168,13 +180,13 @@ public class ThiefAI : MonoBehaviour
         currentRoom = entryRoom;
 
         // 部屋の記憶を初期化
-        roomMemories = new Dictionary<RoomNode, RoomMemory>();
+        roomMemories = new Dictionary<CS_RoomNode, CS_RoomMemory>();
 
         // 視認オブジェクトの記憶を初期化
-        visionTargetMemories = new Dictionary<VisionTarget, VisionTargetMemory>();
+        visionTargetMemories = new Dictionary<CS_VisionTarget, CS_VisionTargetMemory>();
 
         // 初期部屋の記憶を作成
-        roomMemories[currentRoom] = new RoomMemory();
+        roomMemories[currentRoom] = new CS_RoomMemory();
         roomMemories[currentRoom].FirstSetting();
         roomMemories[currentRoom].explorationLevel = currentRoom.initialExplorationLevel;
 
@@ -184,7 +196,7 @@ public class ThiefAI : MonoBehaviour
         navMeshAgent.speed = this.walkSpeed;
 
         // SmartNavAgent を初期化（存在すれば DangerZone 回避を有効化）
-        if (smartNavAgent == null) smartNavAgent = GetComponent<SmartNavAgent>();
+        if (smartNavAgent == null) smartNavAgent = GetComponent<CS_SmartNavAgent>();
         if (smartNavAgent != null)
         {
             smartNavAgent.SetAvoidZoneIDs(avoidZoneIDs);
@@ -196,7 +208,7 @@ public class ThiefAI : MonoBehaviour
         rb.useGravity = false; // 重力の影響を受けないようにする
 
         // 泥棒のリアクションを管理するコンポーネントを取得
-        thiefReaction = GetComponent<ThiefReaction>();
+        thiefReaction = GetComponent<CS_ThiefReaction>();
         thiefReaction.RegisterReaction(data.reactionUISprites);
 
         reactionSprites = data.reactionSprites;
@@ -208,7 +220,7 @@ public class ThiefAI : MonoBehaviour
 
     private void Start()
     {
-        fadeAfterStunTime = GameObject.FindObjectOfType<ThiefManager>().GetThiefCommonDB().fadeAfterStunTime;
+        fadeAfterStunTime = GameObject.FindObjectOfType<CS_ThiefManager>().GetThiefCommonDB().fadeAfterStunTime;
 
         thiefMaterial = GetComponent<Renderer>().material;
         if (thiefMaterial == null)
@@ -264,10 +276,10 @@ public class ThiefAI : MonoBehaviour
         ChangeFace(ReactionSpriteType.Normal);
 
         // 現在の探索対象がプレイヤーである場合は、距離判定をして、一定距離以内であればプレイヤーに向かって移動する処理を追加する
-        if (currentTarget != null && currentTarget is PlayerTarget)
+        if (currentTarget != null && currentTarget is CS_PlayerTarget)
         {
             // 距離判定
-            VisionSensor visionSensor = GetComponent<VisionSensor>();
+            CS_VisionSensor visionSensor = GetComponent<CS_VisionSensor>();
             int distanceToPlayer = (int)Vector3.Distance(transform.position, currentTarget.transform.position);
             if (distanceToPlayer <= visionSensor.viewDistance)
             {
@@ -284,11 +296,11 @@ public class ThiefAI : MonoBehaviour
         if (moveRoute != null && moveRoute.Count > 0)
         {
             // プレイヤーや宝物、標的にする罠などが視認できている場合は、moveRouteをクリアして、そちらに向かう処理を追加する
-            if (currentTarget is PlayerTarget || currentTarget is TrapTarget || currentTarget is VisionTarget)
+            if (currentTarget is CS_PlayerTarget || currentTarget is CS_TrapTarget || currentTarget is CS_VisionTarget)
             {
-                if (currentTarget is VisionTarget)
+                if (currentTarget is CS_VisionTarget)
                 {
-                    if (((VisionTarget)currentTarget).targetType == VisionTarget.TargetType.Treasure)
+                    if (((CS_VisionTarget)currentTarget).targetType == CS_VisionTarget.TargetType.Treasure)
                     {
                         moveRoute.Clear();
                         return;
@@ -339,10 +351,10 @@ public class ThiefAI : MonoBehaviour
             return;
         }
         // 現在の探索対象が視認オブジェクト(VisionTarget)かどうかを判定
-        if (currentTarget is VisionTarget)
+        if (currentTarget is CS_VisionTarget)
         {
             // 探索対象が既に探索済みの場合
-            if (visionTargetMemories[((VisionTarget)currentTarget)].isExplored)
+            if (visionTargetMemories[((CS_VisionTarget)currentTarget)].isExplored)
             {
                 DecideTarget();
             }
@@ -350,26 +362,23 @@ public class ThiefAI : MonoBehaviour
             else
             {
                 // 現在の探索対象が他者にも探索されているオブジェクトである場合は、探索対象をリセットして、次の探索対象を決定する
-                if (visionTargetMemories[((VisionTarget)currentTarget)].searchThief != null && visionTargetMemories[((VisionTarget)currentTarget)].searchThief != this.gameObject)
+                if (visionTargetMemories[((CS_VisionTarget)currentTarget)].searchThief != null && visionTargetMemories[((CS_VisionTarget)currentTarget)].searchThief != this.gameObject)
                 {
-                    //Debug.Log("【" + this.gameObject.name + "】Explore: 探索対象 " + currentTarget.name + " は" + ((VisionTarget)currentTarget).searchThief.gameObject.name + "が探索しているため、探索対象をリセットします。");
-
-
                     currentTarget = null;
                     return;
                 }
 
                 // 探索対象に十分近づいたら、探索度を進める
-                if (Vector3.Distance(transform.position, currentTarget.transform.position) < ((VisionTarget)currentTarget).exploredDistanceThreshold)
+                if (Vector3.Distance(transform.position, currentTarget.transform.position) < ((CS_VisionTarget)currentTarget).exploredDistanceThreshold)
                 {
                     ChangeFace(ReactionSpriteType.Search); // 探索完了の表情に変更する処理を追加する
 
-                    ((VisionTarget)currentTarget).searchThief = this.gameObject; // 探索対象に対して、探索している人を設定する
+                    ((CS_VisionTarget)currentTarget).searchThief = this.gameObject; // 探索対象に対して、探索している人を設定する
 
                     if (ProgressTargetSearchTime())
                     {
                         // 宝物を探索にしていて、完了した場合は、発見状態に切り替える
-                        if (((VisionTarget)currentTarget).targetType == VisionTarget.TargetType.Treasure)
+                        if (((CS_VisionTarget)currentTarget).targetType == CS_VisionTarget.TargetType.Treasure)
                         {
                             // 発見状態に切り替える
                             currentState = ThiefState.Found;
@@ -378,15 +387,15 @@ public class ThiefAI : MonoBehaviour
                         else
                         {
                             // 探索対象を探索済みに設定
-                            visionTargetMemories[((VisionTarget)currentTarget)].isExplored = true;
+                            visionTargetMemories[((CS_VisionTarget)currentTarget)].isExplored = true;
                             // 探索度を加算
-                            roomMemories[currentRoom].explorationLevel += ((VisionTarget)currentTarget).explorationValue;
+                            roomMemories[currentRoom].explorationLevel += ((CS_VisionTarget)currentTarget).explorationValue;
 
                             // 探索度が閾値を超えた場合は、次の部屋に移動するための処理を追加する
                             if (roomMemories[currentRoom].explorationLevel >= nextRoomSearchThreshold)
                             {
                                 // 探索対象をリセット
-                                ((VisionTarget)currentTarget).searchThief = null; // 探索対象の探索している人をリセットする
+                                ((CS_VisionTarget)currentTarget).searchThief = null; // 探索対象の探索している人をリセットする
                                 currentTarget = null;
 
                                 isNextRoomMovePointDecided = true;
@@ -394,7 +403,7 @@ public class ThiefAI : MonoBehaviour
                             // それ以外の場合は、次の探索対象を決定する
                             else
                             {
-                                ((VisionTarget)currentTarget).searchThief = null; // 探索対象の探索している人をリセットする
+                                ((CS_VisionTarget)currentTarget).searchThief = null; // 探索対象の探索している人をリセットする
                                 currentTarget = null;
                                 DecideTarget();
                             }
@@ -403,7 +412,7 @@ public class ThiefAI : MonoBehaviour
                 }
                 else
                 {
-                    visionTargetMemories[((VisionTarget)currentTarget)].explorationProgress = 0; // 探索対象から離れた場合は、探索の進行度をリセットする
+                    visionTargetMemories[((CS_VisionTarget)currentTarget)].explorationProgress = 0; // 探索対象から離れた場合は、探索の進行度をリセットする
                 }
             }
         }
@@ -441,7 +450,7 @@ public class ThiefAI : MonoBehaviour
         currentState = ThiefState.Escape;
 
         // 取得した宝物を他の泥棒の記憶から消去する
-        GameObject.FindObjectOfType<ThiefManager>().EraseTheMemoryToAllThief(currentTarget);
+        GameObject.FindObjectOfType<CS_ThiefManager>().EraseTheMemoryToAllThief(currentTarget);
         // 探索対象をリセット
         currentTarget = null;
     }
@@ -544,22 +553,22 @@ public class ThiefAI : MonoBehaviour
     private void RecognizeObjects()
     {
         // 視界内オブジェクトを取得
-        List<ThiefTarget> visionTargets = this.GetComponent<VisionSensor>().Scan();
+        List<CS_ThiefTarget> visionTargets = this.GetComponent<CS_VisionSensor>().Scan();
 
         // 現在の部屋の記憶がない場合は新たに作成
         if (roomMemories[currentRoom] == null)
         {
-            roomMemories[currentRoom] = new RoomMemory();
+            roomMemories[currentRoom] = new CS_RoomMemory();
             roomMemories[currentRoom].FirstSetting();
         }
 
         bool isNewObjectRecognized = false; // 新たに視認したオブジェクトがあるかどうかを判定するフラグ
         // 視認したオブジェクトを記憶に保存
-        foreach (ThiefTarget target in visionTargets)
+        foreach (CS_ThiefTarget target in visionTargets)
         {
 
             // 現在の部屋の記憶に認識しているオブジェクトのリストがない場合は新たに作成
-            if (roomMemories[currentRoom].recognizedObjects == null) roomMemories[currentRoom].recognizedObjects = new List<ThiefTarget>();
+            if (roomMemories[currentRoom].recognizedObjects == null) roomMemories[currentRoom].recognizedObjects = new List<CS_ThiefTarget>();
 
             bool isAlreadyRecognized = false; // 既に記憶しているオブジェクトかどうかを判定するフラグ
             foreach (var entry in roomMemories[currentRoom].recognizedObjects)
@@ -569,12 +578,12 @@ public class ThiefAI : MonoBehaviour
             }
             if (isAlreadyRecognized)
             {
-                if (target is VisionTarget)
+                if (target is CS_VisionTarget)
                 {
                     // 既に記憶しているオブジェクトが視認オブジェクト(VisionTarget)の場合は、探索している人がいるかどうかの情報を更新する
-                    if (visionTargetMemories.ContainsKey((VisionTarget)target))
+                    if (visionTargetMemories.ContainsKey((CS_VisionTarget)target))
                     {
-                        visionTargetMemories[((VisionTarget)target)].searchThief = ((VisionTarget)target).searchThief;
+                        visionTargetMemories[((CS_VisionTarget)target)].searchThief = ((CS_VisionTarget)target).searchThief;
                     }
                 }
 
@@ -582,10 +591,10 @@ public class ThiefAI : MonoBehaviour
             }
 
 
-            if (target is PlayerTarget)
+            if (target is CS_PlayerTarget)
             {
                 // 現在の探索対象が宝物である場合は、プレイヤーを探索対象に設定しない
-                if (currentTarget is VisionTarget && ((VisionTarget)currentTarget).targetType == VisionTarget.TargetType.Treasure)
+                if (currentTarget is CS_VisionTarget && ((CS_VisionTarget)currentTarget).targetType == CS_VisionTarget.TargetType.Treasure)
                 {
                     continue;
                 }
@@ -608,7 +617,7 @@ public class ThiefAI : MonoBehaviour
             // 新しいオブジェクトを記憶に追加
             roomMemories[currentRoom].recognizedObjects.Add(target);
             // 記憶領域の作成
-            if (target is VisionTarget) visionTargetMemories[((VisionTarget)target)] = new VisionTargetMemory();
+            if (target is CS_VisionTarget) visionTargetMemories[((CS_VisionTarget)target)] = new CS_VisionTargetMemory();
 
             isNewObjectRecognized = true; // 新たに視認したオブジェクトがある場合はフラグを立てる
         }
@@ -632,7 +641,7 @@ public class ThiefAI : MonoBehaviour
         foreach (var entry in roomMemories[currentRoom].recognizedObjects)
         {
             // 未探索のオブジェクトで、かつ他者にも探索されているオブジェクトがある場合は、未探索のオブジェクトがあると判定してtrueを返す
-            if (!visionTargetMemories[((VisionTarget)entry)].isExplored && (visionTargetMemories[((VisionTarget)entry)].searchThief == null)) return true;
+            if (!visionTargetMemories[((CS_VisionTarget)entry)].isExplored && (visionTargetMemories[((CS_VisionTarget)entry)].searchThief == null)) return true;
         }
 
         // 全てのオブジェクトが探索済みの場合はfalseを返す
@@ -650,37 +659,37 @@ public class ThiefAI : MonoBehaviour
         // 未探索のオブジェクトがある場合は、未探索のオブジェクトを優先して探索対象に設定
         if (HasUnexploredTargets())
         {
-            if (currentTarget is VisionTarget)
+            if (currentTarget is CS_VisionTarget)
             {
-                if (currentTarget != null && (VisionTarget)currentTarget)
+                if (currentTarget != null && (CS_VisionTarget)currentTarget)
                 {
-                    ((VisionTarget)currentTarget).searchThief = null; // 現在の探索対象の探索している人をリセットする
+                    ((CS_VisionTarget)currentTarget).searchThief = null; // 現在の探索対象の探索している人をリセットする
                 }
             }
 
             foreach (var entry in roomMemories[currentRoom].recognizedObjects)
             {
                 // 既に探索済みのオブジェクトはスキップ
-                if (visionTargetMemories[((VisionTarget)entry)].isExplored) continue;
+                if (visionTargetMemories[((CS_VisionTarget)entry)].isExplored) continue;
 
                 // 他者にも探索されているオブジェクトはスキップ
-                if (visionTargetMemories[((VisionTarget)entry)].searchThief != null) continue;
+                if (visionTargetMemories[((CS_VisionTarget)entry)].searchThief != null) continue;
 
                 // 既に探索対象に設定しているオブジェクトはスキップ
                 if (entry == currentTarget) continue;
 
                 // 現在の探索対象が視認オブジェクト(VisionTarget)かどうか
-                if (entry is VisionTarget)
+                if (entry is CS_VisionTarget)
                 {
                     // 探索対象の優先順位を決めるロジック
-                    switch (((VisionTarget)entry).targetType)
+                    switch (((CS_VisionTarget)entry).targetType)
                     {
-                        case VisionTarget.TargetType.Treasure:
+                        case CS_VisionTarget.TargetType.Treasure:
                             {
-                                if (currentTarget is VisionTarget)
+                                if (currentTarget is CS_VisionTarget)
                                 {
                                     // 現在の探索対象が宝物でない場合は、問答無用で宝物を探索対象に設定
-                                    if (((VisionTarget)currentTarget).targetType != VisionTarget.TargetType.Treasure)
+                                    if (((CS_VisionTarget)currentTarget).targetType != CS_VisionTarget.TargetType.Treasure)
                                     {
                                         currentTarget = entry;
                                         break;
@@ -700,11 +709,11 @@ public class ThiefAI : MonoBehaviour
                                         else continue;
                                     }
                                 }
-                                else if (currentTarget is TrapTarget)
+                                else if (currentTarget is CS_TrapTarget)
                                 {
 
                                     // 空の宝箱型の罠の場合ではない場合は、スキップ
-                                    if (entry is TrapTarget tt && tt.gimmickScript.gimmick != Gimmick.EmptyChest) continue;
+                                    if (entry is CS_TrapTarget tt && tt.gimmickScript.gimmick != Gimmick.EmptyChest) continue;
 
                                     // 宝物罠の場合は、距離判定で探索対象を切り替える
                                     // オブジェクトとの距離を計算
@@ -725,12 +734,12 @@ public class ThiefAI : MonoBehaviour
                                 }
                             }
                             break;
-                        case VisionTarget.TargetType.RoomObject:
+                        case CS_VisionTarget.TargetType.RoomObject:
                             {
                                 // 現在の探索対象が宝物の場合は、スキップ
-                                if (currentTarget is VisionTarget vt && vt.targetType == VisionTarget.TargetType.Treasure) continue;
+                                if (currentTarget is CS_VisionTarget vt && vt.targetType == CS_VisionTarget.TargetType.Treasure) continue;
                                 // 現在の探索対象が空の宝箱型の罠の場合は、スキップ
-                                if (currentTarget is TrapTarget tt && tt.gimmickScript.gimmick == Gimmick.EmptyChest) continue;
+                                if (currentTarget is CS_TrapTarget tt && tt.gimmickScript.gimmick == Gimmick.EmptyChest) continue;
 
                                 // オブジェクトとの距離を計算
                                 float distance = Vector3.Distance(transform.position, entry.transform.position);
@@ -746,12 +755,12 @@ public class ThiefAI : MonoBehaviour
                             break;
                     }
                 }
-                else if (entry is TrapTarget)
+                else if (entry is CS_TrapTarget)
                 {
                     // 宝物を探索対象にしている場合は、スキップ
-                    if (currentTarget is VisionTarget vt && vt.targetType == VisionTarget.TargetType.Treasure) continue;
+                    if (currentTarget is CS_VisionTarget vt && vt.targetType == CS_VisionTarget.TargetType.Treasure) continue;
                     // 宝物の罠を探索対象にしている場合は、スキップ
-                    if (currentTarget is TrapTarget tt && tt.gimmickScript.gimmick == Gimmick.EmptyChest) continue;
+                    if (currentTarget is CS_TrapTarget tt && tt.gimmickScript.gimmick == Gimmick.EmptyChest) continue;
 
                     // オブジェクトとの距離を計算
                     float distance = Vector3.Distance(transform.position, entry.transform.position);
@@ -770,19 +779,19 @@ public class ThiefAI : MonoBehaviour
         else
         {
             // 前回の探索対象がThiefTargetの派生クラスかどうか(前回が移動ポイントでない場合)
-            if (currentTarget == null || currentTarget is VisionTarget || currentTarget is TrapTarget || currentTarget is PlayerTarget)
+            if (currentTarget == null || currentTarget is CS_VisionTarget || currentTarget is CS_TrapTarget || currentTarget is CS_PlayerTarget)
             {
                 // 前回の探索対象が視認オブジェクト(VisionTarget)の場合は、探索対象をリセットする
                 if (currentTarget != null)
                 {
-                    if ((VisionTarget)currentTarget)
+                    if ((CS_VisionTarget)currentTarget)
                     {
-                        ((VisionTarget)currentTarget).searchThief = null;
+                        ((CS_VisionTarget)currentTarget).searchThief = null;
                         currentTarget = null;
                     }
                 }
                 // 視認オブジェクトから移動ポイントにする場合は一番近いものを探索対象に設定
-                foreach (ThiefTarget target in currentRoom.movePoints)
+                foreach (CS_ThiefTarget target in currentRoom.movePoints)
                 {
                     if (target == null) continue;
 
@@ -839,10 +848,10 @@ public class ThiefAI : MonoBehaviour
             }
         }
 
-        if (currentTarget is VisionTarget)
+        if (currentTarget is CS_VisionTarget)
         {
             // 探索対象が走り状態になる標的オブジェクトのタイプリストに含まれている場合は、走り状態に切り替える
-            if (runTargetTypes.Contains(((VisionTarget)currentTarget).targetType))
+            if (runTargetTypes.Contains(((CS_VisionTarget)currentTarget).targetType))
             {
                 navMeshAgent.speed = runSpeed;
             }
@@ -873,10 +882,10 @@ public class ThiefAI : MonoBehaviour
         switch (type)
         {
             case Gimmick.Pot:
-                thiefReaction.SetReactionUI(ThiefReaction.ThiefReactionType.Pot);
+                thiefReaction.SetReactionUI(CS_ThiefReaction.ThiefReactionType.Pot);
                 break;
             case Gimmick.IronBall:
-                thiefReaction.SetReactionUI(ThiefReaction.ThiefReactionType.IronBall);
+                thiefReaction.SetReactionUI(CS_ThiefReaction.ThiefReactionType.IronBall);
                 break;
             case Gimmick.EmptyChest:
             case Gimmick.None:
@@ -919,13 +928,13 @@ public class ThiefAI : MonoBehaviour
             return;
         }
 
-        currentRoom = currentobject.transform.GetComponentInChildren<RoomNode>();
+        currentRoom = currentobject.transform.GetComponentInChildren<CS_RoomNode>();
         currentRoomObject = currentobject;
 
         // 現在いる部屋の記憶がない場合は新たに作成
         if (!roomMemories.ContainsKey(currentRoom))
         {
-            roomMemories[currentRoom] = new RoomMemory();
+            roomMemories[currentRoom] = new CS_RoomMemory();
             roomMemories[currentRoom].FirstSetting();
             roomMemories[currentRoom].explorationLevel = currentRoom.initialExplorationLevel;
         }
@@ -977,7 +986,7 @@ public class ThiefAI : MonoBehaviour
                 // 行ったことのある方向をリストから除外
                 CS_RoomMoveConnection nextRoom;
                 roomCreatePoint.TryGetConnection(connectDirs[i], out nextRoom);
-                if (roomMemories.ContainsKey(nextRoom.TargetCreatePoint.GetComponentInChildren<RoomNode>()))
+                if (roomMemories.ContainsKey(nextRoom.TargetCreatePoint.GetComponentInChildren<CS_RoomNode>()))
                 {
                     connectDirs.RemoveAt(i);
                     i--;
@@ -1006,7 +1015,7 @@ public class ThiefAI : MonoBehaviour
             CS_RoomMoveConnection nextRoom;
             roomCreatePoint.TryGetConnection(dir, out nextRoom);
 
-            if (nextRoom.TargetCreatePoint.GetComponentInChildren<RoomNode>().transform.tag == "TreasureRoom")
+            if (nextRoom.TargetCreatePoint.GetComponentInChildren<CS_RoomNode>().transform.tag == "TreasureRoom")
             {
                 hasTreasureRoom = true;
                 break;
@@ -1020,7 +1029,7 @@ public class ThiefAI : MonoBehaviour
                 CS_RoomMoveConnection nextRoom;
                 roomCreatePoint.TryGetConnection(connectDirs[i], out nextRoom);
 
-                if (nextRoom.TargetCreatePoint.GetComponentInChildren<RoomNode>().transform.tag != "TreasureRoom")
+                if (nextRoom.TargetCreatePoint.GetComponentInChildren<CS_RoomNode>().transform.tag != "TreasureRoom")
                 {
                     connectDirs.RemoveAt(i);
                     i--;
@@ -1059,7 +1068,7 @@ public class ThiefAI : MonoBehaviour
         {
             // 選択した方向のドアを記憶から削除
             bool isRemoved = false; // 選択した方向のドアを記憶から削除したかどうかを判定するフラグ
-            RoomNode targetRoomNode = null;
+            CS_RoomNode targetRoomNode = null;
             foreach (var room in roomMemories)
             {
                 foreach (var dir in room.Value.unchosenDoors)
@@ -1124,7 +1133,7 @@ public class ThiefAI : MonoBehaviour
         {
             CS_RoomMoveConnection nextRoom;
             roomCreatePoint.TryGetConnection(dir, out nextRoom);
-            if (!roomMemories.ContainsKey(nextRoom.TargetCreatePoint.GetComponentInChildren<RoomNode>())) return true;
+            if (!roomMemories.ContainsKey(nextRoom.TargetCreatePoint.GetComponentInChildren<CS_RoomNode>())) return true;
         }
         return false;
     }
@@ -1134,7 +1143,7 @@ public class ThiefAI : MonoBehaviour
     /// (対象：プレイヤーが攻撃してきたときや、ミミックの罠にかかったときなど)
     /// </summary>
     /// <param name="target">新しく設定する探索対象</param>
-    public void SetTarget(ThiefTarget target)
+    public void SetTarget(CS_ThiefTarget target)
     {
         currentTarget = target;
     }
@@ -1143,7 +1152,7 @@ public class ThiefAI : MonoBehaviour
     /// 指定のオブジェクトに関する記憶を消去する処理
     /// </summary>
     /// <param name="obj">指定オブジェクト</param>
-    public void EraseTheMemory(ThiefTarget obj)
+    public void EraseTheMemory(CS_ThiefTarget obj)
     {
         foreach (var room in roomMemories)
         {
@@ -1177,15 +1186,15 @@ public class ThiefAI : MonoBehaviour
         if (currentTarget == null) return false;
 
         // 現在の探索対象が視認オブジェクト(VisionTarget)でない場合は、falseを返す
-        if (!(currentTarget is VisionTarget)) return false;
+        if (!(currentTarget is CS_VisionTarget)) return false;
 
         // 探索対象の探索にかかる時間を経過させる
         //　((VisionTarget)currentTarget).explorationProgress　: 対象の探索度(MAX : 100.0f)
         // searchTime : 探索対象の探索にかかる時間
-        visionTargetMemories[((VisionTarget)currentTarget)].explorationProgress += (100.0f / searchTime) * Time.deltaTime;
+        visionTargetMemories[((CS_VisionTarget)currentTarget)].explorationProgress += (100.0f / searchTime) * Time.deltaTime;
 
         // 探索対象の探索にかかる時間が経過した場合は、trueを返す
-        if (visionTargetMemories[((VisionTarget)currentTarget)].explorationProgress >= 100.0f) return true;
+        if (visionTargetMemories[((CS_VisionTarget)currentTarget)].explorationProgress >= 100.0f) return true;
 
         return false;
     }
@@ -1265,13 +1274,13 @@ public class ThiefAI : MonoBehaviour
         // -------- 終点が属する部屋(endRoom)を特定 --------
         // end は Transformなので、その Transform が属する RoomCreatePoint を Raycast 等で取得し、
         //そこから RoomNode を引き当てる
-        RoomNode endRoom = null;
+        CS_RoomNode endRoom = null;
         try
         {
             GameObject endRoomObj = CS_RoomCreatePointRaycast.GetRayRoomCreatePoint(end.gameObject);
             if (endRoomObj != null)
             {
-                endRoom = endRoomObj.GetComponentInChildren<RoomNode>();
+                endRoom = endRoomObj.GetComponentInChildren<CS_RoomNode>();
             }
         }
         catch
@@ -1299,8 +1308,8 @@ public class ThiefAI : MonoBehaviour
         // closed : 確定済みノード（これ以上更新しない）
         // bestG : 各部屋(RoomNode)に到達する最小コスト(G)の記録
         var open = new List<RouteNode>();
-        var closed = new HashSet<RoomNode>();
-        var bestG = new Dictionary<RoomNode, float>();
+        var closed = new HashSet<CS_RoomNode>();
+        var bestG = new Dictionary<CS_RoomNode, float>();
 
         // 開始ノード：現在部屋
         // - G:開始なので0
@@ -1458,7 +1467,7 @@ public class ThiefAI : MonoBehaviour
     private sealed class RouteNode
     {
         /// <summary>この探索ノードが表す部屋</summary>
-        public RoomNode Room;
+        public CS_RoomNode Room;
 
         /// <summary>ひとつ前のノード（経路復元に使用）</summary>
         public RouteNode Parent;
@@ -1478,7 +1487,7 @@ public class ThiefAI : MonoBehaviour
         /// <summary>評価値（小さいほど優先度が高い）</summary>
         public float F => G + H;
 
-        public RouteNode(RoomNode room, RouteNode parent, Transform viaDoor, float g, float h)
+        public RouteNode(CS_RoomNode room, RouteNode parent, Transform viaDoor, float g, float h)
         {
             Room = room;
             Parent = parent;
@@ -1497,11 +1506,11 @@ public class ThiefAI : MonoBehaviour
     /// </summary>
     private struct NeighborEdge
     {
-        public RoomNode NextRoom;
+        public CS_RoomNode NextRoom;
         public Transform Door;
         public float Cost;
 
-        public NeighborEdge(RoomNode nextRoom, Transform door, float cost)
+        public NeighborEdge(CS_RoomNode nextRoom, Transform door, float cost)
         {
             NextRoom = nextRoom;
             Door = door;
@@ -1521,7 +1530,7 @@ public class ThiefAI : MonoBehaviour
     /// -ここでは「行ったことがある部屋」制限は掛けない（ConstructionRoute側で判定）。
     /// - 接続が壊れている・参照が取れないケースは `yield break/continue`で安全側に倒す。
     /// </summary>
-    private IEnumerable<NeighborEdge> GetNeighbors(RoomNode from)
+    private IEnumerable<NeighborEdge> GetNeighbors(CS_RoomNode from)
     {
         if (from == null) yield break;
 
@@ -1542,7 +1551,7 @@ public class ThiefAI : MonoBehaviour
             CS_RoomMoveConnection connection;
             if (!createPoint.TryGetConnection(dir, out connection) || connection == null || connection.TargetCreatePoint == null) continue;
 
-            RoomNode nextRoom = connection.TargetCreatePoint.GetComponentInChildren<RoomNode>();
+            CS_RoomNode nextRoom = connection.TargetCreatePoint.GetComponentInChildren<CS_RoomNode>();
             if (nextRoom == null) continue;
 
             // コスト：部屋中心間の距離（取得できなければ1 とする）
@@ -1567,7 +1576,7 @@ public class ThiefAI : MonoBehaviour
     /// - ドア位置ではなく部屋の Transform 座標を使うため、厳密な移動距離とは一致しない。
     /// -ただし部屋移動の大まかな近さを示せるため、探索効率は上がる。
     /// </summary>
-    private float Heuristic(RoomNode a, RoomNode b)
+    private float Heuristic(CS_RoomNode a, CS_RoomNode b)
     {
         if (a == null || b == null) return 0f;
         return Vector3.Distance(a.transform.position, b.transform.position);
@@ -1597,7 +1606,7 @@ public class ThiefAI : MonoBehaviour
         if (!avoidZoneIDs.Contains(zoneID)) avoidZoneIDs.Add(zoneID);
 
         // SmartNavAgent がある場合は即時反映
-        if (smartNavAgent == null) smartNavAgent = GetComponent<SmartNavAgent>();
+        if (smartNavAgent == null) smartNavAgent = GetComponent<CS_SmartNavAgent>();
         if (smartNavAgent != null)
         {
             smartNavAgent.SetAvoidZoneIDs(avoidZoneIDs);

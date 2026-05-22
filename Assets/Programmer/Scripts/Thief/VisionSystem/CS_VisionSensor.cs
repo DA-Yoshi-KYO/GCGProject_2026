@@ -5,13 +5,15 @@
  * ----------------------------------------------------------
  * 2026-04-19 | 初回作成
  * 2026-04-24 | TrapTargetへの対応を追加
+ * 2026-05-22 | ファイル名を変更（VisionSensor.cs → CS_VisionSensor.cs）
+ *            | クラス名を変更（VisionSensor → CS_VisionSensor）
  * 
  */
 using System.Collections.Generic;
 using UnityEngine;
 
 // 視界を管理するセンサー
-public class VisionSensor : MonoBehaviour
+public class CS_VisionSensor : MonoBehaviour
 {
     [Header("視界設定")]
     [Tooltip("視界の半径"), Min(0)]
@@ -31,18 +33,25 @@ public class VisionSensor : MonoBehaviour
     private Color gizmoColor = Color.yellow;
 
 
-    // 視界の半径と角度を設定するメソッド
+    /// <summary>
+    /// 視界の設定を行うメソッド
+    /// </summary>
+    ///　<param name="viewDistance">視界の半径</param>
+    ///　<param name="viewAngle">視界の角度</param>
     public void Setting(float viewDistance, float viewAngle)
     {
         this.viewDistance = viewDistance;
         this.viewAngle = viewAngle;
     }
 
-    // 視界内のターゲットをスキャンしてリストで返す
-    public List<ThiefTarget> Scan()
+    /// <summary>
+    /// 視界内のターゲットをスキャンしてリストで返すメソッド
+    /// </summary>
+    /// <returns>視界内のターゲットのリスト</returns>
+    public List<CS_ThiefTarget> Scan()
     {
         // 視界内のターゲットを格納するリスト
-        List<ThiefTarget> visibleTargets = new List<ThiefTarget>();
+        List<CS_ThiefTarget> visibleTargets = new List<CS_ThiefTarget>();
 
         // 視界内のコライダーを取得
         Collider[] hits = Physics.OverlapSphere(transform.position, viewDistance, targetLayer);
@@ -52,13 +61,13 @@ public class VisionSensor : MonoBehaviour
         {
             
             // VisionTargetコンポーネントを取得
-            ThiefTarget target = hit.GetComponent<VisionTarget>();
+            CS_ThiefTarget target = hit.GetComponent<CS_VisionTarget>();
             if (target == null)
             {
-                target = hit.GetComponent<TrapTarget>();
+                target = hit.GetComponent<CS_TrapTarget>();
                 if (target == null)
                 {
-                    target = hit.GetComponent<PlayerTarget>();
+                    target = hit.GetComponent<CS_PlayerTarget>();
                     if (target == null)
                     {
                         continue; // VisionTargetもTrapTargetもPlayerTargetもない場合はスキップ
@@ -77,8 +86,12 @@ public class VisionSensor : MonoBehaviour
         return visibleTargets;
     }
 
-    // ターゲットが視界内にあるかどうかを判定するメソッド
-    private bool IsVisible(ThiefTarget target)
+    /// <summary>
+    /// ターゲットが視界内にあるかどうかを判定するメソッド
+    /// </summary>
+    /// <param name="target">判定するターゲット</param>
+    /// <returns>ターゲットが視界内にある場合はtrue、そうでない場合はfalse</returns>
+    private bool IsVisible(CS_ThiefTarget target)
     {
         // ターゲットへの方向ベクトルを計算
         Vector3 dir = (target.transform.position - transform.position).normalized;
@@ -97,7 +110,9 @@ public class VisionSensor : MonoBehaviour
     }
 
 
-    // ギズモを描画して視界を可視化
+    /// <summary>
+    /// ギズモを描画するメソッド
+    /// </summary>
     void OnDrawGizmos()
     {
         if (!showGizmos) return;
@@ -115,7 +130,7 @@ public class VisionSensor : MonoBehaviour
         Collider[] hits = Physics.OverlapSphere(transform.position, viewDistance, targetLayer);
         foreach (var hit in hits)
         {
-            VisionTarget target = hit.GetComponent<VisionTarget>();
+            CS_VisionTarget target = hit.GetComponent<CS_VisionTarget>();
             if (target == null) continue;
 
             if (!IsVisible(target)) Gizmos.color = Color.red;
@@ -126,7 +141,7 @@ public class VisionSensor : MonoBehaviour
 
         // 探索対象をギズモで表示
         Gizmos.color = Color.blue;
-        ThiefAI thiefAI = this.GetComponent<ThiefAI>();
+        CS_ThiefAI thiefAI = this.GetComponent<CS_ThiefAI>();
         if (thiefAI != null && thiefAI.CurrentTarget != null)
         {
             Gizmos.DrawLine(transform.position, thiefAI.CurrentTarget.transform.position);

@@ -1,13 +1,11 @@
-/*＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
- * SmartNavAgent
- *＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
- *目的：
- * - NavMeshAgent の通常経路を利用しつつ、独自 DangerZone を回避する。
- *
- *重要：
- * - NavMesh の Bake 再実行なし
- * - NavMeshObstacle(Carve)なし
- * - path.corners を使って "危険ゾーンを横切る可能性" を軽量に判定
+/* ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+ *    泥棒の危険地帯を考慮して目的地を決める、自己改良型NavMeshAgent
+ * ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+ *     宇留野陸斗
+ * ----------------------------------------------------------
+ * 2026-05-21 | 初回作成
+ * 2026-05-22 | ファイル名を変更（SmartNavAgent.cs → CS_SmartNavAgent.cs）
+ *            | クラス名を変更（SmartNavAgent → CS_SmartNavAgent）
  *
  */
 using System.Collections.Generic;
@@ -19,7 +17,7 @@ using UnityEngine.AI;
 /// </summary>
 [DisallowMultipleComponent]
 [RequireComponent(typeof(NavMeshAgent))]
-public sealed class SmartNavAgent : MonoBehaviour
+public sealed class CS_SmartNavAgent : MonoBehaviour
 {
     [SerializeField, Tooltip("使用する NavMeshAgent。未設定の場合は同一GameObjectから取得")]
     private NavMeshAgent agent;
@@ -37,16 +35,18 @@ public sealed class SmartNavAgent : MonoBehaviour
     [SerializeField, Tooltip("NavMesh.SamplePosition の最大探索距離")]
     private float sampleMaxDistance = 2f;
 
-    // 経路計算用（GC抑制のため使い回す）
+    [Tooltip("経路計算用（GC抑制のため使い回す）")]
     private NavMeshPath reusablePath;
 
     public NavMeshAgent Agent => agent;
 
     public IReadOnlyList<int> AvoidZoneIDs => avoidZoneIDs;
 
+    /// <summary>
+    /// 初期化。NavMeshPath と NavMeshAgent を用意する。
+    /// </summary>
     private void Awake()
     {
-        // Unity制約：NavMeshPath はコンストラクタ/フィールド初期化で newしない
         if (reusablePath == null)
         {
             reusablePath = new NavMeshPath();
@@ -93,7 +93,7 @@ public sealed class SmartNavAgent : MonoBehaviour
         }
 
         // DangerZoneManager が無い/ゾーンが無いなら通常移動
-        var mgr = DangerZoneManager.Instance;
+        var mgr = CS_DangerZoneManager.Instance;
         if (mgr == null || mgr.Zones == null || mgr.Zones.Count == 0)
         {
             agent.SetDestination(target);
@@ -108,6 +108,7 @@ public sealed class SmartNavAgent : MonoBehaviour
             return;
         }
 
+        // 経路上に回避対象がなければ通常移動
         if (!PathContainsDanger(reusablePath))
         {
             agent.SetDestination(target);
@@ -127,7 +128,7 @@ public sealed class SmartNavAgent : MonoBehaviour
         if (path == null) return false;
         if (avoidZoneIDs == null || avoidZoneIDs.Count == 0) return false;
 
-        var mgr = DangerZoneManager.Instance;
+        var mgr = CS_DangerZoneManager.Instance;
         if (mgr == null || mgr.Zones == null || mgr.Zones.Count == 0) return false;
 
         var corners = path.corners;
