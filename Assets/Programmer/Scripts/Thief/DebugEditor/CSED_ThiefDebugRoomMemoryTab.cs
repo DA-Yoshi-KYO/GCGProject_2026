@@ -227,7 +227,7 @@ internal sealed class CSED_ThiefDebugRoomMemoryTab
         }
 
         // 誤って別コンポーネントが入った場合の保険
-        if (thief.GetType().Name != "ThiefAI")
+        if (thief.GetType().Name != "CS_ThiefAI")
         {
             EditorGUILayout.HelpBox("選択したオブジェクトは泥棒AIではありません。", MessageType.Warning);
             return;

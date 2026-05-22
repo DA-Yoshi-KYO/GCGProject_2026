@@ -473,7 +473,7 @@ public class CS_ThiefAI : MonoBehaviour
         }
 
         // ドアに十分近づいたら、次のドアへ
-        if (Vector3.Distance(transform.position, door.position) < 1.0f)
+        if (Vector3.Distance(transform.position, door.position) < 1.5f)
         {
             moveRoute.RemoveAt(0);
             isNextRoomMovePointDecided = false; // 次の部屋に移動するためのポイントを決定していない状態に戻す
