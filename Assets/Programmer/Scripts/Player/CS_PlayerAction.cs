@@ -17,7 +17,7 @@ using UnityEngine.InputSystem;
 
 public class CS_PlayerAction : MonoBehaviour
 {
-    [SerializeField] private int initSoul = 5;//初期のソウルの数
+    //[SerializeField] private int initSoul = 5;//初期のソウルの数
     [SerializeField] private float switchInteract = 1f;//ギミックの起動へ切り替る為に必要な長押しの時間
     [SerializeField] private GameObject interactField = null;//インタラクトの範囲を示すフィールド
     [SerializeField] private float interactSpeed = 1f;//インタラクトの速度(interactSpeed秒で範囲が1になる)
@@ -45,7 +45,7 @@ public class CS_PlayerAction : MonoBehaviour
     void Start()
     {
         //現在のソウルの数
-        currentSoul = initSoul;
+        //currentSoul = initSoul;
         playerData = GetComponent<PlayerData>();
 
         // インプットアクションの登録
@@ -88,7 +88,7 @@ public class CS_PlayerAction : MonoBehaviour
         //デバッグ：ギミックの設置位置描画
         DebugDrawGimmickSet();
         // ソウル数などのデバッグコマンド
-        DebugCommand();
+        //DebugCommand();
 #endif
     }
 
@@ -188,11 +188,11 @@ public class CS_PlayerAction : MonoBehaviour
         {
             Debug.LogError("選択されたギミックにGimmickBaseコンポーネントが付いていません"); return;
         }
-        if (currentSoul - gimmick.requiredSoul < 0)
-        {
-            Debug.Log("ソウルが不足しています");
-            return;    // ソウルが足りない場合召喚しない
-        }
+        //if (currentSoul - gimmick.requiredSoul < 0)
+        //{
+        //    Debug.Log("ソウルが不足しています");
+        //    return;    // ソウルが足りない場合召喚しない
+        //}
         GameObject currentRoom = playerData.currentRoomData.GetPlayerRoomData().transform.GetChild(0).gameObject;
         string roomName = currentRoom.name;
         bool isNotSettingRoom = roomName.Contains("Start") || roomName.Contains("Treasure");
@@ -214,7 +214,7 @@ public class CS_PlayerAction : MonoBehaviour
         if (!roomGrid.SetGimmickInGrid(CalculateGimmickSetPosition(), gimmick)) return;
 
         //ソウルの消費
-        currentSoul -= gimmick.requiredSoul;
+        //currentSoul -= gimmick.requiredSoul;
     }
 
     public void SettingGimmickDirection(GimmickBase gimmick)
@@ -465,20 +465,20 @@ public class CS_PlayerAction : MonoBehaviour
     //ソウルの数を加算する関数
     public void AddSoul(int addnum)
     {
-        currentSoul += addnum;
+        //currentSoul += addnum;
     }
 
-    void DebugCommand()
-    {
-        if (Input.GetKey(KeyCode.LeftShift))
-        {
-            if ((Input.GetKey(KeyCode.Space)))
-            {
-                if (Input.GetKeyDown(KeyCode.S))
-                {
-                    currentSoul = initSoul;
-                }
-            }
-        }
-    }
+    //void DebugCommand()
+    //{
+    //    if (Input.GetKey(KeyCode.LeftShift))
+    //    {
+    //        if ((Input.GetKey(KeyCode.Space)))
+    //        {
+    //            if (Input.GetKeyDown(KeyCode.S))
+    //            {
+    //                currentSoul = initSoul;
+    //            }
+    //        }
+    //    }
+    //}
 }
