@@ -74,9 +74,6 @@ public class RockGimmick : GimmickBase
 
             initPositionY = transform.position.y + debugIdleOffset;
             velocity = Vector3.zero;
-
-            CS_PlayerAction playerAction = GameObject.FindObjectOfType<CS_PlayerAction>();
-            playerAction.SettingGimmickDirection(this);
         }
 
         // =========================
@@ -114,11 +111,11 @@ public class RockGimmick : GimmickBase
             }
 
             //インタラクト時転がす
-            if (gimmickDirection == GimmickDirection.Up)
+            if (gimmickDirection == GimmickDirection.Down)
             {//Z+
                 velocity = Vector3.back * rollSpeed;
             }
-            else if (gimmickDirection == GimmickDirection.Down)
+            else if (gimmickDirection == GimmickDirection.Up)
             {//Z-
                 velocity = Vector3.forward * rollSpeed;
             }
