@@ -33,7 +33,7 @@ public class CS_PlayerMove : MonoBehaviour
 
     private float audioTime = 100.0f;
 
-    private CS_3DPlaySE playSE3D;
+    //private CS_3DPlaySE playSE3D;
 
     // Start is called before the first frame update
     void Start()
@@ -67,17 +67,17 @@ public class CS_PlayerMove : MonoBehaviour
         if (Time.timeScale == 0) return;
 
         //移動の足音の処理
-        if(inputDirection.x != 0.0f || inputDirection.y != 0.0f)
-        {
-            if (playSE3D)
-            {
-                if (playSE3D.GetAudioLength("PlayerWalkNormal") < audioTime)
-                {
-                    audioTime = 0.0f;
-                    playSE3D.PlayOneShotSE("PlayerWalkNormal", transform.position, "Walk", CS_3DPlaySE.SEMode.Normal);
-                }
-            }
-        }
+        //if(inputDirection.x != 0.0f || inputDirection.y != 0.0f)
+        //{
+        //    if (playSE3D)
+        //    {
+        //        if (playSE3D.GetAudioLength("PlayerWalkNormal") < audioTime)
+        //        {
+        //            audioTime = 0.0f;
+        //            playSE3D.PlayOneShotSE("PlayerWalkNormal", transform.position, "Walk", CS_3DPlaySE.SEMode.Normal);
+        //        }
+        //    }
+        //}
 
         Vector3 cameraForward = playerCamera.cameraForward;
         Vector3 cameraRight = playerCamera.cameraRight;
