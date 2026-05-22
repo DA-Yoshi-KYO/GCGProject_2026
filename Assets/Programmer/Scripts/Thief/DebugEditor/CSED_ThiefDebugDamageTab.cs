@@ -95,7 +95,7 @@ internal sealed class CSED_ThiefDebugDamageTab
         {
             if (GUILayout.Button("シーンから泥棒AIを収集"))
             {
-                var thiefAiType = FindTypeByName("ThiefAI");
+                var thiefAiType = FindTypeByName("CS_ThiefAI");
                 if (thiefAiType == null)
                 {
                     EditorGUILayout.HelpBox("泥棒AI型が見つかりません。", MessageType.Warning);
@@ -276,7 +276,7 @@ internal sealed class CSED_ThiefDebugDamageTab
     private void TryInvokeTakeDamage(MonoBehaviour thief)
     {
         if (thief == null) return;
-        if (thief.GetType().Name != "ThiefAI") return;
+        if (thief.GetType().Name != "CS_ThiefAI") return;
 
         // Gimmick enum を取得
         var gimmickEnumType = FindTypeByName("Gimmick");

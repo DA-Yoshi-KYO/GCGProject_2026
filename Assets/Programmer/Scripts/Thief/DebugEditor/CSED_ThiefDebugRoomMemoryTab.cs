@@ -96,7 +96,7 @@ internal sealed class CSED_ThiefDebugRoomMemoryTab
             if (GUILayout.Button("シーンから泥棒AIを収集"))
             {
                 // 型名から泥棒AI型を探して収集
-                var thiefAiType = FindTypeByName("ThiefAI");
+                var thiefAiType = FindTypeByName("CS_ThiefAI");
                 if (thiefAiType == null)
                 {
                     EditorGUILayout.HelpBox("泥棒AI型が見つかりません。", MessageType.Warning);
