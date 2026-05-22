@@ -38,7 +38,7 @@ public class RockGimmick : GimmickBase
 
     [Header("DangerZone")]
     [SerializeField, Tooltip("破壊時に生成する DangerZone prefab")]
-    private DangerZone dangerZonePrefab;
+    private CS_DangerZone dangerZonePrefab;
 
     [SerializeField, Tooltip("泥棒のLayer。未設定なら全レイヤー")]
     private LayerMask thiefLayer;
@@ -234,11 +234,11 @@ public class RockGimmick : GimmickBase
 
             if (dangerZonePrefab != null)
             {
-                CSS_ThiefCommonStatusData common = null;
-                var thiefManager = GameObject.FindObjectOfType<ThiefManager>();
+                CO_ThiefCommonStatusData common = null;
+                var thiefManager = GameObject.FindObjectOfType<CS_ThiefManager>();
                 if (thiefManager != null) common = thiefManager.GetThiefCommonDB();
 
-                DangerZoneSpawner.SpawnAndRegisterFromGimmick(dangerZonePrefab, transform.position, this, common, thiefLayer);
+                CS_DangerZoneSpawner.SpawnAndRegisterFromGimmick(dangerZonePrefab, transform.position, this, common, thiefLayer);
             }
             else
             {

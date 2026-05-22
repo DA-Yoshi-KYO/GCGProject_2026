@@ -5,12 +5,16 @@
  * ----------------------------------------------------------
  * 2026-04-19 | 初回作成
  * 2026-05-07 | 探索度を記憶システムに移動
+ * 2026-05-22 | ファイル名を変更（VisionTarget.cs → CS_VisionTarget.cs）
+ *            | クラス名を変更（VisionTarget → CS_VisionTarget）
  * 
  */
 using UnityEngine;
 
-// 視界に入る対象を示すクラス
-public class VisionTarget : ThiefTarget
+/// <summary>
+/// 視界検出ターゲットクラス
+/// </summary>
+public class CS_VisionTarget : CS_ThiefTarget
 {
     // ターゲットの種類
     public enum TargetType
@@ -40,6 +44,9 @@ public class VisionTarget : ThiefTarget
     [SerializeField, Header("このオブジェクトを探索している敵")]
     public GameObject searchThief;
 
+    /// <summary>
+    /// ギズモの表示
+    /// </summary>
     private void OnDrawGizmos()
     {
         if (!showGizmos) return;

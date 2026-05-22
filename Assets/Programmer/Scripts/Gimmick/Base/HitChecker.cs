@@ -122,7 +122,7 @@ public class HitChecker : MonoBehaviour
             return;
         }
 
-        ThiefAI thiefAI = enemy.GetComponent<ThiefAI>();
+        CS_ThiefAI thiefAI = enemy.GetComponent<CS_ThiefAI>();
 
         if (thiefAI != null)
         {
@@ -135,10 +135,10 @@ public class HitChecker : MonoBehaviour
 
     private void EnemyCharm(GameObject enemy)
     {
-        ThiefAI thiefAI = enemy.GetComponent<ThiefAI>();
+        CS_ThiefAI thiefAI = enemy.GetComponent<CS_ThiefAI>();
         if (thiefAI != null)
         {
-            TrapTarget trapTarget = parentGameObject.GetComponent<TrapTarget>();
+            CS_TrapTarget trapTarget = parentGameObject.GetComponent<CS_TrapTarget>();
             if (trapTarget != null)
             {
                 thiefAI.SetTarget(trapTarget);
@@ -200,12 +200,9 @@ public class HitChecker : MonoBehaviour
             // =====================================================
             for (int i = 0 ; i < hitEnemies.Length ; i++)
             {
-                GameObject enemy =
-                    hitEnemies[i].gameObject;
 
-                ThiefAI thiefAI =
-                    enemy.GetComponent<ThiefAI>();
-
+                GameObject enemy = hitEnemies[i].gameObject;
+                CS_ThiefAI thiefAI = enemy.GetComponent<CS_ThiefAI>();
                 if (thiefAI != null)
                 {
                     switch (gimmick)

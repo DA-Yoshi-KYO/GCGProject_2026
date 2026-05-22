@@ -1,17 +1,19 @@
-/*＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
- * DangerZoneSpawner
- *＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
- *目的：
- * -罠発動時に DangerZone を生成する処理を共通化する。
- * - 「一定距離内にいた泥棒」を取得し、その泥棒へ回避対象 zoneID を登録する。
- *
- *備考：
- * - VisionSensor を使わない簡易方式（範囲内=見ていたの代替）。
- * -生成する DangerZone の zoneID/radius/duration は prefab 側の設定を利用する。
+/* ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+ *    危険地帯（DangerZone）生成＆泥棒登録ユーティリティ
+ * ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+ *    宇留野 陸斗
+ * ----------------------------------------------------------
+ * 2026-05-21 | 初回作成
+ * 2026-05-22 | ファイル名を変更（DangerZoneSpawner.cs → CS_DangerZoneSpawner.cs）
+ *            | クラス名を変更（DangerZoneSpawner → CS_DangerZoneSpawner）
+ * 
  */
 using UnityEngine;
 
-public static class DangerZoneSpawner
+/// <summary>
+/// 危険地帯（DangerZone）生成＆泥棒登録ユーティリティクラス。
+/// </summary>
+public static class CS_DangerZoneSpawner
 {
     /// <summary>
     /// DangerZone を生成し、範囲内の泥棒（ThiefAI）へ回避対象として zoneID を登録する。
@@ -20,7 +22,7 @@ public static class DangerZoneSpawner
     /// <param name="spawnPosition">生成位置</param>
     /// <param name="registerRadius">泥棒登録に使う半径（視認の代替）</param>
     /// <param name="thiefLayer">泥棒のLayer（未指定なら全レイヤー）</param>
-    public static DangerZone SpawnAndRegister(DangerZone dangerZonePrefab, Vector3 spawnPosition, float registerRadius, LayerMask thiefLayer)
+    public static CS_DangerZone SpawnAndRegister(CS_DangerZone dangerZonePrefab, Vector3 spawnPosition, float registerRadius, LayerMask thiefLayer)
     {
         if (dangerZonePrefab == null)
         {
@@ -29,7 +31,7 @@ public static class DangerZoneSpawner
         }
 
         // DangerZone を生成
-        DangerZone zone = Object.Instantiate(dangerZonePrefab, spawnPosition, Quaternion.identity);
+        CS_DangerZone zone = Object.Instantiate(dangerZonePrefab, spawnPosition, Quaternion.identity);
         if (zone == null) return null;
 
         // 範囲内泥棒を登録
@@ -38,7 +40,14 @@ public static class DangerZoneSpawner
         return zone;
     }
 
-    private static void RegisterThievesInRange(DangerZone zone, Vector3 center, float radius, LayerMask thiefLayer)
+    /// <summary>
+    /// 指定範囲内の泥棒（ThiefAI）を探索し、DangerZone の zoneID を回避対象として登録する。
+    /// </summary>  
+    /// <param name="zone">登録する DangerZone</param>
+    /// <param name="center">探索の中心位置</param>
+    /// <param name="radius">探索半径</param>
+    /// <param name="thiefLayer">泥棒のLayer （未指定なら全レイヤー）</param>
+    private static void RegisterThievesInRange(CS_DangerZone zone, Vector3 center, float radius, LayerMask thiefLayer)
     {
         if (zone == null) return;
         if (radius <= 0f) return;
@@ -55,7 +64,7 @@ public static class DangerZoneSpawner
             if (col == null) continue;
 
             // 子に付いている可能性を考慮
-            ThiefAI thief = col.GetComponentInParent<ThiefAI>();
+            CS_ThiefAI thief = col.GetComponentInParent<CS_ThiefAI>();
             if (thief == null) continue;
 
             thief.AddAvoidZoneID(zone.ZoneID);
@@ -65,11 +74,11 @@ public static class DangerZoneSpawner
     /// <summary>
     /// GimmickBase の効果範囲を「一定距離」として扱い、DangerZone生成＋登録を行う。
     /// </summary>
-    public static DangerZone SpawnAndRegisterFromGimmick(
-        DangerZone dangerZonePrefab,
+    public static CS_DangerZone SpawnAndRegisterFromGimmick(
+        CS_DangerZone dangerZonePrefab,
         Vector3 spawnPosition,
         GimmickBase gimmick,
-        CSS_ThiefCommonStatusData thiefCommon,
+        CO_ThiefCommonStatusData thiefCommon,
         LayerMask thiefLayer)
     {
         if (gimmick == null)
@@ -80,7 +89,7 @@ public static class DangerZoneSpawner
 
         float registerRadius = CalculateRegisterRadiusFromEffectRange(gimmick);
 
-        DangerZone zone = SpawnAndRegister(dangerZonePrefab, spawnPosition, registerRadius, thiefLayer);
+        CS_DangerZone zone = SpawnAndRegister(dangerZonePrefab, spawnPosition, registerRadius, thiefLayer);
         if (zone == null) return null;
 
         // 残存時間は共通データで上書き
