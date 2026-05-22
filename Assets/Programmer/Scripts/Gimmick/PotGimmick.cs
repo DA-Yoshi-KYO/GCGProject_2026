@@ -32,13 +32,19 @@ public class PotGimmick : GimmickBase
     [SerializeField, Tooltip("泥棒のLayer。未設定なら全レイヤー")]
     private LayerMask thiefLayer;
 
-    private bool isFall = false;  //落下中かどうか
-    private float initPositionY;  //初期位置Y
+    private bool isFall = false;
+    private float initPositionY;
     private bool isFirstUpdate = true;
     private bool isDangerZoneSpawned;
     protected override void IdleUpdate()
     {
     }
+
+    protected override void SearchUpdate()
+    {
+        Debug.Log("PotGimmick: SearchUpdate called", this);
+        base.SearchUpdate();
+    }   
 
     protected override void ActiveUpdate()
     {
