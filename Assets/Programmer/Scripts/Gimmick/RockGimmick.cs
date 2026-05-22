@@ -7,6 +7,7 @@
  * 2026-05-08 | リファクタリング(大瀧)
  */
 
+using System.Collections.Generic;
 using UnityEngine;
 
 public class RockGimmick : GimmickBase
@@ -129,17 +130,14 @@ public class RockGimmick : GimmickBase
             {//X+
                 velocity = Vector3.left * rollSpeed;
             }
-            if (hit.collider.CompareTag("Plane") || hit.collider.CompareTag("Untagged"))
-            {
-                transform.position += velocity * Time.deltaTime;
-                //！！デバッグ用応急処置！！//
-                transform.position = new Vector3(transform.position.x, transform.position.y + debugIdleOffset, transform.position.z);
-            }
+            transform.position += velocity * Time.deltaTime;
+            //！！デバッグ用応急処置！！//
+            transform.position = new Vector3(transform.position.x, transform.position.y + debugIdleOffset, transform.position.z);
             //---------------
             // 壁判定
             // XZ方向にレイを飛ばす
             // 大岩自体が大きいため前後左右レイを少し下に調整
-            Vector3 rayXYOrigin = new Vector3(transform.position.x, transform.position.y - 1.3f, transform.position.z);
+            Vector3 rayXYOrigin = new Vector3(transform.position.x, transform.position.y - 1f, transform.position.z);
             // レイデバッグ
             Debug.DrawRay(rayXYOrigin, velocity * raySideLength, Color.yellow);
             //Debug.Log(rayXYOrigin);
@@ -181,7 +179,14 @@ public class RockGimmick : GimmickBase
                 // 斜面の角度から補正値を計算
                 float angleCorrection;
                 angleCorrection = gravity / 3.141592f + angle / (3.141592f * 2f);
-                pos.y = hit.point.y + 0.4f;
+                if (angle < 5f)
+                {
+                    pos.y = hit.point.y + 0.5f;
+                }
+                else
+                {
+                    pos.y = hit.point.y + 0.4f;
+                }
                 transform.position = new Vector3(pos.x, pos.y + debugUpdateOffset, pos.z);
             }
         }
