@@ -106,6 +106,10 @@ public partial class CSED_CreateTools
         record.editorScriptPath = f_editorScriptPath;
         record.dataScriptPath = f_dataScriptPath;
 
+        record.editorScriptFolderPath = m_GeneratedToolOutputFolderPath;
+        record.dataScriptFolderPath = m_GeneratedScriptableObjectOutputFolderPath;
+        record.assetSaveFolderPath = m_GeneratedAssetOutputFolderPath;
+
         record.headerHistoryDate = m_GeneratedHeaderHistoryDate;
         record.editorHeaderContents = m_GeneratedEditorHeaderContents;
         record.dataHeaderContents = m_GeneratedDataHeaderContents;

@@ -19,6 +19,21 @@ using System.Collections.Generic;
 public class CSED_CreateTools_GeneratedEditorRecord
 {
     /// <summary>
+    /// Editorスクリプト出力フォルダです。
+    /// </summary>
+    public string editorScriptFolderPath;
+
+    /// <summary>
+    /// ScriptableObjectスクリプト出力フォルダです。
+    /// </summary>
+    public string dataScriptFolderPath;
+
+    /// <summary>
+    /// Asset保存先フォルダです。
+    /// </summary>
+    public string assetSaveFolderPath;
+
+    /// <summary>
     /// 表示タイトルです。
     /// </summary>
     public string titleName;

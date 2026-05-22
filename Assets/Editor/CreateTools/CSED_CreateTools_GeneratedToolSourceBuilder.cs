@@ -416,9 +416,33 @@ public partial class CSED_CreateTools
             return;
         }
 
+        if (f_fieldData.FieldType == CSE_CreateTools_FieldType.Vector2Int)
+        {
+            f_builder.AppendLine("        " + f_variableName + " = EditorGUILayout.Vector2IntField(\"" + EscapeString(f_labelName) + "\", " + f_variableName + ");");
+            return;
+        }
+
+        if (f_fieldData.FieldType == CSE_CreateTools_FieldType.Vector3Int)
+        {
+            f_builder.AppendLine("        " + f_variableName + " = EditorGUILayout.Vector3IntField(\"" + EscapeString(f_labelName) + "\", " + f_variableName + ");");
+            return;
+        }
+
         if (f_fieldData.FieldType == CSE_CreateTools_FieldType.Float)
         {
             f_builder.AppendLine("        " + f_variableName + " = EditorGUILayout.FloatField(\"" + EscapeString(f_labelName) + "\", " + f_variableName + ");");
+            return;
+        }
+
+        if (f_fieldData.FieldType == CSE_CreateTools_FieldType.Vector2)
+        {
+            f_builder.AppendLine("        " + f_variableName + " = EditorGUILayout.Vector2Field(\"" + EscapeString(f_labelName) + "\", " + f_variableName + ");");
+            return;
+        }
+
+        if (f_fieldData.FieldType == CSE_CreateTools_FieldType.Vector3)
+        {
+            f_builder.AppendLine("        " + f_variableName + " = EditorGUILayout.Vector3Field(\"" + EscapeString(f_labelName) + "\", " + f_variableName + ");");
             return;
         }
 
@@ -556,8 +580,20 @@ public partial class CSED_CreateTools
             case CSE_CreateTools_FieldType.Int:
                 return "int";
 
+            case CSE_CreateTools_FieldType.Vector2Int:
+                return "Vector2Int";
+
+            case CSE_CreateTools_FieldType.Vector3Int:
+                return "Vector3Int";
+
             case CSE_CreateTools_FieldType.Float:
                 return "float";
+
+            case CSE_CreateTools_FieldType.Vector2:
+                return "Vector2";
+
+            case CSE_CreateTools_FieldType.Vector3:
+                return "Vector3";
 
             case CSE_CreateTools_FieldType.String:
                 return "string";
@@ -591,8 +627,20 @@ public partial class CSED_CreateTools
             case CSE_CreateTools_FieldType.Int:
                 return "int";
 
+            case CSE_CreateTools_FieldType.Vector2Int:
+                return "Vector2Int";
+
+            case CSE_CreateTools_FieldType.Vector3Int:
+                return "Vector3Int";
+
             case CSE_CreateTools_FieldType.Float:
                 return "float";
+
+            case CSE_CreateTools_FieldType.Vector2:
+                return "Vector2";
+
+            case CSE_CreateTools_FieldType.Vector3:
+                return "Vector3";
 
             case CSE_CreateTools_FieldType.String:
                 return "string";
@@ -650,6 +698,26 @@ public partial class CSED_CreateTools
 
         if (f_fieldData.IsDefaultValueNull)
         {
+            if (f_fieldData.FieldType == CSE_CreateTools_FieldType.Vector2Int)
+            {
+                return "Vector2Int.zero";
+            }
+
+            if (f_fieldData.FieldType == CSE_CreateTools_FieldType.Vector3Int)
+            {
+                return "Vector3Int.zero";
+            }
+
+            if (f_fieldData.FieldType == CSE_CreateTools_FieldType.Vector2)
+            {
+                return "Vector2.zero";
+            }
+
+            if (f_fieldData.FieldType == CSE_CreateTools_FieldType.Vector3)
+            {
+                return "Vector3.zero";
+            }
+
             if (f_fieldData.FieldType == CSE_CreateTools_FieldType.String)
             {
                 return "string.Empty";
@@ -1401,23 +1469,9 @@ public partial class CSED_CreateTools
         f_builder.AppendLine("        }");
         f_builder.AppendLine();
         f_builder.AppendLine("        SerializedObject serializedObject = new SerializedObject(f_asset);");
-        f_builder.AppendLine("        SerializedProperty property = serializedObject.GetIterator();");
-        f_builder.AppendLine();
         f_builder.AppendLine("        serializedObject.Update();");
         f_builder.AppendLine();
-        f_builder.AppendLine("        bool enterChildren = true;");
-        f_builder.AppendLine();
-        f_builder.AppendLine("        while (property.NextVisible(enterChildren))");
-        f_builder.AppendLine("        {");
-        f_builder.AppendLine("            enterChildren = false;");
-        f_builder.AppendLine();
-        f_builder.AppendLine("            if (property.name == \"m_Script\")");
-        f_builder.AppendLine("            {");
-        f_builder.AppendLine("                continue;");
-        f_builder.AppendLine("            }");
-        f_builder.AppendLine();
-        f_builder.AppendLine("            EditorGUILayout.PropertyField(property, true);");
-        f_builder.AppendLine("        }");
+        f_builder.AppendLine("        DrawCreatedAssetSerializedFields(serializedObject);");
         f_builder.AppendLine();
         f_builder.AppendLine("        if (serializedObject.ApplyModifiedProperties())");
         f_builder.AppendLine("        {");
@@ -1429,6 +1483,8 @@ public partial class CSED_CreateTools
         f_builder.AppendLine("    }");
         f_builder.AppendLine();
 
+        AppendGeneratedCreatedAssetSerializedFieldMethods(f_builder);
+
         f_builder.AppendLine("    /// <summary>");
         f_builder.AppendLine("    /// AssetをProject上で選択します。");
         f_builder.AppendLine("    /// </summary>");
@@ -1439,6 +1495,125 @@ public partial class CSED_CreateTools
         f_builder.AppendLine("        EditorGUIUtility.PingObject(f_asset);");
         f_builder.AppendLine("    }");
         f_builder.AppendLine("}");
+        f_builder.AppendLine();
+    }
+
+    /// <summary>
+    /// Created Assets側で、生成時のラベル名を使ってScriptableObjectの項目を描画する処理を追加します。
+    /// </summary>
+    /// <param name="f_builder">StringBuilder</param>
+    private void AppendGeneratedCreatedAssetSerializedFieldMethods(StringBuilder f_builder)
+    {
+        f_builder.AppendLine("    /// <summary>");
+        f_builder.AppendLine("    /// 作成済みAssetの各項目を、生成時の表示ラベルで描画します。");
+        f_builder.AppendLine("    /// </summary>");
+        f_builder.AppendLine("    /// <param name=\"f_serializedObject\">対象SerializedObject</param>");
+        f_builder.AppendLine("    private void DrawCreatedAssetSerializedFields(SerializedObject f_serializedObject)");
+        f_builder.AppendLine("    {");
+
+        if (m_FieldDataList != null)
+        {
+            for (int i = 0 ; i < m_FieldDataList.Count ; i++)
+            {
+                CSED_CreateTools_FieldData fieldData = m_FieldDataList[i];
+
+                string variableName = CreateGeneratedVariableName(fieldData.FieldName, i);
+                string labelName = EscapeString(GetGeneratedLabelName(fieldData));
+
+                if (IsGeneratedSingleMinMaxField(fieldData))
+                {
+                    string minVariableName = CreateGeneratedMinVariableName(variableName);
+                    string maxVariableName = CreateGeneratedMaxVariableName(variableName);
+
+                    f_builder.AppendLine("        SerializedProperty " + minVariableName + "Property = f_serializedObject.FindProperty(\"" + minVariableName + "\");");
+                    f_builder.AppendLine("        SerializedProperty " + maxVariableName + "Property = f_serializedObject.FindProperty(\"" + maxVariableName + "\");");
+                    f_builder.AppendLine("        DrawCreatedAssetMinMaxField(\"" + labelName + "\", " + minVariableName + "Property, " + maxVariableName + "Property);");
+                    f_builder.AppendLine("        GUILayout.Space(4.0f);");
+                    f_builder.AppendLine();
+                    continue;
+                }
+
+                f_builder.AppendLine("        DrawCreatedAssetProperty(");
+                f_builder.AppendLine("            f_serializedObject,");
+                f_builder.AppendLine("            \"" + variableName + "\",");
+                f_builder.AppendLine("            \"" + labelName + "\");");
+                f_builder.AppendLine("        GUILayout.Space(4.0f);");
+                f_builder.AppendLine();
+            }
+        }
+
+        f_builder.AppendLine("    }");
+        f_builder.AppendLine();
+
+        f_builder.AppendLine("    /// <summary>");
+        f_builder.AppendLine("    /// 指定したPropertyを表示ラベル付きで描画します。");
+        f_builder.AppendLine("    /// </summary>");
+        f_builder.AppendLine("    /// <param name=\"f_serializedObject\">対象SerializedObject</param>");
+        f_builder.AppendLine("    /// <param name=\"f_propertyName\">Property名</param>");
+        f_builder.AppendLine("    /// <param name=\"f_labelName\">表示ラベル</param>");
+        f_builder.AppendLine("    private void DrawCreatedAssetProperty(");
+        f_builder.AppendLine("        SerializedObject f_serializedObject,");
+        f_builder.AppendLine("        string f_propertyName,");
+        f_builder.AppendLine("        string f_labelName)");
+        f_builder.AppendLine("    {");
+        f_builder.AppendLine("        SerializedProperty property = f_serializedObject.FindProperty(f_propertyName);");
+        f_builder.AppendLine();
+        f_builder.AppendLine("        if (property == null)");
+        f_builder.AppendLine("        {");
+        f_builder.AppendLine("            return;");
+        f_builder.AppendLine("        }");
+        f_builder.AppendLine();
+        f_builder.AppendLine("        EditorGUILayout.PropertyField(");
+        f_builder.AppendLine("            property,");
+        f_builder.AppendLine("            new GUIContent(f_labelName),");
+        f_builder.AppendLine("            true);");
+        f_builder.AppendLine("    }");
+        f_builder.AppendLine();
+
+        f_builder.AppendLine("    /// <summary>");
+        f_builder.AppendLine("    /// MinMaxFieldを表示ラベル付きで描画します。");
+        f_builder.AppendLine("    /// </summary>");
+        f_builder.AppendLine("    /// <param name=\"f_labelName\">表示ラベル</param>");
+        f_builder.AppendLine("    /// <param name=\"f_minProperty\">Min側Property</param>");
+        f_builder.AppendLine("    /// <param name=\"f_maxProperty\">Max側Property</param>");
+        f_builder.AppendLine("    private void DrawCreatedAssetMinMaxField(");
+        f_builder.AppendLine("        string f_labelName,");
+        f_builder.AppendLine("        SerializedProperty f_minProperty,");
+        f_builder.AppendLine("        SerializedProperty f_maxProperty)");
+        f_builder.AppendLine("    {");
+        f_builder.AppendLine("        if (f_minProperty == null || f_maxProperty == null)");
+        f_builder.AppendLine("        {");
+        f_builder.AppendLine("            return;");
+        f_builder.AppendLine("        }");
+        f_builder.AppendLine();
+
+        f_builder.AppendLine("        Rect rowRect = EditorGUILayout.GetControlRect(false, EditorGUIUtility.singleLineHeight);");
+        f_builder.AppendLine();
+
+        f_builder.AppendLine("        float mainLabelWidth = 120.0f;");
+        f_builder.AppendLine("        float smallLabelWidth = 28.0f;");
+        f_builder.AppendLine("        float spacing = 6.0f;");
+        f_builder.AppendLine();
+
+        f_builder.AppendLine("        float valueAreaX = rowRect.x + mainLabelWidth + spacing;");
+        f_builder.AppendLine("        float valueAreaWidth = rowRect.width - mainLabelWidth - spacing;");
+        f_builder.AppendLine("        float fieldWidth = (valueAreaWidth - smallLabelWidth - smallLabelWidth - (spacing * 3.0f)) * 0.5f;");
+        f_builder.AppendLine("        fieldWidth = Mathf.Max(35.0f, fieldWidth);");
+        f_builder.AppendLine();
+
+        f_builder.AppendLine("        Rect labelRect = new Rect(rowRect.x, rowRect.y, mainLabelWidth, rowRect.height);");
+        f_builder.AppendLine("        Rect minLabelRect = new Rect(valueAreaX, rowRect.y, smallLabelWidth, rowRect.height);");
+        f_builder.AppendLine("        Rect minValueRect = new Rect(minLabelRect.xMax + spacing, rowRect.y, fieldWidth, rowRect.height);");
+        f_builder.AppendLine("        Rect maxLabelRect = new Rect(minValueRect.xMax + spacing, rowRect.y, smallLabelWidth, rowRect.height);");
+        f_builder.AppendLine("        Rect maxValueRect = new Rect(maxLabelRect.xMax + spacing, rowRect.y, fieldWidth, rowRect.height);");
+        f_builder.AppendLine();
+
+        f_builder.AppendLine("        EditorGUI.LabelField(labelRect, f_labelName);");
+        f_builder.AppendLine("        EditorGUI.LabelField(minLabelRect, \"Min\");");
+        f_builder.AppendLine("        EditorGUI.PropertyField(minValueRect, f_minProperty, GUIContent.none);");
+        f_builder.AppendLine("        EditorGUI.LabelField(maxLabelRect, \"Max\");");
+        f_builder.AppendLine("        EditorGUI.PropertyField(maxValueRect, f_maxProperty, GUIContent.none);");
+        f_builder.AppendLine("    }");
         f_builder.AppendLine();
     }
 

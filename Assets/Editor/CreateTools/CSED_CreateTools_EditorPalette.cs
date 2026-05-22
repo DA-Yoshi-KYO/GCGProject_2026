@@ -10,6 +10,7 @@
 */
 
 #if UNITY_EDITOR
+using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
 
@@ -92,10 +93,14 @@ public partial class CSED_CreateTools
 
                 DrawEditorPaletteCategoryLabel("Variable");
 
-                GUILayout.Space(c_EditorPaletteSpacing);
+                GUILayout.Space(c_EditorPaletteSpacing); 
 
                 DrawVariablePaletteButton(CSE_CreateTools_FieldType.Int, "int");
+                DrawVariablePaletteButton(CSE_CreateTools_FieldType.Vector2Int, "Vector2Int");
+                DrawVariablePaletteButton(CSE_CreateTools_FieldType.Vector3Int, "Vector3Int");
                 DrawVariablePaletteButton(CSE_CreateTools_FieldType.Float, "float");
+                DrawVariablePaletteButton(CSE_CreateTools_FieldType.Vector2, "Vector2");
+                DrawVariablePaletteButton(CSE_CreateTools_FieldType.Vector3, "Vector3");
                 DrawVariablePaletteButton(CSE_CreateTools_FieldType.String, "string");
                 DrawVariablePaletteButton(CSE_CreateTools_FieldType.Bool, "bool");
                 DrawVariablePaletteButton(CSE_CreateTools_FieldType.ScriptableObject, "ScriptableObject");

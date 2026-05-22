@@ -59,6 +59,22 @@ public partial class CSED_CreateTools
         m_GeneratedScriptableObjectClassName = GetLoadText(f_record.dataClassName, m_GeneratedScriptableObjectClassName);
         m_GeneratedToolMenuPath = GetLoadText(f_record.menuPath, m_GeneratedToolMenuPath);
 
+        m_GeneratedToolOutputFolderPath = GetLoadText(
+           f_record.editorScriptFolderPath,
+           GetFolderPathFromAssetPath(
+              f_record.editorScriptPath,
+              m_GeneratedToolOutputFolderPath));
+
+        m_GeneratedScriptableObjectOutputFolderPath = GetLoadText(
+            f_record.dataScriptFolderPath,
+            GetFolderPathFromAssetPath(
+                f_record.dataScriptPath,
+                m_GeneratedScriptableObjectOutputFolderPath));
+
+        m_GeneratedAssetOutputFolderPath = GetLoadText(
+            f_record.assetSaveFolderPath,
+            m_GeneratedAssetOutputFolderPath);
+
         m_GeneratedDefaultAssetName = GetLoadText(f_record.defaultAssetName, m_GeneratedDefaultAssetName);
         m_GeneratedDefaultAssetFolder = GetLoadText(f_record.defaultAssetFolder, m_GeneratedDefaultAssetFolder);
 
@@ -68,6 +84,31 @@ public partial class CSED_CreateTools
         m_FieldDataReorderableList = null;
 
         Repaint();
+    }
+
+    /// <summary>
+    /// Assetパスからフォルダパスを取得します。
+    /// </summary>
+    /// <param name="f_assetPath">Assetパス</param>
+    /// <param name="f_defaultFolderPath">取得できなかった場合の初期フォルダ</param>
+    /// <returns>フォルダパス</returns>
+    private string GetFolderPathFromAssetPath(
+        string f_assetPath,
+        string f_defaultFolderPath)
+    {
+        if (string.IsNullOrEmpty(f_assetPath))
+        {
+            return f_defaultFolderPath;
+        }
+
+        string folderPath = System.IO.Path.GetDirectoryName(f_assetPath);
+
+        if (string.IsNullOrEmpty(folderPath))
+        {
+            return f_defaultFolderPath;
+        }
+
+        return folderPath.Replace("\\", "/");
     }
 
     /// <summary>

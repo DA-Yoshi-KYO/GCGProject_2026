@@ -26,8 +26,20 @@ public partial class CSED_CreateTools
             case CSE_CreateTools_FieldType.Int:
                 return "int";
 
+            case CSE_CreateTools_FieldType.Vector2Int:
+                return "Vector2Int";
+
+            case CSE_CreateTools_FieldType.Vector3Int:
+                return "Vector3Int";
+
             case CSE_CreateTools_FieldType.Float:
                 return "float";
+
+            case CSE_CreateTools_FieldType.Vector2:
+                return "Vector2";
+
+            case CSE_CreateTools_FieldType.Vector3:
+                return "Vector3";
 
             case CSE_CreateTools_FieldType.String:
                 return "string";

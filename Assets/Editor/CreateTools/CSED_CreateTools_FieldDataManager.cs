@@ -71,6 +71,18 @@ public partial class CSED_CreateTools
             case CSE_CreateTools_FieldType.Int:
                 return "newIntField" + number.ToString("00");
 
+            case CSE_CreateTools_FieldType.Vector2Int:
+                return "newVector2IntField" + number.ToString("00");
+
+            case CSE_CreateTools_FieldType.Vector3Int:
+                return "newVector3IntField" + number.ToString("00");
+
+            case CSE_CreateTools_FieldType.Vector2:
+                return "newVector2Field" + number.ToString("00");
+
+            case CSE_CreateTools_FieldType.Vector3:
+                return "newVector3Field" + number.ToString("00");
+
             case CSE_CreateTools_FieldType.Float:
                 return "newFloatField" + number.ToString("00");
 

@@ -434,7 +434,7 @@ public partial class CSED_CreateTools
             CSE_CreateTools_FieldType beforeListElementFieldType = f_fieldData.ListElementFieldType;
 
             f_fieldData.ListElementFieldType = DrawSmallListElementFieldTypePopup(
-                "  List Type",
+                "  リスト変数",
                 f_fieldData.ListElementFieldType);
 
             if (beforeListElementFieldType != f_fieldData.ListElementFieldType)
@@ -516,7 +516,7 @@ public partial class CSED_CreateTools
         GUILayout.Space(c_FieldInspectorSectionTitleBottomSpacing);
 
         f_fieldData.TagName = DrawSmallTextField(
-            "  Tag Name",
+            "  タグ名",
             f_fieldData.TagName);
 
         GUILayout.Space(c_FieldInspectorSectionTopSpacing);
@@ -544,7 +544,7 @@ public partial class CSED_CreateTools
         GUILayout.Space(c_FieldInspectorSectionTitleBottomSpacing);
 
         f_fieldData.IsDefaultValueNull = DrawSmallToggle(
-            "  Default Is Null",
+            "  NULL",
             f_fieldData.IsDefaultValueNull);
 
         GUILayout.Space(c_FieldInspectorRowSpacing);
@@ -554,19 +554,19 @@ public partial class CSED_CreateTools
             if (f_fieldData.FieldType == CSE_CreateTools_FieldType.ScriptableObject)
             {
                 f_fieldData.DefaultScriptableObjectValue = DrawSmallScriptableObjectDefaultField(
-                    "  Default Value",
+                    "  初期値",
                     f_fieldData);
             }
             else if (f_fieldData.FieldType == CSE_CreateTools_FieldType.Script)
             {
                 f_fieldData.DefaultScriptValue = DrawSmallScriptDefaultField(
-                    "  Default Value",
+                    "  初期値",
                     f_fieldData.DefaultScriptValue);
             }
             else if (f_fieldData.FieldType == CSE_CreateTools_FieldType.GameObject)
             {
                 f_fieldData.DefaultGameObjectValue = DrawSmallGameObjectDefaultField(
-                    "  Default Value",
+                    "  初期値",
                     f_fieldData.DefaultGameObjectValue);
             }
         }
@@ -712,7 +712,7 @@ public partial class CSED_CreateTools
         GUILayout.Space(c_FieldInspectorSectionTitleBottomSpacing);
 
         f_fieldData.IsDefaultValueNull = DrawSmallToggle(
-            "  Default Is Null",
+            "  NULL",
             f_fieldData.IsDefaultValueNull);
 
         GUILayout.Space(c_FieldInspectorRowSpacing);
@@ -722,13 +722,13 @@ public partial class CSED_CreateTools
             if (f_fieldData.FieldType == CSE_CreateTools_FieldType.ScriptableObject)
             {
                 f_fieldData.DefaultScriptableObjectValue = DrawSmallScriptableObjectDefaultField(
-                    "  Default Value",
+                    "  初期値",
                     f_fieldData);
             }
             else
             {
                 f_fieldData.DefaultValueText = DrawSmallTextField(
-                    "  Default Value",
+                    "  初期値",
                     f_fieldData.DefaultValueText);
             }
         }
@@ -876,7 +876,7 @@ public partial class CSED_CreateTools
         GUILayout.Space(c_FieldInspectorRowSpacing);
 
         f_fieldData.IsListDefaultValueNull = DrawSmallToggle(
-            "  Default Is Null",
+            "  NULL",
             f_fieldData.IsListDefaultValueNull);
 
         GUILayout.Space(c_FieldInspectorRowSpacing);
@@ -1151,7 +1151,7 @@ public partial class CSED_CreateTools
     private void DrawTagNameField(CSED_CreateTools_FieldData f_fieldData)
     {
         f_fieldData.TagName = DrawSmallTextField(
-            "  Tag Name",
+            "  タグ名",
             f_fieldData.TagName);
     }
 
@@ -1214,7 +1214,7 @@ public partial class CSED_CreateTools
         GUILayout.Space(c_FieldInspectorSectionTitleBottomSpacing);
 
         f_fieldData.IsDefaultValueNull = DrawSmallToggle(
-            "  Default Is Null",
+            "  NULL",
             f_fieldData.IsDefaultValueNull);
 
         GUILayout.Space(c_FieldInspectorRowSpacing);
@@ -1224,7 +1224,7 @@ public partial class CSED_CreateTools
             bool boolValue = GetFieldDataDefaultBoolValue(f_fieldData);
 
             boolValue = DrawSmallToggle(
-                "  Default Value",
+                "  初期値",
                 boolValue);
 
             f_fieldData.DefaultValueText = boolValue.ToString();
@@ -1259,7 +1259,7 @@ public partial class CSED_CreateTools
         GUILayout.Space(c_FieldInspectorSectionTitleBottomSpacing);
 
         f_fieldData.IsDefaultValueNull = DrawSmallToggle(
-            "  Default Is Null",
+            "  NULL",
             f_fieldData.IsDefaultValueNull);
 
         GUILayout.Space(c_FieldInspectorRowSpacing);
@@ -1267,7 +1267,7 @@ public partial class CSED_CreateTools
         EditorGUI.BeginDisabledGroup(f_fieldData.IsDefaultValueNull);
         {
             f_fieldData.DefaultValueText = DrawSmallTextField(
-                "  Default Value",
+                "  初期値",
                 f_fieldData.DefaultValueText);
         }
         EditorGUI.EndDisabledGroup();
@@ -1666,7 +1666,7 @@ public partial class CSED_CreateTools
             buttonWidth,
             inputRect.height);
 
-        EditorGUI.LabelField(labelRect, "  Element Count");
+        EditorGUI.LabelField(labelRect, "  要素数");
 
         if (GUI.Button(minusRect, "-"))
         {
@@ -1697,7 +1697,11 @@ public partial class CSED_CreateTools
         string[] displayNames =
         {
         "int",
+        "Vector2Int",
+        "Vector3Int",
         "float",
+        "Vector2",
+        "Vector3",
         "string",
         "bool",
         "ScriptableObject",
@@ -1708,7 +1712,11 @@ public partial class CSED_CreateTools
         CSE_CreateTools_FieldType[] values =
         {
         CSE_CreateTools_FieldType.Int,
+        CSE_CreateTools_FieldType.Vector2Int,
+        CSE_CreateTools_FieldType.Vector3Int,
         CSE_CreateTools_FieldType.Float,
+        CSE_CreateTools_FieldType.Vector2,
+        CSE_CreateTools_FieldType.Vector3,
         CSE_CreateTools_FieldType.String,
         CSE_CreateTools_FieldType.Bool,
         CSE_CreateTools_FieldType.ScriptableObject,
