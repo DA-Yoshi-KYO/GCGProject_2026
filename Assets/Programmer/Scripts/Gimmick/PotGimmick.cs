@@ -42,6 +42,7 @@ public class PotGimmick : GimmickBase
 
     protected override void SearchUpdate()
     {
+        Debug.Log("PotGimmick: SearchUpdate called", this);
         base.SearchUpdate();
     }   
 

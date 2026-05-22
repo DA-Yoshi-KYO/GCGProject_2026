@@ -187,7 +187,7 @@ public class GimmickBase : MonoBehaviour
     {
         if (gimmickState == GimmickState.Idle)
         {
-            gimmickState = GimmickState.Active;
+            gimmickState = GimmickState.Search;
         }
     }
 
@@ -396,6 +396,10 @@ public class GimmickBase : MonoBehaviour
                 // Idle状態の処理
                 IdleUpdate();
                 break;
+            case GimmickState.Search:
+            // Search状態の処理
+                SearchUpdate();
+                break;
             case GimmickState.Active:
                 // Active状態の処理
                 ActiveUpdate();
@@ -416,6 +420,8 @@ public class GimmickBase : MonoBehaviour
     }
     protected virtual void SearchUpdate()
     {
+        gimmickState = GimmickState.Active;
+
         // Collider内の泥棒を検知する処理
         Collider[] hitsX = OverlapBoxCollider(searchColliderX);
         Collider[] hitsZ = OverlapBoxCollider(searchColliderZ);
@@ -428,6 +434,7 @@ public class GimmickBase : MonoBehaviour
                 allHits.Add(col);
         }
 
+        Debug.Log("Detected " + allHits.Count + " enemies in search area.");
         if (allHits.Count == 0) return;
 
         // 最も近い敵を探す
@@ -444,25 +451,22 @@ public class GimmickBase : MonoBehaviour
             }
         }
 
+        Debug.Log("Nearest enemy: " + (nearestEnemy != null ? nearestEnemy.name : "None") + ", Distance: " + minDist);
         if (nearestEnemy == null) return;
 
         // 自身から敵への方向ベクトル（XZ平面）
         Vector3 diff = nearestEnemy.position - transform.position;
 
-        // X・Z の絶対値が大きい軸を優先して4方向に分類
         if (Mathf.Abs(diff.x) >= Mathf.Abs(diff.z))
         {
-            // X軸方向が支配的
-            // GetDirectionVec()の定義に合わせて Left=+X, Right=-X
             gimmickDirection = diff.x >= 0f ? GimmickDirection.Left : GimmickDirection.Right;
         }
         else
         {
-            // Z軸方向が支配的
             gimmickDirection = diff.z >= 0f ? GimmickDirection.Up : GimmickDirection.Down;
         }
-        // search状態からActive状態に遷移
-        gimmickState = GimmickState.Active;
+        Debug.Log("Detected enemy: " + nearestEnemy.name + ", Direction: " + gimmickDirection);
+
     }
     protected virtual void ActiveUpdate()
     {
