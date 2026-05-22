@@ -1,5 +1,7 @@
+using UnityEditor.SearchService;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 // 制作者　秋野
 
 
@@ -72,6 +74,8 @@ public class Option : MonoBehaviour
     /// </summary>
     private void OnOption(InputAction.CallbackContext ctx)
     {
+        // タイトルシーンではオプションUIを開かない
+        if (SceneManager.GetActiveScene().name.ToString() == "Title") return;
         if (!_isOptionUIActive)
         {
             OpenOptionUI();
