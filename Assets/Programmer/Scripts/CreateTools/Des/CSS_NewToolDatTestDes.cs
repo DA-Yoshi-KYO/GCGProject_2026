@@ -97,7 +97,7 @@ public class CSS_NewToolDatTestDes : ScriptableObject
     /// <summary>
     /// newListField15です。
     /// </summary>
-    public List<CSS_ThiefCommonStatusData> newListField15;
+    public List<CO_ThiefCommonStatusData> newListField15;
 
     /// <summary>
     /// newListField16です。

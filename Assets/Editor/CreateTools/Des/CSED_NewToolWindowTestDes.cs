@@ -101,7 +101,7 @@ public class CSED_NewToolWindowTestDes : EditorWindow, IHasCustomMenu
     /// <summary>
     /// newListField15です。
     /// </summary>
-    private List<CSS_ThiefCommonStatusData> newListField15 = new List<CSS_ThiefCommonStatusData>()
+    private List<CO_ThiefCommonStatusData> newListField15 = new List<CO_ThiefCommonStatusData>()
     {};
 
     /// <summary>
@@ -292,7 +292,7 @@ public class CSED_NewToolWindowTestDes : EditorWindow, IHasCustomMenu
 
         for (int i = 0; i < newListField15.Count; i++)
         {
-            newListField15[i] = (CSS_ThiefCommonStatusData)EditorGUILayout.ObjectField("Element " + i.ToString(), newListField15[i], typeof(CSS_ThiefCommonStatusData), false);
+            newListField15[i] = (CO_ThiefCommonStatusData)EditorGUILayout.ObjectField("Element " + i.ToString(), newListField15[i], typeof(CO_ThiefCommonStatusData), false);
         }
         GUILayout.Space(6.0f);
 
@@ -368,7 +368,7 @@ public class CSED_NewToolWindowTestDes : EditorWindow, IHasCustomMenu
         asset.newScriptField12 = newScriptField12;
         asset.newField13 = newField13;
         asset.newListField14 = new List<ScriptableObject>(newListField14);
-        asset.newListField15 = new List<CSS_ThiefCommonStatusData>(newListField15);
+        asset.newListField15 = new List<CO_ThiefCommonStatusData>(newListField15);
         asset.newListField16 = new List<GameObject>(newListField16);
 
         string assetPath = AssetDatabase.GenerateUniqueAssetPath(
