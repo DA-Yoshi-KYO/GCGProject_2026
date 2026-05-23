@@ -152,19 +152,19 @@ public partial class CSED_CreateTools
         EditorGUILayout.LabelField("Header設定", EditorStyles.boldLabel);
 
         m_GeneratedHeaderAuthorName = EditorGUILayout.TextField(
-            "  Author Name",
+            "  作者",
             m_GeneratedHeaderAuthorName);
 
         m_GeneratedHeaderHistoryDate = EditorGUILayout.TextField(
-            "  History Date",
+            "  制作日",
             m_GeneratedHeaderHistoryDate);
 
         m_GeneratedEditorHeaderContents = EditorGUILayout.TextField(
-            "  Editor Contents",
+            "  エディター説明",
             m_GeneratedEditorHeaderContents);
 
         m_GeneratedDataHeaderContents = EditorGUILayout.TextField(
-            "  Data Contents",
+            "  データ説明",
             m_GeneratedDataHeaderContents);
     }
 
@@ -398,7 +398,7 @@ public partial class CSED_CreateTools
             EditorGUI.BeginChangeCheck();
 
             m_PreviewEditorTitleName = EditorGUILayout.TextField(
-                "Title Name",
+                "  エディター名",
                 m_PreviewEditorTitleName);
 
             m_GeneratedToolWindowTitle = m_PreviewEditorTitleName;
@@ -435,11 +435,11 @@ public partial class CSED_CreateTools
         EditorGUILayout.LabelField("Default設定", EditorStyles.boldLabel);
 
         m_GeneratedDefaultAssetName = EditorGUILayout.TextField(
-            "  Default Asset Name",
+            "  データ作成初期名",
             m_GeneratedDefaultAssetName);
 
         m_GeneratedDefaultAssetFolder = EditorGUILayout.TextField(
-            "  Default Asset Folder",
+            "  データ保存先",
             m_GeneratedDefaultAssetFolder);
     }
 
