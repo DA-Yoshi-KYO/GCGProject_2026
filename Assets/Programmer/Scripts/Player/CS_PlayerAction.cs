@@ -29,6 +29,8 @@ public class CS_PlayerAction : MonoBehaviour
     }
     [SerializeField] private InteractSyllinder interactMin = new InteractSyllinder { radius = 3f, height = 3f };//インタラクトの範囲の最小値
     [SerializeField] private InteractSyllinder interactMax = new InteractSyllinder { radius = 5f, height = 5f };//インタラクトの範囲の最大値
+    [SerializeField] private GameObject playerMesh = null;//プレイヤーのメッシュオブジェクト
+    private Material playerMaterial = null;//プレイヤーのマテリアル
     [HideInInspector] public int currentSoul { private set; get; } = 0;//現在のソウルの数
     [HideInInspector] public int currentGimmickIndex { private set; get; } = 0;//現在選択しているギミック
 
@@ -58,6 +60,9 @@ public class CS_PlayerAction : MonoBehaviour
         playerData.customInputAction.Player.InteractCancel.started += OnCancel;
 
         interactField.GetComponent<Renderer>().enabled = false;
+
+        playerMaterial = playerMesh.GetComponent<Renderer>().materials[1];
+        playerMaterial.SetVector("_OutlineColor", Color.gray);
     }
 
     // Update is called once per frame
@@ -65,12 +70,22 @@ public class CS_PlayerAction : MonoBehaviour
     {
         settingPos = CalculateGimmickSetPosition();
 
+        if (playerData.currentMode == PlayerData.PlayerMode.Normal)
+        {
+            playerMaterial.SetVector("_OutlineColor", Color.gray);
+        }
+        else
+        {
+            playerMaterial.SetVector("_OutlineColor", Color.yellow);
+        }
         if (isInteracting)
         {
+
             interactTime += Time.deltaTime * interactSpeed;
             // インタラクト範囲の拡大
             if (interactTime >= switchInteract)
             {
+                playerMaterial.SetVector("_OutlineColor", Color.green);
                 interactScale.x = Mathf.Max(interactTime - switchInteract, 0f) + interactMin.radius;
                 interactScale.y = Mathf.Max(interactTime - switchInteract, 0f) + interactMin.height;
                 interactScale.z = Mathf.Max(interactTime - switchInteract, 0f) + interactMin.radius;
@@ -83,7 +98,7 @@ public class CS_PlayerAction : MonoBehaviour
                 interactField.transform.position = interactPos;
             }
         }
-
+        
 #if UNITY_EDITOR
         //デバッグ：ギミックの設置位置描画
         DebugDrawGimmickSet();
@@ -138,19 +153,46 @@ public class CS_PlayerAction : MonoBehaviour
             {
                 // 長押しはギミックの起動を行う
                 interactField.GetComponent<Renderer>().enabled = false;
+<<<<<<< Updated upstream
                 Collider[] hits = Physics.OverlapSphere(
                     interactField.transform.position,
                     interactScale.x * 0.5f
+=======
+
+                float minHeight = -interactScale.y * 0.5f;
+                float maxHeight = interactScale.y * 0.5f;
+                Collider[] hits = Physics.OverlapCapsule(
+                    interactField.transform.position + interactField.transform.up * interactScale.y * 0.5f,
+                    interactField.transform.position - interactField.transform.up * interactScale.y * 0.5f,
+                    interactScale.x * 0.5f,
+                    LayerMask.GetMask("Gimmick")
+>>>>>>> Stashed changes
                 );
                 foreach (Collider hit in hits)
                 {
                     //ギミックの情報を取得
+<<<<<<< Updated upstream
                     Vector3 pos = hit.transform.position;
 
                     float y = Mathf.Abs(pos.y - interactField.transform.position.y);
 
                     // 球と高さを使うことで疑似的に円柱の当たり判定にする
                     if (y > interactScale.y * 0.5f)
+=======
+                    Vector3 hitPoint =
+                        hit.ClosestPoint(interactField.transform.position);
+
+                    // interactField基準高さ
+                    float height =
+                        Vector3.Dot(
+                            hitPoint - interactField.transform.position,
+                            interactField.transform.up
+                        );
+
+                    // 高さ制限
+                    if (height < minHeight ||
+                        height > maxHeight)
+>>>>>>> Stashed changes
                     {
                         continue;
                     }
