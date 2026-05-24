@@ -24,7 +24,6 @@ public class BackGroundSEData
 {
     [Header("再生する場面")] public string situation;//再生するシーン
     [Header("再生音源")] public BackGrondSECueName cueName;//キュー
-    [Header("音量")] public float volume;//音量
 }
 
 [CreateAssetMenu(fileName = "BackGroundSEDataSO", menuName = "ScriptableObjects/BackGroundSEDataSO")]

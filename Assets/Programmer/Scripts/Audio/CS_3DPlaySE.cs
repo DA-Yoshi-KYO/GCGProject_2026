@@ -11,6 +11,8 @@ public class CS_3DPlaySE : MonoBehaviour
 {
     [SerializeField] private SO_3DSEDataBase dataBase;//データベース
 
+    private float currentVolume = 1.0f;//現在の音量
+
     public enum SEMode
     {
         Normal,
@@ -25,7 +27,6 @@ public class CS_3DPlaySE : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
     }
 
     // Update is called once per frame
@@ -51,7 +52,7 @@ public class CS_3DPlaySE : MonoBehaviour
 
         AudioSource audioSource = obj.AddComponent<AudioSource>();
         audioSource.spatialBlend = 1.0f;
-        audioSource.volume = data.volume;
+        audioSource.volume = currentVolume;
 
         ChangeAudioMixerGroup(currentSituation, audioSource, seMode.ToString());
 

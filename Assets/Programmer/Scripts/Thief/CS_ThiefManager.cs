@@ -62,6 +62,10 @@ public class CS_ThiefManager : MonoBehaviour
             // 出入口から 生成された泥棒の数が最大数に達している場合は、次の出入口の処理に移る
             if (spawnCount.ContainsKey(entry))
             {
+                // NULLチェック
+                if (entry.RoomEnemyEntryData == null) continue;
+                if (entry.RoomEnemyEntryData.GetThiefStatusDataList() == null) continue;
+
                 if (spawnCount[entry] >= entry.RoomEnemyEntryData.GetThiefStatusDataList().Count) continue;
             }
             else spawnCount.Add(entry, 0); // 新しい出入口を辞書に追加
@@ -150,6 +154,35 @@ public class CS_ThiefManager : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// 逃走中の泥棒が存在するかを返す処理(宝物を持っていかれているかどうか)
+    /// </summary>
+    /// <returns>逃走中の泥棒が存在する場合はtrue、存在しない場合はfalse</returns>
+    public bool IsEscapeThief()
+    {
+        // 泥棒の親オブジェクトを取得
+        GameObject thiefParent = GameObject.Find("ThiefParent");
+        if (thiefParent == null)
+        {
+            Debug.LogError("ThiefParentが存在しません。");
+            return false;
+        }
+
+        // 全ての泥棒をチェックして、逃走中の泥棒が存在するかを確認
+        for (int i = 0 ; i < thiefParent.transform.childCount ; i++)
+        {
+            GameObject thief = thiefParent.transform.GetChild(i).gameObject;
+            CS_ThiefAI thiefAI = thief.GetComponent<CS_ThiefAI>();
+            if (thiefAI == null) continue;
+
+            if (thiefAI.CurrentState == CS_ThiefAI.ThiefState.Escape)
+            {
+                return true; // 逃走中の泥棒が存在する場合はtrueを返す
+            }
+        }
+
+        return false;
+    }
 
     //////////////////////////////////////////////////////////////////
     /// デバック用の処理
@@ -163,6 +196,8 @@ public class CS_ThiefManager : MonoBehaviour
         {
             Destroy(thiefParent);
         }
+
+        spawnCount.Clear(); // 生成数の管理をリセット
 
         // 泥棒を再生成
         Notify();

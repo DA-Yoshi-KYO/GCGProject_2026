@@ -40,7 +40,7 @@ using UnityEngine.AI;
 public class CS_ThiefAI : MonoBehaviour
 {
     [Tooltip("泥棒の行動状態を定義する列挙型")]
-    private enum ThiefState
+    public enum ThiefState
     {
         [Tooltip("探索状態")]
         Explore,
@@ -52,9 +52,9 @@ public class CS_ThiefAI : MonoBehaviour
         Stunned
     }
 
-    [SerializeField]
     [Tooltip("現在の行動状態")]
     private ThiefState currentState;
+    public ThiefState CurrentState => currentState;
 
     [SerializeField, Header("泥棒のリアクションスプライト(仮)")]
     private List<Sprite> reactionSprites;
@@ -87,6 +87,13 @@ public class CS_ThiefAI : MonoBehaviour
     [Tooltip("探索対象")]
     private CS_ThiefTarget currentTarget;
     public CS_ThiefTarget CurrentTarget => currentTarget;
+
+    [Tooltip("プレイヤーを無視するフラグ")]
+    private bool ignorePlayer = false;
+    [Tooltip("プレイヤーを追跡する残り時間")]
+    private float remainingIgnorePlayerTime;
+    [Tooltip("プレイヤーを追跡する残り時間の初期値")]
+    private float initialRemainingIgnorePlayerTime;
 
     [Tooltip("次の部屋に移動するための移動ポイント")]
     private Transform nextRoomMovePoint;
@@ -167,6 +174,7 @@ public class CS_ThiefAI : MonoBehaviour
         runTargetTypes = typedata.runTargetTypes;
         soulDropCount = typedata.soulDropCount;
         searchTime = typedata.searchTime;
+        initialRemainingIgnorePlayerTime = remainingIgnorePlayerTime = typedata.pursuitTime;
 
         exitAfterStunTime = data.exitAfterStunTime;
         damageStunTime = data.stunTime;
@@ -222,7 +230,7 @@ public class CS_ThiefAI : MonoBehaviour
     {
         fadeAfterStunTime = GameObject.FindObjectOfType<CS_ThiefManager>().GetThiefCommonDB().fadeAfterStunTime;
 
-        thiefMaterial = GetComponent<Renderer>().material;
+        thiefMaterial = GetComponentInChildren<Renderer>().material;
         if (thiefMaterial == null)
         {
             Debug.LogError("ThiefAI: 泥棒のマテリアルが見つかりません。");
@@ -274,23 +282,6 @@ public class CS_ThiefAI : MonoBehaviour
         RecognizeObjects();
 
         ChangeFace(ReactionSpriteType.Normal);
-
-        // 現在の探索対象がプレイヤーである場合は、距離判定をして、一定距離以内であればプレイヤーに向かって移動する処理を追加する
-        if (currentTarget != null && currentTarget is CS_PlayerTarget)
-        {
-            // 距離判定
-            CS_VisionSensor visionSensor = GetComponent<CS_VisionSensor>();
-            int distanceToPlayer = (int)Vector3.Distance(transform.position, currentTarget.transform.position);
-            if (distanceToPlayer <= visionSensor.viewDistance)
-            {
-                MoveTo(currentTarget.transform.position);
-            }
-            else
-            {
-                currentTarget = null;
-            }
-            return;
-        }
 
         // moveRouteが設定されている場合は、moveRouteに沿って移動する処理を追加する
         if (moveRoute != null && moveRoute.Count > 0)
@@ -482,7 +473,7 @@ public class CS_ThiefAI : MonoBehaviour
         }
 
         // ドアに十分近づいたら、次のドアへ
-        if (Vector3.Distance(transform.position, door.position) < 1.0f)
+        if (Vector3.Distance(transform.position, door.position) < 1.5f)
         {
             moveRoute.RemoveAt(0);
             isNextRoomMovePointDecided = false; // 次の部屋に移動するためのポイントを決定していない状態に戻す
@@ -562,6 +553,34 @@ public class CS_ThiefAI : MonoBehaviour
             roomMemories[currentRoom].FirstSetting();
         }
 
+        if (currentTarget is CS_PlayerTarget)
+        {
+            // 視認した中にプレイヤーがいない場合は、探索対象からプレイヤーを外す
+            bool isPlayerInVision = false;
+            foreach (CS_ThiefTarget target in visionTargets)
+            {
+                if (target is CS_PlayerTarget)
+                {
+                    isPlayerInVision = true;
+                    break;
+                }
+            }
+
+            // 追跡する残り時間が0以下の場合は、プレイヤーを無視するフラグを立てる
+            if (remainingIgnorePlayerTime <= 0.0f)
+            {
+                ignorePlayer = true;
+                isPlayerInVision = false; // プレイヤーを無視するフラグを立てた場合は、プレイヤーが視認できていても、プレイヤーが視認できていない状態にする
+                remainingIgnorePlayerTime = 0.0f;
+            }
+            else remainingIgnorePlayerTime -= Time.deltaTime;
+
+            if (!isPlayerInVision)
+            {
+                currentTarget = null;
+            }
+        }
+
         bool isNewObjectRecognized = false; // 新たに視認したオブジェクトがあるかどうかを判定するフラグ
         // 視認したオブジェクトを記憶に保存
         foreach (CS_ThiefTarget target in visionTargets)
@@ -593,6 +612,18 @@ public class CS_ThiefAI : MonoBehaviour
 
             if (target is CS_PlayerTarget)
             {
+                // プレイヤーを視認した場合の処理を追加する
+                if (ignorePlayer)
+                {
+                    continue;
+                }
+
+                // 耐久地が1以上ある場合は、プレイヤーを探索対象に設定しない
+                if (durability > 1)
+                {
+                    continue;
+                }
+
                 // 現在の探索対象が宝物である場合は、プレイヤーを探索対象に設定しない
                 if (currentTarget is CS_VisionTarget && ((CS_VisionTarget)currentTarget).targetType == CS_VisionTarget.TargetType.Treasure)
                 {
@@ -601,7 +632,11 @@ public class CS_ThiefAI : MonoBehaviour
                 // 現在の探索対象が宝物でない場合は、プレイヤーを探索対象に設定する
                 else
                 {
-                    currentTarget = target;
+                    // プレイヤーを探索対象に設定する。ただし、現在の探索対象がプレイヤーでない場合に限る（プレイヤーを探索対象にしている場合は、引き続きプレイヤーを探索対象にする）
+                    if (currentTarget != null && !(currentTarget is CS_PlayerTarget))
+                    {
+                        currentTarget = target;
+                    }
                 }
 
                 // 次の部屋に移動するためのポイントが設定されている場合は、削除する

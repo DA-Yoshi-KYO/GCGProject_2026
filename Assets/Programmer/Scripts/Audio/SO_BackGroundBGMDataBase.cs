@@ -32,7 +32,6 @@ public class BackGroundBGMData
 {
     [Header("再生するシーン名")] public SceneName sceneName;//再生するシーン
     [Header("再生音源")] public BackGroundBGMCueName cueName;//キュー
-    [Header("音量")] public float volume;//音量
 }
 
 [CreateAssetMenu(fileName = "BackGroundBGMDataSO", menuName = "ScriptableObjects/BackGroundBGMDataSO")]

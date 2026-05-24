@@ -55,6 +55,7 @@ public class CS_VisionSensor : MonoBehaviour
 
         // 視界内のコライダーを取得
         Collider[] hits = Physics.OverlapSphere(transform.position, viewDistance, targetLayer);
+       
 
         // 取得したコライダーをループして、視界内にあるターゲットを判定
         foreach (var hit in hits)
