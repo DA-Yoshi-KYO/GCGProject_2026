@@ -153,11 +153,6 @@ public class CS_PlayerAction : MonoBehaviour
             {
                 // 長押しはギミックの起動を行う
                 interactField.GetComponent<Renderer>().enabled = false;
-<<<<<<< Updated upstream
-                Collider[] hits = Physics.OverlapSphere(
-                    interactField.transform.position,
-                    interactScale.x * 0.5f
-=======
 
                 float minHeight = -interactScale.y * 0.5f;
                 float maxHeight = interactScale.y * 0.5f;
@@ -166,21 +161,11 @@ public class CS_PlayerAction : MonoBehaviour
                     interactField.transform.position - interactField.transform.up * interactScale.y * 0.5f,
                     interactScale.x * 0.5f,
                     LayerMask.GetMask("Gimmick")
->>>>>>> Stashed changes
                 );
                 foreach (Collider hit in hits)
                 {
                     //ギミックの情報を取得
-<<<<<<< Updated upstream
-                    Vector3 pos = hit.transform.position;
-
-                    float y = Mathf.Abs(pos.y - interactField.transform.position.y);
-
-                    // 球と高さを使うことで疑似的に円柱の当たり判定にする
-                    if (y > interactScale.y * 0.5f)
-=======
-                    Vector3 hitPoint =
-                        hit.ClosestPoint(interactField.transform.position);
+                    Vector3 hitPoint = hit.ClosestPoint(interactField.transform.position); 
 
                     // interactField基準高さ
                     float height =
@@ -192,7 +177,6 @@ public class CS_PlayerAction : MonoBehaviour
                     // 高さ制限
                     if (height < minHeight ||
                         height > maxHeight)
->>>>>>> Stashed changes
                     {
                         continue;
                     }
