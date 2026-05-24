@@ -17,7 +17,7 @@ using UnityEngine.InputSystem;
 
 public class CS_PlayerAction : MonoBehaviour
 {
-    //[SerializeField] private int initSoul = 5;//初期のソウルの数
+    [SerializeField] private int initSoul = 5;//初期のソウルの数
     [SerializeField] private float switchInteract = 1f;//ギミックの起動へ切り替る為に必要な長押しの時間
     [SerializeField] private GameObject interactField = null;//インタラクトの範囲を示すフィールド
     [SerializeField] private float interactSpeed = 1f;//インタラクトの速度(interactSpeed秒で範囲が1になる)
@@ -29,6 +29,8 @@ public class CS_PlayerAction : MonoBehaviour
     }
     [SerializeField] private InteractSyllinder interactMin = new InteractSyllinder { radius = 3f, height = 3f };//インタラクトの範囲の最小値
     [SerializeField] private InteractSyllinder interactMax = new InteractSyllinder { radius = 5f, height = 5f };//インタラクトの範囲の最大値
+    [SerializeField] private GameObject playerMesh = null;//プレイヤーのメッシュオブジェクト
+    private Material playerMaterial = null;//プレイヤーのマテリアル
     [HideInInspector] public int currentSoul { private set; get; } = 0;//現在のソウルの数
     [HideInInspector] public int currentGimmickIndex { private set; get; } = 0;//現在選択しているギミック
 
@@ -45,7 +47,7 @@ public class CS_PlayerAction : MonoBehaviour
     void Start()
     {
         //現在のソウルの数
-        //currentSoul = initSoul;
+        currentSoul = initSoul;
         playerData = GetComponent<PlayerData>();
 
         // インプットアクションの登録
@@ -58,6 +60,9 @@ public class CS_PlayerAction : MonoBehaviour
         playerData.customInputAction.Player.InteractCancel.started += OnCancel;
 
         interactField.GetComponent<Renderer>().enabled = false;
+
+        playerMaterial = playerMesh.GetComponent<Renderer>().materials[1];
+        playerMaterial.SetVector("_OutlineColor", Color.gray);
     }
 
     // Update is called once per frame
@@ -65,12 +70,22 @@ public class CS_PlayerAction : MonoBehaviour
     {
         settingPos = CalculateGimmickSetPosition();
 
+        if (playerData.currentMode == PlayerData.PlayerMode.Normal)
+        {
+            playerMaterial.SetVector("_OutlineColor", Color.gray);
+        }
+        else
+        {
+            playerMaterial.SetVector("_OutlineColor", Color.yellow);
+        }
         if (isInteracting)
         {
+
             interactTime += Time.deltaTime * interactSpeed;
             // インタラクト範囲の拡大
             if (interactTime >= switchInteract)
             {
+                playerMaterial.SetVector("_OutlineColor", Color.green);
                 interactScale.x = Mathf.Max(interactTime - switchInteract, 0f) + interactMin.radius;
                 interactScale.y = Mathf.Max(interactTime - switchInteract, 0f) + interactMin.height;
                 interactScale.z = Mathf.Max(interactTime - switchInteract, 0f) + interactMin.radius;
@@ -83,12 +98,12 @@ public class CS_PlayerAction : MonoBehaviour
                 interactField.transform.position = interactPos;
             }
         }
-
+        
 #if UNITY_EDITOR
         //デバッグ：ギミックの設置位置描画
         DebugDrawGimmickSet();
         // ソウル数などのデバッグコマンド
-        //DebugCommand();
+        DebugCommand();
 #endif
     }
 
@@ -138,23 +153,33 @@ public class CS_PlayerAction : MonoBehaviour
             {
                 // 長押しはギミックの起動を行う
                 interactField.GetComponent<Renderer>().enabled = false;
-                Collider[] hits = Physics.OverlapBox(
-                    interactField.transform.position,
-                    new Vector3(interactScale.x * 0.5f, interactScale.y * 0.5f, interactScale.z * 0.5f)
-                );
 
+                float minHeight = -interactScale.y * 0.5f;
+                float maxHeight = interactScale.y * 0.5f;
+                Collider[] hits = Physics.OverlapCapsule(
+                    interactField.transform.position + interactField.transform.up * interactScale.y * 0.5f,
+                    interactField.transform.position - interactField.transform.up * interactScale.y * 0.5f,
+                    interactScale.x * 0.5f,
+                    LayerMask.GetMask("Gimmick")
+                );
                 foreach (Collider hit in hits)
                 {
                     //ギミックの情報を取得
-                    //Vector3 pos = hit.transform.position;
+                    Vector3 hitPoint = hit.ClosestPoint(interactField.transform.position); 
 
-                    //float y = Mathf.Abs(pos.y - interactField.transform.position.y);
+                    // interactField基準高さ
+                    float height =
+                        Vector3.Dot(
+                            hitPoint - interactField.transform.position,
+                            interactField.transform.up
+                        );
 
-                    //// 球と高さを使うことで疑似的に円柱の当たり判定にする
-                    //if (y > interactScale.y * 0.5f)
-                    //{
-                    //    continue;
-                    //}
+                    // 高さ制限
+                    if (height < minHeight ||
+                        height > maxHeight)
+                    {
+                        continue;
+                    }
 
                     GimmickBase gimmick = hit.GetComponent<GimmickBase>();
                     if (gimmick == null) continue;
@@ -189,11 +214,11 @@ public class CS_PlayerAction : MonoBehaviour
         {
             Debug.LogError("選択されたギミックにGimmickBaseコンポーネントが付いていません"); return;
         }
-        //if (currentSoul - gimmick.requiredSoul < 0)
-        //{
-        //    Debug.Log("ソウルが不足しています");
-        //    return;    // ソウルが足りない場合召喚しない
-        //}
+        if (currentSoul - gimmick.requiredSoul < 0)
+        {
+            Debug.Log("ソウルが不足しています");
+            return;    // ソウルが足りない場合召喚しない
+        }
         GameObject currentRoom = playerData.currentRoomData.GetPlayerRoomData().transform.GetChild(0).gameObject;
         string roomName = currentRoom.name;
         bool isNotSettingRoom = roomName.Contains("Start") || roomName.Contains("Treasure");
@@ -215,7 +240,7 @@ public class CS_PlayerAction : MonoBehaviour
         if (!roomGrid.SetGimmickInGrid(CalculateGimmickSetPosition(), gimmick)) return;
 
         //ソウルの消費
-        //currentSoul -= gimmick.requiredSoul;
+        currentSoul -= gimmick.requiredSoul;
     }
 
     public void SettingGimmickDirection(GimmickBase gimmick)
@@ -466,20 +491,20 @@ public class CS_PlayerAction : MonoBehaviour
     //ソウルの数を加算する関数
     public void AddSoul(int addnum)
     {
-        //currentSoul += addnum;
+        currentSoul += addnum;
     }
 
-    //void DebugCommand()
-    //{
-    //    if (Input.GetKey(KeyCode.LeftShift))
-    //    {
-    //        if ((Input.GetKey(KeyCode.Space)))
-    //        {
-    //            if (Input.GetKeyDown(KeyCode.S))
-    //            {
-    //                currentSoul = initSoul;
-    //            }
-    //        }
-    //    }
-    //}
+    void DebugCommand()
+    {
+        if (Input.GetKey(KeyCode.LeftShift))
+        {
+            if ((Input.GetKey(KeyCode.Space)))
+            {
+                if (Input.GetKeyDown(KeyCode.S))
+                {
+                    currentSoul = initSoul;
+                }
+            }
+        }
+    }
 }
