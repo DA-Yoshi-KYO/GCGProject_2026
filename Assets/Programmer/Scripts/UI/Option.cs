@@ -1,7 +1,10 @@
+using UnityEditor.SearchService;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 // 制作者　秋野
 
+//　OptionUIの状態の取得関数追加　元浪
 
 // シングルトンクラス
 // サウンドやゲーム設定に関するデータを管理するクラス
@@ -72,6 +75,8 @@ public class Option : MonoBehaviour
     /// </summary>
     private void OnOption(InputAction.CallbackContext ctx)
     {
+        // タイトルシーンではオプションUIを開かない
+        if (SceneManager.GetActiveScene().name.ToString() == "Title") return;
         if (!_isOptionUIActive)
         {
             OpenOptionUI();
@@ -109,7 +114,7 @@ public class Option : MonoBehaviour
     /// <summary>
     /// オプションUIを開く
     /// </summary>
-    private void OpenOptionUI()
+    public void OpenOptionUI()
     {
         _isOptionUIActive = true;
 
@@ -196,6 +201,14 @@ public class Option : MonoBehaviour
     public void SetIsOptionUIActive(bool isActive)
     {
         _isOptionUIActive = isActive;
+    }
+
+    /// <summary>
+    /// OptionUIの状態の取得
+    /// </summary>
+    public bool GetIsOptionUIActive()
+    {
+        return _isOptionUIActive;
     }
 
     private void OnDestroy()

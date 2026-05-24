@@ -19,6 +19,16 @@ public class EmptyChestGimmick : GimmickBase
         }
     }
 
+    protected override void ActiveUpdate()
+    {
+        gimmickState = GimmickState.Idle;
+    }
+
+    protected override void SearchUpdate()
+    {
+            gimmickState = GimmickState.Idle;
+    }
+
     protected override void BrokenUpdate()
     {
         DeleteHitChecker();

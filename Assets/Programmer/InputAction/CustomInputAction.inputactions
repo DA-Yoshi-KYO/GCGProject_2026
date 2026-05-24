@@ -396,7 +396,7 @@
                     "name": "",
                     "id": "7c9bd331-92da-481d-9004-b15c9f1fbdbd",
                     "path": "<Keyboard>/f",
-                    "interactions": "",
+                    "interactions": "Press(pressPoint=1)",
                     "processors": "",
                     "groups": "",
                     "action": "Decision",
@@ -407,7 +407,7 @@
                     "name": "",
                     "id": "11bc2885-ca81-4752-85bc-5734d83866df",
                     "path": "<Keyboard>/space",
-                    "interactions": "",
+                    "interactions": "Press(pressPoint=1)",
                     "processors": "",
                     "groups": "",
                     "action": "Decision",
@@ -497,7 +497,7 @@
                     "name": "",
                     "id": "010f893b-9d47-424e-b2b5-4dbbc2ad9133",
                     "path": "<Keyboard>/f",
-                    "interactions": "",
+                    "interactions": "Press(pressPoint=1)",
                     "processors": "",
                     "groups": "",
                     "action": "Decision",
@@ -508,7 +508,209 @@
                     "name": "",
                     "id": "1899a8b8-a58a-40c6-924a-da11d2ed53d5",
                     "path": "<Keyboard>/space",
+                    "interactions": "Press(pressPoint=1)",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Decision",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "GameClear",
+            "id": "a60c7eb2-1cec-46f5-b121-33a12a3c7d02",
+            "actions": [
+                {
+                    "name": "MoveRight",
+                    "type": "Button",
+                    "id": "2292220b-8b17-459a-bade-635a1e31ee04",
+                    "expectedControlType": "",
+                    "processors": "",
                     "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "MoveLeft",
+                    "type": "Button",
+                    "id": "0641e0fd-1366-4c31-b0a7-3ea733849fd2",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Decision",
+                    "type": "Button",
+                    "id": "06d6d678-2046-47c6-8a9b-af5c42bd19c8",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "1769bb3f-fa65-4bd3-a622-0f9eadfe9864",
+                    "path": "<Keyboard>/d",
+                    "interactions": "Press(pressPoint=1)",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MoveRight",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c6c92914-eb37-446b-80fe-7f91275c23a8",
+                    "path": "<Keyboard>/rightArrow",
+                    "interactions": "Press(pressPoint=1)",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MoveRight",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c0f0ffe4-258e-4a24-bb38-9921e8a1ad0c",
+                    "path": "<Keyboard>/a",
+                    "interactions": "Press(pressPoint=1)",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MoveLeft",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3ece3a00-f0f7-4c70-96d7-aae475d0dfeb",
+                    "path": "<Keyboard>/leftArrow",
+                    "interactions": "Press(pressPoint=1)",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MoveLeft",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "0ffc347d-24a2-4e4f-8783-5e0d50f9078e",
+                    "path": "<Keyboard>/f",
+                    "interactions": "Press(pressPoint=1)",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Decision",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f23f5f01-7b39-49aa-880d-4fff79c8c462",
+                    "path": "<Keyboard>/space",
+                    "interactions": "Press(pressPoint=1)",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Decision",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "GameOver",
+            "id": "b32df814-836c-469f-a7eb-319f130f9bf1",
+            "actions": [
+                {
+                    "name": "MoveRight",
+                    "type": "Button",
+                    "id": "a62375e8-2ffb-4888-b140-c5212b183f8a",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "MoveLeft",
+                    "type": "Button",
+                    "id": "a66eb51f-9647-4de5-ac5f-13f853f0dc75",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Decision",
+                    "type": "Button",
+                    "id": "bdba9494-e4a8-48ba-8d43-508a9aaf8d22",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "41806341-9d6e-4b44-b015-56bcb0ae2807",
+                    "path": "<Keyboard>/d",
+                    "interactions": "Press(pressPoint=1)",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MoveRight",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "67204c2e-8938-493a-9054-39c9dad47878",
+                    "path": "<Keyboard>/rightArrow",
+                    "interactions": "Press(pressPoint=1)",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MoveRight",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "dc4e08b2-3458-4cc4-9381-c7b6c5fcc938",
+                    "path": "<Keyboard>/a",
+                    "interactions": "Press(pressPoint=1)",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MoveLeft",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "07fbbdfd-4cdd-4239-8688-7a964982c174",
+                    "path": "<Keyboard>/leftArrow",
+                    "interactions": "Press(pressPoint=1)",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MoveLeft",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "cc990745-4a02-4edd-a75c-050e6f863d98",
+                    "path": "<Keyboard>/f",
+                    "interactions": "Press(pressPoint=1)",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Decision",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f5eea096-ddc7-453d-bf54-068ad2593a87",
+                    "path": "<Keyboard>/space",
+                    "interactions": "Press(pressPoint=1)",
                     "processors": "",
                     "groups": "",
                     "action": "Decision",

@@ -8883,7 +8883,11 @@ MonoBehaviour:
   str_RoomCreatePointTag: RoomCreatePoint
   f_SearchDelaySeconds: 0.2
   bool_IsDebugLog: 1
-  list_EnemyEntryPointData: []
+  list_EnemyEntryPointData:
+  - cs_RoomCreatePoint: {fileID: 0}
+    e_EnemyEntryDirection: 0
+    cs_RoomMovePoint: {fileID: 0}
+    css_RoomEnemyEntryData: {fileID: 0}
 --- !u!1001 &1224970390
 PrefabInstance:
   m_ObjectHideFlags: 0
