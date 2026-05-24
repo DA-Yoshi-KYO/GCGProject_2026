@@ -122,21 +122,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1cb8868b9940f9d448c56c00405309f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-<<<<<<< Updated upstream
-  initSoul: 5
   switchInteract: 1
-=======
-  switchInteract: 0.5
->>>>>>> Stashed changes
   interactField: {fileID: 4629820388253137526}
-  interactSpeed: 2
+  interactSpeed: 1
   interactMin:
     radius: 3
     height: 3
   interactMax:
     radius: 5
     height: 5
-  playerMesh: {fileID: 2569281707793705752}
   gimmickKind:
   - {fileID: 7905465617219888894, guid: c467ea3baedb9d14088530cb401de8e3, type: 3}
   - {fileID: 8099441442987179503, guid: 80f55bafd488bf04fa703cb32b598578, type: 3}
@@ -234,7 +228,7 @@ GameObject:
   - component: {fileID: 4749555389050136550}
   - component: {fileID: 1012056315902829478}
   - component: {fileID: 9045973451522344877}
-  m_Layer: 0
+  m_Layer: 30
   m_Name: InteractField
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -271,7 +265,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4629820388253137526}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -366,9 +360,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -7511558181221131132, guid: b25c49061faf3dd40a73bcead0d54f24,
         type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: b25c49061faf3dd40a73bcead0d54f24,
+        type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: 17648b18d2f501e45a5d7006bb65aa63, type: 2}
+    - target: {fileID: -7511558181221131132, guid: b25c49061faf3dd40a73bcead0d54f24,
+        type: 3}
+      propertyPath: m_Materials.Array.data[1]
+      value: 
+      objectReference: {fileID: 2100000, guid: 6b3bafe46a1bf374aac55a90620d66d7, type: 2}
     - target: {fileID: 919132149155446097, guid: b25c49061faf3dd40a73bcead0d54f24,
         type: 3}
       propertyPath: m_Name
@@ -379,12 +383,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b25c49061faf3dd40a73bcead0d54f24, type: 3}
---- !u!1 &2569281707793705752 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: b25c49061faf3dd40a73bcead0d54f24,
-    type: 3}
-  m_PrefabInstance: {fileID: 3415564462067734089}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &2948798605621965218 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: b25c49061faf3dd40a73bcead0d54f24,
