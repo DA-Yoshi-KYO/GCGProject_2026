@@ -138,22 +138,23 @@ public class CS_PlayerAction : MonoBehaviour
             {
                 // 長押しはギミックの起動を行う
                 interactField.GetComponent<Renderer>().enabled = false;
-                Collider[] hits = Physics.OverlapSphere(
+                Collider[] hits = Physics.OverlapBox(
                     interactField.transform.position,
-                    interactScale.x * 0.5f
+                    new Vector3(interactScale.x * 0.5f, interactScale.y * 0.5f, interactScale.z * 0.5f)
                 );
+
                 foreach (Collider hit in hits)
                 {
                     //ギミックの情報を取得
-                    Vector3 pos = hit.transform.position;
+                    //Vector3 pos = hit.transform.position;
 
-                    float y = Mathf.Abs(pos.y - interactField.transform.position.y);
+                    //float y = Mathf.Abs(pos.y - interactField.transform.position.y);
 
-                    // 球と高さを使うことで疑似的に円柱の当たり判定にする
-                    if (y > interactScale.y * 0.5f)
-                    {
-                        continue;
-                    }
+                    //// 球と高さを使うことで疑似的に円柱の当たり判定にする
+                    //if (y > interactScale.y * 0.5f)
+                    //{
+                    //    continue;
+                    //}
 
                     GimmickBase gimmick = hit.GetComponent<GimmickBase>();
                     if (gimmick == null) continue;

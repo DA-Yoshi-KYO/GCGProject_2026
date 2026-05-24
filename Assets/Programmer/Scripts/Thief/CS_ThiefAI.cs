@@ -88,6 +88,13 @@ public class CS_ThiefAI : MonoBehaviour
     private CS_ThiefTarget currentTarget;
     public CS_ThiefTarget CurrentTarget => currentTarget;
 
+    [Tooltip("プレイヤーを無視するフラグ")]
+    private bool ignorePlayer = false;
+    [Tooltip("プレイヤーを追跡する残り時間")]
+    private float remainingIgnorePlayerTime;
+    [Tooltip("プレイヤーを追跡する残り時間の初期値")]
+    private float initialRemainingIgnorePlayerTime;
+
     [Tooltip("次の部屋に移動するための移動ポイント")]
     private Transform nextRoomMovePoint;
     [Tooltip("次の部屋に移動するための移動ポイントを決定したかどうかを判定するフラグ")]
@@ -167,6 +174,7 @@ public class CS_ThiefAI : MonoBehaviour
         runTargetTypes = typedata.runTargetTypes;
         soulDropCount = typedata.soulDropCount;
         searchTime = typedata.searchTime;
+        initialRemainingIgnorePlayerTime = remainingIgnorePlayerTime = typedata.pursuitTime;
 
         exitAfterStunTime = data.exitAfterStunTime;
         damageStunTime = data.stunTime;
@@ -222,7 +230,7 @@ public class CS_ThiefAI : MonoBehaviour
     {
         fadeAfterStunTime = GameObject.FindObjectOfType<CS_ThiefManager>().GetThiefCommonDB().fadeAfterStunTime;
 
-        thiefMaterial = GetComponent<Renderer>().material;
+        thiefMaterial = GetComponentInChildren<Renderer>().material;
         if (thiefMaterial == null)
         {
             Debug.LogError("ThiefAI: 泥棒のマテリアルが見つかりません。");
@@ -274,23 +282,6 @@ public class CS_ThiefAI : MonoBehaviour
         RecognizeObjects();
 
         ChangeFace(ReactionSpriteType.Normal);
-
-        // 現在の探索対象がプレイヤーである場合は、距離判定をして、一定距離以内であればプレイヤーに向かって移動する処理を追加する
-        //if (currentTarget != null && currentTarget is CS_PlayerTarget)
-        //{
-        //    // 距離判定
-        //    CS_VisionSensor visionSensor = GetComponent<CS_VisionSensor>();
-        //    int distanceToPlayer = (int)Vector3.Distance(transform.position, currentTarget.transform.position);
-        //    if (distanceToPlayer <= visionSensor.viewDistance)
-        //    {
-        //        MoveTo(currentTarget.transform.position);
-        //    }
-        //    else
-        //    {
-        //        currentTarget = null;
-        //    }
-        //    return;
-        //}
 
         // moveRouteが設定されている場合は、moveRouteに沿って移動する処理を追加する
         if (moveRoute != null && moveRoute.Count > 0)
@@ -482,7 +473,7 @@ public class CS_ThiefAI : MonoBehaviour
         }
 
         // ドアに十分近づいたら、次のドアへ
-        if (Vector3.Distance(transform.position, door.position) < 1.0f)
+        if (Vector3.Distance(transform.position, door.position) < 1.5f)
         {
             moveRoute.RemoveAt(0);
             isNextRoomMovePointDecided = false; // 次の部屋に移動するためのポイントを決定していない状態に戻す
@@ -574,6 +565,16 @@ public class CS_ThiefAI : MonoBehaviour
                     break;
                 }
             }
+
+            // 追跡する残り時間が0以下の場合は、プレイヤーを無視するフラグを立てる
+            if (remainingIgnorePlayerTime <= 0.0f)
+            {
+                ignorePlayer = true;
+                isPlayerInVision = false; // プレイヤーを無視するフラグを立てた場合は、プレイヤーが視認できていても、プレイヤーが視認できていない状態にする
+                remainingIgnorePlayerTime = 0.0f;
+            }
+            else remainingIgnorePlayerTime -= Time.deltaTime;
+
             if (!isPlayerInVision)
             {
                 currentTarget = null;
@@ -611,6 +612,12 @@ public class CS_ThiefAI : MonoBehaviour
 
             if (target is CS_PlayerTarget)
             {
+                // プレイヤーを視認した場合の処理を追加する
+                if (ignorePlayer)
+                {
+                    continue;
+                }
+
                 // 耐久地が1以上ある場合は、プレイヤーを探索対象に設定しない
                 if (durability > 1)
                 {
