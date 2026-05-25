@@ -43,12 +43,16 @@ public class CS_PlayerAction : MonoBehaviour
 
     Vector3 settingPos = Vector3.zero;  // 設置予定場所
 
+    private GimmickManager gimmickManager;
+
     // Start is called before the first frame update
     void Start()
     {
         //現在のソウルの数
         currentSoul = initSoul;
         playerData = GetComponent<PlayerData>();
+
+        gimmickManager = GetComponent<GimmickManager>();
 
         // インプットアクションの登録
         playerData.customInputAction.Player.GimmickChange.started += OnSelect;
@@ -214,11 +218,11 @@ public class CS_PlayerAction : MonoBehaviour
         {
             Debug.LogError("選択されたギミックにGimmickBaseコンポーネントが付いていません"); return;
         }
-        //if(!gimmickManager.IsSetting(gimmick.gimmick))
-        //{
-        //    Debug.Log("ギミックの設置失敗: IsSetting");
-        //    return;
-        //}
+        if (!gimmickManager.IsSetting(gimmick.gimmick))
+        {
+            Debug.Log("ギミックの設置失敗: IsSetting");
+            return;
+        }
         GameObject currentRoom = playerData.currentRoomData.GetPlayerRoomData().transform.GetChild(0).gameObject;
         string roomName = currentRoom.name;
         bool isNotSettingRoom = roomName.Contains("Start") || roomName.Contains("Treasure");
@@ -237,8 +241,44 @@ public class CS_PlayerAction : MonoBehaviour
         {
             Debug.LogError("この部屋の床にRoomGridがついていません");
         }
-        if (!roomGrid.SetGimmickInGrid(CalculateGimmickSetPosition(), gimmick)) return;
-        //gimmickManager.SettingStart(gimmick);
+        Vector3 setPos = CalculateGimmickSetPosition();
+
+        // 設置処理 //
+        if (!roomGrid.SetGimmickInGrid(setPos, gimmick))
+        {
+            return;
+        }
+
+        // =========================
+        // 実際に生成されたインスタンス取得
+        // =========================
+        Collider[] hits = Physics.OverlapSphere(setPos, 10f);
+
+        GimmickBase instance = null;
+
+        foreach (var hit in hits)
+        {
+            GimmickBase g = hit.GetComponent<GimmickBase>();
+
+            if (g == null)
+                continue;
+
+            // 同じ種類のみ
+            if (g.GetGimmickTag() != gimmick.GetGimmickTag())
+                continue;
+
+            instance = g;
+            break;
+        }
+
+        if (instance == null)
+        {
+            Debug.LogError("配置後のGimmick取得失敗");
+            return;
+        }
+
+        // Managerへ実体を登録
+        gimmickManager.SettingStart(instance);
     }
 
     public void SettingGimmickDirection(GimmickBase gimmick)
