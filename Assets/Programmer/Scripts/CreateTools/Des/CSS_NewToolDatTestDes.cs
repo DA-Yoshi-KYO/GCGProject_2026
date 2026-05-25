@@ -8,100 +8,34 @@
 */
 
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "CSS_NewToolDatTestDes", menuName = "ScriptableObjects/CSS_NewToolDatTestDes")]
 public class CSS_NewToolDatTestDes : ScriptableObject
 {
     /// <summary>
-    /// newIntField01です。
+    /// newVector2Field01です。
     /// </summary>
-    public int newIntField01;
+    public Vector2 newVector2Field01;
 
     /// <summary>
-    /// newFloatField02Minです。
+    /// newVector2IntField02です。
     /// </summary>
-    public float newFloatField02Min;
+    public Vector2Int newVector2IntField02;
 
     /// <summary>
-    /// newFloatField02Maxです。
+    /// newField03です。
     /// </summary>
-    public float newFloatField02Max;
+    public GameObject newField03;
 
     /// <summary>
-    /// newFloatField03Minです。
+    /// newListField04です。
     /// </summary>
-    public float newFloatField03Min;
+    public List<Vector2> newListField04;
 
     /// <summary>
-    /// newFloatField03Maxです。
+    /// newListField05です。
     /// </summary>
-    public float newFloatField03Max;
-
-    /// <summary>
-    /// newVector2IntField04です。
-    /// </summary>
-    public Vector2Int newVector2IntField04;
-
-    /// <summary>
-    /// newVector3IntField05です。
-    /// </summary>
-    public Vector3Int newVector3IntField05;
-
-    /// <summary>
-    /// newVector2Field06です。
-    /// </summary>
-    public Vector2 newVector2Field06;
-
-    /// <summary>
-    /// newVector3Field07です。
-    /// </summary>
-    public Vector3 newVector3Field07;
-
-    /// <summary>
-    /// newStringField08です。
-    /// </summary>
-    public string newStringField08;
-
-    /// <summary>
-    /// newStringField09です。
-    /// </summary>
-    public string newStringField09;
-
-    /// <summary>
-    /// newBoolField10です。
-    /// </summary>
-    public bool newBoolField10;
-
-    /// <summary>
-    /// newScriptableObjectField11です。
-    /// </summary>
-    public ScriptableObject newScriptableObjectField11;
-
-    /// <summary>
-    /// newScriptField12です。
-    /// </summary>
-    public MonoScript newScriptField12;
-
-    /// <summary>
-    /// newField13です。
-    /// </summary>
-    public GameObject newField13;
-
-    /// <summary>
-    /// newListField14です。
-    /// </summary>
-    public List<ScriptableObject> newListField14;
-
-    /// <summary>
-    /// newListField15です。
-    /// </summary>
-    public List<CO_ThiefCommonStatusData> newListField15;
-
-    /// <summary>
-    /// newListField16です。
-    /// </summary>
-    public List<GameObject> newListField16;
+    public List<Vector2Int> newListField05;
 
 }
