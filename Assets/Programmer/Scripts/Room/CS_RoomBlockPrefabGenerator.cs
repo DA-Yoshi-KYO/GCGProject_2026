@@ -16,17 +16,9 @@ using UnityEngine;
  *                2026/04/28 Fixedは事前生成、Randomはゲーム開始時生成へ変更(ヨシモト)
  *                2026/04/29 Element0のStartPlayerPointへPlayerPrefabを生成する処理を追加(ヨシモト)
  *                2026/05/03 Player生成時はRaycastではなくRoomCreatePointを直接設定する形へ変更(ヨシモト)
- *                2026/05/25 リファクタリング
+ *                2026/05/25 リファクタリング(ヨシモト)
  *==================================================*/
 
-/// <summary>
-/// RoomPrefabの生成方式です。
-/// </summary>
-public enum CSE_RoomBlockGenerateType
-{
-    Fixed,
-    Random
-}
 
 /// <summary>
 /// 登録されたRoomCreatePointの子としてRoomPrefabを生成するクラスです。
@@ -57,6 +49,28 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
     private CS_RoomCreatePointGenerateDataValidator cs_RoomCreatePointGenerateDataValidator =
         new CS_RoomCreatePointGenerateDataValidator();
 
+    private CS_RoomBlockGenerateExecutor cs_RoomBlockGenerateExecutor;
+
+    /// <summary>
+    /// RoomBlock生成実行クラスを初期化します。
+    /// </summary>
+    private void InitializeRoomBlockGenerateExecutor()
+    {
+        if (cs_RoomBlockGenerateExecutor != null)
+        {
+            return;
+        }
+
+        cs_RoomBlockGenerateExecutor =
+            new CS_RoomBlockGenerateExecutor(
+                cs_GeneratedRoomObjectService,
+                cs_RoomConnectionBuilder,
+                cs_RoomBlockPrefabSelector,
+                cs_RoomCreatePointGenerateDataValidator,
+                cs_GeneratedRoomCameraSetup
+            );
+    }
+
     /// <summary>
     /// 生成済みRoomのRoomMovePoint接続だけを再構築します。
     /// </summary>
@@ -75,84 +89,14 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
         CSE_RoomBlockGenerateType targetGenerateType,
         bool bool_IsReplaceExisting)
     {
-        if (list_RoomCreatePointGenerateData == null || list_RoomCreatePointGenerateData.Count <= 0)
-        {
-            Debug.LogWarning("[RoomBlockPrefabGenerator] 生成対象RoomCreatePointが登録されていません。");
-            return;
-        }
+        InitializeRoomBlockGenerateExecutor();
 
-        cs_GeneratedRoomObjectService.DeleteOldGeneratedRoot(transform);
-
-        int generatedCount = 0;
-
-        for (int i = 0 ; i < list_RoomCreatePointGenerateData.Count ; i++)
-        {
-            CS_RoomCreatePointGenerateData generateData = list_RoomCreatePointGenerateData[i];
-
-            if (generateData == null)
-            {
-                continue;
-            }
-
-            if (generateData.GenerateType != targetGenerateType)
-            {
-                continue;
-            }
-
-            if (!cs_RoomCreatePointGenerateDataValidator.IsValidGenerateData(generateData, i))
-            {
-                continue;
-            }
-
-            Transform pointTransform = generateData.RoomCreatePointTransform;
-
-            if (pointTransform == null)
-            {
-                continue;
-            }
-
-            if (bool_IsReplaceExisting)
-            {
-                cs_GeneratedRoomObjectService.DeleteGeneratedChildren(pointTransform);
-            }
-            else
-            {
-                if (cs_GeneratedRoomObjectService.FindGeneratedRoomChild(pointTransform) != null)
-                {
-                    Debug.LogWarning("[RoomBlockPrefabGenerator] すでに生成済みのRoomがあります。再生成したい場合は再生成メニューを使ってください : " + generateData.RoomCreatePointObject.name);
-                    continue;
-                }
-            }
-
-            GameObject roomPrefab =
-                cs_RoomBlockPrefabSelector.GetRoomBlockPrefab(generateData, i);
-
-            if (roomPrefab == null)
-            {
-                continue;
-            }
-
-            Vector3 spawnPosition = pointTransform.position;
-            Quaternion spawnRotation = pointTransform.rotation;
-
-            GameObject generatedRoom = cs_GeneratedRoomObjectService.CreateRoomInstance(
-                roomPrefab,
-                spawnPosition,
-                spawnRotation,
-                pointTransform
-            );
-
-            generatedRoom.name = cs_GeneratedRoomObjectService.CreateGeneratedRoomName(roomPrefab, i);
-
-            cs_GeneratedRoomCameraSetup.SetupGeneratedRoomForPlayerCamera(generatedRoom);
-
-            generatedCount++;
-        }
-
-        cs_RoomConnectionBuilder.RebuildGeneratedRoomLinks(
-            list_RoomCreatePointGenerateData);
-
-        Debug.Log("[RoomBlockPrefabGenerator] " + targetGenerateType + " のRoomを生成しました。生成数 : " + generatedCount);
+        cs_RoomBlockGenerateExecutor.GenerateRoomBlocksByType(
+            list_RoomCreatePointGenerateData,
+            targetGenerateType,
+            bool_IsReplaceExisting,
+            transform
+        );
     }
 
     /// <summary>
@@ -169,35 +113,12 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
     /// <param name="targetGenerateType">削除対象の方式。</param>
     public void DeleteGeneratedRoomBlocksByType(CSE_RoomBlockGenerateType targetGenerateType)
     {
-        if (list_RoomCreatePointGenerateData == null)
-        {
-            return;
-        }
+        InitializeRoomBlockGenerateExecutor();
 
-        for (int i = 0 ; i < list_RoomCreatePointGenerateData.Count ; i++)
-        {
-            CS_RoomCreatePointGenerateData generateData = list_RoomCreatePointGenerateData[i];
-
-            if (generateData == null)
-            {
-                continue;
-            }
-
-            if (generateData.GenerateType != targetGenerateType)
-            {
-                continue;
-            }
-
-            if (generateData.RoomCreatePointTransform == null)
-            {
-                continue;
-            }
-
-            cs_GeneratedRoomObjectService.DeleteGeneratedChildren(
-                generateData.RoomCreatePointTransform);
-        }
-
-        Debug.Log("[RoomBlockPrefabGenerator] " + targetGenerateType + " の生成済みRoomを削除しました。");
+        cs_RoomBlockGenerateExecutor.DeleteGeneratedRoomBlocksByType(
+            list_RoomCreatePointGenerateData,
+            targetGenerateType
+        );
     }
 
     /// <summary>
