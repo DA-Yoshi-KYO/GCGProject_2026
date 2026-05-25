@@ -44,6 +44,7 @@ public class CS_PlayerAction : MonoBehaviour
     Vector3 settingPos = Vector3.zero;  // 設置予定場所
 
     private GimmickManager gimmickManager;
+    private CS_3DPlaySE playSE;
 
     // Start is called before the first frame update
     void Start()
@@ -67,6 +68,8 @@ public class CS_PlayerAction : MonoBehaviour
 
         playerMaterial = playerMesh.GetComponent<Renderer>().materials[1];
         playerMaterial.SetVector("_OutlineColor", Color.gray);
+
+        playSE = GameObject.Find("3DSE").GetComponent<CS_3DPlaySE>();
     }
 
     // Update is called once per frame
@@ -147,6 +150,7 @@ public class CS_PlayerAction : MonoBehaviour
                         break;
                     case PlayerData.PlayerMode.Setting:
                         SettingAction();
+                        playSE.PlayOneShotSE("CatInteract", gameObject.transform.position, "InteractSE");
                         playerData.currentMode = PlayerData.PlayerMode.Normal;
                         break;
                     default:
@@ -157,6 +161,7 @@ public class CS_PlayerAction : MonoBehaviour
             {
                 // 長押しはギミックの起動を行う
                 interactField.GetComponent<Renderer>().enabled = false;
+                playSE.PlayOneShotSE("CatInteract", gameObject.transform.position, "InteractSE");
 
                 float minHeight = -interactScale.y * 0.5f;
                 float maxHeight = interactScale.y * 0.5f;
