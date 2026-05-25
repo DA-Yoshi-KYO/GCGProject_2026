@@ -154,6 +154,9 @@ public class CS_ThiefAI : MonoBehaviour
     [SerializeField, Tooltip("この泥棒が回避する DangerZone の zoneID 一覧")]
     private List<int> avoidZoneIDs = new List<int>();
 
+    [Tooltip("泥棒関係のサウンド")]
+    private CS_3DPlaySE thiefSound;
+
 
     /// <summary>
     /// 泥棒のステータスを設定する処理
@@ -237,6 +240,12 @@ public class CS_ThiefAI : MonoBehaviour
         }
         thiefMaterial.SetFloat("_DisappearTime", fadeAfterStunTime);
         thiefMaterial.SetFloat("_Timer", fadeAfterStunTime);
+
+        // サウンドマネージャーから泥棒のサウンドを管理するコンポーネントを取得
+        GameObject soundManager = GameObject.Find("AudioManager");
+        // 子オブジェクトからCS_3DPlaySEコンポーネントを取得
+        if (soundManager != null) thiefSound = soundManager.GetComponentInChildren<CS_3DPlaySE>();
+        if (thiefSound == null) Debug.LogWarning("CS_3DPlaySEコンポーネントが見つかりません。サウンドが再生されません。");
 
         FindNowRoomNode();
     }
