@@ -134,6 +134,7 @@ public class GimmickBase : MonoBehaviour
     private GameObject hitChecker;
     private BoxCollider searchColliderX;
     private BoxCollider searchColliderZ;
+    protected CS_3DPlaySE gimmickSound;
 
     private void Start()
     {
@@ -141,6 +142,18 @@ public class GimmickBase : MonoBehaviour
         GameObject Z = search.transform.Find("Z").gameObject;
         searchColliderX = X.GetComponent<BoxCollider>();
         searchColliderZ = Z.GetComponent<BoxCollider>();
+
+        // サウンドマネージャーからCS_3DPlaySEコンポーネントを取得
+        GameObject soundManager = GameObject.Find("AudioManager");
+        // 子オブジェクトからCS_3DPlaySEコンポーネントを取得
+        if (soundManager != null)
+        {
+            gimmickSound = soundManager.GetComponentInChildren<CS_3DPlaySE>();
+        }
+        if(gimmickSound == null)
+        {
+            Debug.LogWarning("CS_3DPlaySEコンポーネントが見つかりません。サウンドが再生されません。");
+        }
     }
 
     /// <summary>
