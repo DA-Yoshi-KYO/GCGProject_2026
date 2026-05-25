@@ -38,7 +38,6 @@ public enum CSE_RoomBlockGenerateType
 public class CS_RoomBlockPrefabGenerator : MonoBehaviour
 {
     private const string ROOM_CREATE_POINT_TAG = "RoomCreatePoint";
-    private const string START_PLAYER_POINT_NAME = "StartPlayerPoint";
     private const string CENTER_NAME = "Center";
 
     [Header("生成対象RoomCreatePoint一覧")]
@@ -46,13 +45,14 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
     private List<CS_RoomCreatePointGenerateData> list_RoomCreatePointGenerateData =
         new List<CS_RoomCreatePointGenerateData>();
 
-    private CS_RoomPlayerPosition cs_RoomPlayerPosition;
-
     private CS_GeneratedRoomObjectService cs_GeneratedRoomObjectService =
         new CS_GeneratedRoomObjectService();
 
     private CS_RoomConnectionBuilder cs_RoomConnectionBuilder =
         new CS_RoomConnectionBuilder();
+
+    private CS_RoomPlayerSpawnService cs_RoomPlayerSpawnService =
+    new CS_RoomPlayerSpawnService();
 
     /// <summary>
     /// 生成済みRoomのRoomMovePoint接続だけを再構築します。
@@ -426,92 +426,9 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
     /// </summary>
     public void CreatePlayerAtFirstRoomStartPoint()
     {
-        if (!Application.isPlaying)
-        {
-            return;
-        }
-
-        CacheRoomPlayerPosition();
-
-        if (cs_RoomPlayerPosition == null)
-        {
-            Debug.LogWarning("[RoomBlockPrefabGenerator] 同じGameObjectにCS_RoomPlayerPositionが付いていません。");
-            return;
-        }
-
-        if (list_RoomCreatePointGenerateData == null || list_RoomCreatePointGenerateData.Count <= 0)
-        {
-            Debug.LogWarning("[RoomBlockPrefabGenerator] Element0のRoomCreatePointがありません。");
-            return;
-        }
-
-        CS_RoomCreatePointGenerateData firstGenerateData = list_RoomCreatePointGenerateData[0];
-
-        if (firstGenerateData == null || firstGenerateData.RoomCreatePointTransform == null)
-        {
-            Debug.LogWarning("[RoomBlockPrefabGenerator] Element0のRoomCreatePointが設定されていません。");
-            return;
-        }
-
-        GameObject firstGeneratedRoom =
-            cs_GeneratedRoomObjectService.FindGeneratedRoomChild(
-                firstGenerateData.RoomCreatePointTransform);
-
-        if (firstGeneratedRoom == null)
-        {
-            Debug.LogWarning("[RoomBlockPrefabGenerator] Element0のRoomCreatePoint内に生成済みRoomがありません。");
-            return;
-        }
-
-        Transform startPlayerPoint = FindStartPlayerPoint(firstGeneratedRoom.transform);
-
-        if (startPlayerPoint == null)
-        {
-            Debug.LogWarning("[RoomBlockPrefabGenerator] Element0の生成Room内にStartPlayerPointがありません。");
-            return;
-        }
-
-        cs_RoomPlayerPosition.CreatePlayerAtStartPoint(
-            startPlayerPoint,
-            firstGenerateData.RoomCreatePointObject
-        );
-    }
-
-    /// <summary>
-    /// Room内からStartPlayerPointを探します。
-    /// </summary>
-    /// <param name="roomRoot">探す対象のRoomルート。</param>
-    /// <returns>StartPlayerPointのTransform。</returns>
-    private Transform FindStartPlayerPoint(Transform roomRoot)
-    {
-        if (roomRoot == null)
-        {
-            return null;
-        }
-
-        Transform[] childTransforms = roomRoot.GetComponentsInChildren<Transform>(true);
-
-        for (int i = 0 ; i < childTransforms.Length ; i++)
-        {
-            if (childTransforms[i].name == START_PLAYER_POINT_NAME)
-            {
-                return childTransforms[i];
-            }
-        }
-
-        return null;
-    }
-
-    /// <summary>
-    /// 同じGameObjectに付いているCS_RoomPlayerPositionを取得します。
-    /// </summary>
-    private void CacheRoomPlayerPosition()
-    {
-        if (cs_RoomPlayerPosition != null)
-        {
-            return;
-        }
-
-        cs_RoomPlayerPosition = GetComponent<CS_RoomPlayerPosition>();
+        cs_RoomPlayerSpawnService.CreatePlayerAtFirstRoomStartPoint(
+            this,
+            list_RoomCreatePointGenerateData,
+            cs_GeneratedRoomObjectService);
     }
 }
