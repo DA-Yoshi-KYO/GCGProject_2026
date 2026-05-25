@@ -51,84 +51,75 @@ public class GimmickBase : MonoBehaviour
     // 大きさ
     [Header("大きさ")]
     [Tooltip("X方向の大きさ"), Min(0)]
-    public float gimmickSizeX;
+    [SerializeField] public float gimmickSizeX;
     [Tooltip("Y方向の大きさ"), Min(0)]
-    public float gimmickSizeY;
+    [SerializeField] public float gimmickSizeY;
     [Tooltip("Z方向の大きさ"), Min(0)]
-    public float gimmickSizeZ;
+    [SerializeField] public float gimmickSizeZ;
     [Tooltip("拡縮率 / ％"), Min(0)]
-    public float gimmickScale = 100;
+    [SerializeField] protected float gimmickScale = 100;
 
     // 命中範囲
     [Header("命中範囲")]
     [Tooltip("X方向の命中範囲"), Min(0)]
-    public float hitRangeX;
+    [SerializeField] protected float hitRangeX;
     [Tooltip("Y方向の命中範囲"), Min(0)]
-    public float hitRangeY;
+    [SerializeField] protected float hitRangeY;
     [Tooltip("Z方向の命中範囲"), Min(0)]
-    public float hitRangeZ;
+    [SerializeField] protected float hitRangeZ;
 
     // 効果範囲
     [Header("効果範囲")]
     [Tooltip("X方向の効果範囲"), Min(0)]
-    public float effectRangeX;
+    [SerializeField] public float effectRangeX;
     [Tooltip("Y方向の効果範囲"), Min(0)]
-    public float effectRangeY;
+    [SerializeField] public float effectRangeY;
     [Tooltip("Z方向の効果範囲"), Min(0)]
-    public float effectRangeZ;
-
-    // 必要なソウル数
-    [Header("必要ソウル数")]
-    [Tooltip("必要なソウル数"), Min(0)]
-    public int requiredSoul;
+    [SerializeField] public float effectRangeZ;
 
     // 攻撃力と効果力
     [Header("攻撃力")]
     [Tooltip("命中時"), Min(0)]
-    public int attackPower;
+    [SerializeField] protected int attackPower;
     [Tooltip("非命中時"), Min(0)]
-    public int effectPower;
+    [SerializeField] protected int effectPower;
 
     [Header("RoomGrid")]
     [Tooltip("RoomGridのオブジェクト")]
-    public RoomGrid roomGrid;
+    [SerializeField] public RoomGrid roomGrid;
 
     [Header("HitChecker")]
     [Tooltip("HitCheckerのオブジェクト")]
-    public GameObject hitCheckerPrefab;
-
+    [SerializeField] protected GameObject hitCheckerPrefab;
     // ギミックの向き
     [Header("ギミックの向き")]
-    public GimmickDirection gimmickDirection;
+    [SerializeField] protected GimmickDirection gimmickDirection;
 
     // ギミックの種類
     [Header("ギミックのタイプ")]
-    public GimmickType gimmickType;
-
+    [SerializeField] protected GimmickType gimmickType;
     [Header("ギミックの種類")]
-    public Gimmick gimmick;
+    [SerializeField] public Gimmick gimmick;
 
     // ギミックの状態
     [Header("ギミックの状態")]
-    public GimmickState gimmickState;
-
+    [SerializeField] public GimmickState gimmickState;
     [Header("泥棒検知")]
-    [SerializeField] private GameObject search;
+    [SerializeField] protected GameObject search;
     [Tooltip("泥棒を検知する範囲"), Min(0)]
     [SerializeField] protected int searchGridRange;
     [Header("敵のレイヤー")]
-    public LayerMask enemyLayer;
+    [SerializeField] protected LayerMask enemyLayer;
 
     [Header("調整用（プログラマー専用）")]
     [Tooltip("ギミックの大きさや位置を調整するための値"), Min(1)]
-    public int Adjust;
-
+    [SerializeField] protected int Adjust;
     // ギミックのグリッド上の位置
     protected Vector2Int gimmickGridPos;
 
-    private GameObject hitChecker;
-    private BoxCollider searchColliderX;
-    private BoxCollider searchColliderZ;
+    protected GameObject hitChecker;
+    protected BoxCollider searchColliderX;
+    protected BoxCollider searchColliderZ;
     protected CS_3DPlaySE gimmickSound;
 
     private void Start()
