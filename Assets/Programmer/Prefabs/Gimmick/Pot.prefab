@@ -94,6 +94,7 @@ MeshRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 664096f9cb4b4554795be23feb957e2f, type: 2}
+  - {fileID: 2100000, guid: 6b3bafe46a1bf374aac55a90620d66d7, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -181,7 +182,7 @@ GameObject:
   - component: {fileID: 3279101354686393898}
   - component: {fileID: 5284634821981415291}
   - component: {fileID: 6548285118755774186}
-  m_Layer: 0
+  m_Layer: 27
   m_Name: Pot
   m_TagString: Gimmick
   m_Icon: {fileID: 0}
@@ -228,7 +229,6 @@ MonoBehaviour:
   effectRangeX: 3
   effectRangeY: 2
   effectRangeZ: 3
-  requiredSoul: 1
   attackPower: 2
   effectPower: 1
   roomGrid: {fileID: 0}
@@ -245,7 +245,7 @@ MonoBehaviour:
     m_Bits: 536870912
   Adjust: 1
   activeTime: 10
-  gravity: 0.001
+  gravity: 0.1
   dangerZonePrefab: {fileID: 1027198714623358771, guid: 1dc331ca8706d994f9348bb340bfb17e,
     type: 3}
   thiefLayer:

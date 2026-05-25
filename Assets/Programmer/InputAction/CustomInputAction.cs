@@ -482,7 +482,7 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
                     ""name"": """",
                     ""id"": ""7c9bd331-92da-481d-9004-b15c9f1fbdbd"",
                     ""path"": ""<Keyboard>/f"",
-                    ""interactions"": """",
+                    ""interactions"": ""Press(pressPoint=1)"",
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Decision"",
@@ -493,7 +493,7 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
                     ""name"": """",
                     ""id"": ""11bc2885-ca81-4752-85bc-5734d83866df"",
                     ""path"": ""<Keyboard>/space"",
-                    ""interactions"": """",
+                    ""interactions"": ""Press(pressPoint=1)"",
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Decision"",
@@ -583,7 +583,7 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
                     ""name"": """",
                     ""id"": ""010f893b-9d47-424e-b2b5-4dbbc2ad9133"",
                     ""path"": ""<Keyboard>/f"",
-                    ""interactions"": """",
+                    ""interactions"": ""Press(pressPoint=1)"",
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Decision"",
@@ -594,7 +594,209 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
                     ""name"": """",
                     ""id"": ""1899a8b8-a58a-40c6-924a-da11d2ed53d5"",
                     ""path"": ""<Keyboard>/space"",
+                    ""interactions"": ""Press(pressPoint=1)"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Decision"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
+        },
+        {
+            ""name"": ""GameClear"",
+            ""id"": ""a60c7eb2-1cec-46f5-b121-33a12a3c7d02"",
+            ""actions"": [
+                {
+                    ""name"": ""MoveRight"",
+                    ""type"": ""Button"",
+                    ""id"": ""2292220b-8b17-459a-bade-635a1e31ee04"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
                     ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""MoveLeft"",
+                    ""type"": ""Button"",
+                    ""id"": ""0641e0fd-1366-4c31-b0a7-3ea733849fd2"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Decision"",
+                    ""type"": ""Button"",
+                    ""id"": ""06d6d678-2046-47c6-8a9b-af5c42bd19c8"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""1769bb3f-fa65-4bd3-a622-0f9eadfe9864"",
+                    ""path"": ""<Keyboard>/d"",
+                    ""interactions"": ""Press(pressPoint=1)"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveRight"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""c6c92914-eb37-446b-80fe-7f91275c23a8"",
+                    ""path"": ""<Keyboard>/rightArrow"",
+                    ""interactions"": ""Press(pressPoint=1)"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveRight"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""c0f0ffe4-258e-4a24-bb38-9921e8a1ad0c"",
+                    ""path"": ""<Keyboard>/a"",
+                    ""interactions"": ""Press(pressPoint=1)"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveLeft"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""3ece3a00-f0f7-4c70-96d7-aae475d0dfeb"",
+                    ""path"": ""<Keyboard>/leftArrow"",
+                    ""interactions"": ""Press(pressPoint=1)"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveLeft"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""0ffc347d-24a2-4e4f-8783-5e0d50f9078e"",
+                    ""path"": ""<Keyboard>/f"",
+                    ""interactions"": ""Press(pressPoint=1)"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Decision"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f23f5f01-7b39-49aa-880d-4fff79c8c462"",
+                    ""path"": ""<Keyboard>/space"",
+                    ""interactions"": ""Press(pressPoint=1)"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Decision"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
+        },
+        {
+            ""name"": ""GameOver"",
+            ""id"": ""b32df814-836c-469f-a7eb-319f130f9bf1"",
+            ""actions"": [
+                {
+                    ""name"": ""MoveRight"",
+                    ""type"": ""Button"",
+                    ""id"": ""a62375e8-2ffb-4888-b140-c5212b183f8a"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""MoveLeft"",
+                    ""type"": ""Button"",
+                    ""id"": ""a66eb51f-9647-4de5-ac5f-13f853f0dc75"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Decision"",
+                    ""type"": ""Button"",
+                    ""id"": ""bdba9494-e4a8-48ba-8d43-508a9aaf8d22"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""41806341-9d6e-4b44-b015-56bcb0ae2807"",
+                    ""path"": ""<Keyboard>/d"",
+                    ""interactions"": ""Press(pressPoint=1)"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveRight"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""67204c2e-8938-493a-9054-39c9dad47878"",
+                    ""path"": ""<Keyboard>/rightArrow"",
+                    ""interactions"": ""Press(pressPoint=1)"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveRight"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""dc4e08b2-3458-4cc4-9381-c7b6c5fcc938"",
+                    ""path"": ""<Keyboard>/a"",
+                    ""interactions"": ""Press(pressPoint=1)"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveLeft"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""07fbbdfd-4cdd-4239-8688-7a964982c174"",
+                    ""path"": ""<Keyboard>/leftArrow"",
+                    ""interactions"": ""Press(pressPoint=1)"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveLeft"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""cc990745-4a02-4edd-a75c-050e6f863d98"",
+                    ""path"": ""<Keyboard>/f"",
+                    ""interactions"": ""Press(pressPoint=1)"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Decision"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f5eea096-ddc7-453d-bf54-068ad2593a87"",
+                    ""path"": ""<Keyboard>/space"",
+                    ""interactions"": ""Press(pressPoint=1)"",
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Decision"",
@@ -625,6 +827,16 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
         m_StageSelect_MoveRight = m_StageSelect.FindAction("MoveRight", throwIfNotFound: true);
         m_StageSelect_MoveLeft = m_StageSelect.FindAction("MoveLeft", throwIfNotFound: true);
         m_StageSelect_Decision = m_StageSelect.FindAction("Decision", throwIfNotFound: true);
+        // GameClear
+        m_GameClear = asset.FindActionMap("GameClear", throwIfNotFound: true);
+        m_GameClear_MoveRight = m_GameClear.FindAction("MoveRight", throwIfNotFound: true);
+        m_GameClear_MoveLeft = m_GameClear.FindAction("MoveLeft", throwIfNotFound: true);
+        m_GameClear_Decision = m_GameClear.FindAction("Decision", throwIfNotFound: true);
+        // GameOver
+        m_GameOver = asset.FindActionMap("GameOver", throwIfNotFound: true);
+        m_GameOver_MoveRight = m_GameOver.FindAction("MoveRight", throwIfNotFound: true);
+        m_GameOver_MoveLeft = m_GameOver.FindAction("MoveLeft", throwIfNotFound: true);
+        m_GameOver_Decision = m_GameOver.FindAction("Decision", throwIfNotFound: true);
     }
 
     ~@CustomInputAction()
@@ -632,6 +844,8 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
         UnityEngine.Debug.Assert(!m_Player.enabled, "This will cause a leak and performance issues, CustomInputAction.Player.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_SelectBar.enabled, "This will cause a leak and performance issues, CustomInputAction.SelectBar.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_StageSelect.enabled, "This will cause a leak and performance issues, CustomInputAction.StageSelect.Disable() has not been called.");
+        UnityEngine.Debug.Assert(!m_GameClear.enabled, "This will cause a leak and performance issues, CustomInputAction.GameClear.Disable() has not been called.");
+        UnityEngine.Debug.Assert(!m_GameOver.enabled, "This will cause a leak and performance issues, CustomInputAction.GameOver.Disable() has not been called.");
     }
 
     /// <summary>
@@ -1101,6 +1315,242 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
     /// Provides a new <see cref="StageSelectActions" /> instance referencing this action map.
     /// </summary>
     public StageSelectActions @StageSelect => new StageSelectActions(this);
+
+    // GameClear
+    private readonly InputActionMap m_GameClear;
+    private List<IGameClearActions> m_GameClearActionsCallbackInterfaces = new List<IGameClearActions>();
+    private readonly InputAction m_GameClear_MoveRight;
+    private readonly InputAction m_GameClear_MoveLeft;
+    private readonly InputAction m_GameClear_Decision;
+    /// <summary>
+    /// Provides access to input actions defined in input action map "GameClear".
+    /// </summary>
+    public struct GameClearActions
+    {
+        private @CustomInputAction m_Wrapper;
+
+        /// <summary>
+        /// Construct a new instance of the input action map wrapper class.
+        /// </summary>
+        public GameClearActions(@CustomInputAction wrapper) { m_Wrapper = wrapper; }
+        /// <summary>
+        /// Provides access to the underlying input action "GameClear/MoveRight".
+        /// </summary>
+        public InputAction @MoveRight => m_Wrapper.m_GameClear_MoveRight;
+        /// <summary>
+        /// Provides access to the underlying input action "GameClear/MoveLeft".
+        /// </summary>
+        public InputAction @MoveLeft => m_Wrapper.m_GameClear_MoveLeft;
+        /// <summary>
+        /// Provides access to the underlying input action "GameClear/Decision".
+        /// </summary>
+        public InputAction @Decision => m_Wrapper.m_GameClear_Decision;
+        /// <summary>
+        /// Provides access to the underlying input action map instance.
+        /// </summary>
+        public InputActionMap Get() { return m_Wrapper.m_GameClear; }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Enable()" />
+        public void Enable() { Get().Enable(); }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Disable()" />
+        public void Disable() { Get().Disable(); }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.enabled" />
+        public bool enabled => Get().enabled;
+        /// <summary>
+        /// Implicitly converts an <see ref="GameClearActions" /> to an <see ref="InputActionMap" /> instance.
+        /// </summary>
+        public static implicit operator InputActionMap(GameClearActions set) { return set.Get(); }
+        /// <summary>
+        /// Adds <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+        /// </summary>
+        /// <param name="instance">Callback instance.</param>
+        /// <remarks>
+        /// If <paramref name="instance" /> is <c>null</c> or <paramref name="instance"/> have already been added this method does nothing.
+        /// </remarks>
+        /// <seealso cref="GameClearActions" />
+        public void AddCallbacks(IGameClearActions instance)
+        {
+            if (instance == null || m_Wrapper.m_GameClearActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_GameClearActionsCallbackInterfaces.Add(instance);
+            @MoveRight.started += instance.OnMoveRight;
+            @MoveRight.performed += instance.OnMoveRight;
+            @MoveRight.canceled += instance.OnMoveRight;
+            @MoveLeft.started += instance.OnMoveLeft;
+            @MoveLeft.performed += instance.OnMoveLeft;
+            @MoveLeft.canceled += instance.OnMoveLeft;
+            @Decision.started += instance.OnDecision;
+            @Decision.performed += instance.OnDecision;
+            @Decision.canceled += instance.OnDecision;
+        }
+
+        /// <summary>
+        /// Removes <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+        /// </summary>
+        /// <remarks>
+        /// Calling this method when <paramref name="instance" /> have not previously been registered has no side-effects.
+        /// </remarks>
+        /// <seealso cref="GameClearActions" />
+        private void UnregisterCallbacks(IGameClearActions instance)
+        {
+            @MoveRight.started -= instance.OnMoveRight;
+            @MoveRight.performed -= instance.OnMoveRight;
+            @MoveRight.canceled -= instance.OnMoveRight;
+            @MoveLeft.started -= instance.OnMoveLeft;
+            @MoveLeft.performed -= instance.OnMoveLeft;
+            @MoveLeft.canceled -= instance.OnMoveLeft;
+            @Decision.started -= instance.OnDecision;
+            @Decision.performed -= instance.OnDecision;
+            @Decision.canceled -= instance.OnDecision;
+        }
+
+        /// <summary>
+        /// Unregisters <param cref="instance" /> and unregisters all input action callbacks via <see cref="GameClearActions.UnregisterCallbacks(IGameClearActions)" />.
+        /// </summary>
+        /// <seealso cref="GameClearActions.UnregisterCallbacks(IGameClearActions)" />
+        public void RemoveCallbacks(IGameClearActions instance)
+        {
+            if (m_Wrapper.m_GameClearActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        /// <summary>
+        /// Replaces all existing callback instances and previously registered input action callbacks associated with them with callbacks provided via <param cref="instance" />.
+        /// </summary>
+        /// <remarks>
+        /// If <paramref name="instance" /> is <c>null</c>, calling this method will only unregister all existing callbacks but not register any new callbacks.
+        /// </remarks>
+        /// <seealso cref="GameClearActions.AddCallbacks(IGameClearActions)" />
+        /// <seealso cref="GameClearActions.RemoveCallbacks(IGameClearActions)" />
+        /// <seealso cref="GameClearActions.UnregisterCallbacks(IGameClearActions)" />
+        public void SetCallbacks(IGameClearActions instance)
+        {
+            foreach (var item in m_Wrapper.m_GameClearActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_GameClearActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    /// <summary>
+    /// Provides a new <see cref="GameClearActions" /> instance referencing this action map.
+    /// </summary>
+    public GameClearActions @GameClear => new GameClearActions(this);
+
+    // GameOver
+    private readonly InputActionMap m_GameOver;
+    private List<IGameOverActions> m_GameOverActionsCallbackInterfaces = new List<IGameOverActions>();
+    private readonly InputAction m_GameOver_MoveRight;
+    private readonly InputAction m_GameOver_MoveLeft;
+    private readonly InputAction m_GameOver_Decision;
+    /// <summary>
+    /// Provides access to input actions defined in input action map "GameOver".
+    /// </summary>
+    public struct GameOverActions
+    {
+        private @CustomInputAction m_Wrapper;
+
+        /// <summary>
+        /// Construct a new instance of the input action map wrapper class.
+        /// </summary>
+        public GameOverActions(@CustomInputAction wrapper) { m_Wrapper = wrapper; }
+        /// <summary>
+        /// Provides access to the underlying input action "GameOver/MoveRight".
+        /// </summary>
+        public InputAction @MoveRight => m_Wrapper.m_GameOver_MoveRight;
+        /// <summary>
+        /// Provides access to the underlying input action "GameOver/MoveLeft".
+        /// </summary>
+        public InputAction @MoveLeft => m_Wrapper.m_GameOver_MoveLeft;
+        /// <summary>
+        /// Provides access to the underlying input action "GameOver/Decision".
+        /// </summary>
+        public InputAction @Decision => m_Wrapper.m_GameOver_Decision;
+        /// <summary>
+        /// Provides access to the underlying input action map instance.
+        /// </summary>
+        public InputActionMap Get() { return m_Wrapper.m_GameOver; }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Enable()" />
+        public void Enable() { Get().Enable(); }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Disable()" />
+        public void Disable() { Get().Disable(); }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.enabled" />
+        public bool enabled => Get().enabled;
+        /// <summary>
+        /// Implicitly converts an <see ref="GameOverActions" /> to an <see ref="InputActionMap" /> instance.
+        /// </summary>
+        public static implicit operator InputActionMap(GameOverActions set) { return set.Get(); }
+        /// <summary>
+        /// Adds <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+        /// </summary>
+        /// <param name="instance">Callback instance.</param>
+        /// <remarks>
+        /// If <paramref name="instance" /> is <c>null</c> or <paramref name="instance"/> have already been added this method does nothing.
+        /// </remarks>
+        /// <seealso cref="GameOverActions" />
+        public void AddCallbacks(IGameOverActions instance)
+        {
+            if (instance == null || m_Wrapper.m_GameOverActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_GameOverActionsCallbackInterfaces.Add(instance);
+            @MoveRight.started += instance.OnMoveRight;
+            @MoveRight.performed += instance.OnMoveRight;
+            @MoveRight.canceled += instance.OnMoveRight;
+            @MoveLeft.started += instance.OnMoveLeft;
+            @MoveLeft.performed += instance.OnMoveLeft;
+            @MoveLeft.canceled += instance.OnMoveLeft;
+            @Decision.started += instance.OnDecision;
+            @Decision.performed += instance.OnDecision;
+            @Decision.canceled += instance.OnDecision;
+        }
+
+        /// <summary>
+        /// Removes <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+        /// </summary>
+        /// <remarks>
+        /// Calling this method when <paramref name="instance" /> have not previously been registered has no side-effects.
+        /// </remarks>
+        /// <seealso cref="GameOverActions" />
+        private void UnregisterCallbacks(IGameOverActions instance)
+        {
+            @MoveRight.started -= instance.OnMoveRight;
+            @MoveRight.performed -= instance.OnMoveRight;
+            @MoveRight.canceled -= instance.OnMoveRight;
+            @MoveLeft.started -= instance.OnMoveLeft;
+            @MoveLeft.performed -= instance.OnMoveLeft;
+            @MoveLeft.canceled -= instance.OnMoveLeft;
+            @Decision.started -= instance.OnDecision;
+            @Decision.performed -= instance.OnDecision;
+            @Decision.canceled -= instance.OnDecision;
+        }
+
+        /// <summary>
+        /// Unregisters <param cref="instance" /> and unregisters all input action callbacks via <see cref="GameOverActions.UnregisterCallbacks(IGameOverActions)" />.
+        /// </summary>
+        /// <seealso cref="GameOverActions.UnregisterCallbacks(IGameOverActions)" />
+        public void RemoveCallbacks(IGameOverActions instance)
+        {
+            if (m_Wrapper.m_GameOverActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        /// <summary>
+        /// Replaces all existing callback instances and previously registered input action callbacks associated with them with callbacks provided via <param cref="instance" />.
+        /// </summary>
+        /// <remarks>
+        /// If <paramref name="instance" /> is <c>null</c>, calling this method will only unregister all existing callbacks but not register any new callbacks.
+        /// </remarks>
+        /// <seealso cref="GameOverActions.AddCallbacks(IGameOverActions)" />
+        /// <seealso cref="GameOverActions.RemoveCallbacks(IGameOverActions)" />
+        /// <seealso cref="GameOverActions.UnregisterCallbacks(IGameOverActions)" />
+        public void SetCallbacks(IGameOverActions instance)
+        {
+            foreach (var item in m_Wrapper.m_GameOverActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_GameOverActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    /// <summary>
+    /// Provides a new <see cref="GameOverActions" /> instance referencing this action map.
+    /// </summary>
+    public GameOverActions @GameOver => new GameOverActions(this);
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Player" which allows adding and removing callbacks.
     /// </summary>
@@ -1193,6 +1643,64 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
     /// <seealso cref="StageSelectActions.AddCallbacks(IStageSelectActions)" />
     /// <seealso cref="StageSelectActions.RemoveCallbacks(IStageSelectActions)" />
     public interface IStageSelectActions
+    {
+        /// <summary>
+        /// Method invoked when associated input action "MoveRight" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnMoveRight(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "MoveLeft" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnMoveLeft(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Decision" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnDecision(InputAction.CallbackContext context);
+    }
+    /// <summary>
+    /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "GameClear" which allows adding and removing callbacks.
+    /// </summary>
+    /// <seealso cref="GameClearActions.AddCallbacks(IGameClearActions)" />
+    /// <seealso cref="GameClearActions.RemoveCallbacks(IGameClearActions)" />
+    public interface IGameClearActions
+    {
+        /// <summary>
+        /// Method invoked when associated input action "MoveRight" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnMoveRight(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "MoveLeft" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnMoveLeft(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Decision" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnDecision(InputAction.CallbackContext context);
+    }
+    /// <summary>
+    /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "GameOver" which allows adding and removing callbacks.
+    /// </summary>
+    /// <seealso cref="GameOverActions.AddCallbacks(IGameOverActions)" />
+    /// <seealso cref="GameOverActions.RemoveCallbacks(IGameOverActions)" />
+    public interface IGameOverActions
     {
         /// <summary>
         /// Method invoked when associated input action "MoveRight" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.

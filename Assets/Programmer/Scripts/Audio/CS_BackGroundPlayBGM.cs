@@ -78,8 +78,6 @@ public class CS_BackGroundPlayBGM : MonoBehaviour
     {
         currentVolume = Mathf.Lerp(maxVolume, 0.0f, time / fadeDuration);
         CriAtom.SetCategoryVolume("CategoryBGM", currentVolume);
-
-        Debug.Log(currentVolume);
     }
 
     //BGMのフェードイン
@@ -87,8 +85,6 @@ public class CS_BackGroundPlayBGM : MonoBehaviour
     {
         currentVolume = Mathf.Lerp(0.0f, maxVolume, time / fadeDuration);
         CriAtom.SetCategoryVolume("CategoryBGM", currentVolume);
-
-        Debug.Log(currentVolume);
     }
 
     //BGMのオプションでの音量調整
