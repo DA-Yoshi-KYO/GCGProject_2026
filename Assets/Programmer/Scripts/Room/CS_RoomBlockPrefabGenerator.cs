@@ -40,9 +40,6 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
     private const string ROOM_CREATE_POINT_TAG = "RoomCreatePoint";
     private const string START_PLAYER_POINT_NAME = "StartPlayerPoint";
     private const string CENTER_NAME = "Center";
-    private const string GENERATED_NAME_PREFIX = "__GeneratedRoom_";
-    private const string DELETING_NAME_PREFIX = "__DeletingRoom_";
-    private const string OLD_GENERATED_ROOT_NAME = "__GeneratedRoomBlocks";
 
     [Header("生成対象RoomCreatePoint一覧")]
     [SerializeField]
@@ -51,8 +48,11 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
 
     private CS_RoomPlayerPosition cs_RoomPlayerPosition;
 
+    private CS_GeneratedRoomObjectService cs_GeneratedRoomObjectService =
+        new CS_GeneratedRoomObjectService();
+
     private CS_RoomConnectionBuilder cs_RoomConnectionBuilder =
-    new CS_RoomConnectionBuilder();
+        new CS_RoomConnectionBuilder();
 
     /// <summary>
     /// 生成済みRoomのRoomMovePoint接続だけを再構築します。
@@ -78,7 +78,7 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
             return;
         }
 
-        DeleteOldGeneratedRoot();
+        cs_GeneratedRoomObjectService.DeleteOldGeneratedRoot(transform);
 
         int generatedCount = 0;
 
@@ -110,11 +110,11 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
 
             if (bool_IsReplaceExisting)
             {
-                DeleteGeneratedChildren(pointTransform);
+                cs_GeneratedRoomObjectService.DeleteGeneratedChildren(pointTransform);
             }
             else
             {
-                if (FindGeneratedRoomChild(pointTransform) != null)
+                if (cs_GeneratedRoomObjectService.FindGeneratedRoomChild(pointTransform) != null)
                 {
                     Debug.LogWarning("[RoomBlockPrefabGenerator] すでに生成済みのRoomがあります。再生成したい場合は再生成メニューを使ってください : " + generateData.RoomCreatePointObject.name);
                     continue;
@@ -131,14 +131,14 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
             Vector3 spawnPosition = pointTransform.position;
             Quaternion spawnRotation = pointTransform.rotation;
 
-            GameObject generatedRoom = CreateRoomInstance(
+            GameObject generatedRoom = cs_GeneratedRoomObjectService.CreateRoomInstance(
                 roomPrefab,
                 spawnPosition,
                 spawnRotation,
                 pointTransform
             );
 
-            generatedRoom.name = GENERATED_NAME_PREFIX + roomPrefab.name + "_" + i.ToString("00");
+            generatedRoom.name = cs_GeneratedRoomObjectService.CreateGeneratedRoomName(roomPrefab, i);
 
             SetupGeneratedRoomForPlayerCamera(generatedRoom);
 
@@ -234,6 +234,14 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
     }
 
     /// <summary>
+    /// 以前の設計でRoomManager下に生成されたRootを削除します。
+    /// </summary>
+    public void DeleteOldGeneratedRoot()
+    {
+        cs_GeneratedRoomObjectService.DeleteOldGeneratedRoot(transform);
+    }
+
+    /// <summary>
     /// 指定した生成方式の生成済みRoomを削除します。
     /// </summary>
     /// <param name="targetGenerateType">削除対象の方式。</param>
@@ -263,7 +271,8 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
                 continue;
             }
 
-            DeleteGeneratedChildren(generateData.RoomCreatePointTransform);
+            cs_GeneratedRoomObjectService.DeleteGeneratedChildren(
+                generateData.RoomCreatePointTransform);
         }
 
         Debug.Log("[RoomBlockPrefabGenerator] " + targetGenerateType + " の生成済みRoomを削除しました。");
@@ -413,155 +422,6 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
     }
 
     /// <summary>
-    /// RoomPrefabを生成します。
-    /// Editor上ではPrefab接続を維持して生成します。
-    /// </summary>
-    /// <param name="prefab">生成するPrefab。</param>
-    /// <param name="position">生成位置。</param>
-    /// <param name="rotation">生成回転。</param>
-    /// <param name="parent">生成先の親Transform。</param>
-    /// <returns>生成されたRoom。</returns>
-    private GameObject CreateRoomInstance(
-        GameObject prefab,
-        Vector3 position,
-        Quaternion rotation,
-        Transform parent)
-    {
-        GameObject instance = null;
-
-#if UNITY_EDITOR
-        if (!Application.isPlaying)
-        {
-            instance = PrefabUtility.InstantiatePrefab(prefab, parent) as GameObject;
-
-            if (instance != null)
-            {
-                Undo.RegisterCreatedObjectUndo(instance, "Generate Room Block");
-            }
-        }
-#endif
-
-        if (instance == null)
-        {
-            instance = Instantiate(prefab, parent);
-        }
-
-        instance.transform.SetPositionAndRotation(position, rotation);
-
-        return instance;
-    }
-
-    /// <summary>
-    /// RoomCreatePointの子にある生成済みRoomだけを削除します。
-    /// </summary>
-    /// <param name="parent">RoomCreatePointのTransform。</param>
-    private void DeleteGeneratedChildren(Transform parent)
-    {
-        for (int i = parent.childCount - 1 ; i >= 0 ; i--)
-        {
-            Transform child = parent.GetChild(i);
-
-            if (!IsGeneratedRoomName(child.name))
-            {
-                continue;
-            }
-
-            DestroyObjectSafe(child.gameObject);
-        }
-    }
-
-    /// <summary>
-    /// 以前の設計でRoomManager下に生成されたRootを削除します。
-    /// </summary>
-    public void DeleteOldGeneratedRoot()
-    {
-        Transform oldRoot = transform.Find(OLD_GENERATED_ROOT_NAME);
-
-        if (oldRoot == null)
-        {
-            return;
-        }
-
-        DestroyObjectSafe(oldRoot.gameObject);
-    }
-
-    /// <summary>
-    /// 生成されたRoom名かどうか確認します。
-    /// </summary>
-    /// <param name="objectName">確認するオブジェクト名。</param>
-    /// <returns>生成Room名の場合はtrue。</returns>
-    private bool IsGeneratedRoomName(string objectName)
-    {
-        if (string.IsNullOrEmpty(objectName))
-        {
-            return false;
-        }
-
-        if (objectName.StartsWith(DELETING_NAME_PREFIX))
-        {
-            return false;
-        }
-
-        return objectName.StartsWith(GENERATED_NAME_PREFIX) || objectName.Contains("_Generated_");
-    }
-
-    /// <summary>
-    /// Play中とEditor中の両方に対応して安全にオブジェクトを削除します。
-    /// </summary>
-    /// <param name="target">削除対象のGameObject。</param>
-    private void DestroyObjectSafe(GameObject target)
-    {
-        if (target == null)
-        {
-            return;
-        }
-
-#if UNITY_EDITOR
-        if (!Application.isPlaying)
-        {
-            Undo.DestroyObjectImmediate(target);
-            return;
-        }
-#endif
-
-        target.name = DELETING_NAME_PREFIX + target.name;
-        target.SetActive(false);
-        Destroy(target);
-    }
-
-    /// <summary>
-    /// RoomCreatePointの子から生成済みRoomを取得します。
-    /// </summary>
-    /// <param name="parent">RoomCreatePointのTransform。</param>
-    /// <returns>生成済みRoom。</returns>
-    private GameObject FindGeneratedRoomChild(Transform parent)
-    {
-        if (parent == null)
-        {
-            return null;
-        }
-
-        for (int i = 0 ; i < parent.childCount ; i++)
-        {
-            Transform child = parent.GetChild(i);
-
-            if (!IsGeneratedRoomName(child.name))
-            {
-                continue;
-            }
-
-            if (!child.gameObject.activeInHierarchy)
-            {
-                continue;
-            }
-
-            return child.gameObject;
-        }
-
-        return null;
-    }
-
-    /// <summary>
     /// Element0の生成Room内にあるStartPlayerPointへPlayerPrefabを生成します。
     /// </summary>
     public void CreatePlayerAtFirstRoomStartPoint()
@@ -593,7 +453,9 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
             return;
         }
 
-        GameObject firstGeneratedRoom = FindGeneratedRoomChild(firstGenerateData.RoomCreatePointTransform);
+        GameObject firstGeneratedRoom =
+            cs_GeneratedRoomObjectService.FindGeneratedRoomChild(
+                firstGenerateData.RoomCreatePointTransform);
 
         if (firstGeneratedRoom == null)
         {
