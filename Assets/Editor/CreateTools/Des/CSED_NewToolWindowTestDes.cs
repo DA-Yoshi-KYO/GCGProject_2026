@@ -18,96 +18,30 @@ using UnityEngine;
 public class CSED_NewToolWindowTestDes : EditorWindow, IHasCustomMenu
 {
     /// <summary>
-    /// newIntField01です。
+    /// newVector2Field01です。
     /// </summary>
-    private int newIntField01 = 0;
+    private Vector2 newVector2Field01 = Vector2.zero;
 
     /// <summary>
-    /// newFloatField02Minです。
+    /// newVector2IntField02です。
     /// </summary>
-    private float newFloatField02Min = 0.0f;
+    private Vector2Int newVector2IntField02 = Vector2Int.zero;
 
     /// <summary>
-    /// newFloatField02Maxです。
+    /// newField03です。
     /// </summary>
-    private float newFloatField02Max = 0.0f;
+    private GameObject newField03 = null;
 
     /// <summary>
-    /// newFloatField03Minです。
+    /// newListField04です。
     /// </summary>
-    private float newFloatField03Min = 0.0f;
-
-    /// <summary>
-    /// newFloatField03Maxです。
-    /// </summary>
-    private float newFloatField03Max = 0.0f;
-
-    /// <summary>
-    /// newVector2IntField04です。
-    /// </summary>
-    private Vector2Int newVector2IntField04 = Vector2Int.zero;
-
-    /// <summary>
-    /// newVector3IntField05です。
-    /// </summary>
-    private Vector3Int newVector3IntField05 = Vector3Int.zero;
-
-    /// <summary>
-    /// newVector2Field06です。
-    /// </summary>
-    private Vector2 newVector2Field06 = Vector2.zero;
-
-    /// <summary>
-    /// newVector3Field07です。
-    /// </summary>
-    private Vector3 newVector3Field07 = Vector3.zero;
-
-    /// <summary>
-    /// newStringField08です。
-    /// </summary>
-    private string newStringField08 = string.Empty;
-
-    /// <summary>
-    /// newStringField09です。
-    /// </summary>
-    private string newStringField09 = string.Empty;
-
-    /// <summary>
-    /// newBoolField10です。
-    /// </summary>
-    private bool newBoolField10 = false;
-
-    /// <summary>
-    /// newScriptableObjectField11です。
-    /// </summary>
-    private ScriptableObject newScriptableObjectField11 = null;
-
-    /// <summary>
-    /// newScriptField12です。
-    /// </summary>
-    private MonoScript newScriptField12 = null;
-
-    /// <summary>
-    /// newField13です。
-    /// </summary>
-    private GameObject newField13 = null;
-
-    /// <summary>
-    /// newListField14です。
-    /// </summary>
-    private List<ScriptableObject> newListField14 = new List<ScriptableObject>()
+    private List<Vector2> newListField04 = new List<Vector2>()
     {};
 
     /// <summary>
-    /// newListField15です。
+    /// newListField05です。
     /// </summary>
-    private List<CO_ThiefCommonStatusData> newListField15 = new List<CO_ThiefCommonStatusData>()
-    {};
-
-    /// <summary>
-    /// newListField16です。
-    /// </summary>
-    private List<GameObject> newListField16 = new List<GameObject>()
+    private List<Vector2Int> newListField05 = new List<Vector2Int>()
     {};
 
     /// <summary>
@@ -162,161 +96,60 @@ public class CSED_NewToolWindowTestDes : EditorWindow, IHasCustomMenu
     {
         m_MainScrollPosition = EditorGUILayout.BeginScrollView(m_MainScrollPosition);
         {
-        newIntField01 = EditorGUILayout.IntField("newIntField01", newIntField01);
+        newVector2Field01 = EditorGUILayout.Vector2Field("newVector2Field01", newVector2Field01);
         GUILayout.Space(6.0f);
 
-        {
-            Rect minMaxRowRect = EditorGUILayout.GetControlRect(false, EditorGUIUtility.singleLineHeight);
-
-            float minMaxMainLabelWidth = 120.0f;
-            float minMaxSmallLabelWidth = 28.0f;
-            float minMaxSpacing = 6.0f;
-
-            float minMaxValueAreaX = minMaxRowRect.x + minMaxMainLabelWidth + minMaxSpacing;
-            float minMaxValueAreaWidth = minMaxRowRect.width - minMaxMainLabelWidth - minMaxSpacing;
-            float minMaxFieldWidth = (minMaxValueAreaWidth - minMaxSmallLabelWidth - minMaxSmallLabelWidth - (minMaxSpacing * 3.0f)) * 0.5f;
-            minMaxFieldWidth = Mathf.Max(35.0f, minMaxFieldWidth);
-
-            Rect minMaxLabelRect = new Rect(minMaxRowRect.x, minMaxRowRect.y, minMaxMainLabelWidth, minMaxRowRect.height);
-            Rect minLabelRect = new Rect(minMaxValueAreaX, minMaxRowRect.y, minMaxSmallLabelWidth, minMaxRowRect.height);
-            Rect minValueRect = new Rect(minLabelRect.xMax + minMaxSpacing, minMaxRowRect.y, minMaxFieldWidth, minMaxRowRect.height);
-            Rect maxLabelRect = new Rect(minValueRect.xMax + minMaxSpacing, minMaxRowRect.y, minMaxSmallLabelWidth, minMaxRowRect.height);
-            Rect maxValueRect = new Rect(maxLabelRect.xMax + minMaxSpacing, minMaxRowRect.y, minMaxFieldWidth, minMaxRowRect.height);
-
-            EditorGUI.LabelField(minMaxLabelRect, "newFloatField02");
-            EditorGUI.LabelField(minLabelRect, "Min");
-            newFloatField02Min = EditorGUI.FloatField(minValueRect, newFloatField02Min);
-            EditorGUI.LabelField(maxLabelRect, "Max");
-            newFloatField02Max = EditorGUI.FloatField(maxValueRect, newFloatField02Max);
-        }
+        newVector2IntField02 = EditorGUILayout.Vector2IntField("newVector2IntField02", newVector2IntField02);
         GUILayout.Space(6.0f);
 
-        {
-            Rect minMaxRowRect = EditorGUILayout.GetControlRect(false, EditorGUIUtility.singleLineHeight);
-
-            float minMaxMainLabelWidth = 120.0f;
-            float minMaxSmallLabelWidth = 28.0f;
-            float minMaxSpacing = 6.0f;
-
-            float minMaxValueAreaX = minMaxRowRect.x + minMaxMainLabelWidth + minMaxSpacing;
-            float minMaxValueAreaWidth = minMaxRowRect.width - minMaxMainLabelWidth - minMaxSpacing;
-            float minMaxFieldWidth = (minMaxValueAreaWidth - minMaxSmallLabelWidth - minMaxSmallLabelWidth - (minMaxSpacing * 3.0f)) * 0.5f;
-            minMaxFieldWidth = Mathf.Max(35.0f, minMaxFieldWidth);
-
-            Rect minMaxLabelRect = new Rect(minMaxRowRect.x, minMaxRowRect.y, minMaxMainLabelWidth, minMaxRowRect.height);
-            Rect minLabelRect = new Rect(minMaxValueAreaX, minMaxRowRect.y, minMaxSmallLabelWidth, minMaxRowRect.height);
-            Rect minValueRect = new Rect(minLabelRect.xMax + minMaxSpacing, minMaxRowRect.y, minMaxFieldWidth, minMaxRowRect.height);
-            Rect maxLabelRect = new Rect(minValueRect.xMax + minMaxSpacing, minMaxRowRect.y, minMaxSmallLabelWidth, minMaxRowRect.height);
-            Rect maxValueRect = new Rect(maxLabelRect.xMax + minMaxSpacing, minMaxRowRect.y, minMaxFieldWidth, minMaxRowRect.height);
-
-            EditorGUI.LabelField(minMaxLabelRect, "newFloatField03");
-            EditorGUI.LabelField(minLabelRect, "Min");
-            newFloatField03Min = EditorGUI.FloatField(minValueRect, newFloatField03Min);
-            EditorGUI.LabelField(maxLabelRect, "Max");
-            newFloatField03Max = EditorGUI.FloatField(maxValueRect, newFloatField03Max);
-        }
+        newField03 = (GameObject)EditorGUILayout.ObjectField("newField03", newField03, typeof(GameObject), false);
         GUILayout.Space(6.0f);
 
-        newVector2IntField04 = EditorGUILayout.Vector2IntField("newVector2IntField04", newVector2IntField04);
-        GUILayout.Space(6.0f);
-
-        newVector3IntField05 = EditorGUILayout.Vector3IntField("newVector3IntField05", newVector3IntField05);
-        GUILayout.Space(6.0f);
-
-        newVector2Field06 = EditorGUILayout.Vector2Field("newVector2Field06", newVector2Field06);
-        GUILayout.Space(6.0f);
-
-        newVector3Field07 = EditorGUILayout.Vector3Field("newVector3Field07", newVector3Field07);
-        GUILayout.Space(6.0f);
-
-        newStringField08 = EditorGUILayout.TextField("newStringField08", newStringField08);
-        GUILayout.Space(6.0f);
-
-        EditorGUILayout.LabelField("newStringField09");
-        newStringField09 = EditorGUILayout.TextArea(newStringField09, GUILayout.Height(64.0f));
-        GUILayout.Space(6.0f);
-
-        newBoolField10 = EditorGUILayout.Toggle("newBoolField10", newBoolField10);
-        GUILayout.Space(6.0f);
-
-        newScriptableObjectField11 = (ScriptableObject)EditorGUILayout.ObjectField("newScriptableObjectField11", newScriptableObjectField11, typeof(ScriptableObject), false);
-        GUILayout.Space(6.0f);
-
-        newScriptField12 = (MonoScript)EditorGUILayout.ObjectField("newScriptField12", newScriptField12, typeof(MonoScript), false);
-        GUILayout.Space(6.0f);
-
-        newField13 = (GameObject)EditorGUILayout.ObjectField("newField13", newField13, typeof(GameObject), false);
-        GUILayout.Space(6.0f);
-
-        EditorGUILayout.LabelField("newListField14", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField("newListField04", EditorStyles.boldLabel);
 
         EditorGUILayout.BeginHorizontal();
         {
-            if (GUILayout.Button("-", GUILayout.Width(24.0f)) && newListField14.Count > 0)
+            if (GUILayout.Button("-", GUILayout.Width(24.0f)) && newListField04.Count > 0)
             {
-                newListField14.RemoveAt(newListField14.Count - 1);
+                newListField04.RemoveAt(newListField04.Count - 1);
             }
 
-            EditorGUILayout.LabelField(newListField14.Count.ToString(), GUILayout.Width(32.0f));
+            EditorGUILayout.LabelField(newListField04.Count.ToString(), GUILayout.Width(32.0f));
 
             if (GUILayout.Button("+", GUILayout.Width(24.0f)))
             {
-                newListField14.Add(null);
+                newListField04.Add(Vector2.zero);
             }
         }
         EditorGUILayout.EndHorizontal();
 
-        for (int i = 0; i < newListField14.Count; i++)
+        for (int i = 0; i < newListField04.Count; i++)
         {
-            newListField14[i] = (ScriptableObject)EditorGUILayout.ObjectField("Element " + i.ToString(), newListField14[i], typeof(ScriptableObject), false);
+            newListField04[i] = EditorGUILayout.Vector2Field("Element " + i.ToString(), newListField04[i]);
         }
         GUILayout.Space(6.0f);
 
-        EditorGUILayout.LabelField("newListField15", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField("newListField05", EditorStyles.boldLabel);
 
         EditorGUILayout.BeginHorizontal();
         {
-            if (GUILayout.Button("-", GUILayout.Width(24.0f)) && newListField15.Count > 0)
+            if (GUILayout.Button("-", GUILayout.Width(24.0f)) && newListField05.Count > 0)
             {
-                newListField15.RemoveAt(newListField15.Count - 1);
+                newListField05.RemoveAt(newListField05.Count - 1);
             }
 
-            EditorGUILayout.LabelField(newListField15.Count.ToString(), GUILayout.Width(32.0f));
+            EditorGUILayout.LabelField(newListField05.Count.ToString(), GUILayout.Width(32.0f));
 
             if (GUILayout.Button("+", GUILayout.Width(24.0f)))
             {
-                newListField15.Add(null);
+                newListField05.Add(Vector2Int.zero);
             }
         }
         EditorGUILayout.EndHorizontal();
 
-        for (int i = 0; i < newListField15.Count; i++)
+        for (int i = 0; i < newListField05.Count; i++)
         {
-            newListField15[i] = (CO_ThiefCommonStatusData)EditorGUILayout.ObjectField("Element " + i.ToString(), newListField15[i], typeof(CO_ThiefCommonStatusData), false);
-        }
-        GUILayout.Space(6.0f);
-
-        EditorGUILayout.LabelField("newListField16", EditorStyles.boldLabel);
-
-        EditorGUILayout.BeginHorizontal();
-        {
-            if (GUILayout.Button("-", GUILayout.Width(24.0f)) && newListField16.Count > 0)
-            {
-                newListField16.RemoveAt(newListField16.Count - 1);
-            }
-
-            EditorGUILayout.LabelField(newListField16.Count.ToString(), GUILayout.Width(32.0f));
-
-            if (GUILayout.Button("+", GUILayout.Width(24.0f)))
-            {
-                newListField16.Add(null);
-            }
-        }
-        EditorGUILayout.EndHorizontal();
-
-        for (int i = 0; i < newListField16.Count; i++)
-        {
-            newListField16[i] = (GameObject)EditorGUILayout.ObjectField("Element " + i.ToString(), newListField16[i], typeof(GameObject), false);
+            newListField05[i] = EditorGUILayout.Vector2IntField("Element " + i.ToString(), newListField05[i]);
         }
         GUILayout.Space(6.0f);
 
@@ -352,24 +185,11 @@ public class CSED_NewToolWindowTestDes : EditorWindow, IHasCustomMenu
         }
 
         CSS_NewToolDatTestDes asset = CreateInstance<CSS_NewToolDatTestDes>();
-        asset.newIntField01 = newIntField01;
-        asset.newFloatField02Min = newFloatField02Min;
-        asset.newFloatField02Max = newFloatField02Max;
-        asset.newFloatField03Min = newFloatField03Min;
-        asset.newFloatField03Max = newFloatField03Max;
-        asset.newVector2IntField04 = newVector2IntField04;
-        asset.newVector3IntField05 = newVector3IntField05;
-        asset.newVector2Field06 = newVector2Field06;
-        asset.newVector3Field07 = newVector3Field07;
-        asset.newStringField08 = newStringField08;
-        asset.newStringField09 = newStringField09;
-        asset.newBoolField10 = newBoolField10;
-        asset.newScriptableObjectField11 = newScriptableObjectField11;
-        asset.newScriptField12 = newScriptField12;
-        asset.newField13 = newField13;
-        asset.newListField14 = new List<ScriptableObject>(newListField14);
-        asset.newListField15 = new List<CO_ThiefCommonStatusData>(newListField15);
-        asset.newListField16 = new List<GameObject>(newListField16);
+        asset.newVector2Field01 = newVector2Field01;
+        asset.newVector2IntField02 = newVector2IntField02;
+        asset.newField03 = newField03;
+        asset.newListField04 = new List<Vector2>(newListField04);
+        asset.newListField05 = new List<Vector2Int>(newListField05);
 
         string assetPath = AssetDatabase.GenerateUniqueAssetPath(
             System.IO.Path.Combine(m_AssetOutputFolderPath, m_AssetFileName + ".asset"));
@@ -790,96 +610,32 @@ public class CSED_NewToolWindowTestDes_CreatedAssetsWindow : EditorWindow
     {
         DrawCreatedAssetProperty(
             f_serializedObject,
-            "newIntField01",
-            "newIntField01");
-        GUILayout.Space(4.0f);
-
-        SerializedProperty newFloatField02MinProperty = f_serializedObject.FindProperty("newFloatField02Min");
-        SerializedProperty newFloatField02MaxProperty = f_serializedObject.FindProperty("newFloatField02Max");
-        DrawCreatedAssetMinMaxField("newFloatField02", newFloatField02MinProperty, newFloatField02MaxProperty);
-        GUILayout.Space(4.0f);
-
-        SerializedProperty newFloatField03MinProperty = f_serializedObject.FindProperty("newFloatField03Min");
-        SerializedProperty newFloatField03MaxProperty = f_serializedObject.FindProperty("newFloatField03Max");
-        DrawCreatedAssetMinMaxField("newFloatField03", newFloatField03MinProperty, newFloatField03MaxProperty);
+            "newVector2Field01",
+            "newVector2Field01");
         GUILayout.Space(4.0f);
 
         DrawCreatedAssetProperty(
             f_serializedObject,
-            "newVector2IntField04",
-            "newVector2IntField04");
+            "newVector2IntField02",
+            "newVector2IntField02");
         GUILayout.Space(4.0f);
 
         DrawCreatedAssetProperty(
             f_serializedObject,
-            "newVector3IntField05",
-            "newVector3IntField05");
+            "newField03",
+            "newField03");
         GUILayout.Space(4.0f);
 
         DrawCreatedAssetProperty(
             f_serializedObject,
-            "newVector2Field06",
-            "newVector2Field06");
+            "newListField04",
+            "newListField04");
         GUILayout.Space(4.0f);
 
         DrawCreatedAssetProperty(
             f_serializedObject,
-            "newVector3Field07",
-            "newVector3Field07");
-        GUILayout.Space(4.0f);
-
-        DrawCreatedAssetProperty(
-            f_serializedObject,
-            "newStringField08",
-            "newStringField08");
-        GUILayout.Space(4.0f);
-
-        DrawCreatedAssetProperty(
-            f_serializedObject,
-            "newStringField09",
-            "newStringField09");
-        GUILayout.Space(4.0f);
-
-        DrawCreatedAssetProperty(
-            f_serializedObject,
-            "newBoolField10",
-            "newBoolField10");
-        GUILayout.Space(4.0f);
-
-        DrawCreatedAssetProperty(
-            f_serializedObject,
-            "newScriptableObjectField11",
-            "newScriptableObjectField11");
-        GUILayout.Space(4.0f);
-
-        DrawCreatedAssetProperty(
-            f_serializedObject,
-            "newScriptField12",
-            "newScriptField12");
-        GUILayout.Space(4.0f);
-
-        DrawCreatedAssetProperty(
-            f_serializedObject,
-            "newField13",
-            "newField13");
-        GUILayout.Space(4.0f);
-
-        DrawCreatedAssetProperty(
-            f_serializedObject,
-            "newListField14",
-            "newListField14");
-        GUILayout.Space(4.0f);
-
-        DrawCreatedAssetProperty(
-            f_serializedObject,
-            "newListField15",
-            "newListField15");
-        GUILayout.Space(4.0f);
-
-        DrawCreatedAssetProperty(
-            f_serializedObject,
-            "newListField16",
-            "newListField16");
+            "newListField05",
+            "newListField05");
         GUILayout.Space(4.0f);
 
     }

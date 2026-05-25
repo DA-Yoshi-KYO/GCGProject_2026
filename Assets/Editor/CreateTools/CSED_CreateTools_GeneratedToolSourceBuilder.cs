@@ -543,6 +543,30 @@ public partial class CSED_CreateTools
             return;
         }
 
+        if (f_fieldData.ListElementFieldType == CSE_CreateTools_FieldType.Vector2Int)
+        {
+            f_builder.AppendLine("            " + f_variableName + "[i] = EditorGUILayout.Vector2IntField(\"Element \" + i.ToString(), " + f_variableName + "[i]);");
+            return;
+        }
+
+        if (f_fieldData.ListElementFieldType == CSE_CreateTools_FieldType.Vector3Int)
+        {
+            f_builder.AppendLine("            " + f_variableName + "[i] = EditorGUILayout.Vector3IntField(\"Element \" + i.ToString(), " + f_variableName + "[i]);");
+            return;
+        }
+
+        if (f_fieldData.ListElementFieldType == CSE_CreateTools_FieldType.Vector2)
+        {
+            f_builder.AppendLine("            " + f_variableName + "[i] = EditorGUILayout.Vector2Field(\"Element \" + i.ToString(), " + f_variableName + "[i]);");
+            return;
+        }
+
+        if (f_fieldData.ListElementFieldType == CSE_CreateTools_FieldType.Vector3)
+        {
+            f_builder.AppendLine("            " + f_variableName + "[i] = EditorGUILayout.Vector3Field(\"Element \" + i.ToString(), " + f_variableName + "[i]);");
+            return;
+        }
+
         if (f_fieldData.ListElementFieldType == CSE_CreateTools_FieldType.Int)
         {
             f_builder.AppendLine("            " + f_variableName + "[i] = EditorGUILayout.IntField(\"Element \" + i.ToString(), " + f_variableName + "[i]);");
@@ -827,8 +851,40 @@ public partial class CSED_CreateTools
             case CSE_CreateTools_FieldType.Int:
                 return GetGeneratedIntText(f_fieldData.ListDefaultElementValueTextList[f_index]);
 
+            case CSE_CreateTools_FieldType.Vector2Int:
+                return "new Vector2Int("
+                    + GetGeneratedIntText(GetListVectorDefaultComponentText(f_fieldData, f_index, 0))
+                    + ", "
+                    + GetGeneratedIntText(GetListVectorDefaultComponentText(f_fieldData, f_index, 1))
+                    + ")";
+
+            case CSE_CreateTools_FieldType.Vector3Int:
+                return "new Vector3Int("
+                    + GetGeneratedIntText(GetListVectorDefaultComponentText(f_fieldData, f_index, 0))
+                    + ", "
+                    + GetGeneratedIntText(GetListVectorDefaultComponentText(f_fieldData, f_index, 1))
+                    + ", "
+                    + GetGeneratedIntText(GetListVectorDefaultComponentText(f_fieldData, f_index, 2))
+                    + ")";
+
             case CSE_CreateTools_FieldType.Float:
                 return GetGeneratedFloatText(f_fieldData.ListDefaultElementValueTextList[f_index]);
+
+            case CSE_CreateTools_FieldType.Vector2:
+                return "new Vector2("
+                    + GetGeneratedFloatText(GetListVectorDefaultComponentText(f_fieldData, f_index, 0))
+                    + ", "
+                    + GetGeneratedFloatText(GetListVectorDefaultComponentText(f_fieldData, f_index, 1))
+                    + ")";
+
+            case CSE_CreateTools_FieldType.Vector3:
+                return "new Vector3("
+                    + GetGeneratedFloatText(GetListVectorDefaultComponentText(f_fieldData, f_index, 0))
+                    + ", "
+                    + GetGeneratedFloatText(GetListVectorDefaultComponentText(f_fieldData, f_index, 1))
+                    + ", "
+                    + GetGeneratedFloatText(GetListVectorDefaultComponentText(f_fieldData, f_index, 2))
+                    + ")";
 
             case CSE_CreateTools_FieldType.String:
                 return "\"" + EscapeString(f_fieldData.ListDefaultElementValueTextList[f_index]) + "\"";
@@ -853,8 +909,20 @@ public partial class CSED_CreateTools
             case CSE_CreateTools_FieldType.Int:
                 return "0";
 
+            case CSE_CreateTools_FieldType.Vector2Int:
+                return "Vector2Int.zero";
+
+            case CSE_CreateTools_FieldType.Vector3Int:
+                return "Vector3Int.zero";
+
             case CSE_CreateTools_FieldType.Float:
                 return "0.0f";
+
+            case CSE_CreateTools_FieldType.Vector2:
+                return "Vector2.zero";
+
+            case CSE_CreateTools_FieldType.Vector3:
+                return "Vector3.zero";
 
             case CSE_CreateTools_FieldType.String:
                 return "string.Empty";
