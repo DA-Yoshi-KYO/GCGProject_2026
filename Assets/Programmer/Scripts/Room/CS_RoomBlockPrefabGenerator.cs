@@ -20,6 +20,7 @@ using UnityEditor;
  *                2026/04/28 Fixedは事前生成、Randomはゲーム開始時生成へ変更(ヨシモト)
  *                2026/04/29 Element0のStartPlayerPointへPlayerPrefabを生成する処理を追加(ヨシモト)
  *                2026/05/03 Player生成時はRaycastではなくRoomCreatePointを直接設定する形へ変更(ヨシモト)
+ *                2026/05/25 リファクタリング
  *==================================================*/
 
 /// <summary>
@@ -55,6 +56,9 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
 
     private CS_GeneratedRoomCameraSetup cs_GeneratedRoomCameraSetup =
         new CS_GeneratedRoomCameraSetup();
+
+    private CS_RoomBlockPrefabSelector cs_RoomBlockPrefabSelector =
+        new CS_RoomBlockPrefabSelector();
 
     /// <summary>
     /// 生成済みRoomのRoomMovePoint接続だけを再構築します。
@@ -123,7 +127,8 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
                 }
             }
 
-            GameObject roomPrefab = GetRoomBlockPrefab(generateData, i);
+            GameObject roomPrefab =
+                cs_RoomBlockPrefabSelector.GetRoomBlockPrefab(generateData, i);
 
             if (roomPrefab == null)
             {
@@ -259,86 +264,6 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
         }
 
         return true;
-    }
-
-    /// <summary>
-    /// 生成方式に応じたRoomPrefabを取得します。
-    /// </summary>
-    /// <param name="generateData">生成データ。</param>
-    /// <param name="index">リスト番号。</param>
-    /// <returns>生成に使うRoomPrefab。</returns>
-    private GameObject GetRoomBlockPrefab(CS_RoomCreatePointGenerateData generateData, int index)
-    {
-        if (generateData.GenerateType == CSE_RoomBlockGenerateType.Fixed)
-        {
-            return GetFixedRoomBlockPrefab(generateData, index);
-        }
-
-        return GetRandomRoomBlockPrefab(generateData, index);
-    }
-
-    /// <summary>
-    /// 固定生成用のRoomPrefabを取得します。
-    /// </summary>
-    /// <param name="generateData">生成データ。</param>
-    /// <param name="index">リスト番号。</param>
-    /// <returns>固定生成用RoomPrefab。</returns>
-    private GameObject GetFixedRoomBlockPrefab(CS_RoomCreatePointGenerateData generateData, int index)
-    {
-        if (generateData.FixedRoomPrefab == null)
-        {
-            Debug.LogWarning("[RoomBlockPrefabGenerator] 固定生成用RoomPrefabが設定されていません。Index : " + index);
-            return null;
-        }
-
-        return generateData.FixedRoomPrefab;
-    }
-
-    /// <summary>
-    /// ランダム生成用のRoomPrefabを取得します。
-    /// </summary>
-    /// <param name="generateData">生成データ。</param>
-    /// <param name="index">リスト番号。</param>
-    /// <returns>ランダムに選ばれたRoomPrefab。</returns>
-    private GameObject GetRandomRoomBlockPrefab(CS_RoomCreatePointGenerateData generateData, int index)
-    {
-        List<GameObject> validPrefabs = GetValidRoomBlockPrefabs(generateData.RandomRoomBlockPrefabs);
-
-        if (validPrefabs.Count <= 0)
-        {
-            Debug.LogWarning("[RoomBlockPrefabGenerator] ランダム生成候補RoomPrefabが設定されていません。Index : " + index);
-            return null;
-        }
-
-        int randomIndex = Random.Range(0, validPrefabs.Count);
-        return validPrefabs[randomIndex];
-    }
-
-    /// <summary>
-    /// nullではないRoomPrefabだけを取得します。
-    /// </summary>
-    /// <param name="roomPrefabs">確認対象Prefabリスト。</param>
-    /// <returns>有効なRoomPrefabリスト。</returns>
-    private List<GameObject> GetValidRoomBlockPrefabs(List<GameObject> roomPrefabs)
-    {
-        List<GameObject> validPrefabs = new List<GameObject>();
-
-        if (roomPrefabs == null)
-        {
-            return validPrefabs;
-        }
-
-        for (int i = 0 ; i < roomPrefabs.Count ; i++)
-        {
-            if (roomPrefabs[i] == null)
-            {
-                continue;
-            }
-
-            validPrefabs.Add(roomPrefabs[i]);
-        }
-
-        return validPrefabs;
     }
 
     /// <summary>
