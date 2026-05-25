@@ -214,11 +214,11 @@ public class CS_PlayerAction : MonoBehaviour
         {
             Debug.LogError("選択されたギミックにGimmickBaseコンポーネントが付いていません"); return;
         }
-        if (currentSoul - gimmick.requiredSoul < 0)
-        {
-            Debug.Log("ソウルが不足しています");
-            return;    // ソウルが足りない場合召喚しない
-        }
+        //if(!gimmickManager.IsSetting(gimmick.gimmick))
+        //{
+        //    Debug.Log("ギミックの設置失敗: IsSetting");
+        //    return;
+        //}
         GameObject currentRoom = playerData.currentRoomData.GetPlayerRoomData().transform.GetChild(0).gameObject;
         string roomName = currentRoom.name;
         bool isNotSettingRoom = roomName.Contains("Start") || roomName.Contains("Treasure");
@@ -238,9 +238,7 @@ public class CS_PlayerAction : MonoBehaviour
             Debug.LogError("この部屋の床にRoomGridがついていません");
         }
         if (!roomGrid.SetGimmickInGrid(CalculateGimmickSetPosition(), gimmick)) return;
-
-        //ソウルの消費
-        currentSoul -= gimmick.requiredSoul;
+        //gimmickManager.SettingStart(gimmick);
     }
 
     public void SettingGimmickDirection(GimmickBase gimmick)

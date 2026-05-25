@@ -77,6 +77,11 @@ public class GimmickBase : MonoBehaviour
     [Tooltip("Z方向の効果範囲"), Min(0)]
     public float effectRangeZ;
 
+    //クールタイム
+    [Header("クールタイム")]
+    [SerializeField]
+    private int coolTime;
+
     // 必要なソウル数
     [Header("必要ソウル数")]
     [Tooltip("必要なソウル数"), Min(0)]
