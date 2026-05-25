@@ -14,6 +14,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using static UnityEditor.Progress;
 
 public class CS_PlayerAction : MonoBehaviour
 {
@@ -45,6 +46,7 @@ public class CS_PlayerAction : MonoBehaviour
 
     private GimmickManager gimmickManager;
     private CS_3DPlaySE playSE;
+    Collider[] hits = null;
 
     // Start is called before the first frame update
     void Start()
@@ -87,11 +89,23 @@ public class CS_PlayerAction : MonoBehaviour
         }
         if (isInteracting)
         {
-
             interactTime += Time.deltaTime * interactSpeed;
             // インタラクト範囲の拡大
             if (interactTime >= switchInteract)
             {
+                if (hits != null)
+                {
+                    foreach (var item in hits)
+                    {
+                        if (item == null) continue;
+                        var renderers = item.GetComponentsInChildren<Renderer>();
+                        foreach (var renderer in renderers)
+                        {
+                            renderer.materials[1].SetVector("_OutlineColor", Color.gray);
+                        }
+                    }
+                }
+
                 playerMaterial.SetVector("_OutlineColor", Color.green);
                 interactScale.x = Mathf.Max(interactTime - switchInteract, 0f) + interactMin.radius;
                 interactScale.y = Mathf.Max(interactTime - switchInteract, 0f) + interactMin.height;
@@ -103,7 +117,29 @@ public class CS_PlayerAction : MonoBehaviour
                 Vector3 interactPos = transform.position;
                 interactPos.y += interactScale.y * 0.5f; // フィールドが地面に接するように位置を調整
                 interactField.transform.position = interactPos;
+
+                hits = Physics.OverlapCapsule(
+                    interactField.transform.position + interactField.transform.up * interactScale.y * 0.5f,
+                    interactField.transform.position - interactField.transform.up * interactScale.y * 0.5f,
+                    interactScale.x * 0.5f,
+                    LayerMask.GetMask("Gimmick")
+                    );
+
+
+                foreach (var item in hits)
+                {
+                    if (item == null) continue;
+
+                    var gimmick = item.GetComponent<GimmickBase>();
+                    if (gimmick.gimmickState != GimmickState.Idle) continue;
+                    var renderers = item.GetComponentsInChildren<Renderer>();
+                    foreach (var renderer in renderers)
+                    {
+                        renderer.materials[1].SetVector("_OutlineColor", Color.green);
+                    }
+                }
             }
+
         }
         
 #if UNITY_EDITOR
@@ -162,17 +198,12 @@ public class CS_PlayerAction : MonoBehaviour
                 // 長押しはギミックの起動を行う
                 interactField.GetComponent<Renderer>().enabled = false;
                 playSE.PlayOneShotSE("CatInteract", gameObject.transform.position, "InteractSE");
-
+                
                 float minHeight = -interactScale.y * 0.5f;
                 float maxHeight = interactScale.y * 0.5f;
-                Collider[] hits = Physics.OverlapCapsule(
-                    interactField.transform.position + interactField.transform.up * interactScale.y * 0.5f,
-                    interactField.transform.position - interactField.transform.up * interactScale.y * 0.5f,
-                    interactScale.x * 0.5f,
-                    LayerMask.GetMask("Gimmick")
-                );
                 foreach (Collider hit in hits)
                 {
+
                     //ギミックの情報を取得
                     Vector3 hitPoint = hit.ClosestPoint(interactField.transform.position); 
 
@@ -194,10 +225,17 @@ public class CS_PlayerAction : MonoBehaviour
                     if (gimmick == null) continue;
                     if (gimmick.gimmickState != GimmickState.Idle) continue;
 
+                    var renderers = hit.GetComponentsInChildren<Renderer>();
+                    foreach (var renderer in renderers)
+                    {
+                        renderer.materials[1].SetVector("_OutlineColor", Color.gray);
+                    }
+
                     //ギミックをアクティブにする
                     Debug.Log($"ギミック：" + hit.name + "がアクティブになりました");
                     gimmick.ActivateGimmick();
                 }
+                hits = null;
             }
         }
 
