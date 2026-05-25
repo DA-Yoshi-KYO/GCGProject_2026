@@ -152,19 +152,19 @@ public partial class CSED_CreateTools
         EditorGUILayout.LabelField("Header設定", EditorStyles.boldLabel);
 
         m_GeneratedHeaderAuthorName = EditorGUILayout.TextField(
-            "  Author Name",
+            "  作者",
             m_GeneratedHeaderAuthorName);
 
         m_GeneratedHeaderHistoryDate = EditorGUILayout.TextField(
-            "  History Date",
+            "  制作日",
             m_GeneratedHeaderHistoryDate);
 
         m_GeneratedEditorHeaderContents = EditorGUILayout.TextField(
-            "  Editor Contents",
+            "  エディター説明",
             m_GeneratedEditorHeaderContents);
 
         m_GeneratedDataHeaderContents = EditorGUILayout.TextField(
-            "  Data Contents",
+            "  データ説明",
             m_GeneratedDataHeaderContents);
     }
 
@@ -398,7 +398,7 @@ public partial class CSED_CreateTools
             EditorGUI.BeginChangeCheck();
 
             m_PreviewEditorTitleName = EditorGUILayout.TextField(
-                "Title Name",
+                "  エディター名",
                 m_PreviewEditorTitleName);
 
             m_GeneratedToolWindowTitle = m_PreviewEditorTitleName;
@@ -435,11 +435,11 @@ public partial class CSED_CreateTools
         EditorGUILayout.LabelField("Default設定", EditorStyles.boldLabel);
 
         m_GeneratedDefaultAssetName = EditorGUILayout.TextField(
-            "  Default Asset Name",
+            "  データ作成初期名",
             m_GeneratedDefaultAssetName);
 
         m_GeneratedDefaultAssetFolder = EditorGUILayout.TextField(
-            "  Default Asset Folder",
+            "  データ保存先",
             m_GeneratedDefaultAssetFolder);
     }
 
@@ -682,6 +682,12 @@ public partial class CSED_CreateTools
             return;
         }
 
+        if (IsVectorFieldType(f_fieldData.ListElementFieldType))
+        {
+            DrawPreviewListVectorElement(f_fieldData, f_index);
+            return;
+        }
+
         if (f_fieldData.FieldLayoutType == CSE_CreateTools_FieldLayoutType.Slider)
         {
             DrawPreviewListSliderElement(f_fieldData, f_index);
@@ -713,6 +719,145 @@ public partial class CSED_CreateTools
         }
 
         DrawPreviewListInputFieldElement(f_fieldData, f_index);
+    }
+
+    /// <summary>
+    /// ListのVector要素プレビューを描画します。
+    /// </summary>
+    /// <param name="f_fieldData">描画対象FieldData</param>
+    /// <param name="f_index">List要素番号</param>
+    private void DrawPreviewListVectorElement(
+        CSED_CreateTools_FieldData f_fieldData,
+        int f_index)
+    {
+        string label = "Element " + f_index.ToString();
+
+        switch (f_fieldData.ListElementFieldType)
+        {
+            case CSE_CreateTools_FieldType.Vector2Int:
+                EditorGUILayout.Vector2IntField(
+                    label,
+                    GetPreviewListVector2IntDefaultValue(f_fieldData, f_index));
+                break;
+
+            case CSE_CreateTools_FieldType.Vector3Int:
+                EditorGUILayout.Vector3IntField(
+                    label,
+                    GetPreviewListVector3IntDefaultValue(f_fieldData, f_index));
+                break;
+
+            case CSE_CreateTools_FieldType.Vector2:
+                EditorGUILayout.Vector2Field(
+                    label,
+                    GetPreviewListVector2DefaultValue(f_fieldData, f_index));
+                break;
+
+            case CSE_CreateTools_FieldType.Vector3:
+                EditorGUILayout.Vector3Field(
+                    label,
+                    GetPreviewListVector3DefaultValue(f_fieldData, f_index));
+                break;
+        }
+    }
+
+    /// <summary>
+    /// List用Vector2Int初期値を取得します。
+    /// </summary>
+    private Vector2Int GetPreviewListVector2IntDefaultValue(
+        CSED_CreateTools_FieldData f_fieldData,
+        int f_index)
+    {
+        return new Vector2Int(
+            GetPreviewListVectorIntComponent(f_fieldData, f_index, 0),
+            GetPreviewListVectorIntComponent(f_fieldData, f_index, 1));
+    }
+
+    /// <summary>
+    /// List用Vector3Int初期値を取得します。
+    /// </summary>
+    private Vector3Int GetPreviewListVector3IntDefaultValue(
+        CSED_CreateTools_FieldData f_fieldData,
+        int f_index)
+    {
+        return new Vector3Int(
+            GetPreviewListVectorIntComponent(f_fieldData, f_index, 0),
+            GetPreviewListVectorIntComponent(f_fieldData, f_index, 1),
+            GetPreviewListVectorIntComponent(f_fieldData, f_index, 2));
+    }
+
+    /// <summary>
+    /// List用Vector2初期値を取得します。
+    /// </summary>
+    private Vector2 GetPreviewListVector2DefaultValue(
+        CSED_CreateTools_FieldData f_fieldData,
+        int f_index)
+    {
+        return new Vector2(
+            GetPreviewListVectorFloatComponent(f_fieldData, f_index, 0),
+            GetPreviewListVectorFloatComponent(f_fieldData, f_index, 1));
+    }
+
+    /// <summary>
+    /// List用Vector3初期値を取得します。
+    /// </summary>
+    private Vector3 GetPreviewListVector3DefaultValue(
+        CSED_CreateTools_FieldData f_fieldData,
+        int f_index)
+    {
+        return new Vector3(
+            GetPreviewListVectorFloatComponent(f_fieldData, f_index, 0),
+            GetPreviewListVectorFloatComponent(f_fieldData, f_index, 1),
+            GetPreviewListVectorFloatComponent(f_fieldData, f_index, 2));
+    }
+
+    /// <summary>
+    /// List内Vector初期値のint要素を取得します。
+    /// </summary>
+    private int GetPreviewListVectorIntComponent(
+        CSED_CreateTools_FieldData f_fieldData,
+        int f_listIndex,
+        int f_componentIndex)
+    {
+        if (f_fieldData.IsListDefaultValueNull)
+        {
+            return 0;
+        }
+
+        int result = 0;
+
+        int.TryParse(
+            GetListVectorDefaultComponentText(
+                f_fieldData,
+                f_listIndex,
+                f_componentIndex),
+            out result);
+
+        return result;
+    }
+
+    /// <summary>
+    /// List内Vector初期値のfloat要素を取得します。
+    /// </summary>
+    private float GetPreviewListVectorFloatComponent(
+        CSED_CreateTools_FieldData f_fieldData,
+        int f_listIndex,
+        int f_componentIndex)
+    {
+        if (f_fieldData.IsListDefaultValueNull)
+        {
+            return 0.0f;
+        }
+
+        float result = 0.0f;
+
+        float.TryParse(
+            GetListVectorDefaultComponentText(
+                f_fieldData,
+                f_listIndex,
+                f_componentIndex),
+            out result);
+
+        return result;
     }
 
     /// <summary>
@@ -1022,10 +1167,34 @@ public partial class CSED_CreateTools
                     GetPreviewIntDefaultValue(f_fieldData));
                 break;
 
+            case CSE_CreateTools_FieldType.Vector2Int:
+                EditorGUILayout.Vector2IntField(
+                    label,
+                    GetPreviewVector2IntDefaultValue(f_fieldData));
+                break;
+
+            case CSE_CreateTools_FieldType.Vector3Int:
+                EditorGUILayout.Vector3IntField(
+                    label,
+                    GetPreviewVector3IntDefaultValue(f_fieldData));
+                break;
+
             case CSE_CreateTools_FieldType.Float:
                 EditorGUILayout.FloatField(
                     label,
                     GetPreviewFloatDefaultValue(f_fieldData));
+                break;
+
+            case CSE_CreateTools_FieldType.Vector2:
+                EditorGUILayout.Vector2Field(
+                    label,
+                    GetPreviewVector2DefaultValue(f_fieldData));
+                break;
+
+            case CSE_CreateTools_FieldType.Vector3:
+                EditorGUILayout.Vector3Field(
+                    label,
+                    GetPreviewVector3DefaultValue(f_fieldData));
                 break;
 
             case CSE_CreateTools_FieldType.Bool:
@@ -1050,6 +1219,104 @@ public partial class CSED_CreateTools
                     GetPreviewStringDefaultValue(f_fieldData));
                 break;
         }
+    }
+
+    /// <summary>
+    /// プレビュー用Vector2Int初期値を取得します。
+    /// </summary>
+    /// <param name="f_fieldData">対象FieldData</param>
+    /// <returns>Vector2Int初期値</returns>
+    private Vector2Int GetPreviewVector2IntDefaultValue(CSED_CreateTools_FieldData f_fieldData)
+    {
+        return new Vector2Int(
+            GetPreviewVectorIntComponent(f_fieldData, 0),
+            GetPreviewVectorIntComponent(f_fieldData, 1));
+    }
+
+    /// <summary>
+    /// プレビュー用Vector3Int初期値を取得します。
+    /// </summary>
+    /// <param name="f_fieldData">対象FieldData</param>
+    /// <returns>Vector3Int初期値</returns>
+    private Vector3Int GetPreviewVector3IntDefaultValue(CSED_CreateTools_FieldData f_fieldData)
+    {
+        return new Vector3Int(
+            GetPreviewVectorIntComponent(f_fieldData, 0),
+            GetPreviewVectorIntComponent(f_fieldData, 1),
+            GetPreviewVectorIntComponent(f_fieldData, 2));
+    }
+
+    /// <summary>
+    /// プレビュー用Vector2初期値を取得します。
+    /// </summary>
+    /// <param name="f_fieldData">対象FieldData</param>
+    /// <returns>Vector2初期値</returns>
+    private Vector2 GetPreviewVector2DefaultValue(CSED_CreateTools_FieldData f_fieldData)
+    {
+        return new Vector2(
+            GetPreviewVectorFloatComponent(f_fieldData, 0),
+            GetPreviewVectorFloatComponent(f_fieldData, 1));
+    }
+
+    /// <summary>
+    /// プレビュー用Vector3初期値を取得します。
+    /// </summary>
+    /// <param name="f_fieldData">対象FieldData</param>
+    /// <returns>Vector3初期値</returns>
+    private Vector3 GetPreviewVector3DefaultValue(CSED_CreateTools_FieldData f_fieldData)
+    {
+        return new Vector3(
+            GetPreviewVectorFloatComponent(f_fieldData, 0),
+            GetPreviewVectorFloatComponent(f_fieldData, 1),
+            GetPreviewVectorFloatComponent(f_fieldData, 2));
+    }
+
+    /// <summary>
+    /// Vector初期値のint要素を取得します。
+    /// </summary>
+    /// <param name="f_fieldData">対象FieldData</param>
+    /// <param name="f_index">要素番号</param>
+    /// <returns>int値</returns>
+    private int GetPreviewVectorIntComponent(
+        CSED_CreateTools_FieldData f_fieldData,
+        int f_index)
+    {
+        if (f_fieldData.IsDefaultValueNull)
+        {
+            return 0;
+        }
+
+        int result = 0;
+
+        int.TryParse(
+            GetVectorDefaultComponentText(f_fieldData, f_index),
+            out result);
+
+        return result;
+    }
+
+    /// <summary>
+    /// Vector初期値のfloat要素を取得します。
+    /// </summary>
+    /// <param name="f_fieldData">対象FieldData</param>
+    /// <param name="f_index">要素番号</param>
+    /// <returns>float値</returns>
+    private float GetPreviewVectorFloatComponent(
+        CSED_CreateTools_FieldData f_fieldData,
+        int f_index)
+    {
+        if (f_fieldData.IsDefaultValueNull)
+        {
+            return 0.0f;
+        }
+
+        float result = 0.0f;
+
+        float.TryParse(
+            GetVectorDefaultComponentText(f_fieldData, f_index),
+            out result);
+
+        return result;
     }
 
     /// <summary>

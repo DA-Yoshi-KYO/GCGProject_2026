@@ -910,6 +910,12 @@ public partial class CSED_CreateTools
             return;
         }
 
+        if (IsVectorFieldType(f_fieldData.ListElementFieldType))
+        {
+            DrawListDefaultVectorElement(f_fieldData, f_index);
+            return;
+        }
+
         if (f_layoutType == CSE_CreateTools_FieldLayoutType.MinMaxField)
         {
             DrawListDefaultMinMaxElement(f_fieldData, f_index);
@@ -935,6 +941,166 @@ public partial class CSED_CreateTools
         }
 
         DrawListDefaultSingleValueElement(f_fieldData, f_index);
+    }
+
+    /// <summary>
+    /// ListのVector要素をX/Y/Z入力として描画します。
+    /// </summary>
+    /// <param name="f_fieldData">選択中Fieldデータ</param>
+    /// <param name="f_index">List要素番号</param>
+    private void DrawListDefaultVectorElement(
+        CSED_CreateTools_FieldData f_fieldData,
+        int f_index)
+    {
+        int componentCount = GetVectorFieldComponentCount(f_fieldData.ListElementFieldType);
+
+        EditorGUILayout.LabelField(
+            "  Element " + f_index.ToString(),
+            EditorStyles.boldLabel);
+
+        GUILayout.Space(c_FieldInspectorRowSpacing);
+
+        for (int i = 0 ; i < componentCount ; i++)
+        {
+            string componentLabel = GetVectorComponentLabel(i);
+            string componentValue = GetListVectorDefaultComponentText(
+                f_fieldData,
+                f_index,
+                i);
+
+            componentValue = DrawSmallTextField(
+                "    " + componentLabel,
+                componentValue);
+
+            SetListVectorDefaultComponentText(
+                f_fieldData,
+                f_index,
+                i,
+                componentValue);
+
+            GUILayout.Space(c_FieldInspectorRowSpacing);
+        }
+    }
+
+    /// <summary>
+    /// List内Vector初期値の指定要素を取得します。
+    /// </summary>
+    /// <param name="f_fieldData">対象FieldData</param>
+    /// <param name="f_listIndex">List要素番号</param>
+    /// <param name="f_componentIndex">Vector要素番号</param>
+    /// <returns>要素文字列</returns>
+    private string GetListVectorDefaultComponentText(
+        CSED_CreateTools_FieldData f_fieldData,
+        int f_listIndex,
+        int f_componentIndex)
+    {
+        string[] values = GetListVectorDefaultValueParts(f_fieldData, f_listIndex);
+
+        if (f_componentIndex < 0 || f_componentIndex >= values.Length)
+        {
+            return "0";
+        }
+
+        if (string.IsNullOrEmpty(values[f_componentIndex]))
+        {
+            return "0";
+        }
+
+        return values[f_componentIndex];
+    }
+
+    /// <summary>
+    /// List内Vector初期値の指定要素を設定します。
+    /// </summary>
+    /// <param name="f_fieldData">対象FieldData</param>
+    /// <param name="f_listIndex">List要素番号</param>
+    /// <param name="f_componentIndex">Vector要素番号</param>
+    /// <param name="f_value">設定値</param>
+    private void SetListVectorDefaultComponentText(
+        CSED_CreateTools_FieldData f_fieldData,
+        int f_listIndex,
+        int f_componentIndex,
+        string f_value)
+    {
+        EnsureListDefaultElementValueList(f_fieldData);
+
+        if (f_listIndex < 0 ||
+            f_listIndex >= f_fieldData.ListDefaultElementValueTextList.Count)
+        {
+            return;
+        }
+
+        int componentCount = GetVectorFieldComponentCount(f_fieldData.ListElementFieldType);
+        string[] values = GetListVectorDefaultValueParts(f_fieldData, f_listIndex);
+
+        if (values.Length != componentCount)
+        {
+            System.Array.Resize(ref values, componentCount);
+        }
+
+        for (int i = 0 ; i < values.Length ; i++)
+        {
+            if (string.IsNullOrEmpty(values[i]))
+            {
+                values[i] = "0";
+            }
+        }
+
+        if (f_componentIndex >= 0 && f_componentIndex < values.Length)
+        {
+            values[f_componentIndex] = f_value;
+        }
+
+        f_fieldData.ListDefaultElementValueTextList[f_listIndex] =
+            string.Join(",", values);
+    }
+
+    /// <summary>
+    /// List内Vector初期値文字列を分解します。
+    /// </summary>
+    /// <param name="f_fieldData">対象FieldData</param>
+    /// <param name="f_listIndex">List要素番号</param>
+    /// <returns>分解後の値配列</returns>
+    private string[] GetListVectorDefaultValueParts(
+        CSED_CreateTools_FieldData f_fieldData,
+        int f_listIndex)
+    {
+        int componentCount = GetVectorFieldComponentCount(f_fieldData.ListElementFieldType);
+        string[] values = new string[componentCount];
+
+        if (f_fieldData.ListDefaultElementValueTextList == null ||
+            f_listIndex < 0 ||
+            f_listIndex >= f_fieldData.ListDefaultElementValueTextList.Count)
+        {
+            for (int i = 0 ; i < values.Length ; i++)
+            {
+                values[i] = "0";
+            }
+
+            return values;
+        }
+
+        string sourceText = f_fieldData.ListDefaultElementValueTextList[f_listIndex];
+
+        if (string.IsNullOrEmpty(sourceText) == false)
+        {
+            string[] splitValues = sourceText.Split(',');
+
+            for (int i = 0 ; i < splitValues.Length && i < values.Length ; i++)
+            {
+                values[i] = splitValues[i];
+            }
+        }
+
+        for (int i = 0 ; i < values.Length ; i++)
+        {
+            if (string.IsNullOrEmpty(values[i]))
+            {
+                values[i] = "0";
+            }
+        }
+
+        return values;
     }
 
     /// <summary>
@@ -1254,12 +1420,18 @@ public partial class CSED_CreateTools
     /// <param name="f_fieldData">選択中Fieldデータ</param>
     private void DrawDefaultValueSettings(CSED_CreateTools_FieldData f_fieldData)
     {
+        if (IsVectorFieldType(f_fieldData.FieldType))
+        {
+            DrawDefaultVectorValueSettings(f_fieldData);
+            return;
+        }
+
         EditorGUILayout.LabelField("Default設定", EditorStyles.boldLabel);
 
         GUILayout.Space(c_FieldInspectorSectionTitleBottomSpacing);
 
         f_fieldData.IsDefaultValueNull = DrawSmallToggle(
-            "  NULL",
+            "  Default Is Null",
             f_fieldData.IsDefaultValueNull);
 
         GUILayout.Space(c_FieldInspectorRowSpacing);
@@ -1267,10 +1439,192 @@ public partial class CSED_CreateTools
         EditorGUI.BeginDisabledGroup(f_fieldData.IsDefaultValueNull);
         {
             f_fieldData.DefaultValueText = DrawSmallTextField(
-                "  初期値",
+                "  Default Value",
                 f_fieldData.DefaultValueText);
         }
         EditorGUI.EndDisabledGroup();
+    }
+
+    /// <summary>
+    /// Vector系の初期値設定を描画します。
+    /// </summary>
+    /// <param name="f_fieldData">選択中Fieldデータ</param>
+    private void DrawDefaultVectorValueSettings(CSED_CreateTools_FieldData f_fieldData)
+    {
+        EditorGUILayout.LabelField("Default設定", EditorStyles.boldLabel);
+
+        GUILayout.Space(c_FieldInspectorSectionTitleBottomSpacing);
+
+        f_fieldData.IsDefaultValueNull = DrawSmallToggle(
+            "  Default Is Null",
+            f_fieldData.IsDefaultValueNull);
+
+        GUILayout.Space(c_FieldInspectorRowSpacing);
+
+        EditorGUI.BeginDisabledGroup(f_fieldData.IsDefaultValueNull);
+        {
+            int componentCount = GetVectorFieldComponentCount(f_fieldData.FieldType);
+
+            for (int i = 0 ; i < componentCount ; i++)
+            {
+                string componentLabel = GetVectorComponentLabel(i);
+                string componentValue = GetVectorDefaultComponentText(f_fieldData, i);
+
+                componentValue = DrawSmallTextField(
+                    "  " + componentLabel,
+                    componentValue);
+
+                SetVectorDefaultComponentText(f_fieldData, i, componentValue);
+
+                GUILayout.Space(c_FieldInspectorRowSpacing);
+            }
+        }
+        EditorGUI.EndDisabledGroup();
+    }
+
+    /// <summary>
+    /// Vector系のFieldTypeか判定します。
+    /// </summary>
+    /// <param name="f_fieldType">確認するFieldType</param>
+    /// <returns>Vector系ならtrue</returns>
+    private bool IsVectorFieldType(CSE_CreateTools_FieldType f_fieldType)
+    {
+        return
+            f_fieldType == CSE_CreateTools_FieldType.Vector2Int ||
+            f_fieldType == CSE_CreateTools_FieldType.Vector3Int ||
+            f_fieldType == CSE_CreateTools_FieldType.Vector2 ||
+            f_fieldType == CSE_CreateTools_FieldType.Vector3;
+    }
+
+    /// <summary>
+    /// Vector系Fieldの要素数を取得します。
+    /// </summary>
+    /// <param name="f_fieldType">FieldType</param>
+    /// <returns>要素数</returns>
+    private int GetVectorFieldComponentCount(CSE_CreateTools_FieldType f_fieldType)
+    {
+        if (f_fieldType == CSE_CreateTools_FieldType.Vector3Int ||
+            f_fieldType == CSE_CreateTools_FieldType.Vector3)
+        {
+            return 3;
+        }
+
+        return 2;
+    }
+
+    /// <summary>
+    /// Vector要素ラベルを取得します。
+    /// </summary>
+    /// <param name="f_index">要素番号</param>
+    /// <returns>要素ラベル</returns>
+    private string GetVectorComponentLabel(int f_index)
+    {
+        switch (f_index)
+        {
+            case 0:
+                return "X";
+
+            case 1:
+                return "Y";
+
+            case 2:
+                return "Z";
+
+            default:
+                return "Value";
+        }
+    }
+
+    /// <summary>
+    /// Vector初期値の指定要素を取得します。
+    /// </summary>
+    /// <param name="f_fieldData">対象FieldData</param>
+    /// <param name="f_index">要素番号</param>
+    /// <returns>要素文字列</returns>
+    private string GetVectorDefaultComponentText(
+        CSED_CreateTools_FieldData f_fieldData,
+        int f_index)
+    {
+        string[] values = GetVectorDefaultValueParts(f_fieldData);
+
+        if (f_index < 0 || f_index >= values.Length)
+        {
+            return "0";
+        }
+
+        if (string.IsNullOrEmpty(values[f_index]))
+        {
+            return "0";
+        }
+
+        return values[f_index];
+    }
+
+    /// <summary>
+    /// Vector初期値の指定要素を設定します。
+    /// </summary>
+    /// <param name="f_fieldData">対象FieldData</param>
+    /// <param name="f_index">要素番号</param>
+    /// <param name="f_value">設定値</param>
+    private void SetVectorDefaultComponentText(
+        CSED_CreateTools_FieldData f_fieldData,
+        int f_index,
+        string f_value)
+    {
+        int componentCount = GetVectorFieldComponentCount(f_fieldData.FieldType);
+        string[] values = GetVectorDefaultValueParts(f_fieldData);
+
+        if (values.Length != componentCount)
+        {
+            System.Array.Resize(ref values, componentCount);
+        }
+
+        for (int i = 0 ; i < values.Length ; i++)
+        {
+            if (string.IsNullOrEmpty(values[i]))
+            {
+                values[i] = "0";
+            }
+        }
+
+        if (f_index >= 0 && f_index < values.Length)
+        {
+            values[f_index] = f_value;
+        }
+
+        f_fieldData.DefaultValueText = string.Join(",", values);
+    }
+
+    /// <summary>
+    /// Vector初期値文字列を分解します。
+    /// </summary>
+    /// <param name="f_fieldData">対象FieldData</param>
+    /// <returns>分解後の値配列</returns>
+    private string[] GetVectorDefaultValueParts(CSED_CreateTools_FieldData f_fieldData)
+    {
+        int componentCount = GetVectorFieldComponentCount(f_fieldData.FieldType);
+
+        string[] values = new string[componentCount];
+
+        if (string.IsNullOrEmpty(f_fieldData.DefaultValueText) == false)
+        {
+            string[] splitValues = f_fieldData.DefaultValueText.Split(',');
+
+            for (int i = 0 ; i < splitValues.Length && i < values.Length ; i++)
+            {
+                values[i] = splitValues[i];
+            }
+        }
+
+        for (int i = 0 ; i < values.Length ; i++)
+        {
+            if (string.IsNullOrEmpty(values[i]))
+            {
+                values[i] = "0";
+            }
+        }
+
+        return values;
     }
 
     /// <summary>

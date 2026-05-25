@@ -28,23 +28,23 @@ public partial class CSED_CreateTools
         GUILayout.Space(4.0f);
 
         m_GeneratedToolClassName = EditorGUILayout.TextField(
-            "  Editor Class",
+            "  エディター名",
             m_GeneratedToolClassName);
 
         m_GeneratedScriptableObjectClassName = EditorGUILayout.TextField(
-            "  Data Class",
+            "  データ名",
             m_GeneratedScriptableObjectClassName);
 
         m_GeneratedToolMenuPath = EditorGUILayout.TextField(
-            "  Menu Path",
+            "  ツールメニューパス",
             m_GeneratedToolMenuPath);
 
         m_GeneratedToolOutputFolderPath = EditorGUILayout.TextField(
-            "  Editor Script Folder",
+            "  エディタースクリプト保存先",
             m_GeneratedToolOutputFolderPath);
 
         m_GeneratedScriptableObjectOutputFolderPath = EditorGUILayout.TextField(
-            "  Data Script Folder",
+            "  データスクリプト保存先",
             m_GeneratedScriptableObjectOutputFolderPath);
     }
 
