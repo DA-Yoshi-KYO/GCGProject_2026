@@ -115,8 +115,6 @@ public class GimmickSelectUI : MonoBehaviour
         var gb = list[idx].GetComponent<GimmickBase>();
         if (itemNameText != null)
             itemNameText.text = gb != null ? gb.gimmick.ToString() : list[idx].name;
-        if (itemCostText != null)
-            itemCostText.text = gb != null ? gb.requiredSoul.ToString() : "—";
         if (itemIndexText != null)
             itemIndexText.text = $"{idx + 1} / {count}";
     }
@@ -130,7 +128,7 @@ public class GimmickSelectUI : MonoBehaviour
 
         var gb = gimmickObj.GetComponent<GimmickBase>();
         string name = gb != null ? gb.gimmick.ToString() : gimmickObj.name;
-        int cost = gb != null ? gb.requiredSoul : 0;
+        int cost = 0;
 
         // アイコンSprite：GimmickBase側にSpriteフィールドを追加するか、
         // SpriteRenderer / UIの子Imageから取得する運用を推奨。
