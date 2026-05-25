@@ -157,6 +157,16 @@ public class CS_ThiefAI : MonoBehaviour
     [Tooltip("泥棒関係のサウンド")]
     private CS_3DPlaySE thiefSound;
 
+    [Tooltip("泥棒が音に反応しているかどうかを判定するフラグ")]
+    private bool isReactingToSound = false;
+
+    [Tooltip("泥棒が反応している音の位置")]
+    private Vector3 soundReactionPosition;
+
+    [Tooltip("探索完了とする距離")]
+    private const float exploredDistanceThreshold = 1.5f;
+
+
 
     /// <summary>
     /// 泥棒のステータスを設定する処理
@@ -203,7 +213,7 @@ public class CS_ThiefAI : MonoBehaviour
 
         // ナビメッシュエージェントの速度を設定
         navMeshAgent = GetComponent<NavMeshAgent>();
-        navMeshAgent.baseOffset =1.0f; // キャラクターの高さに合わせてオフセットを設定
+        navMeshAgent.baseOffset = 1.0f; // キャラクターの高さに合わせてオフセットを設定
         navMeshAgent.speed = this.walkSpeed;
 
         // SmartNavAgent を初期化（存在すれば DangerZone 回避を有効化）
@@ -292,6 +302,18 @@ public class CS_ThiefAI : MonoBehaviour
 
         ChangeFace(ReactionSpriteType.Normal);
 
+        // 音に反応している場合は、音の位置に向かって移動する処理を追加する
+        if (isReactingToSound)
+        {
+            // 音の位置に十分近づいたら、音への反応をやめる
+            if (Vector3.Distance(transform.position, soundReactionPosition) < exploredDistanceThreshold)
+            {
+                isReactingToSound = false;
+                DecideTarget();
+            }
+            return;
+        }
+
         // moveRouteが設定されている場合は、moveRouteに沿って移動する処理を追加する
         if (moveRoute != null && moveRoute.Count > 0)
         {
@@ -322,7 +344,7 @@ public class CS_ThiefAI : MonoBehaviour
             }
             navMeshAgent.SetDestination(nextPoint.position);
             // 次のポイントに十分近づいたら、次のポイントへ
-            if (Vector3.Distance(transform.position, nextPoint.position) < 1.0f)
+            if (Vector3.Distance(transform.position, nextPoint.position) < exploredDistanceThreshold)
             {
                 moveRoute.RemoveAt(0);
             }
@@ -422,7 +444,7 @@ public class CS_ThiefAI : MonoBehaviour
             MoveTo(currentTarget.transform.position);
 
             // 探索対象に十分近づいたら、次の探索対象を決定
-            if (Vector3.Distance(transform.position, currentTarget.transform.position) < 2.0f)
+            if (Vector3.Distance(transform.position, currentTarget.transform.position) < exploredDistanceThreshold)
             {
                 DecideTarget();
             }
@@ -482,7 +504,7 @@ public class CS_ThiefAI : MonoBehaviour
         }
 
         // ドアに十分近づいたら、次のドアへ
-        if (Vector3.Distance(transform.position, door.position) < 1.5f)
+        if (Vector3.Distance(transform.position, door.position) < exploredDistanceThreshold)
         {
             moveRoute.RemoveAt(0);
             isNextRoomMovePointDecided = false; // 次の部屋に移動するためのポイントを決定していない状態に戻す
@@ -697,6 +719,8 @@ public class CS_ThiefAI : MonoBehaviour
     /// </summary>
     private void DecideTarget()
     {
+        if (isReactingToSound) return; // 音に反応している場合は、探索対象を決めない
+
         // 探索対象との距離
         float distanceToTarget = Mathf.Infinity;
 
@@ -1288,6 +1312,22 @@ public class CS_ThiefAI : MonoBehaviour
         isNextRoomMovePointDecided = false;
         nextRoomMovePoint = null;
         currentTarget = null;
+    }
+
+    /// <summary>
+    /// 音のする方向に向かう処理
+    /// </summary>
+    /// <param name="soundPosition">音の鳴った座標</param>
+    public void InvestigateSound(Vector3 soundPosition)
+    {
+        // 音のする方向に向かうための移動ポイントを設定
+        soundReactionPosition = soundPosition;
+        // 現在の経路をリセットして、音のする方向に向かう経路を計算させる
+        navMeshAgent.ResetPath();
+        MoveTo(soundReactionPosition);
+
+        // 音に反応している状態に切り替える
+        isReactingToSound = true;
     }
 
     /// <summary>
