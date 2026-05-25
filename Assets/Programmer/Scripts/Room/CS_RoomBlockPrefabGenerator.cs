@@ -2,10 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
-
 /*==================================================
  *  ファイル名  : CS_RoomBlockPrefabGenerator.cs
  *  制作者      : 吉本竜
@@ -38,8 +34,6 @@ public enum CSE_RoomBlockGenerateType
 /// </summary>
 public class CS_RoomBlockPrefabGenerator : MonoBehaviour
 {
-    private const string ROOM_CREATE_POINT_TAG = "RoomCreatePoint";
-
     [Header("生成対象RoomCreatePoint一覧")]
     [SerializeField]
     private List<CS_RoomCreatePointGenerateData> list_RoomCreatePointGenerateData =
@@ -59,6 +53,9 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
 
     private CS_RoomBlockPrefabSelector cs_RoomBlockPrefabSelector =
         new CS_RoomBlockPrefabSelector();
+
+    private CS_RoomCreatePointGenerateDataValidator cs_RoomCreatePointGenerateDataValidator =
+        new CS_RoomCreatePointGenerateDataValidator();
 
     /// <summary>
     /// 生成済みRoomのRoomMovePoint接続だけを再構築します。
@@ -102,7 +99,7 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
                 continue;
             }
 
-            if (!IsValidGenerateData(generateData, i))
+            if (!cs_RoomCreatePointGenerateDataValidator.IsValidGenerateData(generateData, i))
             {
                 continue;
             }
@@ -201,69 +198,6 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
         }
 
         Debug.Log("[RoomBlockPrefabGenerator] " + targetGenerateType + " の生成済みRoomを削除しました。");
-    }
-
-    /// <summary>
-    /// 生成データが有効か確認します。
-    /// </summary>
-    /// <param name="generateData">生成データ。</param>
-    /// <param name="index">リスト番号。</param>
-    /// <returns>有効な場合はtrue。</returns>
-    private bool IsValidGenerateData(CS_RoomCreatePointGenerateData generateData, int index)
-    {
-        if (generateData == null)
-        {
-            Debug.LogWarning("[RoomBlockPrefabGenerator] 生成データがnullです。Index : " + index);
-            return false;
-        }
-
-        if (generateData.RoomCreatePointObject == null)
-        {
-            Debug.LogWarning("[RoomBlockPrefabGenerator] RoomCreatePointObjectが登録されていません。Index : " + index);
-            return false;
-        }
-
-        if (generateData.RoomCreatePoint == null)
-        {
-            Debug.LogWarning("[RoomBlockPrefabGenerator] CS_RoomCreatePointが付いていません : " + generateData.RoomCreatePointObject.name);
-            return false;
-        }
-
-        if (!IsRoomCreatePointTagValid(generateData.RoomCreatePointObject))
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    /// <summary>
-    /// RoomCreatePointタグが正しく設定されているか確認します。
-    /// </summary>
-    /// <param name="target">確認対象。</param>
-    /// <returns>正しい場合はtrue。</returns>
-    private bool IsRoomCreatePointTagValid(GameObject target)
-    {
-        if (target == null)
-        {
-            return false;
-        }
-
-        try
-        {
-            if (!target.CompareTag(ROOM_CREATE_POINT_TAG))
-            {
-                Debug.LogWarning("[RoomBlockPrefabGenerator] RoomCreatePointタグが付いていません : " + target.name);
-                return false;
-            }
-        }
-        catch (UnityException)
-        {
-            Debug.LogError("[RoomBlockPrefabGenerator] Tag「" + ROOM_CREATE_POINT_TAG + "」が存在しません。UnityのTagsに追加してください。");
-            return false;
-        }
-
-        return true;
     }
 
     /// <summary>
