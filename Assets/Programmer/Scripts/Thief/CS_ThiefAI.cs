@@ -166,7 +166,11 @@ public class CS_ThiefAI : MonoBehaviour
     [Tooltip("探索完了とする距離")]
     private const float exploredDistanceThreshold = 1.5f;
 
-
+    public enum AttractSoundType
+    {
+        CatVoice,
+        GimmickActivate,
+    }
 
     /// <summary>
     /// 泥棒のステータスを設定する処理
@@ -1318,7 +1322,7 @@ public class CS_ThiefAI : MonoBehaviour
     /// 音のする方向に向かう処理
     /// </summary>
     /// <param name="soundPosition">音の鳴った座標</param>
-    public void InvestigateSound(Vector3 soundPosition)
+    public void InvestigateSound(Vector3 soundPosition, AttractSoundType type)
     {
         // 音のする方向に向かうための移動ポイントを設定
         soundReactionPosition = soundPosition;

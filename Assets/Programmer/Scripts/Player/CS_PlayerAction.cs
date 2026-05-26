@@ -4,17 +4,20 @@
  *    元浪梨緒
  *    秋野翔太
  *    大瀧蓮
+ *    吉田京志郎
  * ----------------------------------------------------------
  * 2026-04-24 | 初回作成
  * 2026-04-27 | ソウル消費およびギミックの初期化の実装
  * 2026-05-06 | ギミックの設置位置をプレイヤーの前へ修正：大瀧
  * 2026-05-08 | リファクタリング(大瀧)
- * 
+ * 2026-05-11 | ギミックの設置方向の設定を追加：大瀧
+ * 2026-05-24 | インタラクトの範囲を円柱化：吉田
+ * 2026-05-25 | SEを追加：吉田
+ * 2026-05-25 | インタラクトの範囲に入った泥棒に通知処理：吉田
  */
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using static UnityEditor.Progress;
 
 public class CS_PlayerAction : MonoBehaviour
 {
@@ -122,7 +125,7 @@ public class CS_PlayerAction : MonoBehaviour
                     interactField.transform.position + interactField.transform.up * interactScale.y * 0.5f,
                     interactField.transform.position - interactField.transform.up * interactScale.y * 0.5f,
                     interactScale.x * 0.5f,
-                    LayerMask.GetMask("Gimmick")
+                    LayerMask.GetMask("Gimmick", "Thief")
                     );
 
 
@@ -169,7 +172,7 @@ public class CS_PlayerAction : MonoBehaviour
         {
             interactTime = 0.0f;
             interactField.GetComponent<Renderer>().enabled = true;
-            
+
             interactField.transform.localScale = Vector3.zero;
             isInteracting = true;
         }
@@ -198,14 +201,14 @@ public class CS_PlayerAction : MonoBehaviour
                 // 長押しはギミックの起動を行う
                 interactField.GetComponent<Renderer>().enabled = false;
                 playSE.PlayOneShotSE("CatInteract", gameObject.transform.position, "InteractSE");
-                
+
+                // 円柱で判定を取るために、カプセルでオーバーラップを取った後に上下の半球を除外する
                 float minHeight = -interactScale.y * 0.5f;
                 float maxHeight = interactScale.y * 0.5f;
                 foreach (Collider hit in hits)
                 {
-
                     //ギミックの情報を取得
-                    Vector3 hitPoint = hit.ClosestPoint(interactField.transform.position); 
+                    Vector3 hitPoint = hit.ClosestPoint(interactField.transform.position);
 
                     // interactField基準高さ
                     float height =
@@ -221,24 +224,34 @@ public class CS_PlayerAction : MonoBehaviour
                         continue;
                     }
 
-                    GimmickBase gimmick = hit.GetComponent<GimmickBase>();
-                    if (gimmick == null) continue;
-                    if (gimmick.gimmickState != GimmickState.Idle) continue;
-
                     var renderers = hit.GetComponentsInChildren<Renderer>();
                     foreach (var renderer in renderers)
                     {
                         renderer.materials[1].SetVector("_OutlineColor", Color.gray);
                     }
 
-                    //ギミックをアクティブにする
-                    Debug.Log($"ギミック：" + hit.name + "がアクティブになりました");
-                    gimmick.ActivateGimmick();
+                    GimmickBase gimmick = hit.GetComponent<GimmickBase>();
+                    if (gimmick != null)
+                    {
+                        if (gimmick.gimmickState != GimmickState.Idle) continue;
+
+                        //ギミックをアクティブにする
+                        Debug.Log($"ギミック：" + hit.name + "がアクティブになりました");
+                        gimmick.ActivateGimmick();
+                        continue;
+                    }
+
+                    CS_ThiefAI thief = hit.GetComponent<CS_ThiefAI>();
+                    if (thief != null)
+                    {
+                        thief.InvestigateSound(gameObject.transform.position, CS_ThiefAI.AttractSoundType.CatVoice);
+                    }
                 }
+
                 hits = null;
             }
-        }
 
+        }
     }
 
     private void OnCancel(InputAction.CallbackContext context)
