@@ -49,7 +49,7 @@ public class CS_PlayerAction : MonoBehaviour
 
     private GimmickManager gimmickManager;
     private CS_3DPlaySE playSE;
-    Collider[] hits = null;
+    List<Collider> hitList = new List<Collider>();
 
     // Start is called before the first frame update
     void Start()
@@ -96,20 +96,25 @@ public class CS_PlayerAction : MonoBehaviour
             // インタラクト範囲の拡大
             if (interactTime >= switchInteract)
             {
-                if (hits != null)
+                if (hitList != null)
                 {
-                    foreach (var item in hits)
+                    foreach (var item in hitList)
                     {
                         if (item == null) continue;
                         var renderers = item.GetComponentsInChildren<Renderer>();
                         foreach (var renderer in renderers)
                         {
-                            renderer.materials[1].SetVector("_OutlineColor", Color.gray);
+                            if (renderer.materials.Length < 2) continue;
+
+                            Material material = renderer.materials[1];
+                            if (material != null) material.SetVector("_OutlineColor", Color.gray);
                         }
                     }
                 }
 
                 playerMaterial.SetVector("_OutlineColor", Color.green);
+
+                // インタラクト範囲を拡大
                 interactScale.x = Mathf.Max(interactTime - switchInteract, 0f) + interactMin.radius;
                 interactScale.y = Mathf.Max(interactTime - switchInteract, 0f) + interactMin.height;
                 interactScale.z = Mathf.Max(interactTime - switchInteract, 0f) + interactMin.radius;
@@ -121,25 +126,54 @@ public class CS_PlayerAction : MonoBehaviour
                 interactPos.y += interactScale.y * 0.5f; // フィールドが地面に接するように位置を調整
                 interactField.transform.position = interactPos;
 
-                hits = Physics.OverlapCapsule(
+                // 円柱で判定を取るために、カプセルでオーバーラップを取った後に上下の半球を除外する
+                Collider[] hits = Physics.OverlapCapsule(
                     interactField.transform.position + interactField.transform.up * interactScale.y * 0.5f,
                     interactField.transform.position - interactField.transform.up * interactScale.y * 0.5f,
                     interactScale.x * 0.5f,
                     LayerMask.GetMask("Gimmick", "Thief")
                     );
 
-
-                foreach (var item in hits)
+                float minHeight = -interactScale.y * 0.5f;
+                float maxHeight = interactScale.y * 0.5f;
+                for (int i = 0; i < hits.Length; i++)
                 {
-                    if (item == null) continue;
+                    if (hits[i] == null) continue;
+                    //ギミックの情報を取得
+                    Vector3 hitPoint = hits[i].ClosestPoint(interactField.transform.position);
 
-                    var gimmick = item.GetComponent<GimmickBase>();
-                    if (gimmick.gimmickState != GimmickState.Idle) continue;
-                    var renderers = item.GetComponentsInChildren<Renderer>();
+                    // interactField基準高さ
+                    float height =
+                        Vector3.Dot(
+                            hitPoint - interactField.transform.position,
+                            interactField.transform.up
+                        );
+
+                    // 高さ制限
+                    if (height < minHeight ||
+                        height > maxHeight)
+                    {
+                        continue;
+                    }
+
+                    // ギミックがすでに起動している場合は緑のアウトラインをつけない
+                    var gimmick = hits[i].GetComponent<GimmickBase>();
+                    if (gimmick != null)
+                    {
+                        if (gimmick.gimmickState != GimmickState.Idle) continue;
+                    }
+                    
+                    // アウトラインの色付け
+                    var renderers = hits[i].GetComponentsInChildren<Renderer>();
                     foreach (var renderer in renderers)
                     {
-                        renderer.materials[1].SetVector("_OutlineColor", Color.green);
+                        if (renderer.materials.Length < 2) continue;
+
+                        Material material = renderer.materials[1];
+                        if (material != null) material.SetVector("_OutlineColor", Color.green);
                     }
+
+                    hitList.Add(hits[i]);
                 }
             }
 
@@ -202,32 +236,14 @@ public class CS_PlayerAction : MonoBehaviour
                 interactField.GetComponent<Renderer>().enabled = false;
                 playSE.PlayOneShotSE("CatInteract", gameObject.transform.position, "InteractSE");
 
-                // 円柱で判定を取るために、カプセルでオーバーラップを取った後に上下の半球を除外する
-                float minHeight = -interactScale.y * 0.5f;
-                float maxHeight = interactScale.y * 0.5f;
-                foreach (Collider hit in hits)
+                foreach (Collider hit in hitList)
                 {
-                    //ギミックの情報を取得
-                    Vector3 hitPoint = hit.ClosestPoint(interactField.transform.position);
-
-                    // interactField基準高さ
-                    float height =
-                        Vector3.Dot(
-                            hitPoint - interactField.transform.position,
-                            interactField.transform.up
-                        );
-
-                    // 高さ制限
-                    if (height < minHeight ||
-                        height > maxHeight)
-                    {
-                        continue;
-                    }
-
                     var renderers = hit.GetComponentsInChildren<Renderer>();
                     foreach (var renderer in renderers)
                     {
-                        renderer.materials[1].SetVector("_OutlineColor", Color.gray);
+                        if (renderer.materials.Length < 2) continue;
+                        Material material = renderer.materials[1];
+                        if (material != null) material.SetVector("_OutlineColor", Color.gray);
                     }
 
                     GimmickBase gimmick = hit.GetComponent<GimmickBase>();
@@ -248,7 +264,7 @@ public class CS_PlayerAction : MonoBehaviour
                     }
                 }
 
-                hits = null;
+                hitList.Clear();
             }
 
         }
