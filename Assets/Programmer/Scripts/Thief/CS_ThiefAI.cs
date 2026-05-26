@@ -162,6 +162,8 @@ public class CS_ThiefAI : MonoBehaviour
 
     [Tooltip("泥棒が反応している音の位置")]
     private Vector3 soundReactionPosition;
+    [Tooltip("泥棒が反応している音のタイプ")]
+    private AttractSoundType soundReactionType;
 
     [Tooltip("探索完了とする距離")]
     private const float exploredDistanceThreshold = 1.5f;
@@ -1324,11 +1326,51 @@ public class CS_ThiefAI : MonoBehaviour
     /// <param name="soundPosition">音の鳴った座標</param>
     public void InvestigateSound(Vector3 soundPosition, AttractSoundType type)
     {
-        // 音のする方向に向かうための移動ポイントを設定
-        soundReactionPosition = soundPosition;
-        // 現在の経路をリセットして、音のする方向に向かう経路を計算させる
-        navMeshAgent.ResetPath();
-        MoveTo(soundReactionPosition);
+        if (isReactingToSound)// すでに音に反応している場合
+        {
+            if (type == AttractSoundType.CatVoice)
+            {
+                // すでに猫の鳴き声に反応している場合は、さらに近づくために音のする方向に向かう
+                soundReactionPosition = soundPosition;
+                soundReactionType = type;
+                navMeshAgent.ResetPath();
+                MoveTo(soundReactionPosition);
+            }
+            else if (type == AttractSoundType.GimmickActivate)
+            {
+                switch (soundReactionType)
+                {
+                    case AttractSoundType.GimmickActivate:// すでにギミックの起動音に反応している場合は、より近いものを優先して音のする方向に向かう
+                        {
+                            // 音のする方向と現在の位置の距離を計算
+                            float currentDistance = Vector3.Distance(transform.position, soundReactionPosition);
+                            float newDistance = Vector3.Distance(transform.position, soundPosition);
+                            // より近い方を優先して音のする方向に向かう
+                            if (newDistance < currentDistance)
+                            {
+                                soundReactionPosition = soundPosition;
+                                soundReactionType = type;
+                                navMeshAgent.ResetPath();
+                                MoveTo(soundReactionPosition);
+                            }
+                        }
+                        break;
+                    case AttractSoundType.CatVoice:  // 猫の鳴き声に反応している場合は、何も変更しない
+                    default:
+                        break;
+                }
+            }
+        }
+        else // 音に反応していない場合
+        {
+            // 現在の状態が探索状態ではない場合は何もしない
+            if (currentState != ThiefState.Explore) return;
+            // 音のする方向に向かう
+            soundReactionPosition = soundPosition;
+            soundReactionType = type;
+            navMeshAgent.ResetPath();
+            MoveTo(soundReactionPosition);
+        }
 
         // 音に反応している状態に切り替える
         isReactingToSound = true;
