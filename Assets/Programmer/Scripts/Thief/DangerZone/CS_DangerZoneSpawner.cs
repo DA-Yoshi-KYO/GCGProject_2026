@@ -95,7 +95,7 @@ public static class CS_DangerZoneSpawner
         // 残存時間は共通データで上書き
         if (thiefCommon != null)
         {
-            zone.Initialize(zone.Radius, zone.ZoneID, thiefCommon.dangerZoneDuration);
+            zone.Initialize(gimmick.gimmickSizeX, zone.ZoneID, thiefCommon.dangerZoneDuration);
         }
 
         return zone;
