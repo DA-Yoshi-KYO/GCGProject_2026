@@ -535,8 +535,6 @@ public class CS_ThiefAI : MonoBehaviour
     }
 
     // 気絶状態の行動
-    // ----------------
-    // TODO: その場で動けなくなる処理を追加する
     private void Stunned()
     {
         // ナビメッシュエージェントを停止させる
@@ -558,6 +556,9 @@ public class CS_ThiefAI : MonoBehaviour
         // 耐久力が0以下の場合は、時間経過後に退場する
         else
         {
+            // ダメージを受けたときのSEを再生する
+            if (thiefSound != null) thiefSound.PlayOneShotSE("ThiefDeath", gameObject.transform.position, "ThiefDeath");
+
             // 経過時間が退場するまでの時間を超えた場合は、退場する処理を追加する
             if (elapsedTimeAfterStun >= exitAfterStunTime)
             {
@@ -672,6 +673,9 @@ public class CS_ThiefAI : MonoBehaviour
                     // プレイヤーを探索対象に設定する。ただし、現在の探索対象がプレイヤーでない場合に限る（プレイヤーを探索対象にしている場合は、引き続きプレイヤーを探索対象にする）
                     if (currentTarget != null && !(currentTarget is CS_PlayerTarget))
                     {
+                        // プレイヤーの追跡を開始した場合のSEを再生する
+                        if (thiefSound != null) thiefSound.PlayOneShotSE("ThiefDiscover", gameObject.transform.position, "ThiefDiscover");
+
                         currentTarget = target;
                     }
                 }
@@ -952,6 +956,9 @@ public class CS_ThiefAI : MonoBehaviour
         if (remainingInvincibleTime > 0) return;
 
         durability -= damage;
+
+        // ダメージを受けたときのSEを再生する
+        if (thiefSound != null) thiefSound.PlayOneShotSE("ThiefDamage", gameObject.transform.position, "ThiefDamage");
 
         switch (type)
         {
