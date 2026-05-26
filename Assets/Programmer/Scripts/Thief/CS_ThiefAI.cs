@@ -1730,11 +1730,28 @@ public class CS_ThiefAI : MonoBehaviour
     /// <summary>
     ///罠発動などで「この泥棒が回避する DangerZone」を動的に追加する。
     /// </summary>
+    /// <param name="zoneID">追加する DangerZone のID</param>
     public void AddAvoidZoneID(int zoneID)
     {
         if (avoidZoneIDs == null) avoidZoneIDs = new List<int>();
         if (!avoidZoneIDs.Contains(zoneID)) avoidZoneIDs.Add(zoneID);
 
+        // SmartNavAgent がある場合は即時反映
+        if (smartNavAgent == null) smartNavAgent = GetComponent<CS_SmartNavAgent>();
+        if (smartNavAgent != null)
+        {
+            smartNavAgent.SetAvoidZoneIDs(avoidZoneIDs);
+        }
+    }
+
+    /// <summary>
+    /// 罠解除などで「この泥棒が回避する DangerZone」を動的に削除する。
+    /// </summary>
+    /// <param name="zoneID">削除する DangerZone のID</param>
+    public void RemoveAvoidZoneID(int zoneID)
+    {
+        if (avoidZoneIDs == null) return;
+        if (avoidZoneIDs.Contains(zoneID)) avoidZoneIDs.Remove(zoneID);
         // SmartNavAgent がある場合は即時反映
         if (smartNavAgent == null) smartNavAgent = GetComponent<CS_SmartNavAgent>();
         if (smartNavAgent != null)
