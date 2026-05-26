@@ -556,9 +556,6 @@ public class CS_ThiefAI : MonoBehaviour
         // 耐久力が0以下の場合は、時間経過後に退場する
         else
         {
-            // ダメージを受けたときのSEを再生する
-            if (thiefSound != null) thiefSound.PlayOneShotSE("ThiefDeath", gameObject.transform.position, "ThiefDeath");
-
             // 経過時間が退場するまでの時間を超えた場合は、退場する処理を追加する
             if (elapsedTimeAfterStun >= exitAfterStunTime)
             {
@@ -570,6 +567,9 @@ public class CS_ThiefAI : MonoBehaviour
 
                 if (thiefMaterial.GetFloat("_Timer") <= 0.0f)
                 {
+                    // 気絶したときのSEを再生する処理を追加する
+                    if (thiefSound != null) thiefSound.PlayOneShotSE("ThiefDeath", gameObject.transform.position, "ThiefDeath");
+
                     Destroy(this.gameObject);
                 }
             }
@@ -1340,7 +1340,6 @@ public class CS_ThiefAI : MonoBehaviour
                 // すでに猫の鳴き声に反応している場合は、さらに近づくために音のする方向に向かう
                 soundReactionPosition = soundPosition;
                 soundReactionType = type;
-                navMeshAgent.ResetPath();
                 MoveTo(soundReactionPosition);
             }
             else if (type == AttractSoundType.GimmickActivate)
@@ -1357,7 +1356,6 @@ public class CS_ThiefAI : MonoBehaviour
                             {
                                 soundReactionPosition = soundPosition;
                                 soundReactionType = type;
-                                navMeshAgent.ResetPath();
                                 MoveTo(soundReactionPosition);
                             }
                         }
@@ -1375,7 +1373,6 @@ public class CS_ThiefAI : MonoBehaviour
             // 音のする方向に向かう
             soundReactionPosition = soundPosition;
             soundReactionType = type;
-            navMeshAgent.ResetPath();
             MoveTo(soundReactionPosition);
         }
 
