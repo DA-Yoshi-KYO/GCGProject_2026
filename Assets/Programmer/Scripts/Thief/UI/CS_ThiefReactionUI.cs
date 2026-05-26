@@ -17,7 +17,7 @@ using UnityEngine.UI;
 /// <summary>
 /// 泥棒のリアクションを管理するクラス
 /// </summary>
-public class CS_ThiefReaction : MonoBehaviour
+public class CS_ThiefReactionUI : MonoBehaviour
 {
     [SerializeField,Header("リアクションに使用するスプライトリスト"), Tooltip("リアクションに使用するスプライトリスト")]
     private List<Sprite> reactionSprites = new List<Sprite>();
@@ -61,7 +61,7 @@ public class CS_ThiefReaction : MonoBehaviour
             parentThiefReaction = new GameObject("ParentThiefReaction");
             parentThiefReaction.transform.SetParent(canvas.transform);
             parentThiefReaction.transform.AddComponent<RectTransform>();
-            parentThiefReaction.gameObject.GetComponent<RectTransform>().localPosition = new Vector3(-550, 0, 0);
+            parentThiefReaction.gameObject.GetComponent<RectTransform>().localPosition = new Vector3(-850, 0, 0);
         }
         else parentThiefReaction = parent.gameObject;
     }

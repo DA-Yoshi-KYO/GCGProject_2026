@@ -137,7 +137,7 @@ public class CS_ThiefAI : MonoBehaviour
     [Tooltip("ナビメッシュエージェント")]
     private NavMeshAgent navMeshAgent;
     [Tooltip("泥棒のリアクションを管理するコンポーネント")]
-    private CS_ThiefReaction thiefReaction;
+    private CS_ThiefReactionUI thiefReaction;
 
     [Tooltip("最初の部屋のオブジェクト")]
     private CS_RoomNode firstRoom;
@@ -235,7 +235,7 @@ public class CS_ThiefAI : MonoBehaviour
         rb.useGravity = false; // 重力の影響を受けないようにする
 
         // 泥棒のリアクションを管理するコンポーネントを取得
-        thiefReaction = GetComponent<CS_ThiefReaction>();
+        thiefReaction = GetComponent<CS_ThiefReactionUI>();
         thiefReaction.RegisterReaction(data.reactionUISprites);
 
         reactionSprites = data.reactionSprites;
@@ -963,10 +963,10 @@ public class CS_ThiefAI : MonoBehaviour
         switch (type)
         {
             case Gimmick.Pot:
-                thiefReaction.SetReactionUI(CS_ThiefReaction.ThiefReactionType.Pot);
+                thiefReaction.SetReactionUI(CS_ThiefReactionUI.ThiefReactionType.Pot);
                 break;
             case Gimmick.IronBall:
-                thiefReaction.SetReactionUI(CS_ThiefReaction.ThiefReactionType.IronBall);
+                thiefReaction.SetReactionUI(CS_ThiefReactionUI.ThiefReactionType.IronBall);
                 break;
             case Gimmick.EmptyChest:
             case Gimmick.None:
