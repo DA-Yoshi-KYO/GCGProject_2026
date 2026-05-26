@@ -1,11 +1,12 @@
 /* ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
- *    泥棒のリアクションを管理するクラス
+ *    泥棒のリアクションUIを管理するクラス
  * ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
  *    宇留野 陸斗
  * ----------------------------------------------------------
  * 2026-04-30 | 初回作成
  * 2026-05-22 | ファイル名を変更（CS_ThiefReaction.cs → CS_ThiefReaction.cs）
  *            | クラス名を変更（CS_ThiefReaction → CS_ThiefReaction）
+ *            | クラス名を変更（CS_ThiefReaction → CS_ThiefReactionUI）
  * 
  */
 using System.Collections.Generic;

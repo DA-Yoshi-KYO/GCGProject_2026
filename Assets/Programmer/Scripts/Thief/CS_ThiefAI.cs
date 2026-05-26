@@ -136,8 +136,11 @@ public class CS_ThiefAI : MonoBehaviour
 
     [Tooltip("ナビメッシュエージェント")]
     private NavMeshAgent navMeshAgent;
+    [Tooltip("泥棒のリアクションUIを管理するコンポーネント")]
+    private CS_ThiefReactionUI thiefReactionUI;
+
     [Tooltip("泥棒のリアクションを管理するコンポーネント")]
-    private CS_ThiefReactionUI thiefReaction;
+    private CS_ThiefReaction thiefReaction;
 
     [Tooltip("最初の部屋のオブジェクト")]
     private CS_RoomNode firstRoom;
@@ -234,9 +237,12 @@ public class CS_ThiefAI : MonoBehaviour
         rb.isKinematic = true; // ナビメッシュエージェントで移動させるため、リジットボディをキネマティックに設定
         rb.useGravity = false; // 重力の影響を受けないようにする
 
+        // 泥棒のリアクションUIを管理するコンポーネントを取得
+        thiefReactionUI = GetComponent<CS_ThiefReactionUI>();
+        thiefReactionUI.RegisterReaction(data.reactionUISprites);
+
         // 泥棒のリアクションを管理するコンポーネントを取得
-        thiefReaction = GetComponent<CS_ThiefReactionUI>();
-        thiefReaction.RegisterReaction(data.reactionUISprites);
+        thiefReaction = GetComponentInChildren<CS_ThiefReaction>();
 
         reactionSprites = data.reactionSprites;
 
@@ -311,6 +317,9 @@ public class CS_ThiefAI : MonoBehaviour
         // 音に反応している場合は、音の位置に向かって移動する処理を追加する
         if (isReactingToSound)
         {
+            // 警戒のリアクションに変更
+            thiefReaction.ChangeReaction(CS_ThiefReaction.ThiefReactionType.Alert);
+
             // 音の位置に十分近づいたら、音への反応をやめる
             if (Vector3.Distance(transform.position, soundReactionPosition) < exploredDistanceThreshold)
             {
@@ -403,6 +412,9 @@ public class CS_ThiefAI : MonoBehaviour
 
                     ((CS_VisionTarget)currentTarget).searchThief = this.gameObject; // 探索対象に対して、探索している人を設定する
 
+                    // 探索のリアクションに変更
+                    thiefReaction.ChangeReaction(CS_ThiefReaction.ThiefReactionType.Searching);
+
                     if (ProgressTargetSearchTime())
                     {
                         // 宝物を探索にしていて、完了した場合は、発見状態に切り替える
@@ -486,6 +498,9 @@ public class CS_ThiefAI : MonoBehaviour
     // 逃走状態の行動
     private void Escape()
     {
+        // 宝物を見つけたときのリアクションに変更
+        thiefReaction.ChangeReaction(CS_ThiefReaction.ThiefReactionType.FoundTreasure);
+
         // ルートが未構築なら構築する
         if (moveRoute == null || moveRoute.Count == 0)
         {
@@ -604,19 +619,27 @@ public class CS_ThiefAI : MonoBehaviour
                 }
             }
 
-            // 追跡する残り時間が0以下の場合は、プレイヤーを無視するフラグを立てる
-            if (remainingIgnorePlayerTime <= 0.0f)
+            // 耐久値が1以上ある場合は、秒数であきらめる
+            if (durability > 1)
             {
-                ignorePlayer = true;
-                isPlayerInVision = false; // プレイヤーを無視するフラグを立てた場合は、プレイヤーが視認できていても、プレイヤーが視認できていない状態にする
-                remainingIgnorePlayerTime = 0.0f;
+                // 追跡する残り時間が0以下の場合は、プレイヤーを無視するフラグを立てる
+                if (remainingIgnorePlayerTime <= 0.0f)
+                {
+                    ignorePlayer = true;
+                    isPlayerInVision = false; // プレイヤーを無視するフラグを立てた場合は、プレイヤーが視認できていても、プレイヤーが視認できていない状態にする
+                    remainingIgnorePlayerTime = 0.0f;
+                }
+                else remainingIgnorePlayerTime -= Time.deltaTime;
             }
-            else remainingIgnorePlayerTime -= Time.deltaTime;
 
             if (!isPlayerInVision)
             {
                 currentTarget = null;
+                thiefReaction.ClearReaction();
             }
+
+            // プレイヤーを追跡している状態で、プレイヤーが視認できない場合は、プレイヤーを追跡しているときのリアクションに変更する
+            thiefReaction.ChangeReaction(CS_ThiefReaction.ThiefReactionType.ChasingCat);
         }
 
         bool isNewObjectRecognized = false; // 新たに視認したオブジェクトがあるかどうかを判定するフラグ
@@ -960,13 +983,16 @@ public class CS_ThiefAI : MonoBehaviour
         // ダメージを受けたときのSEを再生する
         if (thiefSound != null) thiefSound.PlayOneShotSE("ThiefDamage", gameObject.transform.position, "ThiefDamage");
 
+        // ダメージを受けたときのリアクションに変更
+        thiefReaction.ChangeReaction(CS_ThiefReaction.ThiefReactionType.HitTrap);
+
         switch (type)
         {
             case Gimmick.Pot:
-                thiefReaction.SetReactionUI(CS_ThiefReactionUI.ThiefReactionType.Pot);
+                thiefReactionUI.SetReactionUI(CS_ThiefReactionUI.ThiefReactionType.Pot);
                 break;
             case Gimmick.IronBall:
-                thiefReaction.SetReactionUI(CS_ThiefReactionUI.ThiefReactionType.IronBall);
+                thiefReactionUI.SetReactionUI(CS_ThiefReactionUI.ThiefReactionType.IronBall);
                 break;
             case Gimmick.EmptyChest:
             case Gimmick.None:
@@ -1274,8 +1300,12 @@ public class CS_ThiefAI : MonoBehaviour
         // searchTime : 探索対象の探索にかかる時間
         visionTargetMemories[((CS_VisionTarget)currentTarget)].explorationProgress += (100.0f / searchTime) * Time.deltaTime;
 
-        // 探索対象の探索にかかる時間が経過した場合は、trueを返す
-        if (visionTargetMemories[((CS_VisionTarget)currentTarget)].explorationProgress >= 100.0f) return true;
+        // 探索度が100%以上になった場合は、探索が終了していると判定してtrueを返す
+        if (visionTargetMemories[((CS_VisionTarget)currentTarget)].explorationProgress >= 100.0f)
+        {
+            thiefReaction.ClearReaction(); // 探索が終了したときのリアクションをクリアする
+            return true;
+        }
 
         return false;
     }
@@ -1287,7 +1317,7 @@ public class CS_ThiefAI : MonoBehaviour
     private void ChangeFace(ReactionSpriteType reaction)
     {
         // 子オブジェクトを取得
-        GameObject child = transform.GetChild(0).gameObject;
+        GameObject child = transform.GetChild(1).gameObject;
         // 取得できなかった場合は、エラーログを出力して処理を終了する
         if (child == null) Debug.LogError("子オブジェクトが見つかりませんでした。ThiefAIのChangeFaceメソッドで、泥棒の表情を変更する処理が正常に動作しない可能性があります。");
 

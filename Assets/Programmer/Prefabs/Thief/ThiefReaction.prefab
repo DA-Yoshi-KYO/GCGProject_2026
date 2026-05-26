@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6311419868909430170}
   - component: {fileID: 4603181103315393579}
+  - component: {fileID: 6522690685040555141}
   m_Layer: 0
   m_Name: ThiefReaction
   m_TagString: Untagged
@@ -26,8 +27,8 @@ Transform:
   m_GameObject: {fileID: 8238770117232913644}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2.2846782, y: 6.654207, z: -17.598104}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -84,3 +85,22 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &6522690685040555141
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8238770117232913644}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d247ade72340dbd4d92eca43c46f2773, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  reactionSprites:
+  - {fileID: 21300000, guid: 9b656f47a9335f54d859729552f8b10d, type: 3}
+  - {fileID: 21300000, guid: a2d372f6c599b594fa70a5065324eebc, type: 3}
+  - {fileID: 21300000, guid: e3d53792164a9af47b43012f939ea995, type: 3}
+  - {fileID: 21300000, guid: 01ad207524335774ea17eb460b075280, type: 3}
+  - {fileID: 21300000, guid: 6b3dbfc00434dd547a7336f565d5be0f, type: 3}
+  - {fileID: 21300000, guid: d231ae3191542774aae6ea0568f240c0, type: 3}
