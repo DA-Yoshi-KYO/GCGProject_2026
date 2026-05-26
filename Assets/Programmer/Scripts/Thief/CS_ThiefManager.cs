@@ -184,6 +184,28 @@ public class CS_ThiefManager : MonoBehaviour
         return false;
     }
 
+    // 指定の危険地帯IDを全ての泥棒の記憶から消す処理
+    public void EraseTheAvoidZoneIDToAllThief(int zoneID)
+    {
+        // 泥棒の親オブジェクトを取得
+        GameObject thiefParent = GameObject.Find("ThiefParent");
+        if (thiefParent == null)
+        {
+            Debug.LogError("ThiefParentが存在しません。");
+        }
+
+        // 全ての泥棒をチェックして、指定の危険地帯IDを記憶から消す
+        for (int i = 0; i < thiefParent.transform.childCount; i++)
+        {
+            GameObject thief = thiefParent.transform.GetChild(i).gameObject;
+            CS_ThiefAI thiefAI = thief.GetComponent<CS_ThiefAI>();
+            if (thiefAI != null)
+            {
+                thiefAI.RemoveAvoidZoneID(zoneID);
+            }
+        }
+    }
+
     //////////////////////////////////////////////////////////////////
     /// デバック用の処理
 

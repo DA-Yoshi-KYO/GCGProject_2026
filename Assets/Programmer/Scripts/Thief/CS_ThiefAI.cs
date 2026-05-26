@@ -535,8 +535,6 @@ public class CS_ThiefAI : MonoBehaviour
     }
 
     // 気絶状態の行動
-    // ----------------
-    // TODO: その場で動けなくなる処理を追加する
     private void Stunned()
     {
         // ナビメッシュエージェントを停止させる
@@ -569,6 +567,9 @@ public class CS_ThiefAI : MonoBehaviour
 
                 if (thiefMaterial.GetFloat("_Timer") <= 0.0f)
                 {
+                    // 気絶したときのSEを再生する処理を追加する
+                    if (thiefSound != null) thiefSound.PlayOneShotSE("ThiefDeath", gameObject.transform.position, "ThiefDeath");
+
                     Destroy(this.gameObject);
                 }
             }
@@ -672,6 +673,9 @@ public class CS_ThiefAI : MonoBehaviour
                     // プレイヤーを探索対象に設定する。ただし、現在の探索対象がプレイヤーでない場合に限る（プレイヤーを探索対象にしている場合は、引き続きプレイヤーを探索対象にする）
                     if (currentTarget != null && !(currentTarget is CS_PlayerTarget))
                     {
+                        // プレイヤーの追跡を開始した場合のSEを再生する
+                        if (thiefSound != null) thiefSound.PlayOneShotSE("ThiefDiscover", gameObject.transform.position, "ThiefDiscover");
+
                         currentTarget = target;
                     }
                 }
@@ -952,6 +956,9 @@ public class CS_ThiefAI : MonoBehaviour
         if (remainingInvincibleTime > 0) return;
 
         durability -= damage;
+
+        // ダメージを受けたときのSEを再生する
+        if (thiefSound != null) thiefSound.PlayOneShotSE("ThiefDamage", gameObject.transform.position, "ThiefDamage");
 
         switch (type)
         {
@@ -1333,7 +1340,6 @@ public class CS_ThiefAI : MonoBehaviour
                 // すでに猫の鳴き声に反応している場合は、さらに近づくために音のする方向に向かう
                 soundReactionPosition = soundPosition;
                 soundReactionType = type;
-                navMeshAgent.ResetPath();
                 MoveTo(soundReactionPosition);
             }
             else if (type == AttractSoundType.GimmickActivate)
@@ -1350,7 +1356,6 @@ public class CS_ThiefAI : MonoBehaviour
                             {
                                 soundReactionPosition = soundPosition;
                                 soundReactionType = type;
-                                navMeshAgent.ResetPath();
                                 MoveTo(soundReactionPosition);
                             }
                         }
@@ -1368,7 +1373,6 @@ public class CS_ThiefAI : MonoBehaviour
             // 音のする方向に向かう
             soundReactionPosition = soundPosition;
             soundReactionType = type;
-            navMeshAgent.ResetPath();
             MoveTo(soundReactionPosition);
         }
 
@@ -1730,11 +1734,28 @@ public class CS_ThiefAI : MonoBehaviour
     /// <summary>
     ///罠発動などで「この泥棒が回避する DangerZone」を動的に追加する。
     /// </summary>
+    /// <param name="zoneID">追加する DangerZone のID</param>
     public void AddAvoidZoneID(int zoneID)
     {
         if (avoidZoneIDs == null) avoidZoneIDs = new List<int>();
         if (!avoidZoneIDs.Contains(zoneID)) avoidZoneIDs.Add(zoneID);
 
+        // SmartNavAgent がある場合は即時反映
+        if (smartNavAgent == null) smartNavAgent = GetComponent<CS_SmartNavAgent>();
+        if (smartNavAgent != null)
+        {
+            smartNavAgent.SetAvoidZoneIDs(avoidZoneIDs);
+        }
+    }
+
+    /// <summary>
+    /// 罠解除などで「この泥棒が回避する DangerZone」を動的に削除する。
+    /// </summary>
+    /// <param name="zoneID">削除する DangerZone のID</param>
+    public void RemoveAvoidZoneID(int zoneID)
+    {
+        if (avoidZoneIDs == null) return;
+        if (avoidZoneIDs.Contains(zoneID)) avoidZoneIDs.Remove(zoneID);
         // SmartNavAgent がある場合は即時反映
         if (smartNavAgent == null) smartNavAgent = GetComponent<CS_SmartNavAgent>();
         if (smartNavAgent != null)

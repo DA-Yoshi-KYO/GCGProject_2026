@@ -37,8 +37,8 @@ public class RockGimmick : GimmickBase
     private float rollSpeed = 0.6f;       // 平面の転がり速度
 
     [Header("DangerZone")]
-    [SerializeField, Tooltip("破壊時に生成する DangerZone prefab")]
-    private CS_DangerZone dangerZonePrefab;
+    [SerializeField, Tooltip("破壊時に生成する DangerZone")]
+    private CS_DangerZone dangerZone;
 
     [SerializeField, Tooltip("泥棒のLayer。未設定なら全レイヤー")]
     private LayerMask thiefLayer;
@@ -229,17 +229,18 @@ public class RockGimmick : GimmickBase
         {
             isDangerZoneSpawned = true;
 
-            if (dangerZonePrefab != null)
+            if (dangerZone != null)
             {
+                // ThiefCommonDBから残存時間を取得
                 CO_ThiefCommonStatusData common = null;
                 var thiefManager = GameObject.FindObjectOfType<CS_ThiefManager>();
                 if (thiefManager != null) common = thiefManager.GetThiefCommonDB();
 
-                CS_DangerZoneSpawner.SpawnAndRegisterFromGimmick(dangerZonePrefab, transform.position, this, common, thiefLayer);
+                CS_DangerZoneSpawner.SpawnAndRegisterFromGimmick(dangerZone, transform.position, this, common, thiefLayer);
             }
             else
             {
-                Debug.LogWarning("RockGimmick: dangerZonePrefab が未設定です。", this);
+                Debug.LogWarning("PotGimmick: dangerZone が未設定です。", this);
             }
         }
 

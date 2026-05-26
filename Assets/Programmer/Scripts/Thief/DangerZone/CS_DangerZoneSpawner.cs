@@ -22,16 +22,16 @@ public static class CS_DangerZoneSpawner
     /// <param name="spawnPosition">生成位置</param>
     /// <param name="registerRadius">泥棒登録に使う半径（視認の代替）</param>
     /// <param name="thiefLayer">泥棒のLayer（未指定なら全レイヤー）</param>
-    public static CS_DangerZone SpawnAndRegister(CS_DangerZone dangerZonePrefab, Vector3 spawnPosition, float registerRadius, LayerMask thiefLayer)
+    public static CS_DangerZone SpawnAndRegister(CS_DangerZone dangerZone, Vector3 spawnPosition, float registerRadius, LayerMask thiefLayer)
     {
-        if (dangerZonePrefab == null)
+        if (dangerZone == null)
         {
-            Debug.LogWarning("DangerZoneSpawner: dangerZonePrefab が nullです。");
+            Debug.LogWarning("DangerZoneSpawner: dangerZoneP が nullです。");
             return null;
         }
 
         // DangerZone を生成
-        CS_DangerZone zone = Object.Instantiate(dangerZonePrefab, spawnPosition, Quaternion.identity);
+        CS_DangerZone zone = Object.Instantiate(dangerZone, spawnPosition, Quaternion.identity);
         if (zone == null) return null;
 
         // 範囲内泥棒を登録
@@ -75,7 +75,7 @@ public static class CS_DangerZoneSpawner
     /// GimmickBase の効果範囲を「一定距離」として扱い、DangerZone生成＋登録を行う。
     /// </summary>
     public static CS_DangerZone SpawnAndRegisterFromGimmick(
-        CS_DangerZone dangerZonePrefab,
+        CS_DangerZone dangerZone,
         Vector3 spawnPosition,
         GimmickBase gimmick,
         CO_ThiefCommonStatusData thiefCommon,
@@ -89,13 +89,13 @@ public static class CS_DangerZoneSpawner
 
         float registerRadius = CalculateRegisterRadiusFromEffectRange(gimmick);
 
-        CS_DangerZone zone = SpawnAndRegister(dangerZonePrefab, spawnPosition, registerRadius, thiefLayer);
+        CS_DangerZone zone = SpawnAndRegister(dangerZone, spawnPosition, registerRadius, thiefLayer);
         if (zone == null) return null;
 
         // 残存時間は共通データで上書き
         if (thiefCommon != null)
         {
-            zone.Initialize(zone.Radius, zone.ZoneID, thiefCommon.dangerZoneDuration);
+            zone.Initialize(gimmick.gimmickSizeX, zone.ZoneID, thiefCommon.dangerZoneDuration);
         }
 
         return zone;

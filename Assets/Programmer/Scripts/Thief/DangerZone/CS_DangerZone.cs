@@ -67,6 +67,12 @@ public sealed class CS_DangerZone : MonoBehaviour
         remaining -= Time.deltaTime;
         if (remaining <= 0f)
         {
+            CS_ThiefManager thiefManager = GameObject.FindObjectOfType<CS_ThiefManager>();
+            if (thiefManager != null)
+            {
+                thiefManager.EraseTheAvoidZoneIDToAllThief(zoneID);
+            }
+
             Destroy(gameObject);
         }
     }
