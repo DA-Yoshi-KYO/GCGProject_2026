@@ -36,12 +36,12 @@ public class CS_3DPlaySE : MonoBehaviour
     }
 
 
-    public void PlayOneShotSE(string currentSituation, Vector3 pos, string gameObjectName, SEMode seMode = SEMode.Normal)
+    public GameObject PlayOneShotSE(string currentSituation, Vector3 pos, string gameObjectName, SEMode seMode = SEMode.Normal)
     {
         SE3DData data = dataBase.seData[currentSituation];
 
         if (data == null)
-            return;
+            return null;
 
         //Snapshot切り替え
         ChangeSnapshot(currentSituation, seMode.ToString(), 0.5f);
@@ -59,6 +59,7 @@ public class CS_3DPlaySE : MonoBehaviour
         audioSource.PlayOneShot(data.audioClip);
         Destroy(obj, data.audioClip.length);
 
+        return obj;
     }
 
 
