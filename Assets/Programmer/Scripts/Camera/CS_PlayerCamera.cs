@@ -7,74 +7,77 @@
  * 2026-04-30 | レイキャストによる透過処理の作成(吉田)
  * 2026-05-11 | カメラの遷移演出の作成(元浪)
  * 2026-05-13 | リファクタリング（元浪）
+ * 2026-05-27 | リファクタリング（吉田）
  */
 using System.Collections.Generic;
 using UnityEngine;
 
 public class CS_PlayerCamera : MonoBehaviour
 {
-    private PlayerData playerData;// プレイヤーのデータ
+    private CS_PlayerData playerData;// プレイヤーのデータ
 
-    [HideInInspector] public CS_RoomCamera roomCamera;//部屋のカメラ
+    /* ---カメラの情報を更新する為の部屋情報--- */
+    private GameObject currentRoom;// 現在の部屋
+    [HideInInspector] public CS_RoomCamera roomCamera;// 部屋のカメラ
+    private GameObject roomCameraObject;// 部屋のカメラ
 
-    private GameObject roomCameraObject;//部屋のカメラ
-
-    private GameObject currentRoom;//現在の部屋
-
+    /* ---カメラの遷移演出のための変数--- */
     [Header("カメラの遷移の回転にかける時間")][SerializeField] private float rotateDuration = 1.0f;//回転にかける時間
     [Header("カメラの遷移の移動にかける時間")][SerializeField] private float moveDuration = 1.0f;//移動にかける時間
     [Header("カメラの追従にかける時間")][SerializeField] private float trackingTime = 0.5f;//追従にかける時間
 
-    private float time = 0.0f;//時間
-
-    struct TransitionCameraInfo
+    private float transTimer = 0.0f;  // 時間
+    
+    struct TransitionCameraInfo     // カメラの遷移演出のための情報をまとめた構造体
     {
-        public Vector3 position;
-        public Quaternion rotation;
+        public Vector3 position;    // カメラの位置
+        public Quaternion rotation; // カメラの回転
     }
-    private TransitionCameraInfo prevTransform;    // 前のカメラ位置
-    private TransitionCameraInfo newTransform;     // 新しいカメラ位置
-
-    //カメラの遷移演出の状態
-    private enum TransitionCamera
+    private TransitionCameraInfo prevInfo;    // 前のカメラ情報
+    private TransitionCameraInfo newInfo;     // 新しいカメラ情報
+   
+    private enum TransitionCamera    // カメラの遷移演出の状態
     {
-        None,
-        Start,
-        CameraIn,
-        CameraMove,
-        CameraOut,
-        End
+        None,       // 遷移なし
+        Start,      // 遷移開始
+        CameraIn,   // カメラの回転移動
+        CameraMove, // カメラの移動
+        CameraOut,  // カメラの回転移動
+        End         // 遷移終了
     }
-
     private TransitionCamera transitionCamera = TransitionCamera.None;
 
-    [HideInInspector] public Vector3 cameraForward = Vector3.zero;//カメラから見た方向
-    [HideInInspector] public Vector3 cameraRight = Vector3.zero;//カメラの右方向ベクトル
+    /* ---移動に使用するためのベクトル--- */
+    [HideInInspector] public Vector3 cameraForward { private set; get; } = Vector3.zero;    //カメラの正面方向ベクトル
+    [HideInInspector] public Vector3 cameraRight { private set; get; } = Vector3.zero;      //カメラの右方向ベクトル
 
+    /* ---レイキャストによるオブジェクトの透過処理のための変数--- */
     [Header("透過するオブジェクトのレイヤー")][SerializeField] LayerMask obstacleLayer;  // 透過するオブジェクトのレイヤー
-    [Header("透過する範囲")][Range(1.0f, 10.0f)][SerializeField] float radius = 1.5f;     // 透過する範囲
-    [Header("透過した後のα値")][Range(0.0f, 1.0f)][SerializeField] float maskAlpha = 0.5f;  // 透過した後のα値
     Dictionary<Renderer, MaterialPropertyBlock> mpbCache = new Dictionary<Renderer, MaterialPropertyBlock>();   // マテリアルのプロパティ
     List<Renderer> currentHits = new List<Renderer>();  // レイキャストの結果衝突したRenderオブジェクトのリスト
 
     // Start is called before the first frame update
     void Start()
     {
-        playerData = GetComponent<PlayerData>();
+        playerData = GetComponent<CS_PlayerData>();
+        if (playerData == null) Debug.LogError("CS_PlayerDataコンポーネントが見つかりませんでした。");
 
         // 現在の部屋を取得し、カメラの初期化を行う
         currentRoom = playerData.currentRoomData.GetPlayerRoomData();
+        if (currentRoom == null) Debug.LogError("現在の部屋を取得できませんでした。");
 
         roomCameraObject = currentRoom.transform.GetComponentInChildren<Camera>().gameObject;
-        roomCameraObject.GetComponent<Camera>().enabled = true;
-
+        if (roomCameraObject == null) Debug.LogError(currentRoom.name + "の部屋にカメラがありません。");
+        else roomCameraObject.GetComponent<Camera>().enabled = true; // 初期部屋のカメラを有効にする
+        
         roomCamera = roomCameraObject.GetComponent<CS_RoomCamera>();
+        if (roomCamera == null) Debug.LogError(roomCameraObject.name + "にCS_RoomCameraコンポーネントがありません。");
     }
 
     // Update is called once per frame
     void Update()
     {
-        //現在のカメラの処理
+        //現在のカメラのベクトルを更新
         cameraRight = roomCameraObject.transform.right;
         cameraForward = roomCameraObject.transform.forward;
 
@@ -83,13 +86,14 @@ public class CS_PlayerCamera : MonoBehaviour
 
         moveAmount.y = 0.0f;
 
-        //カメラの移動の制限値
+        //カメラの移動に制限をかける
         moveAmount.x = Mathf.Min(moveAmount.x, roomCamera.moveAmountLimit.x);
         moveAmount.x = Mathf.Max(moveAmount.x, -roomCamera.moveAmountLimit.x);
 
         moveAmount.z = Mathf.Min(moveAmount.z, roomCamera.moveAmountLimit.z);
         moveAmount.z = Mathf.Max(moveAmount.z, -roomCamera.moveAmountLimit.z);
 
+        //カメラの移動
         roomCameraObject.transform.position = 
             Vector3.Lerp(roomCameraObject.transform.position, roomCamera.initPos - moveAmount, trackingTime * Time.deltaTime);
 
@@ -127,6 +131,9 @@ public class CS_PlayerCamera : MonoBehaviour
         transitionCamera = TransitionCamera.Start;
     }
 
+    /// <summary>
+    /// カメラのレイとプレイヤーの間にあるオブジェクトを透過させる処理
+    /// </summary>
     private void RayCastTransparent()
     {
         // 前フレームのリセット
@@ -177,104 +184,114 @@ public class CS_PlayerCamera : MonoBehaviour
         Time.timeScale = 0.0f;
 
         //現在のカメラ情報を保存
-        prevTransform = new TransitionCameraInfo
+        prevInfo = new TransitionCameraInfo
         {
             position = roomCameraObject.transform.position,
             rotation = roomCameraObject.transform.rotation
         };
 
-        //終値点
+        //終値点のカメラ情報を保存
         Vector3 endPos = currentRoom.transform.position;
         endPos.y += 10.0f;
         Quaternion endRotate = Quaternion.Euler(90f, 180.0f, 0.0f);
-        newTransform.position = endPos;
-        newTransform.rotation = endRotate;
+        newInfo.position = endPos;
+        newInfo.rotation = endRotate;
 
+        // カメラ遷移の状態を進める
         transitionCamera = TransitionCamera.CameraIn;
 
-        time = 0.0f;
+        // 時間のリセット
+        transTimer = 0.0f;
     }
 
     //現在の部屋のカメラの回転移動処理
     private void TransitionCameraIn()
     {
-        //移動処理
-        time += Time.unscaledDeltaTime;
-        float t = Mathf.Clamp01(time / rotateDuration);
-        t = Easing.EaseInOutCubic(t);
+        //時間の更新
+        transTimer += Time.unscaledDeltaTime;
 
-        roomCameraObject.transform.position = Vector3.Lerp(prevTransform.position, newTransform.position, t);
-        roomCameraObject.transform.rotation = Quaternion.Slerp(prevTransform.rotation, newTransform.rotation, t);
+        //移動処理
+        //タイマーを0から1の範囲に正規化して、イージング関数を適用
+        float t = Mathf.Clamp01(transTimer / rotateDuration);
+        t = Easing.EaseInOutCubic(t);
+        roomCameraObject.transform.position = Vector3.Lerp(prevInfo.position, newInfo.position, t);
+        roomCameraObject.transform.rotation = Quaternion.Slerp(prevInfo.rotation, newInfo.rotation, t);
     
         //回転完了
-        if(time > rotateDuration)
+        if(transTimer > rotateDuration)
         {
             //現在のカメラ情報を保存
-            prevTransform = newTransform;
+            prevInfo = newInfo;
 
             //終値点
             GameObject newRoom = playerData.currentRoomData.GetPlayerRoomData();
             Vector3 endPos = newRoom.transform.position;
             endPos.y += 10.0f;
             Quaternion endRotate = Quaternion.Euler(90f, 180.0f, 0.0f);
-            newTransform.position = endPos;
-            newTransform.rotation = endRotate;
+            newInfo.position = endPos;
+            newInfo.rotation = endRotate;
 
             transitionCamera = TransitionCamera.CameraMove;
 
-            time = 0.0f;
+            transTimer = 0.0f;
         }
     }
 
     //現在の部屋から次の部屋へのカメラの移動処理
     private void TransitionCameraMove()
     {
-        time += Time.unscaledDeltaTime;
-        float t = Mathf.Clamp01(time / moveDuration);
+        transTimer += Time.unscaledDeltaTime;
+        float t = Mathf.Clamp01(transTimer / moveDuration);
         t = Easing.EaseInOutCubic(t);
 
-        roomCameraObject.transform.position = Vector3.Lerp(prevTransform.position, newTransform.position, t);
-        roomCameraObject.transform.rotation = Quaternion.Slerp(prevTransform.rotation, newTransform.rotation, t);
+        roomCameraObject.transform.position = Vector3.Lerp(prevInfo.position, newInfo.position, t);
+        roomCameraObject.transform.rotation = Quaternion.Slerp(prevInfo.rotation, newInfo.rotation, t);
 
-        if (time > moveDuration)
+        if (transTimer > moveDuration)
         {
             //現在の部屋を更新
             GameObject newRoom = playerData.currentRoomData.GetPlayerRoomData();
             GameObject newCamera = newRoom.transform.GetComponentInChildren<Camera>().gameObject;
 
             //現在のカメラ情報を保存
-            prevTransform = newTransform;
+            prevInfo = newInfo;
 
-            //終値点
-            newTransform = new TransitionCameraInfo
+            //終値点のカメラ情報を保存
+            newInfo = new TransitionCameraInfo
             {
                 position = newCamera.transform.position,
                 rotation = newCamera.transform.rotation
             };
 
+            //カメラ遷移の状態を進める
             transitionCamera = TransitionCamera.CameraOut;
 
-            time = 0.0f;
+            //時間のリセット
+            transTimer = 0.0f;
         }
     }
 
     //次の部屋のカメラの回転移動処理
     private void TransitionCameraOut()
     {
-        //移動処理
-        time += Time.unscaledDeltaTime;
-        float t = Mathf.Clamp01(time / rotateDuration);
-        t = Easing.EaseInOutCubic(t);
+        //時間の更新
+        transTimer += Time.unscaledDeltaTime;
 
-        roomCameraObject.transform.position = Vector3.Lerp(prevTransform.position, newTransform.position, t);
-        roomCameraObject.transform.rotation = Quaternion.Slerp(prevTransform.rotation, newTransform.rotation, t);
+        //移動処理
+        //タイマーを0から1の範囲に正規化して、イージング関数を適用
+        float t = Mathf.Clamp01(transTimer / rotateDuration);
+        t = Easing.EaseInOutCubic(t);
+        roomCameraObject.transform.position = Vector3.Lerp(prevInfo.position, newInfo.position, t);
+        roomCameraObject.transform.rotation = Quaternion.Slerp(prevInfo.rotation, newInfo.rotation, t);
 
         //回転完了
-        if (time > rotateDuration)
+        if (transTimer > rotateDuration)
         {
-            time = 0.0f;
-
+            //カメラ遷移の状態を進める
             transitionCamera = TransitionCamera.End;
+
+            //時間のリセット
+            transTimer = 0.0f;
         }
     }
 
@@ -298,5 +315,6 @@ public class CS_PlayerCamera : MonoBehaviour
        
         transitionCamera = TransitionCamera.None;   // カメラの遷移終了
     }
+
     //========================
 }

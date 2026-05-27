@@ -359,7 +359,7 @@ public class CS_RoomMovePoint : MonoBehaviour
             return;
         }
 
-        PlayerData playerData = playerTransform.GetComponent<PlayerData>();
+        CS_PlayerData playerData = playerTransform.GetComponent<CS_PlayerData>();
 
         if (playerData == null)
         {
