@@ -21,15 +21,14 @@ using UnityEngine.InputSystem;
 
 public class CS_PlayerAction : MonoBehaviour
 {
-    [SerializeField] private int initSoul = 5;//初期のソウルの数
-    [SerializeField] private float switchInteract = 1f;//ギミックの起動へ切り替る為に必要な長押しの時間
-    [SerializeField] private GameObject interactField = null;//インタラクトの範囲を示すフィールド
-    [SerializeField] private float interactSpeed = 1f;//インタラクトの速度(interactSpeed秒で範囲が1になる)
+    [Header("ギミックの軌道に切り替わる為に必要な長押しの時間")][SerializeField] private float switchInteract = 1f;         // ギミックの起動へ切り替わる為に必要な長押しの時間
+    [Header("インタラクト範囲用のオブジェクト")][SerializeField] private GameObject interactField = null;   // インタラクトの範囲を示すフィールド
+    [Header("ギミックの大きさが最大になるために必要な秒数")][SerializeField] private float interactSpeed = 1f;          // インタラクトの速度(interactSpeed秒で範囲が1になる)
     [System.Serializable]
-    public struct InteractSyllinder
+    public struct InteractSyllinder // インタラクトの範囲を構成する要素をまとめた構造体
     {
-        public float radius;
-        public float height;
+        public float radius;    // 円柱の直径
+        public float height;    // 円柱の高さ
     }
     [SerializeField] private InteractSyllinder interactMin = new InteractSyllinder { radius = 3f, height = 3f };//インタラクトの範囲の最小値
     [SerializeField] private InteractSyllinder interactMax = new InteractSyllinder { radius = 5f, height = 5f };//インタラクトの範囲の最大値
@@ -39,8 +38,8 @@ public class CS_PlayerAction : MonoBehaviour
     [HideInInspector] public int currentGimmickIndex { private set; get; } = 0;//現在選択しているギミック
 
     public List<GameObject> gimmickKind;//所持しているギミックの種類
-    
-    private PlayerData playerData;
+
+    private CS_PlayerData playerData;
     float interactTime = 0.0f;
     Vector3 interactScale = Vector3.zero;
     bool isInteracting = false;
@@ -55,8 +54,7 @@ public class CS_PlayerAction : MonoBehaviour
     void Start()
     {
         //現在のソウルの数
-        currentSoul = initSoul;
-        playerData = GetComponent<PlayerData>();
+        playerData = GetComponent<CS_PlayerData>();
 
         gimmickManager = GetComponent<GimmickManager>();
 
@@ -82,7 +80,7 @@ public class CS_PlayerAction : MonoBehaviour
     {
         settingPos = CalculateGimmickSetPosition();
 
-        if (playerData.currentMode == PlayerData.PlayerMode.Normal)
+        if (playerData.currentMode == CS_PlayerData.PlayerMode.Normal)
         {
             playerMaterial.SetVector("_OutlineColor", Color.gray);
         }
@@ -136,7 +134,7 @@ public class CS_PlayerAction : MonoBehaviour
 
                 float minHeight = -interactScale.y * 0.5f;
                 float maxHeight = interactScale.y * 0.5f;
-                for (int i = 0; i < hits.Length; i++)
+                for (int i = 0 ; i < hits.Length ; i++)
                 {
                     if (hits[i] == null) continue;
                     //ギミックの情報を取得
@@ -162,7 +160,7 @@ public class CS_PlayerAction : MonoBehaviour
                     {
                         if (gimmick.gimmickState != GimmickState.Idle) continue;
                     }
-                    
+
                     // アウトラインの色付け
                     var renderers = hits[i].GetComponentsInChildren<Renderer>();
                     foreach (var renderer in renderers)
@@ -178,12 +176,10 @@ public class CS_PlayerAction : MonoBehaviour
             }
 
         }
-        
+
 #if UNITY_EDITOR
         //デバッグ：ギミックの設置位置描画
         DebugDrawGimmickSet();
-        // ソウル数などのデバッグコマンド
-        DebugCommand();
 #endif
     }
 
@@ -218,13 +214,13 @@ public class CS_PlayerAction : MonoBehaviour
                 // 短押しは設置の処理を行う
                 switch (playerData.currentMode)
                 {
-                    case PlayerData.PlayerMode.Normal:
-                        playerData.currentMode = PlayerData.PlayerMode.Setting;
+                    case CS_PlayerData.PlayerMode.Normal:
+                        playerData.currentMode = CS_PlayerData.PlayerMode.Setting;
                         break;
-                    case PlayerData.PlayerMode.Setting:
+                    case CS_PlayerData.PlayerMode.Setting:
                         SettingAction();
                         playSE.PlayOneShotSE("CatInteract", gameObject.transform.position, "InteractSE");
-                        playerData.currentMode = PlayerData.PlayerMode.Normal;
+                        playerData.currentMode = CS_PlayerData.PlayerMode.Normal;
                         break;
                     default:
                         break;
@@ -273,7 +269,7 @@ public class CS_PlayerAction : MonoBehaviour
     private void OnCancel(InputAction.CallbackContext context)
     {
         // キャンセル操作があった場合、現在のモードをノーマルに戻す
-        playerData.currentMode = PlayerData.PlayerMode.Normal;
+        playerData.currentMode = CS_PlayerData.PlayerMode.Normal;
     }
 
     private void SettingAction()
@@ -481,7 +477,7 @@ public class CS_PlayerAction : MonoBehaviour
 
             }
         }
-        else if(gimmick.GetGimmickSize().y % 2 == 0 && !forwardZ)
+        else if (gimmick.GetGimmickSize().y % 2 == 0 && !forwardZ)
         {
             if (spawnPos.z < transform.position.z &&
                 spawnPos.z + (size.y / 2f) > transform.position.z)
@@ -554,9 +550,9 @@ public class CS_PlayerAction : MonoBehaviour
             {
                 Vector3 checkPos;
                 //偶数だけX軸がズレるから一マス修正
-                if(sizeX % 2 == 0)
+                if (sizeX % 2 == 0)
                 {
-                    checkPos.x = settingPos.x +(sX * gridSize.x) - (gridSize.x * sizeX / 2f);
+                    checkPos.x = settingPos.x + (sX * gridSize.x) - (gridSize.x * sizeX / 2f);
                 }
                 else
                 {
@@ -602,19 +598,5 @@ public class CS_PlayerAction : MonoBehaviour
     public void AddSoul(int addnum)
     {
         currentSoul += addnum;
-    }
-
-    void DebugCommand()
-    {
-        if (Input.GetKey(KeyCode.LeftShift))
-        {
-            if ((Input.GetKey(KeyCode.Space)))
-            {
-                if (Input.GetKeyDown(KeyCode.S))
-                {
-                    currentSoul = initSoul;
-                }
-            }
-        }
     }
 }

@@ -10,7 +10,7 @@ public class GimmickSelectUI : MonoBehaviour
     //  Inspector 参照
     // ──────────────────────────────────────────
     private CS_PlayerAction playerAction;
-    private PlayerData playerData;
+    private CS_PlayerData playerData;
 
     [Header("3枠スロット（固定）")]
     [Tooltip("左隣スロット（小さく表示）")]
@@ -68,12 +68,12 @@ public class GimmickSelectUI : MonoBehaviour
         {
             GameObject player = GameObject.FindWithTag("Player");
             playerAction = player.GetComponent<CS_PlayerAction>();
-            playerData = player.GetComponent<PlayerData>();
+            playerData = player.GetComponent<CS_PlayerData>();
         }
 
         int idx = playerAction.currentGimmickIndex;
         int soul = playerAction.currentSoul;
-        bool isSetting = playerData.currentMode == PlayerData.PlayerMode.Setting;
+        bool isSetting = playerData.currentMode == CS_PlayerData.PlayerMode.Setting;
 
         if (idx != cachedIndex || soul != cachedSoul || isSetting != cachedMode)
         {
@@ -163,7 +163,7 @@ public class GimmickSelectUI : MonoBehaviour
         if (playerAction == null) return;
         cachedIndex = playerAction.currentGimmickIndex;
         cachedSoul = playerAction.currentSoul;
-        cachedMode = playerData.currentMode == PlayerData.PlayerMode.Setting;
+        cachedMode = playerData.currentMode == CS_PlayerData.PlayerMode.Setting;
         Refresh(cachedIndex, cachedSoul, cachedMode);
     }
 }

@@ -114,7 +114,7 @@ public class CS_RoomPlayerPosition : MonoBehaviour
             return;
         }
 
-        PlayerData playerData = playerInstance.GetComponent<PlayerData>();
+        CS_PlayerData playerData = playerInstance.GetComponent<CS_PlayerData>();
 
         if (playerData == null)
         {
