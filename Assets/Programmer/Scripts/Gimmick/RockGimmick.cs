@@ -45,6 +45,9 @@ public class RockGimmick : GimmickBase
 
     private bool isDangerZoneSpawned;
 
+    private float activeTimer = 0f;
+    private bool soundPlayed = false;
+
     //デバッグ用！！！！
     Vector3 startPos;
     bool isStart = false;
@@ -72,6 +75,10 @@ public class RockGimmick : GimmickBase
             isFirstActive = false;
             Vector2Int directionVec = GetDirectionVec();
 
+            if (gimmickSound != null) gimmickSound.PlayOneShotSE("RockRolling", gameObject.transform.position, "RockRolling");
+            activeTimer = gimmickSound.GetAudioLength("RockRolling");
+            soundPlayed = true;
+
             initPositionY = transform.position.y + debugIdleOffset;
             velocity = Vector3.zero;
         }
@@ -86,9 +93,26 @@ public class RockGimmick : GimmickBase
         Vector3 rayOrigin = transform.position + Vector3.up * 0.1f;
         bool hasValidHit = false;   //ヒットが有効かどうか
 
+        //if (soundPlayed)
+        //{
+        //    activeTimer -= Time.deltaTime;
+        //    if (activeTimer <= 0f)
+        //    {
+        //        soundPlayed = false;
+        //    }
+        //}
+
         // 下方向へのレイキャスト　※落下時の判定用
         if (Physics.Raycast(rayOrigin, Vector3.down, out hit, rayDownLength, ~0, QueryTriggerInteraction.Ignore))
         {
+            //サウンドループ用
+            //if(!soundPlayed)
+            //{
+            //    if (gimmickSound != null) gimmickSound.PlayOneShotSE("RockRolling", gameObject.transform.position, "RockSound");
+            //    activeTimer = gimmickSound.GetAudioLength("RockRolling");
+            //    soundPlayed = true;
+            //}
+
             // 自身または子に当たっているなら RaycastAll で次のヒットを探す
             if (hit.collider != null && (hit.collider.gameObject == gameObject || hit.collider.transform.IsChildOf(transform)))
             {
@@ -243,10 +267,9 @@ public class RockGimmick : GimmickBase
                 Debug.LogWarning("PotGimmick: dangerZone が未設定です。", this);
             }
         }
-
+        if (gimmickSound != null) gimmickSound.PlayOneShotSE("RockHit", gameObject.transform.position, "RockSound");
         if (checker != null)
             Destroy(checker);
-
         Destroy(gameObject);
     }
 }
