@@ -323,22 +323,13 @@ public class CS_PlayerAction : MonoBehaviour
         Collider[] hits = Physics.OverlapSphere(setPos, 10f);
 
         GimmickBase instance = null;
+        GimmickBase g = gimmick.GetComponent<GimmickBase>();
 
-        foreach (var hit in hits)
-        {
-            GimmickBase g = hit.GetComponent<GimmickBase>();
+        instance = g;
 
-            if (g == null)
-                continue;
-
-            // 同じ種類のみ
-            if (g.GetGimmickTag() != gimmick.GetGimmickTag())
-                continue;
-
-            instance = g;
-            break;
-        }
-
+        if (g == null)
+        // 同じ種類のみ
+        if (g.GetGimmickTag() != gimmick.GetGimmickTag())
         if (instance == null)
         {
             Debug.LogError("配置後のGimmick取得失敗");
