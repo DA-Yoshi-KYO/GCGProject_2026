@@ -6,6 +6,7 @@
  * 2026-05-27 | 初回作成
  */
 using UnityEngine;
+using System.Collections;
 
 public class CS_FootPrint : MonoBehaviour
 {
@@ -15,8 +16,15 @@ public class CS_FootPrint : MonoBehaviour
     [Header("生成した足跡を削除する時間")][SerializeField] public float destroyTime;//生成した足跡を削除する時間
     [Header("生成位置のX座標の調整")][SerializeField] public float footOffsetX;//生成位置のX座標の調整
     [Header("生成位置のY座標の調整")][SerializeField] public float spawnOffsetY = 0.02f;//生成位置のY座標の調整
-
+ 
     private bool rightFoot = true;//右足かどうか
+
+    private CS_ObjectPool pool;
+
+    private void Start()
+    {
+        pool = new CS_ObjectPool(footPrintPrefab);        
+    }
 
     //足跡の生成関数
     public void SpawnFootprintAuto()
@@ -63,25 +71,16 @@ public class CS_FootPrint : MonoBehaviour
             angleOffset = -10.0f;
         }
 
-        Quaternion rotateinon = Quaternion.LookRotation(forward, Vector3.up) * Quaternion.Euler(90, angleOffset, 0);
+        Quaternion rotation = Quaternion.LookRotation(forward, Vector3.up) * Quaternion.Euler(90, angleOffset, 0);
 
         Vector3 spawnPos = pos + Vector3.up * spawnOffsetY;
 
         //生成
-        GameObject footPrintGameObject = Instantiate(footPrintPrefab, spawnPos, rotateinon);
-
-        //右足か左足かの情報
-        if (rightFoot)
-        {
-            footPrintGameObject.name = "RightFootprint";
-        }
-        else
-        {
-            footPrintGameObject.name = "LeftFootprint";
-        }
+        GameObject footPrintGameObject = pool.GetObject();
+        footPrintGameObject.transform.position = spawnPos;
+        footPrintGameObject.transform.rotation = rotation;
 
         //削除
-        Destroy(footPrintGameObject, destroyTime);
+        StartCoroutine(pool.DisableAfterTime(footPrintGameObject, destroyTime));
     }
-
 }
