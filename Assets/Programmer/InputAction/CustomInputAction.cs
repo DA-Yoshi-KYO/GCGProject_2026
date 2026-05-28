@@ -413,7 +413,7 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
                 {
                     ""name"": ""positive"",
                     ""id"": ""db92f800-5ed9-4571-833f-efc6034f3c08"",
-                    ""path"": ""<XInputController>/leftShoulder"",
+                    ""path"": ""<XInputController>/rightShoulder"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
