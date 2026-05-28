@@ -141,7 +141,7 @@ public class HitChecker : MonoBehaviour
             CS_TrapTarget trapTarget = parentGameObject.GetComponent<CS_TrapTarget>();
             if (trapTarget != null)
             {
-                thiefAI.SetTarget(trapTarget);
+                thiefAI.read_MemorySystem.SetTarget(trapTarget);
             }
         }
     }

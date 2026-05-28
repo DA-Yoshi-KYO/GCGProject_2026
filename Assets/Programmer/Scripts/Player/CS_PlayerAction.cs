@@ -260,7 +260,7 @@ public class CS_PlayerAction : MonoBehaviour
                     CS_ThiefAI thief = hit.GetComponent<CS_ThiefAI>();
                     if (thief != null)
                     {
-                        thief.InvestigateSound(gameObject.transform.position, CS_ThiefAI.AttractSoundType.CatVoice);
+                        thief.read_HearingSystem.InvestigateSound(gameObject.transform.position, CS_HearingSystem.AttractSoundType.CatVoice);
                     }
                 }
 
