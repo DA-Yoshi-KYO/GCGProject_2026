@@ -120,10 +120,6 @@ public class CS_ThiefManager : MonoBehaviour
             CS_ThiefAI thiefAI = thief.GetComponent<CS_ThiefAI>();
             thiefAI.Setting(GameObject.Instantiate(typeData), GetThiefCommonDB(), playerSpeed, entryRoom, entryPoint);
 
-            // 視界システムの設定
-            CS_VisionSensor thiefView = thief.GetComponent<CS_VisionSensor>();
-            thiefView.Setting(typeData.viewDistance, typeData.viewAngle);
-
             // --- 泥棒をthiefParentの子オブジェクトに設定
             thief.transform.parent = thiefParent.transform;
 
@@ -148,7 +144,7 @@ public class CS_ThiefManager : MonoBehaviour
             CS_ThiefAI thiefAI = thief.GetComponentInChildren<CS_ThiefAI>();
             if (thiefAI != null)
             {
-                thiefAI.EraseTheMemory(obj);
+                thiefAI.read_MemorySystem.EraseTheMemory(obj);
             }
         }
 
@@ -201,7 +197,7 @@ public class CS_ThiefManager : MonoBehaviour
             CS_ThiefAI thiefAI = thief.GetComponent<CS_ThiefAI>();
             if (thiefAI != null)
             {
-                thiefAI.RemoveAvoidZoneID(zoneID);
+                thiefAI.read_MemorySystem.RemoveAvoidZoneID(zoneID);
             }
         }
     }

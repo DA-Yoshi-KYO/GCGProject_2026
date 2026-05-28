@@ -6,6 +6,7 @@
  * 2026-05-19 | 初回作成 
  * 2026-05-22 | ファイル名を変更（ThiefDebugDamageTab.cs → CSED_ThiefDebugDamageTab.cs）
  *            | クラス名を変更（ThiefDebugDamageTab → CSED_ThiefDebugDamageTab）
+ * 2026-05-28 | ThiefReactionUIType enum からダメージ種別を選択する機能を追加
  *　
  */
 using UnityEditor;
@@ -246,12 +247,14 @@ internal sealed class CSED_ThiefDebugDamageTab
     /// </summary>
     private void DrawDamageTypePopup()
     {
-        // enum型を名前検索で取得
-        var reactionEnumType = FindTypeByName("ThiefReactionType");
-        if (reactionEnumType == null)
-        {
-            // ネストenum表現
-            reactionEnumType = FindTypeByName("ThiefReaction+ThiefReactionType");
+        // ThiefReactionUIType enum を取得
+        var reactionEnumType = FindTypeByName("CS_ThiefReactionUI+ThiefReactionUIType");
+        if (reactionEnumType != null) {
+            // enumが見つかった場合は、選択中の種別名 -> enum値へ変換して保存
+            damageReactionTypeName = ToGimmickValue(reactionEnumType, damageReactionTypeName)?.ToString() ?? damageReactionTypeName;
+        }
+        else {
+            Debug.LogWarning("CS_ThiefReactionUI+ThiefReactionUIType enum が見つからないため、ダメージ種別の選択にフォールバックします。");
         }
 
         // enumが取れない場合は入力欄にフォールバック

@@ -6,6 +6,7 @@
  * 2026-05-19 | 初回作成 
  * 2026-05-22 | ファイル名を変更（ThiefDebugRoomMemoryTab.cs → CSED_ThiefDebugRoomMemoryTab.cs）
  *            | クラス名を変更（ThiefDebugRoomMemoryTab → CSED_ThiefDebugRoomMemoryTab）
+ * 2026-05-28 | CS_ThiefAIのroomMemoriesがCS_MemorySystemに移動したことへの対応
  *　
  */
 using UnityEditor;
@@ -233,20 +234,48 @@ internal sealed class CSED_ThiefDebugRoomMemoryTab
             return;
         }
 
-        // ThiefAI.RoomMemories をReflectionで取得
-        object memoriesObj = GetPropertyValue(thief, "RoomMemories");
+        // 現行CS_ThiefAIでは roomMemories は CS_MemorySystem が保持している
+        object memorySystemObj = GetPropertyValue(thief, "read_MemorySystem");
+        if (memorySystemObj == null)
+        {
+            // フィールドの可能性にも対応
+            memorySystemObj = GetFieldOrPropertyValue(thief, "memorySystem", includePublic: true);
+        }
+
+        if (memorySystemObj == null)
+        {
+            EditorGUILayout.HelpBox("MemorySystem を取得できません（CS_ThiefAI側に read_MemorySystem が必要です）。", MessageType.Warning);
+            return;
+        }
+
+        object memoriesObj = GetPropertyValue(memorySystemObj, "read_RoomMemorys");
         if (memoriesObj == null)
         {
-            EditorGUILayout.HelpBox("RoomMemories を取得できません（泥棒AI側に RoomMemories プロパティが必要です）。", MessageType.Warning);
+            // 将来の命名揺れ保険
+            memoriesObj = GetPropertyValue(memorySystemObj, "RoomMemories");
+        }
+
+        if (memoriesObj == null)
+        {
+            EditorGUILayout.HelpBox("RoomMemory辞書を取得できません（CS_MemorySystem側に read_RoomMemorys が必要です）。", MessageType.Warning);
             return;
         }
 
         var dict = memoriesObj as IEnumerable;
         if (dict == null)
         {
-            EditorGUILayout.HelpBox("RoomMemories が辞書として扱えません。", MessageType.Warning);
+            EditorGUILayout.HelpBox("RoomMemory辞書が列挙できません。", MessageType.Warning);
             return;
         }
+
+        //追加：現在の探索対象・視認ターゲットのメモリ辞書を取得
+        object currentTargetObj = GetPropertyValue(memorySystemObj, "read_CurrentTarget");
+        if (currentTargetObj == null)
+        {
+            currentTargetObj = GetFieldOrPropertyValue(memorySystemObj, "currentTarget", includePublic: true);
+        }
+
+        IDictionary visionTargetMemoriesDict = GetFieldOrPropertyValue(memorySystemObj, "visionTargetMemories", includePublic: true) as IDictionary;
 
         EditorGUILayout.LabelField("部屋一覧", EditorStyles.boldLabel);
 
@@ -254,8 +283,8 @@ internal sealed class CSED_ThiefDebugRoomMemoryTab
         foreach (var entry in dict)
         {
             // KeyValuePair<,> を想定して Key/Value を取得
-            var key = GetPropertyValue(entry, "Key") as UnityEngine.Object; // RoomNode想定
-            var value = GetPropertyValue(entry, "Value"); // RoomMemory想定
+            var key = GetPropertyValue(entry, "Key") as UnityEngine.Object; // CS_RoomNode想定
+            var value = GetPropertyValue(entry, "Value"); // CS_RoomMemory想定
             if (key == null || value == null) continue;
 
             hasAny = true;
@@ -265,7 +294,7 @@ internal sealed class CSED_ThiefDebugRoomMemoryTab
             if (!detailToggles.TryGetValue(roomId, out detail)) detail = false;
 
             // --- 値取得 ---
-            // RoomMemoryは public field のケースがあるため Public/NonPublic 両方から取得する
+            // CS_RoomMemoryは public field 想定（念のため Public/NonPublic 両対応）
             var explorationLevel = GetFieldOrPropertyValue(value, "explorationLevel", includePublic: true);
             var dangerLevel = GetFieldOrPropertyValue(value, "dangerLevel", includePublic: true);
             var entered = GetFieldOrPropertyValue(value, "enteredDoorDirection", includePublic: true);
@@ -332,6 +361,9 @@ internal sealed class CSED_ThiefDebugRoomMemoryTab
                     // (詳細)
                     EditorGUILayout.LabelField("(詳細)", EditorStyles.miniBoldLabel);
 
+                    //追加：現在の探索対象
+                    DrawCurrentTargetArea(currentTargetObj, visionTargetMemoriesDict);
+
                     // 選択しなかったドア | ○○個
                     using (new EditorGUILayout.HorizontalScope())
                     {
@@ -339,7 +371,6 @@ internal sealed class CSED_ThiefDebugRoomMemoryTab
                         EditorGUILayout.LabelField("| " + unchosenList.Count + "個");
                     }
 
-                    // ・Right
                     for (int i =0; i < unchosenList.Count; i++)
                     {
                         EditorGUILayout.LabelField("・" + unchosenList[i]);
@@ -354,15 +385,30 @@ internal sealed class CSED_ThiefDebugRoomMemoryTab
                         EditorGUILayout.LabelField("| " + recognized.Count + "個");
                     }
 
-                    // ・オブジェクト名 [選択]
+                    // ・オブジェクト名 (探索済み: true/false) [選択]
                     for (int i =0; i < recognized.Count; i++)
                     {
                         var obj = recognized[i];
                         if (obj == null) continue;
 
+                        string exploredText = "-";
+                        try
+                        {
+                            if (visionTargetMemoriesDict != null && visionTargetMemoriesDict.Contains(obj))
+                            {
+                                var mem = visionTargetMemoriesDict[obj];
+                                var isExplored = GetFieldOrPropertyValue(mem, "isExplored", includePublic: true);
+                                exploredText = isExplored != null ? isExplored.ToString() : "-";
+                            }
+                        }
+                        catch
+                        {
+                            exploredText = "-";
+                        }
+
                         using (new EditorGUILayout.HorizontalScope())
                         {
-                            EditorGUILayout.LabelField("・" + obj.name, GUILayout.MinWidth(200));
+                            EditorGUILayout.LabelField("・" + obj.name + " (探索済み: " + exploredText + ")", GUILayout.MinWidth(200));
 
                             if (GUILayout.Button("選択", GUILayout.Width(60)))
                             {
@@ -378,6 +424,86 @@ internal sealed class CSED_ThiefDebugRoomMemoryTab
         if (!hasAny)
         {
             EditorGUILayout.HelpBox("roomMemories が空、または表示可能な要素がありません。", MessageType.Info);
+        }
+    }
+
+    /// <summary>
+    /// 現在の探索対象エリアを描画
+    /// </summary>
+    private static void DrawCurrentTargetArea(object currentTargetObj, IDictionary visionTargetMemoriesDict)
+    {
+        // 線で分割
+        EditorGUILayout.Space(2);
+        EditorGUILayout.LabelField(string.Empty, GUI.skin.horizontalSlider);
+
+        EditorGUILayout.LabelField("現在の探索対象", EditorStyles.boldLabel);
+
+        var uo = currentTargetObj as UnityEngine.Object;
+        if (uo == null)
+        {
+            EditorGUILayout.LabelField("- (なし)");
+            return;
+        }
+
+        using (new EditorGUILayout.HorizontalScope())
+        {
+            EditorGUILayout.LabelField("オブジェクト名：" + uo.name, GUILayout.MinWidth(200));
+            if (GUILayout.Button("選択", GUILayout.Width(60)))
+            {
+                Selection.activeObject = uo;
+                EditorGUIUtility.PingObject(uo);
+            }
+        }
+
+        // visionTargetMemories（CS_VisionTarget -> CS_VisionTargetMemory）の内容を表示
+        if (visionTargetMemoriesDict == null)
+        {
+            EditorGUILayout.HelpBox("visionTargetMemories を取得できません。", MessageType.Info);
+            return;
+        }
+
+        object memory = null;
+        try
+        {
+            if (visionTargetMemoriesDict.Contains(uo))
+            {
+                memory = visionTargetMemoriesDict[uo];
+            }
+        }
+        catch
+        {
+            // IDictionary実装差異などで例外が出ても落とさない
+            memory = null;
+        }
+
+        if (memory == null)
+        {
+            EditorGUILayout.LabelField("visionTargetMemories：-(対象外 または 未登録)");
+            return;
+        }
+
+        var explorationProgress = GetFieldOrPropertyValue(memory, "explorationProgress", includePublic: true);
+        var isExplored = GetFieldOrPropertyValue(memory, "isExplored", includePublic: true);
+        var searchThief = GetFieldOrPropertyValue(memory, "searchThief", includePublic: true) as UnityEngine.Object;
+
+        using (new EditorGUILayout.VerticalScope("box"))
+        {
+            EditorGUILayout.LabelField("visionTargetMemories", EditorStyles.miniBoldLabel);
+            EditorGUILayout.LabelField("探索進行度：" + ToPercentText(explorationProgress));
+            EditorGUILayout.LabelField("探索済み：" + (isExplored != null ? isExplored.ToString() : "-"));
+
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                EditorGUILayout.LabelField("探索している人：" + (searchThief != null ? searchThief.name : "-"), GUILayout.MinWidth(200));
+                using (new EditorGUI.DisabledScope(searchThief == null))
+                {
+                    if (GUILayout.Button("選択", GUILayout.Width(60)))
+                    {
+                        Selection.activeObject = searchThief;
+                        EditorGUIUtility.PingObject(searchThief);
+                    }
+                }
+            }
         }
     }
 

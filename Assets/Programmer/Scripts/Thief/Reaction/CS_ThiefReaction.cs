@@ -46,13 +46,6 @@ public class CS_ThiefReaction : MonoBehaviour
 
     private void Update()
     {
-        // Billboard効果
-        if (Camera.main != null)
-        {
-            Vector3 cameraPosition = Camera.main.transform.position;
-            cameraPosition.y = transform.position.y; // Y軸は固定
-            transform.LookAt(cameraPosition);
-        }
     }
 
     /// <summary>

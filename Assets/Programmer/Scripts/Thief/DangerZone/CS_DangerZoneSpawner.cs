@@ -67,7 +67,7 @@ public static class CS_DangerZoneSpawner
             CS_ThiefAI thief = col.GetComponentInParent<CS_ThiefAI>();
             if (thief == null) continue;
 
-            thief.AddAvoidZoneID(zone.ZoneID);
+            thief.read_MemorySystem.AddAvoidZoneID(zone.ZoneID);
         }
     }
 

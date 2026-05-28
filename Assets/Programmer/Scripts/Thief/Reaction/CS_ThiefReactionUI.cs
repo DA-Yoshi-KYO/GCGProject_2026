@@ -30,7 +30,7 @@ public class CS_ThiefReactionUI : MonoBehaviour
     private GameObject parentThiefReaction;
 
     [Tooltip("リアクションの種類")]
-    public enum ThiefReactionType
+    public enum ThiefReactionUIType
     {
         Pot,
         IronBall,
@@ -128,7 +128,7 @@ public class CS_ThiefReactionUI : MonoBehaviour
     /// リアクションのUIを設定する処理(スプライトリストから指定されたリアクションのスプライトをUIに反映させる処理)
     /// </summary>
     /// <param name="type"></param>
-    public void SetReactionUI(ThiefReactionType type)
+    public void SetReactionUI(ThiefReactionUIType type)
     {
         if (reactionSprites == null || reactionSprites.Count == 0)
         {
