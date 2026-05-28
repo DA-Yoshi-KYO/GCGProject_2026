@@ -320,16 +320,24 @@ public class CS_PlayerAction : MonoBehaviour
         // =========================
         // 実際に生成されたインスタンス取得
         // =========================
-        Collider[] hits = Physics.OverlapSphere(setPos, 10f);
-
+        Collider[] hits = Physics.OverlapSphere(setPos, 1f);
         GimmickBase instance = null;
-        GimmickBase g = gimmick.GetComponent<GimmickBase>();
 
-        instance = g;
+        foreach (var hit in hits)
+        {
+            GimmickBase gimmickBase = hit.GetComponent<GimmickBase>();
 
-        if (g == null)
-        // 同じ種類のみ
-        if (g.GetGimmickTag() != gimmick.GetGimmickTag())
+            if (gimmickBase == null)
+                continue;
+
+            // 同じ種類のみ
+            if (gimmickBase.GetGimmickTag() != gimmick.GetGimmickTag())
+                continue;
+
+            instance = gimmickBase;
+            break;
+        }
+
         if (instance == null)
         {
             Debug.LogError("配置後のGimmick取得失敗");
