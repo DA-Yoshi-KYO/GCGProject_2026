@@ -30,6 +30,9 @@ public class CS_PlayerMove : MonoBehaviour
     private bool isJumping = false;     // ジャンプ中かどうか
     private bool isSneaking = false;    // スニーク中かどうか
 
+    [Tooltip("盗賊に捕まっているかどうか")]
+    private bool isCaughtByThief;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -207,6 +210,16 @@ public class CS_PlayerMove : MonoBehaviour
             QueryTriggerInteraction.Ignore);
 
         return hasGround;
+    }
+
+
+    /// <summary>
+    /// 盗賊に捕まったときの処理
+    /// </summary>
+    public void CaughtByThief()
+    {
+        // フラグを立てる
+        isCaughtByThief = true;
     }
 
     // ---InputActionのコールバック関数---
