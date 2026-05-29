@@ -320,7 +320,10 @@ public class CS_PlayerAction : MonoBehaviour
         // =========================
         // 実際に生成されたインスタンス取得
         // =========================
-        Collider[] hits = Physics.OverlapSphere(setPos, 1f);
+        Vector3 center = setPos;          // 中心位置
+        Vector3 halfExtents = new Vector3(1f, 5f, 1f); // 半径ではなく「半サイズ」
+
+        Collider[] hits = Physics.OverlapBox(center, halfExtents);
         GimmickBase instance = null;
 
         foreach (var hit in hits)

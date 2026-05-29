@@ -99,6 +99,12 @@ public class PotGimmick : GimmickBase
             transform.position -= new Vector3(0, gravity, 0);
             SetHitChecker(transform.position);
 
+            //-1以上になったら破壊
+            if(transform.position.y <= -0.5f)
+            {
+                gimmickState = GimmickState.Broken;
+            }
+
             Ray ray = new Ray(transform.position, Vector3.down);
             if (Physics.Raycast(ray, out RaycastHit hit, 1f))
             {
