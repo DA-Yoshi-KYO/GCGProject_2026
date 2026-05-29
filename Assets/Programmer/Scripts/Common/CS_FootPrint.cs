@@ -11,7 +11,6 @@ using System.Collections;
 public class CS_FootPrint : MonoBehaviour
 {
     [Header("足跡のPrefab")][SerializeField] public GameObject footPrintPrefab;//足跡のPrefab
-    [Header("足跡を出すキャラクター")][SerializeField] public Transform character;//足跡を出すキャラクター
     [Header("生成する時間の間隔")][SerializeField] public float createFootPrintDuration;//生成する時間の間隔
     [Header("生成した足跡を削除する時間")][SerializeField] public float destroyTime;//生成した足跡を削除する時間
     [Header("生成位置のX座標の調整")][SerializeField] public float footOffsetX;//生成位置のX座標の調整
@@ -45,15 +44,15 @@ public class CS_FootPrint : MonoBehaviour
     //左足の生成位置
     public void SpawnLeftFootprint()
     {
-        Vector3 pos = character.position - character.right * footOffsetX;
-        SpawnFootprint(pos, character.forward);
+        Vector3 pos = transform.position - transform.right * footOffsetX;
+        SpawnFootprint(pos, transform.forward);
     }
 
     //右足の生成位置
     public void SpawnRightFootprint()
     {
-        Vector3 pos = character.position + character.right * footOffsetX;
-        SpawnFootprint(pos, character.forward);
+        Vector3 pos = transform.position + transform.right * footOffsetX;
+        SpawnFootprint(pos, transform.forward);
     }
 
     //生成処理

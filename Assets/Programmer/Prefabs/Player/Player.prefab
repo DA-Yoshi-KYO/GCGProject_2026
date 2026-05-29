@@ -19,6 +19,7 @@ GameObject:
   - component: {fileID: -2074343597770408674}
   - component: {fileID: 4198860316425852424}
   - component: {fileID: 7800709859953077983}
+  - component: {fileID: 5981317033681182906}
   m_Layer: 30
   m_Name: Player
   m_TagString: Player
@@ -106,11 +107,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveAmount: 3
+  velocityWalk: 1
   velocitySneak: 0.6
   jumpAmount: 4.99
   gravity: -9.8
   airResistance: 1
-  accelartion: 10
 --- !u!114 &3152219394414369179
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -123,7 +124,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1cb8868b9940f9d448c56c00405309f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  initSoul: 5
   switchInteract: 1
   interactField: {fileID: 4629820388253137526}
   interactSpeed: 1
@@ -154,13 +154,9 @@ MonoBehaviour:
   rotateDuration: 1
   moveDuration: 1
   trackingTime: 0.5
-  cameraForward: {x: 0, y: 0, z: 0}
-  cameraRight: {x: 0, y: 0, z: 0}
   obstacleLayer:
     serializedVersion: 2
     m_Bits: 2147483648
-  radius: 2.3
-  maskAlpha: 0.5
 --- !u!114 &3367410344476483694
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -232,6 +228,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 14e145a7355cc5a408220387544180e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &5981317033681182906
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 91267025467519389}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8845e322623369944b78bf884a16f15a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  footPrintPrefab: {fileID: 7806390277814883630, guid: 2c5b4b17167ba49428528f2cf2fdb4f0,
+    type: 3}
+  character: {fileID: 6119830326453982005}
+  createFootPrintDuration: 0.1
+  destroyTime: 2
+  footOffsetX: 0.1
+  spawnOffsetY: 0.05
 --- !u!1 &4629820388253137526
 GameObject:
   m_ObjectHideFlags: 0

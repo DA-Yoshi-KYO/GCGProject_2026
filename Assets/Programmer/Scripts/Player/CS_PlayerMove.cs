@@ -5,6 +5,7 @@
  * ----------------------------------------------------------
  * 2026-04-24 | 初回作成
  * 2026-05-27 | リファクタリング（吉田）
+ * 2026-05-29 | 足跡の生成処理追加
  */
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -30,10 +31,15 @@ public class CS_PlayerMove : MonoBehaviour
     private bool isJumping = false;     // ジャンプ中かどうか
     private bool isSneaking = false;    // スニーク中かどうか
 
+    private CS_FootPrint footPrint;
+    private float createFootPrintTime = 100.0f;
+
     // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        footPrint = GetComponent<CS_FootPrint>();
+
         if (rb == null) Debug.LogError("Rigitbodyコンポーネントが見つかりませんでした。");
         controller = GetComponent<CharacterController>();
         if (controller == null) Debug.LogError("CharacterControllerコンポーネントが見つかりませんでした。");
@@ -59,6 +65,8 @@ public class CS_PlayerMove : MonoBehaviour
 
     void Update()
     {
+        createFootPrintTime += Time.deltaTime;
+
         // 移動処理
         Move();
     }
@@ -95,6 +103,7 @@ public class CS_PlayerMove : MonoBehaviour
         else
         {
             horizontalMove = forwardMove + rightMove;   // それ以外は入力された移動をそのまま使用
+
         }
 
         // 移動量を更新
@@ -127,6 +136,16 @@ public class CS_PlayerMove : MonoBehaviour
         if (isJumping)
         {
             velocity.y *= airResistance;
+        }
+
+        //足跡の生成
+        if (velocity != Vector3.zero && controller.isGrounded)
+        {
+            if (createFootPrintTime > footPrint.createFootPrintDuration)
+            {
+                createFootPrintTime = 0.0f;
+                footPrint.SpawnFootprintAuto();
+            }
         }
 
         // 重力
