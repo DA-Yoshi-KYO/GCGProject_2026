@@ -76,7 +76,7 @@ public class CS_MemorySystem
 
         // プレイヤーを追跡する残り時間の初期値を設定
         this.initialRemainingIgnorePlayerTime = typedata.pursuitTime;
-        this.remainingIgnorePlayerTime = initialRemainingIgnorePlayerTime;
+        this.remainingIgnorePlayerTime = typedata.pursuitTime;
 
         // 次の部屋探索に切り替える探索度の閾値を設定
         this.nextRoomSearchThreshold = typedata.nextRoomSearchThreshold;
@@ -104,10 +104,10 @@ public class CS_MemorySystem
             roomMemories[currentRoom].FirstSetting();
         }
 
+        bool isPlayerInVision = false;
         if (currentTarget is CS_PlayerTarget)
         {
             // 視認した中にプレイヤーがいない場合は、探索対象からプレイヤーを外す
-            bool isPlayerInVision = false;
             foreach (CS_ThiefTarget target in visionTargets)
             {
                 if (target is CS_PlayerTarget)
@@ -117,20 +117,32 @@ public class CS_MemorySystem
                 }
             }
 
-            // 耐久値が1以上ある場合は、秒数であきらめる
-            if (thiefAI.read_Durability > 1)
+            // プレイヤーが視認できている場合は、プレイヤーを探索対象に設定し続ける
+            if (isPlayerInVision)
             {
-                // 追跡する残り時間が0以下の場合は、プレイヤーを無視するフラグを立てる
-                if (remainingIgnorePlayerTime <= 0.0f)
+                // 耐久値が1以上ある場合は、秒数であきらめる
+                if (thiefAI.read_Durability > 1)
                 {
-                    ignorePlayer = true;
-                    isPlayerInVision = false; // プレイヤーを無視するフラグを立てた場合は、プレイヤーが視認できていても、プレイヤーが視認できていない状態にする
-                    remainingIgnorePlayerTime = 0.0f;
-                    ClearTarget();
+                    // 追跡する残り時間が0以下の場合は、プレイヤーを無視するフラグを立てる
+                    if (remainingIgnorePlayerTime <= 0.0f)
+                    {
+                        ignorePlayer = true;
+                        isPlayerInVision = false; // プレイヤーを無視するフラグを立てた場合は、プレイヤーが視認できていても、プレイヤーが視認できていない状態にする
+                        remainingIgnorePlayerTime = 0.0f;
+                        ClearTarget();
+                    }
+                    else remainingIgnorePlayerTime -= Time.deltaTime;
                 }
-                else remainingIgnorePlayerTime -= Time.deltaTime;
             }
-            else isPlayerInVision = true; // 耐久値が1以下の場合は、プレイヤーを無視しないので、プレイヤーが視認できているかどうかを正確に判定する
+            else
+            {
+                // 追跡時間が残っている場合
+                if (remainingIgnorePlayerTime > 0.0f)
+                {
+                    // 最大値まで回復させる
+                    remainingIgnorePlayerTime = initialRemainingIgnorePlayerTime;
+                }
+            }
 
             if (!isPlayerInVision)
             {
@@ -193,9 +205,15 @@ public class CS_MemorySystem
                     continue;
                 }
 
-                // プレイヤーを未設定の場合は、プレイヤーを探索対象に設定する
-                // プレイヤーの追跡を開始した場合のSEを再生する
-                if (thiefAI.read_ThiefSound != null) thiefAI.read_ThiefSound.PlayOneShotSE("ThiefDiscover", thiefAI.gameObject.transform.position, "ThiefDiscover");
+                // 今回初めてプレイヤーを視認した場合
+                if (!isPlayerInVision)
+                {
+                    // プレイヤーの追跡を開始した場合のSEを再生する
+                    if (thiefAI.read_ThiefSound != null)
+                    {
+                        thiefAI.read_ThiefSound.PlayOneShotSE("ThiefDiscover", thiefAI.gameObject.transform.position, "ThiefDiscover");
+                    }
+                }
 
                 currentTarget = target;
                 continue;
@@ -283,6 +301,8 @@ public class CS_MemorySystem
         {
             // 移動ルートを構築している場合は、探索対象を決めない
             if (thiefAI.read_AStarSystem.HasRoute) return;
+            // 現在の追跡対象がプレイヤーの場合は、探索対象を決めない
+            if (currentTarget is CS_PlayerTarget) return;
 
             DecideTargetMovePoint();
         }

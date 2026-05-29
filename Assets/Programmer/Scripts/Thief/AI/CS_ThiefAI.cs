@@ -346,7 +346,7 @@ public class CS_ThiefAI : MonoBehaviour
         }
         else if (memorySystem.IsCurrentTargetOfType<CS_PlayerTarget>())
         {
-            
+            return;
         }
         else
         {

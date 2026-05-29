@@ -37,7 +37,7 @@ public class CS_MoveSystem
     private Vector3 debugPos;
 
     [Tooltip("バグ対策用位置の同じ位置にいるフレーム数カウンター")]
-    private int samePosFrameCount;
+    private int samePosFrameCount = 0;
 
     /// <summary>
     /// コンストラクタ。必要なコンポーネントやパラメータを受け取って初期化する。
