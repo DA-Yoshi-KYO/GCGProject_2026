@@ -8,6 +8,7 @@
  *            | クラス名を変更（ThiefDebugDamageTab → CSED_ThiefDebugDamageTab）
  *　
  */
+#if UNITY_EDITOR
 using UnityEditor;
 using UnityEngine;
 using System;
@@ -397,3 +398,4 @@ internal sealed class CSED_ThiefDebugDamageTab
         return null;
     }
 }
+#endif

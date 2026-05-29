@@ -8,6 +8,7 @@
  *　           | クラス名を変更（ThiefDebug → CSED_ThiefDebug）
  *　
  */
+#if UNITY_EDITOR
 using UnityEditor;
 using UnityEngine;
 
@@ -93,3 +94,4 @@ public sealed class CSED_ThiefDebug : EditorWindow
         EditorGUILayout.Space(8);
     }
 }
+#endif

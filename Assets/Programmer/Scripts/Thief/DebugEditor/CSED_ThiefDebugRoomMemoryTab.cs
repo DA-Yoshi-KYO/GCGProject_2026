@@ -8,6 +8,8 @@
  *            | クラス名を変更（ThiefDebugRoomMemoryTab → CSED_ThiefDebugRoomMemoryTab）
  *　
  */
+
+#if UNITY_EDITOR
 using UnityEditor;
 using UnityEngine;
 using System;
@@ -468,3 +470,5 @@ internal sealed class CSED_ThiefDebugRoomMemoryTab
         return null;
     }
 }
+
+#endif
