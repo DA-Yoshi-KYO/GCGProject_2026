@@ -76,44 +76,24 @@ public class PotGimmick : GimmickBase
             {//X+
                 interactVecX = -roomGrid.gridSize.x;
             }
-            Vector3 rayOrigin = transform.position + new Vector3(interactVecX, transform.position.y, interactVecZ);
-            initPositionY = rayOrigin.y;
-            Ray ray = new Ray(rayOrigin, Vector3.down);
-            if (Physics.Raycast(ray, out RaycastHit hit, 0.5f))
-            {
-                //地面がある場合は、ギミックをアクティブ状態にする
-                activeTime = 10f; //アクティブ状態の時間を設定
-            }
-            else
-            {
-                isFall = true;
-                //地面がない場合は、そこに落下させてから壊す
-                //落下地点に移動
-                rayOrigin.y = transform.position.y;
-                transform.position = rayOrigin;
-            }
+            Vector3 originPos = transform.position + new Vector3(interactVecX, transform.position.y, interactVecZ);
+            initPositionY = originPos.y;
+            isFall = true;
+            //落下地点に移動
+            originPos.y = transform.position.y;
+            transform.position = originPos;
         }
 
-        if (isFall)
-        {
-            //落下
-            transform.position -= new Vector3(0, gravity, 0);
-            SetHitChecker(transform.position);
+        //落下
+        transform.position -= new Vector3(0, gravity, 0);
+        SetHitChecker(transform.position);
 
-            Ray ray = new Ray(transform.position, Vector3.down);
-            if (!Physics.Raycast(ray, out RaycastHit hit, initPositionY + 0.1f))
-            {//初期の高さ+aのレイを出しをそれが当たっていなかったら破壊
-                gimmickState = GimmickState.Broken;
-            }
-            if (Physics.Raycast(ray, out RaycastHit hitBreak, 1f))
-            {
-                //地面に当たったら破壊
-                if (hitBreak.distance <= 0.1f)
-                {//破壊時チェックヒット
-                    gimmickState = GimmickState.Broken;
-                }
-            }
+        Ray ray = new Ray(transform.position, Vector3.down);
+        if (!Physics.Raycast(ray, out RaycastHit hit, initPositionY + 0.1f))
+        {//初期の高さ+aのレイを出しをそれが当たっていなかったら破壊
+            gimmickState = GimmickState.Broken;
         }
+
         activeTime -= Time.deltaTime;
         if (activeTime <= 0)
         {
