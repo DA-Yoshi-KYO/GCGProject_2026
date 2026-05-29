@@ -46,13 +46,6 @@ public class CS_ThiefReaction : MonoBehaviour
 
     private void Update()
     {
-        // Billboard効果
-        if (Camera.main != null)
-        {
-            Vector3 cameraPosition = Camera.main.transform.position;
-            cameraPosition.y = transform.position.y; // Y軸は固定
-            transform.LookAt(cameraPosition);
-        }
     }
 
     /// <summary>
@@ -82,5 +75,23 @@ public class CS_ThiefReaction : MonoBehaviour
         }
         // スプライトをクリア
         reactionSpriteRenderer.sprite = null;
+    }
+
+    /// <summary>
+    /// 指定したリアクションのスプライトが表示されている場合にのみクリアするメソッド
+    /// </summary>
+    /// <param name="reactionType">クリアするリアクションの種類</param>
+    public void ClearReactionByType(ThiefReactionType reactionType)
+    {
+        if (reactionSpriteRenderer == null)
+        {
+            Debug.LogError("SpriteRendererが見つかりませんでした。");
+            return;
+        }
+        // 現在のスプライトが指定されたリアクションのスプライトと一致する場合にクリア
+        if (reactionSpriteRenderer.sprite == reactionSprites[(int)reactionType])
+        {
+            reactionSpriteRenderer.sprite = null;
+        }
     }
 }

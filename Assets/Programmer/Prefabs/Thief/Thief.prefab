@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 7556749883374108864}
   - component: {fileID: 4791684058368851407}
   - component: {fileID: 6990849704172034852}
-  - component: {fileID: 8524563052370467757}
   - component: {fileID: 7788051665123145142}
   - component: {fileID: 4452736946303439562}
   - component: {fileID: 2397976880975647507}
@@ -108,31 +107,12 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 7b4768fdf9026d2459f4b1b503ad1808, type: 3}
   - {fileID: 21300000, guid: e0afe5ac05b069c4fb011a5d2c5e9106, type: 3}
   durability: 0
-  walkSpeed: 0
-  smartNavAgent: {fileID: 0}
-  avoidZoneIDs: 
---- !u!114 &8524563052370467757
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 729670991071759003}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 63810e3420c0a4647858515094300534, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  viewDistance: 3
-  viewAngle: 120
   targetLayer:
     serializedVersion: 2
     m_Bits: 1073741824
   obstacleLayer:
     serializedVersion: 2
     m_Bits: 2147483648
-  showGizmos: 1
-  gizmoColor: {r: 1, g: 0.015686274, b: 0.86302555, a: 1}
 --- !u!114 &7788051665123145142
 MonoBehaviour:
   m_ObjectHideFlags: 0
