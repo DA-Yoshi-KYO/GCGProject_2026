@@ -195,7 +195,7 @@ public class CS_ThiefAI : MonoBehaviour
 
         fadeAfterStunTime = data.fadeAfterStunTime;
 
-        thiefMaterial = GetComponentInChildren<Renderer>().material;
+        thiefMaterial = transform.GetChild(2).GetComponent<MeshRenderer>().material;
         if (thiefMaterial == null)
         {
             Debug.LogError("ThiefAI: 泥棒のマテリアルが見つかりません。");
@@ -216,6 +216,9 @@ public class CS_ThiefAI : MonoBehaviour
         // 気絶状態のときは無敵時間の経過を管理しない（気絶状態のときは攻撃を受けない想定のため）
         if (remainingInvincibleTime > 0)
         {
+            // 無敵時間が残っているときは青くする
+            thiefMaterial.color = Color.Lerp(Color.red, Color.blue, remainingInvincibleTime / invincibleTime);
+
             if (currentState != ThiefState.Stunned)
             {
                 remainingInvincibleTime -= Time.deltaTime;
