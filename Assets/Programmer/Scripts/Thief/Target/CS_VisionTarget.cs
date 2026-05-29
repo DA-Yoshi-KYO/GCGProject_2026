@@ -21,8 +21,8 @@ public class CS_VisionTarget : CS_ThiefTarget
     {
         [Tooltip("宝物")]
         Treasure,
-        [Tooltip("宝物以外の部屋オブジェクト")]
-        RoomObject,
+        [Tooltip("棚")]
+        Shelf,
     }
 
     [Tooltip("ターゲットの種類")]
@@ -43,6 +43,7 @@ public class CS_VisionTarget : CS_ThiefTarget
 
     [SerializeField, Header("このオブジェクトを探索している敵")]
     public GameObject searchThief;
+
 
     /// <summary>
     /// ギズモの表示

@@ -457,17 +457,27 @@ public class CS_ThiefAI : MonoBehaviour
     /// 耐久値を減らす処理
     /// </summary>
     /// <param name="damage">与える減少値</param>
-    public void TakeDamage(int damage, Gimmick type)
+    /// <param name="type">ギミックの種類</param>
+    /// <param name="isHit">直接命中したかどうか</param>
+    public void TakeDamage(int damage, Gimmick type, bool isHit = true)
     {
         if (remainingInvincibleTime > 0) return;
 
         durability -= damage;
 
         // ダメージを受けたときのSEを再生する
+        if (isHit)
+        {
+            // 直接ダメージを受けたときのリアクションに変更
+            thiefReaction.ChangeReaction(CS_ThiefReaction.ThiefReactionType.HitTrap);
+        }
+        else
+        {
+            // 間接的にダメージを受けたときのリアクションに変更
+            thiefReaction.ChangeReaction(CS_ThiefReaction.ThiefReactionType.NearHitTrap);
+        }
+        // ダメージを受けたときのSEを再生する処理を追加する
         if (thiefSound != null) thiefSound.PlayOneShotSE("ThiefDamage", gameObject.transform.position, "ThiefDamage");
-
-        // ダメージを受けたときのリアクションに変更
-        thiefReaction.ChangeReaction(CS_ThiefReaction.ThiefReactionType.HitTrap);
 
         switch (type)
         {
