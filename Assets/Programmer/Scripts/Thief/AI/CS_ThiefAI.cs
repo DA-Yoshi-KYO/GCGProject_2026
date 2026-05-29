@@ -114,6 +114,16 @@ public class CS_ThiefAI : MonoBehaviour
     private CS_3DPlaySE thiefSound;
     public CS_3DPlaySE read_ThiefSound => thiefSound;
 
+    [SerializeField, Tooltip("視界に入る対象のレイヤー"), Header("視界に入る対象のレイヤー")]
+    private LayerMask targetLayer;
+    [SerializeField, Tooltip("障害物のレイヤー"), Header("障害物のレイヤー")]
+    private LayerMask obstacleLayer;
+
+    [Tooltip("猫を捕まえているときの残り時間")]
+    private float remainingHoldCatTime = 0.0f;
+    [Tooltip("猫を捕まえている時間の初期値")]
+    private float initholdCatTime = 0.0f;
+
     // 分解したクラス一覧
     [Tooltip("移動システム")]
     private CS_MoveSystem moveSystem;
@@ -122,11 +132,6 @@ public class CS_ThiefAI : MonoBehaviour
     [Tooltip("記憶システム")]
     private CS_MemorySystem memorySystem;
     public CS_MemorySystem read_MemorySystem => memorySystem;
-
-    [SerializeField, Tooltip("視界に入る対象のレイヤー"), Header("視界に入る対象のレイヤー")]
-    private LayerMask targetLayer;
-    [SerializeField, Tooltip("障害物のレイヤー"), Header("障害物のレイヤー")]
-    private LayerMask obstacleLayer;
 
     [Tooltip("聴覚システム")]
     private CS_HearingSystem hearingSystem;
@@ -175,6 +180,9 @@ public class CS_ThiefAI : MonoBehaviour
         damageStunTime = data.stunTime;
         invincibleTime = data.invincibleTime;
         remainingInvincibleTime = 0.0f;
+
+        // 猫を捕まえている時間の初期値を設定
+        initholdCatTime = typedata.holdCatTime;
 
         // 初期状態を探索に設定
         currentState = ThiefState.Explore;
@@ -227,6 +235,18 @@ public class CS_ThiefAI : MonoBehaviour
                     remainingInvincibleTime = 0;
                 }
             }
+        }
+
+        // 猫を捕まえているときの経過時間を管理
+        if (remainingHoldCatTime > 0.0f)
+        {
+            remainingHoldCatTime -= Time.deltaTime;
+            if (remainingHoldCatTime < 0.0f)
+            {
+                remainingHoldCatTime = 0.0f;
+                memorySystem.ClearTarget();
+            }
+            return;
         }
 
         // 現在の状態に応じた行動を実行
@@ -361,7 +381,19 @@ public class CS_ThiefAI : MonoBehaviour
         }
         else if (memorySystem.IsCurrentTargetOfType<CS_PlayerTarget>())
         {
-            return;
+            if (memorySystem.IsAtTarget(exploredDistanceThreshold))
+            {
+                // CS_PlayerMoveに通知
+                ((CS_PlayerTarget)memorySystem.read_CurrentTarget).transform.GetComponent<CS_PlayerMove>().CaughtByThief();
+
+                // 猫を捕まえている時間を設定
+                remainingHoldCatTime = initholdCatTime;
+
+                // 猫を捕まえているSEを再生する
+                if (thiefSound != null) thiefSound.PlayOneShotSE("ThiefCatch", gameObject.transform.position, "ThiefCatch");
+
+                return;
+            }
         }
         else
         {

@@ -42,6 +42,10 @@ public class CO_ThiefStatusData : ScriptableObject
     [Tooltip("泥棒が走り状態になる標的オブジェクトのタイプ")]
     public List<CS_VisionTarget.TargetType> runTargetTypes;
 
+    [Header("猫を捕まえている時間")]
+    [Tooltip("泥棒が猫を捕まえている時間(秒)"), Min(0)]
+    public int holdCatTime;
+
     [Header("ソウルのドロップ数")]
     [Tooltip("泥棒が倒されたときにドロップするソウルの数"), Min(0)]
     public int soulDropCount;

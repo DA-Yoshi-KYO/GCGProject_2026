@@ -299,14 +299,14 @@ internal sealed class CSED_ThiefDebugDamageTab
         }
 
         // メソッド取得（オーバーロード誤取得防止のため引数型も指定）
-        var method = thief.GetType().GetMethod("TakeDamage", new[] { typeof(int), gimmickEnumType });
+        var method = thief.GetType().GetMethod("TakeDamage", new[] { typeof(int), gimmickEnumType, typeof(bool) });
         if (method == null)
         {
             Debug.LogWarning("TakeDamage(int, Gimmick) が見つかりません。");
             return;
         }
 
-        method.Invoke(thief, new[] { (object)damageAmount, gimmickValue });
+        method.Invoke(thief, new[] { (object)damageAmount, gimmickValue, true });
     }
 
     /// <summary>

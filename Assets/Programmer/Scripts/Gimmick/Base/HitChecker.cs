@@ -112,7 +112,8 @@ public class HitChecker : MonoBehaviour
     /// </summary>
     /// <param name="enemy"></param>
     /// <param name="damage"></param>
-    private void EnemyDame(GameObject enemy, int damage)
+    /// <param name="isHit"></param>
+    private void EnemyDame(GameObject enemy, int damage, bool isHit = true)
     {
         // =====================================================
         // 一度ダメージを与えた敵には再度当てない
@@ -126,7 +127,7 @@ public class HitChecker : MonoBehaviour
 
         if (thiefAI != null)
         {
-            thiefAI.TakeDamage(damage, gimmick);
+            thiefAI.TakeDamage(damage, gimmick, isHit);
 
             // ダメージ済み登録
             damagedEnemies.Add(enemy);
@@ -183,10 +184,10 @@ public class HitChecker : MonoBehaviour
                     switch (gimmick)
                     {
                         case Gimmick.Pot:
-                            EnemyDame(enemy, effectDamage);
+                            EnemyDame(enemy, effectDamage, false);
                             break;
                         case Gimmick.IronBall:
-                            EnemyDame(enemy, effectDamage);
+                            EnemyDame(enemy, effectDamage, false);
                             break;
                         case Gimmick.EmptyChest:
                             EnemyCharm(enemy);

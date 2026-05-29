@@ -34,6 +34,9 @@ public class CS_PlayerMove : MonoBehaviour
     private CS_FootPrint footPrint;
     private float createFootPrintTime = 100.0f;
 
+    [Tooltip("盗賊に捕まっているかどうか")]
+    private bool isCaughtByThief;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -226,6 +229,16 @@ public class CS_PlayerMove : MonoBehaviour
             QueryTriggerInteraction.Ignore);
 
         return hasGround;
+    }
+
+
+    /// <summary>
+    /// 盗賊に捕まったときの処理
+    /// </summary>
+    public void CaughtByThief()
+    {
+        // フラグを立てる
+        isCaughtByThief = true;
     }
 
     // ---InputActionのコールバック関数---
