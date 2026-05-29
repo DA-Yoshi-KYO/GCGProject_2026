@@ -77,6 +77,7 @@ public class PotGimmick : GimmickBase
                 interactVecX = -roomGrid.gridSize.x;
             }
             Vector3 rayOrigin = transform.position + new Vector3(interactVecX, transform.position.y, interactVecZ);
+            initPositionY = rayOrigin.y;
             Ray ray = new Ray(rayOrigin, Vector3.down);
             if (Physics.Raycast(ray, out RaycastHit hit, 0.5f))
             {
@@ -99,21 +100,16 @@ public class PotGimmick : GimmickBase
             transform.position -= new Vector3(0, gravity, 0);
             SetHitChecker(transform.position);
 
-            //-1以上になったら破壊
-            if(transform.position.y <= -0.5f)
-            {
+            Ray ray = new Ray(transform.position, Vector3.down);
+            if (!Physics.Raycast(ray, out RaycastHit hit, initPositionY + 0.1f))
+            {//初期の高さ+aのレイを出しをそれが当たっていなかったら破壊
                 gimmickState = GimmickState.Broken;
             }
-
-            Ray ray = new Ray(transform.position, Vector3.down);
-            if (Physics.Raycast(ray, out RaycastHit hit, 1f))
+            if (Physics.Raycast(ray, out RaycastHit hitBreak, 1f))
             {
                 //地面に当たったら破壊
-                if (hit.distance <= 0.1f)
+                if (hitBreak.distance <= 0.1f)
                 {//破壊時チェックヒット
-                    Vector2Int directionVec = GetDirectionVec();
-                    Vector2Int hitCheckerGridPos = new Vector2Int(gimmickGridPos.x + directionVec.x, gimmickGridPos.y + directionVec.y);
-                    SetHitChecker(hitCheckerGridPos.x, hitCheckerGridPos.y);
                     gimmickState = GimmickState.Broken;
                 }
             }
