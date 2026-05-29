@@ -14,14 +14,14 @@ using System.Collections;
 public class MultiSceneLoader : MonoBehaviour
 {
     [SerializeField]
-    private SceneAsset[] sceneAssets;
+    private string[] sceneNames;
 
     private IEnumerator Start()
     {
-        foreach (var item in sceneAssets)
+        foreach (var item in sceneNames)
         {
             yield return SceneManager.LoadSceneAsync(
-                item.name,
+                item,
                 LoadSceneMode.Additive);
 
             yield return null;
