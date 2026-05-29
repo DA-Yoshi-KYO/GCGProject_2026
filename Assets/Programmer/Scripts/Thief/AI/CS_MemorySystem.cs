@@ -44,7 +44,7 @@ public class CS_MemorySystem
     private float initialRemainingIgnorePlayerTime;
 
     [Tooltip("泥棒が探索するのにかかる秒数")]
-    private int searchTime;
+    private List<int> searchTime;
 
     [Tooltip("次の部屋探索に切り替える探索度の閾値")]
     private int nextRoomSearchThreshold;
@@ -382,7 +382,7 @@ public class CS_MemorySystem
                                 }
                             }
                             break;
-                        case CS_VisionTarget.TargetType.RoomObject:
+                        case CS_VisionTarget.TargetType.Shelf:
                             {
                                 // 現在の探索対象が宝物の場合は、スキップ
                                 if (currentTarget is CS_VisionTarget vt && vt.targetType == CS_VisionTarget.TargetType.Treasure) continue;
@@ -593,7 +593,7 @@ public class CS_MemorySystem
         // 探索対象の探索にかかる時間を経過させる
         //　((VisionTarget)currentTarget).explorationProgress　: 対象の探索度(MAX : 100.0f)
         // searchTime : 探索対象の探索にかかる時間
-        visionTargetMemories[((CS_VisionTarget)currentTarget)].explorationProgress += (100.0f / searchTime) * Time.deltaTime;
+        visionTargetMemories[((CS_VisionTarget)currentTarget)].explorationProgress += (100.0f / searchTime[((int)((CS_VisionTarget)currentTarget).targetType)]) * Time.deltaTime;
 
         // 探索度が100%以上になった場合は、探索が終了していると判定してtrueを返す
         if (visionTargetMemories[((CS_VisionTarget)currentTarget)].explorationProgress >= 100.0f)
