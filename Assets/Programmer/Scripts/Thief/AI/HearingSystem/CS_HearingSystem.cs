@@ -24,6 +24,11 @@ public class CS_HearingSystem
     private Vector3 soundReactionPosition;
     public Vector3 read_SoundReactionPosition => soundReactionPosition;
 
+    [Tooltip("現在の音を追跡し始めてからの経過時間")]
+    private float soundReactionElapsedTime = 0.0f;
+    [Tooltip("音を追跡する最大時間")]
+    private const int maxSoundReactionTime = 5;
+
     [Tooltip("音の種類を定義する列挙型")]
     public enum AttractSoundType
     {
@@ -91,6 +96,7 @@ public class CS_HearingSystem
             // 音のする方向に向かう
             soundReactionPosition = soundPosition;
             soundReactionType = type;
+            soundReactionElapsedTime = 0.0f;
             thiefAI.read_MoveSystem.MoveTo(soundReactionPosition);
         }
 
@@ -110,6 +116,12 @@ public class CS_HearingSystem
 
         // 音の位置に到達したとみなす距離の閾値と比較して、到達しているかどうかを判定する
         bool isAtPosition = distanceToSound < exploredDistanceThreshold;
+
+        // 現在の音を追跡し始めてからの経過時間を更新する
+        soundReactionElapsedTime += Time.deltaTime;
+
+        // 経過時間が最大時間に達しているかどうかを判定する
+        if (soundReactionElapsedTime >= maxSoundReactionTime) isAtPosition = true;
 
         // 到達していない場合：音に反応している状態を維持する
         // 到達している場合：音に反応している状態を解除する

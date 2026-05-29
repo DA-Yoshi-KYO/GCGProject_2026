@@ -272,6 +272,8 @@ public class CS_ThiefAI : MonoBehaviour
             }
             return;
         }
+        // 音に反応していない場合は、警戒のリアクションをクリアする
+        else thiefReaction.ClearReactionByType(CS_ThiefReaction.ThiefReactionType.Alert);
 
         // moveRouteが設定されている場合
         if (aStarSystem.HasRoute)
@@ -336,6 +338,9 @@ public class CS_ThiefAI : MonoBehaviour
 
                 // 探索対象の探索が完了したかどうか
                 if (!memorySystem.ProgressTargetSearchTime()) return;
+
+                // 探索のリアクションをクリアする
+                thiefReaction.ClearReactionByType(CS_ThiefReaction.ThiefReactionType.Searching);
 
                 // 宝物を探索にしていて、完了した場合は、発見状態に切り替える
                 if (((CS_VisionTarget)memorySystem.read_CurrentTarget).targetType == CS_VisionTarget.TargetType.Treasure)
