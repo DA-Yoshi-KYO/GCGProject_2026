@@ -27,6 +27,13 @@
  * 2026-05-22 | ファイル名を変更（ThiefAI.cs → CS_ThiefAI.cs）
  *            | クラス名を変更（ThiefAI → CS_ThiefAI）
  *            | リアクション処理を管理するコンポーネントを追加（CS_ThiefReaction）
+ * 2026-05-28 | 大解体
+ *            | 以下の要素を管理するクラスを新たに作成して、CS_ThiefAIから処理を移動させる。
+ *            | 移動処理を管理するクラス(CS_MoveSystem)
+ *            | 記憶処理を管理するクラス(CS_MemorySystem)
+ *            | 聴覚処理を管理するクラス(CS_HearingSystem)
+ *            | 視覚処理を管理するクラス(CS_VisionSensor)
+ *            | A*アルゴリズムを用いたルート構築処理を管理するクラス(CS_AStarSystem)
  * 
  */
 using System.Collections.Generic;
