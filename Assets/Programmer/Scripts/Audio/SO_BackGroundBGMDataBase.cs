@@ -15,7 +15,8 @@ public enum SceneName
 {
     TitleScene,
     StageSelectScene,
-    MainScene,
+    MainScene,//MainSceneで切り替えて流すBGM
+    ThiefEscape,//MainSceneで切り替えて流すBGM
 }
 
 //バックグランド用のBGMのキューの名前
@@ -23,15 +24,24 @@ public enum BackGroundBGMCueName
 {
     TitleBGM,
     SelectBGM,
-    InGameBGM,
     ThiefEscapeBGM,
+    InGameBGM,
 };
+
+//ステータス
+public enum BGMStatus
+{
+    NONE,
+    InGame,
+};
+
 
 [Serializable]
 public class BackGroundBGMData
 {
     [Header("再生するシーン名")] public SceneName sceneName;//再生するシーン
     [Header("再生音源")] public BackGroundBGMCueName cueName;//キュー
+    [Header("ステータス")]public BGMStatus status;//ステータス
 }
 
 [CreateAssetMenu(fileName = "BackGroundBGMDataSO", menuName = "ScriptableObjects/BackGroundBGMDataSO")]
