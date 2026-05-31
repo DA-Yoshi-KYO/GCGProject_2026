@@ -4,10 +4,15 @@ Shader "Unlit/SH_magiccircle_down"
     {
         _MainTex ("Texture", 2D) = "white" {}
 
-        [HDR]_GlowColor ("Glow Color", Color) = (1, 1, 1, 1)
+        [HDR]_InnerColor ("Inner Color", Color) = (1, 1, 1, 1)
+        [HDR]_OuterColor ("Outer Color", Color) = (0.2, 0.6, 1, 1)
+
         _GlowPower ("Glow Power", Range(0, 10)) = 3
         _Alpha ("Alpha", Range(0, 1)) = 1
         _BlackCut ("Black Cut", Range(0, 1)) = 0.05
+
+        _GradientMode ("Gradient Mode 0=Vertical 1=Radial", Range(0, 1)) = 1
+        _GradientPower ("Gradient Power", Range(0.1, 5)) = 1
     }
 
     SubShader
@@ -50,10 +55,14 @@ Shader "Unlit/SH_magiccircle_down"
             sampler2D _MainTex;
             float4 _MainTex_ST;
 
-            fixed4 _GlowColor;
+            fixed4 _InnerColor;
+            fixed4 _OuterColor;
+
             float _GlowPower;
             float _Alpha;
             float _BlackCut;
+            float _GradientMode;
+            float _GradientPower;
 
             v2f vert(appdata v)
             {
@@ -70,18 +79,33 @@ Shader "Unlit/SH_magiccircle_down"
             {
                 fixed4 texColor = tex2D(_MainTex, i.uv);
 
-                // 白黒画像から明るさを取る
+                // 白黒画像の白い部分だけをマスクにする
                 float mask = dot(texColor.rgb, float3(0.299, 0.587, 0.114));
 
-                // 黒い部分を消す
+                // 黒を消す
                 mask = saturate((mask - _BlackCut) / (1.0 - _BlackCut));
 
-                // Particle System の Color over Lifetime も反映
+                // 縦グラデーション
+                float verticalGradient = i.uv.y;
+
+                // 中心から外側へのグラデーション
+                float2 centerUV = i.uv - 0.5;
+                float radialGradient = saturate(length(centerUV) * 2.0);
+
+                // 0なら縦、1なら中心外側グラデーション
+                float gradientValue = lerp(verticalGradient, radialGradient, _GradientMode);
+
+                // グラデーションの寄り方を調整
+                gradientValue = pow(saturate(gradientValue), _GradientPower);
+
+                // 内側色 → 外側色
+                fixed4 gradientColor = lerp(_InnerColor, _OuterColor, gradientValue);
+
+                // Particle System側のColor over Lifetimeも反映
                 float particleAlpha = i.color.a;
 
-                // 最終的な光
                 fixed4 col;
-                col.rgb = _GlowColor.rgb * _GlowPower * mask * _Alpha * particleAlpha;
+                col.rgb = gradientColor.rgb * _GlowPower * mask * _Alpha * particleAlpha * i.color.rgb;
                 col.a = mask * _Alpha * particleAlpha;
 
                 return col;
