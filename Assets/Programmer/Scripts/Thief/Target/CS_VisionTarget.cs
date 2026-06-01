@@ -44,6 +44,39 @@ public class CS_VisionTarget : CS_ThiefTarget
     [SerializeField, Header("このオブジェクトを探索している敵")]
     public GameObject searchThief;
 
+    private void Start()
+    {
+        // ターゲットの種類が宝物の場合
+        if (targetType == TargetType.Treasure)
+        {
+            // EndManagerを取得
+            CS_EndManager endManager = GameObject.FindObjectOfType<CS_EndManager>();
+            // EndManagerが存在しない場合は新たに作成
+            if (endManager == null)
+            {
+                GameObject endManagerObj = new GameObject("EndManager");
+                endManager = endManagerObj.AddComponent<CS_EndManager>();
+
+                endManager = GameObject.Instantiate(endManager);
+            }
+
+            // EndManagerに宝物を追加
+            endManager.AddTreasure();
+        }
+    }
+
+    private void OnDestroy()
+    {
+        // ターゲットの種類が宝物の場合、EndManagerから宝物を減らす
+        if (targetType == TargetType.Treasure)
+        {
+            // EndManagerを取得
+            CS_EndManager endManager = GameObject.FindObjectOfType<CS_EndManager>();
+            if (endManager == null) return;
+            // EndManagerから宝物を減らす
+            endManager.StolenTreasure();
+        }
+    }
 
     /// <summary>
     /// ギズモの表示

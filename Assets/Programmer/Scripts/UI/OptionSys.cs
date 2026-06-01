@@ -1,4 +1,3 @@
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -203,6 +202,10 @@ public class OptionSys : MonoBehaviour
             CloseKeyUI();
             return;
         }
+
+        CloseOptionUI();
+        CS_SceneTransition sceneTransition = GameObject.FindObjectOfType<CS_SceneTransition>();
+        sceneTransition.StartSceneTransition("TitleScene");
     }
 
     public void SetBGM(float volume)
