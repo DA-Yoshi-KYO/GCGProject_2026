@@ -191,7 +191,7 @@ public class CS_PlayerAction : MonoBehaviour
         if (contextValue == 1) currentGimmickIndex++;
         else if (contextValue == -1) currentGimmickIndex--;
         currentGimmickIndex = (currentGimmickIndex % gimmickKind.Count + gimmickKind.Count) % gimmickKind.Count;
-
+        Debug.Log("ギミックの数：" + gimmickKind.Count);
         Debug.Log("現在選択中のギミック：" + gimmickKind[currentGimmickIndex].name);
     }
 
