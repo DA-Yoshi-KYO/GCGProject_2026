@@ -212,16 +212,6 @@ public class GimmickManager : MonoBehaviour
                     active.isCoolTime = true;
                     active.coolTimer = info.coolTime;
                 }
-                if (active.lifeTimer <= 0.0f)
-                {
-                    // クールタイム開始
-                    active.isCoolTime = true;
-                    active.coolTimer = info.coolTime;
-
-                    active.gimmick.gimmickState = GimmickState.Broken;
-
-                    Debug.Log("ライフタイム終了" + active.gimmickType);
-                }
             }
             //-------------------------------------------------
             // クールタイム中
