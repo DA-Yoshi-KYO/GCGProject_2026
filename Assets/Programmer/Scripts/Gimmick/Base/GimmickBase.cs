@@ -115,9 +115,16 @@ public class GimmickBase : MonoBehaviour
     [Header("敵のレイヤー")]
     [SerializeField] protected LayerMask enemyLayer;
 
+    [Header("召喚速度")]
+    [Tooltip("出てくる速度"), Min(0)]
+    [SerializeField] protected float spawnSpeed;
+
     // ギミックのグリッド上の位置
     protected Vector2Int gimmickGridPos;
-    
+
+    protected Vector3 targetPoint;
+    protected Vector3 currentPoint;
+
     protected GameObject hitChecker;
     protected BoxCollider searchColliderX;
     protected BoxCollider searchColliderZ;
@@ -141,6 +148,10 @@ public class GimmickBase : MonoBehaviour
         {
             Debug.LogWarning("CS_3DPlaySEコンポーネントが見つかりません。サウンドが再生されません。");
         }
+
+
+        targetPoint = gameObject.transform.position;
+        gameObject.transform.position = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y - gameObject.transform.localScale.y / 2.0f, gameObject.transform.position.z);
     }
 
     /// <summary>
@@ -398,6 +409,10 @@ public class GimmickBase : MonoBehaviour
     {
         switch (gimmickState)
         {
+            case GimmickState.Spawn:
+                // Spawn状態の処理
+                SpawnUpdate();
+                break;
             case GimmickState.Idle:
                 // Idle状態の処理
                 IdleUpdate();
@@ -418,6 +433,20 @@ public class GimmickBase : MonoBehaviour
                 // Broken状態の処理
                 BrokenUpdate();
                 break;
+        }
+    }
+    protected virtual void SpawnUpdate()
+    {
+        if(gameObject.transform.position.y < targetPoint.y)
+        {
+            currentPoint = gameObject.transform.position;
+            currentPoint.y += spawnSpeed * Time.deltaTime;
+            gameObject.transform.position = currentPoint;
+        }
+        else
+        {
+            gameObject.transform.position = targetPoint;
+            gimmickState = GimmickState.Idle;
         }
     }
     protected virtual void IdleUpdate()
