@@ -85,8 +85,8 @@ public class CS_RoomEnemyEntryPointTestReader : MonoBehaviour
             // ・この出入口から最大何体敵が出るか
             // ・出現候補の盗賊データリスト
 
-            CSS_RoomEnemyEntryData cs_RoomEnemyEntryData =
-                cs_EntryPointData.RoomEnemyEntryData;
+            IReadOnlyList<CSS_RoomEnemyEntryData> list_RoomEnemyEntryData =
+                cs_EntryPointData.RoomEnemyEntryDataList;
 
             // RoomCreatePoint名を取得します。
             // nullの場合でもログ表示でエラーにならないように "null" を入れます。
@@ -105,9 +105,7 @@ public class CS_RoomEnemyEntryPointTestReader : MonoBehaviour
             // 敵出入口データ名を取得します。
             // nullの場合でもログ表示でエラーにならないように "null" を入れます。
             string str_RoomEnemyEntryDataName =
-                cs_RoomEnemyEntryData != null
-                    ? cs_RoomEnemyEntryData.name
-                    : "null";
+                CreateRoomEnemyEntryDataNameText(list_RoomEnemyEntryData);
 
             // 敵出入口1件分の基本情報を表示します。
             //
@@ -137,8 +135,55 @@ public class CS_RoomEnemyEntryPointTestReader : MonoBehaviour
             // EntryData : BackDoorEnemyData
             //   ThiefData 0 : 盗賊A
             //   ThiefData 1 : 盗賊B
-            ShowThiefStatusDataList(cs_RoomEnemyEntryData, i);
+            if (list_RoomEnemyEntryData == null || list_RoomEnemyEntryData.Count <= 0)
+            {
+                Debug.LogWarning(
+                    "[EnemyEntryPoint取得確認] 敵出入口データリストが空です。EntryIndex : " + i);
+
+                continue;
+            }
+
+            for (int dataIndex = 0 ; dataIndex < list_RoomEnemyEntryData.Count ; dataIndex++)
+            {
+                ShowThiefStatusDataList(
+                    list_RoomEnemyEntryData[dataIndex],
+                    i);
+            }
         }
+    }
+
+    /// <summary>
+    /// 敵出入口データリストの名前をログ表示用の文字列に変換します。
+    /// </summary>
+    /// <param name="list_RoomEnemyEntryData">敵出入口データリスト。</param>
+    /// <returns>ログ表示用の敵出入口データ名一覧。</returns>
+    private string CreateRoomEnemyEntryDataNameText(IReadOnlyList<CSS_RoomEnemyEntryData> list_RoomEnemyEntryData)
+    {
+        if (list_RoomEnemyEntryData == null || list_RoomEnemyEntryData.Count <= 0)
+        {
+            return "null";
+        }
+
+        string resultText = string.Empty;
+
+        for (int i = 0 ; i < list_RoomEnemyEntryData.Count ; i++)
+        {
+            CSS_RoomEnemyEntryData roomEnemyEntryData = list_RoomEnemyEntryData[i];
+
+            string entryDataName =
+                roomEnemyEntryData != null
+                    ? roomEnemyEntryData.name
+                    : "null";
+
+            if (i > 0)
+            {
+                resultText += ", ";
+            }
+
+            resultText += entryDataName;
+        }
+
+        return resultText;
     }
 
     /// <summary>
