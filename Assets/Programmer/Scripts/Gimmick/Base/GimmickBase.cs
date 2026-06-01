@@ -3,6 +3,7 @@
 // 更新 :2026/04/22 作成開始
 //      :2026/04/24 ギミックの大きさ取得関数の追加
 //      :2026/04/24 ギミックの識別タグ取得関数の追加
+//      :2026/06/01 ガチリファクタ
 
 // ギミック仕様
 // Active状態のときに、命中範囲、効果範囲に当たり判定を設ける
@@ -12,6 +13,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// ギミックタイプの列挙型
+/// </summary>
 public enum Gimmick
 {
     None,
@@ -20,8 +24,12 @@ public enum Gimmick
     EmptyChest,
 }
 
+/// <summary>
+/// ギミックの状態を表す列挙型
+/// </summary>
 public enum GimmickState
 {
+    Spawn,
     Idle,
     Search,
     Active,
@@ -29,12 +37,18 @@ public enum GimmickState
     Broken,
 };
 
+/// <summary>
+/// 再利用可能かどうかを表す列挙型
+/// </summary>
 public enum  GimmickType
 {
     NotReusable = 0,
     Reusable = 1,
 }
 
+/// <summary>
+/// ギミックの向きを表す列挙型
+/// </summary>
 public enum GimmickDirection
 {
     Up,
@@ -48,60 +62,50 @@ public class GimmickBase : MonoBehaviour
     // ギミックのイメ－ジ画像
     public Sprite gimmickImage;
 
-    // 大きさ
+    /// <summary>
+    /// ギミックの大きさをグリッド単位で表す変数
+    /// </summary>
     [Header("大きさ")]
-    [Tooltip("X方向の大きさ"), Min(0)]
-    [SerializeField] public float gimmickSizeX;
-    [Tooltip("Y方向の大きさ"), Min(0)]
-    [SerializeField] public float gimmickSizeY;
-    [Tooltip("Z方向の大きさ"), Min(0)]
-    [SerializeField] public float gimmickSizeZ;
+    [Tooltip("グリッド基準の大きさ"), Min(0)]
+    [SerializeField]protected Vector2Int gimmickSize;
     [Tooltip("拡縮率 / ％"), Min(0)]
     [SerializeField] protected float gimmickScale = 100;
 
-    // 命中範囲
-    [Header("命中範囲")]
-    [Tooltip("X方向の命中範囲"), Min(0)]
-    [SerializeField] protected float hitRangeX;
-    [Tooltip("Y方向の命中範囲"), Min(0)]
-    [SerializeField] protected float hitRangeY;
-    [Tooltip("Z方向の命中範囲"), Min(0)]
-    [SerializeField] protected float hitRangeZ;
-
-    // 効果範囲
-    [Header("効果範囲")]
-    [Tooltip("X方向の効果範囲"), Min(0)]
-    [SerializeField] public float effectRangeX;
-    [Tooltip("Y方向の効果範囲"), Min(0)]
-    [SerializeField] public float effectRangeY;
-    [Tooltip("Z方向の効果範囲"), Min(0)]
-    [SerializeField] public float effectRangeZ;
-
-    // 攻撃力と効果力
+    /// <summary>
+    /// HitCheckerの設定に必要な変数
+    /// </summary>
+    [Header("HitChecker")]
+    [Tooltip("HitCheckerのオブジェクト")]
+    [SerializeField] protected GameObject hitCheckerPrefab;
+    [Header("当たり判定")]
+    [Tooltip("命中範囲の大きさ/グリッド")]
+    [SerializeField] protected Vector3 hitRange;
+    [Tooltip("効果範囲の大きさ/グリッド")]
+    [SerializeField] protected Vector3 effectRange;
     [Header("攻撃力")]
     [Tooltip("命中時"), Min(0)]
     [SerializeField] protected int attackPower;
     [Tooltip("非命中時"), Min(0)]
     [SerializeField] protected int effectPower;
 
-    [Header("RoomGrid")]
-    [Tooltip("RoomGridのオブジェクト")]
-    [SerializeField] public RoomGrid roomGrid;
+    /// <summary>
+    /// 部屋のグリッドを管理するクラスの参照
+    /// </summary>
+    public RoomGrid roomGrid;
 
-    [Header("HitChecker")]
-    [Tooltip("HitCheckerのオブジェクト")]
-    [SerializeField] protected GameObject hitCheckerPrefab;
-    // ギミックの向き
+    /// <summary>
+    /// ギミックの向き、タイプ、種類を表す変数
+    /// </summary>
     [Header("ギミックの向き")]
     [SerializeField] protected GimmickDirection gimmickDirection;
-
-    // ギミックの種類
     [Header("ギミックのタイプ")]
     [SerializeField] protected GimmickType gimmickType;
     [Header("ギミックの種類")]
     [SerializeField] public Gimmick gimmick;
 
-    // ギミックの状態
+    /// <summary>
+    /// ギミック探知状態を表す変数
+    /// </summary>
     [Header("ギミックの状態")]
     [SerializeField] public GimmickState gimmickState;
     [Header("泥棒検知")]
@@ -111,12 +115,9 @@ public class GimmickBase : MonoBehaviour
     [Header("敵のレイヤー")]
     [SerializeField] protected LayerMask enemyLayer;
 
-    [Header("調整用（プログラマー専用）")]
-    [Tooltip("ギミックの大きさや位置を調整するための値"), Min(1)]
-    [SerializeField] protected int Adjust;
     // ギミックのグリッド上の位置
     protected Vector2Int gimmickGridPos;
-
+    
     protected GameObject hitChecker;
     protected BoxCollider searchColliderX;
     protected BoxCollider searchColliderZ;
@@ -156,8 +157,8 @@ public class GimmickBase : MonoBehaviour
 
         Vector3 meshSize = meshFilter.sharedMesh.bounds.size;
 
-        float targetSizeX = gimmickSizeX * roomGrid.gridSize.x;
-        float targetSizeZ = gimmickSizeZ * roomGrid.gridSize.y;
+        float targetSizeX = gimmickSize.x * roomGrid.gridSize.x;
+        float targetSizeZ = gimmickSize.y * roomGrid.gridSize.y;
 
         float scaleX = targetSizeX / meshSize.x;
         float scaleZ = targetSizeZ / meshSize.z;
@@ -248,17 +249,9 @@ public class GimmickBase : MonoBehaviour
             GameObject Effect = hitChecker.transform.Find("Effect").gameObject;
             GameObject Hit = hitChecker.transform.Find("Hit").gameObject;
 
-            Vector3 EffectSize = new Vector3(effectRangeX * roomGrid.gridSize.x,effectRangeY * roomGrid.gridSize.y, effectRangeZ * roomGrid.gridSize.y);
-            Vector3 HitSize = new Vector3(hitRangeX * roomGrid.gridSize.x, hitRangeY * roomGrid.gridSize.y, hitRangeZ * roomGrid.gridSize.y);
+            Vector3 EffectSize = new Vector3(effectRange.x * roomGrid.gridSize.x,effectRange.y * roomGrid.gridSize.y, effectRange.z * roomGrid.gridSize.y);
+            Vector3 HitSize = new Vector3(effectRange.x * roomGrid.gridSize.x, effectRange.y * roomGrid.gridSize.y, hitRange.z * roomGrid.gridSize.y);
             
-            EffectSize.x = EffectSize.x * (float)Adjust;
-            EffectSize.y = EffectSize.y * (float)Adjust;
-            EffectSize.z = EffectSize.z * (float)Adjust;
-
-            HitSize.x = HitSize.x * (float)Adjust;
-            HitSize.y = HitSize.y * (float)Adjust;
-            HitSize.z = HitSize.z * (float)Adjust;
-
             Effect.transform.localScale = EffectSize;
             Hit.transform.localScale = HitSize;
         }
@@ -276,9 +269,8 @@ public class GimmickBase : MonoBehaviour
             return;
         }
 
-        HitCheckerPos.x = HitCheckerPos.x * (float)Adjust;
-        HitCheckerPos.y = (HitCheckerPos.y * (float)Adjust) + ((effectRangeY * roomGrid.gridSize.y) / 2.0f);
-        HitCheckerPos.z = HitCheckerPos.z * (float)Adjust;
+        HitCheckerPos.y = HitCheckerPos.y + ((effectRange.y * roomGrid.gridSize.y) / 2.0f);
+
 
         hitChecker.transform.position = HitCheckerPos;
     }
@@ -307,16 +299,8 @@ public class GimmickBase : MonoBehaviour
             GameObject Effect = hitChecker.transform.Find("Effect").gameObject;
             GameObject Hit = hitChecker.transform.Find("Hit").gameObject;
 
-            Vector3 EffectSize = new Vector3(effectRangeX * roomGrid.gridSize.x, effectRangeY * roomGrid.gridSize.y, effectRangeZ * roomGrid.gridSize.y);
-            Vector3 HitSize = new Vector3(hitRangeX * roomGrid.gridSize.x, hitRangeY * roomGrid.gridSize.y, hitRangeZ * roomGrid.gridSize.y);
-
-            EffectSize.x = EffectSize.x * (float)Adjust;
-            EffectSize.y = EffectSize.y * (float)Adjust;
-            EffectSize.z = EffectSize.z * (float)Adjust;
-
-            HitSize.x = HitSize.x * (float)Adjust;
-            HitSize.y = HitSize.y * (float)Adjust;
-            HitSize.z = HitSize.z * (float)Adjust;
+            Vector3 EffectSize = new Vector3(effectRange.x * roomGrid.gridSize.x, effectRange.y * roomGrid.gridSize.y, effectRange.z * roomGrid.gridSize.y);
+            Vector3 HitSize = new Vector3(hitRange.x * roomGrid.gridSize.x, hitRange.y * roomGrid.gridSize.y, hitRange.z * roomGrid.gridSize.y);
 
             Effect.transform.localScale = EffectSize;
             Hit.transform.localScale = HitSize;
@@ -362,7 +346,7 @@ public class GimmickBase : MonoBehaviour
     /// <returns>ギミックの大きさを表すベクトル</returns>
     public Vector2Int GetGimmickSize()
     {
-        return new Vector2Int((int)gimmickSizeX, (int)gimmickSizeY);
+        return new Vector2Int(gimmickSize.x,gimmickSize.y);
     }
 
     /// <summary>
@@ -372,6 +356,24 @@ public class GimmickBase : MonoBehaviour
     public Gimmick GetGimmickTag()
     {
         return gimmick;
+    }
+
+    /// <summary>
+    /// ギミックの命中範囲をグリッド単位で返す関数
+    /// </summary>
+    /// <returns>命中範囲の大きさ</returns>
+    public Vector3 GetHitRange()
+    {
+        return hitRange;
+    }
+    
+    /// <summary>
+    /// ギミックの効果範囲をグリッド単位で返す関数
+    /// </summary>
+    /// <returns>効果範囲の大きさ</returns>
+    public Vector3 GetEffectRange()
+    {
+        return effectRange;
     }
 
     /// <summary>

@@ -67,6 +67,7 @@ public class GimmickSelectUI : MonoBehaviour
         if (playerAction == null || playerData == null)
         {
             GameObject player = GameObject.FindWithTag("Player");
+            if (player == null) return;
             playerAction = player.GetComponent<CS_PlayerAction>();
             playerData = player.GetComponent<CS_PlayerData>();
         }

@@ -160,7 +160,7 @@ public class CS_ThiefManager : MonoBehaviour
         GameObject thiefParent = GameObject.Find("ThiefParent");
         if (thiefParent == null)
         {
-            Debug.LogError("ThiefParentが存在しません。");
+            //Debug.LogError("ThiefParentが存在しません。");
             return false;
         }
 
