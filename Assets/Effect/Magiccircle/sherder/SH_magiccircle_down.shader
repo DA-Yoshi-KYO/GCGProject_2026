@@ -80,10 +80,17 @@ Shader "Unlit/SH_magiccircle_down"
                 fixed4 texColor = tex2D(_MainTex, i.uv);
 
                 // 白黒画像の白い部分だけをマスクにする
-                float mask = dot(texColor.rgb, float3(0.299, 0.587, 0.114));
-
-                // 黒を消す
-                mask = saturate((mask - _BlackCut) / (1.0 - _BlackCut));
+                float rawMask = dot(texColor.rgb, float3(0.299, 0.587, 0.114));
+                
+                // _BlackCut = 1 のときに割り算が壊れないようにする
+                float safeBlackCut = min(_BlackCut, 0.999);
+                
+                // 元の白黒マスク
+                float mask = saturate((rawMask - safeBlackCut) / max(1.0 - safeBlackCut, 0.0001));
+                
+                // _BlackCut 1 → 0 で、全体が 0 → 1 に出るようにする
+                float reveal = saturate(1.0 - _BlackCut);
+                mask *= reveal;
 
                 // 縦グラデーション
                 float verticalGradient = i.uv.y;
