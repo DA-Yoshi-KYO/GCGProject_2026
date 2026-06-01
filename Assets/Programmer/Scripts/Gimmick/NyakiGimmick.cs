@@ -19,11 +19,6 @@ public class NyakiGimmick : GimmickBase
     void Start()
     {
         volume = FindFirstObjectByType<Volume>();
-
-        if (volume != null)
-        {
-            volume.profile.TryGet(out catEye);
-        }
         gimmickState = GimmickState.Active;
     }
 
