@@ -132,6 +132,16 @@ public class GimmickManager : MonoBehaviour
             " LifeTime : 20" +
             " MaxNum : 2");
 
+        gimmickInfo.Add(
+            Gimmick.Nyaki,
+            new GimmickInfo(5f, 20f, 1));
+
+        Debug.Log(
+            "[Register] Nyaki" +
+            " CoolTime : 5" +
+            " LifeTime : 10" +
+            " MaxNum : 3");
+
         Debug.Log("=== GimmickManager Initialize End ===");
     }
 

@@ -22,6 +22,7 @@ public enum Gimmick
     Pot,
     IronBall,
     EmptyChest,
+    Nyaki,
 }
 
 /// <summary>
