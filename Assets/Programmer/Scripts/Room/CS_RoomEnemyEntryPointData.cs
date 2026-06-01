@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 /*==================================================
@@ -7,6 +8,7 @@ using UnityEngine;
  *  内容        : 敵出入口として使用するRoomMovePoint情報を保持する
  *  履歴        : 2026/05/06 新規作成(ヨシモト)
  *                2026/05/06 敵出入口データScriptableObjectを保持する形へ変更(ヨシモト)
+ *                2026/06/01 敵出入口データをListで保持する形へ変更(ヨシモト)
  *==================================================*/
 
 /// <summary>
@@ -29,7 +31,8 @@ public class CS_RoomEnemyEntryPointData
 
     [Header("敵出入口データ")]
     [SerializeField]
-    private CSS_RoomEnemyEntryData css_RoomEnemyEntryData;
+    private List<CSS_RoomEnemyEntryData> list_RoomEnemyEntryData =
+        new List<CSS_RoomEnemyEntryData>();
 
     /// <summary>
     /// 対象RoomCreatePointを取得します。
@@ -47,12 +50,9 @@ public class CS_RoomEnemyEntryPointData
     public CS_RoomMovePoint RoomMovePoint => cs_RoomMovePoint;
 
     /// <summary>
-    /// 敵出入口データを取得します。
-    /// 
-    /// TestReader側で、
-    /// どの敵出入口データが使われているか確認するために使用します。
+    /// 敵出入口データリストを取得します。
     /// </summary>
-    public CSS_RoomEnemyEntryData RoomEnemyEntryData => css_RoomEnemyEntryData;
+    public IReadOnlyList<CSS_RoomEnemyEntryData> RoomEnemyEntryDataList => list_RoomEnemyEntryData;
 
     /// <summary>
     /// 敵生成位置として使うRoomMovePointのGameObjectを取得します。
@@ -109,17 +109,58 @@ public class CS_RoomEnemyEntryPointData
     {
         get
         {
-            if (css_RoomEnemyEntryData == null)
+            if (list_RoomEnemyEntryData == null)
             {
                 return 0;
             }
 
-            return css_RoomEnemyEntryData.GetMaxEnemySpawnCount();
+            int totalMaxEnemySpawnCount = 0;
+
+            for (int i = 0 ; i < list_RoomEnemyEntryData.Count ; i++)
+            {
+                CSS_RoomEnemyEntryData roomEnemyEntryData = list_RoomEnemyEntryData[i];
+
+                if (roomEnemyEntryData == null)
+                {
+                    continue;
+                }
+
+                totalMaxEnemySpawnCount += roomEnemyEntryData.GetMaxEnemySpawnCount();
+            }
+
+            return totalMaxEnemySpawnCount;
         }
     }
 
     /// <summary>
     /// 敵出入口情報を生成します。
+    /// </summary>
+    /// <param name="cs_RoomCreatePoint">対象RoomCreatePoint。</param>
+    /// <param name="e_EnemyEntryDirection">敵が入ってくる方向。</param>
+    /// <param name="cs_RoomMovePoint">敵生成位置として使うRoomMovePoint。</param>
+    /// <param name="list_RoomEnemyEntryData">敵出入口データリスト。</param>
+    public CS_RoomEnemyEntryPointData(
+        CS_RoomCreatePoint cs_RoomCreatePoint,
+        CSE_RoomDoorDirection e_EnemyEntryDirection,
+        CS_RoomMovePoint cs_RoomMovePoint,
+        List<CSS_RoomEnemyEntryData> list_RoomEnemyEntryData)
+    {
+        this.cs_RoomCreatePoint = cs_RoomCreatePoint;
+        this.e_EnemyEntryDirection = e_EnemyEntryDirection;
+        this.cs_RoomMovePoint = cs_RoomMovePoint;
+
+        if (list_RoomEnemyEntryData == null)
+        {
+            this.list_RoomEnemyEntryData = new List<CSS_RoomEnemyEntryData>();
+        }
+        else
+        {
+            this.list_RoomEnemyEntryData = new List<CSS_RoomEnemyEntryData>(list_RoomEnemyEntryData);
+        }
+    }
+
+    /// <summary>
+    /// 既存処理との互換用として、敵出入口データ1つから敵出入口情報を生成します。
     /// </summary>
     /// <param name="cs_RoomCreatePoint">対象RoomCreatePoint。</param>
     /// <param name="e_EnemyEntryDirection">敵が入ってくる方向。</param>
@@ -134,6 +175,12 @@ public class CS_RoomEnemyEntryPointData
         this.cs_RoomCreatePoint = cs_RoomCreatePoint;
         this.e_EnemyEntryDirection = e_EnemyEntryDirection;
         this.cs_RoomMovePoint = cs_RoomMovePoint;
-        this.css_RoomEnemyEntryData = css_RoomEnemyEntryData;
+
+        list_RoomEnemyEntryData = new List<CSS_RoomEnemyEntryData>();
+
+        if (css_RoomEnemyEntryData != null)
+        {
+            list_RoomEnemyEntryData.Add(css_RoomEnemyEntryData);
+        }
     }
 }
