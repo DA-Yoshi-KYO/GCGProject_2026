@@ -72,7 +72,7 @@ public class CS_SceneTransition : MonoBehaviour
 
         while (time < fadeDuration)
         {
-            time += Time.deltaTime;
+            time += Time.unscaledDeltaTime;
             float alpha = Mathf.Lerp(startAlpha, targetAlpha, time / fadeDuration);
             fadeImage.color = new Color(fadeImage.color.r, fadeImage.color.g, fadeImage.color.b, alpha);
 
