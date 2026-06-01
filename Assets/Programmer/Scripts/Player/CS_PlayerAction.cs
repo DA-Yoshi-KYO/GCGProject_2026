@@ -293,7 +293,7 @@ public class CS_PlayerAction : MonoBehaviour
         }
         GameObject currentRoom = playerData.currentRoomData.GetPlayerRoomData().transform.GetChild(0).gameObject;
         string roomName = currentRoom.name;
-        bool isNotSettingRoom = roomName.Contains("Start") || roomName.Contains("Treasure");
+        bool isNotSettingRoom = roomName.Contains("Treasure");
         Debug.Log(roomName);
         if (currentRoom == null || isNotSettingRoom)
         {
