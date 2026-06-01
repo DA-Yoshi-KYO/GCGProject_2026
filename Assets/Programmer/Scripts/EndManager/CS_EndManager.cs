@@ -23,7 +23,7 @@ public class CS_EndManager : MonoBehaviour
     public bool read_IsEnd => isEnd;
 
     [Tooltip("宝物の総数の現在地")]
-    private int totalTreasureCount = 0;
+    private int totalTreasureCount = 5;
     public int read_TotalTreasureCount => totalTreasureCount;
     [Tooltip("宝物の総数の最大値")]
     private int maxTotalTreasureCount = 0;
