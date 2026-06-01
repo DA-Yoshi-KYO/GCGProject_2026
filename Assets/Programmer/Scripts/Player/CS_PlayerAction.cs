@@ -518,8 +518,8 @@ public class CS_PlayerAction : MonoBehaviour
         Vector3 gridSize = roomGrid.gridSize;
 
         // ギミックのサイズ取得
-        float sizeX = gimmick.gimmickSizeX;
-        float sizeY = gimmick.gimmickSizeY;
+        float sizeX = gimmick.GetGimmickSize().x;
+        float sizeY = gimmick.GetGimmickSize().y;
 
         Vector2Int grid = roomGrid.GetGridFromPos(settingPos);
         settingPos = roomGrid.GimmickEvenNumberCorrection(settingPos, grid, gimmick);

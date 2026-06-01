@@ -95,7 +95,7 @@ public static class CS_DangerZoneSpawner
         // 残存時間は共通データで上書き
         if (thiefCommon != null)
         {
-            zone.Initialize(gimmick.gimmickSizeX, zone.ZoneID, thiefCommon.dangerZoneDuration);
+            zone.Initialize(gimmick.GetGimmickSize().x, zone.ZoneID, thiefCommon.dangerZoneDuration);
         }
 
         return zone;
@@ -114,14 +114,14 @@ public static class CS_DangerZoneSpawner
         float sizeZ = 0f;
         if (gimmick.roomGrid != null)
         {
-            sizeX = gimmick.effectRangeX * gimmick.roomGrid.gridSize.x;
-            sizeZ = gimmick.effectRangeZ * gimmick.roomGrid.gridSize.y;
+            sizeX = gimmick.GetEffectRange().x * gimmick.roomGrid.gridSize.x;
+            sizeZ = gimmick.GetEffectRange().z * gimmick.roomGrid.gridSize.y;
         }
         else
         {
             // roomGrid が無い場合は effectRange をそのまま距離扱い（フォールバック）
-            sizeX = gimmick.effectRangeX;
-            sizeZ = gimmick.effectRangeZ;
+            sizeX = gimmick.GetEffectRange().x;
+            sizeZ = gimmick.GetEffectRange().z;
         }
 
         // Box(XZ) を包含する円：半径 = 対角線/2

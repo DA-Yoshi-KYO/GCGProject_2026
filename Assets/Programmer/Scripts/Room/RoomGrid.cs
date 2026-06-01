@@ -231,8 +231,8 @@ public class RoomGrid : MonoBehaviour
         Vector2Int grid = setGrid;
         Vector3 spawnPos = setPos;
 
-        float sizeX = gimmick.gimmickSizeX;
-        float sizeY = gimmick.gimmickSizeY;
+        float sizeX = gimmick.GetGimmickSize().x;
+        float sizeY = gimmick.GetGimmickSize().y;
 
         // グリッドサイズ
         float gridSizeX = gridSize.x;
