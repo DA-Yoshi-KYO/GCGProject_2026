@@ -34,6 +34,12 @@ public class CS_EndManager : MonoBehaviour
     {
         //--- 勝敗判定 ---//
 
+        // CS_ThiefManagerを取得
+        CS_ThiefManager thiefManager = GameObject.FindObjectOfType<CS_ThiefManager>();
+        if (thiefManager == null) return;
+        // 最初の生成が完了していない場合は判定しない
+        if (!thiefManager.read_IsFirstGenerationComplete) return; 
+
         // 宝物が残っている場合
         if (totalTreasureCount > 0)
         {
@@ -83,5 +89,4 @@ public class CS_EndManager : MonoBehaviour
         totalTreasureCount--;
         if (totalTreasureCount < 0) totalTreasureCount = 0; // 負の値にならないようにする
     }
-
 }

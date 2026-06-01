@@ -39,6 +39,10 @@ public class CS_ThiefManager : MonoBehaviour
     [SerializeField, Header("最初の泥棒を生成するまでの時間(秒)"), Tooltip("最初の生成間隔")]
     private float firstCreateInterval = 5.0f;
 
+    [Tooltip("初回生成が完了しているかどうか")]
+    private bool isFirstGenerationComplete = false;
+    public bool read_IsFirstGenerationComplete => isFirstGenerationComplete;
+
     /// <summary>
     /// 毎フレーム、敵の出入口から泥棒を生成する処理を行う
     /// </summary>
@@ -144,6 +148,8 @@ public class CS_ThiefManager : MonoBehaviour
             // 生成された泥棒の数を更新
             spawnCount[entry]++;
         }
+
+        isFirstGenerationComplete = true; // 最初の生成が完了したことを記録
     }
 
     /// <summary>
