@@ -36,6 +36,9 @@ public class CS_PlayerMove : MonoBehaviour
 
     [Tooltip("盗賊に捕まっているかどうか")]
     private bool isCaughtByThief;
+    [Header("盗賊に捕まっている時間")][SerializeField] private float caughtByThiefDuration = 3.0f;    // 盗賊に捕まっている時間
+    private float caughtByThiefTimer = 0.0f;    // 盗賊に捕まっている時間のタイマー
+    private float prevCatRotationY = 0.0f;    // 盗賊に捕まったときのやられ演出のために回転量を保存する変数
 
     // Start is called before the first frame update
     void Start()
@@ -81,6 +84,25 @@ public class CS_PlayerMove : MonoBehaviour
     {
         // ゲームが一時停止中の場合は移動処理を行わない
         if (Time.timeScale == 0) return;
+
+        // 盗賊に捕まっている場合は、一定時間移動できないようにする
+        if (isCaughtByThief)
+        {
+            caughtByThiefTimer += Time.deltaTime;
+
+            // やられ演出として、ねこを左右に揺らす
+            transform.localRotation = Quaternion.Euler(0f, prevCatRotationY + Mathf.Sin(caughtByThiefTimer * 20), 0f);
+
+            if (caughtByThiefDuration >= caughtByThiefTimer)
+            {
+                isCaughtByThief = false;
+                caughtByThiefTimer = 0.0f;
+            }
+            else
+            {
+                return; // 移動処理を行わない
+            }
+        }
 
         // カメラの前方向と右方向を取得し、y成分を0にして水平移動のベクトルを作成
         Vector3 cameraForward = playerCamera.cameraForward;
@@ -153,6 +175,9 @@ public class CS_PlayerMove : MonoBehaviour
 
         // 重力
         velocity.y += gravity * Time.deltaTime;
+
+        // 回転を保存
+        prevCatRotationY = transform.rotation.eulerAngles.y;
 
         // CharacterControllerを使用して移動
         controller.Move(velocity * Time.deltaTime);
