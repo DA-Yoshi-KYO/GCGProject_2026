@@ -123,9 +123,10 @@ public class RoomGrid : MonoBehaviour
                         ratio = -ratio;
                         break;
                 }
+                float curringUVX = ratio / (float)gridCellNumX;
                 for (int i = 0 ; i < overflowObjectNum.y ; i++)
                 {
-                    gridObjects[i, overflowObjectIndex.x].GetComponent<Renderer>().material.SetFloat("_CurringUVX", ratio / (float)gridCellNumX);
+                    gridObjects[i, overflowObjectIndex.x].GetComponent<Renderer>().material.SetFloat("_CurringUVX", curringUVX);
                 }
                 overflowObjectIndex.x--;
                 overflowNum.x -= gridCellNumX;
@@ -135,14 +136,15 @@ public class RoomGrid : MonoBehaviour
                 float ratio = overflowNum.y >= gridCellNumY ? gridCellNumY : overflowNum.y;
                 switch (gridOrigin)
                 {
-                    case GridOrigin.SouthWest:
-                    case GridOrigin.SouthEast:
+                    case GridOrigin.NorthWest:
+                    case GridOrigin.NorthEast:
                         ratio = -ratio;
                         break;
                 }
+                float curringUVY = ratio / (float)gridCellNumY;
                 for (int i = 0 ; i < overflowObjectNum.x ; i++)
                 {
-                    gridObjects[overflowObjectIndex.y, i].GetComponent<Renderer>().material.SetFloat("_CurringUVY", ratio / (float)gridCellNumY);
+                    gridObjects[overflowObjectIndex.y, i].GetComponent<Renderer>().material.SetFloat("_CurringUVY", curringUVY);
                 }
                 overflowObjectIndex.y--;
                 overflowNum.y -= gridCellNumY;
