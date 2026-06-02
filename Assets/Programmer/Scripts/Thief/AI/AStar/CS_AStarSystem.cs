@@ -93,7 +93,8 @@ public class CS_AStarSystem
     /// ルートを構築する処理
     /// </summary>
     /// <param name="end">ルートの終点</param>
-    public void ConstructionRoute(Transform end)
+    /// <param name="memoryOnly">「行ったことのある部屋のみ」を通るかどうか（trueなら記憶にある部屋のみ、falseなら全ての部屋を通る）</param>
+    public void ConstructionRoute(Transform end, bool memoryOnly = true)
     {
         // -------- 前提チェック --------
         // currentRoom が取れていない場合はルート構築できない
@@ -202,8 +203,8 @@ public class CS_AStarSystem
                 // 隣接が取得できない場合はスキップ
                 if (edge.NextRoom == null) continue;
 
-                // 「行ったことのある部屋のみ」を通る（記憶に無い部屋は通らない）
-                if (!thiefAI.read_MemorySystem.read_RoomMemorys.ContainsKey(edge.NextRoom)) continue;
+                // memoryOnly が true の場合、記憶にない部屋は通らない（false の場合は全ての部屋を通る）
+                if (!thiefAI.read_MemorySystem.read_RoomMemorys.ContainsKey(edge.NextRoom) && memoryOnly) continue;
 
                 // closed に入っている部屋は再評価しない
                 if (closed.Contains(edge.NextRoom)) continue;
