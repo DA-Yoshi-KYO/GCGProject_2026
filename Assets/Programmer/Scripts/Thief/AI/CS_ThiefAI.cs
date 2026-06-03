@@ -203,7 +203,7 @@ public class CS_ThiefAI : MonoBehaviour
 
         fadeAfterStunTime = data.fadeAfterStunTime;
 
-        thiefMaterial = transform.GetChild(2).GetComponent<MeshRenderer>().material;
+        thiefMaterial = transform.GetComponentInChildren<Renderer>().material;
         if (thiefMaterial == null)
         {
             Debug.LogError("ThiefAI: 泥棒のマテリアルが見つかりません。");
