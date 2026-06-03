@@ -56,6 +56,7 @@ public class CS_MagicCircleBlackCutReveal : MonoBehaviour
     /// <summary>
     /// 魔法陣の出現演出を再生する。
     /// </summary>
+    [CS_EffectPlay]
     [ContextMenu("Play Reveal")]
     public void PlayReveal()
     {

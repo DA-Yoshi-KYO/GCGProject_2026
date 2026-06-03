@@ -44,6 +44,7 @@ public class CS_MagicCircleBlackCutHide : MonoBehaviour
     /// <summary>
     /// 魔法陣の消失演出を再生する。
     /// </summary>
+    [CS_EffectStop]
     [ContextMenu("Play Hide")]
     public void PlayHide()
     {
