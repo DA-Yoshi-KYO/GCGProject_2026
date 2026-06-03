@@ -192,6 +192,9 @@ public class HitChecker : MonoBehaviour
                         case Gimmick.EmptyChest:
                             EnemyCharm(enemy);
                             break;
+                        case Gimmick.Nyaki:
+                            EnemyDame(enemy, effectDamage, false);
+                            break;
                     }
                 }
             }
@@ -224,6 +227,9 @@ public class HitChecker : MonoBehaviour
 
                                 Debug.Log("Durability decreased");
                             }
+                            break;
+                        case Gimmick.Nyaki:
+                            EnemyDame(enemy, hitDamage);
                             break;
                     }
                 }

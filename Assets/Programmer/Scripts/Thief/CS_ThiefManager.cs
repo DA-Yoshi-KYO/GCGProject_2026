@@ -39,6 +39,10 @@ public class CS_ThiefManager : MonoBehaviour
     [SerializeField, Header("最初の泥棒を生成するまでの時間(秒)"), Tooltip("最初の生成間隔")]
     private float firstCreateInterval = 5.0f;
 
+    [Tooltip("初回生成が完了しているかどうか")]
+    private bool isFirstGenerationComplete = false;
+    public bool read_IsFirstGenerationComplete => isFirstGenerationComplete;
+
     /// <summary>
     /// 毎フレーム、敵の出入口から泥棒を生成する処理を行う
     /// </summary>
@@ -59,16 +63,30 @@ public class CS_ThiefManager : MonoBehaviour
 
         foreach (var entry in EntryList)
         {
-            // 出入口から 生成された泥棒の数が最大数に達している場合は、次の出入口の処理に移る
+            // 出入口データから、そこに設定されている敵出入口データを取得
+            IReadOnlyList<CSS_RoomEnemyEntryData> list_RoomEnemyEntryData = entry.RoomEnemyEntryDataList;
+
+            // 敵出入口データが存在しない場合は、次の出入口の処理に移る
+            if (list_RoomEnemyEntryData == null || list_RoomEnemyEntryData.Count <= 0) continue;
+
+            CSS_RoomEnemyEntryData roomEnemyEntryData = list_RoomEnemyEntryData[0];
+
+            if (roomEnemyEntryData == null) continue;
+
+            IReadOnlyList<CO_ThiefStatusData> list_ThiefStatusData = roomEnemyEntryData.GetThiefStatusDataList();
+
+            if (list_ThiefStatusData == null)continue;
+
+            // 生成数の管理
             if (spawnCount.ContainsKey(entry))
             {
-                // NULLチェック
-                if (entry.RoomEnemyEntryData == null) continue;
-                if (entry.RoomEnemyEntryData.GetThiefStatusDataList() == null) continue;
+                if (spawnCount[entry] >= list_ThiefStatusData.Count) continue;
 
-                if (spawnCount[entry] >= entry.RoomEnemyEntryData.GetThiefStatusDataList().Count) continue;
             }
-            else spawnCount.Add(entry, 0); // 新しい出入口を辞書に追加
+            else
+            {
+                spawnCount.Add(entry, 0);
+            }
 
             // 生成タイムの登録と更新
             if (createTime.ContainsKey(entry))
@@ -114,7 +132,8 @@ public class CS_ThiefManager : MonoBehaviour
             float playerSpeed = GameObject.FindGameObjectWithTag("Player").GetComponent<CS_PlayerMove>().GetBasePlayerSpeed();
 
             // 泥棒のタイプに応じたデータを取得
-            CO_ThiefStatusData typeData = entry.RoomEnemyEntryData.GetThiefStatusDataList()[spawnCount[entry]];
+            //CO_ThiefStatusData typeData = entry.RoomEnemyEntryData.GetThiefStatusDataList()[spawnCount[entry]];
+            CO_ThiefStatusData typeData = list_ThiefStatusData[spawnCount[entry]];
 
             // 行動AIの設定
             CS_ThiefAI thiefAI = thief.GetComponent<CS_ThiefAI>();
@@ -129,6 +148,8 @@ public class CS_ThiefManager : MonoBehaviour
             // 生成された泥棒の数を更新
             spawnCount[entry]++;
         }
+
+        isFirstGenerationComplete = true; // 最初の生成が完了したことを記録
     }
 
     /// <summary>

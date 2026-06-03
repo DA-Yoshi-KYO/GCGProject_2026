@@ -18,6 +18,7 @@ public class CS_PlayerCamera : MonoBehaviour
 
     /* ---カメラの情報を更新する為の部屋情報--- */
     private GameObject currentRoom;// 現在の部屋
+    Vector3 roomCenter = Vector3.zero;// 部屋の中心座標
     [HideInInspector] public CS_RoomCamera roomCamera;// 部屋のカメラ
     private GameObject roomCameraObject;// 部屋のカメラ
 
@@ -66,6 +67,10 @@ public class CS_PlayerCamera : MonoBehaviour
         currentRoom = playerData.currentRoomData.GetPlayerRoomData();
         if (currentRoom == null) Debug.LogError("現在の部屋を取得できませんでした。");
 
+        Transform roomCenterTransform = currentRoom.transform.GetChild(0).Find("Center");
+        if (roomCenterTransform == null) roomCenter = currentRoom.transform.position;
+        else roomCenter = roomCenterTransform.position;
+
         roomCameraObject = currentRoom.transform.GetComponentInChildren<Camera>().gameObject;
         if (roomCameraObject == null) Debug.LogError(currentRoom.name + "の部屋にカメラがありません。");
         else roomCameraObject.GetComponent<Camera>().enabled = true; // 初期部屋のカメラを有効にする
@@ -82,7 +87,7 @@ public class CS_PlayerCamera : MonoBehaviour
         cameraForward = roomCameraObject.transform.forward;
 
         //プレイヤーに追従して移動
-        Vector3 moveAmount = currentRoom.transform.position - transform.position;
+        Vector3 moveAmount = roomCenter - transform.position;
 
         moveAmount.y = 0.0f;
 
@@ -309,6 +314,11 @@ public class CS_PlayerCamera : MonoBehaviour
 
         // カメラを新しい部屋のカメラに切り替える
         currentRoom = playerData.currentRoomData.GetPlayerRoomData();
+
+        Transform roomCenterTransform = currentRoom.transform.GetChild(0).Find("Center");
+        if (roomCenterTransform == null) roomCenter = currentRoom.transform.position;
+        else roomCenter = roomCenterTransform.position;
+
         roomCameraObject = currentRoom.transform.GetComponentInChildren<Camera>().gameObject;
         roomCamera = roomCameraObject.GetComponent<CS_RoomCamera>();
         roomCameraObject.GetComponent<Camera>().enabled = true;

@@ -191,7 +191,7 @@ public class CS_PlayerAction : MonoBehaviour
         if (contextValue == 1) currentGimmickIndex++;
         else if (contextValue == -1) currentGimmickIndex--;
         currentGimmickIndex = (currentGimmickIndex % gimmickKind.Count + gimmickKind.Count) % gimmickKind.Count;
-
+        Debug.Log("ギミックの数：" + gimmickKind.Count);
         Debug.Log("現在選択中のギミック：" + gimmickKind[currentGimmickIndex].name);
     }
 
@@ -293,7 +293,7 @@ public class CS_PlayerAction : MonoBehaviour
         }
         GameObject currentRoom = playerData.currentRoomData.GetPlayerRoomData().transform.GetChild(0).gameObject;
         string roomName = currentRoom.name;
-        bool isNotSettingRoom = roomName.Contains("Start") || roomName.Contains("Treasure");
+        bool isNotSettingRoom = roomName.Contains("Treasure");
         Debug.Log(roomName);
         if (currentRoom == null || isNotSettingRoom)
         {

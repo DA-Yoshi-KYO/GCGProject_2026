@@ -55,7 +55,7 @@ public class RoomGrid : MonoBehaviour
         foreach (Transform child in transform)
         {
             if (!child.gameObject.name.Contains("Floor")) continue;
-            center += child.localPosition;
+            center += child.position;
             floorCount++;
         }
         center /= floorCount;
@@ -65,7 +65,7 @@ public class RoomGrid : MonoBehaviour
         {
             if (!child.gameObject.name.Contains("Floor")) continue; // Floorオブジェクトのみ探索する
 
-            Vector3 localPos = child.localPosition; // 床から見た相対座標
+            Vector3 childPos = child.position; // 床から見た相対座標
 
             // 左右前後の座標を計算
             float left = center.x - gridDivision.x / 2.0f;
@@ -81,20 +81,20 @@ public class RoomGrid : MonoBehaviour
             switch (gridOrigin)
             {
                 case GridOrigin.NorthWest:
-                    fX = localPos.x - left;
-                    fZ = top - localPos.z;
+                    fX = childPos.x - left;
+                    fZ = top - childPos.z;
                     break;
                 case GridOrigin.NorthEast:
-                    fX = right - localPos.x;
-                    fZ = top - localPos.z;
+                    fX = right - childPos.x;
+                    fZ = top - childPos.z;
                     break;
                 case GridOrigin.SouthWest:
-                    fX = localPos.x - left;
-                    fZ = localPos.z - bottom;
+                    fX = childPos.x - left;
+                    fZ = childPos.z - bottom;
                     break;
                 case GridOrigin.SouthEast:
-                    fX = right - localPos.x;
-                    fZ = localPos.z - bottom;
+                    fX = right - childPos.x;
+                    fZ = childPos.z - bottom;
                     break;
             }
 
@@ -111,7 +111,7 @@ public class RoomGrid : MonoBehaviour
         Vector2Int overflowNum = overflow;
         Vector2Int overflowObjectIndex = new Vector2Int(overflowObjectNum.x - 1, overflowObjectNum.y - 1);
         int forcedQuitCount = 0;
-        while (overflowNum.x >= 0 && overflow.y >= 0)
+        while (overflowNum.x >= 0 && overflowNum.y >= 0)
         {
             if (overflowNum.x > 0)
             {
@@ -123,9 +123,10 @@ public class RoomGrid : MonoBehaviour
                         ratio = -ratio;
                         break;
                 }
+                float curringUVX = ratio / (float)gridCellNumX;
                 for (int i = 0 ; i < overflowObjectNum.y ; i++)
                 {
-                    gridObjects[i, overflowObjectIndex.x].GetComponent<Renderer>().material.SetFloat("_CurringUVX", ratio / (float)gridCellNumX);
+                    gridObjects[i, overflowObjectIndex.x].GetComponent<Renderer>().material.SetFloat("_CurringUVX", curringUVX);
                 }
                 overflowObjectIndex.x--;
                 overflowNum.x -= gridCellNumX;
@@ -136,17 +137,14 @@ public class RoomGrid : MonoBehaviour
                 switch (gridOrigin)
                 {
                     case GridOrigin.NorthWest:
-                        break;
                     case GridOrigin.NorthEast:
-                        break;
-                    case GridOrigin.SouthWest:
-                        break;
-                    case GridOrigin.SouthEast:
+                        ratio = -ratio;
                         break;
                 }
+                float curringUVY = ratio / (float)gridCellNumY;
                 for (int i = 0 ; i < overflowObjectNum.x ; i++)
                 {
-                    gridObjects[overflowObjectIndex.y, i].GetComponent<Renderer>().material.SetFloat("_CurringUVY", ratio / (float)gridCellNumY);
+                    gridObjects[overflowObjectIndex.y, i].GetComponent<Renderer>().material.SetFloat("_CurringUVY", curringUVY);
                 }
                 overflowObjectIndex.y--;
                 overflowNum.y -= gridCellNumY;
