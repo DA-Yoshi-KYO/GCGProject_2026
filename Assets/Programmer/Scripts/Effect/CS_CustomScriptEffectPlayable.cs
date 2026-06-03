@@ -92,6 +92,7 @@ public class CS_CustomScriptEffectPlayable : MonoBehaviour, CSI_EffectPlayable
     }
 
     /// <summary>
+    /// <summary>
     /// 指定されたMonoBehaviourから再生または停止用メソッドを探して実行します。
     /// </summary>
     /// <param name="behaviour">確認対象のMonoBehaviour。</param>
@@ -106,6 +107,10 @@ public class CS_CustomScriptEffectPlayable : MonoBehaviour, CSI_EffectPlayable
 
         MethodInfo[] methods = behaviour.GetType().GetMethods(flags);
 
+        bool bool_HasAttributeMethod = false;
+
+        // 先に属性付きメソッドがあるか確認します。
+        // 属性がある場合は、名前による自動判定を使わないようにします。
         for (int i = 0 ; i < methods.Length ; i++)
         {
             MethodInfo methodInfo = methods[i];
@@ -115,13 +120,58 @@ public class CS_CustomScriptEffectPlayable : MonoBehaviour, CSI_EffectPlayable
                 continue;
             }
 
-            if (!IsTargetEffectMethod(methodInfo, bool_IsPlay))
+            if (HasTargetEffectAttribute(methodInfo, bool_IsPlay))
+            {
+                bool_HasAttributeMethod = true;
+                break;
+            }
+        }
+
+        for (int i = 0 ; i < methods.Length ; i++)
+        {
+            MethodInfo methodInfo = methods[i];
+
+            if (!IsCallableVoidMethod(methodInfo))
             {
                 continue;
             }
 
+            if (bool_HasAttributeMethod)
+            {
+                // 属性が付いているメソッドだけを呼びます。
+                // これで SetHidden などが勝手に呼ばれる事故を防ぎます。
+                if (!HasTargetEffectAttribute(methodInfo, bool_IsPlay))
+                {
+                    continue;
+                }
+            }
+            else
+            {
+                // 属性が一つも無い古いエフェクトだけ、名前判定で呼びます。
+                if (!IsTargetEffectMethod(methodInfo, bool_IsPlay))
+                {
+                    continue;
+                }
+            }
+
             InvokeMethodSafe(behaviour, methodInfo);
         }
+    }
+
+    /// <summary>
+    /// 対象メソッドに再生または停止用の属性が付いているか確認します。
+    /// </summary>
+    /// <param name="methodInfo">確認対象のメソッド。</param>
+    /// <param name="bool_IsPlay">再生処理ならtrue、停止処理ならfalse。</param>
+    /// <returns>対象属性が付いている場合はtrue。</returns>
+    private bool HasTargetEffectAttribute(MethodInfo methodInfo, bool bool_IsPlay)
+    {
+        if (bool_IsPlay)
+        {
+            return Attribute.IsDefined(methodInfo, typeof(CS_EffectPlayAttribute));
+        }
+
+        return Attribute.IsDefined(methodInfo, typeof(CS_EffectStopAttribute));
     }
 
     /// <summary>
@@ -254,5 +304,55 @@ public class CS_CustomScriptEffectPlayable : MonoBehaviour, CSI_EffectPlayable
                 "\n" +
                 exception);
         }
+    }
+
+    /// <summary>
+    /// 再生演出にかかる秒数を取得します。
+    /// </summary>
+    public float PlayDuration => GetEffectDuration(true);
+
+    /// <summary>
+    /// 停止演出にかかる秒数を取得します。
+    /// </summary>
+    public float StopDuration => GetEffectDuration(false);
+
+    /// <summary>
+    /// 子Object内のDurationProviderから、再生または停止にかかる最大秒数を取得します。
+    /// </summary>
+    /// <param name="bool_IsPlay">再生時間を取得する場合はtrue、停止時間を取得する場合はfalse。</param>
+    /// <returns>演出にかかる秒数。</returns>
+    private float GetEffectDuration(bool bool_IsPlay)
+    {
+        float maxDuration = 0.0f;
+
+        MonoBehaviour[] behaviours =
+            GetComponentsInChildren<MonoBehaviour>(bool_IsIncludeInactiveChildren);
+
+        for (int i = 0 ; i < behaviours.Length ; i++)
+        {
+            MonoBehaviour behaviour = behaviours[i];
+
+            if (behaviour == null || behaviour == this)
+            {
+                continue;
+            }
+
+            if (!(behaviour is CSI_EffectDurationProvider durationProvider))
+            {
+                continue;
+            }
+
+            if (bool_IsPlay && durationProvider.HasPlayDuration)
+            {
+                maxDuration = Mathf.Max(maxDuration, durationProvider.PlayDuration);
+            }
+
+            if (!bool_IsPlay && durationProvider.HasStopDuration)
+            {
+                maxDuration = Mathf.Max(maxDuration, durationProvider.StopDuration);
+            }
+        }
+
+        return maxDuration;
     }
 }

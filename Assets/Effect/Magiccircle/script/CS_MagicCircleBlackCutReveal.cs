@@ -13,7 +13,7 @@ using UnityEngine;
 /// <summary>
 /// 魔法陣全体のRendererに対して、_BlackCutを一括で制御するクラス。
 /// </summary>
-public class CS_MagicCircleBlackCutReveal : MonoBehaviour
+public class CS_MagicCircleBlackCutReveal : MonoBehaviour, CSI_EffectDurationProvider
 {
     private static readonly int BlackCutId = Shader.PropertyToID("_BlackCut");
 
@@ -26,11 +26,28 @@ public class CS_MagicCircleBlackCutReveal : MonoBehaviour
     [SerializeField]
     private AnimationCurve revealCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
 
-    [SerializeField]
-    private bool playOnEnable = true;
-
     private MaterialPropertyBlock propertyBlock;
     private Coroutine revealCoroutine;
+
+    /// <summary>
+    /// 再生時間を持っているか取得します。
+    /// </summary>
+    public bool HasPlayDuration => true;
+
+    /// <summary>
+    /// 出現演出の秒数を取得します。
+    /// </summary>
+    public float PlayDuration => revealSeconds;
+
+    /// <summary>
+    /// 停止時間を持っているか取得します。
+    /// </summary>
+    public bool HasStopDuration => false;
+
+    /// <summary>
+    /// 停止演出の秒数を取得します。
+    /// </summary>
+    public float StopDuration => 0.0f;
 
     /// <summary>
     /// 初期化処理を行う。
@@ -40,17 +57,6 @@ public class CS_MagicCircleBlackCutReveal : MonoBehaviour
         propertyBlock = new MaterialPropertyBlock();
         CollectRenderersIfNeeded();
         SetBlackCut(1f);
-    }
-
-    /// <summary>
-    /// 有効化時に出現演出を再生する。
-    /// </summary>
-    private void OnEnable()
-    {
-        if (playOnEnable)
-        {
-            PlayReveal();
-        }
     }
 
     /// <summary>

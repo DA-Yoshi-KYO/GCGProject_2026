@@ -13,7 +13,7 @@ using UnityEngine;
 /// <summary>
 /// 魔法陣全体のRendererに対して、_BlackCutを一括で制御して消失演出を行うクラス。
 /// </summary>
-public class CS_MagicCircleBlackCutHide : MonoBehaviour
+public class CS_MagicCircleBlackCutHide : MonoBehaviour, CSI_EffectDurationProvider
 {
     private static readonly int BlackCutId = Shader.PropertyToID("_BlackCut");
 
@@ -31,6 +31,26 @@ public class CS_MagicCircleBlackCutHide : MonoBehaviour
 
     private MaterialPropertyBlock propertyBlock;
     private Coroutine hideCoroutine;
+
+    /// <summary>
+    /// 再生時間を持っているか取得します。
+    /// </summary>
+    public bool HasPlayDuration => false;
+
+    /// <summary>
+    /// 再生演出の秒数を取得します。
+    /// </summary>
+    public float PlayDuration => 0.0f;
+
+    /// <summary>
+    /// 停止時間を持っているか取得します。
+    /// </summary>
+    public bool HasStopDuration => true;
+
+    /// <summary>
+    /// 消失演出の秒数を取得します。
+    /// </summary>
+    public float StopDuration => hideSeconds;
 
     /// <summary>
     /// 初期化処理を行う。
