@@ -21,6 +21,8 @@ public class CS_GameClearSelectButton : MonoBehaviour
     private CustomInputAction inputActions;
     private int currentButton = 0;
 
+    [Header("フェード処理があるCanvasを格納")][SerializeField] private CS_SceneTransition sceneTransition;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -45,8 +47,6 @@ public class CS_GameClearSelectButton : MonoBehaviour
             {
                 currentButton = backTitleButtonSprite.Length - 1;
             }
-            backTitleButtonImage.sprite = backTitleButtonSprite[currentButton];
-            stageSelectButtonImage.sprite = stageSelectButtonSprite[currentButton];
         }
 
         if (inputActions.GameClear.MoveRight.triggered)
@@ -56,15 +56,16 @@ public class CS_GameClearSelectButton : MonoBehaviour
             {
                 currentButton = 0;
             }
-            backTitleButtonImage.sprite = backTitleButtonSprite[currentButton];
-            stageSelectButtonImage.sprite = stageSelectButtonSprite[currentButton];
         }
+
+        backTitleButtonImage.sprite = backTitleButtonSprite[currentButton];
+        stageSelectButtonImage.sprite = stageSelectButtonSprite[currentButton];
 
         //決定ボタンでシーン遷移
         if (inputActions.GameClear.Decision.triggered)
         {
             string sceneName = sceneTransitionName[currentButton];
-            GetComponent<CS_SceneTransition>().StartSceneTransition(sceneName);
+            sceneTransition.StartSceneTransition(sceneName);
         }
     }
 
