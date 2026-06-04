@@ -34,6 +34,13 @@ public class CS_ThiefReaction : MonoBehaviour
     [Tooltip("リアクションを表示するスプライトレンダラー")]
     private SpriteRenderer reactionSpriteRenderer;
 
+    [Tooltip("泥棒の部屋を取得する為のCS")]
+    CS_MemorySystem memorySystem;
+    [Tooltip("部屋の変更を検知する為の保存用変数")]
+    CS_RoomNode prevRoom;
+    [Tooltip("部屋のカメラ")]
+    Camera roomCamera;
+
     private void Start()
     {
         // SpriteRendererを取得
@@ -42,10 +49,23 @@ public class CS_ThiefReaction : MonoBehaviour
         {
             Debug.LogError("SpriteRendererが見つかりませんでした。");
         }
+
+        memorySystem = transform.parent.GetComponent<CS_ThiefAI>().read_MemorySystem;
     }
 
     private void Update()
     {
+        CS_RoomNode currentRoom = memorySystem.read_CurrentRoom;
+
+        if (currentRoom != prevRoom)
+            roomCamera = currentRoom.GetComponentInChildren<Camera>();
+
+        if (roomCamera != null && roomCamera.enabled)
+        {
+            transform.LookAt(roomCamera.transform.position);
+            transform.Rotate(0, 180, 0);
+        }
+        prevRoom = currentRoom;
     }
 
     /// <summary>

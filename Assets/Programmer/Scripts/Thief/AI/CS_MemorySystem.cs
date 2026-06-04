@@ -794,7 +794,7 @@ public class CS_MemorySystem
             }
 
             // 選択した方向にあるドアの位置を次の移動ポイントに設定
-            thiefAI.read_AStarSystem.ConstructionRoute(currentRoom.GetDirectionWallToDoor(connectDirs[randomIndex]));
+            thiefAI.read_AStarSystem.ConstructionRoute(currentRoom.GetDirectionWallToDoor(connectDirs[randomIndex]), false);
         }
         else
         {
@@ -829,7 +829,7 @@ public class CS_MemorySystem
             }
 
             // ドアの位置を最終目的位置としてルートを構築
-            thiefAI.read_AStarSystem.ConstructionRoute(targetDoorPos);
+            thiefAI.read_AStarSystem.ConstructionRoute(targetDoorPos, false);
         }
     }
 
