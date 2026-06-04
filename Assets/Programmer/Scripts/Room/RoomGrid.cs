@@ -27,6 +27,7 @@ public class RoomGrid : MonoBehaviour
         [Header("南東")] SouthEast,  // 南東
     }
     [Header("グリッドの原点(ここを[0,0]とし、溢れ判定を行う)")][SerializeField] private GridOrigin gridOrigin = GridOrigin.NorthWest;
+    [Header("床に使用するマテリアルの候補")][SerializeField] private Material[] floorMaterials;
 
     void Start()
     {
@@ -38,6 +39,20 @@ public class RoomGrid : MonoBehaviour
             for (int j = 0 ; j < gridDivision.x ; j++)
             {
                 gridGimmicks[i].Add(null);
+            }
+        }
+        List<GameObject> floors = new List<GameObject>();
+
+        foreach (Transform child in transform)
+        {
+            if (!child.gameObject.name.Contains("Floor")) continue;
+            floors.Add(child.gameObject);
+
+            // 床のマテリアルをランダムに変更する
+            if (floorMaterials.Length > 0)
+            {
+                Material randomMaterial = floorMaterials[UnityEngine.Random.Range(0, floorMaterials.Length)];
+                child.GetComponent<Renderer>().material = randomMaterial;
             }
         }
 
@@ -52,20 +67,17 @@ public class RoomGrid : MonoBehaviour
         
         Vector3 center = Vector3.zero;
         int floorCount = 0;
-        foreach (Transform child in transform)
+        foreach (GameObject child in floors)
         {
-            if (!child.gameObject.name.Contains("Floor")) continue;
-            center += child.position;
+            center += child.transform.position;
             floorCount++;
         }
         center /= floorCount;
 
         // Floorの座標から3*3グリッドに変換
-        foreach (Transform child in transform)
+        foreach (GameObject child in floors)
         {
-            if (!child.gameObject.name.Contains("Floor")) continue; // Floorオブジェクトのみ探索する
-
-            Vector3 childPos = child.position; // 床から見た相対座標
+            Vector3 childPos = child.transform.position; // 床から見た相対座標
 
             // 左右前後の座標を計算
             float left = center.x - gridDivision.x / 2.0f;
@@ -102,7 +114,7 @@ public class RoomGrid : MonoBehaviour
             int x = Mathf.FloorToInt(fX / gridCellNumX);
             int z = Mathf.FloorToInt(fZ / gridCellNumY);
 
-            gridObjects[z, x] = child.gameObject;
+            gridObjects[z, x] = child;
         }
 
         // それぞれどれだけ溢れているかチェックする
