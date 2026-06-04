@@ -28,7 +28,7 @@ public class RoomGrid : MonoBehaviour
     }
     [Header("グリッドの原点(ここを[0,0]とし、溢れ判定を行う)")][SerializeField] private GridOrigin gridOrigin = GridOrigin.NorthWest;
     [Header("床に使用するマテリアルの候補")][SerializeField] private Material[] floorMaterials;
-
+    
     void Start()
     {
         // グリッド上のギミック情報を初期化
@@ -207,7 +207,8 @@ public class RoomGrid : MonoBehaviour
         ray.direction = Vector3.down;
         const float rayOriginY = 255f;
         ray.origin = new Vector3(spawnPos.x, rayOriginY, spawnPos.z);
-        RaycastHit[] hits = Physics.RaycastAll(ray, Mathf.Abs(rayOriginY - gameObject.transform.position.y), ~0,
+        // 床を確実に取れるようマージンを大きめに取りレイを飛ばす
+        RaycastHit[] hits = Physics.RaycastAll(ray, Mathf.Abs(rayOriginY - (gameObject.transform.position.y - 10.0f)), ~0,
             QueryTriggerInteraction.Ignore);
         Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
         GameObject hitObject = null;
