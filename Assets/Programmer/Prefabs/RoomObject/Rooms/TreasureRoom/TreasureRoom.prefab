@@ -944,6 +944,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gridDivision: {x: 9, y: 6}
   gridOrigin: 3
+  floorMaterials:
+  - {fileID: 2100000, guid: d855334199bca864fa48d2b712994899, type: 2}
+  - {fileID: 2100000, guid: 6062e2b38c1ec194b984d6931ba75261, type: 2}
 --- !u!1 &3808973247350665630
 GameObject:
   m_ObjectHideFlags: 0
@@ -2500,21 +2503,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 6500413884930132495}
     m_Modifications:
-    - target: {fileID: 203667968174516033, guid: 79104f3d30b05704e8fd57fe7aa58db9,
-        type: 3}
-      propertyPath: m_Materials.Array.data[0]
-      value: 
-      objectReference: {fileID: 2100000, guid: 23cbefbb85f4d5641a2cc5dfa309af50, type: 2}
-    - target: {fileID: 1340029988337163310, guid: 79104f3d30b05704e8fd57fe7aa58db9,
-        type: 3}
-      propertyPath: m_LocalScale.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1340029988337163310, guid: 79104f3d30b05704e8fd57fe7aa58db9,
-        type: 3}
-      propertyPath: m_LocalScale.z
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 1340029988337163310, guid: 79104f3d30b05704e8fd57fe7aa58db9,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -2569,11 +2557,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Floor
-      objectReference: {fileID: 0}
-    - target: {fileID: 1860952567765616276, guid: 79104f3d30b05704e8fd57fe7aa58db9,
-        type: 3}
-      propertyPath: m_TagString
-      value: Plane
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2974,21 +2957,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 6500413884930132495}
     m_Modifications:
-    - target: {fileID: 203667968174516033, guid: 79104f3d30b05704e8fd57fe7aa58db9,
-        type: 3}
-      propertyPath: m_Materials.Array.data[0]
-      value: 
-      objectReference: {fileID: 2100000, guid: 23cbefbb85f4d5641a2cc5dfa309af50, type: 2}
-    - target: {fileID: 1340029988337163310, guid: 79104f3d30b05704e8fd57fe7aa58db9,
-        type: 3}
-      propertyPath: m_LocalScale.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1340029988337163310, guid: 79104f3d30b05704e8fd57fe7aa58db9,
-        type: 3}
-      propertyPath: m_LocalScale.z
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 1340029988337163310, guid: 79104f3d30b05704e8fd57fe7aa58db9,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -3044,11 +3012,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Floor (5)
       objectReference: {fileID: 0}
-    - target: {fileID: 1860952567765616276, guid: 79104f3d30b05704e8fd57fe7aa58db9,
-        type: 3}
-      propertyPath: m_TagString
-      value: Plane
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -3068,21 +3031,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 6500413884930132495}
     m_Modifications:
-    - target: {fileID: 203667968174516033, guid: 79104f3d30b05704e8fd57fe7aa58db9,
-        type: 3}
-      propertyPath: m_Materials.Array.data[0]
-      value: 
-      objectReference: {fileID: 2100000, guid: 23cbefbb85f4d5641a2cc5dfa309af50, type: 2}
-    - target: {fileID: 1340029988337163310, guid: 79104f3d30b05704e8fd57fe7aa58db9,
-        type: 3}
-      propertyPath: m_LocalScale.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1340029988337163310, guid: 79104f3d30b05704e8fd57fe7aa58db9,
-        type: 3}
-      propertyPath: m_LocalScale.z
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 1340029988337163310, guid: 79104f3d30b05704e8fd57fe7aa58db9,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -3137,11 +3085,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Floor (2)
-      objectReference: {fileID: 0}
-    - target: {fileID: 1860952567765616276, guid: 79104f3d30b05704e8fd57fe7aa58db9,
-        type: 3}
-      propertyPath: m_TagString
-      value: Plane
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -3320,21 +3263,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 6500413884930132495}
     m_Modifications:
-    - target: {fileID: 203667968174516033, guid: 79104f3d30b05704e8fd57fe7aa58db9,
-        type: 3}
-      propertyPath: m_Materials.Array.data[0]
-      value: 
-      objectReference: {fileID: 2100000, guid: 23cbefbb85f4d5641a2cc5dfa309af50, type: 2}
-    - target: {fileID: 1340029988337163310, guid: 79104f3d30b05704e8fd57fe7aa58db9,
-        type: 3}
-      propertyPath: m_LocalScale.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1340029988337163310, guid: 79104f3d30b05704e8fd57fe7aa58db9,
-        type: 3}
-      propertyPath: m_LocalScale.z
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 1340029988337163310, guid: 79104f3d30b05704e8fd57fe7aa58db9,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -3389,11 +3317,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Floor (4)
-      objectReference: {fileID: 0}
-    - target: {fileID: 1860952567765616276, guid: 79104f3d30b05704e8fd57fe7aa58db9,
-        type: 3}
-      propertyPath: m_TagString
-      value: Plane
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -3587,21 +3510,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 6500413884930132495}
     m_Modifications:
-    - target: {fileID: 203667968174516033, guid: 79104f3d30b05704e8fd57fe7aa58db9,
-        type: 3}
-      propertyPath: m_Materials.Array.data[0]
-      value: 
-      objectReference: {fileID: 2100000, guid: 23cbefbb85f4d5641a2cc5dfa309af50, type: 2}
-    - target: {fileID: 1340029988337163310, guid: 79104f3d30b05704e8fd57fe7aa58db9,
-        type: 3}
-      propertyPath: m_LocalScale.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1340029988337163310, guid: 79104f3d30b05704e8fd57fe7aa58db9,
-        type: 3}
-      propertyPath: m_LocalScale.z
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 1340029988337163310, guid: 79104f3d30b05704e8fd57fe7aa58db9,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -3656,11 +3564,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Floor (1)
-      objectReference: {fileID: 0}
-    - target: {fileID: 1860952567765616276, guid: 79104f3d30b05704e8fd57fe7aa58db9,
-        type: 3}
-      propertyPath: m_TagString
-      value: Plane
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -3760,21 +3663,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 6500413884930132495}
     m_Modifications:
-    - target: {fileID: 203667968174516033, guid: 79104f3d30b05704e8fd57fe7aa58db9,
-        type: 3}
-      propertyPath: m_Materials.Array.data[0]
-      value: 
-      objectReference: {fileID: 2100000, guid: 23cbefbb85f4d5641a2cc5dfa309af50, type: 2}
-    - target: {fileID: 1340029988337163310, guid: 79104f3d30b05704e8fd57fe7aa58db9,
-        type: 3}
-      propertyPath: m_LocalScale.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1340029988337163310, guid: 79104f3d30b05704e8fd57fe7aa58db9,
-        type: 3}
-      propertyPath: m_LocalScale.z
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 1340029988337163310, guid: 79104f3d30b05704e8fd57fe7aa58db9,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -3829,11 +3717,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Floor (3)
-      objectReference: {fileID: 0}
-    - target: {fileID: 1860952567765616276, guid: 79104f3d30b05704e8fd57fe7aa58db9,
-        type: 3}
-      propertyPath: m_TagString
-      value: Plane
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
