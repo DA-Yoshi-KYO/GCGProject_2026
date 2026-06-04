@@ -8,7 +8,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CS_GameFailure : MonoBehaviour
+public class CS_GameFailureSelectButton : MonoBehaviour
 {
     [Header("ボタンのリスト（左から順に格納してください）")][SerializeField] private GameObject[] buttonList;
     [Header("リトライのボタン画像")][SerializeField] private Sprite[] retryButtonSprite;
@@ -21,6 +21,8 @@ public class CS_GameFailure : MonoBehaviour
 
     private CustomInputAction inputActions;
     private int currentButton = 0;
+
+    [Header("フェード処理があるCanvasを格納")][SerializeField]private CS_SceneTransition sceneTransition;
 
     // Start is called before the first frame update
     void Start()
@@ -46,8 +48,6 @@ public class CS_GameFailure : MonoBehaviour
             {
                 currentButton = backTitleButtonSprite.Length - 1;
             }
-            retryButtonImage.sprite = retryButtonSprite[currentButton];
-            backTitleButtonImage.sprite = backTitleButtonSprite[currentButton];
         }
 
         if (inputActions.GameOver.MoveRight.triggered)
@@ -57,15 +57,16 @@ public class CS_GameFailure : MonoBehaviour
             {
                 currentButton = 0;
             }
-            retryButtonImage.sprite = retryButtonSprite[currentButton];
-            backTitleButtonImage.sprite = backTitleButtonSprite[currentButton];
         }
+
+        retryButtonImage.sprite = retryButtonSprite[currentButton];
+        backTitleButtonImage.sprite = backTitleButtonSprite[currentButton];
 
         //決定ボタンでシーン遷移
         if (inputActions.GameOver.Decision.triggered)
         {
             string sceneName = sceneTransitionName[currentButton];
-            GetComponent<CS_SceneTransition>().StartSceneTransition(sceneName);
+            sceneTransition.StartSceneTransition(sceneName);
         }
     }
 
