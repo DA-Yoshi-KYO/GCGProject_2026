@@ -10,7 +10,6 @@
 
 using UnityEngine;
 using System.Collections.Generic;
-using static UnityEngine.Rendering.DebugUI;
 
 public class GimmickManager : MonoBehaviour
 {
@@ -237,12 +236,12 @@ public class GimmickManager : MonoBehaviour
             switch(other.gameObject.name)
             {
                 case "ItemPot":
-                    AddHaveGimmick(Gimmick.Pot);
+                    AddCurrentGimmick(Gimmick.Pot);
                     Destroy(other.gameObject);
                     Debug.Log("PotHaveAdd: " + gimmickInfo[Gimmick.Pot].maxNum);
                     break;
                 case "ItemRock":
-                    AddHaveGimmick(Gimmick.IronBall);
+                    AddCurrentGimmick(Gimmick.IronBall);
                     Destroy(other.gameObject);
                     Debug.Log("RockHaveAdd: " + gimmickInfo[Gimmick.IronBall].maxNum);
                     break;
@@ -338,7 +337,6 @@ public class GimmickManager : MonoBehaviour
         {
             Debug.LogError(
                 $"[GetCurrentNum Error] {gimmickTag} : 未登録");
-
             return 0;
         }
 
@@ -352,13 +350,31 @@ public class GimmickManager : MonoBehaviour
     //=========================================================
     // 所持数の変更
     //=========================================================
-    public void SetHaveGimmick(Gimmick gimmickTag, int Value)
-    {//ギミック所持数の最大値を設定
-        gimmickInfo[gimmickTag].maxNum = Value;
+    public void SetMaxGimmick(Gimmick gimmickTag, int value)
+    {//ギミックの最大値を設定
+        gimmickInfo[gimmickTag].maxNum = value;
     }
-    public void AddHaveGimmick(Gimmick gimmickTag)
-    {//ギミック所持数の最大値を増加
+    public void AddMaxGimmick(Gimmick gimmickTag)
+    {//ギミックの最大値を追加
         gimmickInfo[gimmickTag].maxNum++;
+    }
+    public void SetCurrentGimmick(Gimmick gimmickTag, int value)
+    {//ギミック所持数の設定
+        gimmickInfo[gimmickTag].currentNum = value;
+        //所持数が最大数を超えたら最大数を増やす
+        if(gimmickInfo[gimmickTag].maxNum < gimmickInfo[gimmickTag].currentNum)
+        {
+            gimmickInfo[gimmickTag].maxNum = gimmickInfo[gimmickTag].currentNum;
+        }
+    }
+    public void AddCurrentGimmick(Gimmick gimmickTag)
+    {//ギミック所持数の追加
+        gimmickInfo[gimmickTag].currentNum++;
+        //所持数が最大数を超えたら最大数を増やす
+        if (gimmickInfo[gimmickTag].maxNum < gimmickInfo[gimmickTag].currentNum)
+        {
+            gimmickInfo[gimmickTag].maxNum = gimmickInfo[gimmickTag].currentNum;
+        }
     }
 
     //=========================================================
