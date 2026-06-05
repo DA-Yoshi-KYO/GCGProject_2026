@@ -26,20 +26,14 @@ public class GimmickSelectUI : MonoBehaviour
     [Tooltip("左右スロットの幅・高さ（px）")]
     [SerializeField] private Vector2 sideSlotSize = new Vector2(60f, 60f);
 
-    [Header("情報テキスト")]
-    [SerializeField] private TextMeshProUGUI soulText;
-    [SerializeField] private TextMeshProUGUI modeBadgeText;
-    [SerializeField] private TextMeshProUGUI itemNameText;
-    [SerializeField] private TextMeshProUGUI itemCostText;
-    [SerializeField] private TextMeshProUGUI itemIndexText;
-
     [Header("ナビゲーションボタン")]
     [SerializeField] private Button btnLeft;
     [SerializeField] private Button btnRight;
 
+    [Header("所有数表示")]
+    [SerializeField] private TextMeshProUGUI Count;
+
     [Header("カラー設定")]
-    [SerializeField] private Color colorNormalMode = new Color(0.44f, 0.75f, 0.31f);
-    [SerializeField] private Color colorSettingMode = new Color(0.91f, 0.79f, 0.25f);
     [SerializeField] private Color colorSelected = new Color(0.95f, 0.82f, 0.28f);
     [SerializeField] private Color colorSide = new Color(0.55f, 0.47f, 0.25f);
 
@@ -73,22 +67,20 @@ public class GimmickSelectUI : MonoBehaviour
         }
 
         int idx = playerAction.currentGimmickIndex;
-        int soul = playerAction.currentSoul;
         bool isSetting = playerData.currentMode == CS_PlayerData.PlayerMode.Setting;
 
-        if (idx != cachedIndex || soul != cachedSoul || isSetting != cachedMode)
+        if (idx != cachedIndex ||isSetting != cachedMode)
         {
             cachedIndex = idx;
-            cachedSoul = soul;
             cachedMode = isSetting;
-            Refresh(idx, soul, isSetting);
+            Refresh(idx,isSetting);
         }
     }
 
     // ──────────────────────────────────────────
     //  全UI更新
     // ──────────────────────────────────────────
-    private void Refresh(int idx, int soul, bool isSetting)
+    private void Refresh(int idx,bool isSetting)
     {
         var list = playerAction.gimmickKind;
         int count = list.Count;
@@ -101,23 +93,6 @@ public class GimmickSelectUI : MonoBehaviour
         SetupSlot(slotCenter, list[idx], true);
         SetupSlot(slotRight, list[iRight], false);
 
-        // ソウル表示
-        if (soulText != null)
-            soulText.text = soul.ToString();
-
-        // モードバッジ
-        if (modeBadgeText != null)
-        {
-            modeBadgeText.text = isSetting ? "SettingMode" : "NormalMode";
-            modeBadgeText.color = isSetting ? colorSettingMode : colorNormalMode;
-        }
-
-        // 選択中アイテム情報
-        var gb = list[idx].GetComponent<GimmickBase>();
-        if (itemNameText != null)
-            itemNameText.text = gb != null ? gb.gimmick.ToString() : list[idx].name;
-        if (itemIndexText != null)
-            itemIndexText.text = $"{idx + 1} / {count}";
     }
 
     // ──────────────────────────────────────────
@@ -131,8 +106,6 @@ public class GimmickSelectUI : MonoBehaviour
         string name = gb != null ? gb.gimmick.ToString() : gimmickObj.name;
         int cost = 0;
 
-        // アイコンSprite：GimmickBase側にSpriteフィールドを追加するか、
-        // SpriteRenderer / UIの子Imageから取得する運用を推奨。
         slot.Setup(name, cost, gb.gimmickImage);
         slot.SetSelected(isSelected, colorSelected, colorSide);
     }
@@ -163,8 +136,7 @@ public class GimmickSelectUI : MonoBehaviour
     {
         if (playerAction == null) return;
         cachedIndex = playerAction.currentGimmickIndex;
-        cachedSoul = playerAction.currentSoul;
         cachedMode = playerData.currentMode == CS_PlayerData.PlayerMode.Setting;
-        Refresh(cachedIndex, cachedSoul, cachedMode);
+        Refresh(cachedIndex,cachedMode);
     }
 }

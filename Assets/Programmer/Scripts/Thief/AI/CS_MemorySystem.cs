@@ -4,7 +4,8 @@
  *    宇留野 陸斗
  * ----------------------------------------------------------
  * 2026-05-27 | 初回作成
- * 
+ * 2026-06-04 | 視認したオブジェクトを記憶する処理を作り変え
+ *            | プレイヤーを無視するフラグと、プレイヤーを追跡する残り時間の処理を追加
  */
 using System.Collections.Generic;
 using UnityEngine;
@@ -41,7 +42,12 @@ public class CS_MemorySystem
     [Tooltip("プレイヤーを追跡する残り時間")]
     private float remainingIgnorePlayerTime;
     [Tooltip("プレイヤーを追跡する残り時間の初期値")]
+
     private float initialRemainingIgnorePlayerTime;
+    [Tooltip("プレイヤーを発見する猶予時間")]
+    private float findPlayerGraceTime;
+    [Tooltip("プレイヤーを発見する猶予時間の初期値")]
+    private float initialFindPlayerGraceTime;
 
     [Tooltip("泥棒が探索するのにかかる秒数")]
     private List<int> searchTime;
@@ -66,168 +72,31 @@ public class CS_MemorySystem
     /// <param name="thiefAI">ThiefAIのメインスクリプト</param>
     /// <param name="entryRoom">最初の部屋の情報</param>
     /// <param name="entryPoint">最初の部屋の入ってきたドアの位置</param>
-    public CS_MemorySystem(CS_ThiefAI thiefAI, CS_RoomNode entryRoom, Transform entryPoint, CO_ThiefStatusData typedata)
+    public CS_MemorySystem(CS_ThiefAI thiefAI, CS_RoomNode entryRoom, Transform entryPoint, CO_ThiefStatusData typedata, CO_ThiefCommonStatusData data)
     {
         // ThiefAIのメインスクリプトを取得
         this.thiefAI = thiefAI;
         // 最初の部屋の情報を保存
-        this.firstRoom = entryRoom;
-        this.firstEntryPoint = entryPoint;
+        firstRoom = entryRoom;
+        firstEntryPoint = entryPoint;
 
         // プレイヤーを追跡する残り時間の初期値を設定
-        this.initialRemainingIgnorePlayerTime = typedata.pursuitTime;
-        this.remainingIgnorePlayerTime = typedata.pursuitTime;
+        initialRemainingIgnorePlayerTime = typedata.pursuitTime;
+        remainingIgnorePlayerTime = typedata.pursuitTime;
+
+        // プレイヤーを発見する猶予時間の初期値を設定
+        initialFindPlayerGraceTime = data.findPlayerGraceTime;
+        findPlayerGraceTime = 0.0f;
 
         // 次の部屋探索に切り替える探索度の閾値を設定
-        this.nextRoomSearchThreshold = typedata.nextRoomSearchThreshold;
+        nextRoomSearchThreshold = typedata.nextRoomSearchThreshold;
 
         // 探索対象の探索にかかる時間を設定
-        this.searchTime = typedata.searchTime;
+        searchTime = typedata.searchTime;
 
         // 記憶領域の作成
-        this.roomMemories = new Dictionary<CS_RoomNode, CS_RoomMemory>();
-        this.visionTargetMemories = new Dictionary<CS_VisionTarget, CS_VisionTargetMemory>();
-    }
-
-    /// <summary>
-    /// 部屋のオブジェクトを視認して記憶に保存する処理
-    /// </summary>
-    public void RecognizeObjects()
-    {
-        // 視界内オブジェクトを取得
-        List<CS_ThiefTarget> visionTargets = thiefAI.read_VisionSensor.Scan();
-
-        // 現在の部屋の記憶がない場合は新たに作成
-        if (roomMemories[currentRoom] == null)
-        {
-            roomMemories[currentRoom] = new CS_RoomMemory();
-            roomMemories[currentRoom].FirstSetting();
-        }
-
-        bool isPlayerInVision = false;
-        if (currentTarget is CS_PlayerTarget)
-        {
-            // 視認した中にプレイヤーがいない場合は、探索対象からプレイヤーを外す
-            foreach (CS_ThiefTarget target in visionTargets)
-            {
-                if (target is CS_PlayerTarget)
-                {
-                    isPlayerInVision = true;
-                    break;
-                }
-            }
-
-            // プレイヤーが視認できている場合は、プレイヤーを探索対象に設定し続ける
-            if (isPlayerInVision)
-            {
-                // 耐久値が1以上ある場合は、秒数であきらめる
-                if (thiefAI.read_Durability > 1)
-                {
-                    // 追跡する残り時間が0以下の場合は、プレイヤーを無視するフラグを立てる
-                    if (remainingIgnorePlayerTime <= 0.0f)
-                    {
-                        ignorePlayer = true;
-                        isPlayerInVision = false; // プレイヤーを無視するフラグを立てた場合は、プレイヤーが視認できていても、プレイヤーが視認できていない状態にする
-                        remainingIgnorePlayerTime = 0.0f;
-                        ClearTarget();
-                    }
-                    else remainingIgnorePlayerTime -= Time.deltaTime;
-                }
-            }
-            else
-            {
-                // 追跡時間が残っている場合
-                if (remainingIgnorePlayerTime > 0.0f)
-                {
-                    // 最大値まで回復させる
-                    remainingIgnorePlayerTime = initialRemainingIgnorePlayerTime;
-                }
-            }
-
-            if (!isPlayerInVision)
-            {
-                ClearTarget();
-                thiefAI.read_ThiefReaction.ClearReaction();
-            }
-            else
-            {
-                thiefAI.read_ThiefReaction.ChangeReaction(CS_ThiefReaction.ThiefReactionType.ChasingCat);
-                thiefAI.read_MoveSystem.MoveTo(currentTarget.transform.position);
-            }
-
-            return;
-        }
-
-        // 視認したオブジェクトを記憶に保存
-        foreach (CS_ThiefTarget target in visionTargets)
-        {
-            // 現在の部屋の記憶に認識しているオブジェクトのリストがない場合は新たに作成
-            if (roomMemories[currentRoom].recognizedObjects == null) roomMemories[currentRoom].recognizedObjects = new List<CS_ThiefTarget>();
-
-            bool isAlreadyRecognized = false; // 既に記憶しているオブジェクトかどうかを判定するフラグ
-            foreach (var entry in roomMemories[currentRoom].recognizedObjects)
-            {
-                // 既に記憶しているオブジェクトの場合はスキップ
-                if (entry == target) isAlreadyRecognized = true;
-            }
-            if (isAlreadyRecognized)
-            {
-                if (target is CS_VisionTarget)
-                {
-                    // 既に記憶しているオブジェクトが視認オブジェクト(VisionTarget)の場合は、探索している人がいるかどうかの情報を更新する
-                    if (visionTargetMemories.ContainsKey((CS_VisionTarget)target))
-                    {
-                        visionTargetMemories[((CS_VisionTarget)target)].searchThief = ((CS_VisionTarget)target).searchThief;
-                    }
-                }
-
-                continue;
-            }
-
-
-            if (target is CS_PlayerTarget)
-            {
-                // 耐久地が1以上あって、プレイヤーを無視するフラグが立っている場合は、プレイヤーを探索対象に設定しない
-                if (thiefAI.read_Durability > 1 && ignorePlayer)
-                {
-                    continue;
-                }
-
-                // 現在の探索対象が宝物である場合は、プレイヤーを探索対象に設定しない
-                if (currentTarget is CS_VisionTarget && ((CS_VisionTarget)currentTarget).targetType == CS_VisionTarget.TargetType.Treasure)
-                {
-                    continue;
-                }
-
-                // 現在の探索対象が空の宝箱型の罠である場合は、プレイヤーを探索対象に設定しない
-                if (currentTarget is CS_TrapTarget tt && tt.gimmickScript.gimmick == Gimmick.EmptyChest)
-                {
-                    continue;
-                }
-
-                // 今回初めてプレイヤーを視認した場合
-                if (!isPlayerInVision)
-                {
-                    // プレイヤーの追跡を開始した場合のSEを再生する
-                    if (thiefAI.read_ThiefSound != null)
-                    {
-                        thiefAI.read_ThiefSound.PlayOneShotSE("ThiefDiscover", thiefAI.gameObject.transform.position, "ThiefDiscover");
-                    }
-                }
-
-                currentTarget = target;
-                continue;
-            }
-
-            // 新しいオブジェクトを記憶に追加
-            roomMemories[currentRoom].recognizedObjects.Add(target);
-
-            // 記憶領域の作成
-            if (target is CS_VisionTarget) visionTargetMemories[((CS_VisionTarget)target)] = new CS_VisionTargetMemory();
-        }
-
-        // 新たに視認したオブジェクトを記憶に保存した後、探索対象を決定する処理を追加する
-        DecideTarget();
+        roomMemories = new Dictionary<CS_RoomNode, CS_RoomMemory>();
+        visionTargetMemories = new Dictionary<CS_VisionTarget, CS_VisionTargetMemory>();
     }
 
     /// <summary>
@@ -239,22 +108,449 @@ public class CS_MemorySystem
     private List<CS_ThiefTarget> GetUnExploredObjectsList()
     {
         List<CS_ThiefTarget> unexploredObjects = new List<CS_ThiefTarget>();
-        // 現在の部屋の記憶がない場合や、認識しているオブジェクトがない場合は、未探索のオブジェクトがないと判定して空のリストを返す
-        if (roomMemories[currentRoom] == null || roomMemories[currentRoom].recognizedObjects == null) return unexploredObjects;
-        // 視認しているオブジェクトの中から未探索のもののみをリストに追加する
-        foreach (var entry in roomMemories[currentRoom].recognizedObjects)
+
+        // currentRoom の記憶が存在しない場合は空を返す
+        if (currentRoom == null) return unexploredObjects;
+
+        // currentRoom の記憶が存在しない、もしくは currentRoom の記憶が破棄されている場合は空を返す
+        CS_RoomMemory roomMemory;
+        if (!roomMemories.TryGetValue(currentRoom, out roomMemory) || roomMemory == null || roomMemory.recognizedObjects == null)
         {
+            return unexploredObjects;
+        }
+
+        // 視認しているオブジェクトの中から未探索のもののみをリストに追加する
+        foreach (var entry in roomMemory.recognizedObjects)
+        {
+            var vt = entry as CS_VisionTarget;
+            if (vt == null) continue;
+
+            CS_VisionTargetMemory vtMemory;
+            if (!visionTargetMemories.TryGetValue(vt, out vtMemory) || vtMemory == null)
+            {
+                // 記憶が作られていない（or破棄済み）場合はここで作成しておく
+                vtMemory = new CS_VisionTargetMemory();
+                visionTargetMemories[vt] = vtMemory;
+            }
+
             // 未探索オブジェクト
-            if (!visionTargetMemories[((CS_VisionTarget)entry)].isExplored)
+            if (!vtMemory.isExplored)
             {
                 // 探索している人がいない場合や、探索している人が自分である場合は、未探索のオブジェクトとしてリストに追加する
-                if (visionTargetMemories[((CS_VisionTarget)entry)].searchThief == null || visionTargetMemories[((CS_VisionTarget)entry)].searchThief == thiefAI.gameObject)
+                if (vtMemory.searchThief == null || vtMemory.searchThief == thiefAI.gameObject)
                 {
                     unexploredObjects.Add(entry);
                 }
             }
         }
+
         return unexploredObjects;
+    }
+
+    /// <summary>
+    /// 部屋のオブジェクトを視認して記憶に保存する処理
+    /// </summary>
+    public void RecognizeObjects()
+    {
+        // 視界内オブジェクトを取得
+        List<CS_ThiefTarget> visionTargets = thiefAI.read_VisionSensor.Scan();
+
+        // 現在の部屋の記憶がない場合は新たに作成
+        CS_RoomMemory roomMemory;
+        // 現在の部屋の記憶がない、もしくは現在の部屋の記憶が破棄されている場合は、新たに作成して保存する
+        if (!roomMemories.TryGetValue(currentRoom, out roomMemory) || roomMemory == null)
+        {
+            roomMemory = new CS_RoomMemory();
+            roomMemory.FirstSetting();
+            roomMemories[currentRoom] = roomMemory;
+        }
+
+        bool isTreasureObject = false;  // 視界内に宝物があるかどうかを判定するフラグ
+        bool isPlayerObject = false;    // 視界内にプレイヤーがいるかどうかを判定するフラグ
+
+        // 視界内オブジェクトを記憶に保存
+        foreach (var entry in visionTargets)
+        {
+            // プレイヤーオブジェクトの場合
+            if (entry is CS_PlayerTarget)
+            {
+                // プレイヤー視認フラグを立てる
+                isPlayerObject = true;
+                continue;
+            }
+
+            // 気絶した泥棒のオブジェクトの場合
+            if (entry is CS_StunThiefTarget)
+            {
+                // そのオブジェクトの危険ゾーンを回避ゾーンとして記憶する
+                AddAvoidZoneID(((CS_StunThiefTarget)entry).read_DangerZone.ZoneID);
+                // 移動システムに回避ゾーンを設定する
+                thiefAI.read_MoveSystem.read_SmartNavAgent.SetAvoidZoneIDs(avoidZoneIDs.ToArray());
+                // 移動システムを再構築する
+                thiefAI.read_MoveSystem.read_SmartNavAgent.RefreshPath();
+
+                continue;
+            }
+
+            // 空の宝箱のオブジェクトの場合は、宝物オブジェクトがあるフラグを立てる
+            if (entry is CS_TrapTarget trap && trap.gimmickScript.gimmick == Gimmick.EmptyChest) isTreasureObject = true;
+
+            // 視認オブジェクト(VisionTarget)でない場合は、スキップする
+            if (!(entry is CS_VisionTarget)) continue;
+
+            // 視界内に宝物がある場合は、isTreasureObjectをtrueにする
+            if (((CS_VisionTarget)entry).targetType == CS_VisionTarget.TargetType.Treasure)isTreasureObject = true;
+
+            // 現在の部屋の認識しているオブジェクトのリストがない場合は、新たに作成する
+            if (roomMemory.recognizedObjects == null) roomMemory.recognizedObjects = new List<CS_ThiefTarget>();
+
+            //すでに記憶しているオブジェクトの場合
+            if (roomMemory.recognizedObjects.Contains(entry))
+            {
+                var vt = entry as CS_VisionTarget;
+                if (vt != null)
+                {
+                    // すでに記憶しているオブジェクトが視認オブジェクトの場合は、そのオブジェクトの記憶を取得する
+                    CS_VisionTargetMemory vtMemory;
+                    if (!visionTargetMemories.TryGetValue(vt, out vtMemory) || vtMemory == null)
+                    {
+                        vtMemory = new CS_VisionTargetMemory();
+                        visionTargetMemories[vt] = vtMemory;
+                    }
+
+                    // 探索している人を更新する
+                    vtMemory.searchThief = vt.searchThief;
+                }
+
+                // スキップする
+                continue;
+            }
+
+            // 記憶に保存する
+            roomMemory.recognizedObjects.Add(entry);
+
+            // 視認オブジェクトの記憶も作成しておく
+            var newVt = entry as CS_VisionTarget;
+            if (newVt != null)
+            {
+                CS_VisionTargetMemory vtMemory;
+                // 記憶が作られていない（or破棄済み）場合はここで作成しておく
+                if (!visionTargetMemories.TryGetValue(newVt, out vtMemory) || vtMemory == null)
+                {
+                    vtMemory = new CS_VisionTargetMemory();
+                    visionTargetMemories[newVt] = vtMemory;
+                }
+            }
+        }
+
+        // 探索対象を決める処理
+        DecideTarget(visionTargets, isTreasureObject, isPlayerObject);
+    }
+
+    /// <summary>
+    /// 探索対象を決める処理
+    /// </summary>
+    private void DecideTarget(List<CS_ThiefTarget> visionTargets, bool isTreasureObject, bool isPlayerObject)
+    {
+        // 現在の探索対象との距離
+        float currrentTargetDistance = Mathf.Infinity;
+
+        // 現在の探索対象が視認オブジェクトで、かつその探索している人が自分でない場合は、探索対象をリセットする
+        if (currentTarget is CS_VisionTarget vt && !CanTarget(vt))
+        {
+            currentTarget = null;
+        }
+
+        // 現在の探索対象がある場合は、現在の探索対象との距離を計算する
+        if (currentTarget != null) currrentTargetDistance = Vector3.Distance(thiefAI.transform.position, currentTarget.transform.position);
+
+        //ーーーーーーーーーーーーーーーーーーーーーーーー
+        //--- 宝箱を視認している場合
+        //ーーーーーーーーーーーーーーーーーーーーーーーー
+        if (isTreasureObject)
+        {
+            // 視認したオブジェクトを走査
+            foreach (var entry in visionTargets)
+            {
+                // 現在の探索対象の場合はスキップする
+                if (entry == currentTarget) continue;
+
+                // 宝物オブジェクトの場合
+                //  or 空の宝箱罠の場合
+                if ((entry is CS_VisionTarget visionTarget && visionTarget.targetType == CS_VisionTarget.TargetType.Treasure)
+                    || (entry is CS_TrapTarget trapTarget && trapTarget.gimmickScript.gimmick == Gimmick.EmptyChest))
+                {
+                    // VisionTargetで、他人が探索中なら対象にしない
+                    var entryVt = entry as CS_VisionTarget;
+                    if (entryVt != null && !CanTarget(entryVt))
+                    {
+                        continue;
+                    }
+
+                    // 現在の探索対象との距離よりも近い場合は、そのオブジェクトを探索対象に設定する
+                    float distance = Vector3.Distance(thiefAI.transform.position, entry.transform.position);
+                    if (distance < currrentTargetDistance)
+                    {
+                        currrentTargetDistance = distance;
+                        SetTarget(entry);
+                        continue;
+                    }
+                }
+            }
+
+            thiefAI.read_MoveSystem.UpdateMoveSpeed(currentTarget);
+            thiefAI.read_MoveSystem.MoveTo(currentTarget.transform.position);
+
+            // 宝物を探索対象に設定した後は、A*システムのルートをクリアする
+            if (thiefAI.read_AStarSystem.HasRoute) thiefAI.read_AStarSystem.ClearRoute();
+
+            return;
+        }
+
+        //ーーーーーーーーーーーーーーーーーーーーーーーー
+        //--- プレイヤーを視認している場合
+        //ーーーーーーーーーーーーーーーーーーーーーーーー
+        if (isPlayerObject)
+        {
+            CS_PlayerTarget playerTarget = null;
+            // 視認したオブジェクトを走査
+            foreach (var entry in visionTargets)
+            {
+                // プレイヤーオブジェクトの場合
+                if (entry is CS_PlayerTarget)
+                {
+                    playerTarget = (CS_PlayerTarget)entry;
+                    break;
+                }
+            }
+
+            // 現在の耐久値が1以下の場合
+            if (thiefAI.read_Durability <= 1)
+            {
+                // 探索対象に設定
+                currentTarget = playerTarget;
+
+                thiefAI.read_MoveSystem.UpdateMoveSpeed(currentTarget);
+                thiefAI.read_MoveSystem.MoveTo(currentTarget.transform.position);
+            }
+            else
+            {
+                // プレイヤーを無視するフラグが立っていない場合は、探索対象に設定する
+                if (!ignorePlayer)
+                {
+                    //　無敵状態ではないときは、プレイヤーを無視する
+                    if (thiefAI.read_RemainingInvincibleTime <= 0) return;
+
+                    currentTarget = playerTarget;
+                    thiefAI.read_MoveSystem.UpdateMoveSpeed(currentTarget);
+                    thiefAI.read_MoveSystem.MoveTo(currentTarget.transform.position);
+                }
+            }
+
+            // プレイヤーを探索対象に設定した後は、A*システムのルートをクリアする
+            if (thiefAI.read_AStarSystem.HasRoute) thiefAI.read_AStarSystem.ClearRoute();
+
+            return;
+        }
+        // プレイヤーを視認していない場合
+        else
+        {
+            // 追跡のリアクションをクリアする
+            thiefAI.read_ThiefReaction.ClearReactionByType(CS_ThiefReaction.ThiefReactionType.ChasingCat);
+
+            // 現在の探索対象がプレイヤーの場合は、探索対象をリセットする
+            if (currentTarget is CS_PlayerTarget) ClearTarget();
+
+        }
+
+        //ーーーーーーーーーーーーーーーーーーーーーーーー
+        //--- 音に反応している場合
+        //ーーーーーーーーーーーーーーーーーーーーーーーー
+        if (thiefAI.read_HearingSystem.read_IsReactingToSound)
+        {
+            // 現在の探索対象をリセット
+            currentTarget = null;
+
+            // 音に反応しているオブジェクトを探索対象に設定する
+            thiefAI.read_MoveSystem.MoveTo(thiefAI.read_HearingSystem.read_SoundReactionPosition);
+
+            return;
+        }
+
+        //ーーーーーーーーーーーーーーーーーーーーーーーー
+        //--- 未探索の記憶オブジェクトがある場合
+        //ーーーーーーーーーーーーーーーーーーーーーーーー
+        List<CS_ThiefTarget> unexploredObjects = GetUnExploredObjectsList();
+        if (unexploredObjects.Count > 0)
+        {
+            // 未探索の記憶オブジェクトの中で最も近いものを探索対象に設定する
+            foreach (var entry in unexploredObjects)
+            {
+                // 念のため：未探索リスト側で漏れてもここで弾く
+                var entryVt = entry as CS_VisionTarget;
+                if (entryVt != null && !CanTarget(entryVt))
+                {
+                    continue;
+                }
+
+                float distance = Vector3.Distance(thiefAI.transform.position, entry.transform.position);
+                if (distance < currrentTargetDistance)
+                {
+                    currrentTargetDistance = distance;
+                    SetTarget(entry);
+                    thiefAI.read_MoveSystem.UpdateMoveSpeed(currentTarget);
+                    thiefAI.read_MoveSystem.MoveTo(currentTarget.transform.position);
+                    continue;
+                }
+            }
+
+            return;
+        }
+
+        //ーーーーーーーーーーーーーーーーーーーーーーーー
+        //--- 部屋の移動ポイントを探索対象にする処理
+        //ーーーーーーーーーーーーーーーーーーーーーーーー
+        DecideTargetMovePoint();
+    }
+
+    /// <summary>
+    /// 現在の探索対象に対して、探索が完了しているかどうかを判定する処理
+    /// </summary>
+    public void EvaluateCurrentTarget()
+    {
+        float distanceToTarget = Mathf.Infinity;
+
+        // 現在の探索対象がある場合
+        if (currentTarget != null)
+        {
+            distanceToTarget = Vector3.Distance(thiefAI.transform.position, currentTarget.transform.position);
+
+            // 視認オブジェクトの場合
+            if (currentTarget is CS_VisionTarget)
+            {
+                // 探索対象との距離が、探索済みとする距離の閾値以下になっている場合
+                if (distanceToTarget <= ((CS_VisionTarget)currentTarget).exploredDistanceThreshold)
+                {
+                    // 探索対象の探索している人を自分に設定する
+                    visionTargetMemories[((CS_VisionTarget)currentTarget)].searchThief = thiefAI.gameObject;
+                    (( CS_VisionTarget)currentTarget).searchThief = thiefAI.gameObject;
+
+                    // 泥棒のリアクションを探索に変更する
+                    thiefAI.read_ThiefReaction.ChangeReaction(CS_ThiefReaction.ThiefReactionType.Searching);
+
+                    // 探索対象の探索にかかる時間を経過させる
+                    if (ProgressTargetSearchTime())
+                    {
+                        // 完了した探索対象が宝物の場合
+                        if (((CS_VisionTarget)currentTarget).targetType == CS_VisionTarget.TargetType.Treasure)
+                        {
+                            // 泥棒の状態をFoundに変更する
+                            thiefAI.ChangeStatus(CS_ThiefAI.ThiefState.Found);
+                        }
+                        else ClearTarget();
+                    }
+                }
+                else
+                {
+                    // 探索対象との距離が、探索済みとする距離の閾値よりも大きい場合は、探索度をリセットする
+                    ResetCurrentTargetExplorationProgress();
+                }
+            }
+            // プレイヤーの場合
+            else if (currentTarget is CS_PlayerTarget)
+            {
+                // 常にプレイヤーの方を向くように回転させる
+                thiefAI.transform.LookAt(new Vector3(currentTarget.transform.position.x, thiefAI.transform.position.y, currentTarget.transform.position.z));
+
+                // 現在の耐久値が1より大きい場合
+                if (thiefAI.read_Durability > 1)
+                {
+                    remainingIgnorePlayerTime -= Time.deltaTime;
+                    if (remainingIgnorePlayerTime <= 0)
+                    {
+                        ignorePlayer = true;
+                        remainingIgnorePlayerTime = 0;
+                        ClearTarget();
+                        return;
+                    }
+                }
+
+                // 泥棒のリアクションを追跡に変更する
+                thiefAI.read_ThiefReaction.ChangeReaction(CS_ThiefReaction.ThiefReactionType.ChasingCat);
+
+                // 探索対象との距離が、探索済みとする距離の閾値以下になっている場合は、探索対象をリセットする
+                if (distanceToTarget <= thiefAI.read_ExploredDistanceThreshold)
+                {
+                    // CS_PlayerMoveに通知
+                    ((CS_PlayerTarget)currentTarget).transform.GetComponent<CS_PlayerMove>().CaughtByThief();
+
+                    thiefAI.CatchCat();
+
+                    ClearTarget();
+                    return;
+                }
+            }
+            // 部屋の移動ポイントの場合
+            else if (currentTarget is CS_ThiefTarget)
+            {
+                if (Vector3.Distance(thiefAI.transform.position, currentTarget.transform.position) > thiefAI.read_ExploredDistanceThresholdMovePoint)
+                {
+                    return;
+                }
+
+                // 現在の移動ポイントがリストのどこにあるかを判定
+                for (int i = 0 ; i < currentRoom.movePoints.Count ; i++)
+                {
+                    // 現在の移動ポイントがリストのどこにあるかを判定
+                    if (currentRoom.movePoints[i] == currentTarget)
+                    {
+                        int nextIndex = 0;
+
+                        // 右回りの場合
+                        if (currentRoom.isListDown)
+                        {
+                            // 次のインデックスを計算
+                            nextIndex = i + 1;
+
+                            // インデックスがリストの範囲を超える場合は、リストの先頭に戻す
+                            if (nextIndex >= currentRoom.movePoints.Count) nextIndex = 0;
+
+                            // リストを加算して次の移動ポイントを探索対象に設定
+                            currentTarget = currentRoom.movePoints[nextIndex];
+                        }
+                        // 左回りの場合
+                        else
+                        {
+                            // 次のインデックスを計算
+                            nextIndex = i - 1;
+
+                            // インデックスがリストの範囲を超える場合は、リストの末尾に戻す
+                            if (nextIndex < 0) nextIndex = currentRoom.movePoints.Count - 1;
+
+                            // リストを減算して次の移動ポイントを探索対象に設定
+                            currentTarget = currentRoom.movePoints[nextIndex];
+                        }
+                        thiefAI.read_MoveSystem.UpdateMoveSpeed(currentTarget);
+                        thiefAI.read_MoveSystem.MoveTo(currentTarget.transform.position);
+                        break;
+                    }
+                }
+            }
+        }
+        // 現在の探索対象がない場合
+        else
+        {
+            // 音に反応している場合
+            if (thiefAI.read_HearingSystem.read_IsReactingToSound)
+            {
+                // 泥棒のリアクションを警戒に変更する
+                thiefAI.read_ThiefReaction.ChangeReaction(CS_ThiefReaction.ThiefReactionType.Alert);
+
+                // 音に反応している位置との距離が、探索済みとする距離の閾値以下になっている場合は、その位置を探索対象に設定する
+                if (!thiefAI.read_HearingSystem.IsAtSoundReactionPosition(thiefAI.read_ExploredDistanceThreshold)) return;
+            }
+            else thiefAI.read_ThiefReaction.ClearReactionByType(CS_ThiefReaction.ThiefReactionType.Alert);
+        }
     }
 
     /// <summary>
@@ -286,164 +582,17 @@ public class CS_MemorySystem
     }
 
     /// <summary>
-    /// 探索対象を決める処理
-    /// </summary>
-    private void DecideTarget()
-    {
-        // 音に反応している場合は、探索対象を決めない
-        if (thiefAI.read_HearingSystem.read_IsReactingToSound) return;
-
-        // 未探索のオブジェクトのみを格納したリストを取得する
-        List<CS_ThiefTarget> unexploredObjects = GetUnExploredObjectsList();
-
-        // 未探索のオブジェクトがない場合は、部屋の移動ルートに沿って移動する処理を追加する
-        if (unexploredObjects.Count == 0)
-        {
-            // 移動ルートを構築している場合は、探索対象を決めない
-            if (thiefAI.read_AStarSystem.HasRoute) return;
-            // 現在の追跡対象がプレイヤーの場合は、探索対象を決めない
-            if (currentTarget is CS_PlayerTarget) return;
-
-            DecideTargetMovePoint();
-        }
-        else
-        {
-            // 探索対象との距離
-            float distanceToTarget = Mathf.Infinity;
-
-            // 標的を変更したかどうかを判定するフラグ
-            bool isChangeTarget = false;
-
-            if (currentTarget != null)
-            {
-                distanceToTarget = Vector3.Distance(thiefAI.transform.position, currentTarget.transform.position);
-            }
-
-            // 未探索のオブジェクトがある場合は、未探索のオブジェクトを優先して探索対象に設定
-            foreach (var entry in unexploredObjects)
-            {
-                // 現在の探索対象が視認オブジェクト(VisionTarget)かどうか
-                if (entry is CS_VisionTarget)
-                {
-                    // 探索対象の優先順位を決めるロジック
-                    switch (((CS_VisionTarget)entry).targetType)
-                    {
-                        case CS_VisionTarget.TargetType.Treasure:
-                            {
-                                if (currentTarget is CS_VisionTarget)
-                                {
-                                    // 現在の探索対象が宝物でない場合は、問答無用で宝物を探索対象に設定
-                                    if (((CS_VisionTarget)currentTarget).targetType != CS_VisionTarget.TargetType.Treasure)
-                                    {
-                                        currentTarget = entry;
-                                        isChangeTarget = true;
-                                        break;
-                                    }
-                                    // 現在の探索対象も宝物の場合は、距離が近い方を探索対象に設定する
-                                    else
-                                    {
-                                        // オブジェクトとの距離を計算
-                                        float distance = Vector3.Distance(thiefAI.transform.position, entry.transform.position);
-
-                                        // より近いオブジェクトを探索対象に設定
-                                        if (distance < distanceToTarget)
-                                        {
-                                            distanceToTarget = distance;
-                                            currentTarget = entry;
-                                            isChangeTarget = true;
-                                        }
-                                        else continue;
-                                    }
-                                }
-                                else if (currentTarget is CS_TrapTarget)
-                                {
-
-                                    // 空の宝箱型の罠の場合ではない場合は、スキップ
-                                    if (entry is CS_TrapTarget tt && tt.gimmickScript.gimmick != Gimmick.EmptyChest) continue;
-
-                                    // 宝物罠の場合は、距離判定で探索対象を切り替える
-                                    // オブジェクトとの距離を計算
-                                    float distance = Vector3.Distance(thiefAI.transform.position, entry.transform.position);
-
-                                    // より近いオブジェクトを探索対象に設定
-                                    if (distance < distanceToTarget)
-                                    {
-                                        distanceToTarget = distance;
-                                        currentTarget = entry;
-                                        isChangeTarget = true;
-                                    }
-                                    else continue;
-                                }
-                                else
-                                {
-                                    // プレイヤーを探索対象にしている場合は、問答無用で宝物を探索対象に設定
-                                    currentTarget = entry;
-                                    isChangeTarget = true;
-                                }
-                            }
-                            break;
-                        case CS_VisionTarget.TargetType.Shelf:
-                            {
-                                // 現在の探索対象が宝物の場合は、スキップ
-                                if (currentTarget is CS_VisionTarget vt && vt.targetType == CS_VisionTarget.TargetType.Treasure) continue;
-                                // 現在の探索対象が空の宝箱型の罠の場合は、スキップ
-                                if (currentTarget is CS_TrapTarget tt && tt.gimmickScript.gimmick == Gimmick.EmptyChest) continue;
-                                // 現在の探索対象がプレイヤーの場合は、スキップ
-                                if (currentTarget is CS_PlayerTarget) continue;
-
-                                // オブジェクトとの距離を計算
-                                float distance = Vector3.Distance(thiefAI.transform.position, entry.transform.position);
-
-                                // より近いオブジェクトを探索対象に設定
-                                if (distance < distanceToTarget)
-                                {
-                                    distanceToTarget = distance;
-                                    currentTarget = entry;
-                                    isChangeTarget = true;
-                                }
-                                else continue;
-                            }
-                            break;
-                    }
-                }
-                else if (entry is CS_TrapTarget)
-                {
-                    // 宝物を探索対象にしている場合は、スキップ
-                    if (currentTarget is CS_VisionTarget vt && vt.targetType == CS_VisionTarget.TargetType.Treasure) continue;
-                    // 宝物の罠を探索対象にしている場合は、スキップ
-                    if (currentTarget is CS_TrapTarget tt && tt.gimmickScript.gimmick == Gimmick.EmptyChest) continue;
-
-                    // オブジェクトとの距離を計算
-                    float distance = Vector3.Distance(thiefAI.transform.position, entry.transform.position);
-                    // より近いオブジェクトを探索対象に設定
-                    if (distance < distanceToTarget)
-                    {
-                        distanceToTarget = distance;
-                        currentTarget = entry;
-                        isChangeTarget = true;
-                    }
-                    else continue;
-                }
-            }
-
-            // 探索対象を変更したときは、移動システムに通知する
-            if (isChangeTarget)
-            {
-                // 探索対象を変更したときの移動速度を更新する
-                thiefAI.read_MoveSystem.UpdateMoveSpeed(currentTarget);
-
-                // 探索対象に向かって移動
-                thiefAI.read_MoveSystem.MoveTo(currentTarget.transform.position);
-            }
-        }
-    }
-
-    /// <summary>
     /// 部屋の移動ルートに沿って移動するための探索対象を決める処理
     /// </summary>
-    public void DecideTargetMovePoint()
+    private void DecideTargetMovePoint()
     {
-        bool isChangeTarget = false;
+        // 部屋の探索度が閾値を超えている場合
+        if (IsCurrentRoomExplored())
+        {
+            NextDoorElection();
+            return;
+        }
+
         // 探索対象との距離
         float distanceToTarget = -1;
         // 前回の探索対象がThiefTargetの派生クラスかどうか(前回が移動ポイントでない場合)
@@ -461,67 +610,11 @@ public class CS_MemorySystem
                 {
                     distanceToTarget = distance;
                     currentTarget = target;
-                    isChangeTarget = true;
+                    thiefAI.read_MoveSystem.UpdateMoveSpeed(currentTarget);
+                    thiefAI.read_MoveSystem.MoveTo(currentTarget.transform.position);
                 }
                 else continue;
             }
-        }
-        // 移動ポイントから移動ポイントにする場合は、右回りの場合リストを加算、左回りの場合リストを減算して設定
-        else
-        {
-            if (Vector3.Distance(thiefAI.transform.position, currentTarget.transform.position) > 1.0f)
-            {
-                return;
-            }
-
-            // 現在の移動ポイントがリストのどこにあるかを判定
-            for (int i = 0 ; i < currentRoom.movePoints.Count ; i++)
-            {
-                // 現在の移動ポイントがリストのどこにあるかを判定
-                if (currentRoom.movePoints[i] == currentTarget)
-                {
-                    int nextIndex = 0;
-
-                    // 右回りの場合
-                    if (currentRoom.isListDown)
-                    {
-                        // 次のインデックスを計算
-                        nextIndex = i + 1;
-
-                        // インデックスがリストの範囲を超える場合は、リストの先頭に戻す
-                        if (nextIndex >= currentRoom.movePoints.Count) nextIndex = 0;
-
-                        // リストを加算して次の移動ポイントを探索対象に設定
-                        currentTarget = currentRoom.movePoints[nextIndex];
-
-                        isChangeTarget = true;
-                        break;
-                    }
-                    // 左回りの場合
-                    else
-                    {
-                        // 次のインデックスを計算
-                        nextIndex = i - 1;
-
-                        // インデックスがリストの範囲を超える場合は、リストの末尾に戻す
-                        if (nextIndex < 0) nextIndex = currentRoom.movePoints.Count - 1;
-
-                        // リストを減算して次の移動ポイントを探索対象に設定
-                        currentTarget = currentRoom.movePoints[nextIndex];
-
-                        isChangeTarget = true;
-                        break;
-                    }
-                }
-            }
-        }
-
-        if (isChangeTarget)
-        {
-            // 探索対象を変更したときの移動速度を更新する
-            thiefAI.read_MoveSystem.UpdateMoveSpeed(currentTarget);
-            // 探索対象に向かって移動
-            thiefAI.read_MoveSystem.MoveTo(currentTarget.transform.position);
         }
     }
 
@@ -532,11 +625,30 @@ public class CS_MemorySystem
     /// <param name="target">新しく設定する探索対象</param>
     public void SetTarget(CS_ThiefTarget target)
     {
+        // 強制変更でも、他人が探索中の VisionTargetには乗り換えない
+        var vt = target as CS_VisionTarget;
+        if (vt != null && !CanTarget(vt))
+        {
+            return;
+        }
+
         currentTarget = target;
         // 探索対象を変更したときの移動速度を更新する
         thiefAI.read_MoveSystem.UpdateMoveSpeed(currentTarget);
         // 探索対象に向かって移動
         thiefAI.read_MoveSystem.MoveTo(currentTarget.transform.position);
+    }
+
+    /// <summary>
+    /// プレイヤーを発見する猶予時間を経過させる処理
+    /// </summary>
+    public void UpdateFindPlayerGraceTime()
+    {
+        if (findPlayerGraceTime > 0)
+        {
+            findPlayerGraceTime -= Time.deltaTime;
+        }
+        else findPlayerGraceTime = 0;
     }
 
     /// <summary>
@@ -559,30 +671,14 @@ public class CS_MemorySystem
     {
         ignorePlayer = false;
         remainingIgnorePlayerTime = initialRemainingIgnorePlayerTime;
-    }
-
-    /// <summary>
-    /// 探索対象に到達しているかどうかを判定する処理
-    /// </summary>
-    /// <param name="exploredDistanceThreshold">探索対象に到達していると判定する距離の閾値</param>
-    /// <returns> 探索対象に到達しているかどうか</returns>
-    public bool IsAtTarget(float exploredDistanceThreshold)
-    {
-        // 探索対象がない場合は、探索対象に到達していないと判定してfalseを返す
-        if (currentTarget == null) return false;
-
-        // 探索対象への距離を計算
-        float distanceToTarget = Vector3.Distance(thiefAI.transform.position, currentTarget.transform.position);
-
-        // 探索対象への距離が閾値以下になっている場合は、探索対象に到達していると判定してtrueを返す
-        return distanceToTarget <= exploredDistanceThreshold;
+        findPlayerGraceTime = initialFindPlayerGraceTime;
     }
 
     /// <summary>
     /// 探索対象の探索にかかる時間を経過させる処理
     /// </summary>
     /// <returns>探索が終了しているかどうか</returns>
-    public bool ProgressTargetSearchTime()
+    private bool ProgressTargetSearchTime()
     {
         // 探索対象がない場合は、falseを返す
         if (currentTarget == null) return false;
@@ -624,7 +720,7 @@ public class CS_MemorySystem
     /// 現在の部屋の探索度が閾値を超えているかどうかを判定する処理
     /// </summary>
     /// <returns>現在の部屋の探索度が閾値を超えているかどうか</returns>
-    public bool IsCurrentRoomExplored()
+    private bool IsCurrentRoomExplored()
     {
         // 現在の部屋の記憶がない場合は、探索度が閾値を超えていないと判定してfalseを返す
         if (roomMemories[currentRoom] == null) return false;
@@ -635,7 +731,7 @@ public class CS_MemorySystem
     /// <summary>
     /// 現在の探索対象の探索度をリセットする処理
     /// </summary>
-    public void ResetCurrentTargetExplorationProgress()
+    private void ResetCurrentTargetExplorationProgress()
     {
         if (currentTarget == null) return;
         if (!(currentTarget is CS_VisionTarget)) return;
@@ -913,46 +1009,25 @@ public class CS_MemorySystem
     }
 
     /// <summary>
-    /// 現在の探索対象が指定した型のオブジェクトかどうかを判定する処理
+    /// 指定の視認ターゲットを、自分が探索対象にしてよいか判定する
     /// </summary>
-    /// <typeparam name="T">指定する型</typeparam>
-    /// <returns> true:現在の探索対象が指定した型のオブジェクトである | false:現在の探索対象が指定した型のオブジェクトでない</returns>
-    public bool IsCurrentTargetOfType<T>() where T : CS_ThiefTarget
+    private bool CanTarget(CS_VisionTarget vt)
     {
-        if (currentTarget == null) return false;
-        return currentTarget is T;
-    }
+        if (vt == null) return false;
 
-    /// <summary>
-    /// 現在の探索対象が探索可能なオブジェクトかどうかを判定する処理
-    /// </summary>
-    /// <returns> true:現在の探索対象が探索可能なオブジェクトである | false:現在の探索対象が探索可能なオブジェクトでない</returns>
-    public bool IsCurrentTargetExplorableToVisionTarget()
-    {
-        // 現在の探索対象がない場合は、探索可能なオブジェクトでないと判定してfalseを返す
-        if (currentTarget == null) return false;
-
-        // 現在の探索対象が視認オブジェクト(VisionTarget)の場合
-        if (currentTarget is CS_VisionTarget)
+        //まずは記憶側の searchThief を優先（無ければコンポーネント側）
+        CS_VisionTargetMemory mem;
+        GameObject owner = null;
+        if (visionTargetMemories != null && visionTargetMemories.TryGetValue(vt, out mem) && mem != null)
         {
-            // 現在の探索対象の記憶がない場合は、探索可能なオブジェクトでないと判定してfalseを返す
-            if (!visionTargetMemories.ContainsKey((CS_VisionTarget)currentTarget)) return false;
-
-            // 現在の探索対象が探索済みの場合は、探索可能なオブジェクトでないと判定してfalseを返す
-            if (visionTargetMemories[((CS_VisionTarget)currentTarget)].isExplored) return false;
-
-            // 現在の探索対象が他者にも探索されている場合は、探索可能なオブジェクトでないと判定してfalseを返す
-            if (visionTargetMemories[((CS_VisionTarget)currentTarget)].searchThief != null &&
-                visionTargetMemories[((CS_VisionTarget)currentTarget)].searchThief != thiefAI.gameObject)
-            {
-                ClearTarget(); // 探索対象をリセットする
-                return false;
-            }
-
-            // 現在の探索対象が探索可能なオブジェクトであると判定してtrueを返す
-            return true;
+            owner = mem.searchThief;
+        }
+        if (owner == null)
+        {
+            owner = vt.searchThief;
         }
 
-        return false;
+        // owner が設定されていて、自分以外なら対象にしない
+        return owner == null || owner == thiefAI.gameObject;
     }
 }
