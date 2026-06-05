@@ -4,9 +4,9 @@
  *    元浪梨緒
  * ----------------------------------------------------------
  * 2026-05-27 | 初回作成
+ * 2026-06-05 | バグの修正(斜めの地面を歩くときに地面に沿って出るように)
  */
 using UnityEngine;
-using System.Collections;
 
 public class CS_FootPrint : MonoBehaviour
 {
@@ -73,6 +73,18 @@ public class CS_FootPrint : MonoBehaviour
         Quaternion rotation = Quaternion.LookRotation(forward, Vector3.up) * Quaternion.Euler(90, angleOffset, 0);
 
         Vector3 spawnPos = pos + Vector3.up * spawnOffsetY;
+
+        //斜めの地面を歩く際の回転と位置の修正
+        Ray ray = new Ray(spawnPos, Vector3.down);
+        if(Physics.Raycast(ray, out RaycastHit hit, 0.5f))
+        {
+            spawnPos = hit.point;
+            spawnPos.y += 0.01f;
+            rotation = Quaternion.LookRotation(
+                Vector3.ProjectOnPlane(forward, hit.normal), //地面に沿ったforward
+                hit.normal                                   //地面の法線
+            ) * Quaternion.Euler(90, 0.0f, 0);
+        }
 
         //生成
         GameObject footPrintGameObject = pool.GetObject();
