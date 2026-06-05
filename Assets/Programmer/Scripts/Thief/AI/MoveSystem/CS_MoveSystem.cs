@@ -145,6 +145,9 @@ public class CS_MoveSystem
             samePosFrameCount++;
             if (samePosFrameCount > 120) // 2秒以上同じ位置にいる場合
             {
+                // 少し位置をずらす
+                thiefAI.transform.position += new Vector3(0.1f, 0, 0.1f);
+
                 // 音に反応しているとき
                 if (thiefAI.read_HearingSystem.read_IsReactingToSound)
                 {

@@ -33,9 +33,9 @@ public class CO_ThiefStatusData : ScriptableObject
     public List<int> searchTime;
 
     [Header("探索に関する項目")]
-    [Tooltip("泥棒の歩き速度倍率"), Range(0.0f, 1.0f)]
+    [Tooltip("泥棒の歩き速度倍率"), Range(0.0f, 3.0f)]
     public float walkSpeedMultiplier;
-    [Tooltip("泥棒の走り速度倍率"), Range(0.0f, 1.0f)]
+    [Tooltip("泥棒の走り速度倍率"), Range(0.0f, 3.0f)]
     public float runSpeedMultiplier;
 
     [Header("走り状態になる標的オブジェクトタイプ")]

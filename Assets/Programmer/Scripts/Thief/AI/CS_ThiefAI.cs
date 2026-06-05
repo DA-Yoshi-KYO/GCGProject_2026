@@ -34,6 +34,7 @@
  *            | 聴覚処理を管理するクラス(CS_HearingSystem)
  *            | 視覚処理を管理するクラス(CS_VisionSensor)
  *            | A*アルゴリズムを用いたルート構築処理を管理するクラス(CS_AStarSystem)
+ * 2026-06-04 | 気絶したときの処理をCS_StunThiefTargetに移動
  * 
  */
 using System.Collections.Generic;
@@ -90,6 +91,7 @@ public class CS_ThiefAI : MonoBehaviour
     private float invincibleTime;
     [Tooltip("無敵時間の現在残り時間")]
     private float remainingInvincibleTime;
+    public float read_RemainingInvincibleTime => remainingInvincibleTime;
 
     [Tooltip("気絶後に退場するまでの時間")]
     private int exitAfterStunTime;
@@ -109,6 +111,8 @@ public class CS_ThiefAI : MonoBehaviour
     [Tooltip("探索完了とする距離")]
     private const float exploredDistanceThreshold = 1.5f;
     private const float exploredDistanceThresholdMovePoint = 1.0f;
+    public float read_ExploredDistanceThreshold => exploredDistanceThreshold;
+    public float read_ExploredDistanceThresholdMovePoint => exploredDistanceThresholdMovePoint;
 
     [Tooltip("泥棒関係のサウンド")]
     private CS_3DPlaySE thiefSound;
@@ -173,7 +177,7 @@ public class CS_ThiefAI : MonoBehaviour
         aStarSystem = new CS_AStarSystem(this);
 
         // 記憶システムの初期化
-        memorySystem = new CS_MemorySystem(this, entryRoom, entryPoint, typedata);
+        memorySystem = new CS_MemorySystem(this, entryRoom, entryPoint, typedata, data);
         memorySystem.FindNowRoomNode();
 
         exitAfterStunTime = data.exitAfterStunTime;
@@ -273,133 +277,18 @@ public class CS_ThiefAI : MonoBehaviour
     // 探索状態の行動
     private void Explore()
     {
+        // 表情のリセット
+        ChangeFace(ReactionSpriteType.Normal);
+        thiefReaction.ClearReaction();
+
         // 探索対象を決定
         memorySystem.RecognizeObjects();
 
-        ChangeFace(ReactionSpriteType.Normal);
+        // 探索完了判定
+        memorySystem.EvaluateCurrentTarget();
 
-        // 音に反応している場合
-        if (hearingSystem.read_IsReactingToSound)
-        {
-            // 警戒のリアクションに変更
-            thiefReaction.ChangeReaction(CS_ThiefReaction.ThiefReactionType.Alert);
-
-            // 音の位置に十分近づいたら
-            if (hearingSystem.IsAtSoundReactionPosition(exploredDistanceThreshold))
-            {
-                // 音に反応している状態を解除して、探索対象をリセットする
-                memorySystem.ClearTarget();
-            }
-            return;
-        }
-        // 音に反応していない場合は、警戒のリアクションをクリアする
-        else thiefReaction.ClearReactionByType(CS_ThiefReaction.ThiefReactionType.Alert);
-
-        // moveRouteが設定されている場合
-        if (aStarSystem.HasRoute)
-        {
-            // 現在の探索対象が宝箱である場合
-            if (memorySystem.IsCurrentTargetOfType<CS_VisionTarget>())
-            {
-                // 現在の探索対象が宝物である場合
-                if (((CS_VisionTarget)memorySystem.read_CurrentTarget).targetType == CS_VisionTarget.TargetType.Treasure)
-                {
-                    // 移動ルートをクリアする
-                    aStarSystem.ClearRoute();
-                    return;
-                }
-            }
-            // 現在の探索対象がプレイヤーである場合
-            else if (memorySystem.IsCurrentTargetOfType<CS_PlayerTarget>())
-            {
-                // 移動ルートをクリアする
-                aStarSystem.ClearRoute();
-                return;
-            }
-            // 現在の探索対象が空の宝箱罠である場合
-            else if (memorySystem.IsCurrentTargetOfType<CS_TrapTarget>())
-            {
-                // 現在の探索対象が空の宝箱の罠である場合
-                if (((CS_TrapTarget)memorySystem.read_CurrentTarget).gimmickScript.gimmick == Gimmick.EmptyChest)
-                {
-                    // 移動ルートをクリアする
-                    aStarSystem.ClearRoute();
-                    return;
-                }
-            }
-
-            // 移動ルートを更新
-            aStarSystem.UpdateRoute(exploredDistanceThresholdMovePoint);
-            return;
-        }
-
-        // 現在の部屋の探索度が閾値に達している場合は、次の部屋に移動するための移動ポイントを決定する
-        if (memorySystem.IsCurrentRoomExplored())
-        {
-            memorySystem.NextDoorElection();
-            return;
-        }
-
-        // 探索対象が視認オブジェクト(VisionTarget)で、探索可能かどうかを確認
-        if (memorySystem.IsCurrentTargetExplorableToVisionTarget())
-        {
-            // 探索対象に十分近づいたら、探索度を進める
-            if (memorySystem.IsAtTarget(exploredDistanceThreshold))
-            {
-                // 探索完了の表情に変更
-                ChangeFace(ReactionSpriteType.Search);
-                // 探索のリアクションに変更
-                thiefReaction.ChangeReaction(CS_ThiefReaction.ThiefReactionType.Searching);
-
-                // 現在の探索対象が視認オブジェクト(VisionTarget)である場合
-                if (!memorySystem.IsCurrentTargetOfType<CS_VisionTarget>()) return;
-                // 探索対象に対して、探索している人を設定する
-                ((CS_VisionTarget)memorySystem.read_CurrentTarget).searchThief = this.gameObject;
-
-                // 探索対象の探索が完了したかどうか
-                if (!memorySystem.ProgressTargetSearchTime()) return;
-
-                // 探索のリアクションをクリアする
-                thiefReaction.ClearReactionByType(CS_ThiefReaction.ThiefReactionType.Searching);
-
-                // 宝物を探索にしていて、完了した場合は、発見状態に切り替える
-                if (((CS_VisionTarget)memorySystem.read_CurrentTarget).targetType == CS_VisionTarget.TargetType.Treasure)
-                {
-                    // 発見状態に切り替える
-                    currentState = ThiefState.Found;
-                    return;
-                }
-
-                // 探索対象をリセットする
-                memorySystem.ClearTarget();
-            }
-            else
-            {
-                // 探索対象に十分近づいていない場合は、探索度の進行をリセットする
-                memorySystem.ResetCurrentTargetExplorationProgress();
-            }
-        }
-        else if (memorySystem.IsCurrentTargetOfType<CS_PlayerTarget>())
-        {
-            if (memorySystem.IsAtTarget(exploredDistanceThreshold))
-            {
-                // CS_PlayerMoveに通知
-                ((CS_PlayerTarget)memorySystem.read_CurrentTarget).transform.GetComponent<CS_PlayerMove>().CaughtByThief();
-
-                // 猫を捕まえている時間を設定
-                remainingHoldCatTime = initholdCatTime;
-
-                // 猫を捕まえているSEを再生する
-                if (thiefSound != null) thiefSound.PlayOneShotSE("ThiefCatch", gameObject.transform.position, "ThiefCatch");
-
-                return;
-            }
-        }
-        else
-        {
-            memorySystem.DecideTargetMovePoint();
-            return;
-        }
+        // 体力が1以上残っている場合は、プレイヤーを発見してからの猶予時間を更新する
+        if (durability > 1)memorySystem.UpdateFindPlayerGraceTime();
     }
 
     // 発見状態の行動
@@ -511,6 +400,10 @@ public class CS_ThiefAI : MonoBehaviour
         // ダメージを受けたときのSEを再生する処理を追加する
         if (thiefSound != null) thiefSound.PlayOneShotSE("ThiefDamage", gameObject.transform.position, "ThiefDamage");
 
+        // プレイヤーの追跡情報をリセットする
+        memorySystem.ResetIgnorePlayer();
+
+
         switch (type)
         {
             case Gimmick.Pot:
@@ -540,6 +433,9 @@ public class CS_ThiefAI : MonoBehaviour
         if (durability <= 0)
         {
             durability = 0;
+
+            // StunThiefTargetに通知する
+            GetComponent<CS_StunThiefTarget>().Notify();
 
             // プレイヤーにソウルを入手させる
             CS_PlayerAction playerAction = GameObject.FindObjectOfType<CS_PlayerAction>();
@@ -575,4 +471,48 @@ public class CS_ThiefAI : MonoBehaviour
         material.mainTexture = reactionSprites[(int)reaction].texture;
     }
 
+    /// <summary>
+    /// 現在の状態を変更する処理
+    /// </summary>
+    /// <param name="newState">変更する状態</param>
+    public void ChangeStatus(ThiefState newState)
+    {
+        currentState = newState;
+    }
+
+    /// <summary>
+    /// 猫を捕まえた処理
+    /// </summary>
+    public void CatchCat()
+    {
+        // 猫を捕まえている時間を設定
+        remainingHoldCatTime = initholdCatTime;
+
+        // 猫を捕まえているSEを再生する
+        if (thiefSound != null) thiefSound.PlayOneShotSE("ThiefCatch", gameObject.transform.position, "ThiefCatch");
+    }
+
+    private void OnDrawGizmos()
+    {
+        // 視界の範囲を描画
+        if (visionSensor != null)
+        {
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(transform.position, visionSensor.viewDistance);
+            Vector3 forward = transform.forward * visionSensor.viewDistance;
+            Vector3 leftBoundary = Quaternion.Euler(0, -visionSensor.viewAngle / 2, 0) * forward;
+            Vector3 rightBoundary = Quaternion.Euler(0, visionSensor.viewAngle / 2
+                , 0) * forward;
+            Gizmos.DrawLine(transform.position, transform.position + leftBoundary);
+            Gizmos.DrawLine(transform.position, transform.position + rightBoundary);
+        }
+
+        // 現在の移動目的地までを線で描画
+        if (memorySystem != null)
+        {
+            if (memorySystem.read_CurrentTarget == null) return;
+            Gizmos.color = Color.green;
+            Gizmos.DrawLine(transform.position, memorySystem.read_CurrentTarget.transform.position);
+        }
+    }
 }
