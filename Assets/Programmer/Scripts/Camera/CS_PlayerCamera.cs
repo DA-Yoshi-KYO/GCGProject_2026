@@ -8,6 +8,7 @@
  * 2026-05-11 | カメラの遷移演出の作成(元浪)
  * 2026-05-13 | リファクタリング（元浪）
  * 2026-05-27 | リファクタリング（吉田）
+ * 2026-06-05 | 初期値のカメラの修正
  */
 using System.Collections.Generic;
 using UnityEngine;
@@ -77,6 +78,16 @@ public class CS_PlayerCamera : MonoBehaviour
         
         roomCamera = roomCameraObject.GetComponent<CS_RoomCamera>();
         if (roomCamera == null) Debug.LogError(roomCameraObject.name + "にCS_RoomCameraコンポーネントがありません。");
+
+        //視点がプレイヤーから始まるように補正
+        Vector3 moveAmount = roomCenter - transform.position;
+        moveAmount.y = 0.0f;
+        
+        //カメラの移動に制限をかける
+        moveAmount.x = Mathf.Clamp(moveAmount.x, -roomCamera.moveAmountLimit.x, roomCamera.moveAmountLimit.x);
+        moveAmount.z = Mathf.Clamp(moveAmount.z, -roomCamera.moveAmountLimit.z, roomCamera.moveAmountLimit.z);
+
+        roomCameraObject.transform.position = roomCamera.initPos - moveAmount;
     }
 
     // Update is called once per frame
@@ -92,11 +103,8 @@ public class CS_PlayerCamera : MonoBehaviour
         moveAmount.y = 0.0f;
 
         //カメラの移動に制限をかける
-        moveAmount.x = Mathf.Min(moveAmount.x, roomCamera.moveAmountLimit.x);
-        moveAmount.x = Mathf.Max(moveAmount.x, -roomCamera.moveAmountLimit.x);
-
-        moveAmount.z = Mathf.Min(moveAmount.z, roomCamera.moveAmountLimit.z);
-        moveAmount.z = Mathf.Max(moveAmount.z, -roomCamera.moveAmountLimit.z);
+        moveAmount.x = Mathf.Clamp(moveAmount.x, -roomCamera.moveAmountLimit.x, roomCamera.moveAmountLimit.x);
+        moveAmount.z = Mathf.Clamp(moveAmount.z, -roomCamera.moveAmountLimit.z, roomCamera.moveAmountLimit.z);
 
         //カメラの移動
         roomCameraObject.transform.position = 
