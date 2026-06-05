@@ -7849,6 +7849,105 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 046c3b25ad524534a9de6710f4692f62, type: 3}
+--- !u!1001 &823016145
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 91267025467519389, guid: 8d4a7515b8820ff4db2aed09a277b63d,
+        type: 3}
+      propertyPath: m_Name
+      value: CutScenePlayer
+      objectReference: {fileID: 0}
+    - target: {fileID: 6119830326453982005, guid: 8d4a7515b8820ff4db2aed09a277b63d,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6119830326453982005, guid: 8d4a7515b8820ff4db2aed09a277b63d,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6119830326453982005, guid: 8d4a7515b8820ff4db2aed09a277b63d,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6119830326453982005, guid: 8d4a7515b8820ff4db2aed09a277b63d,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6119830326453982005, guid: 8d4a7515b8820ff4db2aed09a277b63d,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6119830326453982005, guid: 8d4a7515b8820ff4db2aed09a277b63d,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6119830326453982005, guid: 8d4a7515b8820ff4db2aed09a277b63d,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6119830326453982005, guid: 8d4a7515b8820ff4db2aed09a277b63d,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6119830326453982005, guid: 8d4a7515b8820ff4db2aed09a277b63d,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6119830326453982005, guid: 8d4a7515b8820ff4db2aed09a277b63d,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 91267025467519389, guid: 8d4a7515b8820ff4db2aed09a277b63d,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 823016147}
+  m_SourcePrefab: {fileID: 100100000, guid: 8d4a7515b8820ff4db2aed09a277b63d, type: 3}
+--- !u!1 &823016146 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 91267025467519389, guid: 8d4a7515b8820ff4db2aed09a277b63d,
+    type: 3}
+  m_PrefabInstance: {fileID: 823016145}
+  m_PrefabAsset: {fileID: 0}
+--- !u!95 &823016147
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 823016146}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 0}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1001 &827233459
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -13272,6 +13371,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: GameClear
+      objectReference: {fileID: 0}
+    - target: {fileID: 8825777290066060721, guid: e9052ebde256aaf428e9c723da62a8cd,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -22019,6 +22123,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: GameFailure
       objectReference: {fileID: 0}
+    - target: {fileID: 1800926748982794732, guid: 9a047d5018516d747a87c96e7f4c9be3,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1994221463082544088, guid: 9a047d5018516d747a87c96e7f4c9be3,
         type: 3}
       propertyPath: sceneTransition
@@ -22761,6 +22870,7 @@ SceneRoots:
   - {fileID: 993097688}
   - {fileID: 569421522}
   - {fileID: 301767379}
+  - {fileID: 58382191}
   - {fileID: 1946413206}
   - {fileID: 1816742005}
-  - {fileID: 58382191}
+  - {fileID: 823016145}
