@@ -38,6 +38,9 @@ public sealed class CS_SmartNavAgent : MonoBehaviour
     [Tooltip("経路計算用（GC抑制のため使い回す）")]
     private NavMeshPath reusablePath;
 
+    [Tooltip("現在の標的地点")]
+    private Vector3 currentTargetPoint;
+
     public NavMeshAgent Agent => agent;
 
     public IReadOnlyList<int> AvoidZoneIDs => avoidZoneIDs;
@@ -78,6 +81,14 @@ public sealed class CS_SmartNavAgent : MonoBehaviour
     }
 
     /// <summary>
+    /// 現在の標的地点に対して経路を再計算する。
+    /// </summary>
+    public void RefreshPath()
+    {
+        MoveTo(currentTargetPoint);
+    }
+
+    /// <summary>
     ///目的地へ移動。必要なら危険を避けた代替地点を探す。
     /// </summary>
     public void MoveTo(Vector3 target)
@@ -114,6 +125,9 @@ public sealed class CS_SmartNavAgent : MonoBehaviour
             agent.SetDestination(target);
             return;
         }
+
+        // 現在の標的地点を更新
+        currentTargetPoint = target;
 
         // 危険があれば安全地点検索
         Vector3 safe = FindSafePosition(target);

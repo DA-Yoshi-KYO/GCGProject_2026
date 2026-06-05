@@ -355,6 +355,7 @@ public class CS_AStarSystem
         if (moveRoute != null)
         {
             moveRoute.Clear();
+            moveRoute = null;
         }
     }
 

@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 6990849704172034852}
   - component: {fileID: 7788051665123145142}
   - component: {fileID: 4452736946303439562}
+  - component: {fileID: -292384914880140469}
   - component: {fileID: 2397976880975647507}
   m_Layer: 29
   m_Name: Thief
@@ -143,6 +144,20 @@ MonoBehaviour:
   safeSearchRadius: 5
   safeSearchTryCount: 20
   sampleMaxDistance: 2
+--- !u!114 &-292384914880140469
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 729670991071759003}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8cfa6e2369dff3c45b8293956394f3c6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dangerZonePrefab: {fileID: 1027198714623358771, guid: 1dc331ca8706d994f9348bb340bfb17e,
+    type: 3}
 --- !u!195 &2397976880975647507
 NavMeshAgent:
   m_ObjectHideFlags: 0

@@ -59,10 +59,9 @@ public class CS_HearingSystem
         {
             if (type == AttractSoundType.CatVoice)
             {
-                // すでに猫の鳴き声に反応している場合は、さらに近づくために音のする方向に向かう
+                // 猫の鳴き声に反応している場合は、ギミックの起動音よりも優先して音のする方向に向かうための情報を更新する
                 soundReactionPosition = soundPosition;
                 soundReactionType = type;
-                thiefAI.read_MoveSystem.MoveTo(soundReactionPosition);
             }
             else if (type == AttractSoundType.GimmickActivate)
             {
@@ -73,12 +72,11 @@ public class CS_HearingSystem
                             // 音のする方向と現在の位置の距離を計算
                             float currentDistance = Vector3.Distance(thiefAI.transform.position, soundReactionPosition);
                             float newDistance = Vector3.Distance(thiefAI.transform.position, soundPosition);
-                            // より近い方を優先して音のする方向に向かう
+                            // 新しい音の方が近い場合は、音のする方向に向かうための情報を更新する
                             if (newDistance < currentDistance)
                             {
                                 soundReactionPosition = soundPosition;
                                 soundReactionType = type;
-                                thiefAI.read_MoveSystem.MoveTo(soundReactionPosition);
                             }
                         }
                         break;
@@ -93,11 +91,9 @@ public class CS_HearingSystem
             // 現在の状態が探索状態ではない場合は何もしない
             if (thiefAI.CurrentState != CS_ThiefAI.ThiefState.Explore) return;
 
-            // 音のする方向に向かう
+            // 音のする方向に向かうための情報を保存する
             soundReactionPosition = soundPosition;
             soundReactionType = type;
-            soundReactionElapsedTime = 0.0f;
-            thiefAI.read_MoveSystem.MoveTo(soundReactionPosition);
         }
 
         // 音に反応している状態に切り替える
