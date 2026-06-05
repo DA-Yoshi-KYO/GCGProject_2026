@@ -94,27 +94,23 @@ public class GimmickManager : MonoBehaviour
         //壺 ________________________
         gimmickInfo.Add(
             Gimmick.Pot,
-            new GimmickInfo(5f, 5));
+            new GimmickInfo(5f, 0));
         Debug.Log(
             "[Register] Pot" +
-            " CoolTime : 5" +
-            " LifeTime : 10" +
-            " MaxNum : 5");
+            " CoolTime : 5");
 
         //大岩 ______________________
         gimmickInfo.Add(
             Gimmick.IronBall,
-            new GimmickInfo(10f, 2));
+            new GimmickInfo(10f, 0));
         Debug.Log(
             "[Register] IronBall" +
-            " CoolTime : 10" +
-            " LifeTime : 15" +
-            " MaxNum : 2");
+            " CoolTime : 10");
 
         //宝箱 _______________________
         gimmickInfo.Add(
             Gimmick.EmptyChest,
-            new GimmickInfo(10f, 2));
+            new GimmickInfo(10f, 0));
         Debug.Log(
             "[Register] EmptyChest" +
             " CoolTime : 10" +
@@ -230,6 +226,31 @@ public class GimmickManager : MonoBehaviour
     }
 
     //=========================================================
+    // OnTriggerEnter
+    //=========================================================
+    private void OnTriggerEnter(Collider other)
+    {
+        //アイテムに当たった時
+        if (other.CompareTag("Item"))
+        {
+            //アイテム自体の名前でタグ判定
+            switch(other.gameObject.name)
+            {
+                case "ItemPot":
+                    AddHaveGimmick(Gimmick.Pot);
+                    Destroy(other.gameObject);
+                    Debug.Log("PotHaveAdd: " + gimmickInfo[Gimmick.Pot].maxNum);
+                    break;
+                case "ItemRock":
+                    AddHaveGimmick(Gimmick.IronBall);
+                    Destroy(other.gameObject);
+                    Debug.Log("RockHaveAdd: " + gimmickInfo[Gimmick.IronBall].maxNum);
+                    break;
+            }
+        }
+    }
+
+    //=========================================================
     // 設置可能か
     //=========================================================
     public bool IsSetting(Gimmick gT)
@@ -307,6 +328,25 @@ public class GimmickManager : MonoBehaviour
             $" : {gimmickInfo[gimmickTag].maxNum}");
 
         return gimmickInfo[gimmickTag].maxNum;
+    }
+    //=========================================================
+    // 最大設置数取得
+    //=========================================================
+    public int GetCurrentNum(Gimmick gimmickTag)
+    {
+        if (!gimmickInfo.ContainsKey(gimmickTag))
+        {
+            Debug.LogError(
+                $"[GetCurrentNum Error] {gimmickTag} : 未登録");
+
+            return 0;
+        }
+
+        Debug.Log(
+            $"[GetMaxNum] {gimmickTag}" +
+            $" : {gimmickInfo[gimmickTag].currentNum}");
+
+        return gimmickInfo[gimmickTag].currentNum;
     }
 
     //=========================================================

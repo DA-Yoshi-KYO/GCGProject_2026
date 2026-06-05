@@ -16,6 +16,7 @@
  * 2026-05-25 | インタラクトの範囲に入った泥棒に通知処理：吉田
  */
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -88,6 +89,7 @@ public class CS_PlayerAction : MonoBehaviour
         {
             playerMaterial.SetVector("_OutlineColor", Color.yellow);
         }
+
         if (isInteracting)
         {
             interactTime += Time.deltaTime * interactSpeed;
