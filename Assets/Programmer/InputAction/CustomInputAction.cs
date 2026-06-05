@@ -826,6 +826,169 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""Option"",
+            ""id"": ""059931e0-5b90-4848-b1d1-beb502211a3e"",
+            ""actions"": [
+                {
+                    ""name"": ""Up"",
+                    ""type"": ""Button"",
+                    ""id"": ""7da60e86-dd2f-482a-98b8-799af31f3777"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Down"",
+                    ""type"": ""Button"",
+                    ""id"": ""9988ab11-3abd-42c4-9ffe-8e6c32a5a480"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Left"",
+                    ""type"": ""Button"",
+                    ""id"": ""b3014a1d-ad43-4679-bbd4-feffd56137d9"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Right"",
+                    ""type"": ""Button"",
+                    ""id"": ""eb29b140-d63f-4868-a8e9-052305f2e098"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Decision"",
+                    ""type"": ""Button"",
+                    ""id"": ""a7dadc8f-9ea0-4f81-88ab-c7efd7f18bff"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""ff0d3296-0c48-449f-996d-21237b082715"",
+                    ""path"": ""<Keyboard>/w"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Up"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""347b58ae-9dac-4905-a211-727358fea578"",
+                    ""path"": ""<Keyboard>/upArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Up"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""c169070f-58b2-43db-8385-a461a6efcad9"",
+                    ""path"": ""<Keyboard>/s"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Down"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""1b9de74b-deab-44f6-9c20-708e3a43d777"",
+                    ""path"": ""<Keyboard>/downArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Down"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""fe305e18-11ec-46f4-b3df-61dacad27607"",
+                    ""path"": ""<Keyboard>/f"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Decision"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""e62acca6-bb6a-43f8-919e-1ab7f5ec4771"",
+                    ""path"": ""<Keyboard>/space"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Decision"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""6dbecfe9-07c5-4232-8f7d-72cf43f81220"",
+                    ""path"": ""<Keyboard>/a"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Left"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""cb112f7a-da92-4e01-8230-86445c0406f1"",
+                    ""path"": ""<Keyboard>/leftArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Left"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""44a35b7d-cf7b-47fd-8393-150e0b0f2fc1"",
+                    ""path"": ""<Keyboard>/d"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Right"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a588a260-4d90-4177-929b-4afddcac247c"",
+                    ""path"": ""<Keyboard>/rightArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Right"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": []
@@ -859,6 +1022,13 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
         m_GameOver_MoveRight = m_GameOver.FindAction("MoveRight", throwIfNotFound: true);
         m_GameOver_MoveLeft = m_GameOver.FindAction("MoveLeft", throwIfNotFound: true);
         m_GameOver_Decision = m_GameOver.FindAction("Decision", throwIfNotFound: true);
+        // Option
+        m_Option = asset.FindActionMap("Option", throwIfNotFound: true);
+        m_Option_Up = m_Option.FindAction("Up", throwIfNotFound: true);
+        m_Option_Down = m_Option.FindAction("Down", throwIfNotFound: true);
+        m_Option_Left = m_Option.FindAction("Left", throwIfNotFound: true);
+        m_Option_Right = m_Option.FindAction("Right", throwIfNotFound: true);
+        m_Option_Decision = m_Option.FindAction("Decision", throwIfNotFound: true);
     }
 
     ~@CustomInputAction()
@@ -868,6 +1038,7 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
         UnityEngine.Debug.Assert(!m_StageSelect.enabled, "This will cause a leak and performance issues, CustomInputAction.StageSelect.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_GameClear.enabled, "This will cause a leak and performance issues, CustomInputAction.GameClear.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_GameOver.enabled, "This will cause a leak and performance issues, CustomInputAction.GameOver.Disable() has not been called.");
+        UnityEngine.Debug.Assert(!m_Option.enabled, "This will cause a leak and performance issues, CustomInputAction.Option.Disable() has not been called.");
     }
 
     /// <summary>
@@ -1573,6 +1744,146 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
     /// Provides a new <see cref="GameOverActions" /> instance referencing this action map.
     /// </summary>
     public GameOverActions @GameOver => new GameOverActions(this);
+
+    // Option
+    private readonly InputActionMap m_Option;
+    private List<IOptionActions> m_OptionActionsCallbackInterfaces = new List<IOptionActions>();
+    private readonly InputAction m_Option_Up;
+    private readonly InputAction m_Option_Down;
+    private readonly InputAction m_Option_Left;
+    private readonly InputAction m_Option_Right;
+    private readonly InputAction m_Option_Decision;
+    /// <summary>
+    /// Provides access to input actions defined in input action map "Option".
+    /// </summary>
+    public struct OptionActions
+    {
+        private @CustomInputAction m_Wrapper;
+
+        /// <summary>
+        /// Construct a new instance of the input action map wrapper class.
+        /// </summary>
+        public OptionActions(@CustomInputAction wrapper) { m_Wrapper = wrapper; }
+        /// <summary>
+        /// Provides access to the underlying input action "Option/Up".
+        /// </summary>
+        public InputAction @Up => m_Wrapper.m_Option_Up;
+        /// <summary>
+        /// Provides access to the underlying input action "Option/Down".
+        /// </summary>
+        public InputAction @Down => m_Wrapper.m_Option_Down;
+        /// <summary>
+        /// Provides access to the underlying input action "Option/Left".
+        /// </summary>
+        public InputAction @Left => m_Wrapper.m_Option_Left;
+        /// <summary>
+        /// Provides access to the underlying input action "Option/Right".
+        /// </summary>
+        public InputAction @Right => m_Wrapper.m_Option_Right;
+        /// <summary>
+        /// Provides access to the underlying input action "Option/Decision".
+        /// </summary>
+        public InputAction @Decision => m_Wrapper.m_Option_Decision;
+        /// <summary>
+        /// Provides access to the underlying input action map instance.
+        /// </summary>
+        public InputActionMap Get() { return m_Wrapper.m_Option; }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Enable()" />
+        public void Enable() { Get().Enable(); }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Disable()" />
+        public void Disable() { Get().Disable(); }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.enabled" />
+        public bool enabled => Get().enabled;
+        /// <summary>
+        /// Implicitly converts an <see ref="OptionActions" /> to an <see ref="InputActionMap" /> instance.
+        /// </summary>
+        public static implicit operator InputActionMap(OptionActions set) { return set.Get(); }
+        /// <summary>
+        /// Adds <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+        /// </summary>
+        /// <param name="instance">Callback instance.</param>
+        /// <remarks>
+        /// If <paramref name="instance" /> is <c>null</c> or <paramref name="instance"/> have already been added this method does nothing.
+        /// </remarks>
+        /// <seealso cref="OptionActions" />
+        public void AddCallbacks(IOptionActions instance)
+        {
+            if (instance == null || m_Wrapper.m_OptionActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_OptionActionsCallbackInterfaces.Add(instance);
+            @Up.started += instance.OnUp;
+            @Up.performed += instance.OnUp;
+            @Up.canceled += instance.OnUp;
+            @Down.started += instance.OnDown;
+            @Down.performed += instance.OnDown;
+            @Down.canceled += instance.OnDown;
+            @Left.started += instance.OnLeft;
+            @Left.performed += instance.OnLeft;
+            @Left.canceled += instance.OnLeft;
+            @Right.started += instance.OnRight;
+            @Right.performed += instance.OnRight;
+            @Right.canceled += instance.OnRight;
+            @Decision.started += instance.OnDecision;
+            @Decision.performed += instance.OnDecision;
+            @Decision.canceled += instance.OnDecision;
+        }
+
+        /// <summary>
+        /// Removes <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+        /// </summary>
+        /// <remarks>
+        /// Calling this method when <paramref name="instance" /> have not previously been registered has no side-effects.
+        /// </remarks>
+        /// <seealso cref="OptionActions" />
+        private void UnregisterCallbacks(IOptionActions instance)
+        {
+            @Up.started -= instance.OnUp;
+            @Up.performed -= instance.OnUp;
+            @Up.canceled -= instance.OnUp;
+            @Down.started -= instance.OnDown;
+            @Down.performed -= instance.OnDown;
+            @Down.canceled -= instance.OnDown;
+            @Left.started -= instance.OnLeft;
+            @Left.performed -= instance.OnLeft;
+            @Left.canceled -= instance.OnLeft;
+            @Right.started -= instance.OnRight;
+            @Right.performed -= instance.OnRight;
+            @Right.canceled -= instance.OnRight;
+            @Decision.started -= instance.OnDecision;
+            @Decision.performed -= instance.OnDecision;
+            @Decision.canceled -= instance.OnDecision;
+        }
+
+        /// <summary>
+        /// Unregisters <param cref="instance" /> and unregisters all input action callbacks via <see cref="OptionActions.UnregisterCallbacks(IOptionActions)" />.
+        /// </summary>
+        /// <seealso cref="OptionActions.UnregisterCallbacks(IOptionActions)" />
+        public void RemoveCallbacks(IOptionActions instance)
+        {
+            if (m_Wrapper.m_OptionActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        /// <summary>
+        /// Replaces all existing callback instances and previously registered input action callbacks associated with them with callbacks provided via <param cref="instance" />.
+        /// </summary>
+        /// <remarks>
+        /// If <paramref name="instance" /> is <c>null</c>, calling this method will only unregister all existing callbacks but not register any new callbacks.
+        /// </remarks>
+        /// <seealso cref="OptionActions.AddCallbacks(IOptionActions)" />
+        /// <seealso cref="OptionActions.RemoveCallbacks(IOptionActions)" />
+        /// <seealso cref="OptionActions.UnregisterCallbacks(IOptionActions)" />
+        public void SetCallbacks(IOptionActions instance)
+        {
+            foreach (var item in m_Wrapper.m_OptionActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_OptionActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    /// <summary>
+    /// Provides a new <see cref="OptionActions" /> instance referencing this action map.
+    /// </summary>
+    public OptionActions @Option => new OptionActions(this);
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Player" which allows adding and removing callbacks.
     /// </summary>
@@ -1738,6 +2049,49 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnMoveLeft(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Decision" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnDecision(InputAction.CallbackContext context);
+    }
+    /// <summary>
+    /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Option" which allows adding and removing callbacks.
+    /// </summary>
+    /// <seealso cref="OptionActions.AddCallbacks(IOptionActions)" />
+    /// <seealso cref="OptionActions.RemoveCallbacks(IOptionActions)" />
+    public interface IOptionActions
+    {
+        /// <summary>
+        /// Method invoked when associated input action "Up" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnUp(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Down" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnDown(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Left" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnLeft(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Right" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnRight(InputAction.CallbackContext context);
         /// <summary>
         /// Method invoked when associated input action "Decision" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
