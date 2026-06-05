@@ -10,7 +10,6 @@
 
 using UnityEngine;
 using System.Collections.Generic;
-using static UnityEngine.Rendering.DebugUI;
 
 public class GimmickManager : MonoBehaviour
 {
@@ -94,27 +93,23 @@ public class GimmickManager : MonoBehaviour
         //壺 ________________________
         gimmickInfo.Add(
             Gimmick.Pot,
-            new GimmickInfo(5f, 5));
+            new GimmickInfo(5f, 0));
         Debug.Log(
             "[Register] Pot" +
-            " CoolTime : 5" +
-            " LifeTime : 10" +
-            " MaxNum : 5");
+            " CoolTime : 5");
 
         //大岩 ______________________
         gimmickInfo.Add(
             Gimmick.IronBall,
-            new GimmickInfo(10f, 2));
+            new GimmickInfo(10f, 0));
         Debug.Log(
             "[Register] IronBall" +
-            " CoolTime : 10" +
-            " LifeTime : 15" +
-            " MaxNum : 2");
+            " CoolTime : 10");
 
         //宝箱 _______________________
         gimmickInfo.Add(
             Gimmick.EmptyChest,
-            new GimmickInfo(10f, 2));
+            new GimmickInfo(10f, 0));
         Debug.Log(
             "[Register] EmptyChest" +
             " CoolTime : 10" +
@@ -230,6 +225,31 @@ public class GimmickManager : MonoBehaviour
     }
 
     //=========================================================
+    // OnTriggerEnter
+    //=========================================================
+    private void OnTriggerEnter(Collider other)
+    {
+        //アイテムに当たった時
+        if (other.CompareTag("Item"))
+        {
+            //アイテム自体の名前でタグ判定
+            switch(other.gameObject.name)
+            {
+                case "ItemPot":
+                    AddCurrentGimmick(Gimmick.Pot);
+                    Destroy(other.gameObject);
+                    Debug.Log("PotHaveAdd: " + gimmickInfo[Gimmick.Pot].maxNum);
+                    break;
+                case "ItemRock":
+                    AddCurrentGimmick(Gimmick.IronBall);
+                    Destroy(other.gameObject);
+                    Debug.Log("RockHaveAdd: " + gimmickInfo[Gimmick.IronBall].maxNum);
+                    break;
+            }
+        }
+    }
+
+    //=========================================================
     // 設置可能か
     //=========================================================
     public bool IsSetting(Gimmick gT)
@@ -308,17 +328,53 @@ public class GimmickManager : MonoBehaviour
 
         return gimmickInfo[gimmickTag].maxNum;
     }
+    //=========================================================
+    // 最大設置数取得
+    //=========================================================
+    public int GetCurrentNum(Gimmick gimmickTag)
+    {
+        if (!gimmickInfo.ContainsKey(gimmickTag))
+        {
+            Debug.LogError(
+                $"[GetCurrentNum Error] {gimmickTag} : 未登録");
+            return 0;
+        }
+
+        Debug.Log(
+            $"[GetMaxNum] {gimmickTag}" +
+            $" : {gimmickInfo[gimmickTag].currentNum}");
+
+        return gimmickInfo[gimmickTag].currentNum;
+    }
 
     //=========================================================
     // 所持数の変更
     //=========================================================
-    public void SetHaveGimmick(Gimmick gimmickTag, int Value)
-    {//ギミック所持数の最大値を設定
-        gimmickInfo[gimmickTag].maxNum = Value;
+    public void SetMaxGimmick(Gimmick gimmickTag, int value)
+    {//ギミックの最大値を設定
+        gimmickInfo[gimmickTag].maxNum = value;
     }
-    public void AddHaveGimmick(Gimmick gimmickTag)
-    {//ギミック所持数の最大値を増加
+    public void AddMaxGimmick(Gimmick gimmickTag)
+    {//ギミックの最大値を追加
         gimmickInfo[gimmickTag].maxNum++;
+    }
+    public void SetCurrentGimmick(Gimmick gimmickTag, int value)
+    {//ギミック所持数の設定
+        gimmickInfo[gimmickTag].currentNum = value;
+        //所持数が最大数を超えたら最大数を増やす
+        if(gimmickInfo[gimmickTag].maxNum < gimmickInfo[gimmickTag].currentNum)
+        {
+            gimmickInfo[gimmickTag].maxNum = gimmickInfo[gimmickTag].currentNum;
+        }
+    }
+    public void AddCurrentGimmick(Gimmick gimmickTag)
+    {//ギミック所持数の追加
+        gimmickInfo[gimmickTag].currentNum++;
+        //所持数が最大数を超えたら最大数を増やす
+        if (gimmickInfo[gimmickTag].maxNum < gimmickInfo[gimmickTag].currentNum)
+        {
+            gimmickInfo[gimmickTag].maxNum = gimmickInfo[gimmickTag].currentNum;
+        }
     }
 
     //=========================================================
