@@ -4,6 +4,7 @@
  *    元浪梨緒
  * ----------------------------------------------------------
  * 2026-05-22 | 初回作成
+ * 2026-06-05 | バグの修正
  */
 using UnityEngine;
 using UnityEngine.UI;
@@ -33,7 +34,7 @@ public class CS_GameFailureSelectButton : MonoBehaviour
         retryButtonImage = GameObject.Find("RetryButton").GetComponent<Image>();
         retryButtonImage.sprite = retryButtonSprite[currentButton];
 
-        backTitleButtonImage = GameObject.Find("BackTitleButton").GetComponent<Image>();
+        backTitleButtonImage = GameObject.Find("GameFailureBackTitleButton").GetComponent<Image>();
         backTitleButtonImage.sprite = backTitleButtonSprite[currentButton];
     }
 

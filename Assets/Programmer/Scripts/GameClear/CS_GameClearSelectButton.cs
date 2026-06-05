@@ -4,6 +4,7 @@
  *    元浪梨緒
  * ----------------------------------------------------------
  * 2026-05-22 | 初回作成
+ * 2026-06-05 | バグの修正
  */
 using UnityEngine;
 using UnityEngine.UI;
@@ -29,7 +30,7 @@ public class CS_GameClearSelectButton : MonoBehaviour
         inputActions = new CustomInputAction();
         inputActions.GameClear.Enable();
 
-        backTitleButtonImage = GameObject.Find("BackTitleButton").GetComponent<Image>();
+        backTitleButtonImage = GameObject.Find("GameClearBackTitleButton").GetComponent<Image>();
         backTitleButtonImage.sprite = backTitleButtonSprite[currentButton];
 
         stageSelectButtonImage = GameObject.Find("StageSelectButton").GetComponent<Image>();

@@ -37,7 +37,7 @@ public class CS_GameResult : MonoBehaviour
 
             if (end)
             {
-                gameClear.SetActive(true);
+                gameFailure.SetActive(true);
             }
             else
             {
