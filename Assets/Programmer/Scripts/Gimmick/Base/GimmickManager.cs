@@ -203,7 +203,6 @@ public class GimmickManager : MonoBehaviour
             else
             {
                 active.coolTimer -= Time.deltaTime;
-
                 // クールタイム終了
                 if (active.coolTimer <= 0.0f)
                 {
@@ -290,27 +289,7 @@ public class GimmickManager : MonoBehaviour
     }
 
     //=========================================================
-    // 残り設置可能数取得
-    //=========================================================
-    public int GetRemainNum(Gimmick gT)
-    {
-        if (!gimmickInfo.ContainsKey(gT))
-        {
-            Debug.LogError(
-                $"[GetRemainNum Error] {gT} : 未登録");
-
-            return 0;
-        }
-
-        Debug.Log(
-            $"[GetRemainNum] {gT}" +
-            $" : {gimmickInfo[gT].currentNum}");
-
-        return gimmickInfo[gT].currentNum;
-    }
-
-    //=========================================================
-    // 最大設置数取得
+    // 最大所持数取得
     //=========================================================
     public int GetMaxNum(Gimmick gimmickTag)
     {
@@ -329,7 +308,7 @@ public class GimmickManager : MonoBehaviour
         return gimmickInfo[gimmickTag].maxNum;
     }
     //=========================================================
-    // 最大設置数取得
+    // 最大設置数取得※現在の所持数。
     //=========================================================
     public int GetCurrentNum(Gimmick gimmickTag)
     {
@@ -341,10 +320,28 @@ public class GimmickManager : MonoBehaviour
         }
 
         Debug.Log(
-            $"[GetMaxNum] {gimmickTag}" +
+            $"[GetCurrentNum] {gimmickTag}" +
             $" : {gimmickInfo[gimmickTag].currentNum}");
 
         return gimmickInfo[gimmickTag].currentNum;
+    }
+    //=========================================================
+    // クールタイム取得
+    //==========================================================
+    public float GetCoolTime(Gimmick gimmickTag)
+    {//クールタイムの最大値を取得
+        float maxTime = 0.0f;
+
+        foreach (var active in activeGimmicks)
+        {
+            if (active.gimmickType == gimmickTag &&
+                active.isCoolTime)
+            {
+                maxTime = Mathf.Max(maxTime, active.coolTimer);
+            }
+        }
+
+        return maxTime;
     }
 
     //=========================================================
@@ -361,7 +358,7 @@ public class GimmickManager : MonoBehaviour
     public void SetCurrentGimmick(Gimmick gimmickTag, int value)
     {//ギミック所持数の設定
         gimmickInfo[gimmickTag].currentNum = value;
-        //所持数が最大数を超えたら最大数を増やす
+        //所持数が最大数を超えたら最大数を変更
         if(gimmickInfo[gimmickTag].maxNum < gimmickInfo[gimmickTag].currentNum)
         {
             gimmickInfo[gimmickTag].maxNum = gimmickInfo[gimmickTag].currentNum;
@@ -370,7 +367,7 @@ public class GimmickManager : MonoBehaviour
     public void AddCurrentGimmick(Gimmick gimmickTag)
     {//ギミック所持数の追加
         gimmickInfo[gimmickTag].currentNum++;
-        //所持数が最大数を超えたら最大数を増やす
+        //所持数が最大数を超えたら最大数を変更
         if (gimmickInfo[gimmickTag].maxNum < gimmickInfo[gimmickTag].currentNum)
         {
             gimmickInfo[gimmickTag].maxNum = gimmickInfo[gimmickTag].currentNum;
