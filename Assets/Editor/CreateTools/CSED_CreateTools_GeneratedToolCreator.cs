@@ -19,7 +19,7 @@ using UnityEditor;
 public partial class CSED_CreateTools
 {
     /// <summary>
-    /// EditorWindowスクリプトとScriptableObjectスクリプトを生成します。
+    /// EditorWindowスクリプトとScriptableObjectスクリプト
     /// </summary>
     private void CreateGeneratedEditorTool()
     {
