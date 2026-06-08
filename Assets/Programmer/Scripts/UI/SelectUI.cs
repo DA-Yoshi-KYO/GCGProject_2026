@@ -85,7 +85,7 @@ public class GimmickSelectUI : MonoBehaviour
 
         int idx = playerAction.currentGimmickIndex;
         UpdateCountText(idx);
-        // ── インデックス変化検知 ──
+
         if (idx != prevIndex)
         {
             int slideDir = 1;
@@ -117,7 +117,6 @@ public class GimmickSelectUI : MonoBehaviour
             prevIndex = idx;
         }
 
-        // ── スライドアニメーション ──
         if (isAnimating)
         {
             animT += Time.deltaTime * animationSpeed;
@@ -137,9 +136,12 @@ public class GimmickSelectUI : MonoBehaviour
             }
         }
 
-        // ── CT マスク更新（毎フレーム） ──
         UpdateCTMask(idx);
     }
+
+    // ============================================================
+    //  CT マスク
+    // ============================================================
 
     /// <summary>
     /// Filled Image を CT マスク用に初期化する
@@ -149,9 +151,8 @@ public class GimmickSelectUI : MonoBehaviour
         if (mask == null) return;
         mask.type = Image.Type.Filled;
         mask.fillMethod = Image.FillMethod.Radial360;
-        // 左（9時方向）を起点にして時計回り
-        mask.fillOrigin = (int)Image.Origin360.Left;
-        mask.fillClockwise = true;
+        mask.fillOrigin = (int)Image.Origin360.Bottom;
+        mask.fillClockwise = false;
         mask.fillAmount = 0f;
         mask.color = col;
         mask.raycastTarget = false;
@@ -183,6 +184,8 @@ public class GimmickSelectUI : MonoBehaviour
             ? Mathf.Clamp01(coolTime / totalCool)
             : 0f;
 
+        CoolTimeRatio = coolRatio;
+
         if (consumed <= 0)
         {
             SetMaskFill(ctMask1, 0f);
@@ -200,33 +203,41 @@ public class GimmickSelectUI : MonoBehaviour
         }
     }
 
+    private System.Collections.Generic.Dictionary<Gimmick, float> ctMaxCache
+        = new System.Collections.Generic.Dictionary<Gimmick, float>();
+
+    private System.Collections.Generic.Dictionary<Gimmick, float> ctPrevTime
+        = new System.Collections.Generic.Dictionary<Gimmick, float>();
+
     /// <summary>
-    /// GimmickInfo から登録済みクールタイムを取得するラッパー
-    /// ※ GimmickManager に GetTotalCoolTime が無い場合はここで管理
+    /// CT最大値を返す。残り時間が前フレームより増えた瞬間をCT開始と判断して記録する。
     /// </summary>
     private float GetTotalCoolTime(Gimmick tag)
     {
-        return totalCoolTimeCache;
+        float remaining = gimmickManager.GetCoolTime(tag);
+        float prev = ctPrevTime.ContainsKey(tag) ? ctPrevTime[tag] : 0f;
+
+        if (remaining > prev + 0.01f)
+            ctMaxCache[tag] = remaining;
+
+        ctPrevTime[tag] = remaining;
+
+        return ctMaxCache.ContainsKey(tag) ? ctMaxCache[tag] : 1f;
     }
 
-    private float totalCoolTimeCache = 1f;
+    private void RefreshCoolTimeCache(int idx) { }
 
-    private void RefreshCoolTimeCache(int idx)
-    {
-        if (gimmickManager == null) return;
-        GimmickBase gb = GetGimmickBase(idx);
-        if (gb == null) return;
-
-        Gimmick tag = gb.GetGimmickTag();
-        float coolTime = gimmickManager.GetCoolTime(tag);
-        if (coolTime > totalCoolTimeCache)
-            totalCoolTimeCache = coolTime;
-    }
+    /// <summary>
+    /// 現在選択中ギミックの CT 進捗（0.0=CT終了 / 1.0=CT最大）
+    /// シェーダー側から参照する用
+    /// </summary>
+    public float CoolTimeRatio { get; private set; } = 0f;
 
     private static void SetMaskFill(Image mask, float fill)
     {
         if (mask == null) return;
-        mask.fillAmount = fill;
+        const float maxFill = 190f / 360f;
+        mask.fillAmount = fill * maxFill;
         mask.enabled = fill > 0f;
     }
 
@@ -251,7 +262,6 @@ public class GimmickSelectUI : MonoBehaviour
         SetImage(leftImg, GetSprite(leftIdx), sideAlpha);
         SetImage(rightImg, GetSprite(rightIdx), sideAlpha);
 
-        // CT キャッシュ更新
         RefreshCoolTimeCache(idx);
     }
 
