@@ -23,6 +23,7 @@ public enum Gimmick
     IronBall,
     EmptyChest,
     Nyaki,
+    Pitfall,
 }
 
 /// <summary>
