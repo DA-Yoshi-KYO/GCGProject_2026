@@ -62,6 +62,7 @@ public class GimmickBase : MonoBehaviour
 {
     // ギミックのイメ－ジ画像
     public Sprite gimmickImage;
+    public Sprite gimmickTextImage;
 
     /// <summary>
     /// ギミックの大きさをグリッド単位で表す変数
