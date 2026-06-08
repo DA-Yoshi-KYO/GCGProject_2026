@@ -26,6 +26,9 @@ public class CS_MemorySystem
     private CS_RoomNode currentRoom;
     public CS_RoomNode read_CurrentRoom => currentRoom;
 
+    [Tooltip("現在いる部屋のCreateRoomPoint")]
+    public Transform read_CurrentRoomPoint => currentRoom != null ? currentRoom.gameObject.transform.parent : null;
+
     private GameObject currentRoomObject;
 
     [Tooltip("部屋に関する記憶")]
