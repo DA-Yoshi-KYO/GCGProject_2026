@@ -89,7 +89,7 @@ public class CS_HearingSystem
         else // 音に反応していない場合
         {
             // 現在の状態が探索状態ではない場合は何もしない
-            if (thiefAI.CurrentState != CS_ThiefAI.ThiefState.Explore) return;
+            if (thiefAI.read_CurrentState != CS_ThiefAI.ThiefState.Explore) return;
 
             // 音のする方向に向かうための情報を保存する
             soundReactionPosition = soundPosition;

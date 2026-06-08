@@ -192,7 +192,7 @@ public class CS_ThiefManager : MonoBehaviour
             CS_ThiefAI thiefAI = thief.GetComponent<CS_ThiefAI>();
             if (thiefAI == null) continue;
 
-            if (thiefAI.CurrentState == CS_ThiefAI.ThiefState.Escape)
+            if (thiefAI.read_CurrentState == CS_ThiefAI.ThiefState.Escape)
             {
                 return true; // 逃走中の泥棒が存在する場合はtrueを返す
             }

@@ -61,7 +61,7 @@ public class CS_ThiefAI : MonoBehaviour
     }
     [Tooltip("現在の行動状態")]
     private ThiefState currentState;
-    public ThiefState CurrentState => currentState;
+    public ThiefState read_CurrentState => currentState;
 
     [SerializeField, Header("泥棒のリアクションスプライト(仮)")]
     private List<Sprite> reactionSprites;
@@ -80,6 +80,10 @@ public class CS_ThiefAI : MonoBehaviour
     [SerializeField, Tooltip("泥棒の耐久力")]
     private int durability;
     public int read_Durability => durability;
+
+    [Tooltip("泥棒の最大耐久力")]
+    private int maxDurability;
+    public int read_MaxDurability => maxDurability;
 
     [Tooltip("持っている宝物オジェクト")]// 見つけたら設定する
     private GameObject heldTreasure;
@@ -128,6 +132,10 @@ public class CS_ThiefAI : MonoBehaviour
     [Tooltip("猫を捕まえている時間の初期値")]
     private float initholdCatTime = 0.0f;
 
+    [Tooltip("アニメーション用")]
+    private Animator animator;
+    public Animator read_Animator => animator;
+
     // 分解したクラス一覧
     [Tooltip("移動システム")]
     private CS_MoveSystem moveSystem;
@@ -162,6 +170,7 @@ public class CS_ThiefAI : MonoBehaviour
         /*未実装、未設定　*///data.jumpHeight;
 
         durability = typedata.durability;
+        maxDurability = typedata.durability;
         soulDropCount = typedata.soulDropCount;
 
         // 移動システムの初期化
@@ -214,6 +223,9 @@ public class CS_ThiefAI : MonoBehaviour
         }
         thiefMaterial.SetFloat("_DisappearTime", fadeAfterStunTime);
         thiefMaterial.SetFloat("_Timer", fadeAfterStunTime);
+
+        // アニメーション用のコンポーネントを取得
+        animator = GetComponentInChildren<Animator>();
 
         // サウンドマネージャーから泥棒のサウンドを管理するコンポーネントを取得
         GameObject soundManager = GameObject.Find("AudioManager");
@@ -386,6 +398,9 @@ public class CS_ThiefAI : MonoBehaviour
 
         durability -= damage;
 
+        // 泥棒のアニメーション状態をDamageにする
+        if (animator != null)animator.SetTrigger("DamageTrigger");
+
         // ダメージを受けたときのSEを再生する
         if (isHit)
         {
@@ -491,6 +506,20 @@ public class CS_ThiefAI : MonoBehaviour
         // 猫を捕まえているSEを再生する
         if (thiefSound != null) thiefSound.PlayOneShotSE("ThiefCatch", gameObject.transform.position, "ThiefCatch");
     }
+
+    /// <summary>
+    /// 泥棒のアニメーションを変更する処理(Triigerのみ)
+    /// </summary>
+    /// <param name="parameter">変更するアニメーションのパラメーター</param>
+    /// memo: 
+    /// NotFoundTrigger | 空の宝箱を探索後のアニメーション
+    /// FoundTrigger | 宝物を探索後のアニメーション
+    /// DamageTrigger | ダメージを受けたときのアニメーション
+    public void SetAnimation(string parameter)
+    {
+        if (animator != null) animator.SetTrigger(parameter);
+    }
+
 
     private void OnDrawGizmos()
     {
