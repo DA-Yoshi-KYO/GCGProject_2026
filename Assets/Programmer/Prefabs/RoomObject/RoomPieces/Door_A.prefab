@@ -58,10 +58,31 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 8b3bd705ee6b80e4a8f88b71d13443c6,
+        type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 8b3bd705ee6b80e4a8f88b71d13443c6,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: fa13ff2649006af4cbfd0ca48e72bd3c, type: 2}
+    - target: {fileID: -7511558181221131132, guid: 8b3bd705ee6b80e4a8f88b71d13443c6,
+        type: 3}
+      propertyPath: m_Materials.Array.data[1]
+      value: 
+      objectReference: {fileID: 2100000, guid: 1a71687698b750846a0c47e7bc667d7d, type: 2}
+    - target: {fileID: -5754084199372789682, guid: 8b3bd705ee6b80e4a8f88b71d13443c6,
+        type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 8733429697405204941, guid: 0e2e4d3178c324b45bd5faec3a8e4cc6,
+        type: 3}
     - target: {fileID: 919132149155446097, guid: 8b3bd705ee6b80e4a8f88b71d13443c6,
         type: 3}
       propertyPath: m_Name
-      value: SM_Env_Wall_Door_A
+      value: Door_A
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -99,4 +120,4 @@ MeshCollider:
   serializedVersion: 5
   m_Convex: 0
   m_CookingOptions: 30
-  m_Mesh: {fileID: 6953790117593582525, guid: 8b3bd705ee6b80e4a8f88b71d13443c6, type: 3}
+  m_Mesh: {fileID: 8733429697405204941, guid: 0e2e4d3178c324b45bd5faec3a8e4cc6, type: 3}
