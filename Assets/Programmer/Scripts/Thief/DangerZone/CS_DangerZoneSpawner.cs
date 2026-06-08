@@ -41,6 +41,32 @@ public static class CS_DangerZoneSpawner
     }
 
     /// <summary>
+    /// DangerZone を生成するだけのユーティリティ。泥棒登録は行わない。
+    /// </summary>
+    /// <param name="dangerZonePrefab">DangerZone コンポーネント付き prefab</param>
+    /// <param name="spawnPosition">生成位置</param>
+    /// <returns>生成された DangerZone インスタンス。生成に失敗した場合は null。</returns>
+    public static CS_DangerZone Spawn(CS_DangerZone dangerZone, Vector3 spawnPosition, CO_ThiefCommonStatusData commonData)
+    {
+        if (dangerZone == null)
+        {
+            Debug.LogWarning("DangerZoneSpawner: dangerZoneP が nullです。");
+            return null;
+        }
+        // DangerZone を生成
+        CS_DangerZone zone = Object.Instantiate(dangerZone, spawnPosition, Quaternion.identity);
+        if (zone == null) return null;
+
+        // 共通データがあれば残存時間などを初期化
+        if (commonData != null)
+        {
+            zone.Initialize(commonData.avoidStunThiefRange, zone.ZoneID, commonData.exitAfterStunTime);
+        }
+
+        return zone;
+    }
+
+    /// <summary>
     /// 指定範囲内の泥棒（ThiefAI）を探索し、DangerZone の zoneID を回避対象として登録する。
     /// </summary>  
     /// <param name="zone">登録する DangerZone</param>

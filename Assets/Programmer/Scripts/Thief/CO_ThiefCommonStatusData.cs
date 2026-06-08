@@ -34,6 +34,14 @@ public class CO_ThiefCommonStatusData : ScriptableObject
     [Tooltip("泥棒が攻撃を受けた後の無敵時間"),Min(0)]
     public int invincibleTime;
 
+    [Header("気絶解消後、プレイヤーを発見する猶予時間(秒)")]
+    [Tooltip("泥棒が気絶から回復した後、プレイヤーを見つけることのできる猶予時間"), Min(0)]
+    public int findPlayerGraceTime;
+
+    [Header("気絶した泥棒を避ける範囲")]
+    [Tooltip("泥棒が気絶したときに、他の泥棒が避ける範囲"), Min(0)]
+    public int avoidStunThiefRange;
+
     [Header("気絶した後に退場するまでの間隔(秒)")]
     [Tooltip("泥棒が気絶した後に退場するまでの間隔"), Min(0)]
     public int exitAfterStunTime;
