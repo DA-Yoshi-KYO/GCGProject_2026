@@ -195,6 +195,13 @@ public class HitChecker : MonoBehaviour
                         case Gimmick.Nyaki:
                             EnemyDame(enemy, effectDamage, false);
                             break;
+                        case Gimmick.Pitfall:
+                            Debug.Log("Pitfall hit effect");
+                            EnemyDame(enemy, effectDamage, false);
+                            //シーフ落とす関数追加する//
+                            parentGameObject.GetComponent<PitfallGimmick>();
+                            parentGameObject.GetComponent<PitfallGimmick>().gimmickState = GimmickState.Active;
+                            break;
                     }
                 }
             }
@@ -230,6 +237,13 @@ public class HitChecker : MonoBehaviour
                             break;
                         case Gimmick.Nyaki:
                             EnemyDame(enemy, hitDamage);
+                            break;
+                        case Gimmick.Pitfall:
+                            Debug.Log("Pitfall hit enemy");
+                            EnemyDame(enemy, hitDamage);
+                            //シーフ落とす関数追加する//
+                            parentGameObject.GetComponent<PitfallGimmick>();
+                            parentGameObject.GetComponent<PitfallGimmick>().gimmickState = GimmickState.Active;
                             break;
                     }
                 }
