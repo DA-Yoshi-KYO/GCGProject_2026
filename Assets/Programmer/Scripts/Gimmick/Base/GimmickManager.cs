@@ -1,4 +1,4 @@
-//|| GimmickBase.cs ||――――――――――――
+//|| GimmickManager.cs ||――――――――――――
 //|| 作者 : 大瀧蓮
 //||
 //|| 更新 : 2026/05/24 作成開始
@@ -112,9 +112,7 @@ public class GimmickManager : MonoBehaviour
             new GimmickInfo(10f, 0));
         Debug.Log(
             "[Register] EmptyChest" +
-            " CoolTime : 10" +
-            " LifeTime : 20" +
-            " MaxNum : 2");
+            " CoolTime : 10");
 
         //にゃき _____________________
         gimmickInfo.Add(
@@ -122,9 +120,15 @@ public class GimmickManager : MonoBehaviour
             new GimmickInfo(5f, 1));
         Debug.Log(
             "[Register] Nyaki" +
-            " CoolTime : 5" +
-            " LifeTime : 10" +
-            " MaxNum : 3");
+            " CoolTime : 5");
+
+        //落とし穴 ___________________
+        gimmickInfo.Add(
+            Gimmick.Pitfall,
+            new GimmickInfo(5f, 1));
+        Debug.Log(
+            "[Register] Pitfall" +
+            " CoolTime : 5");
     }
 
     //=========================================================
@@ -243,6 +247,21 @@ public class GimmickManager : MonoBehaviour
                     AddCurrentGimmick(Gimmick.IronBall);
                     Destroy(other.gameObject);
                     Debug.Log("RockHaveAdd: " + gimmickInfo[Gimmick.IronBall].maxNum);
+                    break;
+                case "ItemEmptyChest":
+                    AddCurrentGimmick(Gimmick.EmptyChest);
+                    Destroy(other.gameObject);
+                    Debug.Log("EmptyChestHaveAdd: " + gimmickInfo[Gimmick.EmptyChest].maxNum);
+                    break;
+                case "ItemNyaki":
+                    AddCurrentGimmick(Gimmick.Nyaki);
+                    Destroy(other.gameObject);
+                    Debug.Log("NyakiHaveAdd: " + gimmickInfo[Gimmick.Nyaki].maxNum);
+                    break;
+                case "ItemPitfall":
+                    AddCurrentGimmick(Gimmick.Pitfall);
+                    Destroy(other.gameObject);
+                    Debug.Log("PitfallHaveAdd: " + gimmickInfo[Gimmick.Pitfall].maxNum);
                     break;
             }
         }
