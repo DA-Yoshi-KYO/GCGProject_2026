@@ -158,14 +158,14 @@ public class RockGimmick : GimmickBase
             // 壁判定
             // XZ方向にレイを飛ばす
             // 大岩自体が大きいため前後左右レイを少し下に調整
-            Vector3 rayXYOrigin = new Vector3(transform.position.x, transform.position.y - 1f, transform.position.z);
+            Vector3 rayXYOrigin = new Vector3(transform.position.x, transform.position.y - 1.5f, transform.position.z);
             // レイデバッグ
             Debug.DrawRay(rayXYOrigin, velocity * raySideLength, Color.yellow);
             //Debug.Log(rayXYOrigin);
             //レイ判定
             if (Physics.Raycast(rayXYOrigin, velocity, out check, raySideLength))
             {//レイが当たったら角度をチェック
-                if (HitBrokeAngle(check, velocity, slopeAngleLimit))
+                if (HitBrokeAngle(check, velocity, 85f))
                 {//当たった面が一定値以上の斜面なら
                     if (hit.collider.CompareTag("Plane") || hit.collider.CompareTag("Untagged"))
                     {

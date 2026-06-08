@@ -184,12 +184,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   effectId: 1
   spawnPoint: {fileID: 168089676}
+  spawnScale: {x: 1, y: 1, z: 1}
   playKey: 13
   stopKey: 32
   destroyKey: 8
   bool_IsUseDefaultPlaySpeed: 1
   overridePlaySpeed: 1
   bool_IsDestroyAfterStop: 0
+  scaleUpKey: 273
+  scaleDownKey: 274
+  scaleStep: 0.2
 --- !u!1 &880720037
 GameObject:
   m_ObjectHideFlags: 0
@@ -394,13 +398,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2085515767}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.4335401, y: -0, z: -0, w: 0.90113425}
+  m_LocalRotation: {x: 0.2164396, y: 0, z: 0, w: 0.97629607}
   m_LocalPosition: {x: 0, y: 0.335, z: -0.263}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 51.385, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 25, y: 0, z: 0}
 --- !u!114 &2085515771
 MonoBehaviour:
   m_ObjectHideFlags: 0
