@@ -70,8 +70,9 @@ public class CS_PlayerAction : MonoBehaviour
 
         interactField.GetComponent<Renderer>().enabled = false;
 
-        playerMaterial = playerMesh.GetComponent<Renderer>().materials[1];
-        playerMaterial.SetVector("_OutlineColor", Color.gray);
+        Material[] materials = playerMesh.GetComponentInChildren<Renderer>().materials;
+        playerMaterial = materials[materials.Length - 1]; // 最後のマテリアルをプレイヤーのアウトライン用マテリアルとする
+        playerMaterial?.SetVector("_OutlineColor", Color.gray);
 
         playSE = GameObject.Find("3DSE").GetComponent<CS_3DPlaySE>();
     }
@@ -83,11 +84,11 @@ public class CS_PlayerAction : MonoBehaviour
 
         if (playerData.currentMode == CS_PlayerData.PlayerMode.Normal)
         {
-            playerMaterial.SetVector("_OutlineColor", Color.gray);
+            playerMaterial?.SetVector("_OutlineColor", Color.gray);
         }
         else
         {
-            playerMaterial.SetVector("_OutlineColor", Color.yellow);
+            playerMaterial?.SetVector("_OutlineColor", Color.yellow);
         }
 
         if (isInteracting)
@@ -112,7 +113,7 @@ public class CS_PlayerAction : MonoBehaviour
                     }
                 }
 
-                playerMaterial.SetVector("_OutlineColor", Color.green);
+                playerMaterial?.SetVector("_OutlineColor", Color.green);
 
                 // インタラクト範囲を拡大
                 interactScale.x = Mathf.Max(interactTime - switchInteract, 0f) + interactMin.radius;
