@@ -46,8 +46,7 @@ public class CS_WarpTrigger : MonoBehaviour
 
         Debug.Log("BeforePos" + other.transform.position);
 
-        Vector3 offset = other.transform.forward * 1.0f;
-        other.transform.position = wp.targetPoint.transform.position + offset;
+        other.transform.position = wp.targetPoint.transform.position;
 
         Debug.Log("AfterPos" + other.transform.position);
 

@@ -5,59 +5,137 @@
  * ----------------------------------------------------------
  * 2026-06-08 | 初回作成
  */
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering.VirtualTexturing;
 
-public class CS_Warp : MonoBehaviour
+public class CS_WarpSpawn : MonoBehaviour
 {
-    public Transform[] spawnPoints;//候補地点
-    public GameObject warpEntrancePrefab;
-    public GameObject warpExitPrefab;
+    private Transform[] spawnPoints;//候補地点
+    List<Transform> spawnPointsList;
+    [Header("ワープの入り口用のPrefab")][SerializeField]public GameObject warpEntrancePrefab;
+    [Header("ワープの出口用のPrefab")][SerializeField]public GameObject warpExitPrefab;
+    [Header("ワープの数")][SerializeField] private int warpCount = 1;
 
     private GameObject currentEntrance;
     private GameObject currentExit;
 
-    public void SpawnWarpEntrance()
+    [SerializeField] public bool debug;
+
+    // Start is called before the first frame update
+    void Start()
+    {
+    }
+
+    private void Update()
+    {
+        //部屋が作られていないと探せないためUpdate内で実装する
+
+        if (debug)
+        {
+            if (Input.GetKeyDown(KeyCode.J))
+            {
+                SpawnWarp();
+            }
+        }
+    }
+
+    public void SpawnWarp()
     {
         //既存の入口・出口を削除
         if (currentEntrance != null) Destroy(currentEntrance);
         if (currentExit != null) Destroy(currentExit);
 
-        //入口をランダムに選ぶ
-        int entranceIndex = Random.Range(0, spawnPoints.Length);
+        //生成位置候補の処理
+        ProcessGenerationCandidatePositions();
 
-        //出口は入口以外から選ぶ
-        int exitIndex;
-        do
+        spawnPointsList = new List<Transform>(spawnPoints);
+
+        //シャッフル
+        for (int i = spawnPointsList.Count - 1 ; i > 0 ; i--)
         {
-            exitIndex = Random.Range(0, spawnPoints.Length);
+            int r = Random.Range(0, i + 1);
+            var prev = spawnPointsList[i];
+            spawnPointsList[i] = spawnPointsList[r];
+            spawnPointsList[r] = prev;
         }
-        while (exitIndex == entranceIndex);
 
-        //入口生成
-        currentEntrance = Instantiate(
-            warpEntrancePrefab,
-            spawnPoints[entranceIndex].position,
-            spawnPoints[entranceIndex].rotation
-        );
+        //作れる最大ペア数
+        int maxWarp = Mathf.Min(warpCount, spawnPointsList.Count / 2);
 
-        //出口生成
-        currentExit = Instantiate(
-            warpExitPrefab,
-            spawnPoints[exitIndex].position,
-            spawnPoints[exitIndex].rotation
-        );
+        for (int i = 0 ; i < maxWarp ; i++)
+        {
+            //2つずつ取り出す
+            Transform entrancePoint = spawnPointsList[i * 2];
+            Transform exitPoint = spawnPointsList[i * 2 + 1];
 
-        //WarpPoint のリンク設定
-        CS_WarpPoint entranceWP = currentEntrance.GetComponent<CS_WarpPoint>();
-        CS_WarpPoint exitWP = currentExit.GetComponent<CS_WarpPoint>();
+            //入口生成
+            GameObject entranceObj = Instantiate(
+                warpEntrancePrefab,
+                entrancePoint.position,
+                entrancePoint.rotation
+            );
 
-        entranceWP.targetPoint = exitWP;//入口→出口（双方向）
-        exitWP.targetPoint = entranceWP;//出口→入口（双方向）
+            //出口生成
+            GameObject exitObj = Instantiate(
+                warpExitPrefab,
+                exitPoint.position,
+                exitPoint.rotation
+            );
+
+            //WarpPoint のリンク設定（双方向）
+            CS_WarpPoint entranceWP = entranceObj.GetComponent<CS_WarpPoint>();
+            CS_WarpPoint exitWP = exitObj.GetComponent<CS_WarpPoint>();
+
+            entranceWP.targetPoint = exitWP;
+            exitWP.targetPoint = entranceWP;
+        }
     }
 
-    // Start is called before the first frame update
-    void Start()
+    //生成位置候補の処理
+    public void ProcessGenerationCandidatePositions()
     {
-        SpawnWarpEntrance();
+        GameObject roomParent = GameObject.Find("RoomCreatePoints");
+        Transform roomChild;
+        if (roomParent == null)
+            return;
+
+        //初期部屋と宝部屋は探索しない
+        int count = roomParent.transform.childCount - 2;
+        spawnPoints = new Transform[count];
+
+        for (int i = 1; i < roomParent.transform.childCount - 1 ;++i)
+        {
+            roomChild = roomParent.transform.GetChild(i);
+
+            Transform warpObj = FindWarpObject(roomChild, "WarpCreatePos");
+
+            if (warpObj == null)
+                return;
+
+            spawnPoints[i - 1] = warpObj;
+        }
+    }
+
+    //再帰処理で探す
+    private Transform FindWarpObject(Transform parent, string name)
+    {
+        Queue<Transform> queue = new Queue<Transform>();
+        queue.Enqueue(parent);
+
+        while (queue.Count > 0)
+        {
+            Transform current = queue.Dequeue();
+
+            foreach (Transform child in current)
+            {
+                if (child.name == name)
+                    return child;
+
+                queue.Enqueue(child);
+            }
+        }
+
+        return null;
     }
 }
