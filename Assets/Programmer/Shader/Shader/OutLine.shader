@@ -1,75 +1,88 @@
-Shader "Custom/Outline"
+Shader "Custom/URP/Outline"
 {
     Properties
     {
-        _OutlineColor ("Outline Color", Color) = (0.03,0.03,0.03,1)
-        _OutlineWidth ("Outline Width", Range(0.0, 1.0)) = 1
+        _OutlineWidth ("Outline Width", Range(0.0, 10.0)) = 1.5
+        _OutlineColor ("Outline Color", Color) = (0, 0, 0, 1)
     }
 
     SubShader
     {
         Tags
         {
-            "RenderPipeline"="UniversalPipeline"
-            "RenderType"="Transparent"
-            "Queue"="Transparent"
+            "RenderType" = "Opaque"
+            "RenderPipeline" = "UniversalPipeline"
+            "Queue" = "Geometry+1"
         }
 
         Pass
         {
             Name "Outline"
+            Tags { "LightMode" = "SRPDefaultUnlit" }
 
-            Cull Front
-            ZWrite Off
+            Cull Front      // 裏面のみ描画（Back-face法に戻す）
+            ZWrite On
             ZTest LEqual
-            Blend SrcAlpha OneMinusSrcAlpha
 
             HLSLPROGRAM
-            #pragma vertex vert
-            #pragma fragment frag
+            #pragma vertex OutlineVert
+            #pragma fragment OutlineFrag
+            #pragma multi_compile_instancing
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+
+            CBUFFER_START(UnityPerMaterial)
+                float  _OutlineWidth;
+                float4 _OutlineColor;
+            CBUFFER_END
 
             struct Attributes
             {
                 float4 positionOS : POSITION;
-                float3 normalOS   : NORMAL;
+                float4 tangentOS  : TANGENT;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
             struct Varyings
             {
                 float4 positionCS : SV_POSITION;
+                UNITY_VERTEX_OUTPUT_STEREO
             };
 
-            CBUFFER_START(UnityPerMaterial)
-
-            float4 _OutlineColor;
-            float  _OutlineWidth;
-
-            CBUFFER_END
-
-            Varyings vert(Attributes IN)
+            Varyings OutlineVert(Attributes input)
             {
-                Varyings OUT;
+                Varyings output;
+                UNITY_SETUP_INSTANCE_ID(input);
+                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
 
-                float3 positionOS = IN.positionOS.xyz;
+                // Tangentのスムース法線（向きは元法線に揃え済み）
+                float3 smoothNormalOS = normalize(input.tangentOS.xyz);
 
-                // 法線方向へ膨張
-                positionOS += normalize(IN.normalOS) * (_OutlineWidth * 0.1f);
+                // ビュー空間へ変換
+                float3 smoothNormalVS = normalize(mul((float3x3)UNITY_MATRIX_IT_MV, smoothNormalOS));
 
-                float3 positionWS = TransformObjectToWorld(positionOS);
+                // クリップ空間の頂点位置
+                float4 posCS = TransformObjectToHClip(input.positionOS.xyz);
 
-                OUT.positionCS = TransformWorldToHClip(positionWS);
+                // クリップ空間でスクリーン固定サイズ押し出し
+                float4 normalCS  = mul(UNITY_MATRIX_P, float4(smoothNormalVS, 0.0));
+                float2 normalNDC = normalize(normalCS.xy);
 
-                return OUT;
+                float width = _OutlineWidth * 0.001;
+                posCS.xy += normalNDC * posCS.w * width;
+
+                output.positionCS = posCS;
+                return output;
             }
 
-            half4 frag(Varyings IN) : SV_Target
+            half4 OutlineFrag(Varyings input) : SV_Target
             {
-                return _OutlineColor;
+                return half4(_OutlineColor.rgb, 1.0);
             }
 
             ENDHLSL
         }
     }
+
+    FallBack Off
 }
