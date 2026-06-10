@@ -1,18 +1,46 @@
 /*
 +=====================================
  ファイル名 : CSE_EffectType.cs
- 概要     : エフェクトの種類を定義する
+ 概要     : Effectの再生方式を定義するEnum
  作者     : ヨシモト リョウ
- 履歴     : 2026/06/03 新規作成
+ 履歴     : 2026/06/10 新規作成
 =====================================+
 */
 
 /// <summary>
-/// エフェクトの種類を表す列挙型です。
+/// Effectの再生方式を表す列挙型です。
 /// </summary>
 public enum CSE_EffectType
 {
-    CustomCS,
+    None,
+
+    /// <summary>
+    /// C#スクリプトで制御するEffectです。
+    /// </summary>
+    CustomScript,
+
+    /// <summary>
+    /// UnityのParticleSystemを使用するEffectです。
+    /// </summary>
     ParticleSystem,
-    SpriteSheet
+
+    /// <summary>
+    /// Vertex Animation Textureを使用するEffectです。
+    /// </summary>
+    VAT,
+
+    /// <summary>
+    /// スプライトシートを使用するEffectです。
+    /// </summary>
+    SpriteSheet,
+
+    /// <summary>
+    /// ShaderやMaterialだけで動くEffectです。
+    /// </summary>
+    ShaderOnly,
+
+    /// <summary>
+    /// エフェクシアを使用するEffectです。
+    /// </summary>
+    Effekseer
 }

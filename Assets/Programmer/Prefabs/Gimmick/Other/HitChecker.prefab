@@ -63,6 +63,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8680212374388006181}
   - component: {fileID: 2398870776643814341}
+  - component: {fileID: 5082598780226959448}
   m_Layer: 0
   m_Name: HitChecker
   m_TagString: Untagged
@@ -104,6 +105,21 @@ MonoBehaviour:
   enemyLayer:
     serializedVersion: 2
     m_Bits: 536870912
+--- !u!114 &5082598780226959448
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5250139902968933795}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c06abdfa00f89e448b543744105e372a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  go_HitEffectPrefab: {fileID: 264367429111437040, guid: 2f3bdde62f321304691068dcd30e7773,
+    type: 3}
+  f_EffectUpOffset: 0.05
 --- !u!1 &6080328134442126634
 GameObject:
   m_ObjectHideFlags: 0

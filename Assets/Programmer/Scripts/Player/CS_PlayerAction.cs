@@ -14,6 +14,7 @@
  * 2026-05-24 | インタラクトの範囲を円柱化：吉田
  * 2026-05-25 | SEを追加：吉田
  * 2026-05-25 | インタラクトの範囲に入った泥棒に通知処理：吉田
+ * 2026-06-11 | ギミック設置時のEffect再生処理を追加：吉本
  */
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -50,6 +51,9 @@ public class CS_PlayerAction : MonoBehaviour
     private CS_3DPlaySE playSE;
     List<Collider> hitList = new List<Collider>();
 
+    // ギミック設置時のEffect再生クラスへの参照
+    private CS_GimmickSetEffectPlayer cs_GimmickSetEffectPlayer;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -74,6 +78,8 @@ public class CS_PlayerAction : MonoBehaviour
         outlineController.SetOutlineColor(Color.gray);
 
         playSE = GameObject.Find("3DSE").GetComponent<CS_3DPlaySE>();
+
+        cs_GimmickSetEffectPlayer = GetComponent<CS_GimmickSetEffectPlayer>();
     }
 
     // Update is called once per frame
@@ -347,6 +353,15 @@ public class CS_PlayerAction : MonoBehaviour
         {
             Debug.LogError("配置後のGimmick取得失敗");
             return;
+        }
+
+        // ギミック直下に魔法陣Effectを生成して再生
+        // ギミック設置時Effectを再生
+        if (cs_GimmickSetEffectPlayer != null)
+        {
+            cs_GimmickSetEffectPlayer.PlayGimmickSetEffect(
+                instance.transform.position,
+                instance);
         }
 
         // Managerへ実体を登録
