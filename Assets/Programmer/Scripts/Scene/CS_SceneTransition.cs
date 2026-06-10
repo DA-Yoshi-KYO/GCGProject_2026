@@ -23,7 +23,6 @@ public class CS_SceneTransition : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        fadeImage = GameObject.Find("Fade").GetComponent<Image>();
         backGroundPlayBGM = GameObject.Find("BGM").GetComponent<CS_BackGroundPlayBGM>();
 
         fadeImage.color = new Color(fadeImage.color.r, fadeImage.color.g, fadeImage.color.b, 1.0f);

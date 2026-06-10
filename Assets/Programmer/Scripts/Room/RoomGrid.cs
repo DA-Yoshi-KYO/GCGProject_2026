@@ -9,7 +9,6 @@
  * 2026-05-08 | リファクタリング(大瀧)
  * 
  */
-using EffekseerTool.Data.Value;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -56,7 +55,7 @@ public class RoomGrid : MonoBehaviour
             if (floorMaterials.Length > 0)
             {
                 Material randomMaterial = floorMaterials[UnityEngine.Random.Range(0, floorMaterials.Length)];
-                child.GetComponent<Renderer>().material = randomMaterial;
+                child.GetComponentInChildren<Renderer>().material = randomMaterial;
             }
 
             sum += child.transform.position;
@@ -155,7 +154,7 @@ public class RoomGrid : MonoBehaviour
                 float curringUVX = ratio / (float)gridCellNumX;
                 for (int i = 0 ; i < overflowObjectNum.y ; i++)
                 {
-                    gridObjects[i, overflowObjectIndex.x].GetComponent<Renderer>().material.SetFloat("_CurringUVX", curringUVX);
+                    gridObjects[i, overflowObjectIndex.x].GetComponentInChildren<Renderer>().material.SetFloat("_CurringUVX", curringUVX);
                 }
                 overflowObjectIndex.x--;
                 overflowNum.x -= gridCellNumX;
@@ -173,7 +172,7 @@ public class RoomGrid : MonoBehaviour
                 float curringUVY = ratio / (float)gridCellNumY;
                 for (int i = 0 ; i < overflowObjectNum.x ; i++)
                 {
-                    gridObjects[overflowObjectIndex.y, i].GetComponent<Renderer>().material.SetFloat("_CurringUVY", curringUVY);
+                    gridObjects[overflowObjectIndex.y, i].GetComponentInChildren<Renderer>().material.SetFloat("_CurringUVY", curringUVY);
                 }
                 overflowObjectIndex.y--;
                 overflowNum.y -= gridCellNumY;
