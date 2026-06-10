@@ -22,7 +22,9 @@ public class CS_RoomBlockRandomGenerator : MonoBehaviour
     [SerializeField]
     private bool bool_IsAutoRegenerateRandomOnStart = true;
 
-    private CS_WarpSpawn cs_WarpSpawn = new CS_WarpSpawn();
+    [Header("ワープのマネージャーからの取得")]
+    [SerializeField]
+    private CS_WarpSpawn cs_WarpSpawn;
 
     private bool bool_IsRuntimeRegenerating = false;
 
