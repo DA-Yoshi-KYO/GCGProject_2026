@@ -10,10 +10,16 @@ public class EnemyIcon : MonoBehaviour
 
     void Update()
     {
-        if (thiefAI == null) return;
+        if (thiefAI == null)
+        {
+            Debug.Log("[EnemyIcon] Update: thiefAI is null, skipping update");
+            return;
+        }
 
-        int current = thiefAI.read_Durability;
+            int current = thiefAI.read_Durability;
         int max = thiefAI.read_MaxDurability;
+
+        Debug.Log($"[EnemyIcon] Update: current={current}, max={max}");
 
         if (max <= 0) return;
 
@@ -24,8 +30,6 @@ public class EnemyIcon : MonoBehaviour
     {
         thiefAI = script;
 
-        // 右から縮小する設定をコードで保証
-        // （Inspector 側で設定済みなら不要だが念のため）
         if (hp != null)
         {
             hp.type = Image.Type.Filled;

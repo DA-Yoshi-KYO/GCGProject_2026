@@ -29,7 +29,7 @@ public class EnemyUI : MonoBehaviour
         enemyManager = GameObject.Find(enemyParentName);
         if (enemyManager == null)
         {
-            Debug.LogError($"[EnemyUI] 名前 '{enemyParentName}' のオブジェクトが見つかりません");
+            Debug.Log($"[EnemyUI] 名前 '{enemyParentName}' のオブジェクトが見つかりません");
             return;
         }
 
@@ -45,7 +45,7 @@ public class EnemyUI : MonoBehaviour
             enemyManager = GameObject.Find(enemyParentName);
             if (enemyManager == null)
             {
-                Debug.LogError($"[EnemyUI] 名前 '{enemyParentName}' のオブジェクトが見つかりません");
+                Debug.Log($"[EnemyUI] 名前 '{enemyParentName}' のオブジェクトが見つかりません");
             }
                 return;
         }
