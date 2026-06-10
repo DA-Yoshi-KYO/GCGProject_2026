@@ -34,6 +34,8 @@ public class CS_PlayerMove : MonoBehaviour
     private CS_FootPrint footPrint;
     private float createFootPrintTime = 100.0f;
 
+    private Animator animator; // プレイヤーのアニメーター
+
     [Tooltip("盗賊に捕まっているかどうか")]
     private bool isCaughtByThief;
 
@@ -64,6 +66,9 @@ public class CS_PlayerMove : MonoBehaviour
         playerData.customInputAction.Player.Sneak.started += OnSneak;
         playerData.customInputAction.Player.Sneak.performed += OnSneak;
         playerData.customInputAction.Player.Sneak.canceled += OnSneak;
+
+        // アニメーターの取得
+        animator = GetComponentInChildren<Animator>();
     }
 
     void Update()
@@ -81,6 +86,8 @@ public class CS_PlayerMove : MonoBehaviour
     {
         // ゲームが一時停止中の場合は移動処理を行わない
         if (Time.timeScale == 0) return;
+
+        animator.SetBool("IsJumping", !controller.isGrounded);
 
         // カメラの前方向と右方向を取得し、y成分を0にして水平移動のベクトルを作成
         Vector3 cameraForward = playerCamera.cameraForward;
@@ -156,6 +163,8 @@ public class CS_PlayerMove : MonoBehaviour
 
         // CharacterControllerを使用して移動
         controller.Move(velocity * Time.deltaTime);
+
+        
     }
 
     /// <summary>
