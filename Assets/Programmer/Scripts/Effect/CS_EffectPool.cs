@@ -89,9 +89,23 @@ public class CS_EffectPool
             return null;
         }
 
+        CS_EffectTransformController cs_EffectTransformController =
+            csad_EffectProcess.GetComponent<CS_EffectTransformController>();
+
+        if (cs_EffectTransformController != null)
+        {
+            cs_EffectTransformController.StopTransformControl();
+        }
+
         csad_EffectProcess.transform.SetPositionAndRotation(
             v3_Position,
             q_Rotation);
+
+        if (go_EffectPrefab != null)
+        {
+            csad_EffectProcess.transform.localScale =
+                go_EffectPrefab.transform.localScale;
+        }
 
         csad_EffectProcess.gameObject.SetActive(true);
 
