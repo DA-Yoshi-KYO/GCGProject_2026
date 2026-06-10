@@ -22,6 +22,10 @@ public class CS_RoomBlockRandomGenerator : MonoBehaviour
     [SerializeField]
     private bool bool_IsAutoRegenerateRandomOnStart = true;
 
+    [Header("ワープのマネージャーからの取得")]
+    [SerializeField]
+    private CS_WarpSpawn cs_WarpSpawn;
+
     private bool bool_IsRuntimeRegenerating = false;
 
     /// <summary>
@@ -98,7 +102,7 @@ public class CS_RoomBlockRandomGenerator : MonoBehaviour
     }
 
     /// <summary>
-    /// Play中用のRandom Room再生成処理です。
+    /// Play中用のRandom Room再生成処理です。生成ごワープの生成も行います。
     /// </summary>
     private IEnumerator RegenerateRandomRoomBlocksRuntimeCoroutine()
     {
@@ -118,6 +122,13 @@ public class CS_RoomBlockRandomGenerator : MonoBehaviour
             true);
 
         yield return null;
+
+        // ワープ生成はRoom生成後に行う必要があるため、ここで実行します。
+        if (cs_WarpSpawn != null)
+        {
+            cs_WarpSpawn.SpawnWarp();
+        }
+
 
         cs_RoomBlockPrefabGenerator.CreatePlayerAtFirstRoomStartPoint();
 
