@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7464062737429334774}
   - component: {fileID: 2868336821702428489}
-  - component: {fileID: -8440752667188568641}
+  - component: {fileID: 4374251384866418497}
   m_Layer: 0
   m_Name: MagicCircle
   m_TagString: Untagged
@@ -96,7 +96,7 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &-8440752667188568641
+--- !u!114 &4374251384866418497
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -105,9 +105,20 @@ MonoBehaviour:
   m_GameObject: {fileID: 6919014136174155209}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 85bed44d5a1a51a4685fd44fe38120c5, type: 3}
+  m_Script: {fileID: 11500000, guid: a2e984b002514154c9ea16025a2780eb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  csst_DefaultEffectPlayData:
+    b_UsePlayTime: 1
+    f_InspectorPlayTime: 1
+    b_UseEndTime: 1
+    f_InspectorEndTime: 1
+    b_UseLoopFlag: 0
+    b_InspectorLoopFlag: 0
+    b_UseHideOnEnd: 1
+    b_InspectorHideOnEnd: 0
+    b_UsePlayEndTime: 1
+    f_InspectorPlayEndTime: 0
 --- !u!1001 &327976186843051843
 PrefabInstance:
   m_ObjectHideFlags: 0

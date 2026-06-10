@@ -11,7 +11,7 @@ using UnityEngine;
 
 /// <summary>
 /// ShaderOnly系Effectの共通処理です。
-/// 自分自身についているRendererへShader値を渡します。
+/// 生成フェーズ、待機フェーズ、終了フェーズを管理します。
 /// </summary>
 public abstract class CS_EffectShaderOnly : CSAD_EffectCommonProcessBase
 {
@@ -26,12 +26,12 @@ public abstract class CS_EffectShaderOnly : CSAD_EffectCommonProcessBase
     private static readonly int int_EffectPlayPropertyId = Shader.PropertyToID("_EffectPlay");
 
     /// <summary>
-    /// Effectを表示するRendererです。
+    /// 自分自身のRendererです。
     /// </summary>
     protected Renderer rd_EffectRenderer;
 
     /// <summary>
-    /// MaterialPropertyBlockです。
+    /// 自分自身のMaterialPropertyBlockです。
     /// </summary>
     protected MaterialPropertyBlock mpb_EffectMaterialPropertyBlock;
 
@@ -41,9 +41,24 @@ public abstract class CS_EffectShaderOnly : CSAD_EffectCommonProcessBase
     protected bool bool_IsPlaying;
 
     /// <summary>
-    /// 現在の再生時間です。
+    /// 終了フェーズ中かどうかです。
     /// </summary>
-    protected float f_CurrentPlayTime;
+    private bool bool_IsEnding;
+
+    /// <summary>
+    /// 生成フェーズが完了したかどうかです。
+    /// </summary>
+    private bool bool_IsPlayPhaseCompleted;
+
+    /// <summary>
+    /// 全体の再生経過時間です。
+    /// </summary>
+    protected float f_CurrentEffectTime;
+
+    /// <summary>
+    /// 終了フェーズの経過時間です。
+    /// </summary>
+    private float f_CurrentEndTime;
 
     /// <summary>
     /// 初期化処理です。
@@ -71,9 +86,13 @@ public abstract class CS_EffectShaderOnly : CSAD_EffectCommonProcessBase
             return;
         }
 
-        f_CurrentPlayTime += Time.deltaTime;
+        f_CurrentEffectTime += Time.deltaTime;
 
-        SetShaderFloat(int_EffectTimePropertyId, f_CurrentPlayTime);
+        SetShaderFloatToSelf(int_EffectTimePropertyId, f_CurrentEffectTime);
+
+        UpdatePlayPhaseProcess();
+
+        UpdateEndPhaseProcess();
 
         UpdateShaderOnlyEffect();
     }
@@ -83,39 +102,137 @@ public abstract class CS_EffectShaderOnly : CSAD_EffectCommonProcessBase
     /// </summary>
     protected override void PlayEffectProcess()
     {
-        if (rd_EffectRenderer == null)
+        bool_IsPlaying = true;
+        bool_IsEnding = false;
+        bool_IsPlayPhaseCompleted = false;
+
+        f_CurrentEffectTime = 0.0f;
+        f_CurrentEndTime = 0.0f;
+
+        SetShaderFloatToSelf(int_EffectPlayPropertyId, 1.0f);
+        SetShaderFloatToSelf(int_EffectTimePropertyId, 0.0f);
+
+        OnPlayPhaseStart();
+        UpdatePlayPhase(0.0f);
+
+        if (csst_EffectPlayData.f_PlayTime.HasValue == false ||
+            csst_EffectPlayData.f_PlayTime.Value <= 0.0f)
         {
-            Debug.LogWarning("[CS_EffectShaderOnly] Rendererがありません : " + gameObject.name);
+            bool_IsPlayPhaseCompleted = true;
+            UpdatePlayPhase(1.0f);
+            OnPlayPhaseComplete();
+        }
+    }
+
+    /// <summary>
+    /// 生成フェーズを更新します。
+    /// </summary>
+    private void UpdatePlayPhaseProcess()
+    {
+        if (bool_IsPlayPhaseCompleted)
+        {
             return;
         }
 
-        bool_IsPlaying = true;
-        f_CurrentPlayTime = 0.0f;
+        if (bool_IsEnding)
+        {
+            return;
+        }
 
-        SetShaderFloat(int_EffectPlayPropertyId, 1.0f);
-        SetShaderFloat(int_EffectTimePropertyId, 0.0f);
+        if (csst_EffectPlayData.f_PlayTime.HasValue == false ||
+            csst_EffectPlayData.f_PlayTime.Value <= 0.0f)
+        {
+            bool_IsPlayPhaseCompleted = true;
+            UpdatePlayPhase(1.0f);
+            OnPlayPhaseComplete();
+            return;
+        }
 
-        PlayShaderOnlyEffect();
+        float f_NormalizedPlayTime =
+            Mathf.Clamp01(f_CurrentEffectTime / csst_EffectPlayData.f_PlayTime.Value);
+
+        UpdatePlayPhase(f_NormalizedPlayTime);
+
+        if (f_NormalizedPlayTime >= 1.0f)
+        {
+            bool_IsPlayPhaseCompleted = true;
+            OnPlayPhaseComplete();
+        }
     }
 
     /// <summary>
-    /// ShaderOnlyEffectの終了処理です。
+    /// 終了開始処理です。
     /// </summary>
     protected override void EndEffectProcess()
     {
-        bool_IsPlaying = false;
+        if (bool_IsEnding)
+        {
+            return;
+        }
 
-        SetShaderFloat(int_EffectPlayPropertyId, 0.0f);
+        bool_IsEnding = true;
+        f_CurrentEndTime = 0.0f;
 
-        EndShaderOnlyEffect();
+        OnEndPhaseStart();
+        UpdateEndPhase(0.0f);
+
+        if (csst_EffectPlayData.f_EndTime.HasValue == false ||
+            csst_EffectPlayData.f_EndTime.Value <= 0.0f)
+        {
+            UpdateEndPhase(1.0f);
+            OnEndPhaseComplete();
+
+            bool_IsEnding = false;
+            bool_IsPlaying = false;
+
+            SetShaderFloatToSelf(int_EffectPlayPropertyId, 0.0f);
+
+            FinishEndEffect();
+        }
     }
 
     /// <summary>
-    /// Shaderへfloat値を渡します。
+    /// 終了フェーズを更新します。
+    /// </summary>
+    private void UpdateEndPhaseProcess()
+    {
+        if (bool_IsEnding == false)
+        {
+            return;
+        }
+
+        if (csst_EffectPlayData.f_EndTime.HasValue == false ||
+            csst_EffectPlayData.f_EndTime.Value <= 0.0f)
+        {
+            return;
+        }
+
+        f_CurrentEndTime += Time.deltaTime;
+
+        float f_NormalizedEndTime =
+            Mathf.Clamp01(f_CurrentEndTime / csst_EffectPlayData.f_EndTime.Value);
+
+        UpdateEndPhase(f_NormalizedEndTime);
+
+        if (f_NormalizedEndTime >= 1.0f)
+        {
+            OnEndPhaseComplete();
+
+            bool_IsEnding = false;
+            bool_IsPlaying = false;
+
+            SetShaderFloatToSelf(int_EffectPlayPropertyId, 0.0f);
+
+            FinishEndEffect();
+        }
+    }
+
+    /// <summary>
+    /// 自分自身のShaderへfloat値を渡します。
     /// </summary>
     /// <param name="int_propertyId">Shader Property ID。</param>
     /// <param name="f_value">設定する値。</param>
-    protected void SetShaderFloat(int int_propertyId, float f_value)
+    protected void SetShaderFloatToSelf(int int_propertyId, float f_value)
     {
         if (rd_EffectRenderer == null)
         {
@@ -133,28 +250,59 @@ public abstract class CS_EffectShaderOnly : CSAD_EffectCommonProcessBase
     }
 
     /// <summary>
-    /// ShaderOnlyEffect固有の再生開始処理です。
-    /// 必要な場合だけ継承先で上書きします。
+    /// 生成フェーズ開始時の処理です。
     /// </summary>
-    protected virtual void PlayShaderOnlyEffect()
+    protected virtual void OnPlayPhaseStart()
     {
 
     }
 
     /// <summary>
-    /// ShaderOnlyEffect固有の更新処理です。
-    /// 必要な場合だけ継承先で上書きします。
+    /// 生成フェーズ中の更新処理です。
+    /// </summary>
+    /// <param name="f_NormalizedPlayTime">0.0～1.0の生成進行度。</param>
+    protected virtual void UpdatePlayPhase(float f_NormalizedPlayTime)
+    {
+
+    }
+
+    /// <summary>
+    /// 生成フェーズ完了時の処理です。
+    /// </summary>
+    protected virtual void OnPlayPhaseComplete()
+    {
+
+    }
+
+    /// <summary>
+    /// 終了フェーズ開始時の処理です。
+    /// </summary>
+    protected virtual void OnEndPhaseStart()
+    {
+
+    }
+
+    /// <summary>
+    /// 終了フェーズ中の更新処理です。
+    /// </summary>
+    /// <param name="f_NormalizedEndTime">0.0～1.0の終了進行度。</param>
+    protected virtual void UpdateEndPhase(float f_NormalizedEndTime)
+    {
+
+    }
+
+    /// <summary>
+    /// 終了フェーズ完了時の処理です。
+    /// </summary>
+    protected virtual void OnEndPhaseComplete()
+    {
+
+    }
+
+    /// <summary>
+    /// ShaderOnlyEffect固有の通常更新処理です。
     /// </summary>
     protected virtual void UpdateShaderOnlyEffect()
-    {
-
-    }
-
-    /// <summary>
-    /// ShaderOnlyEffect固有の終了処理です。
-    /// 必要な場合だけ継承先で上書きします。
-    /// </summary>
-    protected virtual void EndShaderOnlyEffect()
     {
 
     }

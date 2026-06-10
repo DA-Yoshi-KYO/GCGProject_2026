@@ -26,17 +26,28 @@ public class CS_EffectShaderOnlyTestPlayer : MonoBehaviour
     [SerializeField]
     private bool bool_PlayOnStart = true;
 
-    [Header("生成から終了までの時間")]
+    [Header("呼び出し側からPositionを指定するか")]
+    [SerializeField]
+    private bool bool_SetPositionFromCaller = true;
+
+    [Header("呼び出し側からRotationを指定するか")]
+    [SerializeField]
+    private bool bool_SetRotationFromCaller = true;
+
+    [Header("呼び出し側からPlayEndTimeを指定するか")]
+    [SerializeField]
+    private bool bool_SetPlayEndTimeFromCaller = false;
+
     [SerializeField]
     private float f_PlayEndTime = 3.0f;
 
-    [Header("終了時に非表示にするか")]
+    [Header("呼び出し側からHideOnEndを指定するか")]
     [SerializeField]
-    private bool bool_EndActive = true;
+    private bool bool_SetHideOnEndFromCaller = false;
 
-    /// <summary>
-    /// 開始処理です。
-    /// </summary>
+    [SerializeField]
+    private bool bool_HideOnEnd = true;
+
     private void Start()
     {
         if (bool_PlayOnStart)
@@ -45,9 +56,6 @@ public class CS_EffectShaderOnlyTestPlayer : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 更新処理です。
-    /// </summary>
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.P))
@@ -61,9 +69,6 @@ public class CS_EffectShaderOnlyTestPlayer : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// テストEffectを再生します。
-    /// </summary>
     private void PlayTestEffect()
     {
         if (cs_EffectPlayer == null)
@@ -84,17 +89,29 @@ public class CS_EffectShaderOnlyTestPlayer : MonoBehaviour
         CSST_EffectPlayData csst_EffectPlayData = new CSST_EffectPlayData();
         csst_EffectPlayData.CSST_EffectPlayData_Init();
 
-        csst_EffectPlayData.SetPosition(v3_SpawnPosition);
-        csst_EffectPlayData.SetRotation(q_SpawnRotation);
-        csst_EffectPlayData.SetPlayEndTime(f_PlayEndTime);
-        csst_EffectPlayData.SetEndActive(bool_EndActive);
+        if (bool_SetPositionFromCaller)
+        {
+            csst_EffectPlayData.SetPosition(v3_SpawnPosition);
+        }
+
+        if (bool_SetRotationFromCaller)
+        {
+            csst_EffectPlayData.SetRotation(q_SpawnRotation);
+        }
+
+        if (bool_SetPlayEndTimeFromCaller)
+        {
+            csst_EffectPlayData.SetPlayEndTime(f_PlayEndTime);
+        }
+
+        if (bool_SetHideOnEndFromCaller)
+        {
+            csst_EffectPlayData.SetHideOnEnd(bool_HideOnEnd);
+        }
 
         cs_EffectPlayer.PlayEffect(csst_EffectPlayData);
     }
 
-    /// <summary>
-    /// テストEffectを終了します。
-    /// </summary>
     private void EndTestEffect()
     {
         if (cs_EffectPlayer == null)

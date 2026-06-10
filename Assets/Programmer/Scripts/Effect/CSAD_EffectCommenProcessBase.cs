@@ -18,7 +18,15 @@ using UnityEngine;
 public abstract class CSAD_EffectCommonProcessBase : MonoBehaviour, CSI_EffectPlayable
 {
     /// <summary>
-    /// 受け取ったEffect再生データです。
+    /// Prefab側で設定するEffect再生データです。
+    /// 呼び出し側のCSST_EffectPlayDataに値がない場合、この値を使用します。
+    /// </summary>
+    [Header("Prefab側Effect再生データ")]
+    [SerializeField]
+    protected CSST_EffectPlayData csst_DefaultEffectPlayData;
+
+    /// <summary>
+    /// 実際に再生で使うEffect再生データです。
     /// </summary>
     protected CSST_EffectPlayData csst_EffectPlayData;
 
@@ -32,6 +40,16 @@ public abstract class CSAD_EffectCommonProcessBase : MonoBehaviour, CSI_EffectPl
     /// ObjectPoolへ戻す時などに使います。
     /// </summary>
     private Action<CSAD_EffectCommonProcessBase> action_OnEffectEnd;
+
+    /// <summary>
+    /// 終了要求済みかどうかです。
+    /// </summary>
+    protected bool bool_IsEndRequested { get; private set; }
+
+    /// <summary>
+    /// 終了完了済みかどうかです。
+    /// </summary>
+    private bool bool_IsEndFinished;
 
     /// <summary>
     /// 初期化処理です。
@@ -53,10 +71,15 @@ public abstract class CSAD_EffectCommonProcessBase : MonoBehaviour, CSI_EffectPl
     /// <summary>
     /// Effectを再生します。
     /// </summary>
-    /// <param name="csst_effectData">Effect再生データ。</param>
+    /// <param name="csst_effectData">呼び出し側の再生データ。</param>
     public void PlayEffect(CSST_EffectPlayData csst_effectData)
     {
-        csst_EffectPlayData = csst_effectData;
+        bool_IsEndRequested = false;
+        bool_IsEndFinished = false;
+
+        StopAutoEndTimer();
+
+        csst_EffectPlayData = CreateMergedEffectPlayData(csst_effectData);
 
         gameObject.SetActive(true);
 
@@ -70,13 +93,122 @@ public abstract class CSAD_EffectCommonProcessBase : MonoBehaviour, CSI_EffectPl
     }
 
     /// <summary>
-    /// Effectを終了します。
+    /// 呼び出し側の再生データとPrefab側再生データを合成します。
+    /// 呼び出し側に値がある場合は呼び出し側を優先します。
+    /// </summary>
+    /// <param name="csst_effectData">呼び出し側の再生データ。</param>
+    /// <returns>合成後の再生データ。</returns>
+    private CSST_EffectPlayData CreateMergedEffectPlayData(CSST_EffectPlayData csst_effectData)
+    {
+        CSST_EffectPlayData csst_ResultData = new CSST_EffectPlayData();
+        csst_ResultData.CSST_EffectPlayData_Init();
+
+        if (csst_effectData.v3_Position.HasValue)
+        {
+            csst_ResultData.SetPosition(csst_effectData.v3_Position.Value);
+        }
+        else if (csst_DefaultEffectPlayData.v3_Position.HasValue)
+        {
+            csst_ResultData.SetPosition(csst_DefaultEffectPlayData.v3_Position.Value);
+        }
+
+        if (csst_effectData.q_Rotation.HasValue)
+        {
+            csst_ResultData.SetRotation(csst_effectData.q_Rotation.Value);
+        }
+        else if (csst_DefaultEffectPlayData.q_Rotation.HasValue)
+        {
+            csst_ResultData.SetRotation(csst_DefaultEffectPlayData.q_Rotation.Value);
+        }
+
+        if (csst_effectData.v3_Scale.HasValue)
+        {
+            csst_ResultData.SetScale(csst_effectData.v3_Scale.Value);
+        }
+        else if (csst_DefaultEffectPlayData.v3_Scale.HasValue)
+        {
+            csst_ResultData.SetScale(csst_DefaultEffectPlayData.v3_Scale.Value);
+        }
+
+        if (csst_effectData.f_PlayTime.HasValue)
+        {
+            csst_ResultData.SetPlayTime(csst_effectData.f_PlayTime.Value);
+        }
+        else if (csst_DefaultEffectPlayData.f_PlayTime.HasValue)
+        {
+            csst_ResultData.SetPlayTime(csst_DefaultEffectPlayData.f_PlayTime.Value);
+        }
+
+        if (csst_effectData.f_EndTime.HasValue)
+        {
+            csst_ResultData.SetEndTime(csst_effectData.f_EndTime.Value);
+        }
+        else if (csst_DefaultEffectPlayData.f_EndTime.HasValue)
+        {
+            csst_ResultData.SetEndTime(csst_DefaultEffectPlayData.f_EndTime.Value);
+        }
+
+        if (csst_effectData.b_LoopFlag.HasValue)
+        {
+            csst_ResultData.SetLoopFlag(csst_effectData.b_LoopFlag.Value);
+        }
+        else if (csst_DefaultEffectPlayData.b_LoopFlag.HasValue)
+        {
+            csst_ResultData.SetLoopFlag(csst_DefaultEffectPlayData.b_LoopFlag.Value);
+        }
+
+        if (csst_effectData.b_HideOnEnd.HasValue)
+        {
+            csst_ResultData.SetHideOnEnd(csst_effectData.b_HideOnEnd.Value);
+        }
+        else if (csst_DefaultEffectPlayData.b_HideOnEnd.HasValue)
+        {
+            csst_ResultData.SetHideOnEnd(csst_DefaultEffectPlayData.b_HideOnEnd.Value);
+        }
+
+        if (csst_effectData.f_PlayEndTime.HasValue)
+        {
+            csst_ResultData.SetPlayEndTime(csst_effectData.f_PlayEndTime.Value);
+        }
+        else if (csst_DefaultEffectPlayData.f_PlayEndTime.HasValue)
+        {
+            csst_ResultData.SetPlayEndTime(csst_DefaultEffectPlayData.f_PlayEndTime.Value);
+        }
+
+        return csst_ResultData;
+    }
+
+    /// <summary>
+    /// Effectの終了開始を行います。
+    /// 終了演出がある場合は派生クラス側で行い、
+    /// 終了演出完了後にFinishEndEffectを呼びます。
     /// </summary>
     public void EndEffect()
     {
+        if (bool_IsEndRequested)
+        {
+            return;
+        }
+
+        bool_IsEndRequested = true;
+
         StopAutoEndTimer();
 
         EndEffectProcess();
+    }
+
+    /// <summary>
+    /// 終了処理を完了します。
+    /// 終了演出完了後に派生クラスから呼びます。
+    /// </summary>
+    protected void FinishEndEffect()
+    {
+        if (bool_IsEndFinished)
+        {
+            return;
+        }
+
+        bool_IsEndFinished = true;
 
         ApplyCommonEndData();
 
@@ -85,7 +217,6 @@ public abstract class CSAD_EffectCommonProcessBase : MonoBehaviour, CSI_EffectPl
 
     /// <summary>
     /// 再生時の共通データを反映します。
-    /// nullの場合は反映しません。
     /// </summary>
     private void ApplyCommonPlayData()
     {
@@ -122,7 +253,8 @@ public abstract class CSAD_EffectCommonProcessBase : MonoBehaviour, CSI_EffectPl
     }
 
     /// <summary>
-    /// 自動終了処理を開始します。
+    /// 自動終了開始処理を開始します。
+    /// 生成時間 + 自動終了待機時間 の後に EndEffect を呼びます。
     /// </summary>
     private void StartAutoEndTimer()
     {
@@ -133,11 +265,20 @@ public abstract class CSAD_EffectCommonProcessBase : MonoBehaviour, CSI_EffectPl
             return;
         }
 
-        co_AutoEndCoroutine = StartCoroutine(AutoEndCoroutine());
+        float f_AutoEndDelay = 0.0f;
+
+        if (csst_EffectPlayData.f_PlayTime.HasValue)
+        {
+            f_AutoEndDelay += Mathf.Max(0.0f, csst_EffectPlayData.f_PlayTime.Value);
+        }
+
+        f_AutoEndDelay += Mathf.Max(0.0f, csst_EffectPlayData.f_PlayEndTime.Value);
+
+        co_AutoEndCoroutine = StartCoroutine(AutoEndCoroutine(f_AutoEndDelay));
     }
 
     /// <summary>
-    /// 自動終了処理を停止します。
+    /// 自動終了開始処理を停止します。
     /// </summary>
     private void StopAutoEndTimer()
     {
@@ -151,11 +292,13 @@ public abstract class CSAD_EffectCommonProcessBase : MonoBehaviour, CSI_EffectPl
     }
 
     /// <summary>
-    /// 指定時間後にEffectを終了します。
+    /// 指定時間後に終了開始します。
     /// </summary>
-    private IEnumerator AutoEndCoroutine()
+    /// <param name="f_delayTime">待機時間。</param>
+    /// <returns>Coroutine。</returns>
+    private IEnumerator AutoEndCoroutine(float f_delayTime)
     {
-        yield return new WaitForSeconds(csst_EffectPlayData.f_PlayEndTime.Value);
+        yield return new WaitForSeconds(f_delayTime);
 
         co_AutoEndCoroutine = null;
 
@@ -181,10 +324,11 @@ public abstract class CSAD_EffectCommonProcessBase : MonoBehaviour, CSI_EffectPl
     protected abstract void PlayEffectProcess();
 
     /// <summary>
-    /// 派生クラス側でEffectごとの終了処理を行います。
+    /// 派生クラス側でEffectごとの終了開始処理を行います。
+    /// 終了演出が無い場合は即終了します。
     /// </summary>
     protected virtual void EndEffectProcess()
     {
-
+        FinishEndEffect();
     }
 }
