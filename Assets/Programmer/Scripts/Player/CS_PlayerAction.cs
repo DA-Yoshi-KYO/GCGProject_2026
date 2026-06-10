@@ -14,6 +14,7 @@
  * 2026-05-24 | インタラクトの範囲を円柱化：吉田
  * 2026-05-25 | SEを追加：吉田
  * 2026-05-25 | インタラクトの範囲に入った泥棒に通知処理：吉田
+ * 2026-06-11 | ギミック設置時のEffect再生処理を追加：吉本
  */
 using System.Collections.Generic;
 using Unity.VisualScripting;
