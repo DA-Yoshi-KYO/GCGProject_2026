@@ -9,37 +9,26 @@ using UnityEngine;
 =====================================+
 */
 
+/// <summary>
+/// ShaderOnly系Effectの共通処理です。
+/// 自分自身についているRendererへShader値を渡します。
+/// </summary>
 public abstract class CS_EffectShaderOnly : CSAD_EffectCommonProcessBase
 {
     /// <summary>
+    /// Shaderに渡す再生時間のProperty IDです。
+    /// </summary>
+    private static readonly int int_EffectTimePropertyId = Shader.PropertyToID("_EffectTime");
+
+    /// <summary>
+    /// Shaderに渡す再生状態のProperty IDです。
+    /// </summary>
+    private static readonly int int_EffectPlayPropertyId = Shader.PropertyToID("_EffectPlay");
+
+    /// <summary>
     /// Effectを表示するRendererです。
     /// </summary>
-    [Header("Effectを表示するRenderer")]
-    [SerializeField]
     protected Renderer rd_EffectRenderer;
-
-    /// <summary>
-    /// Shaderに渡す再生時間のProperty名です。
-    /// </summary>
-    [Header("Shader Property Name")]
-    [SerializeField]
-    protected string str_EffectTimePropertyName = "_EffectTime";
-
-    /// <summary>
-    /// Shaderに渡す再生状態のProperty名です。
-    /// </summary>
-    [SerializeField]
-    protected string str_EffectPlayPropertyName = "_EffectPlay";
-
-    /// <summary>
-    /// 再生中かどうかです。
-    /// </summary>
-    protected bool b_IsPlaying;
-
-    /// <summary>
-    /// 現在の再生時間です。
-    /// </summary>
-    protected float f_CurrentPlayTime;
 
     /// <summary>
     /// MaterialPropertyBlockです。
@@ -47,13 +36,23 @@ public abstract class CS_EffectShaderOnly : CSAD_EffectCommonProcessBase
     protected MaterialPropertyBlock mpb_EffectMaterialPropertyBlock;
 
     /// <summary>
-    /// 初期化処理
+    /// 再生中かどうかです。
+    /// </summary>
+    protected bool bool_IsPlaying;
+
+    /// <summary>
+    /// 現在の再生時間です。
+    /// </summary>
+    protected float f_CurrentPlayTime;
+
+    /// <summary>
+    /// 初期化処理です。
     /// </summary>
     public override void InitEffect()
     {
         if (rd_EffectRenderer == null)
         {
-            rd_EffectRenderer = GetComponentInChildren<Renderer>(true);
+            rd_EffectRenderer = GetComponent<Renderer>();
         }
 
         if (mpb_EffectMaterialPropertyBlock == null)
@@ -63,18 +62,18 @@ public abstract class CS_EffectShaderOnly : CSAD_EffectCommonProcessBase
     }
 
     /// <summary>
-    /// 毎フレーム更新処理
+    /// 更新処理です。
     /// </summary>
     protected virtual void Update()
     {
-        if (b_IsPlaying == false)
+        if (bool_IsPlaying == false)
         {
             return;
         }
 
         f_CurrentPlayTime += Time.deltaTime;
 
-        SetShaderFloat(str_EffectTimePropertyName, f_CurrentPlayTime);
+        SetShaderFloat(int_EffectTimePropertyId, f_CurrentPlayTime);
 
         UpdateShaderOnlyEffect();
     }
@@ -84,11 +83,17 @@ public abstract class CS_EffectShaderOnly : CSAD_EffectCommonProcessBase
     /// </summary>
     protected override void PlayEffectProcess()
     {
-        b_IsPlaying = true;
+        if (rd_EffectRenderer == null)
+        {
+            Debug.LogWarning("[CS_EffectShaderOnly] Rendererがありません : " + gameObject.name);
+            return;
+        }
+
+        bool_IsPlaying = true;
         f_CurrentPlayTime = 0.0f;
 
-        SetShaderFloat(str_EffectPlayPropertyName, 1.0f);
-        SetShaderFloat(str_EffectTimePropertyName, 0.0f);
+        SetShaderFloat(int_EffectPlayPropertyId, 1.0f);
+        SetShaderFloat(int_EffectTimePropertyId, 0.0f);
 
         PlayShaderOnlyEffect();
     }
@@ -98,9 +103,9 @@ public abstract class CS_EffectShaderOnly : CSAD_EffectCommonProcessBase
     /// </summary>
     protected override void EndEffectProcess()
     {
-        b_IsPlaying = false;
+        bool_IsPlaying = false;
 
-        SetShaderFloat(str_EffectPlayPropertyName, 0.0f);
+        SetShaderFloat(int_EffectPlayPropertyId, 0.0f);
 
         EndShaderOnlyEffect();
     }
@@ -108,9 +113,9 @@ public abstract class CS_EffectShaderOnly : CSAD_EffectCommonProcessBase
     /// <summary>
     /// Shaderへfloat値を渡します。
     /// </summary>
-    /// <param name="str_propertyName">Shader Property名。</param>
+    /// <param name="int_propertyId">Shader Property ID。</param>
     /// <param name="f_value">設定する値。</param>
-    protected void SetShaderFloat(string str_propertyName, float f_value)
+    protected void SetShaderFloat(int int_propertyId, float f_value)
     {
         if (rd_EffectRenderer == null)
         {
@@ -123,7 +128,7 @@ public abstract class CS_EffectShaderOnly : CSAD_EffectCommonProcessBase
         }
 
         rd_EffectRenderer.GetPropertyBlock(mpb_EffectMaterialPropertyBlock);
-        mpb_EffectMaterialPropertyBlock.SetFloat(str_propertyName, f_value);
+        mpb_EffectMaterialPropertyBlock.SetFloat(int_propertyId, f_value);
         rd_EffectRenderer.SetPropertyBlock(mpb_EffectMaterialPropertyBlock);
     }
 

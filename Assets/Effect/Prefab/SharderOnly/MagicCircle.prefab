@@ -10,10 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7464062737429334774}
   - component: {fileID: 2868336821702428489}
-  - component: {fileID: 2525470770027994085}
-  - component: {fileID: 4518518643748887828}
-  - component: {fileID: 78578949394234452}
-  - component: {fileID: 7535315446314247593}
+  - component: {fileID: -8440752667188568641}
   m_Layer: 0
   m_Name: MagicCircle
   m_TagString: Untagged
@@ -99,7 +96,7 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &2525470770027994085
+--- !u!114 &-8440752667188568641
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -108,106 +105,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 6919014136174155209}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 42f5910037d81054aa5dc2a31b89879c, type: 3}
+  m_Script: {fileID: 11500000, guid: 85bed44d5a1a51a4685fd44fe38120c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  targetRenderers: []
-  revealSeconds: 1
-  revealCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  playOnEnable: 1
---- !u!114 &4518518643748887828
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6919014136174155209}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3337b70944a764a4fb722ca4b120c142, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  targetRenderers: []
-  hideSeconds: 1
-  hideCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  setInactiveAfterHide: 1
---- !u!114 &78578949394234452
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6919014136174155209}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bb9212e69eb193b42a494e9a8c799fbe, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  effectType: 0
-  defaultPlaySpeed: 1
-  isDefaultLifeTimeInfinite: 1
-  defaultLifeTime: 0
---- !u!114 &7535315446314247593
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6919014136174155209}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 013bc7832885f8442ae3678f96937d65, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  bool_IsIncludeInactiveChildren: 1
-  bool_IsUseMethodNameFallback: 1
-  bool_IsActivateOnPlay: 1
 --- !u!1001 &327976186843051843
 PrefabInstance:
   m_ObjectHideFlags: 0

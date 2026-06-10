@@ -9,6 +9,10 @@ using UnityEngine;
 =====================================+
 */
 
+/// <summary>
+/// ShaderOnlyEffectの標準再生クラスです。
+/// Prefabにはこのクラスを付けます。
+/// </summary>
 public class CS_EffectShaderOnlyDefault : CS_EffectShaderOnly
 {
 

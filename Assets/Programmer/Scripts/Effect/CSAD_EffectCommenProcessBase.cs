@@ -1,20 +1,24 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
 /*
 +=====================================
  ファイル名 : CSAD_EffectCommonProcessBase.cs
- 概要     : Effectの共通処理の基底クラス受けとるEffect再生データを保持するクラス
+ 概要     : Effectの共通処理の基底クラス
  作者     : ヨシモト リョウ
  履歴     : 2026/06/10 新規作成
 =====================================+
 */
 
-public abstract class CSAD_EffectCommonProcessBase : MonoBehaviour
+/// <summary>
+/// Effectの共通処理を行う基底クラスです。
+/// Template Methodとして、再生と終了の流れを固定します。
+/// </summary>
+public abstract class CSAD_EffectCommonProcessBase : MonoBehaviour, CSI_EffectPlayable
 {
     /// <summary>
     /// 受け取ったEffect再生データです。
-    /// 実行時用の一時データとして保持します。
     /// </summary>
     protected CSST_EffectPlayData csst_EffectPlayData;
 
@@ -24,7 +28,13 @@ public abstract class CSAD_EffectCommonProcessBase : MonoBehaviour
     private Coroutine co_AutoEndCoroutine;
 
     /// <summary>
-    /// 初期化処理
+    /// Effect終了時に通知する処理です。
+    /// ObjectPoolへ戻す時などに使います。
+    /// </summary>
+    private Action<CSAD_EffectCommonProcessBase> action_OnEffectEnd;
+
+    /// <summary>
+    /// 初期化処理です。
     /// </summary>
     public virtual void InitEffect()
     {
@@ -32,12 +42,23 @@ public abstract class CSAD_EffectCommonProcessBase : MonoBehaviour
     }
 
     /// <summary>
-    /// 再生処理
+    /// Effect終了時の通知処理を設定します。
+    /// </summary>
+    /// <param name="action_onEffectEnd">Effect終了時に呼ぶ処理。</param>
+    public void SetOnEffectEndAction(Action<CSAD_EffectCommonProcessBase> action_onEffectEnd)
+    {
+        action_OnEffectEnd = action_onEffectEnd;
+    }
+
+    /// <summary>
+    /// Effectを再生します。
     /// </summary>
     /// <param name="csst_effectData">Effect再生データ。</param>
     public void PlayEffect(CSST_EffectPlayData csst_effectData)
     {
         csst_EffectPlayData = csst_effectData;
+
+        gameObject.SetActive(true);
 
         InitEffect();
 
@@ -49,7 +70,7 @@ public abstract class CSAD_EffectCommonProcessBase : MonoBehaviour
     }
 
     /// <summary>
-    /// 終了処理
+    /// Effectを終了します。
     /// </summary>
     public void EndEffect()
     {
@@ -58,11 +79,13 @@ public abstract class CSAD_EffectCommonProcessBase : MonoBehaviour
         EndEffectProcess();
 
         ApplyCommonEndData();
+
+        NotifyEffectEnd();
     }
 
     /// <summary>
     /// 再生時の共通データを反映します。
-    /// nullの場合は何もしません。
+    /// nullの場合は反映しません。
     /// </summary>
     private void ApplyCommonPlayData()
     {
@@ -137,6 +160,19 @@ public abstract class CSAD_EffectCommonProcessBase : MonoBehaviour
         co_AutoEndCoroutine = null;
 
         EndEffect();
+    }
+
+    /// <summary>
+    /// Effect終了を通知します。
+    /// </summary>
+    private void NotifyEffectEnd()
+    {
+        if (action_OnEffectEnd == null)
+        {
+            return;
+        }
+
+        action_OnEffectEnd(this);
     }
 
     /// <summary>
