@@ -119,6 +119,12 @@ public class CS_RoomBlockRandomGenerator : MonoBehaviour
 
         yield return null;
 
+
+
+        // ワープ生成処理
+
+
+
         cs_RoomBlockPrefabGenerator.CreatePlayerAtFirstRoomStartPoint();
 
         bool_IsRuntimeRegenerating = false;
