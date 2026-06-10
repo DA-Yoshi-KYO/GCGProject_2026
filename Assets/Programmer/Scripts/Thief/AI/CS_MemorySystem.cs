@@ -365,7 +365,7 @@ public class CS_MemorySystem
         }
 
         // 以下は構築しているルート移動を優先させる
-        if (!thiefAI.read_AStarSystem.HasRoute) return;
+        if (thiefAI.read_AStarSystem.HasRoute) return;
 
         //ーーーーーーーーーーーーーーーーーーーーーーーー
         //--- 音に反応している場合
@@ -866,6 +866,12 @@ public class CS_MemorySystem
                     if (!connectDirs.Contains(dir)) connectDirs.Add(dir);
                 }
             }
+
+            // それでもリストが空の場合は、現在の部屋の接続している方向をリストに追加
+            if (connectDirs.Count == 0)
+            {
+                connectDirs = roomCreatePoint.GetConnectDirections();
+            }
         }
 
         // 宝部屋判定
@@ -898,7 +904,14 @@ public class CS_MemorySystem
             }
         }
 
-        // 接続している部屋の方向をランダムに選択
+        // connectDirs が空になる可能性があるため、念のためチェックして早期リターンする
+        if (connectDirs == null || connectDirs.Count == 0)
+        {
+            Debug.LogWarning("【泥棒】NextDoorElection: 選択可能な接続方向が見つかりませんでした。処理を中断します。", thiefAI.gameObject);
+            Debug.LogWarning("名前：" + thiefAI.gameObject.name);
+            return;
+        }
+
         int randomIndex = Random.Range(0, connectDirs.Count);
 
         if (hasUnvisitedNextRooms)
@@ -913,7 +926,7 @@ public class CS_MemorySystem
                 {
                     if (connectDirs[i] == unchosenDoor)
                     {
-                        // すでに記憶している選択しなかった方向のドアの場合は、重複して記憶しないようにスキップする
+                        //すでに記憶している選択しなかった方向のドアの場合は、重複して記憶しないようにスキップする
                         continue;
                     }
                 }
@@ -935,7 +948,7 @@ public class CS_MemorySystem
                 {
                     if (dir == connectDirs[randomIndex])
                     {
-                        // どの部屋のドアかを記憶
+                        //どの部屋のドアかを記憶
                         targetRoomNode = room.Key;
                         // 記憶から選択した方向のドアを削除
                         room.Value.unchosenDoors.Remove(dir);
@@ -948,6 +961,12 @@ public class CS_MemorySystem
             }
 
             // 選択したドアの位置を取得
+            if (targetRoomNode == null)
+            {
+                Debug.LogWarning("【泥棒】NextDoorElection: 選択したドアの所有部屋が見つかりませんでした。処理を中断します。", thiefAI.gameObject);
+                return;
+            }
+
             Transform targetDoorPos = targetRoomNode.GetDirectionWallToDoor(connectDirs[randomIndex]);
 
             if (targetDoorPos == null)

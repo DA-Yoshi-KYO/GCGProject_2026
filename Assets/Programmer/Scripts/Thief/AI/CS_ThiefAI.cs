@@ -59,7 +59,7 @@ public class CS_ThiefAI : MonoBehaviour
         [Tooltip("気絶状態")]
         Stunned
     }
-    [Tooltip("現在の行動状態")]
+    [SerializeField, Tooltip("現在の行動状態")]
     private ThiefState currentState;
     public ThiefState read_CurrentState => currentState;
 
@@ -92,6 +92,8 @@ public class CS_ThiefAI : MonoBehaviour
     private int exitAfterStunTime;
     [Tooltip("気絶後の経過時間")]
     private float elapsedTimeAfterStun;
+    [Tooltip("気絶状態の更新処理を実行するかどうか")]
+    private bool isUpdatingStunState;
 
     [Tooltip("ドロップするソウルの数")]
     private int soulDropCount;
@@ -270,14 +272,14 @@ public class CS_ThiefAI : MonoBehaviour
                 Stunned();
                 break;
         }
-
-        // 移動システムのスタックを修正する処理
-        moveSystem.FixStuck();
     }
 
     // 探索状態の行動
     private void Explore()
     {
+        // 移動システムのスタックを修正する処理
+        moveSystem.FixStuck();
+
         thiefReaction.ClearReaction();
 
         // 探索対象を決定
@@ -300,7 +302,7 @@ public class CS_ThiefAI : MonoBehaviour
         heldTreasure.transform.localPosition = new Vector3(0.0f, this.transform.position.y, 0.0f); // 宝物の位置を泥棒の位置に合わせる
 
         // 状態を逃走に変更
-        currentState = ThiefState.Escape;
+        ChangeStatus(ThiefState.Escape);
 
         // 取得した宝物を他の泥棒の記憶から消去する
         GameObject.FindObjectOfType<CS_ThiefManager>().EraseTheMemoryToAllThief(heldTreasure.GetComponent<CS_ThiefTarget>());
@@ -311,6 +313,9 @@ public class CS_ThiefAI : MonoBehaviour
     // 逃走状態の行動
     private void Escape()
     {
+        // 移動システムのスタックを修正する処理
+        moveSystem.FixStuck();
+
         // 宝物を見つけたときのリアクションに変更
         thiefReaction.ChangeReaction(CS_ThiefReaction.ThiefReactionType.FoundTreasure);
 
@@ -334,11 +339,11 @@ public class CS_ThiefAI : MonoBehaviour
     // 気絶状態の行動
     private void Stunned()
     {
-        // ナビメッシュエージェントを停止させる
-        moveSystem.read_NavMeshAgent.isStopped = true;
+        // ナビメッシュエージェントを停止させる（安全に）
+        SetAgentStopped(true);
 
         // 経過時間を加算
-        elapsedTimeAfterStun += Time.deltaTime;
+        if(isUpdatingStunState) elapsedTimeAfterStun += Time.deltaTime;
 
         // 耐久値が残っている場合は、気絶時間が経過したら無敵時間を付与して、状態を探索に戻す
         if (durability > 0)
@@ -347,7 +352,7 @@ public class CS_ThiefAI : MonoBehaviour
             if (elapsedTimeAfterStun >= damageStunTime)
             {
                 currentState = ThiefState.Explore; // 状態を探索に戻す
-                moveSystem.read_NavMeshAgent.isStopped = false; // ナビメッシュエージェントを再開させる
+                SetAgentStopped(false); // ナビメッシュエージェントを再開させる（安全に）
             }
         }
         // 耐久力が0以下の場合は、時間経過後に退場する
@@ -479,6 +484,68 @@ public class CS_ThiefAI : MonoBehaviour
         if (animator != null) animator.SetTrigger(parameter);
     }
 
+    // == 落とし穴用項目
+    /// <summary>
+    /// 落とし穴ギミックにハマった
+    /// </summary>
+    [ContextMenu("落とし穴ギミックにハマったときの処理")]
+    public void PitFallStart()
+    {
+        // 状態を気絶に変更
+        ChangeStatus(ThiefState.Stunned);
+        // 気絶時間の経過時間をリセット
+        elapsedTimeAfterStun = 0.0f;
+        // 気絶状態の更新処理を実行するようにする
+        isUpdatingStunState = false;
+
+        // NavMeshAgentを停止させる
+        moveSystem.read_NavMeshAgent.ResetPath();
+        moveSystem.read_NavMeshAgent.enabled = false;
+        // SmartNavAgentも停止させる
+        moveSystem.read_SmartNavAgent.enabled = false;
+
+        // 落とし穴にハマったときの見た目の位置調整
+        // 体の8割ほど埋める
+        Vector3 pos = transform.position;
+        transform.position = new Vector3(pos.x, pos.y - transform.localScale.y * 0.8f, pos.z);
+    }
+    /// <summary>
+    /// 落とし穴ギミックから抜けた
+    /// </summary>
+    [ContextMenu("落とし穴ギミックから抜けたときの処理")]
+    public void PitFallEnd()
+    {
+        // 気絶状態の更新処理を実行するようにする
+        isUpdatingStunState = true; 
+        // NavMeshAgentを再度有効にする
+        moveSystem.read_NavMeshAgent.enabled = true;
+        // SmartNavAgentも再度有効にする
+        moveSystem.read_SmartNavAgent.enabled = true;
+    }
+
+    /// <summary>
+    /// ナビメッシュエージェントを安全に停止させる処理
+    /// </summary>
+    /// <param name="stop">停止させるかどうか</param>
+    private void SetAgentStopped(bool stop)
+    {
+        var agent = moveSystem?.read_NavMeshAgent;
+        if (agent == null) return;
+
+        // エージェントが無効化されている場合は操作しない（PitFall中など）
+        if (!agent.enabled) return;
+
+        // NavMesh上に置かれていないエージェントに対して isStopped を呼ぶと例外になるためチェック
+        if (agent.isOnNavMesh)
+        {
+            agent.isStopped = stop;
+        }
+        else
+        {
+            // 安全のためログを残す（頻発する場合は削除）
+            Debug.LogWarning("SetAgentStopped: NavMeshAgent が NavMesh 上にありません。操作をスキップします。", this);
+        }
+    }
 
     private void OnDrawGizmos()
     {

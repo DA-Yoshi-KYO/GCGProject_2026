@@ -123,10 +123,10 @@ public class CS_RoomMovePoint : MonoBehaviour
     }
 
     /// <summary>
-    /// Triggerに入ったオブジェクトを確認します。
+    /// Triggerに入ったオブジェクトが移動対象タグを持っているか確認し、移動処理を行います。
     /// </summary>
     /// <param name="other">Triggerに入ったCollider。</param>
-    private void OnTriggerEnter(Collider other)
+    private void OnTriggerStay(Collider other)
     {
         Debug.Log("[RoomMovePoint] Triggerに入りました : " + other.name);
 

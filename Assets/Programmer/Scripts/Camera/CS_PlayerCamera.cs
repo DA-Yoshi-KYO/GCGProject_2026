@@ -334,28 +334,5 @@ public class CS_PlayerCamera : MonoBehaviour
         transitionCamera = TransitionCamera.None;   // カメラの遷移終了
     }
 
-    //ワープ用のカメラ処理関数
-    public void RoomCameraRefresh()
-    {
-        // 動かした前のカメラを無効にして、元の位置に戻す
-        roomCamera = roomCameraObject.GetComponent<CS_RoomCamera>();
-        roomCameraObject.GetComponent<Camera>().enabled = false;
-        roomCameraObject.transform.position = roomCamera.initPos;
-        roomCameraObject.transform.rotation = roomCamera.initRotate;
-
-        // カメラを新しい部屋のカメラに切り替える
-        currentRoom = playerData.currentRoomData.GetPlayerRoomData();
-
-        Transform roomCenterTransform = currentRoom.transform.GetChild(0).Find("Center");
-        if (roomCenterTransform == null) roomCenter = currentRoom.transform.position;
-        else roomCenter = roomCenterTransform.position;
-
-        roomCameraObject = currentRoom.transform.GetComponentInChildren<Camera>().gameObject;
-        roomCamera = roomCameraObject.GetComponent<CS_RoomCamera>();
-        roomCameraObject.GetComponent<Camera>().enabled = true;
-       
-        transitionCamera = TransitionCamera.None;   // カメラの遷移終了
-    }
-
     //========================
 }
