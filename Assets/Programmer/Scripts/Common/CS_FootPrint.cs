@@ -95,7 +95,7 @@ public class CS_FootPrint : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("No ground" + "SpawnPos: " + spawnPos);
+            //Debug.LogWarning("No ground" + "SpawnPos: " + spawnPos);
         }
     }
 }
