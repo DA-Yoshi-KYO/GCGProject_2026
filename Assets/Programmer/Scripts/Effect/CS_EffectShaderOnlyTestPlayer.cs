@@ -44,9 +44,14 @@ public class CS_EffectShaderOnlyTestPlayer : MonoBehaviour
     [Header("呼び出し側からHideOnEndを指定するか")]
     [SerializeField]
     private bool b_SetHideOnEndFromCaller = false;
-
     [SerializeField]
     private bool b_HideOnEnd = true;
+
+    [Header("呼び出し側からPool最大数を指定するか")]
+    [SerializeField]
+    private bool b_SetMaxPoolCountFromCaller = false;
+    [SerializeField]
+    private int n_OverrideMaxPoolCount = 3;
 
     private void Start()
     {
@@ -107,6 +112,15 @@ public class CS_EffectShaderOnlyTestPlayer : MonoBehaviour
         if (b_SetHideOnEndFromCaller)
         {
             csst_EffectPlayData.SetHideOnEnd(b_HideOnEnd);
+        }
+
+        if (b_SetMaxPoolCountFromCaller)
+        {
+            cs_EffectPlayer.PlayEffect(
+                csst_EffectPlayData,
+                n_OverrideMaxPoolCount);
+
+            return;
         }
 
         cs_EffectPlayer.PlayEffect(csst_EffectPlayData);
