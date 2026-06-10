@@ -7,7 +7,11 @@ public class EnemyIcon : MonoBehaviour
     [SerializeField] private Image hp;
 
     private CS_ThiefAI thiefAI;
-
+    private CS_RoomPlayerPosition roomPlayerPosition;
+    private void Start()
+    {
+        roomPlayerPosition = GameObject.Find("RoomManager").GetComponent<CS_RoomPlayerPosition>();
+    }
     void Update()
     {
         if (thiefAI == null)
@@ -21,6 +25,21 @@ public class EnemyIcon : MonoBehaviour
         if (max <= 0) return;
 
         hp.fillAmount = Mathf.Clamp01((float)current / max);
+
+        if (roomPlayerPosition == null)
+        {
+            return;
+        }
+            // 同じ部屋にいる場合サイズを大きくする
+        if (thiefAI.read_MemorySystem.read_CurrentRoomPoint == roomPlayerPosition.PlayerRoomData.transform)
+        {
+            transform.localScale = Vector3.Lerp(transform.localScale, Vector3.one * 1.1f, Time.deltaTime * 5f);
+        }
+        else
+        {
+            transform.localScale = Vector3.Lerp(transform.localScale, Vector3.one * 0.9f, Time.deltaTime * 5f);
+        }
+
     }
 
     public void SetScript(CS_ThiefAI script)
