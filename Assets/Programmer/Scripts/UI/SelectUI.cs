@@ -100,7 +100,7 @@ public class GimmickSelectUI : MonoBehaviour
 
             RefreshImages(idx);
 
-            float offset = slotSpacing * -slideDir;
+            float offset = slotSpacing * slideDir;
             centerFrom = centerAnchor + new Vector2(offset, 0f);
             leftFrom = leftAnchor + new Vector2(offset, 0f);
             rightFrom = rightAnchor + new Vector2(offset, 0f);

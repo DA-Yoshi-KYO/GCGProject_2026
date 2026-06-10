@@ -12,14 +12,11 @@ public class EnemyIcon : MonoBehaviour
     {
         if (thiefAI == null)
         {
-            Debug.Log("[EnemyIcon] Update: thiefAI is null, skipping update");
             return;
         }
 
             int current = thiefAI.read_Durability;
         int max = thiefAI.read_MaxDurability;
-
-        Debug.Log($"[EnemyIcon] Update: current={current}, max={max}");
 
         if (max <= 0) return;
 

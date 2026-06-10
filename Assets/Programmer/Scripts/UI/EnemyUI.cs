@@ -68,7 +68,6 @@ public class EnemyUI : MonoBehaviour
     // ============================================================
     private void AddIcon(int index)
     {
-        Debug.Log($"[EnemyUI] アイコン追加: 敵インデックス {index}");
         // プレハブを複製
         GameObject icon = Instantiate(enemyIconPrefab, transform);
 
