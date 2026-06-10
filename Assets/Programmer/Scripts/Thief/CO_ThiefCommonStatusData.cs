@@ -50,10 +50,6 @@ public class CO_ThiefCommonStatusData : ScriptableObject
     [Tooltip("泥棒が気絶した後のフェード時間"), Min(0)]
     public int fadeAfterStunTime;
 
-    [Header("泥棒のリアクションスプライトリスト")]
-    [Tooltip("泥棒のリアクションスプライトリスト")]
-    public List<Sprite> reactionSprites;
-
     [Header("泥棒のリアクションUI用スプライトリスト")]
     [Tooltip("泥棒のリアクションUI用スプライトリスト")]
     public List<Sprite> reactionUISprites;

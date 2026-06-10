@@ -54,7 +54,7 @@ public class CS_RoomMoveConnection
     /// <summary>
     /// 敵出入口用データが設定されているか取得します。
     /// </summary>
-    public bool HasEnemyEntryData => IsEnemyEntryDoor && cs_RoomEnemyEntryDataSO != null;
+    private bool HasEnemyEntryData => IsEnemyEntryDoor && cs_RoomEnemyEntryDataSO != null;
 
     /// <summary>
     /// 移動先RoomCreatePointを取得します。
@@ -77,12 +77,28 @@ public class CS_RoomMoveConnection
     /// <returns>最大出現数。</returns>
     public int GetMaxEnemySpawnCount()
     {
+        // 敵出入口用データが設定されていない場合
         if (!HasEnemyEntryData)
         {
-            return 0;
+            // ここでステージマネージャーからデータを設定する
+            CS_StageManager cs_StageManager = GameObject.FindObjectOfType<CS_StageManager>();
+            // ステージマネージャーが存在する場合は、データを設定してもらう
+            if (cs_StageManager != null) cs_StageManager.SetStageEnemyEntryData();
+
+            // 再度確認して、データが設定されていない場合は0を返す
+            if (!HasEnemyEntryData) return 0;
         }
 
         return cs_RoomEnemyEntryDataSO.GetMaxEnemySpawnCount();
+    }
+
+    /// <summary>
+    /// 敵出入口用データを設定します。
+    /// </summary>
+    /// <param name="newData">新しい敵出入口用データ。</param>
+    public void SetEnemyEntryData(CSS_RoomEnemyEntryData newData)
+    {
+        cs_RoomEnemyEntryDataSO = newData;
     }
 
     /// <summary>
