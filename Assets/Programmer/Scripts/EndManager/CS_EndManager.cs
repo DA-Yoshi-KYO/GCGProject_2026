@@ -49,7 +49,7 @@ public class CS_EndManager : MonoBehaviour
             int thiefCount = thiefParent.transform.childCount;
 
             // WaveManagerを取得
-            CS_WaveManager waveManager = GameObject.FindObjectOfType< CS_WaveManager>();
+            CS_StageManager waveManager = GameObject.FindObjectOfType< CS_StageManager>();
 
             // 泥棒がいなくなった場合
             if (thiefCount == 0 && waveManager.IsMaxWave())
