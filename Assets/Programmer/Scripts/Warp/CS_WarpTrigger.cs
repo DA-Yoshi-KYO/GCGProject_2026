@@ -9,13 +9,22 @@ using UnityEngine;
 
 public class CS_WarpTrigger : MonoBehaviour
 {
-    private float warpDisableTime = 5.0f;
+    [Header("ワープのクールタイム")][SerializeField]public float warpCoolTime = 1.0f;
 
     private CS_WarpPoint selfWarpPoint;
+
+    private CS_RoomPlayerPosition roomPlayerPosition;
 
     private void Start()
     {
         selfWarpPoint = GetComponent<CS_WarpPoint>();
+
+        roomPlayerPosition = GameObject.Find("RoomManager").GetComponent<CS_RoomPlayerPosition>();
+        if (roomPlayerPosition == null)
+        {
+            Debug.Log("RoomManagerが見つかりませんでした");
+            return;
+        }
     }
 
 
@@ -23,6 +32,7 @@ public class CS_WarpTrigger : MonoBehaviour
     {
         if (selfWarpPoint.warping)
         {
+            //ワープのクールタイム
             selfWarpPoint.warpTimeCount -= Time.deltaTime;
             if (selfWarpPoint.warpTimeCount <= 0.0f)
             {
@@ -40,19 +50,40 @@ public class CS_WarpTrigger : MonoBehaviour
             return;
 
         CS_WarpPoint wp = GetComponent<CS_WarpPoint>();
+        CharacterController controller = other.GetComponent<CharacterController>();
 
         if (wp == null || wp.targetPoint == null)
             return;
 
-        Debug.Log("BeforePos" + other.transform.position);
+        //プレイヤーの座標更新
+        Time.timeScale = 0.0f;
+        controller.enabled = false;
 
-        other.transform.position = wp.targetPoint.transform.position;
+        var rb = other.attachedRigidbody;
+        rb.isKinematic = true;
+        rb.velocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
 
-        Debug.Log("AfterPos" + other.transform.position);
+        Vector3 offset = wp.targetPoint.transform.forward * 1.0f;
+        other.transform.position = wp.targetPoint.transform.position + offset;
+
+        Time.timeScale = 1.0f;
+        rb.isKinematic = false;
+        controller.enabled = true;
+
+        //カメラ更新
+        roomPlayerPosition.RefreshPlayerRoomData();
+        CS_PlayerCamera playerCamera = other.GetComponent<CS_PlayerCamera>();
+        if (playerCamera == null)
+        {
+            Debug.Log("CS＿PlayerCameraが見つかりませんでした");
+            return;
+        }
+        playerCamera.RoomCameraRefresh();
 
         selfWarpPoint.warping = true;
         wp.targetPoint.warping = true;
-        selfWarpPoint.warpTimeCount = warpDisableTime;
-        wp.targetPoint.warpTimeCount = warpDisableTime;
+        selfWarpPoint.warpTimeCount = warpCoolTime;
+        wp.targetPoint.warpTimeCount = warpCoolTime;
     }
 }
