@@ -37,5 +37,10 @@ public enum CSE_EffectType
     /// <summary>
     /// ShaderやMaterialだけで動くEffectです。
     /// </summary>
-    ShaderOnly
+    ShaderOnly,
+
+    /// <summary>
+    /// エフェクシアを使用するEffectです。
+    /// </summary>
+    Effekseer
 }
