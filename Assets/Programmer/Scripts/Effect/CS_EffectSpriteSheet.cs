@@ -25,6 +25,25 @@ public abstract class CS_EffectSpriteSheet : CSAD_EffectCommonProcessBase
     [SerializeField]
     protected Sprite[] sp_EffectSprites;
 
+    [Header("Billboard設定")]
+    [SerializeField]
+    protected bool bool_IsBillboard = false;
+
+    /// <summary>
+    /// Billboardで向く対象Transformです。
+    /// nullの場合はMainCameraを使用します。
+    /// </summary>
+    protected Transform tr_BillboardTarget;
+
+    /// <summary>
+    /// Billboard対象を外部から設定します。
+    /// </summary>
+    /// <param name="tr_Target">Billboard対象Transform。</param>
+    public void SetBillboardTarget(Transform tr_Target)
+    {
+        tr_BillboardTarget = tr_Target;
+    }
+
     /// <summary>
     /// 現在の再生時間です。
     /// </summary>
@@ -53,12 +72,45 @@ public abstract class CS_EffectSpriteSheet : CSAD_EffectCommonProcessBase
     /// </summary>
     protected virtual void Update()
     {
+        if (bool_IsBillboard)
+        {
+            UpdateBillboard();
+        }
+
         if (bool_IsPlaying == false)
         {
             return;
         }
 
         UpdateSpriteSheet();
+    }
+
+    /// <summary>
+    /// Billboard処理です。
+    /// </summary>
+    private void UpdateBillboard()
+    {
+        if (tr_BillboardTarget == null)
+        {
+            Camera mainCamera = Camera.main;
+
+            if (mainCamera == null)
+            {
+                return;
+            }
+
+            tr_BillboardTarget = mainCamera.transform;
+        }
+
+        Vector3 v3_DirectionToCamera =
+            transform.position - tr_BillboardTarget.position;
+
+        if (v3_DirectionToCamera.sqrMagnitude <= 0.0001f)
+        {
+            return;
+        }
+
+        transform.rotation = Quaternion.LookRotation(v3_DirectionToCamera.normalized);
     }
 
     /// <summary>
