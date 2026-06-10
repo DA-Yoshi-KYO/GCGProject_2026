@@ -118,7 +118,7 @@ public class CS_WarpSpawn : MonoBehaviour
     }
 
     //再帰処理で探す
-    private Transform FindWarpObject(Transform parent, string name)
+    public Transform FindWarpObject(Transform parent, string name)
     {
         Queue<Transform> queue = new Queue<Transform>();
         queue.Enqueue(parent);
