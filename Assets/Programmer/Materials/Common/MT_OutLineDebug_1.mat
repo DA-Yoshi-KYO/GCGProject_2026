@@ -7,14 +7,13 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: MT_Cat_2
-  m_Shader: {fileID: -6465566751694194690, guid: 3fbabf8991b020748bbe1130aa7b6184,
-    type: 3}
-  m_Parent: {fileID: 2100000, guid: b5dc78e9af9824e45bec50a6591a0c70, type: 2}
-  m_ModifiedSerializedProperties: 2
+  m_Name: MT_OutLineDebug_1
+  m_Shader: {fileID: 4800000, guid: 406024de9b67ca0428f6714dd7ab7598, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords: []
-  m_LightmapFlags: 2
+  m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
@@ -23,22 +22,15 @@ Material:
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
-    m_TexEnvs:
-    - _ColorMap:
-        m_Texture: {fileID: 2800000, guid: fd7f78b56809f214d94e83ae51ea261a, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _ORMMap:
-        m_Texture: {fileID: 2800000, guid: ef25ce83a481b4547a312ab15adc4e75, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
+    m_TexEnvs: []
     m_Ints: []
     m_Floats:
-    - _UseColorMap: 1
-    - _UseNormalMap: 0
-    m_Colors: []
+    - _Alpha: 1
+    - _OutlineWidth: 2
+    m_Colors:
+    - _OutlineColor: {r: 1, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []
---- !u!114 &709909971153917997
+--- !u!114 &4430049198071974529
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}

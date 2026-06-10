@@ -67,6 +67,7 @@ public class CS_PlayerMove : MonoBehaviour
         playerData.customInputAction.Player.Sneak.performed += OnSneak;
         playerData.customInputAction.Player.Sneak.canceled += OnSneak;
 
+        // アニメーターの取得
         animator = GetComponentInChildren<Animator>();
     }
 

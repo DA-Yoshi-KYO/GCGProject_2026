@@ -44,6 +44,14 @@ public class RoomGrid : MonoBehaviour
         }
         List<GameObject> floors = new List<GameObject>();
 
+        GameObject roomParent = GameObject.Find("RoomCreatePoints");
+        List<GameObject> rooms = new List<GameObject>();
+        for (int i = 0 ; i < roomParent.transform.childCount ; i++)
+        {
+            if (i == 0 || i == roomParent.transform.childCount - 1) continue;
+            rooms.Add(roomParent.transform.GetChild(i).gameObject);
+        }
+
         int floorCount = 0;
         Vector3 sum = Vector3.zero;
         foreach (Transform child in transform)
