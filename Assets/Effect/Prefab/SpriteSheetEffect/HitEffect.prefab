@@ -10,8 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 7962937907751812782}
   - component: {fileID: 3080063443073449872}
-  - component: {fileID: 2641680515010442527}
-  - component: {fileID: -668642224397557110}
   m_Layer: 0
   m_Name: HitEffect
   m_TagString: Untagged
@@ -86,38 +84,3 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &2641680515010442527
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 264367429111437040}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bb9212e69eb193b42a494e9a8c799fbe, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  effectType: 0
-  defaultPlaySpeed: 1
-  isDefaultLifeTimeInfinite: 1
-  defaultLifeTime: 3
---- !u!114 &-668642224397557110
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 264367429111437040}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 242dfe80fdbe1a647826e6dc6ee9a17f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  targetSpriteRenderer: {fileID: 0}
-  spriteFrames: []
-  framesPerSecond: 24
-  bool_IsLoop: 0
-  bool_IsDeactivateOnFinish: 1
-  bool_IsDeactivateOnStop: 1
-  bool_IsHideRendererOnStop: 1
