@@ -7,65 +7,70 @@ using UnityEngine;
 [RequireComponent(typeof(Renderer))]
 public class CS_OutlineController : MonoBehaviour
 {
-    [Header("Outline Settings")]
-    [SerializeField] Color  _outlineColor = new Color(0.03f, 0.03f, 0.03f, 1f);
-    [SerializeField, Range(0f, 1f)] float _outlineWidth = 1f;
-
-    Renderer          _renderer;
+    Renderer _renderer;
     MaterialPropertyBlock _mpb;
 
-    // ShaderのプロパティID（文字列検索のコストを初回だけにする）
     static readonly int ColorID = Shader.PropertyToID("_OutlineColor");
     static readonly int WidthID = Shader.PropertyToID("_OutlineWidth");
 
-    void Awake()
+    // ── コンストラクタ ────────────────────────────────────────
+
+    public CS_OutlineController(GameObject go)
     {
-        _renderer = GetComponent<Renderer>();
-        _mpb      = new MaterialPropertyBlock();
-        Apply();
+        _renderer = go.GetComponent<Renderer>();
+        Init();
     }
 
-    // ── 外部から呼ぶAPI ───────────────────────────────────────
+    public CS_OutlineController(Renderer renderer)
+    {
+        _renderer = renderer;
+        Init();
+    }
 
-    /// <summary>アウトラインの色を変更する</summary>
+    void Init()
+    {
+        if (_renderer == null)
+        {
+            Debug.LogWarning("[OutlineController] Renderer が見つかりません");
+            return;
+        }
+        _mpb = new MaterialPropertyBlock();
+        // 既存のMPBがあれば引き継ぐ
+        _renderer.GetPropertyBlock(_mpb);
+    }
+
+    // ── 外部API ───────────────────────────────────────────────
+
     public void SetOutlineColor(Color color)
     {
-        _outlineColor = color;
-        Apply();
-    }
-
-    /// <summary>アウトラインの太さを変更する</summary>
-    public void SetOutlineWidth(float width)
-    {
-        _outlineWidth = width;
-        Apply();
-    }
-
-    /// <summary>色と太さを同時に変更する</summary>
-    public void SetOutline(Color color, float width)
-    {
-        _outlineColor = color;
-        _outlineWidth = width;
-        Apply();
-    }
-
-    // ── 内部処理 ─────────────────────────────────────────────
-
-    void Apply()
-    {
+        if (_renderer == null) return;
         _renderer.GetPropertyBlock(_mpb);
-        _mpb.SetColor(ColorID, _outlineColor);
-        _mpb.SetFloat(WidthID, _outlineWidth);
+        _mpb.SetColor(ColorID, color);
         _renderer.SetPropertyBlock(_mpb);
     }
 
-#if UNITY_EDITOR
-    // Inspectorで値を変えたときリアルタイム反映
-    void OnValidate()
+    public void SetOutlineWidth(float width)
     {
-        if (_renderer == null) _renderer = GetComponent<Renderer>();
-        if (_mpb      == null) _mpb      = new MaterialPropertyBlock();
-        Apply();
+        if (_renderer == null) return;
+        _renderer.GetPropertyBlock(_mpb);
+        _mpb.SetFloat(WidthID, width);
+        _renderer.SetPropertyBlock(_mpb);
     }
-#endif
+
+    public void SetOutline(Color color, float width)
+    {
+        if (_renderer == null) return;
+        _renderer.GetPropertyBlock(_mpb);
+        _mpb.SetColor(ColorID, color);
+        _mpb.SetFloat(WidthID, width);
+        _renderer.SetPropertyBlock(_mpb);
+    }
+
+    /// <summary>MPBをリセットしてデフォルト値に戻す</summary>
+    public void ResetOutline()
+    {
+        if (_renderer == null) return;
+        _mpb.Clear();
+        _renderer.SetPropertyBlock(_mpb);
+    }
 }

@@ -40,8 +40,8 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 4749555389050136550}
   - {fileID: 4675682225876343513}
+  - {fileID: 4749555389050136550}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!136 &1222524947915401728
@@ -133,7 +133,6 @@ MonoBehaviour:
   interactMax:
     radius: 5
     height: 3
-  playerMesh: {fileID: 5451761944959107171}
   gimmickKind:
   - {fileID: 7905465617219888894, guid: c467ea3baedb9d14088530cb401de8e3, type: 3}
   - {fileID: 8099441442987179503, guid: 80f55bafd488bf04fa703cb32b598578, type: 3}
@@ -440,6 +439,11 @@ PrefabInstance:
       propertyPath: m_Materials.Array.data[7]
       value: 
       objectReference: {fileID: 2100000, guid: 6b3bafe46a1bf374aac55a90620d66d7, type: 2}
+    - target: {fileID: -3736364943898055418, guid: d581143a8aab09e419577d846cf51932,
+        type: 3}
+      propertyPath: m_Layer
+      value: 26
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: d581143a8aab09e419577d846cf51932,
         type: 3}
       propertyPath: m_Name
