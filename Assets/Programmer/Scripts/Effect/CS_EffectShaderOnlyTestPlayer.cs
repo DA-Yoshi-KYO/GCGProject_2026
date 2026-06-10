@@ -24,33 +24,33 @@ public class CS_EffectShaderOnlyTestPlayer : MonoBehaviour
 
     [Header("Start時に再生するか")]
     [SerializeField]
-    private bool bool_PlayOnStart = true;
+    private bool b_PlayOnStart = true;
 
     [Header("呼び出し側からPositionを指定するか")]
     [SerializeField]
-    private bool bool_SetPositionFromCaller = true;
+    private bool b_SetPositionFromCaller = true;
 
     [Header("呼び出し側からRotationを指定するか")]
     [SerializeField]
-    private bool bool_SetRotationFromCaller = true;
+    private bool b_SetRotationFromCaller = true;
 
     [Header("呼び出し側からPlayEndTimeを指定するか")]
     [SerializeField]
-    private bool bool_SetPlayEndTimeFromCaller = false;
+    private bool b_SetPlayEndTimeFromCaller = false;
 
     [SerializeField]
     private float f_PlayEndTime = 3.0f;
 
     [Header("呼び出し側からHideOnEndを指定するか")]
     [SerializeField]
-    private bool bool_SetHideOnEndFromCaller = false;
+    private bool b_SetHideOnEndFromCaller = false;
 
     [SerializeField]
-    private bool bool_HideOnEnd = true;
+    private bool b_HideOnEnd = true;
 
     private void Start()
     {
-        if (bool_PlayOnStart)
+        if (b_PlayOnStart)
         {
             PlayTestEffect();
         }
@@ -89,24 +89,24 @@ public class CS_EffectShaderOnlyTestPlayer : MonoBehaviour
         CSST_EffectPlayData csst_EffectPlayData = new CSST_EffectPlayData();
         csst_EffectPlayData.CSST_EffectPlayData_Init();
 
-        if (bool_SetPositionFromCaller)
+        if (b_SetPositionFromCaller)
         {
             csst_EffectPlayData.SetPosition(v3_SpawnPosition);
         }
 
-        if (bool_SetRotationFromCaller)
+        if (b_SetRotationFromCaller)
         {
             csst_EffectPlayData.SetRotation(q_SpawnRotation);
         }
 
-        if (bool_SetPlayEndTimeFromCaller)
+        if (b_SetPlayEndTimeFromCaller)
         {
             csst_EffectPlayData.SetPlayEndTime(f_PlayEndTime);
         }
 
-        if (bool_SetHideOnEndFromCaller)
+        if (b_SetHideOnEndFromCaller)
         {
-            csst_EffectPlayData.SetHideOnEnd(bool_HideOnEnd);
+            csst_EffectPlayData.SetHideOnEnd(b_HideOnEnd);
         }
 
         cs_EffectPlayer.PlayEffect(csst_EffectPlayData);

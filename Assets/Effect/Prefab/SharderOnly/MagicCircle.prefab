@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 7464062737429334774}
   - component: {fileID: 2868336821702428489}
   - component: {fileID: 4374251384866418497}
+  - component: {fileID: 7990791195206730652}
   m_Layer: 0
   m_Name: MagicCircle
   m_TagString: Untagged
@@ -119,6 +120,20 @@ MonoBehaviour:
     b_InspectorHideOnEnd: 0
     b_UsePlayEndTime: 1
     f_InspectorPlayEndTime: 0
+--- !u!114 &7990791195206730652
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6919014136174155209}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0feb0cd4f31e30c48be9f09df51bbaab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  b_UsePool: 1
+  n_MaxPoolCount: 5
 --- !u!1001 &327976186843051843
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -44,12 +44,12 @@ public abstract class CSAD_EffectCommonProcessBase : MonoBehaviour, CSI_EffectPl
     /// <summary>
     /// 終了要求済みかどうかです。
     /// </summary>
-    protected bool bool_IsEndRequested { get; private set; }
+    protected bool b_IsEndRequested { get; private set; }
 
     /// <summary>
     /// 終了完了済みかどうかです。
     /// </summary>
-    private bool bool_IsEndFinished;
+    private bool b_IsEndFinished;
 
     /// <summary>
     /// 初期化処理です。
@@ -74,8 +74,8 @@ public abstract class CSAD_EffectCommonProcessBase : MonoBehaviour, CSI_EffectPl
     /// <param name="csst_effectData">呼び出し側の再生データ。</param>
     public void PlayEffect(CSST_EffectPlayData csst_effectData)
     {
-        bool_IsEndRequested = false;
-        bool_IsEndFinished = false;
+        b_IsEndRequested = false;
+        b_IsEndFinished = false;
 
         StopAutoEndTimer();
 
@@ -185,12 +185,12 @@ public abstract class CSAD_EffectCommonProcessBase : MonoBehaviour, CSI_EffectPl
     /// </summary>
     public void EndEffect()
     {
-        if (bool_IsEndRequested)
+        if (b_IsEndRequested)
         {
             return;
         }
 
-        bool_IsEndRequested = true;
+        b_IsEndRequested = true;
 
         StopAutoEndTimer();
 
@@ -203,12 +203,12 @@ public abstract class CSAD_EffectCommonProcessBase : MonoBehaviour, CSI_EffectPl
     /// </summary>
     protected void FinishEndEffect()
     {
-        if (bool_IsEndFinished)
+        if (b_IsEndFinished)
         {
             return;
         }
 
-        bool_IsEndFinished = true;
+        b_IsEndFinished = true;
 
         ApplyCommonEndData();
 
@@ -331,4 +331,6 @@ public abstract class CSAD_EffectCommonProcessBase : MonoBehaviour, CSI_EffectPl
     {
         FinishEndEffect();
     }
+
+
 }

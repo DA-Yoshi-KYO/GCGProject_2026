@@ -18,15 +18,15 @@ public class CS_EffectPlayDefaultData
 {
     [Header("ループ設定")]
     [SerializeField]
-    private bool bool_DefaultLoopFlag = false;
+    private bool b_DefaultLoopFlag = false;
 
     [Header("終了時の非表示設定")]
     [SerializeField]
-    private bool bool_DefaultHideOnEnd = true;
+    private bool b_DefaultHideOnEnd = true;
 
     [Header("自動終了設定")]
     [SerializeField]
-    private bool bool_IsAutoEnd = true;
+    private bool b_IsAutoEnd = true;
 
     [SerializeField]
     private float f_AutoEndTime = 3.0f;
@@ -73,7 +73,7 @@ public class CS_EffectPlayDefaultData
         }
         else
         {
-            csst_ResultData.SetLoopFlag(bool_DefaultLoopFlag);
+            csst_ResultData.SetLoopFlag(b_DefaultLoopFlag);
         }
 
         if (csst_RequestData.b_HideOnEnd.HasValue)
@@ -82,14 +82,14 @@ public class CS_EffectPlayDefaultData
         }
         else
         {
-            csst_ResultData.SetHideOnEnd(bool_DefaultHideOnEnd);
+            csst_ResultData.SetHideOnEnd(b_DefaultHideOnEnd);
         }
 
         if (csst_RequestData.f_PlayEndTime.HasValue)
         {
             csst_ResultData.SetPlayEndTime(csst_RequestData.f_PlayEndTime.Value);
         }
-        else if (bool_IsAutoEnd)
+        else if (b_IsAutoEnd)
         {
             csst_ResultData.SetPlayEndTime(f_AutoEndTime);
         }

@@ -27,7 +27,7 @@ public abstract class CS_EffectSpriteSheet : CSAD_EffectCommonProcessBase
 
     [Header("Billboard設定")]
     [SerializeField]
-    protected bool bool_IsBillboard = false;
+    protected bool b_IsBillboard = false;
 
     /// <summary>
     /// Billboardで向く対象Transformです。
@@ -52,12 +52,12 @@ public abstract class CS_EffectSpriteSheet : CSAD_EffectCommonProcessBase
     /// <summary>
     /// 再生中かどうかです。
     /// </summary>
-    protected bool bool_IsPlaying;
+    protected bool b_IsPlaying;
 
     /// <summary>
     /// 現在表示しているSprite番号です。
     /// </summary>
-    protected int int_CurrentSpriteIndex;
+    protected int n_CurrentSpriteIndex;
 
     /// <summary>
     /// 初期化処理です。
@@ -72,12 +72,12 @@ public abstract class CS_EffectSpriteSheet : CSAD_EffectCommonProcessBase
     /// </summary>
     protected virtual void Update()
     {
-        if (bool_IsBillboard)
+        if (b_IsBillboard)
         {
             UpdateBillboard();
         }
 
-        if (bool_IsPlaying == false)
+        if (b_IsPlaying == false)
         {
             return;
         }
@@ -130,9 +130,9 @@ public abstract class CS_EffectSpriteSheet : CSAD_EffectCommonProcessBase
             return;
         }
 
-        bool_IsPlaying = true;
+        b_IsPlaying = true;
         f_CurrentPlayTime = 0.0f;
-        int_CurrentSpriteIndex = 0;
+        n_CurrentSpriteIndex = 0;
 
         sr_EffectSpriteRenderer.sprite = sp_EffectSprites[0];
 
@@ -187,7 +187,7 @@ public abstract class CS_EffectSpriteSheet : CSAD_EffectCommonProcessBase
 
         if (IsLoop() == false && f_CurrentPlayTime >= f_PlayTime)
         {
-            bool_IsPlaying = false;
+            b_IsPlaying = false;
             SetSpriteFrame(sp_EffectSprites.Length - 1);
             OnSpriteSheetPlayComplete();
         }
@@ -199,15 +199,15 @@ public abstract class CS_EffectSpriteSheet : CSAD_EffectCommonProcessBase
     /// <param name="int_SpriteIndex">表示するSprite番号。</param>
     private void SetSpriteFrame(int int_SpriteIndex)
     {
-        if (int_CurrentSpriteIndex == int_SpriteIndex)
+        if (n_CurrentSpriteIndex == int_SpriteIndex)
         {
             return;
         }
 
-        int_CurrentSpriteIndex = int_SpriteIndex;
-        sr_EffectSpriteRenderer.sprite = sp_EffectSprites[int_CurrentSpriteIndex];
+        n_CurrentSpriteIndex = int_SpriteIndex;
+        sr_EffectSpriteRenderer.sprite = sp_EffectSprites[n_CurrentSpriteIndex];
 
-        OnSpriteFrameChanged(int_CurrentSpriteIndex);
+        OnSpriteFrameChanged(n_CurrentSpriteIndex);
     }
 
     /// <summary>
@@ -243,7 +243,7 @@ public abstract class CS_EffectSpriteSheet : CSAD_EffectCommonProcessBase
     /// </summary>
     protected override void EndEffectProcess()
     {
-        bool_IsPlaying = false;
+        b_IsPlaying = false;
 
         OnSpriteSheetEnd();
 

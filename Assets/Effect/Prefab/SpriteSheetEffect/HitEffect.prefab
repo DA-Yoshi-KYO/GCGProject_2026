@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 7962937907751812782}
   - component: {fileID: 3080063443073449872}
   - component: {fileID: 1196758137401276313}
+  - component: {fileID: -8486564387984845596}
   m_Layer: 0
   m_Name: HitEffect
   m_TagString: Untagged
@@ -99,15 +100,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   csst_DefaultEffectPlayData:
     b_UsePlayTime: 1
-    f_InspectorPlayTime: 1
+    f_InspectorPlayTime: 0.5
     b_UseEndTime: 1
-    f_InspectorEndTime: 1
+    f_InspectorEndTime: 0.5
     b_UseLoopFlag: 0
     b_InspectorLoopFlag: 0
     b_UseHideOnEnd: 1
     b_InspectorHideOnEnd: 1
     b_UsePlayEndTime: 1
-    f_InspectorPlayEndTime: 1
+    f_InspectorPlayEndTime: 0
   sp_EffectSprites:
   - {fileID: -401013165, guid: 23e53cdeb2026e94c99467fe4c761d7a, type: 3}
   - {fileID: -579639619, guid: 23e53cdeb2026e94c99467fe4c761d7a, type: 3}
@@ -117,4 +118,18 @@ MonoBehaviour:
   - {fileID: 1767273201, guid: 23e53cdeb2026e94c99467fe4c761d7a, type: 3}
   - {fileID: -1431929500, guid: 23e53cdeb2026e94c99467fe4c761d7a, type: 3}
   - {fileID: 1230303726, guid: 23e53cdeb2026e94c99467fe4c761d7a, type: 3}
-  bool_IsBillboard: 1
+  b_IsBillboard: 1
+--- !u!114 &-8486564387984845596
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 264367429111437040}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0feb0cd4f31e30c48be9f09df51bbaab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  b_UsePool: 1
+  n_MaxPoolCount: 5
