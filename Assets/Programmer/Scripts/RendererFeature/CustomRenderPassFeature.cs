@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
-using static FullScreenPassRendererFeature;
 
 public class CustomRenderPassFeature : ScriptableRendererFeature
 {
