@@ -360,7 +360,7 @@ public class CS_PlayerAction : MonoBehaviour
         if (cs_GimmickSetEffectPlayer != null)
         {
             cs_GimmickSetEffectPlayer.PlayGimmickSetEffect(
-                setPos,
+                instance.transform.position,
                 instance);
         }
 
