@@ -33,12 +33,11 @@ public class CS_PlayerAction : MonoBehaviour
     }
     [SerializeField] private InteractSyllinder interactMin = new InteractSyllinder { radius = 3f, height = 3f };//インタラクトの範囲の最小値
     [SerializeField] private InteractSyllinder interactMax = new InteractSyllinder { radius = 5f, height = 5f };//インタラクトの範囲の最大値
-    [SerializeField] private GameObject playerMesh = null;//プレイヤーのメッシュオブジェクト
-    private Material playerMaterial = null;//プレイヤーのマテリアル
     [HideInInspector] public int currentSoul { private set; get; } = 0;//現在のソウルの数
     [HideInInspector] public int currentGimmickIndex { private set; get; } = 0;//現在選択しているギミック
 
     public List<GameObject> gimmickKind;//所持しているギミックの種類
+    private CS_OutlineController outlineController; // プレイヤーのアウトラインを制御
 
     private CS_PlayerData playerData;
     float interactTime = 0.0f;
@@ -70,9 +69,9 @@ public class CS_PlayerAction : MonoBehaviour
 
         interactField.GetComponent<Renderer>().enabled = false;
 
-        Material[] materials = playerMesh.GetComponentInChildren<Renderer>().materials;
-        playerMaterial = materials[materials.Length - 1]; // 最後のマテリアルをプレイヤーのアウトライン用マテリアルとする
-        playerMaterial?.SetVector("_OutlineColor", Color.gray);
+        // アウトラインコントローラーの初期化
+        outlineController = new CS_OutlineController(GetComponentInChildren<SkinnedMeshRenderer>());
+        outlineController.SetOutlineColor(Color.gray);
 
         playSE = GameObject.Find("3DSE").GetComponent<CS_3DPlaySE>();
     }
@@ -84,11 +83,11 @@ public class CS_PlayerAction : MonoBehaviour
 
         if (playerData.currentMode == CS_PlayerData.PlayerMode.Normal)
         {
-            playerMaterial?.SetVector("_OutlineColor", Color.gray);
+            outlineController.SetOutlineColor(Color.gray);
         }
         else
         {
-            playerMaterial?.SetVector("_OutlineColor", Color.yellow);
+            outlineController.SetOutlineColor(Color.yellow);
         }
 
         if (isInteracting)
@@ -113,7 +112,7 @@ public class CS_PlayerAction : MonoBehaviour
                     }
                 }
 
-                playerMaterial?.SetVector("_OutlineColor", Color.green);
+                outlineController.SetOutlineColor(Color.green);
 
                 // インタラクト範囲を拡大
                 interactScale.x = Mathf.Max(interactTime - switchInteract, 0f) + interactMin.radius;
