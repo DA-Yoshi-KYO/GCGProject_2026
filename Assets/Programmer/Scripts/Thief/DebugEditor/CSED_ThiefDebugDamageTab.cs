@@ -298,15 +298,17 @@ internal sealed class CSED_ThiefDebugDamageTab
             return;
         }
 
-        // メソッド取得（オーバーロード誤取得防止のため引数型も指定）
-        var method = thief.GetType().GetMethod("TakeDamage", new[] { typeof(int), gimmickEnumType, typeof(bool) });
+        // メソッド取得）
+        var method = thief.GetType().GetMethod("TakeDamage");
         if (method == null)
         {
             Debug.LogWarning("TakeDamage(int, Gimmick) が見つかりません。");
             return;
         }
 
-        method.Invoke(thief, new[] { (object)damageAmount, gimmickValue, true });
+        Vector3 gimmickPoint = new Vector3(0, 0, 0); // ギミックポイントは仮に(0,0,0)を渡す。
+
+        method.Invoke(thief, new[] { (object)damageAmount, gimmickValue, gimmickPoint, true });
     }
 
     /// <summary>

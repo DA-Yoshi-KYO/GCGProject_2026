@@ -29,6 +29,8 @@ public class CO_ThiefStatusData : ScriptableObject
     public int durability;
 
     [Header("泥棒が探索するのにかかる秒数")]
+    [Header("0 : 宝物")]
+    [Header("1 : 棚")]
     [Tooltip("泥棒が探索するのにかかる秒数")]
     public List<int> searchTime;
 
@@ -45,10 +47,6 @@ public class CO_ThiefStatusData : ScriptableObject
     [Header("猫を捕まえている時間")]
     [Tooltip("泥棒が猫を捕まえている時間(秒)"), Min(0)]
     public int holdCatTime;
-
-    [Header("ソウルのドロップ数")]
-    [Tooltip("泥棒が倒されたときにドロップするソウルの数"), Min(0)]
-    public int soulDropCount;
 
     [Header("プレイヤーを追跡する時間(秒)")]
     [Tooltip("泥棒がプレイヤーを追跡する時間(秒)"), Min(0)]

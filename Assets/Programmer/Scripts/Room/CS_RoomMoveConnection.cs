@@ -102,6 +102,14 @@ public class CS_RoomMoveConnection
     }
 
     /// <summary>
+    /// 敵の出入口用データをクリアします。
+    /// </summary>
+    public void ClearEnemyEntryData()
+    {
+        cs_RoomEnemyEntryDataSO = null;
+    }
+
+    /// <summary>
     /// 敵侵入数を取得します。
     /// 互換用として、最大出現数を返します。
     /// </summary>

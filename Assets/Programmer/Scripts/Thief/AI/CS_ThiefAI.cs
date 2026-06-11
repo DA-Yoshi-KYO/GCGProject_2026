@@ -98,9 +98,6 @@ public class CS_ThiefAI : MonoBehaviour
     [Tooltip("気絶状態の更新処理を実行するかどうか")]
     private bool isUpdatingStunState = true;
 
-    [Tooltip("ドロップするソウルの数")]
-    private int soulDropCount;
-
     [Tooltip("泥棒のリアクションUIを管理するコンポーネント")]
     private CS_ThiefReactionUI thiefReactionUI;
 
@@ -171,7 +168,6 @@ public class CS_ThiefAI : MonoBehaviour
 
         durability = typedata.durability;
         maxDurability = typedata.durability;
-        soulDropCount = typedata.soulDropCount;
 
         // 移動システムの初期化
         moveSystem = new CS_MoveSystem(this, GetComponent<NavMeshAgent>(), GetComponent<CS_SmartNavAgent>(), typedata, playerSpeed);
@@ -292,6 +288,8 @@ public class CS_ThiefAI : MonoBehaviour
 
         thiefReaction.ClearReaction();
 
+        thiefGimmickAction.UpdateAction();
+
         // 探索対象を決定
         memorySystem.RecognizeObjects();
 
@@ -380,9 +378,11 @@ public class CS_ThiefAI : MonoBehaviour
             if (elapsedTimeAfterStun >= exitAfterStunTime)
             {
                 // 泥棒のアニメーション状態をStunにする
-                if (animator != null) animator.SetBool("IsStun", false);
 
                 thiefMaterial.SetFloat("_Timer", fadeAfterStunTime - (elapsedTimeAfterStun - exitAfterStunTime));
+
+                // 退場移動
+                moveSystem.StunMove();
 
                 if (thiefMaterial.GetFloat("_Timer") <= 0.0f)
                 {
@@ -390,6 +390,16 @@ public class CS_ThiefAI : MonoBehaviour
                     if (thiefSound != null) thiefSound.PlayOneShotSE("ThiefDeath", gameObject.transform.position, "ThiefDeath");
 
                     Destroy(this.gameObject);
+                }
+            }
+            else
+            {
+                thiefReaction.ClearReaction();
+
+                if (animator != null)
+                {
+                    animator.SetBool("IsStun", false);
+                    animator.SetTrigger("DeathTrigger");
                 }
             }
         }
@@ -452,7 +462,7 @@ public class CS_ThiefAI : MonoBehaviour
                 break;
         }
 
-        currentState = ThiefState.Stunned; // 状態を気絶に変更
+        ChangeStatus(ThiefState.Stunned); // 状態を気絶に変更
         elapsedTimeAfterStun = 0.0f; // 気絶時間の経過時間をリセット
 
         remainingInvincibleTime = invincibleTime; // 無敵時間を付与
@@ -467,13 +477,6 @@ public class CS_ThiefAI : MonoBehaviour
 
             // StunThiefTargetに通知する
             GetComponent<CS_StunThiefTarget>().Notify();
-
-            // プレイヤーにソウルを入手させる
-            CS_PlayerAction playerAction = GameObject.FindObjectOfType<CS_PlayerAction>();
-
-            // playerActionが見つかった場合は、ソウルを加算する処理を実行する。見つからない場合は、エラーログを出力する。
-            if (playerAction != null) playerAction.AddSoul(soulDropCount);
-            else Debug.LogError("PlayerActionが見つかりませんでした。ThiefAIのTakeDamageメソッドで、プレイヤーにソウルを入手させる処理が正常に動作しない可能性があります。");
         }
     }
 

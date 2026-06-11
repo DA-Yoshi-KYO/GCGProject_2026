@@ -223,7 +223,14 @@ public class CS_MemorySystem
 
                     // 探索している人を更新する
                     vtMemory.searchThief = vt.searchThief;
+
+                    if (vt.targetType == CS_VisionTarget.TargetType.Treasure)
+                    {
+                        // すでに記憶しているオブジェクトが宝物の場合は、宝物があるフラグを立てる
+                        isTreasureObject = true;
+                    }
                 }
+
 
                 // スキップする
                 continue;
@@ -278,6 +285,11 @@ public class CS_MemorySystem
         //ーーーーーーーーーーーーーーーーーーーーーーーー
         if (isTreasureObject)
         {
+            if (currentTarget is CS_ThiefTarget)
+            {
+                currrentTargetDistance = Mathf.Infinity;
+            }
+
             // 視認したオブジェクトを走査
             foreach (var entry in visionTargets)
             {
@@ -387,6 +399,10 @@ public class CS_MemorySystem
         List<CS_ThiefTarget> unexploredObjects = GetUnExploredObjectsList();
         if (unexploredObjects.Count > 0)
         {
+            if (currentTarget is CS_ThiefTarget)
+            {
+                currrentTargetDistance = Mathf.Infinity;
+            }
 
             CS_ThiefTarget target = null;
             // 未探索の記憶オブジェクトの中で最も近いものを探索対象に設定する
@@ -609,7 +625,7 @@ public class CS_MemorySystem
         }
 
         // 探索対象との距離
-        float distanceToTarget = -1;
+        float distanceToTarget = Mathf.Infinity;
         // 前回の探索対象がThiefTargetの派生クラスかどうか(前回が移動ポイントでない場合)
         if (currentTarget == null || currentTarget is CS_VisionTarget || currentTarget is CS_TrapTarget || currentTarget is CS_PlayerTarget)
         {
@@ -621,7 +637,7 @@ public class CS_MemorySystem
                 // オブジェクトとの距離を計算
                 float distance = Vector3.Distance(thiefAI.transform.position, target.transform.position);
                 // より近いオブジェクトを探索対象に設定
-                if (distance > distanceToTarget)
+                if (distance < distanceToTarget)
                 {
                     distanceToTarget = distance;
                     currentTarget = target;
@@ -830,6 +846,7 @@ public class CS_MemorySystem
         // 入ってきたドアをリストから除外
         // もし行ったことのない部屋がある場合は行ったことのある方向をリストから除外
         bool hasUnvisitedNextRooms = HasUnvisitedNextRooms(); // 次の部屋候補の中に行ったことのない部屋があるかどうかを判定するフラグ
+        bool UnchosenDoorSelect = false; // 選択しなかった方向のドアを対象として選んだかどうか
 
         // 次の部屋候補の中に行ったことのない部屋がある場合
         if (hasUnvisitedNextRooms)
@@ -872,6 +889,7 @@ public class CS_MemorySystem
             {
                 connectDirs = roomCreatePoint.GetConnectDirections();
             }
+            else UnchosenDoorSelect = true; // 選択しなかった方向のドアを対象として選ぶ場合は、フラグを立てる
         }
 
         // 宝部屋判定
@@ -939,44 +957,52 @@ public class CS_MemorySystem
         }
         else
         {
-            // 選択した方向のドアを記憶から削除
-            bool isRemoved = false; // 選択した方向のドアを記憶から削除したかどうかを判定するフラグ
-            CS_RoomNode targetRoomNode = null;
-            foreach (var room in roomMemories)
+            if (UnchosenDoorSelect)
             {
-                foreach (var dir in room.Value.unchosenDoors)
+                // 選択した方向のドアを記憶から削除
+                bool isRemoved = false; // 選択した方向のドアを記憶から削除したかどうかを判定するフラグ
+                CS_RoomNode targetRoomNode = null;
+                foreach (var room in roomMemories)
                 {
-                    if (dir == connectDirs[randomIndex])
+                    foreach (var dir in room.Value.unchosenDoors)
                     {
-                        //どの部屋のドアかを記憶
-                        targetRoomNode = room.Key;
-                        // 記憶から選択した方向のドアを削除
-                        room.Value.unchosenDoors.Remove(dir);
-                        // 選択した方向のドアを記憶から削除したフラグを立てる
-                        isRemoved = true;
-                        break;
+                        if (dir == connectDirs[randomIndex])
+                        {
+                            //どの部屋のドアかを記憶
+                            targetRoomNode = room.Key;
+                            // 記憶から選択した方向のドアを削除
+                            room.Value.unchosenDoors.Remove(dir);
+                            // 選択した方向のドアを記憶から削除したフラグを立てる
+                            isRemoved = true;
+                            break;
+                        }
                     }
+                    if (isRemoved) break;
                 }
-                if (isRemoved) break;
-            }
 
-            // 選択したドアの位置を取得
-            if (targetRoomNode == null)
+                // 選択したドアの位置を取得
+                if (targetRoomNode == null)
+                {
+                    Debug.LogWarning("【泥棒】NextDoorElection: 選択したドアの所有部屋が見つかりませんでした。処理を中断します。", thiefAI.gameObject);
+                    return;
+                }
+
+                Transform targetDoorPos = targetRoomNode.GetDirectionWallToDoor(connectDirs[randomIndex]);
+
+                if (targetDoorPos == null)
+                {
+                    Debug.LogError("【泥棒】選択したドアの位置が見つかりませんでした。ThiefAIのNextDoorElectionメソッドで、次に設定する移動ポイントを決定するロジックが正常に動作しない可能性があります。");
+                    return;
+                }
+
+                // ドアの位置を最終目的位置としてルートを構築
+                thiefAI.read_AStarSystem.ConstructionRoute(targetDoorPos, false);
+            }
+            else 
             {
-                Debug.LogWarning("【泥棒】NextDoorElection: 選択したドアの所有部屋が見つかりませんでした。処理を中断します。", thiefAI.gameObject);
-                return;
+                // 選択した方向にあるドアの位置を次の移動ポイントに設定
+                thiefAI.read_AStarSystem.ConstructionRoute(currentRoom.GetDirectionWallToDoor(connectDirs[randomIndex]), false);
             }
-
-            Transform targetDoorPos = targetRoomNode.GetDirectionWallToDoor(connectDirs[randomIndex]);
-
-            if (targetDoorPos == null)
-            {
-                Debug.LogError("【泥棒】選択したドアの位置が見つかりませんでした。ThiefAIのNextDoorElectionメソッドで、次に設定する移動ポイントを決定するロジックが正常に動作しない可能性があります。");
-                return;
-            }
-
-            // ドアの位置を最終目的位置としてルートを構築
-            thiefAI.read_AStarSystem.ConstructionRoute(targetDoorPos, false);
         }
     }
 
