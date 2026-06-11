@@ -29,6 +29,8 @@ public class CO_ThiefStatusData : ScriptableObject
     public int durability;
 
     [Header("泥棒が探索するのにかかる秒数")]
+    [Header("0 : 宝物")]
+    [Header("1 : 棚")]
     [Tooltip("泥棒が探索するのにかかる秒数")]
     public List<int> searchTime;
 

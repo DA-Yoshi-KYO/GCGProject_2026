@@ -12,6 +12,7 @@
  *            | 生成位置の選定の記載
  * 2026-05-22 | ファイル名を変更（ThiefManager.cs → CS_ThiefManager.cs）
  *            | クラス名を変更（ThiefManager → CS_ThiefManager）
+ *            | データベースから生成間隔の値を取得して設定する処理の記載
  * 
  */
 using System.Collections.Generic;
