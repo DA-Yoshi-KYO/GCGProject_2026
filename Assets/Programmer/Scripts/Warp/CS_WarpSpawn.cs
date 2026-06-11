@@ -4,23 +4,21 @@
  *    元浪梨緒
  * ----------------------------------------------------------
  * 2026-06-08 | 初回作成
+ * 2026-06-11 | 隣同士の部屋にワープを作成しないように修正
  */
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Rendering.VirtualTexturing;
 
 public class CS_WarpSpawn : MonoBehaviour
 {
     private Transform[] spawnPoints;//候補地点
-    List<Transform> spawnPointsList;
+    private List<Transform> spawnPointsList;//候補地点リスト
     [Header("ワープの入り口用のPrefab")][SerializeField]public GameObject warpEntrancePrefab;
     [Header("ワープの出口用のPrefab")][SerializeField]public GameObject warpExitPrefab;
     [Header("ワープの数")][SerializeField] private int warpCount = 1;
 
     private GameObject currentEntrance;
     private GameObject currentExit;
-
-    [SerializeField] public bool debug;
 
     // Start is called before the first frame update
     void Start()
@@ -29,15 +27,6 @@ public class CS_WarpSpawn : MonoBehaviour
 
     private void Update()
     {
-        //部屋が作られていないと探せないためUpdate内で実装する
-
-        if (debug)
-        {
-            if (Input.GetKeyDown(KeyCode.J))
-            {
-                SpawnWarp();
-            }
-        }
     }
 
     public void SpawnWarp()
@@ -65,18 +54,92 @@ public class CS_WarpSpawn : MonoBehaviour
 
         for (int i = 0 ; i < maxWarp ; i++)
         {
-            //2つずつ取り出す
-            Transform entrancePoint = spawnPointsList[i * 2];
-            Transform exitPoint = spawnPointsList[i * 2 + 1];
+            List<Transform> remove = new List<Transform>(spawnPointsList);
 
             //入口生成
+            Transform entrancePoint = remove[i];
+
             GameObject entranceObj = Instantiate(
                 warpEntrancePrefab,
                 entrancePoint.position,
                 entrancePoint.rotation
             );
 
+            //部屋の隣同士の情報取得して候補から外す
+            CS_RoomCreatePoint roomCreatePoint = remove[i].gameObject.GetComponentInParent<CS_RoomCreatePoint>();
+
+            Transform deletionCandidate;//削除候補
+            List<Transform> deletionCandidateList = new List<Transform>();//削除候補のリスト格納
+            Transform parent;
+
+            deletionCandidateList.Add(remove[i]);
+
+            CS_RoomMoveConnection roomMoveConnectionRight;
+            if (roomCreatePoint.TryGetConnection(CSE_RoomDoorDirection.Right, out roomMoveConnectionRight))
+            {
+                parent = roomMoveConnectionRight.TargetCreatePoint.transform;
+                for(int j = 0 ; j < remove.Count ; ++j)
+                {
+                    deletionCandidate = FindParentObject(remove[j], parent.gameObject.name);
+
+                    if (deletionCandidate != null)
+                    {
+                        deletionCandidateList.Add(remove[j]);
+                    }
+                }
+            }
+            CS_RoomMoveConnection roomMoveConnectionLeft;
+            if (roomCreatePoint.TryGetConnection(CSE_RoomDoorDirection.Left, out roomMoveConnectionLeft))
+            {
+                parent = roomMoveConnectionLeft.TargetCreatePoint.transform;
+                for (int j = 0 ; j < remove.Count ; ++j)
+                {
+                    deletionCandidate = FindParentObject(remove[j], parent.gameObject.name);
+
+                    if (deletionCandidate != null)
+                    {
+                        deletionCandidateList.Add(remove[j]);
+                    }
+                }
+            }
+            CS_RoomMoveConnection roomMoveConnectionFront;
+            if (roomCreatePoint.TryGetConnection(CSE_RoomDoorDirection.Front, out roomMoveConnectionFront))
+            {
+                parent = roomMoveConnectionFront.TargetCreatePoint.transform;
+                for (int j = 0 ; j < remove.Count ; ++j)
+                {
+                    deletionCandidate = FindParentObject(remove[j], parent.gameObject.name);
+
+                    if (deletionCandidate != null)
+                    {
+                        deletionCandidateList.Add(remove[j]);
+                    }
+                }
+            }
+            CS_RoomMoveConnection roomMoveConnectionBack;
+            if (roomCreatePoint.TryGetConnection(CSE_RoomDoorDirection.Back, out roomMoveConnectionBack))
+            {
+                parent = roomMoveConnectionBack.TargetCreatePoint.transform;
+                for (int j = 0 ; j < remove.Count ; ++j)
+                {
+                    deletionCandidate = FindParentObject(remove[j], parent.gameObject.name);
+
+                    if (deletionCandidate != null)
+                    {
+                        deletionCandidateList.Add(remove[j]);
+                    }
+                }
+            }
+
+            //まとめて削除
+            foreach (var obj in deletionCandidateList)
+            {
+                remove.Remove(obj);
+            }
+
             //出口生成
+            Transform exitPoint = remove[i];
+
             GameObject exitObj = Instantiate(
                 warpExitPrefab,
                 exitPoint.position,
@@ -89,6 +152,10 @@ public class CS_WarpSpawn : MonoBehaviour
 
             entranceWP.targetPoint = exitWP;
             exitWP.targetPoint = entranceWP;
+
+            //複数ワープをつくるために作られた場所は削除
+            spawnPointsList.Remove(entrancePoint);
+            spawnPointsList.Remove(exitPoint);
         }
     }
 
@@ -108,7 +175,7 @@ public class CS_WarpSpawn : MonoBehaviour
         {
             roomChild = roomParent.transform.GetChild(i);
 
-            Transform warpObj = FindWarpObject(roomChild, "WarpCreatePos");
+            Transform warpObj = FindChildObject(roomChild, "WarpCreatePos");
 
             if (warpObj == null)
                 return;
@@ -118,7 +185,9 @@ public class CS_WarpSpawn : MonoBehaviour
     }
 
     //再帰処理で探す
-    public Transform FindWarpObject(Transform parent, string name)
+
+    //子オブジェクトを探索する場合
+    public Transform FindChildObject(Transform parent, string name)
     {
         Queue<Transform> queue = new Queue<Transform>();
         queue.Enqueue(parent);
@@ -134,6 +203,22 @@ public class CS_WarpSpawn : MonoBehaviour
 
                 queue.Enqueue(child);
             }
+        }
+
+        return null;
+    }
+
+    //親オブジェクトを探索する場合
+    public Transform FindParentObject(Transform child, string name)
+    {
+        Transform current = child.parent;
+
+        while (current.parent != null)
+        {
+            if (current.name == name)
+                return current;
+
+            current = current.parent;
         }
 
         return null;
