@@ -223,7 +223,14 @@ public class CS_MemorySystem
 
                     // 探索している人を更新する
                     vtMemory.searchThief = vt.searchThief;
+
+                    if (vt.targetType == CS_VisionTarget.TargetType.Treasure)
+                    {
+                        // すでに記憶しているオブジェクトが宝物の場合は、宝物があるフラグを立てる
+                        isTreasureObject = true;
+                    }
                 }
+
 
                 // スキップする
                 continue;
@@ -278,6 +285,11 @@ public class CS_MemorySystem
         //ーーーーーーーーーーーーーーーーーーーーーーーー
         if (isTreasureObject)
         {
+            if (currentTarget is CS_ThiefTarget)
+            {
+                currrentTargetDistance = Mathf.Infinity;
+            }
+
             // 視認したオブジェクトを走査
             foreach (var entry in visionTargets)
             {
@@ -387,6 +399,10 @@ public class CS_MemorySystem
         List<CS_ThiefTarget> unexploredObjects = GetUnExploredObjectsList();
         if (unexploredObjects.Count > 0)
         {
+            if (currentTarget is CS_ThiefTarget)
+            {
+                currrentTargetDistance = Mathf.Infinity;
+            }
 
             CS_ThiefTarget target = null;
             // 未探索の記憶オブジェクトの中で最も近いものを探索対象に設定する
@@ -609,7 +625,7 @@ public class CS_MemorySystem
         }
 
         // 探索対象との距離
-        float distanceToTarget = -1;
+        float distanceToTarget = Mathf.Infinity;
         // 前回の探索対象がThiefTargetの派生クラスかどうか(前回が移動ポイントでない場合)
         if (currentTarget == null || currentTarget is CS_VisionTarget || currentTarget is CS_TrapTarget || currentTarget is CS_PlayerTarget)
         {
@@ -621,7 +637,7 @@ public class CS_MemorySystem
                 // オブジェクトとの距離を計算
                 float distance = Vector3.Distance(thiefAI.transform.position, target.transform.position);
                 // より近いオブジェクトを探索対象に設定
-                if (distance > distanceToTarget)
+                if (distance < distanceToTarget)
                 {
                     distanceToTarget = distance;
                     currentTarget = target;
