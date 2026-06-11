@@ -309,7 +309,12 @@ public class CS_ThiefAI : MonoBehaviour
         heldTreasure = memorySystem.read_CurrentTarget.gameObject;
         heldTreasure.transform.parent = this.transform; // 泥棒の子オブジェクトにする
         heldTreasure.GetComponent<Collider>().enabled = false; // 宝物のコライダーを無効にする
-        heldTreasure.transform.localPosition = new Vector3(0.0f, this.transform.position.y, 0.0f); // 宝物の位置を泥棒の位置に合わせる
+        heldTreasure.transform.localScale *= 0.5f; // 宝物のサイズを半分にする
+
+        //-- 体の前に持つ位置を設定
+        // 泥棒の正面方向を基準に、少し前方に持つ位置を設定
+        Vector3 holdPosition = transform.position + transform.forward * 0.5f + Vector3.up * -0.5f;
+        heldTreasure.transform.position = holdPosition;
 
         // 状態を逃走に変更
         ChangeStatus(ThiefState.Escape);
