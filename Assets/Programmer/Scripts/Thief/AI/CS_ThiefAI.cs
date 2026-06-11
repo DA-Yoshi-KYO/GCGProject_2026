@@ -380,6 +380,9 @@ public class CS_ThiefAI : MonoBehaviour
 
                 thiefMaterial.SetFloat("_Timer", fadeAfterStunTime - (elapsedTimeAfterStun - exitAfterStunTime));
 
+                // 退場移動
+                moveSystem.StunMove();
+
                 if (thiefMaterial.GetFloat("_Timer") <= 0.0f)
                 {
                     // 気絶したときのSEを再生する処理を追加する

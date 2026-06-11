@@ -6,6 +6,7 @@
  * 2026-05-27 | 初回作成
  * 
  */
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
@@ -38,6 +39,9 @@ public class CS_MoveSystem
 
     [Tooltip("バグ対策用位置の同じ位置にいるフレーム数カウンター")]
     private int samePosFrameCount = 0;
+
+    [Tooltip("気絶後の退場方向")]
+    private Vector3 exitDirectionAfterStun;
 
     /// <summary>
     /// コンストラクタ。必要なコンポーネントやパラメータを受け取って初期化する。
@@ -133,6 +137,27 @@ public class CS_MoveSystem
 
         // ワープ後に、ThiefAIの記憶システムにワープアクションを通知する
         thiefAI.read_MemorySystem.WarpAction(entryDoorDir);
+    }
+
+    /// <summary>
+    /// 気絶状態後の退場移動処理
+    /// </summary>
+    public void StunMove()
+    {
+        // 退場方向が設定されていない場合
+        if (exitDirectionAfterStun == Vector3.zero)
+        {
+            // 入ってきたドアの方向を基に退場方向を設定する
+            exitDirectionAfterStun = Vector3.Normalize(thiefAI.read_MemorySystem.read_FirstEntryPoint.position - thiefAI.transform.position);
+            // 移動方向に向きを変える
+            thiefAI.transform.rotation = Quaternion.LookRotation(exitDirectionAfterStun);
+
+        }
+
+        // 気絶後の退場方向に向かって移動する
+        Vector3 exitPosition = thiefAI.transform.position + exitDirectionAfterStun.normalized; // 退場する距離を適宜調整
+        exitPosition.y = thiefAI.transform.position.y; // 高さは変えない
+        thiefAI.transform.position = Vector3.MoveTowards(thiefAI.transform.position, exitPosition, walkSpeed * 0.5f * Time.deltaTime);
     }
 
     /// <summary>
