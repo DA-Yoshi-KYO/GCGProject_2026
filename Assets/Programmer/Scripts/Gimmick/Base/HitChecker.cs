@@ -17,6 +17,9 @@ public class HitChecker : MonoBehaviour
     [Header("敵のレイヤー")]
     public LayerMask enemyLayer;
 
+    // ギミック命中時のHitEffect再生クラス
+    private CS_GimmickHitEffectPlayer cs_GimmickHitEffectPlayer;
+
     private bool isLoop = false;
     private bool firstUpdate = true;
     private int hitDamage = 0;
@@ -26,6 +29,10 @@ public class HitChecker : MonoBehaviour
 
     // 既にダメージを与えた敵を保存
     private HashSet<GameObject> damagedEnemies = new HashSet<GameObject>();
+    private void Awake()
+    {
+        cs_GimmickHitEffectPlayer = GetComponent<CS_GimmickHitEffectPlayer>();
+    }
 
     /// <summary>
     /// 当たり判定の処理をループさせるかどうか
@@ -113,7 +120,12 @@ public class HitChecker : MonoBehaviour
     /// <param name="enemy"></param>
     /// <param name="damage"></param>
     /// <param name="isHit"></param>
-    private void EnemyDame(GameObject enemy, int damage, bool isHit = true)
+    private void EnemyDame(
+        GameObject enemy,
+        int damage,
+        bool isHit = true,
+        Collider enemyCollider = null,
+        BoxCollider hitBox = null)
     {
         // =====================================================
         // 一度ダメージを与えた敵には再度当てない
@@ -127,7 +139,14 @@ public class HitChecker : MonoBehaviour
 
         if (thiefAI != null)
         {
-            thiefAI.TakeDamage(damage, gimmick, isHit);
+            thiefAI.TakeDamage(damage, gimmick, transform.position, isHit);
+
+            if (cs_GimmickHitEffectPlayer != null)
+            {
+                cs_GimmickHitEffectPlayer.PlayHitEffect(
+                    enemyCollider,
+                    hitBox);
+            }
 
             // ダメージ済み登録
             damagedEnemies.Add(enemy);
@@ -184,20 +203,20 @@ public class HitChecker : MonoBehaviour
                     switch (gimmick)
                     {
                         case Gimmick.Pot:
-                            EnemyDame(enemy, effectDamage, false);
+                            EnemyDame(enemy, effectDamage, false, effectEnemies[i], effect);
                             break;
                         case Gimmick.IronBall:
-                            EnemyDame(enemy, effectDamage, false);
+                            EnemyDame(enemy, effectDamage, false, effectEnemies[i], effect);
                             break;
                         case Gimmick.EmptyChest:
                             EnemyCharm(enemy);
                             break;
                         case Gimmick.Nyaki:
-                            EnemyDame(enemy, effectDamage, false);
+                            EnemyDame(enemy, effectDamage, false, effectEnemies[i], effect);
                             break;
                         case Gimmick.Pitfall:
                             Debug.Log("Pitfall hit effect");
-                            EnemyDame(enemy, effectDamage, false);
+                            EnemyDame(enemy, effectDamage, false, effectEnemies[i], effect);
                             //シーフ落とす関数追加する//
                             parentGameObject.GetComponent<PitfallGimmick>();
                             parentGameObject.GetComponent<PitfallGimmick>().gimmickState = GimmickState.Active;
@@ -219,10 +238,10 @@ public class HitChecker : MonoBehaviour
                     switch (gimmick)
                     {
                         case Gimmick.Pot:
-                            EnemyDame(enemy, hitDamage);
+                            EnemyDame(enemy, hitDamage, true, hitEnemies[i], hit);
                             break;
                         case Gimmick.IronBall:
-                            EnemyDame(enemy, hitDamage);
+                            EnemyDame(enemy, hitDamage, true, hitEnemies[i], hit);
                             break;
                         case Gimmick.EmptyChest:
                             EnemyCharm(enemy);
@@ -236,11 +255,11 @@ public class HitChecker : MonoBehaviour
                             }
                             break;
                         case Gimmick.Nyaki:
-                            EnemyDame(enemy, hitDamage);
+                            EnemyDame(enemy, hitDamage, true, hitEnemies[i], hit);
                             break;
                         case Gimmick.Pitfall:
                             Debug.Log("Pitfall hit enemy");
-                            EnemyDame(enemy, hitDamage);
+                            EnemyDame(enemy, hitDamage, true, hitEnemies[i], hit);
                             //シーフ落とす関数追加する//
                             parentGameObject.GetComponent<PitfallGimmick>();
                             parentGameObject.GetComponent<PitfallGimmick>().gimmickState = GimmickState.Active;

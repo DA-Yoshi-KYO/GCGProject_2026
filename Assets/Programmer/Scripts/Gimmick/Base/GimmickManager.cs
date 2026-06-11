@@ -16,6 +16,7 @@ public class GimmickManager : MonoBehaviour
     //=========================================================
     // ギミック種類ごとの設定情報
     //=========================================================
+    [System.Serializable]
     public class GimmickInfo
     {
         // クールタイムの長さ
@@ -65,8 +66,22 @@ public class GimmickManager : MonoBehaviour
     //=========================================================
     // ギミック設定
     //=========================================================
+    [System.Serializable]
+    private class GimmickInfoData
+    {
+        public Gimmick gimmickTag;
+        public GimmickInfo gimmickInfo;
+        public GameObject itemPrefab;
+    }
+
+    [SerializeField]
+    private List<GimmickInfoData> gimmickInfoList;
+
     private Dictionary<Gimmick, GimmickInfo> gimmickInfo =
         new Dictionary<Gimmick, GimmickInfo>();
+
+    private Dictionary<Gimmick, bool> isItemGetNow = 
+        new Dictionary<Gimmick, bool>();
 
     //=========================================================
     // 設置中ギミック
@@ -76,59 +91,16 @@ public class GimmickManager : MonoBehaviour
 
     GimmickInfo info;
 
-    //=========================================================
-    // Start
-    //=========================================================
-    void Start()
+    private void Awake()
     {
-        gimmickInfo.Clear();
+        gimmickInfo = new Dictionary<Gimmick, GimmickInfo>();
+
         activeGimmicks.Clear();
 
-        Debug.Log("=== GimmickManager Initialize Start ===");
-
-        //=====================================================
-        // ギミック登録 ※初期登録数の設定
-        //=====================================================
-
-        //壺 ________________________
-        gimmickInfo.Add(
-            Gimmick.Pot,
-            new GimmickInfo(5f, 0));
-        Debug.Log(
-            "[Register] Pot" +
-            " CoolTime : 5");
-
-        //大岩 ______________________
-        gimmickInfo.Add(
-            Gimmick.IronBall,
-            new GimmickInfo(10f, 0));
-        Debug.Log(
-            "[Register] IronBall" +
-            " CoolTime : 10");
-
-        //宝箱 _______________________
-        gimmickInfo.Add(
-            Gimmick.EmptyChest,
-            new GimmickInfo(10f, 0));
-        Debug.Log(
-            "[Register] EmptyChest" +
-            " CoolTime : 10");
-
-        //にゃき _____________________
-        gimmickInfo.Add(
-            Gimmick.Nyaki,
-            new GimmickInfo(5f, 1));
-        Debug.Log(
-            "[Register] Nyaki" +
-            " CoolTime : 5");
-
-        //落とし穴 ___________________
-        gimmickInfo.Add(
-            Gimmick.Pitfall,
-            new GimmickInfo(5f, 1));
-        Debug.Log(
-            "[Register] Pitfall" +
-            " CoolTime : 5");
+        foreach (var data in gimmickInfoList)
+        {
+            gimmickInfo[data.gimmickTag] = data.gimmickInfo;
+        }
     }
 
     //=========================================================
@@ -232,37 +204,20 @@ public class GimmickManager : MonoBehaviour
     //=========================================================
     private void OnTriggerEnter(Collider other)
     {
-        //アイテムに当たった時
-        if (other.CompareTag("Item"))
+        if (!other.CompareTag("Item"))
+            return;
+
+        string itemName = other.gameObject.name.Replace("(Clone)", "");
+        foreach (var data in gimmickInfoList)
         {
-            //アイテム自体の名前でタグ判定
-            switch(other.gameObject.name)
+            if (data.itemPrefab.name == itemName)
             {
-                case "ItemPot":
-                    AddCurrentGimmick(Gimmick.Pot);
-                    Destroy(other.gameObject);
-                    Debug.Log("PotHaveAdd: " + gimmickInfo[Gimmick.Pot].maxNum);
-                    break;
-                case "ItemRock":
-                    AddCurrentGimmick(Gimmick.IronBall);
-                    Destroy(other.gameObject);
-                    Debug.Log("RockHaveAdd: " + gimmickInfo[Gimmick.IronBall].maxNum);
-                    break;
-                case "ItemEmptyChest":
-                    AddCurrentGimmick(Gimmick.EmptyChest);
-                    Destroy(other.gameObject);
-                    Debug.Log("EmptyChestHaveAdd: " + gimmickInfo[Gimmick.EmptyChest].maxNum);
-                    break;
-                case "ItemNyaki":
-                    AddCurrentGimmick(Gimmick.Nyaki);
-                    Destroy(other.gameObject);
-                    Debug.Log("NyakiHaveAdd: " + gimmickInfo[Gimmick.Nyaki].maxNum);
-                    break;
-                case "ItemPitfall":
-                    AddCurrentGimmick(Gimmick.Pitfall);
-                    Destroy(other.gameObject);
-                    Debug.Log("PitfallHaveAdd: " + gimmickInfo[Gimmick.Pitfall].maxNum);
-                    break;
+                AddCurrentGimmick(data.gimmickTag);
+                Destroy(other.gameObject);
+                IsSetItemGetNow(data.gimmickTag, true);
+
+                Debug.Log($"{data.gimmickTag}HaveAdd");
+                break;
             }
         }
     }
@@ -270,15 +225,15 @@ public class GimmickManager : MonoBehaviour
     //=========================================================
     // 設置可能か
     //=========================================================
-    public bool IsSetting(Gimmick gT)
+    public bool IsSetting(Gimmick gimmickTag)
     {
         // 登録されていない
-        if (!gimmickInfo.ContainsKey(gT))
+        if (!gimmickInfo.ContainsKey(gimmickTag))
         {
             Debug.LogError(
-                $"[IsSetting Error] {gT} : 未登録ギミック");
+                $"[IsSetting Error] {gimmickTag} : 未登録ギミック");
             Debug.Log(
-                $"[Type FullName] {gT.GetType().FullName}");
+                $"[Type FullName] {gimmickTag.GetType().FullName}");
             Debug.Log(
                 $"[Dictionary Count] {gimmickInfo.Count}");
             foreach (var pair in gimmickInfo)
@@ -290,19 +245,19 @@ public class GimmickManager : MonoBehaviour
             return false;
         }
 
-        GimmickInfo data = gimmickInfo[gT];
+        GimmickInfo data = gimmickInfo[gimmickTag];
 
         // 置ける数がない
         if (data.currentNum <= 0)
         {
             Debug.Log(
-                $"[IsSetting] {gT} : 設置不可");
+                $"[IsSetting] {gimmickTag} : 設置不可");
 
             return false;
         }
 
         Debug.Log(
-            $"[IsSetting] {gT} : 設置可能");
+            $"[IsSetting] {gimmickTag} : 設置可能");
 
         return true;
     }
@@ -319,11 +274,6 @@ public class GimmickManager : MonoBehaviour
 
             return 0;
         }
-
-        Debug.Log(
-            $"[GetMaxNum] {gimmickTag}" +
-            $" : {gimmickInfo[gimmickTag].maxNum}");
-
         return gimmickInfo[gimmickTag].maxNum;
     }
     //=========================================================
@@ -337,13 +287,23 @@ public class GimmickManager : MonoBehaviour
                 $"[GetCurrentNum Error] {gimmickTag} : 未登録");
             return 0;
         }
-
-        Debug.Log(
-            $"[GetCurrentNum] {gimmickTag}" +
-            $" : {gimmickInfo[gimmickTag].currentNum}");
-
         return gimmickInfo[gimmickTag].currentNum;
     }
+
+    //=========================================================
+    // 特定のタグのギミックを取得した瞬間を判定
+    //=========================================================
+    private void IsSetItemGetNow(Gimmick gimmickTag, bool Getting)
+    {
+        isItemGetNow[gimmickTag] = Getting;
+    }
+    public bool IsGetItemGetNow(Gimmick gimmickTag)
+    {
+        bool isGetting = isItemGetNow[gimmickTag];
+        IsSetItemGetNow(gimmickTag, false);
+        return isGetting;
+    }
+
     //=========================================================
     // クールタイム取得
     //==========================================================

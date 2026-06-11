@@ -131,8 +131,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 168089676}
-  - component: {fileID: 168089677}
   - component: {fileID: 168089678}
+  - component: {fileID: 168089677}
   m_Layer: 0
   m_Name: Test
   m_TagString: Untagged
@@ -148,7 +148,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 168089674}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -162,14 +162,13 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 168089674}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f396e9fa78cd9c947a957600ce4e65fe, type: 3}
+  m_Script: {fileID: 11500000, guid: 392ec5ac6ab66b645a01a679dbd2d422, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cs_EffectRoot: {fileID: 0}
-  playKey: 13
-  stopKey: 32
+  go_EffectPrefab: {fileID: 264367429111437040, guid: 2f3bdde62f321304691068dcd30e7773,
+    type: 3}
 --- !u!114 &168089678
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -179,21 +178,24 @@ MonoBehaviour:
   m_GameObject: {fileID: 168089674}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 57e866293366cb44fa123ee63423d9bb, type: 3}
+  m_Script: {fileID: 11500000, guid: 7164efc91b1f05746bf8958f49aff693, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  effectId: 1
-  spawnPoint: {fileID: 168089676}
-  spawnScale: {x: 1, y: 1, z: 1}
-  playKey: 13
-  stopKey: 32
-  destroyKey: 8
-  bool_IsUseDefaultPlaySpeed: 1
-  overridePlaySpeed: 1
-  bool_IsDestroyAfterStop: 0
-  scaleUpKey: 273
-  scaleDownKey: 274
-  scaleStep: 0.2
+  cs_EffectPlayer: {fileID: 168089677}
+  tr_SpawnPoint: {fileID: 0}
+  b_PlayOnStart: 0
+  b_SetPositionFromCaller: 0
+  b_SetRotationFromCaller: 0
+  b_SetPlayEndTimeFromCaller: 0
+  f_PlayEndTime: 0
+  b_SetHideOnEndFromCaller: 0
+  b_HideOnEnd: 0
+  b_SetMaxPoolCountFromCaller: 1
+  n_OverrideMaxPoolCount: 2
+  v3_TestMoveOffset: {x: 0, y: 1, z: 0}
+  v3_TestRotateEulerAngles: {x: 0, y: 180, z: 0}
+  v3_TestScale: {x: 2, y: 2, z: 2}
+  f_TestTransformChangeTime: 0.5
 --- !u!1 &880720037
 GameObject:
   m_ObjectHideFlags: 0
@@ -221,11 +223,11 @@ Light:
   m_GameObject: {fileID: 880720037}
   m_Enabled: 1
   serializedVersion: 10
-  m_Type: 1
+  m_Type: 0
   m_Shape: 0
-  m_Color: {r: 1, g: 0.95686275, b: 0.8392157, a: 1}
+  m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_Intensity: 1
-  m_Range: 10
+  m_Range: 5.83
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
@@ -312,6 +314,80 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 0
+--- !u!1 &1093002728
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1093002731}
+  - component: {fileID: 1093002730}
+  - component: {fileID: 1093002729}
+  m_Layer: 0
+  m_Name: Test (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1093002729
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1093002728}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 392ec5ac6ab66b645a01a679dbd2d422, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  go_EffectPrefab: {fileID: 6919014136174155209, guid: b124811fd02cac14cb38d010489faa7e,
+    type: 3}
+--- !u!114 &1093002730
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1093002728}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7164efc91b1f05746bf8958f49aff693, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cs_EffectPlayer: {fileID: 1093002729}
+  tr_SpawnPoint: {fileID: 0}
+  b_PlayOnStart: 0
+  b_SetPositionFromCaller: 0
+  b_SetRotationFromCaller: 0
+  b_SetPlayEndTimeFromCaller: 0
+  f_PlayEndTime: 0
+  b_SetHideOnEndFromCaller: 0
+  b_HideOnEnd: 0
+  b_SetMaxPoolCountFromCaller: 1
+  n_OverrideMaxPoolCount: 2
+  v3_TestMoveOffset: {x: 0, y: 1, z: 0}
+  v3_TestRotateEulerAngles: {x: 0, y: 180, z: 0}
+  v3_TestScale: {x: 2, y: 2, z: 2}
+  f_TestTransformChangeTime: 0.5
+--- !u!4 &1093002731
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1093002728}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2085515767
 GameObject:
   m_ObjectHideFlags: 0
@@ -399,7 +475,7 @@ Transform:
   m_GameObject: {fileID: 2085515767}
   serializedVersion: 2
   m_LocalRotation: {x: 0.2164396, y: 0, z: 0, w: 0.97629607}
-  m_LocalPosition: {x: 0, y: 0.335, z: -0.263}
+  m_LocalPosition: {x: 0.09, y: 0.916, z: -1.539}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -428,7 +504,7 @@ MonoBehaviour:
     m_Bits: 1
   m_VolumeTrigger: {fileID: 0}
   m_VolumeFrameworkUpdateModeOption: 2
-  m_RenderPostProcessing: 0
+  m_RenderPostProcessing: 1
   m_Antialiasing: 0
   m_AntialiasingQuality: 2
   m_StopNaN: 0
@@ -456,3 +532,4 @@ SceneRoots:
   - {fileID: 2085515770}
   - {fileID: 880720039}
   - {fileID: 168089676}
+  - {fileID: 1093002731}

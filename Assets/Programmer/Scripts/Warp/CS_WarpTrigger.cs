@@ -79,7 +79,7 @@ public class CS_WarpTrigger : MonoBehaviour
             Debug.Log("CS＿PlayerCameraが見つかりませんでした");
             return;
         }
-        playerCamera.RoomCameraRefresh();
+        playerCamera.OnRoomMove();
 
         selfWarpPoint.warping = true;
         wp.targetPoint.warping = true;
