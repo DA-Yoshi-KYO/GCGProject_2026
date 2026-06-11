@@ -44,6 +44,40 @@ public class CS_StageManager : MonoBehaviour
         waveCount = 1;
         stageCount = 1;
 
+        maxWaveCount = enemyDatabase.stageThiefDataList[stageCount - 1].waveData.Count; // データベースから現在のステージの最大ウェーブ数を取得して設定する
+    }
+
+    /// <summary>
+    /// 生成後敵が全員倒された場合、ウェーブ数を増やす処理を呼び出す
+    /// </summary>
+    private void Update()
+    {
+        // すべての敵が倒されたかどうかをチェックする
+        GameObject thiefParent = GameObject.Find("ThiefParent");
+
+        // ThiefParentが見つからない場合はエラーを出して処理を終了する
+        if (thiefParent == null) return;
+
+        CS_ThiefManager thiefManager = GameObject.FindAnyObjectByType<CS_ThiefManager>();
+        if (thiefManager == null) return;
+
+        // ThiefParentの子オブジェクトが0の場合、すべての敵が倒されたor帰宅したと判断する
+        if (thiefParent.transform.childCount == 0 && thiefManager.read_IsFirstGenerationComplete && thiefManager.read_IsResetAfterWaveProgress)
+        {
+            if (IsMaxWave()) return; // 現在のウェーブ数が最大ウェーブ数に達している場合は、これ以上ウェーブ数を増やさないようにする
+
+            WaveCountUp(); // ウェーブ数を増やす処理を呼び出す
+
+            // ThiefManagerを取得して通知する
+            CS_RoomEnemyEntryPointCollector collector = GameObject.Find("RoomCreatePoints").GetComponent<CS_RoomEnemyEntryPointCollector>();
+            if (collector == null) return;
+            collector.ClearEnemyEntryPointData(); // 敵の出入口のデータを一度クリアする
+            collector.CollectEnemyEntryPointData(); // 敵の出入口のデータを再収集する
+
+            thiefManager.ResetSpawnCount(); // 泥棒の生成数をリセットする
+            thiefManager.Notify();  // 泥棒の生成処理を呼び出す
+
+        }
     }
 
     /// <summary>
@@ -52,6 +86,7 @@ public class CS_StageManager : MonoBehaviour
     public void WaveCountUp()
     {
         waveCount++;
+        isRegistered = false; // ウェーブ数が変わったので、登録処理を再度実行できるようにする
     }
 
     /// <summary>
@@ -60,6 +95,10 @@ public class CS_StageManager : MonoBehaviour
     public void StageCountUp()
     {
         stageCount++;
+
+        waveCount = 1; // ステージが変わるとウェーブ数はリセットされる
+        maxWaveCount = enemyDatabase.stageThiefDataList[stageCount - 1].waveData.Count; // データベースから現在のステージの最大ウェーブ数を取得して設定する
+
         isRegistered = false; // ステージ数が変わったので、登録処理を再度実行できるようにする
     }
 
@@ -86,7 +125,7 @@ public class CS_StageManager : MonoBehaviour
             return;
         }
 
-        var EnemyDatas = enemyDatabase.thiefData[stageCount - 1].enemtEntryDatas;
+        var EnemyDatas = enemyDatabase.stageThiefDataList[stageCount - 1].waveData[waveCount - 1].enemtEntryDatas;
 
         // データベースから取得した敵の出現データをもとに、各部屋のCS_RoomCreatePointに敵の出現データを設定する
         foreach (var data in EnemyDatas)

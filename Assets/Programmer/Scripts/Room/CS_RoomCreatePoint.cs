@@ -190,6 +190,17 @@ public class CS_RoomCreatePoint : MonoBehaviour
     }
 
     /// <summary>
+    /// 全ての敵出入口データをクリアします。
+    /// </summary>
+    public void ClearEnemyEntryDirections()
+    {
+        cs_RightConnection.ClearEnemyEntryData();
+        cs_LeftConnection.ClearEnemyEntryData();
+        cs_FrontConnection.ClearEnemyEntryData();
+        cs_BackConnection.ClearEnemyEntryData();
+    }
+
+    /// <summary>
     /// 指定方向の接続情報を取得します。
     /// </summary>
     /// <param name="e_FromDirection">取得したい方向。</param>
