@@ -363,6 +363,9 @@ public class CS_ThiefAI : MonoBehaviour
             {
                 currentState = ThiefState.Explore; // 状態を探索に戻す
                 SetAgentStopped(false); // ナビメッシュエージェントを再開させる（安全に）
+
+                // 泥棒のアニメーション状態をStunにする
+                if (animator != null) animator.SetBool("IsStun", false);
             }
         }
         // 耐久力が0以下の場合は、時間経過後に退場する
@@ -371,6 +374,9 @@ public class CS_ThiefAI : MonoBehaviour
             // 経過時間が退場するまでの時間を超えた場合は、退場する処理を追加する
             if (elapsedTimeAfterStun >= exitAfterStunTime)
             {
+                // 泥棒のアニメーション状態をStunにする
+                if (animator != null) animator.SetBool("IsStun", false);
+
                 thiefMaterial.SetFloat("_Timer", fadeAfterStunTime - (elapsedTimeAfterStun - exitAfterStunTime));
 
                 if (thiefMaterial.GetFloat("_Timer") <= 0.0f)
@@ -389,12 +395,22 @@ public class CS_ThiefAI : MonoBehaviour
     /// </summary>
     /// <param name="damage">与える減少値</param>
     /// <param name="type">ギミックの種類</param>
+    /// <param name="gimmickPoint">ギミックの位置</param>
     /// <param name="isHit">直接命中したかどうか</param>
-    public void TakeDamage(int damage, Gimmick type, bool isHit = true)
+    public void TakeDamage(int damage, Gimmick type, Vector3 gimmickPoint, bool isHit = true)
     {
         if (remainingInvincibleTime > 0) return;
 
         durability -= damage;
+
+        // ギミックの方を向く
+        Vector3 directionToGimmick = gimmickPoint - transform.position;
+        directionToGimmick.y = 0; // 水平方向のみにする
+        if (directionToGimmick != Vector3.zero)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(directionToGimmick);
+            transform.rotation = targetRotation;
+        }
 
         // 泥棒のアニメーション状態をDamageにする
         if (animator != null)animator.SetTrigger("DamageTrigger");
@@ -475,8 +491,8 @@ public class CS_ThiefAI : MonoBehaviour
                 // 逃走状態になったときの処理を追加する
                 break;
             case ThiefState.Stunned:
-                // 泥棒のアニメーション状態をDamageにする
-                if (animator != null) animator.SetTrigger("DamageTrigger");
+                // 泥棒のアニメーション状態をStunにする
+                if (animator != null) animator.SetBool("IsStun", true);
                 // 気絶時間の経過時間をリセット
                 elapsedTimeAfterStun = 0.0f;
                 break;
