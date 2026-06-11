@@ -21,8 +21,11 @@ public class CS_MoveSystem
 
     [SerializeField, Tooltip("泥棒の歩き移動速度")]
     private float walkSpeed;
+    public float read_WalkSpeed => walkSpeed;
+
     [SerializeField, Tooltip("泥棒の走り移動速度")]
     private float runSpeed;
+        public float read_RunSpeed => runSpeed;
 
     [Tooltip("走り状態になる標的オブジェクトのタイプリスト")]
     private List<CS_VisionTarget.TargetType> runTargetTypes;

@@ -288,6 +288,8 @@ public class CS_ThiefAI : MonoBehaviour
 
         thiefReaction.ClearReaction();
 
+        thiefGimmickAction.UpdateAction();
+
         // 探索対象を決定
         memorySystem.RecognizeObjects();
 
