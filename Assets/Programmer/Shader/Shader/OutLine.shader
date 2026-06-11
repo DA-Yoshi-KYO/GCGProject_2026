@@ -11,7 +11,7 @@ Shader "Custom/Outline"
         Tags
         {
             "RenderPipeline" = "UniversalPipeline"
-            "RenderType"     = "Opaque"
+            "RenderType"     = "Transparent"
             "Queue"          = "Geometry+1"
         }
 
@@ -19,10 +19,10 @@ Shader "Custom/Outline"
         {
             Name "Outline"
             Cull Front
-            ZWrite On
+            ZWrite Off
             ZTest LEqual
-            Blend Off
 
+            Blend SrcAlpha OneMinusSrcAlpha
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
@@ -70,8 +70,8 @@ Shader "Custom/Outline"
 
             half4 frag(Varyings IN) : SV_Target
             {
-                UNITY_SETUP_INSTANCE_ID(IN);
-                return UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _OutlineColor);
+                float4 color = _OutlineColor;
+                return color;
             }
             ENDHLSL
         }
