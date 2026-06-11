@@ -105,6 +105,42 @@ public class CS_RoomEnemyEntryPointCollector : MonoBehaviour
     }
 
     /// <summary>
+    /// 収集した敵出入口情報を全てクリアします。
+    /// </summary>
+    public void ClearEnemyEntryPointData()
+    {
+        list_EnemyEntryPointData.Clear();
+        IsCollected = false;
+
+        Transform tr_SearchRoot = tr_RoomCreatePointsRoot;
+
+        if (tr_SearchRoot == null)
+        {
+            tr_SearchRoot = transform;
+        }
+
+        CS_RoomCreatePoint[] array_RoomCreatePoints =
+            tr_SearchRoot.GetComponentsInChildren<CS_RoomCreatePoint>(true);
+
+        for (int i = 0 ; i < array_RoomCreatePoints.Length ; i++)
+        {
+            CS_RoomCreatePoint cs_RoomCreatePoint = array_RoomCreatePoints[i];
+
+            if (cs_RoomCreatePoint == null)
+            {
+                continue;
+            }
+
+            if (!IsTargetRoomCreatePoint(cs_RoomCreatePoint.gameObject))
+            {
+                continue;
+            }
+
+            cs_RoomCreatePoint.ClearEnemyEntryDirections();
+        }
+    }
+
+    /// <summary>
     /// 1つのRoomCreatePointから敵出入口情報を収集します。
     /// </summary>
     /// <param name="cs_RoomCreatePoint">確認対象のRoomCreatePoint。</param>
