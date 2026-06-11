@@ -35,9 +35,12 @@
  *            | 視覚処理を管理するクラス(CS_VisionSensor)
  *            | A*アルゴリズムを用いたルート構築処理を管理するクラス(CS_AStarSystem)
  * 2026-06-04 | 気絶したときの処理をCS_StunThiefTargetに移動
+ * 2026-06-10 | 落とし穴ギミックにハマったときの処理を追加
+ *            | 落とし穴ギミックから抜けたときの処理を追加
+ *            | ナビメッシュエージェントを安全に停止させる処理を追加
+ * 2026-06-11 | 落とし穴用の処理をCS_ThiefGimmickActionに移動
  * 
  */
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -93,7 +96,7 @@ public class CS_ThiefAI : MonoBehaviour
     [Tooltip("気絶後の経過時間")]
     private float elapsedTimeAfterStun;
     [Tooltip("気絶状態の更新処理を実行するかどうか")]
-    private bool isUpdatingStunState;
+    private bool isUpdatingStunState = true;
 
     [Tooltip("ドロップするソウルの数")]
     private int soulDropCount;
@@ -150,6 +153,10 @@ public class CS_ThiefAI : MonoBehaviour
     private CS_AStarSystem aStarSystem;
     public CS_AStarSystem read_AStarSystem => aStarSystem;
 
+    [Tooltip("ギミック行動システム")]
+    private CS_ThiefGimmickAction thiefGimmickAction;
+    public CS_ThiefGimmickAction read_ThiefGimmickAction => thiefGimmickAction;
+
     /// <summary>
     /// 泥棒のステータスを設定する処理
     /// </summary>
@@ -181,6 +188,9 @@ public class CS_ThiefAI : MonoBehaviour
         // 記憶システムの初期化
         memorySystem = new CS_MemorySystem(this, entryRoom, entryPoint, typedata, data);
         memorySystem.FindNowRoomNode();
+
+        // ギミック行動システムの初期化
+        thiefGimmickAction = new CS_ThiefGimmickAction(this);
 
         exitAfterStunTime = data.exitAfterStunTime;
         damageStunTime = data.stunTime;
@@ -353,6 +363,9 @@ public class CS_ThiefAI : MonoBehaviour
             {
                 currentState = ThiefState.Explore; // 状態を探索に戻す
                 SetAgentStopped(false); // ナビメッシュエージェントを再開させる（安全に）
+
+                // 泥棒のアニメーション状態をStunにする
+                if (animator != null) animator.SetBool("IsStun", false);
             }
         }
         // 耐久力が0以下の場合は、時間経過後に退場する
@@ -361,11 +374,10 @@ public class CS_ThiefAI : MonoBehaviour
             // 経過時間が退場するまでの時間を超えた場合は、退場する処理を追加する
             if (elapsedTimeAfterStun >= exitAfterStunTime)
             {
-                thiefMaterial.SetFloat("_Timer", fadeAfterStunTime - (elapsedTimeAfterStun - exitAfterStunTime));
+                // 泥棒のアニメーション状態をStunにする
+                if (animator != null) animator.SetBool("IsStun", false);
 
-                Transform faceTransform = this.transform.GetChild(1);
-                Vector3 facePos = faceTransform.position;
-                faceTransform.position = new Vector3(facePos.x, facePos.y + 0.01f * (elapsedTimeAfterStun - exitAfterStunTime), facePos.z);
+                thiefMaterial.SetFloat("_Timer", fadeAfterStunTime - (elapsedTimeAfterStun - exitAfterStunTime));
 
                 if (thiefMaterial.GetFloat("_Timer") <= 0.0f)
                 {
@@ -383,12 +395,22 @@ public class CS_ThiefAI : MonoBehaviour
     /// </summary>
     /// <param name="damage">与える減少値</param>
     /// <param name="type">ギミックの種類</param>
+    /// <param name="gimmickPoint">ギミックの位置</param>
     /// <param name="isHit">直接命中したかどうか</param>
-    public void TakeDamage(int damage, Gimmick type, bool isHit = true)
+    public void TakeDamage(int damage, Gimmick type, Vector3 gimmickPoint, bool isHit = true)
     {
         if (remainingInvincibleTime > 0) return;
 
         durability -= damage;
+
+        // ギミックの方を向く
+        Vector3 directionToGimmick = gimmickPoint - transform.position;
+        directionToGimmick.y = 0; // 水平方向のみにする
+        if (directionToGimmick != Vector3.zero)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(directionToGimmick);
+            transform.rotation = targetRotation;
+        }
 
         // 泥棒のアニメーション状態をDamageにする
         if (animator != null)animator.SetTrigger("DamageTrigger");
@@ -457,6 +479,24 @@ public class CS_ThiefAI : MonoBehaviour
     public void ChangeStatus(ThiefState newState)
     {
         currentState = newState;
+        switch(newState)
+            {
+            case ThiefState.Explore:
+                // 探索状態になったときの処理を追加する
+                break;
+            case ThiefState.Found:
+                // 発見状態になったときの処理を追加する
+                break;
+            case ThiefState.Escape:
+                // 逃走状態になったときの処理を追加する
+                break;
+            case ThiefState.Stunned:
+                // 泥棒のアニメーション状態をStunにする
+                if (animator != null) animator.SetBool("IsStun", true);
+                // 気絶時間の経過時間をリセット
+                elapsedTimeAfterStun = 0.0f;
+                break;
+        }
     }
 
     /// <summary>
@@ -484,45 +524,6 @@ public class CS_ThiefAI : MonoBehaviour
         if (animator != null) animator.SetTrigger(parameter);
     }
 
-    // == 落とし穴用項目
-    /// <summary>
-    /// 落とし穴ギミックにハマった
-    /// </summary>
-    [ContextMenu("落とし穴ギミックにハマったときの処理")]
-    public void PitFallStart()
-    {
-        // 状態を気絶に変更
-        ChangeStatus(ThiefState.Stunned);
-        // 気絶時間の経過時間をリセット
-        elapsedTimeAfterStun = 0.0f;
-        // 気絶状態の更新処理を実行するようにする
-        isUpdatingStunState = false;
-
-        // NavMeshAgentを停止させる
-        moveSystem.read_NavMeshAgent.ResetPath();
-        moveSystem.read_NavMeshAgent.enabled = false;
-        // SmartNavAgentも停止させる
-        moveSystem.read_SmartNavAgent.enabled = false;
-
-        // 落とし穴にハマったときの見た目の位置調整
-        // 体の8割ほど埋める
-        Vector3 pos = transform.position;
-        transform.position = new Vector3(pos.x, pos.y - transform.localScale.y * 0.8f, pos.z);
-    }
-    /// <summary>
-    /// 落とし穴ギミックから抜けた
-    /// </summary>
-    [ContextMenu("落とし穴ギミックから抜けたときの処理")]
-    public void PitFallEnd()
-    {
-        // 気絶状態の更新処理を実行するようにする
-        isUpdatingStunState = true; 
-        // NavMeshAgentを再度有効にする
-        moveSystem.read_NavMeshAgent.enabled = true;
-        // SmartNavAgentも再度有効にする
-        moveSystem.read_SmartNavAgent.enabled = true;
-    }
-
     /// <summary>
     /// ナビメッシュエージェントを安全に停止させる処理
     /// </summary>
@@ -545,6 +546,15 @@ public class CS_ThiefAI : MonoBehaviour
             // 安全のためログを残す（頻発する場合は削除）
             Debug.LogWarning("SetAgentStopped: NavMeshAgent が NavMesh 上にありません。操作をスキップします。", this);
         }
+    }
+
+    /// <summary>
+    /// 気絶状態の更新処理を実行するかどうかを設定する処理
+    /// </summary>
+    /// <param name="isUpdating">気絶状態の更新処理を実行するかどうか</param>
+    public void SetStunnedUpdateFlag(bool isUpdating)
+    {
+        isUpdatingStunState = isUpdating;
     }
 
     private void OnDrawGizmos()

@@ -139,7 +139,7 @@ public class HitChecker : MonoBehaviour
 
         if (thiefAI != null)
         {
-            thiefAI.TakeDamage(damage, gimmick, isHit);
+            thiefAI.TakeDamage(damage, gimmick, transform.position, isHit);
 
             if (cs_GimmickHitEffectPlayer != null)
             {
