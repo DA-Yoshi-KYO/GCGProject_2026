@@ -20,7 +20,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Cryrange01
+  m_Name: Cryrange05
   m_Shader: {fileID: 4800000, guid: 9985b615531cd5d4fb958ee1b3faaa81, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -61,11 +61,11 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 183c4a2168e242f42989d5ef3d0c22e3, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0.25, y: 0.5}
+        m_Texture: {fileID: 2800000, guid: cc868183dcb0f6045a033114278240a1, type: 3}
+        m_Scale: {x: 5, y: 3}
+        m_Offset: {x: 0, y: 0}
     - _MaskTex:
-        m_Texture: {fileID: 2800000, guid: 850d12ff0312c7d4a9ada9dae985db57, type: 3}
+        m_Texture: {fileID: 2800000, guid: 807c3093c62d9204ebac7ecf5b4d3818, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
@@ -90,7 +90,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _TopMaskTex:
         m_Texture: {fileID: 2800000, guid: 6ebf4e859adc5c54185889d6fbc4f49b, type: 3}
-        m_Scale: {x: 1, y: 1}
+        m_Scale: {x: 1, y: 0.9}
         m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
         m_Texture: {fileID: 0}
@@ -106,14 +106,13 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Alpha: 0.75
+    - _Alpha: 0.8
     - _AlphaClip: 0
     - _AlphaToMask: 0
     - _BasePower: 0
-    - _BlackCut: 0.75
+    - _BlackCut: 0.2
     - _Blend: 0
     - _BlendModePreserveSpecular: 1
-    - _BottomStrength: 0.1
     - _BumpScale: 1
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
@@ -129,12 +128,11 @@ Material:
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
-    - _GlowPower: 2.6
-    - _GradientMode: 0.8
+    - _GlowPower: 0.1
+    - _GradientMode: 0
     - _GradientPower: 5
-    - _HeightFadePower: 2
     - _MaskInvert: 0
-    - _MaskPower: 0.5
+    - _MaskPower: 2.5
     - _Metallic: 0
     - _NoisePower: 0.5
     - _NoiseScale: 8
@@ -144,7 +142,7 @@ Material:
     - _QueueOffset: 0
     - _ReceiveShadows: 1
     - _RotateSpeed: 0.8
-    - _ScrollSpeed: 0.75
+    - _ScrollSpeed: 1
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
@@ -154,18 +152,18 @@ Material:
     - _SweepPower: 8
     - _SweepSoftness: 0.08
     - _SweepWidth: 0.08
-    - _TopAreaPower: 2
+    - _TopAreaPower: 0.1
     - _TopMaskInvert: 0
-    - _TopMaskPower: 5
-    - _TopMaskStrength: 1
+    - _TopMaskPower: 2
+    - _TopMaskStrength: 5
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _InnerColor: {r: 0, g: 1, b: 0.81251574, a: 1}
-    - _OuterColor: {r: 0, g: 1, b: 0.3280983, a: 1}
+    - _InnerColor: {r: 0.061502814, g: 1, b: 0, a: 1}
+    - _OuterColor: {r: 0.031372547, g: 1, b: 0, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
     - _SweepColor: {r: 0.4, g: 0.9, b: 1, a: 1}
   m_BuildTextureStacks: []
