@@ -25,8 +25,10 @@ public class GimmickSelectUI : MonoBehaviour
     [Header("CT マスク（Center スロット直下の Filled Image）")]
     [Tooltip("消費1個目のグレーマスク Image（ImageType=Filled, FillMethod=Radial360）")]
     [SerializeField] private Image ctMask1;
+    private Material ctMaskMat1;
     [Tooltip("消費2個目以降のグレーマスク Image（同設定, ctMask1より少し暗い色）")]
     [SerializeField] private Image ctMask2;
+    private Material ctMaskMat2;
 
     [Header("CT マスク 基本色")]
     [SerializeField] private Color ctColor1 = new Color(0.25f, 0.25f, 0.25f, 0.85f);
@@ -66,8 +68,8 @@ public class GimmickSelectUI : MonoBehaviour
 
         slotSpacing = centerAnchor.x - leftAnchor.x;
 
-        InitCTMask(ctMask1, ctColor1);
-        InitCTMask(ctMask2, ctColor2);
+        InitCTMask(ctMask1, ctColor1, ref ctMaskMat1);
+        InitCTMask(ctMask2, ctColor2, ref ctMaskMat2);
     }
 
     private void Update()
@@ -146,16 +148,15 @@ public class GimmickSelectUI : MonoBehaviour
     /// <summary>
     /// Filled Image を CT マスク用に初期化する
     /// </summary>
-    private void InitCTMask(Image mask, Color col)
+    private void InitCTMask(Image mask, Color col, ref Material mat)
     {
         if (mask == null) return;
-        mask.type = Image.Type.Filled;
-        mask.fillMethod = Image.FillMethod.Radial360;
-        mask.fillOrigin = (int)Image.Origin360.Bottom;
-        mask.fillClockwise = false;
-        mask.fillAmount = 0f;
-        mask.color = col;
         mask.raycastTarget = false;
+
+        mat = mask.material;
+        mat.SetFloat("_FillAmount", 0f);
+        mat.SetTexture("_MainTex", mask.sprite.texture);
+        mat.SetColor("_Color", col);
     }
 
     /// <summary>
@@ -168,8 +169,8 @@ public class GimmickSelectUI : MonoBehaviour
         GimmickBase gb = GetGimmickBase(idx);
         if (gb == null)
         {
-            SetMaskFill(ctMask1, 0f);
-            SetMaskFill(ctMask2, 0f);
+            SetMaskFill(ctMaskMat1, 0f);
+            SetMaskFill(ctMaskMat2, 0f);
             return;
         }
 
@@ -188,18 +189,18 @@ public class GimmickSelectUI : MonoBehaviour
 
         if (consumed <= 0)
         {
-            SetMaskFill(ctMask1, 0f);
-            SetMaskFill(ctMask2, 0f);
+            SetMaskFill(ctMaskMat1, 0f);
+            SetMaskFill(ctMaskMat2, 0f);
         }
         else if (consumed == 1)
         {
-            SetMaskFill(ctMask1, coolRatio);
-            SetMaskFill(ctMask2, 0f);
+            SetMaskFill(ctMaskMat1, coolRatio);
+            SetMaskFill(ctMaskMat2, 0f);
         }
         else
         {
-            SetMaskFill(ctMask1, 1f);
-            SetMaskFill(ctMask2, coolRatio);
+            SetMaskFill(ctMaskMat1, 1f);
+            SetMaskFill(ctMaskMat2, coolRatio);
         }
     }
 
@@ -233,12 +234,10 @@ public class GimmickSelectUI : MonoBehaviour
     /// </summary>
     public float CoolTimeRatio { get; private set; } = 0f;
 
-    private static void SetMaskFill(Image mask, float fill)
+    private static void SetMaskFill(Material maskMat, float fill)
     {
-        if (mask == null) return;
-        const float maxFill = 190f / 360f;
-        mask.fillAmount = fill * maxFill;
-        mask.enabled = fill > 0f;
+        if (maskMat == null) return;
+        maskMat.SetFloat("_FillAmount", fill);
     }
 
     private void UpdateCountText(int idx)
