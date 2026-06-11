@@ -378,7 +378,6 @@ public class CS_ThiefAI : MonoBehaviour
             if (elapsedTimeAfterStun >= exitAfterStunTime)
             {
                 // 泥棒のアニメーション状態をStunにする
-                if (animator != null) animator.SetBool("IsStun", false);
 
                 thiefMaterial.SetFloat("_Timer", fadeAfterStunTime - (elapsedTimeAfterStun - exitAfterStunTime));
 
@@ -391,6 +390,16 @@ public class CS_ThiefAI : MonoBehaviour
                     if (thiefSound != null) thiefSound.PlayOneShotSE("ThiefDeath", gameObject.transform.position, "ThiefDeath");
 
                     Destroy(this.gameObject);
+                }
+            }
+            else
+            {
+                thiefReaction.ClearReaction();
+
+                if (animator != null)
+                {
+                    animator.SetBool("IsStun", false);
+                    animator.SetTrigger("DeathTrigger");
                 }
             }
         }
@@ -453,7 +462,7 @@ public class CS_ThiefAI : MonoBehaviour
                 break;
         }
 
-        currentState = ThiefState.Stunned; // 状態を気絶に変更
+        ChangeStatus(ThiefState.Stunned); // 状態を気絶に変更
         elapsedTimeAfterStun = 0.0f; // 気絶時間の経過時間をリセット
 
         remainingInvincibleTime = invincibleTime; // 無敵時間を付与
