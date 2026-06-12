@@ -54,6 +54,9 @@ public class CS_PlayerAction : MonoBehaviour
     // ギミック設置時のEffect再生クラスへの参照
     private CS_GimmickSetEffectPlayer cs_GimmickSetEffectPlayer;
 
+    // インタラクト範囲Effect再生クラスへの参照
+    private CS_PlayerInteractRangeEffectPlayer cs_PlayerInteractRangeEffectPlayer;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -80,6 +83,9 @@ public class CS_PlayerAction : MonoBehaviour
         playSE = GameObject.Find("3DSE").GetComponent<CS_3DPlaySE>();
 
         cs_GimmickSetEffectPlayer = GetComponent<CS_GimmickSetEffectPlayer>();
+
+        cs_PlayerInteractRangeEffectPlayer = GetComponent<CS_PlayerInteractRangeEffectPlayer>();
+
     }
 
     // Update is called once per frame
@@ -131,6 +137,13 @@ public class CS_PlayerAction : MonoBehaviour
                 Vector3 interactPos = transform.position;
                 interactPos.y += interactScale.y * 0.5f; // フィールドが地面に接するように位置を調整
                 interactField.transform.position = interactPos;
+
+                // Effectのサイズを変更
+                if (cs_PlayerInteractRangeEffectPlayer != null)
+                {
+                    cs_PlayerInteractRangeEffectPlayer.UpdateInteractRangeEffect(
+                        interactField.transform);
+                }
 
                 // 円柱で判定を取るために、カプセルでオーバーラップを取った後に上下の半球を除外する
                 Collider[] hits = Physics.OverlapCapsule(
@@ -213,10 +226,23 @@ public class CS_PlayerAction : MonoBehaviour
 
             interactField.transform.localScale = Vector3.zero;
             isInteracting = true;
+
+            if (cs_PlayerInteractRangeEffectPlayer != null)
+            {
+                cs_PlayerInteractRangeEffectPlayer.PlayInteractRangeEffect(
+                    interactField.transform);
+            }
         }
         else if (context.canceled)
         {
             isInteracting = false;
+
+            // Effectの停止
+            if (cs_PlayerInteractRangeEffectPlayer != null)
+            {
+                cs_PlayerInteractRangeEffectPlayer.EndInteractRangeEffect();
+            }
+
             if (interactTime < switchInteract)
             {
                 // 短押しは設置の処理を行う
@@ -236,6 +262,12 @@ public class CS_PlayerAction : MonoBehaviour
             }
             else
             {
+
+
+                //! ここにギミック起動範囲のエフェクトを入れる。
+
+
+
                 // 長押しはギミックの起動を行う
                 interactField.GetComponent<Renderer>().enabled = false;
                 playSE.PlayOneShotSE("CatInteract", gameObject.transform.position, "InteractSE");

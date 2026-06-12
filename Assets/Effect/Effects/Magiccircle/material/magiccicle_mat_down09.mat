@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: magiccicle_mat_down07
+  m_Name: magiccicle_mat_down09
   m_Shader: {fileID: 4800000, guid: 153b36af907fa774cacb6f0cfcc4b550, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -56,7 +56,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _NoiseTex:
-        m_Texture: {fileID: 2800000, guid: cc868183dcb0f6045a033114278240a1, type: 3}
+        m_Texture: {fileID: 2800000, guid: 0ded6e15410bcd145a82a5d60686ed07, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
@@ -85,10 +85,10 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Alpha: 1
+    - _Alpha: 0.1
     - _AlphaClip: 0
     - _AlphaToMask: 0
-    - _BasePower: 0.17
+    - _BasePower: 1.26
     - _BlackCut: 0
     - _Blend: 0
     - _BlendModePreserveSpecular: 1
@@ -125,16 +125,16 @@ Material:
     - _Parallax: 0.005
     - _QueueOffset: 0
     - _ReceiveShadows: 1
-    - _RotateSpeed: 0.1
+    - _RotateSpeed: 5
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _SrcBlendAlpha: 1
     - _Surface: 0
-    - _SweepPower: 1
-    - _SweepSoftness: 0.3
-    - _SweepWidth: 0.05
+    - _SweepPower: 20
+    - _SweepSoftness: 0.08
+    - _SweepWidth: 0.5
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:
@@ -145,7 +145,7 @@ Material:
     - _InnerColor: {r: 0.93678015, g: 1, b: 0.21226418, a: 1}
     - _OuterColor: {r: 1, g: 0, b: 0.692471, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
-    - _SweepColor: {r: 0, g: 1, b: 0.00002193451, a: 1}
+    - _SweepColor: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
 --- !u!114 &8732606940815203376
 MonoBehaviour:
