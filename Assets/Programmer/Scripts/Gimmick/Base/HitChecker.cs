@@ -175,27 +175,6 @@ public class HitChecker : MonoBehaviour
         }
     }
 
-    public CS_ThiefGimmickAction SearchEnemy(Gimmick gimmickTag)
-    {
-        Collider []
-        searchEnemies =
-                GetSearchEnemies();
-        //======================================================
-        // 索敵範囲
-        //======================================================
-        for(int i = 0 ; i < searchEnemies.Length ; i++)
-        {
-            GameObject enemy = searchEnemies[i].gameObject;
-            CS_ThiefAI thiefAI = enemy.GetComponent<CS_ThiefAI>();
-            thiefGA = thiefAI.read_ThiefGimmickAction;
-            if (thiefAI != null)
-            {
-                return thiefGA;
-            }
-        }
-        return null;
-    }
-
     private void FixedUpdate()
     {
         if (firstUpdate || isLoop)
@@ -207,6 +186,28 @@ public class HitChecker : MonoBehaviour
 
             Collider[] effectEnemies =
                 GetEffectEnemies();
+
+            Collider[] searchEnemies =
+                GetSearchEnemies();
+
+            //======================================================
+            // 索敵範囲
+            //======================================================
+            for (int i = 0 ; i < searchEnemies.Length ; i++)
+            {
+                GameObject enemy = searchEnemies[i].gameObject;
+                CS_ThiefAI thiefAI = enemy.GetComponent<CS_ThiefAI>();
+                thiefGA = thiefAI.read_ThiefGimmickAction;
+                GimmickBase gimmickBase = parentGameObject.GetComponent<GimmickBase>();
+                switch (gimmick)
+                {
+                    case Gimmick.IronBall:
+                        thiefGA.IronBallStart(gimmickBase);
+                        Debug.Log("泥棒逃げる！");
+                        break;
+                }
+            }
+
             // =====================================================
             // 効果範囲
             // =====================================================
@@ -229,6 +230,19 @@ public class HitChecker : MonoBehaviour
                 {
                     GameObject enemy =
                         effectEnemies[i].gameObject;
+                    CS_ThiefAI thiefAI = enemy.GetComponent<CS_ThiefAI>();
+                    thiefGA = thiefAI.read_ThiefGimmickAction;
+                    if (thiefAI != null)
+                    {
+                        thiefGA = thiefAI.read_ThiefGimmickAction;
+                    }
+                    GimmickBase gimmickBase = parentGameObject.GetComponent<GimmickBase>();
+                    switch (gimmick)
+                    {
+                        case Gimmick.Pitfall:
+                            thiefGA.PitFallStart(gimmickBase.transform.position);
+                            break;
+                    }
 
                     switch (gimmick)
                     {
@@ -263,6 +277,14 @@ public class HitChecker : MonoBehaviour
                 GameObject enemy = hitEnemies[i].gameObject;
                 CS_ThiefAI thiefAI = enemy.GetComponent<CS_ThiefAI>();
                 thiefGA = thiefAI.read_ThiefGimmickAction;
+                GimmickBase gimmickBase = parentGameObject.GetComponent<GimmickBase>();
+                switch (gimmick)
+                {
+                    case Gimmick.Pitfall:
+                        thiefGA.PitFallStart(gimmickBase.transform.position);
+                        break;
+                }
+
                 if (thiefAI != null)
                 {
                     switch (gimmick)
