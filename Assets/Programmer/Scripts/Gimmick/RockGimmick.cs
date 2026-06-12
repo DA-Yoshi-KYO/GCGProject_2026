@@ -82,8 +82,6 @@ public class RockGimmick : GimmickBase
             velocity = Vector3.zero;
 
             SetHitChecker(transform.position);
-            hitting = hitChecker.GetComponent<HitChecker>();
-            hitting.SearchEnemy(gimmick).IronBallStart(this);
         }
 
         // =========================
@@ -249,7 +247,10 @@ public class RockGimmick : GimmickBase
     protected override void BrokenUpdate()
     {
         DeleteHitChecker();
-        GetThiefGimmickAction().IronBallEnd();
+        if (GetThiefGimmickAction() != null)
+        {
+            GetThiefGimmickAction().IronBallEnd();
+        }
         //hitting.SearchEnemy(gimmick).IronBallEnd();
         //破壊時に1回だけ生成
         if (!isDangerZoneSpawned)
