@@ -7,6 +7,7 @@
  * 2026-05-08 | リファクタリング(大瀧)
  */
 
+using EffekseerTool;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -48,11 +49,11 @@ public class RockGimmick : GimmickBase
     private float activeTimer = 0f;
     private bool soundPlayed = false;
 
-    //デバッグ用！！！！
     Vector3 startPos;
     bool isStart = false;
     private float debugIdleOffset = 0.9f;
     private float debugUpdateOffset = 0.4f;
+    private HitChecker hitting;
 
     protected override void IdleUpdate()
     {
@@ -81,6 +82,10 @@ public class RockGimmick : GimmickBase
 
             initPositionY = transform.position.y + debugIdleOffset;
             velocity = Vector3.zero;
+
+            SetHitChecker(transform.position);
+            hitting = hitChecker.GetComponent<HitChecker>();
+            hitting.SearchEnemy(gimmick).IronBallStart(this);
         }
 
         // =========================
@@ -92,7 +97,6 @@ public class RockGimmick : GimmickBase
         // レイ起点を少し上にずらして自身コライダへの衝突を回避する
         Vector3 rayOrigin = transform.position + Vector3.up * 0.1f;
         bool hasValidHit = false;   //ヒットが有効かどうか
-
         //if (soundPlayed)
         //{
         //    activeTimer -= Time.deltaTime;
@@ -247,7 +251,8 @@ public class RockGimmick : GimmickBase
     protected override void BrokenUpdate()
     {
         DeleteHitChecker();
-
+        GetThiefGimmickAction().IronBallEnd();
+        //hitting.SearchEnemy(gimmick).IronBallEnd();
         //破壊時に1回だけ生成
         if (!isDangerZoneSpawned)
         {
