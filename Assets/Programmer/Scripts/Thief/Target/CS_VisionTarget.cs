@@ -16,17 +16,8 @@ using UnityEngine;
 /// </summary>
 public class CS_VisionTarget : CS_ThiefTarget
 {
-    // ターゲットの種類
-    public enum TargetType
-    {
-        [Tooltip("宝物")]
-        Treasure,
-        [Tooltip("棚")]
-        Shelf,
-    }
-
     [Tooltip("ターゲットの種類")]
-    public TargetType targetType;
+    public CSE_VisionTargetType targetType;
 
     [Header("探索したときに得る探索度")]
     [Tooltip("探索したときに得る探索度")]
@@ -47,7 +38,7 @@ public class CS_VisionTarget : CS_ThiefTarget
     private void Start()
     {
         // ターゲットの種類が宝物の場合
-        if (targetType == TargetType.Treasure)
+        if (targetType == CSE_VisionTargetType.Treasure)
         {
             // EndManagerを取得
             CS_EndManager endManager = GameObject.FindObjectOfType<CS_EndManager>();
@@ -68,7 +59,7 @@ public class CS_VisionTarget : CS_ThiefTarget
     private void OnDestroy()
     {
         // ターゲットの種類が宝物の場合、EndManagerから宝物を減らす
-        if (targetType == TargetType.Treasure)
+        if (targetType == CSE_VisionTargetType.Treasure)
         {
             // EndManagerを取得
             CS_EndManager endManager = GameObject.FindObjectOfType<CS_EndManager>();

@@ -44,7 +44,7 @@ public class CS_ThiefGimmickAction
     public void PitFallStart(Vector3 pitfallPoint)
     {
         // 状態を気絶に変更
-        thiefAI.ChangeStatus(CS_ThiefAI.ThiefState.Stunned);
+        thiefAI.ChangeStatus(CSE_ThiefState.Stunned);
         // 気絶状態の更新処理を実行しないようにする
         thiefAI.SetStunnedUpdateFlag(false);
 

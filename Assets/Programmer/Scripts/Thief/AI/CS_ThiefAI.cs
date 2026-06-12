@@ -52,21 +52,9 @@ using UnityEngine.AI;
 [RequireComponent(typeof(NavMeshAgent))]
 public class CS_ThiefAI : MonoBehaviour
 {
-    [Tooltip("泥棒の行動状態を定義する列挙型")]
-    public enum ThiefState
-    {
-        [Tooltip("探索状態")]
-        Explore,
-        [Tooltip("発見状態")]
-        Found,
-        [Tooltip("逃走状態")]
-        Escape,
-        [Tooltip("気絶状態")]
-        Stunned
-    }
     [SerializeField, Tooltip("現在の行動状態")]
-    private ThiefState currentState;
-    public ThiefState read_CurrentState => currentState;
+    private CSE_ThiefState currentState;
+    public CSE_ThiefState read_CurrentState => currentState;
 
     [Tooltip("泥棒のマテリアル")]
     private Material[] thiefMaterial;
@@ -202,7 +190,7 @@ public class CS_ThiefAI : MonoBehaviour
         initholdCatTime = typedata.holdCatTime;
 
         // 初期状態を探索に設定
-        currentState = ThiefState.Explore;
+        currentState = CSE_ThiefState.Explore;
 
         // リジットボディの設定
         Rigidbody rb = GetComponent<Rigidbody>();
@@ -240,7 +228,7 @@ public class CS_ThiefAI : MonoBehaviour
         // 気絶状態のときは無敵時間の経過を管理しない（気絶状態のときは攻撃を受けない想定のため）
         if (remainingInvincibleTime > 0)
         {
-            if (currentState != ThiefState.Stunned)
+            if (currentState != CSE_ThiefState.Stunned)
             {
                 remainingInvincibleTime -= Time.deltaTime;
                 if (remainingInvincibleTime < 0)
@@ -265,16 +253,16 @@ public class CS_ThiefAI : MonoBehaviour
         // 現在の状態に応じた行動を実行
         switch (currentState)
         {
-            case ThiefState.Explore:
+            case CSE_ThiefState.Explore:
                 Explore();
                 break;
-            case ThiefState.Found:
+            case CSE_ThiefState.Found:
                 Found();
                 break;
-            case ThiefState.Escape:
+            case CSE_ThiefState.Escape:
                 Escape();
                 break;
-            case ThiefState.Stunned:
+            case CSE_ThiefState.Stunned:
                 Stunned();
                 break;
         }
@@ -315,7 +303,7 @@ public class CS_ThiefAI : MonoBehaviour
         heldTreasure.transform.position = holdPosition;
 
         // 状態を逃走に変更
-        ChangeStatus(ThiefState.Escape);
+        ChangeStatus(CSE_ThiefState.Escape);
 
         // 取得した宝物を他の泥棒の記憶から消去する
         GameObject.FindObjectOfType<CS_ThiefManager>().EraseTheMemoryToAllThief(heldTreasure.GetComponent<CS_ThiefTarget>());
@@ -330,7 +318,7 @@ public class CS_ThiefAI : MonoBehaviour
         moveSystem.FixStuck();
 
         // 宝物を見つけたときのリアクションに変更
-        thiefReaction.ChangeReaction(CS_ThiefReaction.ThiefReactionType.FoundTreasure);
+        thiefReaction.ChangeReaction(CSE_ThiefReactionType.FoundTreasure);
 
         // 帰宅ルートが未構築なら構築する
         if (!aStarSystem.HasRoute)
@@ -364,7 +352,7 @@ public class CS_ThiefAI : MonoBehaviour
             // 経過時間が気絶時間を超えた場合は、耐久力を減少させて、状態を探索に戻す
             if (elapsedTimeAfterStun >= damageStunTime)
             {
-                currentState = ThiefState.Explore; // 状態を探索に戻す
+                currentState = CSE_ThiefState.Explore; // 状態を探索に戻す
                 SetAgentStopped(false); // ナビメッシュエージェントを再開させる（安全に）
 
                 // 泥棒のアニメーション状態をStunにする
@@ -439,12 +427,12 @@ public class CS_ThiefAI : MonoBehaviour
         if (isHit)
         {
             // 直接ダメージを受けたときのリアクションに変更
-            thiefReaction.ChangeReaction(CS_ThiefReaction.ThiefReactionType.HitTrap);
+            thiefReaction.ChangeReaction(CSE_ThiefReactionType.HitTrap);
         }
         else
         {
             // 間接的にダメージを受けたときのリアクションに変更
-            thiefReaction.ChangeReaction(CS_ThiefReaction.ThiefReactionType.NearHitTrap);
+            thiefReaction.ChangeReaction(CSE_ThiefReactionType.NearHitTrap);
         }
         // ダメージを受けたときのSEを再生する処理を追加する
         if (thiefSound != null) thiefSound.PlayOneShotSE("ThiefDamage", gameObject.transform.position, "ThiefDamage");
@@ -456,10 +444,10 @@ public class CS_ThiefAI : MonoBehaviour
         switch (type)
         {
             case Gimmick.Pot:
-                thiefReactionUI.SetReactionUI(CS_ThiefReactionUI.ThiefReactionUIType.Pot);
+                thiefReactionUI.SetReactionUI(CSE_ThiefReactionUIType.Pot);
                 break;
             case Gimmick.IronBall:
-                thiefReactionUI.SetReactionUI(CS_ThiefReactionUI.ThiefReactionUIType.IronBall);
+                thiefReactionUI.SetReactionUI(CSE_ThiefReactionUIType.IronBall);
                 break;
             case Gimmick.EmptyChest:
             case Gimmick.None:
@@ -467,7 +455,7 @@ public class CS_ThiefAI : MonoBehaviour
                 break;
         }
 
-        ChangeStatus(ThiefState.Stunned); // 状態を気絶に変更
+        ChangeStatus(CSE_ThiefState.Stunned); // 状態を気絶に変更
         elapsedTimeAfterStun = 0.0f; // 気絶時間の経過時間をリセット
 
         remainingInvincibleTime = invincibleTime; // 無敵時間を付与
@@ -489,21 +477,21 @@ public class CS_ThiefAI : MonoBehaviour
     /// 現在の状態を変更する処理
     /// </summary>
     /// <param name="newState">変更する状態</param>
-    public void ChangeStatus(ThiefState newState)
+    public void ChangeStatus(CSE_ThiefState newState)
     {
         currentState = newState;
         switch(newState)
             {
-            case ThiefState.Explore:
+            case CSE_ThiefState.Explore:
                 // 探索状態になったときの処理を追加する
                 break;
-            case ThiefState.Found:
+            case CSE_ThiefState.Found:
                 // 発見状態になったときの処理を追加する
                 break;
-            case ThiefState.Escape:
+            case CSE_ThiefState.Escape:
                 // 逃走状態になったときの処理を追加する
                 break;
-            case ThiefState.Stunned:
+            case CSE_ThiefState.Stunned:
                 // 泥棒のアニメーション状態をStunにする
                 if (animator != null) animator.SetBool("IsStun", true);
                 // 気絶時間の経過時間をリセット

@@ -27,15 +27,8 @@ public class CS_MoveSystem
     private float runSpeed;
         public float read_RunSpeed => runSpeed;
 
-    [Tooltip("泥棒が走り状態になる標的オブジェクトのタイプを指定するための列挙型")]
-    public enum  RunTargetType
-    {
-        Player,         // プレイヤー
-        Treasure,       // 宝物
-    }
-
     [Tooltip("走り状態になる標的オブジェクトのタイプリスト")]
-    private List<RunTargetType> runTargetTypes;
+    private List<CSE_ThiefRunTargetType> runTargetTypes;
 
     [Tooltip("ナビメッシュエージェント")]
     private NavMeshAgent navMeshAgent;
@@ -102,7 +95,7 @@ public class CS_MoveSystem
         {
             switch (targetType)
             {
-                case RunTargetType.Player:
+                case CSE_ThiefRunTargetType.Player:
                     if (currentTarget is CS_PlayerTarget)
                     {
                         // 現在の標的がプレイヤーの場合は走り速度に切り替える
@@ -110,8 +103,8 @@ public class CS_MoveSystem
                         return;
                     }
                     break;
-                case RunTargetType.Treasure:
-                    if (currentTarget is CS_VisionTarget vt && vt.targetType == CS_VisionTarget.TargetType.Treasure)
+                case CSE_ThiefRunTargetType.Treasure:
+                    if (currentTarget is CS_VisionTarget vt && vt.targetType == CSE_VisionTargetType.Treasure)
                     {
                         // 現在の標的が宝物の場合は走り速度に切り替える
                         navMeshAgent.speed = runSpeed;

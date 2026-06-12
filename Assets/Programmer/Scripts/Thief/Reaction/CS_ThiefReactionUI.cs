@@ -29,13 +29,6 @@ public class CS_ThiefReactionUI : MonoBehaviour
     [Tooltip("リアクションのUIの親オブジェクト")]
     private GameObject parentThiefReaction;
 
-    [Tooltip("リアクションの種類")]
-    public enum ThiefReactionUIType
-    {
-        Pot,
-        IronBall,
-    }
-
     [Tooltip("リアクションを表示する時間")]
     private const float reactionDisplayTime = 2.0f;
 
@@ -128,7 +121,7 @@ public class CS_ThiefReactionUI : MonoBehaviour
     /// リアクションのUIを設定する処理(スプライトリストから指定されたリアクションのスプライトをUIに反映させる処理)
     /// </summary>
     /// <param name="type"></param>
-    public void SetReactionUI(ThiefReactionUIType type)
+    public void SetReactionUI(CSE_ThiefReactionUIType type)
     {
         if (reactionSprites == null || reactionSprites.Count == 0)
         {

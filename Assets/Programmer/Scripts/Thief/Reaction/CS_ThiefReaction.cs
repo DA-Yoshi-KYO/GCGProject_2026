@@ -14,23 +14,6 @@ public class CS_ThiefReaction : MonoBehaviour
     [SerializeField, Header("リアクションに使用するスプライトリスト"), Tooltip("リアクションに使用するスプライトリスト")]
     private List<Sprite> reactionSprites = new List<Sprite>();
 
-    [Tooltip("リアクションの種類")]
-    public enum ThiefReactionType
-    {
-        [Tooltip("ネコを追跡中")]
-        ChasingCat,
-        [Tooltip("ギミックに直接被弾")]
-        HitTrap,
-        [Tooltip("ギミックが間近で被弾")]
-        NearHitTrap,
-        [Tooltip("警戒")]
-        Alert,
-        [Tooltip("お宝を見つける・お宝を運ぶ")]
-        FoundTreasure,
-        [Tooltip("物を探索")]
-        Searching,
-    }
-
     [Tooltip("リアクションを表示するスプライトレンダラー")]
     private SpriteRenderer reactionSpriteRenderer;
 
@@ -72,7 +55,7 @@ public class CS_ThiefReaction : MonoBehaviour
     /// リアクションの種類に応じてスプライトを変更するメソッド
     /// </summary>
     /// <param name="reactionType">変更するリアクションの種類</param>
-    public void ChangeReaction(ThiefReactionType reactionType)
+    public void ChangeReaction(CSE_ThiefReactionType reactionType)
     {
         if (reactionSpriteRenderer == null)
         {
@@ -101,7 +84,7 @@ public class CS_ThiefReaction : MonoBehaviour
     /// 指定したリアクションのスプライトが表示されている場合にのみクリアするメソッド
     /// </summary>
     /// <param name="reactionType">クリアするリアクションの種類</param>
-    public void ClearReactionByType(ThiefReactionType reactionType)
+    public void ClearReactionByType(CSE_ThiefReactionType reactionType)
     {
         if (reactionSpriteRenderer == null)
         {

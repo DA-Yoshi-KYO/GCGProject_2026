@@ -29,16 +29,8 @@ public class CS_HearingSystem
     [Tooltip("音を追跡する最大時間")]
     private const int maxSoundReactionTime = 5;
 
-    [Tooltip("音の種類を定義する列挙型")]
-    public enum AttractSoundType
-    {
-        [Tooltip("猫の鳴き声")]
-        CatVoice,
-        [Tooltip("ギミックの起動音")]
-        GimmickActivate,
-    }
     [Tooltip("泥棒が反応している音のタイプ")]
-    private AttractSoundType soundReactionType;
+    private CSE_ThiefAttractSoundType soundReactionType;
 
     /// <summary>
     /// コンストラクタ
@@ -53,21 +45,21 @@ public class CS_HearingSystem
     /// 音のする方向に向かう処理
     /// </summary>
     /// <param name="soundPosition">音の鳴った座標</param>
-    public void InvestigateSound(Vector3 soundPosition, AttractSoundType type)
+    public void InvestigateSound(Vector3 soundPosition, CSE_ThiefAttractSoundType type)
     {
         if (isReactingToSound)// すでに音に反応している場合
         {
-            if (type == AttractSoundType.CatVoice)
+            if (type == CSE_ThiefAttractSoundType.CatVoice)
             {
                 // 猫の鳴き声に反応している場合は、ギミックの起動音よりも優先して音のする方向に向かうための情報を更新する
                 soundReactionPosition = soundPosition;
                 soundReactionType = type;
             }
-            else if (type == AttractSoundType.GimmickActivate)
+            else if (type == CSE_ThiefAttractSoundType.GimmickActivate)
             {
                 switch (soundReactionType)
                 {
-                    case AttractSoundType.GimmickActivate:// すでにギミックの起動音に反応している場合は、より近いものを優先して音のする方向に向かう
+                    case CSE_ThiefAttractSoundType.GimmickActivate:// すでにギミックの起動音に反応している場合は、より近いものを優先して音のする方向に向かう
                         {
                             // 音のする方向と現在の位置の距離を計算
                             float currentDistance = Vector3.Distance(thiefAI.transform.position, soundReactionPosition);
@@ -80,7 +72,7 @@ public class CS_HearingSystem
                             }
                         }
                         break;
-                    case AttractSoundType.CatVoice:  // 猫の鳴き声に反応している場合は、何も変更しない
+                    case CSE_ThiefAttractSoundType.CatVoice:  // 猫の鳴き声に反応している場合は、何も変更しない
                     default:
                         break;
                 }
@@ -89,7 +81,7 @@ public class CS_HearingSystem
         else // 音に反応していない場合
         {
             // 現在の状態が探索状態ではない場合は何もしない
-            if (thiefAI.read_CurrentState != CS_ThiefAI.ThiefState.Explore) return;
+            if (thiefAI.read_CurrentState != CSE_ThiefState.Explore) return;
 
             // 音のする方向に向かうための情報を保存する
             soundReactionPosition = soundPosition;

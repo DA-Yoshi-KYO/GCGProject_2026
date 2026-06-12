@@ -249,7 +249,7 @@ internal sealed class CSED_ThiefDebugDamageTab
     private void DrawDamageTypePopup()
     {
         // ThiefReactionUIType enum を取得
-        var reactionEnumType = FindTypeByName("CS_ThiefReactionUI+ThiefReactionUIType");
+        var reactionEnumType = FindTypeByName("CSE_ThiefReactionUIType");
         if (reactionEnumType != null) {
             // enumが見つかった場合は、選択中の種別名 -> enum値へ変換して保存
             damageReactionTypeName = ToGimmickValue(reactionEnumType, damageReactionTypeName)?.ToString() ?? damageReactionTypeName;

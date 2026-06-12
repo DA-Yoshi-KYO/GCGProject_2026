@@ -202,7 +202,7 @@ public class CS_MemorySystem
             if (!(entry is CS_VisionTarget)) continue;
 
             // 視界内に宝物がある場合は、isTreasureObjectをtrueにする
-            if (((CS_VisionTarget)entry).targetType == CS_VisionTarget.TargetType.Treasure)isTreasureObject = true;
+            if (((CS_VisionTarget)entry).targetType == CSE_VisionTargetType.Treasure)isTreasureObject = true;
 
             // 現在の部屋の認識しているオブジェクトのリストがない場合は、新たに作成する
             if (roomMemory.recognizedObjects == null) roomMemory.recognizedObjects = new List<CS_ThiefTarget>();
@@ -224,7 +224,7 @@ public class CS_MemorySystem
                     // 探索している人を更新する
                     vtMemory.searchThief = vt.searchThief;
 
-                    if (vt.targetType == CS_VisionTarget.TargetType.Treasure)
+                    if (vt.targetType == CSE_VisionTargetType.Treasure)
                     {
                         // すでに記憶しているオブジェクトが宝物の場合は、宝物があるフラグを立てる
                         isTreasureObject = true;
@@ -298,7 +298,7 @@ public class CS_MemorySystem
 
                 // 宝物オブジェクトの場合
                 //  or 空の宝箱罠の場合
-                if ((entry is CS_VisionTarget visionTarget && visionTarget.targetType == CS_VisionTarget.TargetType.Treasure)
+                if ((entry is CS_VisionTarget visionTarget && visionTarget.targetType == CSE_VisionTargetType.Treasure)
                     || (entry is CS_TrapTarget trapTarget && trapTarget.gimmickScript.gimmick == Gimmick.EmptyChest))
                 {
                     // VisionTargetで、他人が探索中なら対象にしない
@@ -369,7 +369,7 @@ public class CS_MemorySystem
         else
         {
             // 追跡のリアクションをクリアする
-            thiefAI.read_ThiefReaction.ClearReactionByType(CS_ThiefReaction.ThiefReactionType.ChasingCat);
+            thiefAI.read_ThiefReaction.ClearReactionByType(CSE_ThiefReactionType.ChasingCat);
 
             // 現在の探索対象がプレイヤーの場合は、探索対象をリセットする
             if (currentTarget is CS_PlayerTarget) ClearTarget();
@@ -469,13 +469,13 @@ public class CS_MemorySystem
                     if (thiefAI.read_Animator != null) thiefAI.read_Animator.SetBool("IsHunting", true);
 
                     // 泥棒のリアクションを探索に変更する
-                    thiefAI.read_ThiefReaction.ChangeReaction(CS_ThiefReaction.ThiefReactionType.Searching);
+                    thiefAI.read_ThiefReaction.ChangeReaction(CSE_ThiefReactionType.Searching);
 
                     // 探索対象の探索にかかる時間を経過させる
                     if (ProgressTargetSearchTime())
                     {
                         // 探索したものが宝物以外の場合は、探索対象をリセットする
-                        if (((CS_VisionTarget)currentTarget).targetType != CS_VisionTarget.TargetType.Treasure) ClearTarget();
+                        if (((CS_VisionTarget)currentTarget).targetType != CSE_VisionTargetType.Treasure) ClearTarget();
                     }
                 }
                 else
@@ -504,7 +504,7 @@ public class CS_MemorySystem
                 }
 
                 // 泥棒のリアクションを追跡に変更する
-                thiefAI.read_ThiefReaction.ChangeReaction(CS_ThiefReaction.ThiefReactionType.ChasingCat);
+                thiefAI.read_ThiefReaction.ChangeReaction(CSE_ThiefReactionType.ChasingCat);
 
                 // 探索対象との距離が、探索済みとする距離の閾値以下になっている場合は、探索対象をリセットする
                 if (distanceToTarget <= thiefAI.read_ExploredDistanceThreshold)
@@ -575,12 +575,12 @@ public class CS_MemorySystem
             if (thiefAI.read_HearingSystem.read_IsReactingToSound)
             {
                 // 泥棒のリアクションを警戒に変更する
-                thiefAI.read_ThiefReaction.ChangeReaction(CS_ThiefReaction.ThiefReactionType.Alert);
+                thiefAI.read_ThiefReaction.ChangeReaction(CSE_ThiefReactionType.Alert);
 
                 // 音に反応している位置との距離が、探索済みとする距離の閾値以下になっている場合は、その位置を探索対象に設定する
                 if (!thiefAI.read_HearingSystem.IsAtSoundReactionPosition(thiefAI.read_ExploredDistanceThreshold)) return;
             }
-            else thiefAI.read_ThiefReaction.ClearReactionByType(CS_ThiefReaction.ThiefReactionType.Alert);
+            else thiefAI.read_ThiefReaction.ClearReactionByType(CSE_ThiefReactionType.Alert);
         }
     }
 
@@ -735,14 +735,14 @@ public class CS_MemorySystem
             thiefAI.read_ThiefReaction.ClearReaction(); // 探索が終了したときのリアクションをクリアする
 
             // 探索対象が宝物の場合は、そのままtrueを返す
-            if (((CS_VisionTarget)currentTarget).targetType == CS_VisionTarget.TargetType.Treasure)
+            if (((CS_VisionTarget)currentTarget).targetType == CSE_VisionTargetType.Treasure)
             {
                 // 泥棒のアニメーション状態をHuntingに変更する
                 if (thiefAI.read_Animator != null) thiefAI.read_Animator.SetBool("IsHunting", false);
                 // 泥棒のアニメーション状態をHuntingに変更する
                 if (thiefAI.read_Animator != null) thiefAI.read_Animator.SetTrigger("FoundTrigger");
                 // 泥棒の状態をFoundに変更する
-                thiefAI.ChangeStatus(CS_ThiefAI.ThiefState.Found);
+                thiefAI.ChangeStatus(CSE_ThiefState.Found);
 
                 return true;
             }
