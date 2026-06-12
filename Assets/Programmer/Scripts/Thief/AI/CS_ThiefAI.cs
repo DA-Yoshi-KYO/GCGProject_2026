@@ -384,7 +384,7 @@ public class CS_ThiefAI : MonoBehaviour
                     mat.SetFloat("_Alpha", fadeAmount);
                 }
 
-                outlineController.SetOutlineColor(new Color(1.0f, 0.0f, 0.0f, fadeAmount));
+                outlineController.SetOutlineColor(new Color(1.0f, 0.0f, 0.0f, 0.0f));
 
                 // 退場移動
                 moveSystem.StunMove();
