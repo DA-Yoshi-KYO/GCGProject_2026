@@ -27,8 +27,15 @@ public class CS_MoveSystem
     private float runSpeed;
         public float read_RunSpeed => runSpeed;
 
+    [Tooltip("泥棒が走り状態になる標的オブジェクトのタイプを指定するための列挙型")]
+    public enum  RunTargetType
+    {
+        Player,         // プレイヤー
+        Treasure,       // 宝物
+    }
+
     [Tooltip("走り状態になる標的オブジェクトのタイプリスト")]
-    private List<CS_VisionTarget.TargetType> runTargetTypes;
+    private List<RunTargetType> runTargetTypes;
 
     [Tooltip("ナビメッシュエージェント")]
     private NavMeshAgent navMeshAgent;
@@ -83,26 +90,39 @@ public class CS_MoveSystem
     /// <param name="currentTarget">現在の標的オブジェクト</param>
     public void UpdateMoveSpeed(CS_ThiefTarget currentTarget)
     {
-        if (currentTarget == null) return;
-
-        if (currentTarget is CS_VisionTarget)
+        if (currentTarget == null)
         {
-            if (currentTarget != null && runTargetTypes.Contains(((CS_VisionTarget)currentTarget).targetType))
-            {
-                // 現在の標的が走り状態になるタイプの場合、走り速度に切り替える
-                navMeshAgent.speed = runSpeed;
-            }
-            else
-            {
-                // それ以外の場合は歩き速度に切り替える
-                navMeshAgent.speed = walkSpeed;
-            }
-        }
-        else
-        {
-            // CS_VisionTarget 以外の標的の場合は歩き速度に切り替える
+            // 標的がいない場合は歩き速度に切り替える
             navMeshAgent.speed = walkSpeed;
+            return;
         }
+
+
+        foreach (var targetType in runTargetTypes)
+        {
+            switch (targetType)
+            {
+                case RunTargetType.Player:
+                    if (currentTarget is CS_PlayerTarget)
+                    {
+                        // 現在の標的がプレイヤーの場合は走り速度に切り替える
+                        navMeshAgent.speed = runSpeed;
+                        return;
+                    }
+                    break;
+                case RunTargetType.Treasure:
+                    if (currentTarget is CS_VisionTarget vt && vt.targetType == CS_VisionTarget.TargetType.Treasure)
+                    {
+                        // 現在の標的が宝物の場合は走り速度に切り替える
+                        navMeshAgent.speed = runSpeed;
+                        return;
+                    }
+                    break;
+            }
+        }
+
+        //標的の場合は歩き速度に切り替える
+        navMeshAgent.speed = walkSpeed;
     }
 
     /// <summary>
