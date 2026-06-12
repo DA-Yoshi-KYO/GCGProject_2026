@@ -1,4 +1,4 @@
-Shader "Unlit/SH_URPWoll"
+Shader "Unlit/SH_URPWall_TextureOnly"
 {
     Properties
     {
