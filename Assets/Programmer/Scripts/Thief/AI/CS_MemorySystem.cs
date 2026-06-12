@@ -255,6 +255,12 @@ public class CS_MemorySystem
     /// </summary>
     private void DecideTarget(List<CS_ThiefTarget> visionTargets, bool isTreasureObject, bool isPlayerObject)
     {
+        // 現在の部屋の探索度が閾値を超えている場合
+        if (roomMemories[currentRoom].explorationLevel >= nextRoomSearchThreshold)
+        {
+            if (!thiefAI.read_AStarSystem.HasRoute) NextDoorElection();
+        }
+
         // 現在の探索対象との距離
         float currrentTargetDistance = Mathf.Infinity;
 
@@ -358,6 +364,9 @@ public class CS_MemorySystem
 
         }
 
+        // 以下は構築しているルート移動を優先させる
+        if (!thiefAI.read_AStarSystem.HasRoute) return;
+
         //ーーーーーーーーーーーーーーーーーーーーーーーー
         //--- 音に反応している場合
         //ーーーーーーーーーーーーーーーーーーーーーーーー
@@ -415,6 +424,14 @@ public class CS_MemorySystem
     /// </summary>
     public void EvaluateCurrentTarget()
     {
+        // 帰宅ルートが未構築なら構築する
+        if (thiefAI.read_AStarSystem.HasRoute)
+        {
+            // ルートを更新
+            thiefAI.read_AStarSystem.UpdateRoute(thiefAI.read_ExploredDistanceThreshold);
+            return;
+        }
+
         float distanceToTarget = Mathf.Infinity;
 
         // 現在の探索対象がある場合

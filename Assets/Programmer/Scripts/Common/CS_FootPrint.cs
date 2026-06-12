@@ -14,7 +14,7 @@ public class CS_FootPrint : MonoBehaviour
     [Header("生成する時間の間隔")][SerializeField] public float createFootPrintDuration;//生成する時間の間隔
     [Header("生成した足跡を削除する時間")][SerializeField] public float destroyTime;//生成した足跡を削除する時間
     [Header("生成位置のX座標の調整")][SerializeField] public float footOffsetX;//生成位置のX座標の調整
-    [Header("生成位置のY座標の調整")][SerializeField] public float spawnOffsetY = 0.02f;//生成位置のY座標の調整
+    [Header("生成位置のY座標の調整")][SerializeField] public float spawnOffsetY = 1f;//生成位置のY座標の調整
  
     private bool rightFoot = true;//右足かどうか
 
@@ -76,7 +76,7 @@ public class CS_FootPrint : MonoBehaviour
 
         //斜めの地面を歩く際の回転と位置の修正
         Ray ray = new Ray(spawnPos, Vector3.down);
-        if(Physics.Raycast(ray, out RaycastHit hit, 0.5f))
+        if (Physics.Raycast(ray, out RaycastHit hit))
         {
             spawnPos = hit.point;
             spawnPos.y += 0.01f;
@@ -84,14 +84,18 @@ public class CS_FootPrint : MonoBehaviour
                 Vector3.ProjectOnPlane(forward, hit.normal), //地面に沿ったforward
                 hit.normal                                   //地面の法線
             ) * Quaternion.Euler(90, 0.0f, 0);
+
+            //生成
+            GameObject footPrintGameObject = pool.GetObject();
+            footPrintGameObject.transform.position = spawnPos;
+            footPrintGameObject.transform.rotation = rotation;
+
+            //削除
+            StartCoroutine(pool.DisableAfterTime(footPrintGameObject, destroyTime));
         }
-
-        //生成
-        GameObject footPrintGameObject = pool.GetObject();
-        footPrintGameObject.transform.position = spawnPos;
-        footPrintGameObject.transform.rotation = rotation;
-
-        //削除
-        StartCoroutine(pool.DisableAfterTime(footPrintGameObject, destroyTime));
+        else
+        {
+            Debug.LogWarning("No ground" + "SpawnPos: " + spawnPos);
+        }
     }
 }

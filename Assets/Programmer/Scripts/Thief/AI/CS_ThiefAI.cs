@@ -63,15 +63,6 @@ public class CS_ThiefAI : MonoBehaviour
     private ThiefState currentState;
     public ThiefState read_CurrentState => currentState;
 
-    [SerializeField, Header("泥棒のリアクションスプライト(仮)")]
-    private List<Sprite> reactionSprites;
-    enum ReactionSpriteType
-    {
-        Normal, // 通常
-        Search, // 探索
-        Stun    // 気絶
-    }
-
     [Tooltip("泥棒のマテリアル")]
     private Material thiefMaterial;
     [Tooltip("泥棒のマテリアルのフェードアウトにかかる時間")]
@@ -212,8 +203,6 @@ public class CS_ThiefAI : MonoBehaviour
         // 泥棒のリアクションを管理するコンポーネントを取得
         thiefReaction = GetComponentInChildren<CS_ThiefReaction>();
 
-        reactionSprites = data.reactionSprites;
-
         fadeAfterStunTime = data.fadeAfterStunTime;
 
         thiefMaterial = transform.GetComponentInChildren<Renderer>().material;
@@ -289,8 +278,6 @@ public class CS_ThiefAI : MonoBehaviour
     // 探索状態の行動
     private void Explore()
     {
-        // 表情のリセット
-        ChangeFace(ReactionSpriteType.Normal);
         thiefReaction.ClearReaction();
 
         // 探索対象を決定
@@ -440,9 +427,6 @@ public class CS_ThiefAI : MonoBehaviour
 
         memorySystem.ResetIgnorePlayer(); // プレイヤーを無視する状態をリセット
 
-        // 泥棒の表情を気絶の表情に変更する処理を追加する
-        ChangeFace(ReactionSpriteType.Stun);
-
 
         // 耐久力が0以下になった場合は、耐久力を0に補正して気絶状態にする
         if (durability <= 0)
@@ -459,31 +443,6 @@ public class CS_ThiefAI : MonoBehaviour
             if (playerAction != null) playerAction.AddSoul(soulDropCount);
             else Debug.LogError("PlayerActionが見つかりませんでした。ThiefAIのTakeDamageメソッドで、プレイヤーにソウルを入手させる処理が正常に動作しない可能性があります。");
         }
-    }
-
-    /// <summary>
-    /// 泥棒の表情を変更する処理
-    /// </summary>
-    /// <param name="reaction">変更するタイプ</param>
-    private void ChangeFace(ReactionSpriteType reaction)
-    {
-        // 子オブジェクトを取得
-        GameObject child = transform.GetChild(1).gameObject;
-        // 取得できなかった場合は、エラーログを出力して処理を終了する
-        if (child == null) Debug.LogError("子オブジェクトが見つかりませんでした。ThiefAIのChangeFaceメソッドで、泥棒の表情を変更する処理が正常に動作しない可能性があります。");
-
-        // 子オブジェクトからMeshRendererを取得
-        MeshRenderer meshRenderer = child.GetComponent<MeshRenderer>();
-        // 取得できなかった場合は、エラーログを出力して処理を終了する
-        if (meshRenderer == null) Debug.LogError(" MeshRendererが見つかりませんでした。ThiefAIのChangeFaceメソッドで、泥棒の表情を変更する処理が正常に動作しない可能性があります。");
-
-        // Materialの取得
-        Material material = meshRenderer.material;
-        // 取得できなかった場合は、エラーログを出力して処理を終了する
-        if (material == null) Debug.LogError(" Materialが見つかりませんでした。ThiefAIのChangeFaceメソッドで、泥棒の表情を変更する処理が正常に動作しない可能性があります。");
-
-        // 表情のスプライトを変更する
-        material.mainTexture = reactionSprites[(int)reaction].texture;
     }
 
     /// <summary>
