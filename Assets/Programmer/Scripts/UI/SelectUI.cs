@@ -9,6 +9,7 @@ public class GimmickSelectUI : MonoBehaviour
     [SerializeField] private GameObject Center;
     [SerializeField] private GameObject Left;
     [SerializeField] private GameObject Right;
+    [SerializeField] private GameObject TextImage;
 
     [Header("所持数テキスト（TMP_Text）")]
     [SerializeField] private TMP_Text countText;
@@ -38,7 +39,7 @@ public class GimmickSelectUI : MonoBehaviour
     private CS_PlayerAction playerAction;
     private GimmickManager gimmickManager;
 
-    private Image centerImg, leftImg, rightImg;
+    private Image centerImg, leftImg, rightImg,TextImg;
     private RectTransform centerRT, leftRT, rightRT;
 
     private Vector2 centerAnchor, leftAnchor, rightAnchor;
@@ -57,6 +58,7 @@ public class GimmickSelectUI : MonoBehaviour
         centerImg = Center.GetComponent<Image>();
         leftImg = Left.GetComponent<Image>();
         rightImg = Right.GetComponent<Image>();
+        TextImg = TextImage.GetComponent<Image>();
 
         centerRT = Center.GetComponent<RectTransform>();
         leftRT = Left.GetComponent<RectTransform>();
@@ -257,9 +259,13 @@ public class GimmickSelectUI : MonoBehaviour
         int leftIdx = (idx - 1 + count) % count;
         int rightIdx = (idx + 1) % count;
 
+        Sprite TextImage = playerAction.gimmickKind[idx]?.GetComponent<GimmickBase>()?.gimmickTextImage;
+
+
         SetImage(centerImg, GetSprite(idx), 1f);
         SetImage(leftImg, GetSprite(leftIdx), sideAlpha);
         SetImage(rightImg, GetSprite(rightIdx), sideAlpha);
+        SetImage(TextImg, TextImage, 1f);
 
         RefreshCoolTimeCache(idx);
     }
