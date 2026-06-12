@@ -3,42 +3,44 @@
  * ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
  *    宇留野 陸斗
  * ----------------------------------------------------------
- * 2026-04-17 | 初回作成
- * 2026-04-20 | 探索対象の決定ロジックを追加
- *            | 探索対象の優先順位を追加
- * 2026-04-22 | 耐久値を減少させる処理を追加
- *            | NavMeshAgentを利用して移動する処理を追加
- * 2026-04-23 | 泥棒のデータベースの項目変更に合わせて、Settingメソッドの内容を変更
- *            | 走り状態になる標的オブジェクトのタイプに応じて、移動速度を切り替える処理を追加
- * 2026-04-24 | 探索対象を強制的に変更する処理を追加
- *            | 探索対象の決定ロジックを一つにまとめる(複数個所に分散していたものを、DecideTargetメソッドにまとめる)
- * 2026-04-25 | 次に設定する移動ポイントを決定するロジックの不具合を修正
- * 2026-04-26 | 気絶後の退場処理を仮作成
- *            | 宝物を持って移動する処理を仮作成
- * 2026-04-27 | 部屋移動の閾値に達していたら次の部屋に移動する処理を追加
- * 2026-04-28 | 次の部屋に移動するための移動ポイントを決定するロジックを追加
- * 2026-05-01 | 帰宅ルートを構築するロジックを追加
- * 2026-05-07 | CS_RoomEnemyEntryPointDataを用いた初期部屋の設定の記載
- * 2026-05-08 | 初期部屋の入ってきたドアの位置を保存する処理の記載
- * 2026-05-15 | 同じ部屋の中で、他者が探索しているオブジェクトを探索対象にしないようにする処理を追加
- * 2026-05-17 | DecideTarget内のキャストエラーの不具合を修正
- * 2026-05-18 | A*アルゴリズムを用いて帰宅ルートを構築するロジックを追加
- * 2026-05-21 | CS_SmartNavAgentを用いた危険地帯を考慮した移動処理の追加
- * 2026-05-22 | ファイル名を変更（ThiefAI.cs → CS_ThiefAI.cs）
- *            | クラス名を変更（ThiefAI → CS_ThiefAI）
- *            | リアクション処理を管理するコンポーネントを追加（CS_ThiefReaction）
- * 2026-05-28 | 大解体
- *            | 以下の要素を管理するクラスを新たに作成して、CS_ThiefAIから処理を移動させる。
- *            | 移動処理を管理するクラス(CS_MoveSystem)
- *            | 記憶処理を管理するクラス(CS_MemorySystem)
- *            | 聴覚処理を管理するクラス(CS_HearingSystem)
- *            | 視覚処理を管理するクラス(CS_VisionSensor)
- *            | A*アルゴリズムを用いたルート構築処理を管理するクラス(CS_AStarSystem)
- * 2026-06-04 | 気絶したときの処理をCS_StunThiefTargetに移動
- * 2026-06-10 | 落とし穴ギミックにハマったときの処理を追加
- *            | 落とし穴ギミックから抜けたときの処理を追加
- *            | ナビメッシュエージェントを安全に停止させる処理を追加
- * 2026-06-11 | 落とし穴用の処理をCS_ThiefGimmickActionに移動
+ * 2026-04-17   | 初回作成
+ * 2026-04-20   | 探索対象の決定ロジックを追加
+ *              | 探索対象の優先順位を追加
+ * 2026-04-22   | 耐久値を減少させる処理を追加
+ *              | NavMeshAgentを利用して移動する処理を追加
+ * 2026-04-23   | 泥棒のデータベースの項目変更に合わせて、Settingメソッドの内容を変更
+ *              | 走り状態になる標的オブジェクトのタイプに応じて、移動速度を切り替える処理を追加
+ * 2026-04-24   | 探索対象を強制的に変更する処理を追加
+ *              | 探索対象の決定ロジックを一つにまとめる(複数個所に分散していたものを、DecideTargetメソッドにまとめる)
+ * 2026-04-25   | 次に設定する移動ポイントを決定するロジックの不具合を修正
+ * 2026-04-26   | 気絶後の退場処理を仮作成
+ *              | 宝物を持って移動する処理を仮作成
+ * 2026-04-27   | 部屋移動の閾値に達していたら次の部屋に移動する処理を追加
+ * 2026-04-28   | 次の部屋に移動するための移動ポイントを決定するロジックを追加
+ * 2026-05-01   | 帰宅ルートを構築するロジックを追加
+ * 2026-05-07   | CS_RoomEnemyEntryPointDataを用いた初期部屋の設定の記載
+ * 2026-05-08   | 初期部屋の入ってきたドアの位置を保存する処理の記載
+ * 2026-05-15   | 同じ部屋の中で、他者が探索しているオブジェクトを探索対象にしないようにする処理を追加
+ * 2026-05-17   | DecideTarget内のキャストエラーの不具合を修正
+ * 2026-05-18   | A*アルゴリズムを用いて帰宅ルートを構築するロジックを追加
+ * 2026-05-21   | CS_SmartNavAgentを用いた危険地帯を考慮した移動処理の追加
+ * 2026-05-22   | ファイル名を変更（ThiefAI.cs → CS_ThiefAI.cs）
+ *              | クラス名を変更（ThiefAI → CS_ThiefAI）
+ *              | リアクション処理を管理するコンポーネントを追加（CS_ThiefReaction）
+ * 2026-05-28   | 大解体
+ *              | 以下の要素を管理するクラスを新たに作成して、CS_ThiefAIから処理を移動させる。
+ *              | 移動処理を管理するクラス(CS_MoveSystem)
+ *              | 記憶処理を管理するクラス(CS_MemorySystem)
+ *              | 聴覚処理を管理するクラス(CS_HearingSystem)
+ *              | 視覚処理を管理するクラス(CS_VisionSensor)
+ *              | A*アルゴリズムを用いたルート構築処理を管理するクラス(CS_AStarSystem)
+ * 2026-06-04   | 気絶したときの処理をCS_StunThiefTargetに移動
+ * 2026-06-10   | 落とし穴ギミックにハマったときの処理を追加
+ *              | 落とし穴ギミックから抜けたときの処理を追加
+ *              | ナビメッシュエージェントを安全に停止させる処理を追加
+ * 2026-06-11   | 落とし穴用の処理をCS_ThiefGimmickActionに移動
+ *              | 気絶状態の更新処理を実行するかどうかを設定する処理を追加
+ * 2026-06-12   | 退場時のフェードアウト処理を追加
  * 
  */
 using UnityEngine;
@@ -67,9 +69,12 @@ public class CS_ThiefAI : MonoBehaviour
     public ThiefState read_CurrentState => currentState;
 
     [Tooltip("泥棒のマテリアル")]
-    private Material thiefMaterial;
+    private Material[] thiefMaterial;
     [Tooltip("泥棒のマテリアルのフェードアウトにかかる時間")]
     private float fadeAfterStunTime;
+
+    [Tooltip("アウトラインコントローラー")]
+    private CS_OutlineController outlineController;
 
     [SerializeField, Tooltip("泥棒の耐久力")]
     private int durability;
@@ -213,13 +218,11 @@ public class CS_ThiefAI : MonoBehaviour
 
         fadeAfterStunTime = data.fadeAfterStunTime;
 
-        thiefMaterial = transform.GetComponentInChildren<Renderer>().material;
-        if (thiefMaterial == null)
-        {
-            Debug.LogError("ThiefAI: 泥棒のマテリアルが見つかりません。");
-        }
-        thiefMaterial.SetFloat("_DisappearTime", fadeAfterStunTime);
-        thiefMaterial.SetFloat("_Timer", fadeAfterStunTime);
+        // マテリアルの取得
+        thiefMaterial = transform.GetComponentInChildren<SkinnedMeshRenderer>().materials;
+
+        // アウトラインコントローラーの作成
+        outlineController = new CS_OutlineController(transform.GetComponentInChildren<SkinnedMeshRenderer>().gameObject);
 
         // アニメーション用のコンポーネントを取得
         animator = GetComponentInChildren<Animator>();
@@ -237,9 +240,6 @@ public class CS_ThiefAI : MonoBehaviour
         // 気絶状態のときは無敵時間の経過を管理しない（気絶状態のときは攻撃を受けない想定のため）
         if (remainingInvincibleTime > 0)
         {
-            // 無敵時間が残っているときは青くする
-            thiefMaterial.color = Color.Lerp(Color.red, Color.blue, remainingInvincibleTime / invincibleTime);
-
             if (currentState != ThiefState.Stunned)
             {
                 remainingInvincibleTime -= Time.deltaTime;
@@ -377,14 +377,19 @@ public class CS_ThiefAI : MonoBehaviour
             // 経過時間が退場するまでの時間を超えた場合は、退場する処理を追加する
             if (elapsedTimeAfterStun >= exitAfterStunTime)
             {
-                // 泥棒のアニメーション状態をStunにする
+                float fadeAmount = fadeAfterStunTime - (elapsedTimeAfterStun - exitAfterStunTime);
 
-                thiefMaterial.SetFloat("_Timer", fadeAfterStunTime - (elapsedTimeAfterStun - exitAfterStunTime));
+                foreach (Material mat in thiefMaterial)
+                {
+                    mat.SetFloat("_Alpha", fadeAmount);
+                }
+
+                outlineController.SetOutlineColor(new Color(1.0f, 0.0f, 0.0f, 0.0f));
 
                 // 退場移動
                 moveSystem.StunMove();
 
-                if (thiefMaterial.GetFloat("_Timer") <= 0.0f)
+                if (fadeAmount <= 0.0f)
                 {
                     // 気絶したときのSEを再生する処理を追加する
                     if (thiefSound != null) thiefSound.PlayOneShotSE("ThiefDeath", gameObject.transform.position, "ThiefDeath");
