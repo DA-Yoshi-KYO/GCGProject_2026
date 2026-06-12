@@ -85,6 +85,8 @@ public class GimmickBase : MonoBehaviour
     [SerializeField] protected Vector3 hitRange;
     [Tooltip("効果範囲の大きさ/グリッド")]
     [SerializeField] protected Vector3 effectRange;
+    [Tooltip("索敵範囲の大きさ/グリッド")]
+    [SerializeField] protected Vector3 searchRange;
     [Header("攻撃力")]
     [Tooltip("命中時"), Min(0)]
     [SerializeField] protected int attackPower;
@@ -132,6 +134,8 @@ public class GimmickBase : MonoBehaviour
     protected BoxCollider searchColliderX;
     protected BoxCollider searchColliderZ;
     protected CS_3DPlaySE gimmickSound;
+
+    private HitChecker hit;
 
     private void Start()
     {
@@ -249,7 +253,7 @@ public class GimmickBase : MonoBehaviour
         {
             hitChecker = Instantiate(hitCheckerPrefab);
 
-            HitChecker hit = hitChecker.GetComponent<HitChecker>();
+            hit = hitChecker.GetComponent<HitChecker>();
             if (hit != null)
             {
                 hit.SetHitDamage(attackPower);
@@ -262,12 +266,15 @@ public class GimmickBase : MonoBehaviour
             // 当たり判定の大きさを設定
             GameObject Effect = hitChecker.transform.Find("Effect").gameObject;
             GameObject Hit = hitChecker.transform.Find("Hit").gameObject;
+            GameObject Search = hitChecker.transform.Find("Search").gameObject;
 
             Vector3 EffectSize = new Vector3(effectRange.x * roomGrid.gridSize.x,effectRange.y * roomGrid.gridSize.y, effectRange.z * roomGrid.gridSize.y);
             Vector3 HitSize = new Vector3(effectRange.x * roomGrid.gridSize.x, effectRange.y * roomGrid.gridSize.y, hitRange.z * roomGrid.gridSize.y);
-            
+            Vector3 SearchSize = new Vector3(effectRange.x * roomGrid.gridSize.x, effectRange.y * roomGrid.gridSize.y, searchRange.z * roomGrid.gridSize.y);
+
             Effect.transform.localScale = EffectSize;
             Hit.transform.localScale = HitSize;
+            Search.transform.localScale = SearchSize;
         }
 
         Vector3 HitCheckerPos;
@@ -299,7 +306,7 @@ public class GimmickBase : MonoBehaviour
         {
             hitChecker = Instantiate(hitCheckerPrefab);
 
-            HitChecker hit = hitChecker.GetComponent<HitChecker>();
+            hit = hitChecker.GetComponent<HitChecker>();
             if (hit != null)
             {
                 hit.SetHitDamage(attackPower);
@@ -312,14 +319,22 @@ public class GimmickBase : MonoBehaviour
             // 当たり判定の大きさを設定
             GameObject Effect = hitChecker.transform.Find("Effect").gameObject;
             GameObject Hit = hitChecker.transform.Find("Hit").gameObject;
+            GameObject Search = hitChecker.transform.Find("Search").gameObject;
 
             Vector3 EffectSize = new Vector3(effectRange.x * roomGrid.gridSize.x, effectRange.y * roomGrid.gridSize.y, effectRange.z * roomGrid.gridSize.y);
             Vector3 HitSize = new Vector3(hitRange.x * roomGrid.gridSize.x, hitRange.y * roomGrid.gridSize.y, hitRange.z * roomGrid.gridSize.y);
+            Vector3 SearchSize = new Vector3(searchRange.x * roomGrid.gridSize.x, searchRange.y * roomGrid.gridSize.y, searchRange.z * roomGrid.gridSize.y);
 
             Effect.transform.localScale = EffectSize;
             Hit.transform.localScale = HitSize;
+            Search.transform.localScale = SearchSize;
         }
         hitChecker.transform.position = WorldPos;
+    }
+
+    public CS_ThiefGimmickAction GetThiefGimmickAction()
+    {
+        return hit.GetThiefGA();
     }
 
     /// <summary>

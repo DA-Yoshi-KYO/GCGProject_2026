@@ -9,7 +9,7 @@
 using UnityEngine;
 using UnityEngine.AI;
 
-public class CS_ThiefGimmickAction : MonoBehaviour
+public class CS_ThiefGimmickAction
 {
     [Tooltip("ThiefAIスクリプトへの参照")]
     private CS_ThiefAI thiefAI;
@@ -41,7 +41,7 @@ public class CS_ThiefGimmickAction : MonoBehaviour
     /// <summary>
     /// 落とし穴ギミック用行動の開始
     /// </summary>
-    public void PitFallStart()
+    public void PitFallStart(Vector3 pitfallPoint)
     {
         // 状態を気絶に変更
         thiefAI.ChangeStatus(CS_ThiefAI.ThiefState.Stunned);
@@ -56,8 +56,8 @@ public class CS_ThiefGimmickAction : MonoBehaviour
 
         // 落とし穴にハマったときの見た目の位置調整
         // 体の8割ほど埋める
-        Vector3 pos = transform.position;
-        transform.position = new Vector3(pos.x, pos.y - transform.localScale.y * 0.8f, pos.z);
+        Vector3 pos = pitfallPoint;
+        thiefAI.transform.position = new Vector3(pos.x, pos.y + thiefAI.transform.localScale.y * 0.5f, pos.z);
     }
 
     /// <summary>
@@ -86,7 +86,7 @@ public class CS_ThiefGimmickAction : MonoBehaviour
     /// </summary>
     private bool IronBallUpdate()
     {
-        if (targetGimmick == null) return true;
+        if (targetGimmick == null) return false;
 
         var moveSystem = thiefAI.read_MoveSystem;
         if (moveSystem == null) return false;
@@ -183,5 +183,6 @@ public class CS_ThiefGimmickAction : MonoBehaviour
     public void IronBallEnd()
     {
         targetGimmick = null;
+        thiefAI.read_MoveSystem.read_NavMeshAgent.ResetPath();
     }
 }
