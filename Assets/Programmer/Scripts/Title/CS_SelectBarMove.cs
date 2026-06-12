@@ -30,22 +30,31 @@ public class CS_SelectBarMove : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (!Option.Instance.GetIsOptionUIActive())
+        {
+            inputActions.SelectBar.Enable();
+        }
+        else
+        {
+            inputActions.SelectBar.Disable();
+        }
+
         //現在選択しているボタンの移動処理
-        if(inputActions.SelectBar.MoveUp.triggered)
+        if (inputActions.SelectBar.MoveUp.triggered)
         {
             backGroundPlaySE.PlaySE("Cusor");
             currentButton--;
-            if(currentButton < 0)
+            if (currentButton < 0)
             {
                 currentButton = buttonList.Length - 1;
             }
         }
 
-        if(inputActions.SelectBar.MoveDown.triggered)
+        if (inputActions.SelectBar.MoveDown.triggered)
         {
             backGroundPlaySE.PlaySE("Cusor");
             currentButton++;
-            if(currentButton >= buttonList.Length)
+            if (currentButton >= buttonList.Length)
             {
                 currentButton = 0;
             }
@@ -53,17 +62,17 @@ public class CS_SelectBarMove : MonoBehaviour
 
         //座標移動
         Vector3 selectBarPos = selectBar.GetComponent<RectTransform>().anchoredPosition;
-        
+
         selectBarPos.y = buttonList[currentButton].GetComponent<RectTransform>().anchoredPosition.y;
 
         selectBar.GetComponent<RectTransform>().anchoredPosition = selectBarPos;
 
         //決定ボタンでシーン遷移
-        if(inputActions.SelectBar.Decision.triggered)
+        if (inputActions.SelectBar.Decision.triggered)
         {
             backGroundPlaySE.PlaySE("Decision");
             string sceneName = "";
-            switch(currentButton)
+            switch (currentButton)
             {
                 case 0:
                     sceneName = "StageSelectScene";

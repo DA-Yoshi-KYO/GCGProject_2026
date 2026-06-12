@@ -120,7 +120,7 @@ public class Option : MonoBehaviour
         if (_prevOption == null)
         {
             // Canvasを探してその子オブジェクトとしてOptionUIを生成
-            GameObject canvas = GameObject.Find("Canvas");
+            GameObject canvas = GameObject.Find("OptionCanvas");
             _prevOption = Instantiate(OptionUI, Vector3.zero, Quaternion.identity, canvas.transform);
         }
 

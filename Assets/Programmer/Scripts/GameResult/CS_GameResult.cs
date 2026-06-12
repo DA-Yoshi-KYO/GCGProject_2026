@@ -17,12 +17,15 @@ public class CS_GameResult : MonoBehaviour
 
     [Header("デバッグの確認時用")][SerializeField] public bool debugEnd;
 
+    private CS_BackGroundPlaySE backGroundPlaySE;
+    private bool startJingle = false;
+
     // Start is called before the first frame update
     void Start()
     {
-
-
         endManager = GameObject.Find("EndManager").GetComponent<CS_EndManager>();
+
+        backGroundPlaySE = GameObject.Find("SE").GetComponent<CS_BackGroundPlaySE>();
     }
 
     // Update is called once per frame
@@ -38,6 +41,11 @@ public class CS_GameResult : MonoBehaviour
             if (end)
             {
                 gameFailure.SetActive(true);
+                if (!startJingle)
+                {
+                    backGroundPlaySE.PlaySE("LoseJingle");
+                    startJingle = true;
+                }
             }
             else
             {
@@ -52,10 +60,20 @@ public class CS_GameResult : MonoBehaviour
                 if (endManager.read_IsWin)
                 {
                     gameClear.SetActive(true);
+                    if (!startJingle)
+                    {
+                        backGroundPlaySE.PlaySE("WinJingle");
+                        startJingle = true;
+                    }
                 }
                 else
                 {
                     gameFailure.SetActive(true);
+                    if (!startJingle)
+                    {
+                        backGroundPlaySE.PlaySE("LoseJingle");
+                        startJingle = true;
+                    }
                 }
             }
             else
