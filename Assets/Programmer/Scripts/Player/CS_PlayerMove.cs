@@ -39,6 +39,10 @@ public class CS_PlayerMove : MonoBehaviour
     [Tooltip("盗賊に捕まっているかどうか")]
     private bool isCaughtByThief;
 
+    [Header("ジャンプ開始するまでのマージン(フレーム単位)")]  private const int jumpMerginFrame = 5;
+    private int jumpMerginFrameCount = 5;
+    bool isJumpMerging = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -69,6 +73,7 @@ public class CS_PlayerMove : MonoBehaviour
 
         // アニメーターの取得
         animator = GetComponentInChildren<Animator>();
+        jumpMerginFrameCount = jumpMerginFrame;
     }
 
     void Update()
@@ -86,8 +91,10 @@ public class CS_PlayerMove : MonoBehaviour
     {
         // ゲームが一時停止中の場合は移動処理を行わない
         if (Time.timeScale == 0) return;
+        // ジャンプ待機中は移動処理を行わない
+        if (isJumpMerging && !isJumping) return;
 
-        animator.SetBool("IsJumping", !controller.isGrounded);
+        animator.SetBool("IsGround", controller.isGrounded);
 
         // カメラの前方向と右方向を取得し、y成分を0にして水平移動のベクトルを作成
         Vector3 cameraForward = playerCamera.cameraForward;
@@ -165,6 +172,24 @@ public class CS_PlayerMove : MonoBehaviour
         controller.Move(velocity * Time.deltaTime);
 
         
+    }
+
+    private void FixedUpdate()
+    {
+        if (isJumpMerging)
+        {
+            if (jumpMerginFrameCount == 0)
+            {
+                isJumping = true;
+                isJumpMerging = false;
+                jumpMerginFrameCount = jumpMerginFrame;
+            }
+            else jumpMerginFrameCount--;
+        }
+        else
+        {
+
+        }
     }
 
     /// <summary>
@@ -260,8 +285,9 @@ public class CS_PlayerMove : MonoBehaviour
         // 空中にいるときはジャンプできないようにする
         if (controller.isGrounded)
         {
+            animator.SetTrigger("JumpTrigger");
             velocity.y = jumpAmount;
-            isJumping = true;
+            isJumpMerging = true;
         }
     }
     private void OnSneak(InputAction.CallbackContext context)
