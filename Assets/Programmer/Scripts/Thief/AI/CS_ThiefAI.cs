@@ -256,6 +256,7 @@ public class CS_ThiefAI : MonoBehaviour
             remainingHoldCatTime -= Time.deltaTime;
             if (remainingHoldCatTime < 0.0f)
             {
+                ((CS_PlayerTarget)memorySystem.read_CurrentTarget).transform.GetComponent<CS_PlayerMove>().CaughtByThief(false);
                 remainingHoldCatTime = 0.0f;
                 memorySystem.ClearTarget();
             }

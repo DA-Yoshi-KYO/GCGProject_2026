@@ -89,6 +89,12 @@ public class CS_PlayerMove : MonoBehaviour
     /// </summary>
     private void Move()
     {
+        // 泥棒に捕まっている間は動かさない
+        if (isCaughtByThief)
+        {
+            return;
+        }
+
         // ゲームが一時停止中の場合は移動処理を行わない
         if (Time.timeScale == 0) return;
         // ジャンプ待機中は移動処理を行わない
@@ -176,6 +182,10 @@ public class CS_PlayerMove : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (isCaughtByThief)
+        {
+            return;
+        }
         if (isJumpMerging)
         {
             if (jumpMerginFrameCount == 0)
@@ -269,19 +279,30 @@ public class CS_PlayerMove : MonoBehaviour
     /// <summary>
     /// 盗賊に捕まったときの処理
     /// </summary>
-    public void CaughtByThief()
+    public void CaughtByThief(bool caught)
     {
         // フラグを立てる
-        isCaughtByThief = true;
+        isCaughtByThief = caught;
     }
 
     // ---InputActionのコールバック関数---
     private void OnMove(InputAction.CallbackContext context)
     {
+        // 泥棒に捕まっている間は移動を入力しない
+        if (isCaughtByThief)
+        {
+            return;
+        }
         inputDirection = context.ReadValue<Vector2>();
     }
     private void OnJump(InputAction.CallbackContext context)
     {
+        // 泥棒に捕まっている間はジャンプを入力しない
+        if (isCaughtByThief)
+        {
+            return;
+        }
+
         // 空中にいるときはジャンプできないようにする
         if (controller.isGrounded)
         {
