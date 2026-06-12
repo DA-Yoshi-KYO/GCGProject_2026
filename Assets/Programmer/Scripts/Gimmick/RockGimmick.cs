@@ -7,8 +7,6 @@
  * 2026-05-08 | リファクタリング(大瀧)
  */
 
-using EffekseerTool;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class RockGimmick : GimmickBase
