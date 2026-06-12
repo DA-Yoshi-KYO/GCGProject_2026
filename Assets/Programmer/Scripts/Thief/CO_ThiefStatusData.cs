@@ -42,7 +42,7 @@ public class CO_ThiefStatusData : ScriptableObject
 
     [Header("走り状態になる標的オブジェクトタイプ")]
     [Tooltip("泥棒が走り状態になる標的オブジェクトのタイプ")]
-    public List<CS_VisionTarget.TargetType> runTargetTypes;
+    public List<CS_MoveSystem.RunTargetType> runTargetTypes;
 
     [Header("猫を捕まえている時間")]
     [Tooltip("泥棒が猫を捕まえている時間(秒)"), Min(0)]
