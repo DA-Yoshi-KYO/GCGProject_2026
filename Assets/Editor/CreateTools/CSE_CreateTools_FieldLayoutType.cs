@@ -40,6 +40,11 @@ public enum CSE_CreateTools_FieldLayoutType
     TextArea,
 
     /// <summary>
+    /// ドロップダウンです。
+    /// </summary>
+    Dropdown,
+
+    /// <summary>
     /// 候補から選択するタイプのレイアウトです。
     /// </summary>
     Select

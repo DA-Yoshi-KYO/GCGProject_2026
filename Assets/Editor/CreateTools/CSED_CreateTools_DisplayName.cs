@@ -53,6 +53,9 @@ public partial class CSED_CreateTools
             case CSE_CreateTools_FieldType.Script:
                 return "Script";
 
+            case CSE_CreateTools_FieldType.Enum:
+                return "Enum";
+
             case CSE_CreateTools_FieldType.GameObject:
                 return "GameObject";
 

@@ -103,6 +103,7 @@ public partial class CSED_CreateTools
                 DrawVariablePaletteButton(CSE_CreateTools_FieldType.Vector3, "Vector3");
                 DrawVariablePaletteButton(CSE_CreateTools_FieldType.String, "string");
                 DrawVariablePaletteButton(CSE_CreateTools_FieldType.Bool, "bool");
+                DrawVariablePaletteButton(CSE_CreateTools_FieldType.Enum, "Enum");
                 DrawVariablePaletteButton(CSE_CreateTools_FieldType.ScriptableObject, "ScriptableObject");
                 DrawVariablePaletteButton(CSE_CreateTools_FieldType.Script, "Script");
                 DrawVariablePaletteButton(CSE_CreateTools_FieldType.GameObject, "GameObject");

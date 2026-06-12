@@ -41,6 +41,11 @@ public enum CSE_CreateTools_FieldType
     Bool,
 
     /// <summary>
+    /// enum型です。
+    /// </summary>
+    Enum,
+
+    /// <summary>
     /// ScriptableObject型です。
     /// </summary>
     ScriptableObject,
