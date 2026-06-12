@@ -14,6 +14,8 @@ public class HitChecker : MonoBehaviour
     public BoxCollider hit;
     [Header("効果範囲")]
     public BoxCollider effect;
+    [Header("索敵範囲")]
+    public BoxCollider search;
     [Header("敵のレイヤー")]
     public LayerMask enemyLayer;
 
@@ -25,6 +27,7 @@ public class HitChecker : MonoBehaviour
     private int hitDamage = 0;
     private int effectDamage = 0;
     private Gimmick gimmick;
+    private CS_ThiefGimmickAction thiefGA;
     GameObject parentGameObject;
 
     // 既にダメージを与えた敵を保存
@@ -59,6 +62,12 @@ public class HitChecker : MonoBehaviour
     public Collider[] GetEffectEnemies()
     {
         return OverlapBoxCollider(effect);
+    }
+
+    // 索敵範囲の設定
+    public Collider[] GetSearchEnemies()
+    {
+        return OverlapBoxCollider(search);
     }
 
     /// <summary>
@@ -165,6 +174,28 @@ public class HitChecker : MonoBehaviour
             }
         }
     }
+
+    public CS_ThiefGimmickAction SearchEnemy(Gimmick gimmickTag)
+    {
+        Collider []
+        searchEnemies =
+                GetSearchEnemies();
+        //======================================================
+        // 索敵範囲
+        //======================================================
+        for(int i = 0 ; i < searchEnemies.Length ; i++)
+        {
+            GameObject enemy = searchEnemies[i].gameObject;
+            CS_ThiefAI thiefAI = enemy.GetComponent<CS_ThiefAI>();
+            thiefGA = thiefAI.read_ThiefGimmickAction;
+            if (thiefAI != null)
+            {
+                return thiefGA;
+            }
+        }
+        return null;
+    }
+
     private void FixedUpdate()
     {
         if (firstUpdate || isLoop)
@@ -176,7 +207,6 @@ public class HitChecker : MonoBehaviour
 
             Collider[] effectEnemies =
                 GetEffectEnemies();
-
             // =====================================================
             // 効果範囲
             // =====================================================
@@ -230,9 +260,9 @@ public class HitChecker : MonoBehaviour
             // =====================================================
             for (int i = 0 ; i < hitEnemies.Length ; i++)
             {
-
                 GameObject enemy = hitEnemies[i].gameObject;
                 CS_ThiefAI thiefAI = enemy.GetComponent<CS_ThiefAI>();
+                thiefGA = thiefAI.read_ThiefGimmickAction;
                 if (thiefAI != null)
                 {
                     switch (gimmick)
@@ -259,8 +289,8 @@ public class HitChecker : MonoBehaviour
                             break;
                         case Gimmick.Pitfall:
                             Debug.Log("Pitfall hit enemy");
-                            EnemyDame(enemy, hitDamage, true, hitEnemies[i], hit);
                             //シーフ落とす関数追加する//
+                            thiefGA.PitFallStart(transform.position);
                             parentGameObject.GetComponent<PitfallGimmick>();
                             parentGameObject.GetComponent<PitfallGimmick>().gimmickState = GimmickState.Active;
                             break;
@@ -268,5 +298,9 @@ public class HitChecker : MonoBehaviour
                 }
             }
         }
+    }
+    public CS_ThiefGimmickAction GetThiefGA()
+    {
+        return thiefGA;
     }
 }
