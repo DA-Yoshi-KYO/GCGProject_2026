@@ -12,6 +12,7 @@
  *            | 生成位置の選定の記載
  * 2026-05-22 | ファイル名を変更（ThiefManager.cs → CS_ThiefManager.cs）
  *            | クラス名を変更（ThiefManager → CS_ThiefManager）
+ *            | データベースから生成間隔の値を取得して設定する処理の記載
  * 
  */
 using System.Collections.Generic;
@@ -34,14 +35,35 @@ public class CS_ThiefManager : MonoBehaviour
     [Tooltip("敵の出入口のデータと、そこから生成された泥棒の数を管理する辞書")]
     private Dictionary<CS_RoomEnemyEntryPointData, int> spawnCount = new Dictionary<CS_RoomEnemyEntryPointData, int>();
 
-    [SerializeField, Header("次の泥棒を生成するまでの感覚(秒)"), Tooltip("泥棒を生成する間隔の基本値")]
-    private float createInterval = 1.0f;
-    [SerializeField, Header("最初の泥棒を生成するまでの時間(秒)"), Tooltip("最初の生成間隔")]
-    private float firstCreateInterval = 5.0f;
+    [Tooltip("最初の生成間隔")]
+    private float firstCreateInterval = 0.0f;
+    [Tooltip("ウェーブ進行後泥棒を生成するまでの間隔")]
+    private float nextWaveCreateInterval = 0.0f;
+    [Tooltip("泥棒を生成する間隔の基本値")]
+    private float createInterval = 0.0f;
 
     [Tooltip("初回生成が完了しているかどうか")]
     private bool isFirstGenerationComplete = false;
     public bool read_IsFirstGenerationComplete => isFirstGenerationComplete;
+
+    [Tooltip("生成が完了しているかどうか")]
+    private bool isGenerationComplete = false;
+    public bool read_IsGenerationComplete => isGenerationComplete;
+
+    [Tooltip("ウェーブ進行後のリセットを行うかどうか")]
+    private bool isResetAfterWaveProgress = true;
+    public bool read_IsResetAfterWaveProgress => isResetAfterWaveProgress;
+
+    private void Start()
+    {
+        // 泥棒の親オブジェクトを生成
+        new GameObject("ThiefParent");
+
+        // データベースから生成間隔の値を取得して設定する
+        firstCreateInterval = thiefCommonDB.firstCreateInterval;
+        nextWaveCreateInterval = thiefCommonDB.nextWaveCreateInterval;
+        createInterval = thiefCommonDB.createInterval;
+    }
 
     /// <summary>
     /// 毎フレーム、敵の出入口から泥棒を生成する処理を行う
@@ -52,14 +74,13 @@ public class CS_ThiefManager : MonoBehaviour
     }
 
     // 泥棒を生成するメソッド
-    private void Notify()
+    public void Notify()
     {
+        CS_RoomEnemyEntryPointCollector collector = GameObject.Find("RoomCreatePoints").GetComponent<CS_RoomEnemyEntryPointCollector>();
+        if (collector == null) return;
         // 敵の出入口を取得
-        IReadOnlyList<CS_RoomEnemyEntryPointData> EntryList = GameObject.Find("RoomCreatePoints").GetComponent<CS_RoomEnemyEntryPointCollector>().EnemyEntryPointDataList;
-        if (EntryList.Count == 0)
-        {
-            return; // 出入口が存在しない場合は、処理を終了
-        }
+        IReadOnlyList<CS_RoomEnemyEntryPointData> EntryList = collector.EnemyEntryPointDataList;
+        if (EntryList.Count == 0) return; // 出入口が存在しない場合は、処理を終了
 
         foreach (var entry in EntryList)
         {
@@ -75,7 +96,7 @@ public class CS_ThiefManager : MonoBehaviour
 
             IReadOnlyList<CO_ThiefStatusData> list_ThiefStatusData = roomEnemyEntryData.GetThiefStatusDataList();
 
-            if (list_ThiefStatusData == null)continue;
+            if (list_ThiefStatusData == null) continue;
 
             // 生成数の管理
             if (spawnCount.ContainsKey(entry))
@@ -106,7 +127,11 @@ public class CS_ThiefManager : MonoBehaviour
             // 新しい出入口を辞書に追加
             else
             {
-                createTime.Add(entry, firstCreateInterval);
+                // 最初の生成間隔を設定して登録
+                if (!isFirstGenerationComplete) createTime.Add(entry, firstCreateInterval);
+                // ウェーブ進行後の生成間隔を設定して登録
+                else createTime.Add(entry, nextWaveCreateInterval);
+
                 continue; // 最初の生成間隔を待つため、次の出入口の処理に移る
             }
 
@@ -149,7 +174,34 @@ public class CS_ThiefManager : MonoBehaviour
             spawnCount[entry]++;
         }
 
-        isFirstGenerationComplete = true; // 最初の生成が完了したことを記録
+        // 予定している生成数に達しているかどうかを確認
+        bool allSpawned = true;
+        foreach (var entry in EntryList)
+        {
+            if (!spawnCount.ContainsKey(entry) || spawnCount[entry] < entry.RoomEnemyEntryDataList[0].GetThiefStatusDataList().Count)
+            {
+                allSpawned = false;
+                break;
+            }
+        }
+
+        if (allSpawned)
+        {
+            // 最初の生成が完了したことを記録
+            if (!isFirstGenerationComplete) isFirstGenerationComplete = true;
+            // 生成が完了したことを記録
+            isGenerationComplete = true;
+            // ウェーブ進行後のリセットを行うようにする
+            isResetAfterWaveProgress = true;
+        }
+    }
+
+    // 泥棒の生成数をリセットする処理
+    public void ResetSpawnCount()
+    {
+        spawnCount.Clear();
+        isGenerationComplete = false;
+        isResetAfterWaveProgress = false;
     }
 
     /// <summary>

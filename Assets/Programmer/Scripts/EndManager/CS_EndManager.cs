@@ -38,7 +38,7 @@ public class CS_EndManager : MonoBehaviour
         CS_ThiefManager thiefManager = GameObject.FindObjectOfType<CS_ThiefManager>();
         if (thiefManager == null) return;
         // 最初の生成が完了していない場合は判定しない
-        if (!thiefManager.read_IsFirstGenerationComplete) return; 
+        if (!thiefManager.read_IsFirstGenerationComplete) return;
 
         // 宝物が残っている場合
         if (totalTreasureCount > 0)
@@ -48,11 +48,14 @@ public class CS_EndManager : MonoBehaviour
             if (thiefParent == null) return;
             int thiefCount = thiefParent.transform.childCount;
 
+            // 生成が完了していない場合は判定しない
+            if (!thiefManager.read_IsGenerationComplete) return;
+
             // WaveManagerを取得
-            CS_WaveManager waveManager = GameObject.FindObjectOfType< CS_WaveManager>();
+            CS_StageManager stageManager = GameObject.FindObjectOfType< CS_StageManager>();
 
             // 泥棒がいなくなった場合
-            if (thiefCount == 0 && waveManager.IsMaxWave())
+            if (thiefCount == 0 && stageManager.IsMaxWave())
             {
                 // 勝利
 

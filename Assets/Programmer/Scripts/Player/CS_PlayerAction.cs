@@ -14,6 +14,7 @@
  * 2026-05-24 | インタラクトの範囲を円柱化：吉田
  * 2026-05-25 | SEを追加：吉田
  * 2026-05-25 | インタラクトの範囲に入った泥棒に通知処理：吉田
+ * 2026-06-11 | ギミック設置時のEffect再生処理を追加：吉本
  */
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -33,12 +34,11 @@ public class CS_PlayerAction : MonoBehaviour
     }
     [SerializeField] private InteractSyllinder interactMin = new InteractSyllinder { radius = 3f, height = 3f };//インタラクトの範囲の最小値
     [SerializeField] private InteractSyllinder interactMax = new InteractSyllinder { radius = 5f, height = 5f };//インタラクトの範囲の最大値
-    [SerializeField] private GameObject playerMesh = null;//プレイヤーのメッシュオブジェクト
-    private Material playerMaterial = null;//プレイヤーのマテリアル
     [HideInInspector] public int currentSoul { private set; get; } = 0;//現在のソウルの数
     [HideInInspector] public int currentGimmickIndex { private set; get; } = 0;//現在選択しているギミック
 
     public List<GameObject> gimmickKind;//所持しているギミックの種類
+    private CS_OutlineController outlineController; // プレイヤーのアウトラインを制御
 
     private CS_PlayerData playerData;
     float interactTime = 0.0f;
@@ -50,6 +50,12 @@ public class CS_PlayerAction : MonoBehaviour
     private GimmickManager gimmickManager;
     private CS_3DPlaySE playSE;
     List<Collider> hitList = new List<Collider>();
+
+    // ギミック設置時のEffect再生クラスへの参照
+    private CS_GimmickSetEffectPlayer cs_GimmickSetEffectPlayer;
+
+    // インタラクト範囲Effect再生クラスへの参照
+    private CS_PlayerInteractRangeEffectPlayer cs_PlayerInteractRangeEffectPlayer;
 
     // Start is called before the first frame update
     void Start()
@@ -70,11 +76,16 @@ public class CS_PlayerAction : MonoBehaviour
 
         interactField.GetComponent<Renderer>().enabled = false;
 
-        Material[] materials = playerMesh.GetComponentInChildren<Renderer>().materials;
-        playerMaterial = materials[materials.Length - 1]; // 最後のマテリアルをプレイヤーのアウトライン用マテリアルとする
-        playerMaterial?.SetVector("_OutlineColor", Color.gray);
+        // アウトラインコントローラーの初期化
+        outlineController = new CS_OutlineController(GetComponentInChildren<SkinnedMeshRenderer>());
+        outlineController.SetOutlineColor(Color.gray);
 
         playSE = GameObject.Find("3DSE").GetComponent<CS_3DPlaySE>();
+
+        cs_GimmickSetEffectPlayer = GetComponent<CS_GimmickSetEffectPlayer>();
+
+        cs_PlayerInteractRangeEffectPlayer = GetComponent<CS_PlayerInteractRangeEffectPlayer>();
+
     }
 
     // Update is called once per frame
@@ -84,11 +95,11 @@ public class CS_PlayerAction : MonoBehaviour
 
         if (playerData.currentMode == CS_PlayerData.PlayerMode.Normal)
         {
-            playerMaterial?.SetVector("_OutlineColor", Color.gray);
+            outlineController.SetOutlineColor(Color.gray);
         }
         else
         {
-            playerMaterial?.SetVector("_OutlineColor", Color.yellow);
+            outlineController.SetOutlineColor(Color.yellow);
         }
 
         if (isInteracting)
@@ -113,7 +124,7 @@ public class CS_PlayerAction : MonoBehaviour
                     }
                 }
 
-                playerMaterial?.SetVector("_OutlineColor", Color.green);
+                outlineController.SetOutlineColor(Color.green);
 
                 // インタラクト範囲を拡大
                 interactScale.x = Mathf.Max(interactTime - switchInteract, 0f) + interactMin.radius;
@@ -126,6 +137,13 @@ public class CS_PlayerAction : MonoBehaviour
                 Vector3 interactPos = transform.position;
                 interactPos.y += interactScale.y * 0.5f; // フィールドが地面に接するように位置を調整
                 interactField.transform.position = interactPos;
+
+                // Effectのサイズを変更
+                if (cs_PlayerInteractRangeEffectPlayer != null)
+                {
+                    cs_PlayerInteractRangeEffectPlayer.UpdateInteractRangeEffect(
+                        interactField.transform);
+                }
 
                 // 円柱で判定を取るために、カプセルでオーバーラップを取った後に上下の半球を除外する
                 Collider[] hits = Physics.OverlapCapsule(
@@ -208,10 +226,23 @@ public class CS_PlayerAction : MonoBehaviour
 
             interactField.transform.localScale = Vector3.zero;
             isInteracting = true;
+
+            if (cs_PlayerInteractRangeEffectPlayer != null)
+            {
+                cs_PlayerInteractRangeEffectPlayer.PlayInteractRangeEffect(
+                    interactField.transform);
+            }
         }
         else if (context.canceled)
         {
             isInteracting = false;
+
+            // Effectの停止
+            if (cs_PlayerInteractRangeEffectPlayer != null)
+            {
+                cs_PlayerInteractRangeEffectPlayer.EndInteractRangeEffect();
+            }
+
             if (interactTime < switchInteract)
             {
                 // 短押しは設置の処理を行う
@@ -231,6 +262,12 @@ public class CS_PlayerAction : MonoBehaviour
             }
             else
             {
+
+
+                //! ここにギミック起動範囲のエフェクトを入れる。
+
+
+
                 // 長押しはギミックの起動を行う
                 interactField.GetComponent<Renderer>().enabled = false;
                 playSE.PlayOneShotSE("CatInteract", gameObject.transform.position, "InteractSE");
@@ -348,6 +385,15 @@ public class CS_PlayerAction : MonoBehaviour
         {
             Debug.LogError("配置後のGimmick取得失敗");
             return;
+        }
+
+        // ギミック直下に魔法陣Effectを生成して再生
+        // ギミック設置時Effectを再生
+        if (cs_GimmickSetEffectPlayer != null)
+        {
+            cs_GimmickSetEffectPlayer.PlayGimmickSetEffect(
+                instance.transform.position,
+                instance);
         }
 
         // Managerへ実体を登録

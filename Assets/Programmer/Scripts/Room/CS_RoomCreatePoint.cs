@@ -72,7 +72,7 @@ public class CS_RoomCreatePoint : MonoBehaviour
             return false;
         }
 
-        if (!cs_Connection.HasEnemyEntryData)
+        if (!(cs_Connection.GetEnemyEntryCount() > 0))
         {
             return false;
         }
@@ -166,27 +166,38 @@ public class CS_RoomCreatePoint : MonoBehaviour
     {
         List<CSE_RoomDoorDirection> list_EnemyEntryDirections = new List<CSE_RoomDoorDirection>();
 
-        if (cs_RightConnection.HasEnemyEntryData)
+        if (cs_RightConnection.GetEnemyEntryCount() > 0)
         {
             list_EnemyEntryDirections.Add(CSE_RoomDoorDirection.Right);
         }
 
-        if (cs_LeftConnection.HasEnemyEntryData)
+        if (cs_LeftConnection.GetEnemyEntryCount() > 0)
         {
             list_EnemyEntryDirections.Add(CSE_RoomDoorDirection.Left);
         }
 
-        if (cs_FrontConnection.HasEnemyEntryData)
+        if (cs_FrontConnection.GetEnemyEntryCount() > 0)
         {
             list_EnemyEntryDirections.Add(CSE_RoomDoorDirection.Front);
         }
 
-        if (cs_BackConnection.HasEnemyEntryData)
+        if (cs_BackConnection.GetEnemyEntryCount() > 0)
         {
             list_EnemyEntryDirections.Add(CSE_RoomDoorDirection.Back);
         }
 
         return list_EnemyEntryDirections;
+    }
+
+    /// <summary>
+    /// 全ての敵出入口データをクリアします。
+    /// </summary>
+    public void ClearEnemyEntryDirections()
+    {
+        cs_RightConnection.ClearEnemyEntryData();
+        cs_LeftConnection.ClearEnemyEntryData();
+        cs_FrontConnection.ClearEnemyEntryData();
+        cs_BackConnection.ClearEnemyEntryData();
     }
 
     /// <summary>
@@ -213,5 +224,26 @@ public class CS_RoomCreatePoint : MonoBehaviour
             default:
                 return null;
         }
+    }
+
+    /// <summary>
+    /// 指定方向の敵出入口データを設定します。
+    /// </summary>
+    /// <param name="e_FromDirection">指定方向</param>
+    /// <param name="newData">設定する敵出入口データ</param>
+    public void SetEnemyData(CSE_RoomDoorDirection e_FromDirection, CSS_RoomEnemyEntryData newData)
+    {
+        CS_RoomMoveConnection cs_Connection = GetConnection(e_FromDirection);
+        if (cs_Connection == null)
+        {
+            Debug.LogError($"指定された方向の接続情報が見つかりません。方向: {e_FromDirection}");
+            return;
+        }
+        if (!cs_Connection.IsEnemyEntryDoor)
+        {
+            Debug.LogError($"指定された方向は敵出入口ではありません。方向: {e_FromDirection}");
+            return;
+        }
+        cs_Connection.SetEnemyEntryData(newData);
     }
 }

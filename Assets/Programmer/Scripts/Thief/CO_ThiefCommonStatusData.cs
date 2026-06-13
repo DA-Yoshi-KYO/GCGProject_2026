@@ -23,7 +23,20 @@ using UnityEngine;
     menuName = "ScriptableObjects/Thief/CommonStatusData")]
 public class CO_ThiefCommonStatusData : ScriptableObject
 {
-    [Tooltip("ジャンプ可能な高さ(マス目)"), Min(0)]
+    [Header("ゲーム開始から泥棒を生成するまでの時間(秒)"), Min(0)]
+    [Tooltip("ゲーム開始から最初の泥棒を生成するまでの時間")]
+    public float firstCreateInterval;
+
+    [Header("次のウェーブの敵を生成するまでの時間(秒)"), Min(0)]
+    [Tooltip("次のウェーブの敵を生成するまでの時間")]
+    public float nextWaveCreateInterval;
+
+    [Header("泥棒を生成する間隔の基本値(秒)"), Min(0)]
+    [Tooltip("泥棒を生成する間隔の基本値")]
+    public float createInterval;
+
+    [Header("泥棒のジャンプの高さ(マス目)"), Min(0)]
+    [Tooltip("ジャンプ可能な高さ(マス目)")]
     public int jumpHeight;
 
     [Header("攻撃命中後の気絶時間(秒)")]
@@ -49,10 +62,6 @@ public class CO_ThiefCommonStatusData : ScriptableObject
     [Header("気絶した後のフェード時間(秒)")]
     [Tooltip("泥棒が気絶した後のフェード時間"), Min(0)]
     public int fadeAfterStunTime;
-
-    [Header("泥棒のリアクションスプライトリスト")]
-    [Tooltip("泥棒のリアクションスプライトリスト")]
-    public List<Sprite> reactionSprites;
 
     [Header("泥棒のリアクションUI用スプライトリスト")]
     [Tooltip("泥棒のリアクションUI用スプライトリスト")]

@@ -6,6 +6,7 @@
  * 2026-05-27 | 初回作成
  * 
  */
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
@@ -20,11 +21,21 @@ public class CS_MoveSystem
 
     [SerializeField, Tooltip("泥棒の歩き移動速度")]
     private float walkSpeed;
+    public float read_WalkSpeed => walkSpeed;
+
     [SerializeField, Tooltip("泥棒の走り移動速度")]
     private float runSpeed;
+        public float read_RunSpeed => runSpeed;
+
+    [Tooltip("泥棒が走り状態になる標的オブジェクトのタイプを指定するための列挙型")]
+    public enum  RunTargetType
+    {
+        Player,         // プレイヤー
+        Treasure,       // 宝物
+    }
 
     [Tooltip("走り状態になる標的オブジェクトのタイプリスト")]
-    private List<CS_VisionTarget.TargetType> runTargetTypes;
+    private List<RunTargetType> runTargetTypes;
 
     [Tooltip("ナビメッシュエージェント")]
     private NavMeshAgent navMeshAgent;
@@ -38,6 +49,9 @@ public class CS_MoveSystem
 
     [Tooltip("バグ対策用位置の同じ位置にいるフレーム数カウンター")]
     private int samePosFrameCount = 0;
+
+    [Tooltip("気絶後の退場方向")]
+    private Vector3 exitDirectionAfterStun;
 
     /// <summary>
     /// コンストラクタ。必要なコンポーネントやパラメータを受け取って初期化する。
@@ -76,26 +90,39 @@ public class CS_MoveSystem
     /// <param name="currentTarget">現在の標的オブジェクト</param>
     public void UpdateMoveSpeed(CS_ThiefTarget currentTarget)
     {
-        if (currentTarget == null) return;
-
-        if (currentTarget is CS_VisionTarget)
+        if (currentTarget == null)
         {
-            if (currentTarget != null && runTargetTypes.Contains(((CS_VisionTarget)currentTarget).targetType))
-            {
-                // 現在の標的が走り状態になるタイプの場合、走り速度に切り替える
-                navMeshAgent.speed = runSpeed;
-            }
-            else
-            {
-                // それ以外の場合は歩き速度に切り替える
-                navMeshAgent.speed = walkSpeed;
-            }
-        }
-        else
-        {
-            // CS_VisionTarget 以外の標的の場合は歩き速度に切り替える
+            // 標的がいない場合は歩き速度に切り替える
             navMeshAgent.speed = walkSpeed;
+            return;
         }
+
+
+        foreach (var targetType in runTargetTypes)
+        {
+            switch (targetType)
+            {
+                case RunTargetType.Player:
+                    if (currentTarget is CS_PlayerTarget)
+                    {
+                        // 現在の標的がプレイヤーの場合は走り速度に切り替える
+                        navMeshAgent.speed = runSpeed;
+                        return;
+                    }
+                    break;
+                case RunTargetType.Treasure:
+                    if (currentTarget is CS_VisionTarget vt && vt.targetType == CS_VisionTarget.TargetType.Treasure)
+                    {
+                        // 現在の標的が宝物の場合は走り速度に切り替える
+                        navMeshAgent.speed = runSpeed;
+                        return;
+                    }
+                    break;
+            }
+        }
+
+        //標的の場合は歩き速度に切り替える
+        navMeshAgent.speed = walkSpeed;
     }
 
     /// <summary>
@@ -133,6 +160,27 @@ public class CS_MoveSystem
 
         // ワープ後に、ThiefAIの記憶システムにワープアクションを通知する
         thiefAI.read_MemorySystem.WarpAction(entryDoorDir);
+    }
+
+    /// <summary>
+    /// 気絶状態後の退場移動処理
+    /// </summary>
+    public void StunMove()
+    {
+        // 退場方向が設定されていない場合
+        if (exitDirectionAfterStun == Vector3.zero)
+        {
+            // 入ってきたドアの方向を基に退場方向を設定する
+            exitDirectionAfterStun = Vector3.Normalize(thiefAI.read_MemorySystem.read_FirstEntryPoint.position - thiefAI.transform.position);
+            // 移動方向に向きを変える
+            thiefAI.transform.rotation = Quaternion.LookRotation(exitDirectionAfterStun);
+
+        }
+
+        // 気絶後の退場方向に向かって移動する
+        Vector3 exitPosition = thiefAI.transform.position + exitDirectionAfterStun.normalized; // 退場する距離を適宜調整
+        exitPosition.y = thiefAI.transform.position.y; // 高さは変えない
+        thiefAI.transform.position = Vector3.MoveTowards(thiefAI.transform.position, exitPosition, walkSpeed * 0.5f * Time.deltaTime);
     }
 
     /// <summary>
