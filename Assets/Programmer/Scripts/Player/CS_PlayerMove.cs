@@ -94,7 +94,6 @@ public class CS_PlayerMove : MonoBehaviour
         // ジャンプ待機中は移動処理を行わない
         if (isJumpMerging && !isJumping) return;
 
-        animator.SetBool("IsGround", controller.isGrounded);
 
         // カメラの前方向と右方向を取得し、y成分を0にして水平移動のベクトルを作成
         Vector3 cameraForward = playerCamera.cameraForward;
@@ -171,7 +170,9 @@ public class CS_PlayerMove : MonoBehaviour
         // CharacterControllerを使用して移動
         controller.Move(velocity * Time.deltaTime);
 
-        
+        Vector2 verocityXZ = new Vector2(velocity.x, velocity.z);
+        animator.SetBool("IsGround", controller.isGrounded);
+        animator.SetBool("IsMoving", verocityXZ.sqrMagnitude > 0);
     }
 
     private void FixedUpdate()
