@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-2564633450512134348
+--- !u!114 &-7694799529802909036
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}
@@ -20,7 +20,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: MTV_Stand_A_2
+  m_Name: MTV_Chest
   m_Shader: {fileID: -6465566751694194690, guid: 4f43b46da54065a42a2f16b0a5c56ffb,
     type: 3}
   m_Parent: {fileID: 2100000, guid: 6cc41fb1c85ea0b469ad432acdfe9c14, type: 2}
@@ -36,20 +36,17 @@ Material:
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
-    m_TexEnvs:
-    - _ColorMap:
-        m_Texture: {fileID: 2800000, guid: a64d71848e398ab4cb9b76d006e2b4f7, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _NormalMap:
-        m_Texture: {fileID: 2800000, guid: 7a95c5cd615be2240a0771cac440121d, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _ORMMap:
-        m_Texture: {fileID: 2800000, guid: db70c2234e8d2d9449d02ded85f4aa6b, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
+    m_TexEnvs: []
     m_Ints: []
-    m_Floats: []
-    m_Colors: []
+    m_Floats:
+    - _Alpha: 1
+    - _UseBaseColor: 0
+    - _UseColorMap: 0
+    - _UseMetallic: 0
+    - _UseNormalMap: 0
+    - _UseOcclusion: 0
+    - _UseSmoothness: 0
+    - _UseToon: 0
+    m_Colors:
+    - _BaseColor: {r: 0, g: 0.2243948, b: 1, a: 1}
   m_BuildTextureStacks: []
