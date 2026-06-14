@@ -163,25 +163,36 @@ public class CS_WarpSpawn : MonoBehaviour
     public void ProcessGenerationCandidatePositions()
     {
         GameObject roomParent = GameObject.Find("RoomCreatePoints");
-        Transform roomChild;
+
         if (roomParent == null)
-            return;
-
-        //初期部屋と宝部屋は探索しない
-        int count = roomParent.transform.childCount - 2;
-        spawnPoints = new Transform[count];
-
-        for (int i = 1; i < roomParent.transform.childCount - 1 ;++i)
         {
-            roomChild = roomParent.transform.GetChild(i);
+            Debug.LogError("[CS_WarpSpawn] RoomCreatePoints が見つかりません。", this);
+            spawnPoints = new Transform[0];
+            return;
+        }
+
+        List<Transform> foundSpawnPoints = new List<Transform>();
+
+        // 初期部屋と宝部屋は探索しない
+        for (int i = 1 ; i < roomParent.transform.childCount - 1 ; ++i)
+        {
+            Transform roomChild = roomParent.transform.GetChild(i);
 
             Transform warpObj = FindChildObject(roomChild, "WarpCreatePos");
 
             if (warpObj == null)
-                return;
+            {
+                Debug.LogWarning(
+                    "[CS_WarpSpawn] WarpCreatePos が見つかりません。Room : " + roomChild.name,
+                    roomChild);
 
-            spawnPoints[i - 1] = warpObj;
+                continue;
+            }
+
+            foundSpawnPoints.Add(warpObj);
         }
+
+        spawnPoints = foundSpawnPoints.ToArray();
     }
 
     //再帰処理で探す
