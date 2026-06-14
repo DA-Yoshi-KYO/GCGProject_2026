@@ -13,15 +13,26 @@ public class CS_WarpSpawn : MonoBehaviour
 {
     private Transform[] spawnPoints;//候補地点
     private List<Transform> spawnPointsList;//候補地点リスト
-    [Header("ワープの入り口用のPrefab")][SerializeField]public GameObject warpEntrancePrefab;
-    [Header("ワープの出口用のPrefab")][SerializeField]public GameObject warpExitPrefab;
-    [Header("ワープの数")][SerializeField] private int warpCount = 1;
-    [Header("RoomCreatePointの元データ")][SerializeField] private GameObject go_RoomCreatePointsFormer;
+
+    [Header("ワープの入り口用のPrefab")]
+    [SerializeField] public GameObject warpEntrancePrefab;
+
+    [Header("ワープの出口用のPrefab")]
+    [SerializeField] public GameObject warpExitPrefab;
+
+    [Header("ワープの数")]
+    [SerializeField] private int warpCount = 1;
+
+    [Header("RoomCreatePointの元データ")]
+    [SerializeField] private GameObject go_RoomCreatePointsFormer;
 
     private GameObject currentEntrance;
     private GameObject currentExit;
+
     private List<GameObject> lgo_warpWallObjects = new List<GameObject>();
     private List<GameObject[]> warpWallPairList = new List<GameObject[]>();
+
+    private List<GameObject> lgo_currentWarpObjects = new List<GameObject>();
 
     // Start is called before the first frame update
     public void WarpPointStart()
@@ -36,131 +47,35 @@ public class CS_WarpSpawn : MonoBehaviour
 
     public void SpawnWarp()
     {
-        //既存の入口・出口を削除
-        if (currentEntrance != null) Destroy(currentEntrance);
-        if (currentExit != null) Destroy(currentExit);
+        CollectWarpWalls();
+        CreateRandomWarpWallPairs();
+    }
 
-        //生成位置候補の処理
-        ProcessGenerationCandidatePositions();
-
-        spawnPointsList = new List<Transform>(spawnPoints);
-
-        //シャッフル
-        for (int i = spawnPointsList.Count - 1 ; i > 0 ; i--)
+    /// <summary>
+    /// 現在生成されているワープオブジェクトを削除します。
+    /// </summary>
+    private void DestroyCurrentWarpObjects()
+    {
+        foreach (GameObject warpObject in lgo_currentWarpObjects)
         {
-            int r = Random.Range(0, i + 1);
-            var prev = spawnPointsList[i];
-            spawnPointsList[i] = spawnPointsList[r];
-            spawnPointsList[r] = prev;
+            if (warpObject != null)
+            {
+                Destroy(warpObject);
+            }
         }
 
-        //作れる最大ペア数
-        int maxWarp = Mathf.Min(warpCount, spawnPointsList.Count / 2);
+        lgo_currentWarpObjects.Clear();
 
-        for (int i = 0 ; i < maxWarp ; i++)
+        if (currentEntrance != null)
         {
-            List<Transform> remove = new List<Transform>(spawnPointsList);
+            Destroy(currentEntrance);
+            currentEntrance = null;
+        }
 
-            //入口生成
-            Transform entrancePoint = remove[i];
-
-            GameObject entranceObj = Instantiate(
-                warpEntrancePrefab,
-                entrancePoint.position,
-                entrancePoint.rotation
-            );
-
-            //部屋の隣同士の情報取得して候補から外す
-            CS_RoomCreatePoint roomCreatePoint = remove[i].gameObject.GetComponentInParent<CS_RoomCreatePoint>();
-
-            Transform deletionCandidate;//削除候補
-            List<Transform> deletionCandidateList = new List<Transform>();//削除候補のリスト格納
-            Transform parent;
-
-            deletionCandidateList.Add(remove[i]);
-
-            CS_RoomMoveConnection roomMoveConnectionRight;
-            if (roomCreatePoint.TryGetConnection(CSE_RoomDoorDirection.Right, out roomMoveConnectionRight))
-            {
-                parent = roomMoveConnectionRight.TargetCreatePoint.transform;
-                for(int j = 0 ; j < remove.Count ; ++j)
-                {
-                    deletionCandidate = FindParentObject(remove[j], parent.gameObject.name);
-
-                    if (deletionCandidate != null)
-                    {
-                        deletionCandidateList.Add(remove[j]);
-                    }
-                }
-            }
-            CS_RoomMoveConnection roomMoveConnectionLeft;
-            if (roomCreatePoint.TryGetConnection(CSE_RoomDoorDirection.Left, out roomMoveConnectionLeft))
-            {
-                parent = roomMoveConnectionLeft.TargetCreatePoint.transform;
-                for (int j = 0 ; j < remove.Count ; ++j)
-                {
-                    deletionCandidate = FindParentObject(remove[j], parent.gameObject.name);
-
-                    if (deletionCandidate != null)
-                    {
-                        deletionCandidateList.Add(remove[j]);
-                    }
-                }
-            }
-            CS_RoomMoveConnection roomMoveConnectionFront;
-            if (roomCreatePoint.TryGetConnection(CSE_RoomDoorDirection.Front, out roomMoveConnectionFront))
-            {
-                parent = roomMoveConnectionFront.TargetCreatePoint.transform;
-                for (int j = 0 ; j < remove.Count ; ++j)
-                {
-                    deletionCandidate = FindParentObject(remove[j], parent.gameObject.name);
-
-                    if (deletionCandidate != null)
-                    {
-                        deletionCandidateList.Add(remove[j]);
-                    }
-                }
-            }
-            CS_RoomMoveConnection roomMoveConnectionBack;
-            if (roomCreatePoint.TryGetConnection(CSE_RoomDoorDirection.Back, out roomMoveConnectionBack))
-            {
-                parent = roomMoveConnectionBack.TargetCreatePoint.transform;
-                for (int j = 0 ; j < remove.Count ; ++j)
-                {
-                    deletionCandidate = FindParentObject(remove[j], parent.gameObject.name);
-
-                    if (deletionCandidate != null)
-                    {
-                        deletionCandidateList.Add(remove[j]);
-                    }
-                }
-            }
-
-            //まとめて削除
-            foreach (var obj in deletionCandidateList)
-            {
-                remove.Remove(obj);
-            }
-
-            //出口生成
-            Transform exitPoint = remove[i];
-
-            GameObject exitObj = Instantiate(
-                warpExitPrefab,
-                exitPoint.position,
-                exitPoint.rotation
-            );
-
-            //WarpPoint のリンク設定（双方向）
-            CS_WarpPoint entranceWP = entranceObj.GetComponent<CS_WarpPoint>();
-            CS_WarpPoint exitWP = exitObj.GetComponent<CS_WarpPoint>();
-
-            entranceWP.targetPoint = exitWP;
-            exitWP.targetPoint = entranceWP;
-
-            //複数ワープをつくるために作られた場所は削除
-            spawnPointsList.Remove(entrancePoint);
-            spawnPointsList.Remove(exitPoint);
+        if (currentExit != null)
+        {
+            Destroy(currentExit);
+            currentExit = null;
         }
     }
 
@@ -215,7 +130,9 @@ public class CS_WarpSpawn : MonoBehaviour
             foreach (Transform child in current)
             {
                 if (child.name == name)
+                {
                     return child;
+                }
 
                 queue.Enqueue(child);
             }
@@ -232,7 +149,9 @@ public class CS_WarpSpawn : MonoBehaviour
         while (current.parent != null)
         {
             if (current.name == name)
+            {
                 return current;
+            }
 
             current = current.parent;
         }
@@ -277,7 +196,21 @@ public class CS_WarpSpawn : MonoBehaviour
     /// </summary>
     private void CreateRandomWarpWallPairs()
     {
+        DestroyCurrentWarpObjects();
+
         warpWallPairList.Clear();
+
+        if (warpEntrancePrefab == null)
+        {
+            Debug.LogError("[CS_WarpSpawn] warpEntrancePrefab が設定されていません。", this);
+            return;
+        }
+
+        if (warpExitPrefab == null)
+        {
+            Debug.LogError("[CS_WarpSpawn] warpExitPrefab が設定されていません。", this);
+            return;
+        }
 
         List<GameObject> candidateList = new List<GameObject>(lgo_warpWallObjects);
         candidateList.RemoveAll(obj => obj == null);
@@ -309,6 +242,8 @@ public class CS_WarpSpawn : MonoBehaviour
             SetWarpWallFlag(warpWallA, true);
             SetWarpWallFlag(warpWallB, true);
 
+            CreateWarpPointPair(warpWallA, warpWallB);
+
             Debug.Log(
                 "[CS_WarpSpawn] WarpWallペア : "
                 + warpWallA.name
@@ -334,6 +269,87 @@ public class CS_WarpSpawn : MonoBehaviour
                 this
             );
         }
+    }
+
+    /// <summary>
+    /// WarpWallの位置情報を使って、入口と出口のワープオブジェクトを生成します。
+    /// </summary>
+    private void CreateWarpPointPair(GameObject warpWallA, GameObject warpWallB)
+    {
+        CS_WarpWallSwitch warpWallSwitchA = warpWallA.GetComponent<CS_WarpWallSwitch>();
+        CS_WarpWallSwitch warpWallSwitchB = warpWallB.GetComponent<CS_WarpWallSwitch>();
+
+        if (warpWallSwitchA == null)
+        {
+            Debug.LogWarning(
+                "[CS_WarpSpawn] CS_WarpWallSwitch が付いていません : "
+                + warpWallA.name,
+                warpWallA
+            );
+
+            return;
+        }
+
+        if (warpWallSwitchB == null)
+        {
+            Debug.LogWarning(
+                "[CS_WarpSpawn] CS_WarpWallSwitch が付いていません : "
+                + warpWallB.name,
+                warpWallB
+            );
+
+            return;
+        }
+
+        Transform warpPointA = warpWallSwitchA.GetWarpPointTransform();
+        Transform warpPointB = warpWallSwitchB.GetWarpPointTransform();
+
+        GameObject entranceObj = Instantiate(
+            warpEntrancePrefab,
+            warpPointA.position,
+            warpPointA.rotation
+        );
+
+        GameObject exitObj = Instantiate(
+            warpExitPrefab,
+            warpPointB.position,
+            warpPointB.rotation
+        );
+
+        lgo_currentWarpObjects.Add(entranceObj);
+        lgo_currentWarpObjects.Add(exitObj);
+
+        currentEntrance = entranceObj;
+        currentExit = exitObj;
+
+        //WarpPoint のリンク設定（双方向）
+        CS_WarpPoint entranceWP = entranceObj.GetComponent<CS_WarpPoint>();
+        CS_WarpPoint exitWP = exitObj.GetComponent<CS_WarpPoint>();
+
+        if (entranceWP == null)
+        {
+            Debug.LogWarning(
+                "[CS_WarpSpawn] 入口Prefabに CS_WarpPoint が付いていません : "
+                + entranceObj.name,
+                entranceObj
+            );
+
+            return;
+        }
+
+        if (exitWP == null)
+        {
+            Debug.LogWarning(
+                "[CS_WarpSpawn] 出口Prefabに CS_WarpPoint が付いていません : "
+                + exitObj.name,
+                exitObj
+            );
+
+            return;
+        }
+
+        entranceWP.targetPoint = exitWP;
+        exitWP.targetPoint = entranceWP;
     }
 
     /// <summary>
