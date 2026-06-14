@@ -41,6 +41,6 @@ public class PitfallGimmick : GimmickBase
     protected override void BrokenUpdate()
     {
         GetThiefGimmickAction().PitFallEnd();
-        Destroy(gameObject);
+        base.BrokenUpdate();
     }
 }
