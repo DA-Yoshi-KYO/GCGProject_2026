@@ -145,11 +145,17 @@ public class CS_ThiefManager : MonoBehaviour
 
             // 生成位置の取得
             Transform entryPoint = entry.RoomMovePointObject.transform;
+
             // 生成される初期部屋の取得
             CS_RoomNode entryRoom = entry.RoomCreatePoint.transform.GetComponentInChildren<CS_RoomNode>();
 
             //泥棒の生成
-            GameObject thief = GameObject.Instantiate(thiefPrefab);
+            GameObject thief = GameObject.Instantiate(
+                thiefPrefab,
+                entryPoint.position,
+                entryPoint.rotation,
+                thiefParent.transform
+            );
 
             thief.name = "Thief_" + thiefParent.transform.childCount;
 
