@@ -16,13 +16,18 @@ public class CS_WarpSpawn : MonoBehaviour
     [Header("ワープの入り口用のPrefab")][SerializeField]public GameObject warpEntrancePrefab;
     [Header("ワープの出口用のPrefab")][SerializeField]public GameObject warpExitPrefab;
     [Header("ワープの数")][SerializeField] private int warpCount = 1;
+    [Header("RoomCreatePointの元データ")][SerializeField] private GameObject go_RoomCreatePointsFormer;
 
     private GameObject currentEntrance;
     private GameObject currentExit;
+    private List<GameObject> lgo_warpWallObjects = new List<GameObject>();
+    private List<GameObject[]> warpWallPairList = new List<GameObject[]>();
 
     // Start is called before the first frame update
-    void Start()
+    public void WarpPointStart()
     {
+        CollectWarpWalls();
+        CreateRandomWarpWallPairs();
     }
 
     private void Update()
@@ -233,5 +238,127 @@ public class CS_WarpSpawn : MonoBehaviour
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// go_RoomCreatePointsFormer の子階層から、TagがWarpWallのObjectを集めます。
+    /// </summary>
+    private void CollectWarpWalls()
+    {
+        lgo_warpWallObjects.Clear();
+
+        if (go_RoomCreatePointsFormer == null)
+        {
+            Debug.LogError("[CS_WarpSpawn] go_RoomCreatePointsFormer が設定されていません。", this);
+            return;
+        }
+
+        Transform[] childTransforms = go_RoomCreatePointsFormer.GetComponentsInChildren<Transform>(true);
+
+        foreach (Transform childTransform in childTransforms)
+        {
+            if (childTransform == go_RoomCreatePointsFormer.transform)
+            {
+                continue;
+            }
+
+            if (childTransform.CompareTag("WarpWall"))
+            {
+                lgo_warpWallObjects.Add(childTransform.gameObject);
+            }
+        }
+
+        Debug.Log("[CS_WarpSpawn] WarpWall の数 : " + lgo_warpWallObjects.Count, this);
+    }
+
+    /// <summary>
+    /// WarpWall同士をランダムにペアにします。
+    /// ペアに使われなかったWarpWallは無効化します。
+    /// </summary>
+    private void CreateRandomWarpWallPairs()
+    {
+        warpWallPairList.Clear();
+
+        List<GameObject> candidateList = new List<GameObject>(lgo_warpWallObjects);
+        candidateList.RemoveAll(obj => obj == null);
+
+        // シャッフル
+        for (int i = candidateList.Count - 1 ; i > 0 ; i--)
+        {
+            int randomIndex = Random.Range(0, i + 1);
+
+            GameObject temp = candidateList[i];
+            candidateList[i] = candidateList[randomIndex];
+            candidateList[randomIndex] = temp;
+        }
+
+        int pairCount = Mathf.Min(warpCount, candidateList.Count / 2);
+
+        HashSet<GameObject> usedWarpWalls = new HashSet<GameObject>();
+
+        for (int i = 0 ; i < pairCount ; i++)
+        {
+            GameObject warpWallA = candidateList[i * 2];
+            GameObject warpWallB = candidateList[i * 2 + 1];
+
+            warpWallPairList.Add(new GameObject[] { warpWallA, warpWallB });
+
+            usedWarpWalls.Add(warpWallA);
+            usedWarpWalls.Add(warpWallB);
+
+            SetWarpWallFlag(warpWallA, true);
+            SetWarpWallFlag(warpWallB, true);
+
+            Debug.Log(
+                "[CS_WarpSpawn] WarpWallペア : "
+                + warpWallA.name
+                + " <-> "
+                + warpWallB.name,
+                this
+            );
+        }
+
+        // ペアに使われなかったWarpWallを無効化
+        foreach (GameObject warpWall in candidateList)
+        {
+            if (usedWarpWalls.Contains(warpWall))
+            {
+                continue;
+            }
+
+            SetWarpWallFlag(warpWall, false);
+
+            Debug.Log(
+                "[CS_WarpSpawn] 未使用WarpWallを無効化 : "
+                + warpWall.name,
+                this
+            );
+        }
+    }
+
+    /// <summary>
+    /// WarpWallの有効/無効フラグを切り替えます。
+    /// </summary>
+    private void SetWarpWallFlag(GameObject warpWallObject, bool flag)
+    {
+        if (warpWallObject == null)
+        {
+            return;
+        }
+
+        CS_WarpWallSwitch warpWallSwitch = warpWallObject.GetComponent<CS_WarpWallSwitch>();
+
+        if (warpWallSwitch == null)
+        {
+            Debug.LogWarning(
+                "[CS_WarpSpawn] CS_WarpWallSwitch が付いていません : "
+                + warpWallObject.name,
+                warpWallObject
+            );
+
+            return;
+        }
+
+        warpWallSwitch.SetWarpWallFlag(flag);
     }
 }
