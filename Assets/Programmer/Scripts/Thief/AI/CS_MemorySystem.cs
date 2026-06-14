@@ -40,6 +40,10 @@ public class CS_MemorySystem
     [Tooltip("視認オブジェクトの記憶")]
     private Dictionary<CS_VisionTarget, CS_VisionTargetMemory> visionTargetMemories;
 
+    [Tooltip("視認したギミックオブジェクト")]
+    private List<CS_TrapTarget> gimmickObjectsMemories;
+    public IReadOnlyList<CS_TrapTarget> read_GimmickObjectsMemories => gimmickObjectsMemories;
+
     [Tooltip("プレイヤーを無視するフラグ")]
     private bool ignorePlayer = false;
     [Tooltip("プレイヤーを追跡する残り時間")]
@@ -195,9 +199,6 @@ public class CS_MemorySystem
                 continue;
             }
 
-            // 空の宝箱のオブジェクトの場合は、宝物オブジェクトがあるフラグを立てる
-            if (entry is CS_TrapTarget trap && trap.gimmickScript.gimmick == Gimmick.EmptyChest) isTreasureObject = true;
-
             // 視認オブジェクト(VisionTarget)でない場合は、スキップする
             if (!(entry is CS_VisionTarget)) continue;
 
@@ -252,6 +253,42 @@ public class CS_MemorySystem
                 }
             }
         }
+
+        // 視認しているギミックを記憶に保存
+        if (gimmickObjectsMemories == null) gimmickObjectsMemories = new List<CS_TrapTarget>();
+        gimmickObjectsMemories.Clear();
+        foreach (var entry in visionTargets)
+        {
+            // 視認オブジェクトの中からギミックオブジェクトのみをリストに追加する
+            if (!(entry is CS_TrapTarget trapTarget)) continue;
+
+            // ギミックオブジェクトを記憶に保存する
+            if (gimmickObjectsMemories == null) gimmickObjectsMemories = new List<CS_TrapTarget>();
+            gimmickObjectsMemories.Add(trapTarget);
+        }
+
+        foreach (CS_TrapTarget trap in gimmickObjectsMemories)
+        {
+            switch(trap.gimmickScript.gimmick)
+            {
+                // 空の宝箱罠の場合は、宝物があるフラグを立てる
+                case Gimmick.EmptyChest:
+                    {
+                        isTreasureObject = true;
+                    }
+                    break;
+                case Gimmick.IronBall:
+                    {
+                        // 現在の状態がActiveの場合でないときは、スキップする
+                        if (trap.gimmickScript.gimmickState != GimmickState.Active) continue;
+
+                        // 泥棒の大岩用ギミックアクションの開始処理を呼び出す
+                        thiefAI.read_ThiefGimmickAction.IronBallStart(trap.gimmickScript);
+                    }
+                    break;
+            }
+        }
+
 
         // 探索対象を決める処理
         DecideTarget(visionTargets, isTreasureObject, isPlayerObject);
