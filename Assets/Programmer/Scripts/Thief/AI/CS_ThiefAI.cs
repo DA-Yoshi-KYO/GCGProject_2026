@@ -43,6 +43,7 @@
  * 2026-06-12   | 退場時のフェードアウト処理を追加
  * 
  */
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -121,7 +122,7 @@ public class CS_ThiefAI : MonoBehaviour
     public CS_3DPlaySE read_ThiefSound => thiefSound;
 
     [SerializeField, Tooltip("視界に入る対象のレイヤー"), Header("視界に入る対象のレイヤー")]
-    private LayerMask targetLayer;
+    private List<LayerMask> targetLayer;
     [SerializeField, Tooltip("障害物のレイヤー"), Header("障害物のレイヤー")]
     private LayerMask obstacleLayer;
 
@@ -367,8 +368,12 @@ public class CS_ThiefAI : MonoBehaviour
                 currentState = ThiefState.Explore; // 状態を探索に戻す
                 SetAgentStopped(false); // ナビメッシュエージェントを再開させる（安全に）
 
-                // 泥棒のアニメーション状態をStunにする
-                if (animator != null) animator.SetBool("IsStun", false);
+                // アニメーションの状態を解除(歩き状態に戻す)
+                if (animator != null)
+                {
+                    animator.SetBool("IsStun", false);
+                    animator.SetBool("IsDamage", false);
+                }
             }
         }
         // 耐久力が0以下の場合は、時間経過後に退場する
@@ -404,6 +409,7 @@ public class CS_ThiefAI : MonoBehaviour
                 if (animator != null)
                 {
                     animator.SetBool("IsStun", false);
+                    animator.SetBool("IsDamage", false);
                     animator.SetTrigger("DeathTrigger");
                 }
             }
@@ -432,9 +438,6 @@ public class CS_ThiefAI : MonoBehaviour
             transform.rotation = targetRotation;
         }
 
-        // 泥棒のアニメーション状態をDamageにする
-        if (animator != null)animator.SetTrigger("DamageTrigger");
-
         // ダメージを受けたときのSEを再生する
         if (isHit)
         {
@@ -456,9 +459,13 @@ public class CS_ThiefAI : MonoBehaviour
         switch (type)
         {
             case Gimmick.Pot:
+                // 泥棒のアニメーション状態をDamageにする
+                if (animator != null) animator.SetBool("IsStun", true);
                 thiefReactionUI.SetReactionUI(CS_ThiefReactionUI.ThiefReactionUIType.Pot);
                 break;
             case Gimmick.IronBall:
+                // 泥棒のアニメーション状態をDamageにする
+                if (animator != null) animator.SetBool("IsDamage", true);
                 thiefReactionUI.SetReactionUI(CS_ThiefReactionUI.ThiefReactionUIType.IronBall);
                 break;
             case Gimmick.EmptyChest:

@@ -249,7 +249,7 @@ public class RockGimmick : GimmickBase
         DeleteHitChecker();
         if (GetThiefGimmickAction() != null)
         {
-            GetThiefGimmickAction().IronBallEnd();
+            GetThiefGimmickAction().IronBallEnd(this);
         }
         //hitting.SearchEnemy(gimmick).IronBallEnd();
         //破壊時に1回だけ生成

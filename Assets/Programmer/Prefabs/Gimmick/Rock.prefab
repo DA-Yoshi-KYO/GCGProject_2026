@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 6585128417810237207}
   - component: {fileID: 6606053111696247535}
   - component: {fileID: 4737612621436864203}
+  - component: {fileID: 3010162553955162518}
   m_Layer: 27
   m_Name: Rock
   m_TagString: Gimmick
@@ -151,6 +152,20 @@ MonoBehaviour:
   thiefLayer:
     serializedVersion: 2
     m_Bits: 536870912
+--- !u!114 &3010162553955162518
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5619306240066455382}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee003987777810640bc67fb600e99a3c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  alertValue: 0
+  gimmickScript: {fileID: 4737612621436864203}
 --- !u!1001 &7102488724510636985
 PrefabInstance:
   m_ObjectHideFlags: 0
