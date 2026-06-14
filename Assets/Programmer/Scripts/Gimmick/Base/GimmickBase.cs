@@ -99,6 +99,7 @@ public class GimmickBase : MonoBehaviour
     protected CS_3DPlaySE gimmickSound;
 
     private HitChecker hit;
+    public HitChecker read_Hit => hit;
 
     private void Start()
     {
