@@ -103,6 +103,7 @@ public class PotGimmick : GimmickBase
 
     protected override void BrokenUpdate()
     {
+        base.BrokenUpdate();
         //破壊時に1回だけ生成
         if (!isDangerZoneSpawned)
         {
@@ -114,7 +115,6 @@ public class PotGimmick : GimmickBase
                 CO_ThiefCommonStatusData common = null;
                 var thiefManager = GameObject.FindObjectOfType<CS_ThiefManager>();
                 if (thiefManager != null) common = thiefManager.GetThiefCommonDB();
-
                 CS_DangerZoneSpawner.SpawnAndRegisterFromGimmick(dangerZone, transform.position, this, common, thiefLayer);
             }
             else
@@ -125,6 +125,5 @@ public class PotGimmick : GimmickBase
         if(gimmickSound != null)gimmickSound.PlayOneShotSE("PotFall", gameObject.transform.position, "PotSound");
         isFirstUpdate = true;
         DeleteHitChecker();
-        Destroy(gameObject);
     }
 }
