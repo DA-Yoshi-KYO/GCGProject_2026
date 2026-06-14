@@ -31,8 +31,8 @@ public class EmptyChestGimmick : GimmickBase
 
     protected override void BrokenUpdate()
     {
+        base.BrokenUpdate();
         DeleteHitChecker();
-        Destroy(gameObject);
     }
 
     /// <summary>

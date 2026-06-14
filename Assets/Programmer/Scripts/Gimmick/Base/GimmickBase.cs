@@ -79,6 +79,12 @@ public class GimmickBase : MonoBehaviour
 
     [Header("召喚速度")]
     [SerializeField] protected float spawnSpeed;
+    [Header("召喚震度")]
+    [SerializeField] protected float spawnVibration;
+    [Header("振動感覚")]
+    [SerializeField] protected int spawnVibrationSpeed;
+    private int spawnVibrationCount = 0;
+    private bool isOffsetSet = false;
 
     [Header("RendererComponent")]
     [SerializeField] private MeshRenderer[] mesh;
@@ -420,10 +426,26 @@ public class GimmickBase : MonoBehaviour
 
     protected virtual void SpawnUpdate()
     {
-        if (transform.position.y < targetPoint.y)
+        if (transform.position.y < targetPoint.y + transform.localScale.y / 2.0f)
         {
             currentPoint = transform.position;
             currentPoint.y += spawnSpeed * Time.deltaTime;
+            if (spawnVibrationCount > spawnVibrationSpeed)
+            {
+                if (!isOffsetSet)
+                {
+                    currentPoint.x += Random.Range(-spawnVibration, spawnVibration);
+                    currentPoint.z += Random.Range(-spawnVibration, spawnVibration);
+                    isOffsetSet = true;
+                }
+                else
+                {
+                    currentPoint = transform.position;
+                    isOffsetSet = false;
+                }
+                spawnVibrationCount = 0;
+            }
+            spawnVibrationCount++;
             transform.position = currentPoint;
         }
         else
