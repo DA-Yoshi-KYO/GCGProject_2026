@@ -10,7 +10,7 @@ using UnityEngine;
 
 public class CS_SelectBarMove : MonoBehaviour
 {
-    [Header("ボタンのリスト（上から順に格納してください）")][SerializeField] private GameObject[] buttonList;
+    [Header("ボタンのリスト（上から順に格納してください）")][SerializeField] private CS_TitleButton[] buttonList;
     [Header("選択バー")][SerializeField] private GameObject selectBar;
 
     private CustomInputAction inputActions;
@@ -25,6 +25,9 @@ public class CS_SelectBarMove : MonoBehaviour
         inputActions.SelectBar.Enable();
 
         backGroundPlaySE = GameObject.Find("SE").GetComponent<CS_BackGroundPlaySE>();
+
+        currentButton = 0;
+        UpdateButtonTexture();
     }
 
     // Update is called once per frame
@@ -48,6 +51,8 @@ public class CS_SelectBarMove : MonoBehaviour
             {
                 currentButton = buttonList.Length - 1;
             }
+
+            UpdateButtonTexture();
         }
 
         if (inputActions.SelectBar.MoveDown.triggered)
@@ -58,12 +63,14 @@ public class CS_SelectBarMove : MonoBehaviour
             {
                 currentButton = 0;
             }
+
+            UpdateButtonTexture();
         }
 
         //座標移動
         Vector3 selectBarPos = selectBar.GetComponent<RectTransform>().anchoredPosition;
 
-        selectBarPos.y = buttonList[currentButton].GetComponent<RectTransform>().anchoredPosition.y;
+        selectBarPos.y = buttonList[currentButton].gameObject.GetComponent<RectTransform>().anchoredPosition.y;
 
         selectBar.GetComponent<RectTransform>().anchoredPosition = selectBarPos;
 
@@ -97,4 +104,11 @@ public class CS_SelectBarMove : MonoBehaviour
         inputActions.SelectBar.Disable();
     }
 
+    private void UpdateButtonTexture()
+    {
+        for (int i = 0 ; i < buttonList.Length ; i++)
+        {
+            buttonList[i].ChangeTexture(i == currentButton);
+        }
+    }
 }
