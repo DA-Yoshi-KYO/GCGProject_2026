@@ -9,7 +9,7 @@ using UnityEngine;
 
 public class CS_WarpTrigger : MonoBehaviour
 {
-    [Header("ワープのクールタイム")][SerializeField]public float warpCoolTime = 1.0f;
+    [Header("ワープのクールタイム")][SerializeField] public float warpCoolTime = 1.0f;
 
     private CS_WarpPoint selfWarpPoint;
 
@@ -64,8 +64,14 @@ public class CS_WarpTrigger : MonoBehaviour
         rb.velocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
 
-        Vector3 offset = wp.targetPoint.transform.forward * 1.0f;
-        other.transform.position = wp.targetPoint.transform.position + offset;
+        Transform exitPosition = wp.targetPoint.warpExitPosition;
+
+        if (exitPosition == null)
+        {
+            exitPosition = wp.targetPoint.transform;
+        }
+
+        other.transform.position = exitPosition.position;
 
         Time.timeScale = 1.0f;
         rb.isKinematic = false;

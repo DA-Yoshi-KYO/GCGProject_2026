@@ -304,6 +304,31 @@ public class CS_WarpSpawn : MonoBehaviour
         Transform warpPointA = warpWallSwitchA.GetWarpPointTransform();
         Transform warpPointB = warpWallSwitchB.GetWarpPointTransform();
 
+        Transform warpExitPositionA = FindChildObject(warpWallA.transform, "WarpExitPosition");
+        Transform warpExitPositionB = FindChildObject(warpWallB.transform, "WarpExitPosition");
+
+        if (warpExitPositionA == null)
+        {
+            Debug.LogWarning(
+                "[CS_WarpSpawn] WarpExitPosition が見つかりません : "
+                + warpWallA.name,
+                warpWallA
+            );
+
+            warpExitPositionA = warpPointA;
+        }
+
+        if (warpExitPositionB == null)
+        {
+            Debug.LogWarning(
+                "[CS_WarpSpawn] WarpExitPosition が見つかりません : "
+                + warpWallB.name,
+                warpWallB
+            );
+
+            warpExitPositionB = warpPointB;
+        }
+
         GameObject entranceObj = Instantiate(
             warpEntrancePrefab,
             warpPointA.position,
@@ -350,6 +375,9 @@ public class CS_WarpSpawn : MonoBehaviour
 
         entranceWP.targetPoint = exitWP;
         exitWP.targetPoint = entranceWP;
+
+        entranceWP.warpExitPosition = warpExitPositionA;
+        exitWP.warpExitPosition = warpExitPositionB;
     }
 
     /// <summary>
