@@ -3,38 +3,44 @@
  * ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
  *    宇留野 陸斗
  * ----------------------------------------------------------
- * 2026-04-17 | 初回作成
- * 2026-04-20 | 探索対象の決定ロジックを追加
- *            | 探索対象の優先順位を追加
- * 2026-04-22 | 耐久値を減少させる処理を追加
- *            | NavMeshAgentを利用して移動する処理を追加
- * 2026-04-23 | 泥棒のデータベースの項目変更に合わせて、Settingメソッドの内容を変更
- *            | 走り状態になる標的オブジェクトのタイプに応じて、移動速度を切り替える処理を追加
- * 2026-04-24 | 探索対象を強制的に変更する処理を追加
- *            | 探索対象の決定ロジックを一つにまとめる(複数個所に分散していたものを、DecideTargetメソッドにまとめる)
- * 2026-04-25 | 次に設定する移動ポイントを決定するロジックの不具合を修正
- * 2026-04-26 | 気絶後の退場処理を仮作成
- *            | 宝物を持って移動する処理を仮作成
- * 2026-04-27 | 部屋移動の閾値に達していたら次の部屋に移動する処理を追加
- * 2026-04-28 | 次の部屋に移動するための移動ポイントを決定するロジックを追加
- * 2026-05-01 | 帰宅ルートを構築するロジックを追加
- * 2026-05-07 | CS_RoomEnemyEntryPointDataを用いた初期部屋の設定の記載
- * 2026-05-08 | 初期部屋の入ってきたドアの位置を保存する処理の記載
- * 2026-05-15 | 同じ部屋の中で、他者が探索しているオブジェクトを探索対象にしないようにする処理を追加
- * 2026-05-17 | DecideTarget内のキャストエラーの不具合を修正
- * 2026-05-18 | A*アルゴリズムを用いて帰宅ルートを構築するロジックを追加
- * 2026-05-21 | CS_SmartNavAgentを用いた危険地帯を考慮した移動処理の追加
- * 2026-05-22 | ファイル名を変更（ThiefAI.cs → CS_ThiefAI.cs）
- *            | クラス名を変更（ThiefAI → CS_ThiefAI）
- *            | リアクション処理を管理するコンポーネントを追加（CS_ThiefReaction）
- * 2026-05-28 | 大解体
- *            | 以下の要素を管理するクラスを新たに作成して、CS_ThiefAIから処理を移動させる。
- *            | 移動処理を管理するクラス(CS_MoveSystem)
- *            | 記憶処理を管理するクラス(CS_MemorySystem)
- *            | 聴覚処理を管理するクラス(CS_HearingSystem)
- *            | 視覚処理を管理するクラス(CS_VisionSensor)
- *            | A*アルゴリズムを用いたルート構築処理を管理するクラス(CS_AStarSystem)
- * 2026-06-04 | 気絶したときの処理をCS_StunThiefTargetに移動
+ * 2026-04-17   | 初回作成
+ * 2026-04-20   | 探索対象の決定ロジックを追加
+ *              | 探索対象の優先順位を追加
+ * 2026-04-22   | 耐久値を減少させる処理を追加
+ *              | NavMeshAgentを利用して移動する処理を追加
+ * 2026-04-23   | 泥棒のデータベースの項目変更に合わせて、Settingメソッドの内容を変更
+ *              | 走り状態になる標的オブジェクトのタイプに応じて、移動速度を切り替える処理を追加
+ * 2026-04-24   | 探索対象を強制的に変更する処理を追加
+ *              | 探索対象の決定ロジックを一つにまとめる(複数個所に分散していたものを、DecideTargetメソッドにまとめる)
+ * 2026-04-25   | 次に設定する移動ポイントを決定するロジックの不具合を修正
+ * 2026-04-26   | 気絶後の退場処理を仮作成
+ *              | 宝物を持って移動する処理を仮作成
+ * 2026-04-27   | 部屋移動の閾値に達していたら次の部屋に移動する処理を追加
+ * 2026-04-28   | 次の部屋に移動するための移動ポイントを決定するロジックを追加
+ * 2026-05-01   | 帰宅ルートを構築するロジックを追加
+ * 2026-05-07   | CS_RoomEnemyEntryPointDataを用いた初期部屋の設定の記載
+ * 2026-05-08   | 初期部屋の入ってきたドアの位置を保存する処理の記載
+ * 2026-05-15   | 同じ部屋の中で、他者が探索しているオブジェクトを探索対象にしないようにする処理を追加
+ * 2026-05-17   | DecideTarget内のキャストエラーの不具合を修正
+ * 2026-05-18   | A*アルゴリズムを用いて帰宅ルートを構築するロジックを追加
+ * 2026-05-21   | CS_SmartNavAgentを用いた危険地帯を考慮した移動処理の追加
+ * 2026-05-22   | ファイル名を変更（ThiefAI.cs → CS_ThiefAI.cs）
+ *              | クラス名を変更（ThiefAI → CS_ThiefAI）
+ *              | リアクション処理を管理するコンポーネントを追加（CS_ThiefReaction）
+ * 2026-05-28   | 大解体
+ *              | 以下の要素を管理するクラスを新たに作成して、CS_ThiefAIから処理を移動させる。
+ *              | 移動処理を管理するクラス(CS_MoveSystem)
+ *              | 記憶処理を管理するクラス(CS_MemorySystem)
+ *              | 聴覚処理を管理するクラス(CS_HearingSystem)
+ *              | 視覚処理を管理するクラス(CS_VisionSensor)
+ *              | A*アルゴリズムを用いたルート構築処理を管理するクラス(CS_AStarSystem)
+ * 2026-06-04   | 気絶したときの処理をCS_StunThiefTargetに移動
+ * 2026-06-10   | 落とし穴ギミックにハマったときの処理を追加
+ *              | 落とし穴ギミックから抜けたときの処理を追加
+ *              | ナビメッシュエージェントを安全に停止させる処理を追加
+ * 2026-06-11   | 落とし穴用の処理をCS_ThiefGimmickActionに移動
+ *              | 気絶状態の更新処理を実行するかどうかを設定する処理を追加
+ * 2026-06-12   | 退場時のフェードアウト処理を追加
  * 
  */
 using System.Collections.Generic;
@@ -59,14 +65,17 @@ public class CS_ThiefAI : MonoBehaviour
         [Tooltip("気絶状態")]
         Stunned
     }
-    [Tooltip("現在の行動状態")]
+    [SerializeField, Tooltip("現在の行動状態")]
     private ThiefState currentState;
     public ThiefState read_CurrentState => currentState;
 
     [Tooltip("泥棒のマテリアル")]
-    private Material thiefMaterial;
+    private Material[] thiefMaterial;
     [Tooltip("泥棒のマテリアルのフェードアウトにかかる時間")]
     private float fadeAfterStunTime;
+
+    [Tooltip("アウトラインコントローラー")]
+    private CS_OutlineController outlineController;
 
     [SerializeField, Tooltip("泥棒の耐久力")]
     private int durability;
@@ -92,9 +101,8 @@ public class CS_ThiefAI : MonoBehaviour
     private int exitAfterStunTime;
     [Tooltip("気絶後の経過時間")]
     private float elapsedTimeAfterStun;
-
-    [Tooltip("ドロップするソウルの数")]
-    private int soulDropCount;
+    [Tooltip("気絶状態の更新処理を実行するかどうか")]
+    private bool isUpdatingStunState = true;
 
     [Tooltip("泥棒のリアクションUIを管理するコンポーネント")]
     private CS_ThiefReactionUI thiefReactionUI;
@@ -114,7 +122,7 @@ public class CS_ThiefAI : MonoBehaviour
     public CS_3DPlaySE read_ThiefSound => thiefSound;
 
     [SerializeField, Tooltip("視界に入る対象のレイヤー"), Header("視界に入る対象のレイヤー")]
-    private LayerMask targetLayer;
+    private List<LayerMask> targetLayer;
     [SerializeField, Tooltip("障害物のレイヤー"), Header("障害物のレイヤー")]
     private LayerMask obstacleLayer;
 
@@ -148,6 +156,10 @@ public class CS_ThiefAI : MonoBehaviour
     private CS_AStarSystem aStarSystem;
     public CS_AStarSystem read_AStarSystem => aStarSystem;
 
+    [Tooltip("ギミック行動システム")]
+    private CS_ThiefGimmickAction thiefGimmickAction;
+    public CS_ThiefGimmickAction read_ThiefGimmickAction => thiefGimmickAction;
+
     /// <summary>
     /// 泥棒のステータスを設定する処理
     /// </summary>
@@ -162,7 +174,6 @@ public class CS_ThiefAI : MonoBehaviour
 
         durability = typedata.durability;
         maxDurability = typedata.durability;
-        soulDropCount = typedata.soulDropCount;
 
         // 移動システムの初期化
         moveSystem = new CS_MoveSystem(this, GetComponent<NavMeshAgent>(), GetComponent<CS_SmartNavAgent>(), typedata, playerSpeed);
@@ -179,6 +190,9 @@ public class CS_ThiefAI : MonoBehaviour
         // 記憶システムの初期化
         memorySystem = new CS_MemorySystem(this, entryRoom, entryPoint, typedata, data);
         memorySystem.FindNowRoomNode();
+
+        // ギミック行動システムの初期化
+        thiefGimmickAction = new CS_ThiefGimmickAction(this);
 
         exitAfterStunTime = data.exitAfterStunTime;
         damageStunTime = data.stunTime;
@@ -205,13 +219,11 @@ public class CS_ThiefAI : MonoBehaviour
 
         fadeAfterStunTime = data.fadeAfterStunTime;
 
-        thiefMaterial = transform.GetComponentInChildren<Renderer>().material;
-        if (thiefMaterial == null)
-        {
-            Debug.LogError("ThiefAI: 泥棒のマテリアルが見つかりません。");
-        }
-        thiefMaterial.SetFloat("_DisappearTime", fadeAfterStunTime);
-        thiefMaterial.SetFloat("_Timer", fadeAfterStunTime);
+        // マテリアルの取得
+        thiefMaterial = transform.GetComponentInChildren<SkinnedMeshRenderer>().materials;
+
+        // アウトラインコントローラーの作成
+        outlineController = new CS_OutlineController(transform.GetComponentInChildren<SkinnedMeshRenderer>().gameObject);
 
         // アニメーション用のコンポーネントを取得
         animator = GetComponentInChildren<Animator>();
@@ -229,9 +241,6 @@ public class CS_ThiefAI : MonoBehaviour
         // 気絶状態のときは無敵時間の経過を管理しない（気絶状態のときは攻撃を受けない想定のため）
         if (remainingInvincibleTime > 0)
         {
-            // 無敵時間が残っているときは青くする
-            thiefMaterial.color = Color.Lerp(Color.red, Color.blue, remainingInvincibleTime / invincibleTime);
-
             if (currentState != ThiefState.Stunned)
             {
                 remainingInvincibleTime -= Time.deltaTime;
@@ -270,15 +279,17 @@ public class CS_ThiefAI : MonoBehaviour
                 Stunned();
                 break;
         }
-
-        // 移動システムのスタックを修正する処理
-        moveSystem.FixStuck();
     }
 
     // 探索状態の行動
     private void Explore()
     {
+        // 移動システムのスタックを修正する処理
+        moveSystem.FixStuck();
+
         thiefReaction.ClearReaction();
+
+        thiefGimmickAction.UpdateAction();
 
         // 探索対象を決定
         memorySystem.RecognizeObjects();
@@ -297,10 +308,15 @@ public class CS_ThiefAI : MonoBehaviour
         heldTreasure = memorySystem.read_CurrentTarget.gameObject;
         heldTreasure.transform.parent = this.transform; // 泥棒の子オブジェクトにする
         heldTreasure.GetComponent<Collider>().enabled = false; // 宝物のコライダーを無効にする
-        heldTreasure.transform.localPosition = new Vector3(0.0f, this.transform.position.y, 0.0f); // 宝物の位置を泥棒の位置に合わせる
+        heldTreasure.transform.localScale *= 0.5f; // 宝物のサイズを半分にする
+
+        //-- 体の前に持つ位置を設定
+        // 泥棒の正面方向を基準に、少し前方に持つ位置を設定
+        Vector3 holdPosition = transform.position + transform.forward * 0.5f + Vector3.up * -0.5f;
+        heldTreasure.transform.position = holdPosition;
 
         // 状態を逃走に変更
-        currentState = ThiefState.Escape;
+        ChangeStatus(ThiefState.Escape);
 
         // 取得した宝物を他の泥棒の記憶から消去する
         GameObject.FindObjectOfType<CS_ThiefManager>().EraseTheMemoryToAllThief(heldTreasure.GetComponent<CS_ThiefTarget>());
@@ -311,6 +327,9 @@ public class CS_ThiefAI : MonoBehaviour
     // 逃走状態の行動
     private void Escape()
     {
+        // 移動システムのスタックを修正する処理
+        moveSystem.FixStuck();
+
         // 宝物を見つけたときのリアクションに変更
         thiefReaction.ChangeReaction(CS_ThiefReaction.ThiefReactionType.FoundTreasure);
 
@@ -334,11 +353,11 @@ public class CS_ThiefAI : MonoBehaviour
     // 気絶状態の行動
     private void Stunned()
     {
-        // ナビメッシュエージェントを停止させる
-        moveSystem.read_NavMeshAgent.isStopped = true;
+        // ナビメッシュエージェントを停止させる（安全に）
+        SetAgentStopped(true);
 
         // 経過時間を加算
-        elapsedTimeAfterStun += Time.deltaTime;
+        if(isUpdatingStunState) elapsedTimeAfterStun += Time.deltaTime;
 
         // 耐久値が残っている場合は、気絶時間が経過したら無敵時間を付与して、状態を探索に戻す
         if (durability > 0)
@@ -347,7 +366,14 @@ public class CS_ThiefAI : MonoBehaviour
             if (elapsedTimeAfterStun >= damageStunTime)
             {
                 currentState = ThiefState.Explore; // 状態を探索に戻す
-                moveSystem.read_NavMeshAgent.isStopped = false; // ナビメッシュエージェントを再開させる
+                SetAgentStopped(false); // ナビメッシュエージェントを再開させる（安全に）
+
+                // アニメーションの状態を解除(歩き状態に戻す)
+                if (animator != null)
+                {
+                    animator.SetBool("IsStun", false);
+                    animator.SetBool("IsDamage", false);
+                }
             }
         }
         // 耐久力が0以下の場合は、時間経過後に退場する
@@ -356,18 +382,35 @@ public class CS_ThiefAI : MonoBehaviour
             // 経過時間が退場するまでの時間を超えた場合は、退場する処理を追加する
             if (elapsedTimeAfterStun >= exitAfterStunTime)
             {
-                thiefMaterial.SetFloat("_Timer", fadeAfterStunTime - (elapsedTimeAfterStun - exitAfterStunTime));
+                float fadeAmount = fadeAfterStunTime - (elapsedTimeAfterStun - exitAfterStunTime);
 
-                Transform faceTransform = this.transform.GetChild(1);
-                Vector3 facePos = faceTransform.position;
-                faceTransform.position = new Vector3(facePos.x, facePos.y + 0.01f * (elapsedTimeAfterStun - exitAfterStunTime), facePos.z);
+                foreach (Material mat in thiefMaterial)
+                {
+                    mat.SetFloat("_Alpha", fadeAmount);
+                }
 
-                if (thiefMaterial.GetFloat("_Timer") <= 0.0f)
+                outlineController.SetOutlineColor(new Color(1.0f, 0.0f, 0.0f, 0.0f));
+
+                // 退場移動
+                moveSystem.StunMove();
+
+                if (fadeAmount <= 0.0f)
                 {
                     // 気絶したときのSEを再生する処理を追加する
                     if (thiefSound != null) thiefSound.PlayOneShotSE("ThiefDeath", gameObject.transform.position, "ThiefDeath");
 
                     Destroy(this.gameObject);
+                }
+            }
+            else
+            {
+                thiefReaction.ClearReaction();
+
+                if (animator != null)
+                {
+                    animator.SetBool("IsStun", false);
+                    animator.SetBool("IsDamage", false);
+                    animator.SetTrigger("DeathTrigger");
                 }
             }
         }
@@ -378,15 +421,22 @@ public class CS_ThiefAI : MonoBehaviour
     /// </summary>
     /// <param name="damage">与える減少値</param>
     /// <param name="type">ギミックの種類</param>
+    /// <param name="gimmickPoint">ギミックの位置</param>
     /// <param name="isHit">直接命中したかどうか</param>
-    public void TakeDamage(int damage, Gimmick type, bool isHit = true)
+    public void TakeDamage(int damage, Gimmick type, Vector3 gimmickPoint, bool isHit = true)
     {
         if (remainingInvincibleTime > 0) return;
 
         durability -= damage;
 
-        // 泥棒のアニメーション状態をDamageにする
-        if (animator != null)animator.SetTrigger("DamageTrigger");
+        // ギミックの方を向く
+        Vector3 directionToGimmick = gimmickPoint - transform.position;
+        directionToGimmick.y = 0; // 水平方向のみにする
+        if (directionToGimmick != Vector3.zero)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(directionToGimmick);
+            transform.rotation = targetRotation;
+        }
 
         // ダメージを受けたときのSEを再生する
         if (isHit)
@@ -409,9 +459,13 @@ public class CS_ThiefAI : MonoBehaviour
         switch (type)
         {
             case Gimmick.Pot:
+                // 泥棒のアニメーション状態をDamageにする
+                if (animator != null) animator.SetBool("IsStun", true);
                 thiefReactionUI.SetReactionUI(CS_ThiefReactionUI.ThiefReactionUIType.Pot);
                 break;
             case Gimmick.IronBall:
+                // 泥棒のアニメーション状態をDamageにする
+                if (animator != null) animator.SetBool("IsDamage", true);
                 thiefReactionUI.SetReactionUI(CS_ThiefReactionUI.ThiefReactionUIType.IronBall);
                 break;
             case Gimmick.EmptyChest:
@@ -420,7 +474,7 @@ public class CS_ThiefAI : MonoBehaviour
                 break;
         }
 
-        currentState = ThiefState.Stunned; // 状態を気絶に変更
+        ChangeStatus(ThiefState.Stunned); // 状態を気絶に変更
         elapsedTimeAfterStun = 0.0f; // 気絶時間の経過時間をリセット
 
         remainingInvincibleTime = invincibleTime; // 無敵時間を付与
@@ -435,13 +489,6 @@ public class CS_ThiefAI : MonoBehaviour
 
             // StunThiefTargetに通知する
             GetComponent<CS_StunThiefTarget>().Notify();
-
-            // プレイヤーにソウルを入手させる
-            CS_PlayerAction playerAction = GameObject.FindObjectOfType<CS_PlayerAction>();
-
-            // playerActionが見つかった場合は、ソウルを加算する処理を実行する。見つからない場合は、エラーログを出力する。
-            if (playerAction != null) playerAction.AddSoul(soulDropCount);
-            else Debug.LogError("PlayerActionが見つかりませんでした。ThiefAIのTakeDamageメソッドで、プレイヤーにソウルを入手させる処理が正常に動作しない可能性があります。");
         }
     }
 
@@ -452,6 +499,24 @@ public class CS_ThiefAI : MonoBehaviour
     public void ChangeStatus(ThiefState newState)
     {
         currentState = newState;
+        switch(newState)
+            {
+            case ThiefState.Explore:
+                // 探索状態になったときの処理を追加する
+                break;
+            case ThiefState.Found:
+                // 発見状態になったときの処理を追加する
+                break;
+            case ThiefState.Escape:
+                // 逃走状態になったときの処理を追加する
+                break;
+            case ThiefState.Stunned:
+                // 泥棒のアニメーション状態をStunにする
+                if (animator != null) animator.SetBool("IsStun", true);
+                // 気絶時間の経過時間をリセット
+                elapsedTimeAfterStun = 0.0f;
+                break;
+        }
     }
 
     /// <summary>
@@ -479,6 +544,38 @@ public class CS_ThiefAI : MonoBehaviour
         if (animator != null) animator.SetTrigger(parameter);
     }
 
+    /// <summary>
+    /// ナビメッシュエージェントを安全に停止させる処理
+    /// </summary>
+    /// <param name="stop">停止させるかどうか</param>
+    private void SetAgentStopped(bool stop)
+    {
+        var agent = moveSystem?.read_NavMeshAgent;
+        if (agent == null) return;
+
+        // エージェントが無効化されている場合は操作しない（PitFall中など）
+        if (!agent.enabled) return;
+
+        // NavMesh上に置かれていないエージェントに対して isStopped を呼ぶと例外になるためチェック
+        if (agent.isOnNavMesh)
+        {
+            agent.isStopped = stop;
+        }
+        else
+        {
+            // 安全のためログを残す（頻発する場合は削除）
+            Debug.LogWarning("SetAgentStopped: NavMeshAgent が NavMesh 上にありません。操作をスキップします。", this);
+        }
+    }
+
+    /// <summary>
+    /// 気絶状態の更新処理を実行するかどうかを設定する処理
+    /// </summary>
+    /// <param name="isUpdating">気絶状態の更新処理を実行するかどうか</param>
+    public void SetStunnedUpdateFlag(bool isUpdating)
+    {
+        isUpdatingStunState = isUpdating;
+    }
 
     private void OnDrawGizmos()
     {

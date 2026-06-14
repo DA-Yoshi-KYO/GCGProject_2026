@@ -1,41 +1,30 @@
 /*
 +=====================================
  ファイル名 : CSI_EffectPlayable.cs
- 概要     : エフェクトの再生・停止を共通化するインターフェース
+ 概要     : Effect再生に必要な共通操作を定義するInterface
  作者     : ヨシモト リョウ
- 履歴     : 2026/06/03 新規作成
-            2026/06/03 再生時間・停止時間の取得を追加
+ 履歴     : 2026/06/10 新規作成
 =====================================+
 */
 
 /// <summary>
-/// エフェクトの再生・停止を共通化するインターフェースです。
+/// Effect再生に必要な共通操作を定義するInterfaceです。
 /// </summary>
 public interface CSI_EffectPlayable
 {
     /// <summary>
-    /// 再生演出にかかる秒数を取得します。
+    /// Effectを初期化します。
     /// </summary>
-    float PlayDuration { get; }
+    void InitEffect();
 
     /// <summary>
-    /// 停止演出にかかる秒数を取得します。
+    /// Effectを再生します。
     /// </summary>
-    float StopDuration { get; }
+    /// <param name="csst_effectData">Effect再生データ。</param>
+    void PlayEffect(CSST_EffectPlayData csst_effectData);
 
     /// <summary>
-    /// エフェクトを再生します。
+    /// Effectを終了します。
     /// </summary>
-    void PlayEffect();
-
-    /// <summary>
-    /// エフェクトを停止します。
-    /// </summary>
-    void StopEffect();
-
-    /// <summary>
-    /// エフェクトの再生速度を設定します。
-    /// </summary>
-    /// <param name="playSpeed">再生速度。</param>
-    void SetPlaySpeed(float playSpeed);
+    void EndEffect();
 }

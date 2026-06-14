@@ -14,18 +14,28 @@ public class HitChecker : MonoBehaviour
     public BoxCollider hit;
     [Header("効果範囲")]
     public BoxCollider effect;
+    [Header("索敵範囲")]
+    public BoxCollider search;
     [Header("敵のレイヤー")]
     public LayerMask enemyLayer;
+
+    // ギミック命中時のHitEffect再生クラス
+    private CS_GimmickHitEffectPlayer cs_GimmickHitEffectPlayer;
 
     private bool isLoop = false;
     private bool firstUpdate = true;
     private int hitDamage = 0;
     private int effectDamage = 0;
     private Gimmick gimmick;
+    private CS_ThiefGimmickAction thiefGA;
     GameObject parentGameObject;
 
     // 既にダメージを与えた敵を保存
     private HashSet<GameObject> damagedEnemies = new HashSet<GameObject>();
+    private void Awake()
+    {
+        cs_GimmickHitEffectPlayer = GetComponent<CS_GimmickHitEffectPlayer>();
+    }
 
     /// <summary>
     /// 当たり判定の処理をループさせるかどうか
@@ -52,6 +62,12 @@ public class HitChecker : MonoBehaviour
     public Collider[] GetEffectEnemies()
     {
         return OverlapBoxCollider(effect);
+    }
+
+    // 索敵範囲の設定
+    public Collider[] GetSearchEnemies()
+    {
+        return OverlapBoxCollider(search);
     }
 
     /// <summary>
@@ -113,7 +129,12 @@ public class HitChecker : MonoBehaviour
     /// <param name="enemy"></param>
     /// <param name="damage"></param>
     /// <param name="isHit"></param>
-    private void EnemyDame(GameObject enemy, int damage, bool isHit = true)
+    private void EnemyDame(
+        GameObject enemy,
+        int damage,
+        bool isHit = true,
+        Collider enemyCollider = null,
+        BoxCollider hitBox = null)
     {
         // =====================================================
         // 一度ダメージを与えた敵には再度当てない
@@ -127,7 +148,14 @@ public class HitChecker : MonoBehaviour
 
         if (thiefAI != null)
         {
-            thiefAI.TakeDamage(damage, gimmick, isHit);
+            thiefAI.TakeDamage(damage, gimmick, transform.position, isHit);
+
+            if (cs_GimmickHitEffectPlayer != null)
+            {
+                cs_GimmickHitEffectPlayer.PlayHitEffect(
+                    enemyCollider,
+                    hitBox);
+            }
 
             // ダメージ済み登録
             damagedEnemies.Add(enemy);
@@ -146,6 +174,7 @@ public class HitChecker : MonoBehaviour
             }
         }
     }
+
     private void FixedUpdate()
     {
         if (firstUpdate || isLoop)
@@ -157,6 +186,27 @@ public class HitChecker : MonoBehaviour
 
             Collider[] effectEnemies =
                 GetEffectEnemies();
+
+            Collider[] searchEnemies =
+                GetSearchEnemies();
+
+            //======================================================
+            // 索敵範囲
+            //======================================================
+            for (int i = 0 ; i < searchEnemies.Length ; i++)
+            {
+                GameObject enemy = searchEnemies[i].gameObject;
+                CS_ThiefAI thiefAI = enemy.GetComponent<CS_ThiefAI>();
+                thiefGA = thiefAI.read_ThiefGimmickAction;
+                GimmickBase gimmickBase = parentGameObject.GetComponent<GimmickBase>();
+                switch (gimmick)
+                {
+                    case Gimmick.IronBall:
+                        //thiefGA.IronBallStart(gimmickBase);
+                        //Debug.Log("泥棒逃げる！");
+                        break;
+                }
+            }
 
             // =====================================================
             // 効果範囲
@@ -180,24 +230,37 @@ public class HitChecker : MonoBehaviour
                 {
                     GameObject enemy =
                         effectEnemies[i].gameObject;
+                    CS_ThiefAI thiefAI = enemy.GetComponent<CS_ThiefAI>();
+                    thiefGA = thiefAI.read_ThiefGimmickAction;
+                    if (thiefAI != null)
+                    {
+                        thiefGA = thiefAI.read_ThiefGimmickAction;
+                    }
+                    GimmickBase gimmickBase = parentGameObject.GetComponent<GimmickBase>();
+                    switch (gimmick)
+                    {
+                        case Gimmick.Pitfall:
+                            thiefGA.PitFallStart(gimmickBase.transform.position);
+                            break;
+                    }
 
                     switch (gimmick)
                     {
                         case Gimmick.Pot:
-                            EnemyDame(enemy, effectDamage, false);
+                            EnemyDame(enemy, effectDamage, false, effectEnemies[i], effect);
                             break;
                         case Gimmick.IronBall:
-                            EnemyDame(enemy, effectDamage, false);
+                            EnemyDame(enemy, effectDamage, false, effectEnemies[i], effect);
                             break;
                         case Gimmick.EmptyChest:
                             EnemyCharm(enemy);
                             break;
                         case Gimmick.Nyaki:
-                            EnemyDame(enemy, effectDamage, false);
+                            EnemyDame(enemy, effectDamage, false, effectEnemies[i], effect);
                             break;
                         case Gimmick.Pitfall:
                             Debug.Log("Pitfall hit effect");
-                            EnemyDame(enemy, effectDamage, false);
+                            EnemyDame(enemy, effectDamage, false, effectEnemies[i], effect);
                             //シーフ落とす関数追加する//
                             parentGameObject.GetComponent<PitfallGimmick>();
                             parentGameObject.GetComponent<PitfallGimmick>().gimmickState = GimmickState.Active;
@@ -211,18 +274,26 @@ public class HitChecker : MonoBehaviour
             // =====================================================
             for (int i = 0 ; i < hitEnemies.Length ; i++)
             {
-
                 GameObject enemy = hitEnemies[i].gameObject;
                 CS_ThiefAI thiefAI = enemy.GetComponent<CS_ThiefAI>();
+                thiefGA = thiefAI.read_ThiefGimmickAction;
+                GimmickBase gimmickBase = parentGameObject.GetComponent<GimmickBase>();
+                switch (gimmick)
+                {
+                    case Gimmick.Pitfall:
+                        thiefGA.PitFallStart(gimmickBase.transform.position);
+                        break;
+                }
+
                 if (thiefAI != null)
                 {
                     switch (gimmick)
                     {
                         case Gimmick.Pot:
-                            EnemyDame(enemy, hitDamage);
+                            EnemyDame(enemy, hitDamage, true, hitEnemies[i], hit);
                             break;
                         case Gimmick.IronBall:
-                            EnemyDame(enemy, hitDamage);
+                            EnemyDame(enemy, hitDamage, true, hitEnemies[i], hit);
                             break;
                         case Gimmick.EmptyChest:
                             EnemyCharm(enemy);
@@ -236,12 +307,12 @@ public class HitChecker : MonoBehaviour
                             }
                             break;
                         case Gimmick.Nyaki:
-                            EnemyDame(enemy, hitDamage);
+                            EnemyDame(enemy, hitDamage, true, hitEnemies[i], hit);
                             break;
                         case Gimmick.Pitfall:
                             Debug.Log("Pitfall hit enemy");
-                            EnemyDame(enemy, hitDamage);
                             //シーフ落とす関数追加する//
+                            thiefGA.PitFallStart(transform.position);
                             parentGameObject.GetComponent<PitfallGimmick>();
                             parentGameObject.GetComponent<PitfallGimmick>().gimmickState = GimmickState.Active;
                             break;
@@ -249,5 +320,9 @@ public class HitChecker : MonoBehaviour
                 }
             }
         }
+    }
+    public CS_ThiefGimmickAction GetThiefGA()
+    {
+        return thiefGA;
     }
 }

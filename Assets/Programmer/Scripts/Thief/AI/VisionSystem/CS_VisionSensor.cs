@@ -25,7 +25,7 @@ public class CS_VisionSensor
     public float viewAngle;
 
     [Tooltip("視界に入る対象のレイヤー")]
-    public LayerMask targetLayer;
+    public List<LayerMask> targetLayer;
     [Tooltip("障害物のレイヤー")]
     public LayerMask obstacleLayer;
 
@@ -34,7 +34,7 @@ public class CS_VisionSensor
     /// </summary>
     ///　<param name="viewDistance">視界の半径</param>
     ///　<param name="viewAngle">視界の角度</param>
-    public CS_VisionSensor(CS_ThiefAI thiefAI, CO_ThiefStatusData typeData, LayerMask targetLayer, LayerMask obstacleLayer)
+    public CS_VisionSensor(CS_ThiefAI thiefAI, CO_ThiefStatusData typeData, List<LayerMask> targetLayer, LayerMask obstacleLayer)
     {
         // ThiefAIスクリプトへの参照を保存
         this.thiefAI = thiefAI;
@@ -58,13 +58,18 @@ public class CS_VisionSensor
         List<CS_ThiefTarget> visibleTargets = new List<CS_ThiefTarget>();
 
         // 視界内のコライダーを取得
-        Collider[] hits = Physics.OverlapSphere(thiefAI.transform.position, viewDistance, targetLayer);
-       
+        List<Collider> hits = new List<Collider>();
+        foreach (var layer in targetLayer)
+        {
+            Collider[] scanObjects = Physics.OverlapSphere(thiefAI.transform.position, viewDistance, layer);
+
+            // 取得したコライダーをリストに追加
+            hits.AddRange(scanObjects);
+        }
 
         // 取得したコライダーをループして、視界内にあるターゲットを判定
         foreach (var hit in hits)
         {
-            
             // VisionTargetコンポーネントを取得
             CS_ThiefTarget target = hit.GetComponent<CS_VisionTarget>();
             if (target == null)

@@ -111,7 +111,7 @@ public class CS_PlayerCamera : MonoBehaviour
             Vector3.Lerp(roomCameraObject.transform.position, roomCamera.initPos - moveAmount, trackingTime * Time.deltaTime);
 
         // レイキャストによるオブジェクトの透過処理
-        RayCastTransparent();
+        //RayCastTransparent();
 
         //カメラの遷移演出の処理
         switch (transitionCamera)
@@ -154,7 +154,7 @@ public class CS_PlayerCamera : MonoBehaviour
         {
             if (mpbCache.TryGetValue(r, out var mpb))
             {
-                mpb.SetFloat("_EnableClip", 0);
+                mpb.SetFloat("_Alpha", 1);
                 r.SetPropertyBlock(mpb);
             }
         }
@@ -165,12 +165,12 @@ public class CS_PlayerCamera : MonoBehaviour
         Vector3 playerPos = gameObject.transform.position;
         float playerDist = Vector3.Distance(playerPos, camPos);
         Ray ray = new Ray(camPos, (playerPos - camPos).normalized);
-        RaycastHit[] hits = Physics.RaycastAll(ray, playerDist, obstacleLayer);
+        RaycastHit[] hits = Physics.RaycastAll(ray, playerDist);
 
         foreach (var hit in hits)
         {
             // 衝突したRendererオブジェクトの取得
-            Renderer r = hit.collider.GetComponent<Renderer>();
+            Renderer r = hit.collider.GetComponentInChildren<Renderer>();
             if (r == null) continue;
 
             // マテリアルの取得
@@ -181,7 +181,7 @@ public class CS_PlayerCamera : MonoBehaviour
             }
 
             // マテリアルのパラメータを設定
-            mpb.SetFloat("_EnableClip", 1);
+            mpb.SetFloat("_Alpha", 1.0f);
             r.SetPropertyBlock(mpb);
 
             currentHits.Add(r);
@@ -314,29 +314,6 @@ public class CS_PlayerCamera : MonoBehaviour
         //更新を再開
         Time.timeScale = 1.0f;
 
-        // 動かした前のカメラを無効にして、元の位置に戻す
-        roomCamera = roomCameraObject.GetComponent<CS_RoomCamera>();
-        roomCameraObject.GetComponent<Camera>().enabled = false;
-        roomCameraObject.transform.position = roomCamera.initPos;
-        roomCameraObject.transform.rotation = roomCamera.initRotate;
-
-        // カメラを新しい部屋のカメラに切り替える
-        currentRoom = playerData.currentRoomData.GetPlayerRoomData();
-
-        Transform roomCenterTransform = currentRoom.transform.GetChild(0).Find("Center");
-        if (roomCenterTransform == null) roomCenter = currentRoom.transform.position;
-        else roomCenter = roomCenterTransform.position;
-
-        roomCameraObject = currentRoom.transform.GetComponentInChildren<Camera>().gameObject;
-        roomCamera = roomCameraObject.GetComponent<CS_RoomCamera>();
-        roomCameraObject.GetComponent<Camera>().enabled = true;
-       
-        transitionCamera = TransitionCamera.None;   // カメラの遷移終了
-    }
-
-    //ワープ用のカメラ処理関数
-    public void RoomCameraRefresh()
-    {
         // 動かした前のカメラを無効にして、元の位置に戻す
         roomCamera = roomCameraObject.GetComponent<CS_RoomCamera>();
         roomCameraObject.GetComponent<Camera>().enabled = false;

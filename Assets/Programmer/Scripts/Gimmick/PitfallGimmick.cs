@@ -1,4 +1,4 @@
-//|| PitfallGimmick.cs ||――――――――――――
+//|| PitfallGimmick.cs ||――――――――――
 //|| 作者 : 大瀧蓮
 //||
 //|| 更新 : 2026/06/081 作成開始
@@ -40,6 +40,7 @@ public class PitfallGimmick : GimmickBase
     }
     protected override void BrokenUpdate()
     {
+        GetThiefGimmickAction().PitFallEnd();
         Destroy(gameObject);
     }
 }

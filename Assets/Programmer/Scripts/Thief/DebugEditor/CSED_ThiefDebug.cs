@@ -24,8 +24,10 @@ public sealed class CSED_ThiefDebug : EditorWindow
     {
         /// <summary>ダメージデバッグ</summary>
         Damage,
-        /// <summary>部屋記憶（roomMemories）デバッグ</summary>
-        RoomMemory,
+        /// <summary>部屋記憶（参照）</summary>
+        RoomMemoryView,
+        /// <summary>部屋記憶（追加）</summary>
+        RoomMemoryAdd,
     }
 
     // 現在表示しているタブ
@@ -37,6 +39,7 @@ public sealed class CSED_ThiefDebug : EditorWindow
     // 各タブの描画クラス
     private CSED_ThiefDebugDamageTab damageTab;
     private CSED_ThiefDebugRoomMemoryTab roomMemoryTab;
+    private CSED_ThiefDebugRoomMemoryAddTab roomMemoryAddTab;
 
     /// <summary>
     /// Unityメニューからデバッグウィンドウを開く
@@ -56,6 +59,7 @@ public sealed class CSED_ThiefDebug : EditorWindow
         // Script Reload後も保持される必要があるものは、ここで生成
         if (damageTab == null) damageTab = new CSED_ThiefDebugDamageTab();
         if (roomMemoryTab == null) roomMemoryTab = new CSED_ThiefDebugRoomMemoryTab();
+        if (roomMemoryAddTab == null) roomMemoryAddTab = new CSED_ThiefDebugRoomMemoryAddTab();
     }
 
     /// <summary>
@@ -77,8 +81,11 @@ public sealed class CSED_ThiefDebug : EditorWindow
                 case CSE_Tab.Damage:
                     damageTab.Draw();
                     break;
-                case CSE_Tab.RoomMemory:
+                case CSE_Tab.RoomMemoryView:
                     roomMemoryTab.Draw();
+                    break;
+                case CSE_Tab.RoomMemoryAdd:
+                    roomMemoryAddTab.Draw();
                     break;
             }
         }
@@ -90,7 +97,7 @@ public sealed class CSED_ThiefDebug : EditorWindow
     private void DrawToolbar()
     {
         EditorGUILayout.Space(4);
-        currentTab = (CSE_Tab)GUILayout.Toolbar((int)currentTab, new[] { "ダメージ", "ルーム記憶" });
+        currentTab = (CSE_Tab)GUILayout.Toolbar((int)currentTab, new[] { "ダメージ", "記憶参照", "記憶追加" });
         EditorGUILayout.Space(8);
     }
 }
