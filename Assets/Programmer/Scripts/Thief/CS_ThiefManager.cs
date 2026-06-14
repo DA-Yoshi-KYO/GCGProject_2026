@@ -150,7 +150,7 @@ public class CS_ThiefManager : MonoBehaviour
             CS_RoomNode entryRoom = entry.RoomCreatePoint.transform.GetComponentInChildren<CS_RoomNode>();
 
 
-            // ============================================ 
+            // ============================================ 応急処置
             //泥棒の生成
             GameObject thief = GameObject.Instantiate(
                 thiefPrefab,
@@ -170,7 +170,6 @@ public class CS_ThiefManager : MonoBehaviour
             {
                 agent.Warp(hit.position);
             }
-            //=============================================
 
             // 基準となるプレイヤーの速度を取得
             float playerSpeed = GameObject.FindGameObjectWithTag("Player").GetComponent<CS_PlayerMove>().GetBasePlayerSpeed();
@@ -191,6 +190,7 @@ public class CS_ThiefManager : MonoBehaviour
 
             // 生成された泥棒の数を更新
             spawnCount[entry]++;
+            //=============================================
         }
 
         // 予定している生成数に達しているかどうかを確認
