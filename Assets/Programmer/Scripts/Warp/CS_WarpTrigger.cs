@@ -59,10 +59,19 @@ public class CS_WarpTrigger : MonoBehaviour
         Time.timeScale = 0.0f;
         controller.enabled = false;
 
-        var rb = other.attachedRigidbody;
-        rb.isKinematic = true;
-        rb.velocity = Vector3.zero;
-        rb.angularVelocity = Vector3.zero;
+        Rigidbody rb = other.attachedRigidbody;
+
+        if (rb == null)
+        {
+            rb = other.GetComponentInParent<Rigidbody>();
+        }
+
+        if (rb != null)
+        {
+            rb.isKinematic = true;
+            rb.velocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+        }
 
         Transform exitPosition = wp.targetPoint.warpExitPosition;
 
@@ -74,7 +83,10 @@ public class CS_WarpTrigger : MonoBehaviour
         other.transform.position = exitPosition.position;
 
         Time.timeScale = 1.0f;
-        rb.isKinematic = false;
+        if (rb != null)
+        {
+            rb.isKinematic = false;
+        }
         controller.enabled = true;
 
         //カメラ更新
