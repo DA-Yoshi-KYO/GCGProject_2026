@@ -48,7 +48,6 @@ public class CS_SelectBarMove : MonoBehaviour
             inputActions.SelectBar.Disable();
         }
 
-
         //座標移動
         Vector3 selectBarPos = selectBar.GetComponent<RectTransform>().anchoredPosition;
 
