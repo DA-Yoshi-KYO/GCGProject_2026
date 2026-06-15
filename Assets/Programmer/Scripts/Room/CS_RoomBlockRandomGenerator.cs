@@ -126,9 +126,9 @@ public class CS_RoomBlockRandomGenerator : MonoBehaviour
         // ワープ生成はRoom生成後に行う必要があるため、ここで実行します。
         if (cs_WarpSpawn != null)
         {
+            cs_WarpSpawn.WarpPointStart();
             cs_WarpSpawn.SpawnWarp();
         }
-
 
         cs_RoomBlockPrefabGenerator.CreatePlayerAtFirstRoomStartPoint();
 

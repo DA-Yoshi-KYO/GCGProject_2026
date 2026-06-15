@@ -27,7 +27,7 @@ Transform:
   m_GameObject: {fileID: 3866281684556340184}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.6413894, y: -0.33000013, z: -1.1665485}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -46,7 +46,7 @@ Light:
   m_Shape: 0
   m_Color: {r: 0.011552572, g: 1, b: 0, a: 1}
   m_Intensity: 4
-  m_Range: 2
+  m_Range: 3
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
@@ -221,7 +221,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -241,6 +241,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   targetPoint: {fileID: 4555532844791919902, guid: 923b92514a3ea7540b52aa688c9166fa,
     type: 3}
+  warpExitPosition: {fileID: 0}
   warping: 0
   warpTimeCount: 0
 --- !u!114 &2728356425666441190
