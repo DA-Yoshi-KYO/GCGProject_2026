@@ -1,32 +1,36 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Security.Cryptography;
-using Unity.VisualScripting;
+/* ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+ *    カットシーンビデオの再生する判定
+ * ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+ *    元浪梨緒
+ * ----------------------------------------------------------
+ * 2026-06-15 | 初回作成
+ */
 using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.Video;
 
 public class CS_CutSceneVideoTrigger : MonoBehaviour
 {
-    [Header("再生する場面")][SerializeField] public string situation;
+    private GameObject cutSceneManager;
+    [Header("再生する場面")][SerializeField] private string situation;
+
+    private void Start()
+    {
+        cutSceneManager = GameObject.Find("CutSceneManager");
+    }
+
     private void OnTriggerEnter(Collider other)
     {
-        //if (!other.CompareTag("Player"))
-        //    return;
+        if (other.CompareTag("Player"))
+        {
+            //再生するデータの場面の設定
+            for (int i = 0 ; i < cutSceneManager.GetComponent<CS_CutSceneVideo>().cutScenedata.Length ; ++i)
+            {
+                if (situation == cutSceneManager.GetComponent<CS_CutSceneVideo>().cutScenedata[i].situation)
+                {
+                cutSceneManager.GetComponent<CS_CutSceneVideo>().setNumber = i;
+                }
+            }
 
-        ////再生するデータの場面の設定
-        //for (int i = 0 ; i < cutScenedata.Length ; ++i)
-        //{
-        //    if (situation == cutScenedata[i].situation)
-        //    {
-        //        setNumber = i;
-        //    }
-        //}
-
-        //if (timelinedata.timeLineDatas[number].start)
-        //    return;
-
-        //videoPlayer.clip = timelinedata.timeLineDatas[number].videoClip;
-        //rawImage.enabled = true;
+        cutSceneManager.GetComponent<CS_CutSceneVideo>().PlayVideo();
+        }
     }
 }
