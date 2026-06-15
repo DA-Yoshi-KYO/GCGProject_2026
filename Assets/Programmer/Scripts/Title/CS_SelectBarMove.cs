@@ -5,6 +5,7 @@
  * ----------------------------------------------------------
  * 2026-05-15 | 初回作成
  * 2026-05-17 | SE再生処理追加
+ * 2026-06-15 | 修正
  */
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -18,6 +19,8 @@ public class CS_SelectBarMove : MonoBehaviour
     private int currentButton = 0;
 
     private CS_BackGroundPlaySE backGroundPlaySE;
+
+    [Header("GameStartButton押した際にシーン遷移する名前")][SerializeField] public string pressGameStartToSceneName;
 
     // Start is called before the first frame update
     void Start()
@@ -61,7 +64,7 @@ public class CS_SelectBarMove : MonoBehaviour
             switch (currentButton)
             {
                 case 0:
-                    sceneName = "StageSelectScene";
+                    sceneName = pressGameStartToSceneName;
                     GetComponent<CS_SceneTransition>().StartSceneTransition(sceneName);
                     break;
                 case 1:
