@@ -5,16 +5,16 @@
  * ----------------------------------------------------------
  * 2026-06-03 | 初回作成
  */
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
 
 public class CS_CutSceneVideo : MonoBehaviour
 {
-    [SerializeField] public VideoPlayer videoPlayer;
+    private VideoPlayer videoPlayer;
     [SerializeField] public RawImage rawImage;
     [SerializeField] public SO_CutSceneVideo cutSceneVideoDataBase;
-    [Header("再生する場面")][SerializeField] public string situation;
 
     private CutSceneData[] cutScenedata;
     private int setNumber;
@@ -22,6 +22,8 @@ public class CS_CutSceneVideo : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        videoPlayer = GetComponent<VideoPlayer>();
+
         //非表示
         rawImage.enabled = false;
 
@@ -48,14 +50,14 @@ public class CS_CutSceneVideo : MonoBehaviour
     //ビデオの再生準備
     private void PlayVideo()
     {
-        //再生するデータの場面の設定
-        for (int i = 0 ; i < cutScenedata.Length ; ++i)
-        {
-            if (situation == cutScenedata[i].situation)
-            {
-                setNumber = i;
-            }
-        }
+        ////再生するデータの場面の設定
+        //for (int i = 0 ; i < cutScenedata.Length ; ++i)
+        //{
+        //    if (situation == cutScenedata[i].situation)
+        //    {
+        //        setNumber = i;
+        //    }
+        //}
 
         //再生していたら実行しない
         if (cutScenedata[setNumber].played)
@@ -74,4 +76,6 @@ public class CS_CutSceneVideo : MonoBehaviour
         rawImage.enabled = false;
         videoPlayer.Stop();
     }
+
+
 }
