@@ -5,7 +5,7 @@ using UnityEngine;
 /// SkinnedMeshRenderer または MeshRenderer を持つ GameObject にアタッチする
 /// </summary>
 [RequireComponent(typeof(Renderer))]
-public class CS_OutlineController : MonoBehaviour
+public class CS_OutlineController
 {
     Renderer _renderer;
     MaterialPropertyBlock _mpb;

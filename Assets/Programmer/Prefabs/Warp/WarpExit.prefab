@@ -46,7 +46,7 @@ Light:
   m_Shape: 0
   m_Color: {r: 0.011552572, g: 1, b: 0, a: 1}
   m_Intensity: 4
-  m_Range: 2
+  m_Range: 3
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
@@ -221,7 +221,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -241,6 +241,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   targetPoint: {fileID: 1403176251542966684, guid: 0b1dfab1dec9eaf4e9e1fc5d739742d8,
     type: 3}
+  warpExitPosition: {fileID: 0}
   warping: 0
   warpTimeCount: 0
 --- !u!114 &3339610772266771739

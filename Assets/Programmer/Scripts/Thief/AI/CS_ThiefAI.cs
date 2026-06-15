@@ -130,6 +130,7 @@ public class CS_ThiefAI : MonoBehaviour
     private float remainingHoldCatTime = 0.0f;
     [Tooltip("猫を捕まえている時間の初期値")]
     private float initholdCatTime = 0.0f;
+    public float read_RemainingHoldCatTime => remainingHoldCatTime;
 
     [Tooltip("アニメーション用")]
     private Animator animator;
@@ -182,7 +183,8 @@ public class CS_ThiefAI : MonoBehaviour
         hearingSystem = new CS_HearingSystem(this);
 
         // 視覚システムの初期化
-        visionSensor = new CS_VisionSensor(this, typedata, targetLayer, obstacleLayer);
+        visionSensor = GetComponentInChildren<CS_VisionSensor>();
+        visionSensor.Setting(this, typedata, targetLayer, obstacleLayer);
 
         // A*アルゴリズムシステムの初期化
         aStarSystem = new CS_AStarSystem(this);
@@ -237,6 +239,12 @@ public class CS_ThiefAI : MonoBehaviour
 
     private void Update()
     {
+        // 初回行動に入る前は当たり判定が無効なのでオンにする
+        if (!GetComponent<Collider>().enabled)
+        {
+            GetComponent<Collider>().enabled = true;
+        }
+
         // 無敵時間の経過を管理
         // 気絶状態のときは無敵時間の経過を管理しない（気絶状態のときは攻撃を受けない想定のため）
         if (remainingInvincibleTime > 0)
@@ -287,9 +295,9 @@ public class CS_ThiefAI : MonoBehaviour
         // 移動システムのスタックを修正する処理
         moveSystem.FixStuck();
 
-        thiefReaction.ClearReaction();
+        if(thiefGimmickAction.UpdateAction()) return;
 
-        thiefGimmickAction.UpdateAction();
+        thiefReaction.ClearReaction();
 
         // 探索対象を決定
         memorySystem.RecognizeObjects();
@@ -511,8 +519,6 @@ public class CS_ThiefAI : MonoBehaviour
                 // 逃走状態になったときの処理を追加する
                 break;
             case ThiefState.Stunned:
-                // 泥棒のアニメーション状態をStunにする
-                if (animator != null) animator.SetBool("IsStun", true);
                 // 気絶時間の経過時間をリセット
                 elapsedTimeAfterStun = 0.0f;
                 break;
@@ -575,29 +581,5 @@ public class CS_ThiefAI : MonoBehaviour
     public void SetStunnedUpdateFlag(bool isUpdating)
     {
         isUpdatingStunState = isUpdating;
-    }
-
-    private void OnDrawGizmos()
-    {
-        // 視界の範囲を描画
-        if (visionSensor != null)
-        {
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawWireSphere(transform.position, visionSensor.viewDistance);
-            Vector3 forward = transform.forward * visionSensor.viewDistance;
-            Vector3 leftBoundary = Quaternion.Euler(0, -visionSensor.viewAngle / 2, 0) * forward;
-            Vector3 rightBoundary = Quaternion.Euler(0, visionSensor.viewAngle / 2
-                , 0) * forward;
-            Gizmos.DrawLine(transform.position, transform.position + leftBoundary);
-            Gizmos.DrawLine(transform.position, transform.position + rightBoundary);
-        }
-
-        // 現在の移動目的地までを線で描画
-        if (memorySystem != null)
-        {
-            if (memorySystem.read_CurrentTarget == null) return;
-            Gizmos.color = Color.green;
-            Gizmos.DrawLine(transform.position, memorySystem.read_CurrentTarget.transform.position);
-        }
     }
 }

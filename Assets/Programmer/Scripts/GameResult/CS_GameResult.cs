@@ -16,9 +16,11 @@ public class CS_GameResult : MonoBehaviour
     bool end = false;
 
     [Header("デバッグの確認時用")][SerializeField] public bool debugEnd;
+    [Header("デバッグコマンド　GameClearへのキー")][SerializeField] public KeyCode gameClearKey;
+    [Header("デバッグコマンド　GameFailureへのキー")][SerializeField] public KeyCode gameFailureKey;
 
     private CS_BackGroundPlaySE backGroundPlaySE;
-    private bool startJingle = false;
+    private bool startJingle = false;//ジングルが再生されたかどうか
 
     // Start is called before the first frame update
     void Start()
@@ -26,6 +28,9 @@ public class CS_GameResult : MonoBehaviour
         endManager = GameObject.Find("EndManager").GetComponent<CS_EndManager>();
 
         backGroundPlaySE = GameObject.Find("SE").GetComponent<CS_BackGroundPlaySE>();
+
+        gameClear.SetActive(false);
+        gameFailure.SetActive(false);
     }
 
     // Update is called once per frame
@@ -33,12 +38,17 @@ public class CS_GameResult : MonoBehaviour
     {
         if (debugEnd)
         {
-            if (Input.GetKeyDown(KeyCode.H))
+            if(Input.GetKeyDown(gameClearKey))
             {
-                end = true;
+                gameClear.SetActive(true);
+                if (!startJingle)
+                {
+                    backGroundPlaySE.PlaySE("WinJingle");
+                    startJingle = true;
+                }
             }
 
-            if (end)
+            if(Input.GetKeyDown(gameFailureKey))
             {
                 gameFailure.SetActive(true);
                 if (!startJingle)
@@ -46,11 +56,6 @@ public class CS_GameResult : MonoBehaviour
                     backGroundPlaySE.PlaySE("LoseJingle");
                     startJingle = true;
                 }
-            }
-            else
-            {
-                gameClear.SetActive(false);
-                gameFailure.SetActive(false);
             }
         }
         else
@@ -75,11 +80,6 @@ public class CS_GameResult : MonoBehaviour
                         startJingle = true;
                     }
                 }
-            }
-            else
-            {
-                gameClear.SetActive(false);
-                gameFailure.SetActive(false);
             }
         }
     }

@@ -41,6 +41,10 @@ public class CS_ThiefReaction : MonoBehaviour
     [Tooltip("部屋のカメラ")]
     Camera roomCamera;
 
+    [Tooltip("リアクションが変化しない時間を計測するタイマー")]
+    public float notChangeTimer = 0.0f;
+
+
     private void Start()
     {
         // SpriteRendererを取得
@@ -66,14 +70,26 @@ public class CS_ThiefReaction : MonoBehaviour
             transform.Rotate(0, 180, 0);
         }
         prevRoom = currentRoom;
+
+        // タイマーの更新
+        if (notChangeTimer > 0.0f)
+        {
+            notChangeTimer -= Time.deltaTime;
+            if (notChangeTimer < 0.0f)
+            {
+                notChangeTimer = 0.0f;
+            }
+        }
     }
 
     /// <summary>
     /// リアクションの種類に応じてスプライトを変更するメソッド
     /// </summary>
     /// <param name="reactionType">変更するリアクションの種類</param>
-    public void ChangeReaction(ThiefReactionType reactionType)
+    public void ChangeReaction(ThiefReactionType reactionType, float setNotChangeTimer = 0.0f)
     {
+        if (notChangeTimer > 0.0f) return;
+
         if (reactionSpriteRenderer == null)
         {
             Debug.LogError("SpriteRendererが見つかりませんでした。");
@@ -81,6 +97,8 @@ public class CS_ThiefReaction : MonoBehaviour
         }
         // リアクションの種類に応じてスプライトを変更
         reactionSpriteRenderer.sprite = reactionSprites[(int)reactionType];
+
+        notChangeTimer = setNotChangeTimer;
     }
 
     /// <summary>
@@ -88,6 +106,8 @@ public class CS_ThiefReaction : MonoBehaviour
     /// </summary>
     public void ClearReaction()
     {
+        if (notChangeTimer > 0.0f) return;
+
         if (reactionSpriteRenderer == null)
         {
             Debug.LogError("SpriteRendererが見つかりませんでした。");

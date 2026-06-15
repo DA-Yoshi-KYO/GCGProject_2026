@@ -274,6 +274,7 @@ public class CS_MemorySystem
                 // 空の宝箱罠の場合は、宝物があるフラグを立てる
                 case Gimmick.EmptyChest:
                     {
+                        thiefAI.read_ThiefGimmickAction.EmptyChestStart(trap.gimmickScript);
                         isTreasureObject = true;
                     }
                     break;
@@ -355,6 +356,8 @@ public class CS_MemorySystem
                     }
                 }
             }
+
+
 
             // 宝物を探索対象に設定した後は、A*システムのルートをクリアする
             if (thiefAI.read_AStarSystem.HasRoute) thiefAI.read_AStarSystem.ClearRoute();
@@ -547,14 +550,13 @@ public class CS_MemorySystem
                 if (distanceToTarget <= thiefAI.read_ExploredDistanceThreshold)
                 {
                     // CS_PlayerMoveに通知
-                    ((CS_PlayerTarget)currentTarget).transform.GetComponent<CS_PlayerMove>().CaughtByThief();
+                    ((CS_PlayerTarget)currentTarget).transform.GetComponent<CS_PlayerMove>().CaughtByThief(thiefAI.read_RemainingHoldCatTime);
 
                     // 泥棒のアニメーション状態をHuntingに変更する
                     if (thiefAI.read_Animator != null) thiefAI.read_Animator.SetBool("IsHunting", true);
 
                     thiefAI.CatchCat();
 
-                    ClearTarget();
                     return;
                 }
             }
@@ -598,7 +600,6 @@ public class CS_MemorySystem
                             // リストを減算して次の移動ポイントを探索対象に設定
                             currentTarget = currentRoom.movePoints[nextIndex];
                         }
-                        thiefAI.read_MoveSystem.UpdateMoveSpeed(currentTarget);
                         thiefAI.read_MoveSystem.MoveTo(currentTarget.transform.position);
                         break;
                     }
@@ -678,7 +679,6 @@ public class CS_MemorySystem
                 {
                     distanceToTarget = distance;
                     currentTarget = target;
-                    thiefAI.read_MoveSystem.UpdateMoveSpeed(currentTarget);
                     thiefAI.read_MoveSystem.MoveTo(currentTarget.transform.position);
                 }
                 else continue;
@@ -706,8 +706,6 @@ public class CS_MemorySystem
 
         currentTarget = target;
 
-        // 探索対象を変更したときの移動速度を更新する
-        thiefAI.read_MoveSystem.UpdateMoveSpeed(currentTarget);
         // 探索対象に向かって移動
         thiefAI.read_MoveSystem.MoveTo(currentTarget.transform.position);
     }
