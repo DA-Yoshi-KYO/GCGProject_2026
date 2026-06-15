@@ -270,7 +270,7 @@ public class CS_PlayerMove : MonoBehaviour
     /// <summary>
     /// 盗賊に捕まったときの処理
     /// </summary>
-    public void CaughtByThief()
+    public void CaughtByThief(float holdCatTime)
     {
         // フラグを立てる
         isCaughtByThief = true;

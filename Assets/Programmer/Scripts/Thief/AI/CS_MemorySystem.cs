@@ -550,14 +550,13 @@ public class CS_MemorySystem
                 if (distanceToTarget <= thiefAI.read_ExploredDistanceThreshold)
                 {
                     // CS_PlayerMoveに通知
-                    ((CS_PlayerTarget)currentTarget).transform.GetComponent<CS_PlayerMove>().CaughtByThief();
+                    ((CS_PlayerTarget)currentTarget).transform.GetComponent<CS_PlayerMove>().CaughtByThief(thiefAI.read_RemainingHoldCatTime);
 
                     // 泥棒のアニメーション状態をHuntingに変更する
                     if (thiefAI.read_Animator != null) thiefAI.read_Animator.SetBool("IsHunting", true);
 
                     thiefAI.CatchCat();
 
-                    ClearTarget();
                     return;
                 }
             }
