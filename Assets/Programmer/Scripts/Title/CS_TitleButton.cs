@@ -7,7 +7,7 @@ public class CS_TitleButton : MonoBehaviour
     [Header("選択時のテクスチャ")][SerializeField] Sprite onTexture;
     Image currentImage;
 
-    void Start()
+    void Awake()
     {
         currentImage = GetComponent<Image>();
         currentImage.sprite = offTexture;
@@ -15,6 +15,7 @@ public class CS_TitleButton : MonoBehaviour
 
     public void ChangeTexture(bool isSelect)
     {
-        currentImage.sprite = isSelect ? onTexture : offTexture;
+        if (currentImage != null)
+            currentImage.sprite = isSelect ? onTexture : offTexture;
     }
 }

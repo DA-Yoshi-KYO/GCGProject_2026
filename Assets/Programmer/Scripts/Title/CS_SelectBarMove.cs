@@ -7,6 +7,7 @@
  * 2026-05-17 | SE再生処理追加
  */
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class CS_SelectBarMove : MonoBehaviour
 {
@@ -23,11 +24,13 @@ public class CS_SelectBarMove : MonoBehaviour
     {
         inputActions = new CustomInputAction();
         inputActions.SelectBar.Enable();
+        inputActions.SelectBar.MoveAxis.started += TitleSelectInput;
 
         backGroundPlaySE = GameObject.Find("SE").GetComponent<CS_BackGroundPlaySE>();
 
         currentButton = 0;
         UpdateButtonTexture();
+
     }
 
     // Update is called once per frame
@@ -42,30 +45,6 @@ public class CS_SelectBarMove : MonoBehaviour
             inputActions.SelectBar.Disable();
         }
 
-        //現在選択しているボタンの移動処理
-        if (inputActions.SelectBar.MoveUp.triggered)
-        {
-            backGroundPlaySE.PlaySE("Cusor");
-            currentButton--;
-            if (currentButton < 0)
-            {
-                currentButton = buttonList.Length - 1;
-            }
-
-            UpdateButtonTexture();
-        }
-
-        if (inputActions.SelectBar.MoveDown.triggered)
-        {
-            backGroundPlaySE.PlaySE("Cusor");
-            currentButton++;
-            if (currentButton >= buttonList.Length)
-            {
-                currentButton = 0;
-            }
-
-            UpdateButtonTexture();
-        }
 
         //座標移動
         Vector3 selectBarPos = selectBar.GetComponent<RectTransform>().anchoredPosition;
@@ -109,6 +88,38 @@ public class CS_SelectBarMove : MonoBehaviour
         for (int i = 0 ; i < buttonList.Length ; i++)
         {
             buttonList[i].ChangeTexture(i == currentButton);
+        }
+    }
+
+    void TitleSelectInput(InputAction.CallbackContext context)
+    {
+        if (context.started)
+        {
+            float inputFloat = context.ReadValue<float>();
+
+            //現在選択しているボタンの移動処理
+            if (inputFloat > 0.0f)
+            {
+                backGroundPlaySE.PlaySE("Cusor");
+                currentButton--;
+                if (currentButton < 0)
+                {
+                    currentButton = buttonList.Length - 1;
+                }
+
+                UpdateButtonTexture();
+            }
+            else if (inputFloat < 0.0f)
+            {
+                backGroundPlaySE.PlaySE("Cusor");
+                currentButton++;
+                if (currentButton >= buttonList.Length)
+                {
+                    currentButton = 0;
+                }
+
+                UpdateButtonTexture();
+            }
         }
     }
 }
