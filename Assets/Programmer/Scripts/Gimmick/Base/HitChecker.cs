@@ -253,7 +253,8 @@ public class HitChecker : MonoBehaviour
                             EnemyDame(enemy, effectDamage, false, effectEnemies[i], effect);
                             break;
                         case Gimmick.EmptyChest:
-                            EnemyCharm(enemy);
+                            thiefAI.read_ThiefGimmickAction.EmptyChestStart(gimmickBase);
+                            ((EmptyChestGimmick)gimmickBase).AddTargetThiefAI(thiefAI);
                             break;
                         case Gimmick.Nyaki:
                             EnemyDame(enemy, effectDamage, false, effectEnemies[i], effect);
@@ -278,12 +279,6 @@ public class HitChecker : MonoBehaviour
                 CS_ThiefAI thiefAI = enemy.GetComponent<CS_ThiefAI>();
                 thiefGA = thiefAI.read_ThiefGimmickAction;
                 GimmickBase gimmickBase = parentGameObject.GetComponent<GimmickBase>();
-                switch (gimmick)
-                {
-                    case Gimmick.Pitfall:
-                        thiefGA.PitFallStart(gimmickBase.transform.position);
-                        break;
-                }
 
                 if (thiefAI != null)
                 {
@@ -296,12 +291,14 @@ public class HitChecker : MonoBehaviour
                             EnemyDame(enemy, hitDamage, true, hitEnemies[i], hit);
                             break;
                         case Gimmick.EmptyChest:
-                            EnemyCharm(enemy);
                             EmptyChestGimmick emptyChestGimmick =
                                 parentGameObject.GetComponent<EmptyChestGimmick>();
                             if (emptyChestGimmick != null)
                             {
                                 emptyChestGimmick.Durability_Value_Decreased();
+                                thiefAI.read_ThiefReaction.ChangeReaction(CS_ThiefReaction.ThiefReactionType.Searching);
+                                thiefAI.read_Animator.SetBool("IsHunting", true);
+                                thiefAI.read_MoveSystem.Stop();
 
                                 Debug.Log("Durability decreased");
                             }

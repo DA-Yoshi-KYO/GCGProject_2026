@@ -145,13 +145,31 @@ public class CS_ThiefManager : MonoBehaviour
 
             // 生成位置の取得
             Transform entryPoint = entry.RoomMovePointObject.transform;
+
             // 生成される初期部屋の取得
             CS_RoomNode entryRoom = entry.RoomCreatePoint.transform.GetComponentInChildren<CS_RoomNode>();
 
+
+            // ============================================ 応急処置
             //泥棒の生成
-            GameObject thief = GameObject.Instantiate(thiefPrefab);
+            GameObject thief = GameObject.Instantiate(
+                thiefPrefab,
+                entryPoint.position,
+                entryPoint.rotation,
+                thiefParent.transform
+            );
+
+            //GameObject thief = GameObject.Instantiate(thiefPrefab);
 
             thief.name = "Thief_" + thiefParent.transform.childCount;
+
+            // 近くのNavMesh上の位置を検索して、泥棒をそこにワープさせる
+            UnityEngine.AI.NavMeshAgent agent = thief.GetComponent<UnityEngine.AI.NavMeshAgent>();
+
+            if (agent != null && UnityEngine.AI.NavMesh.SamplePosition(entryPoint.position, out UnityEngine.AI.NavMeshHit hit, 5.0f, UnityEngine.AI.NavMesh.AllAreas))
+            {
+                agent.Warp(hit.position);
+            }
 
             // 基準となるプレイヤーの速度を取得
             float playerSpeed = GameObject.FindGameObjectWithTag("Player").GetComponent<CS_PlayerMove>().GetBasePlayerSpeed();
@@ -165,13 +183,14 @@ public class CS_ThiefManager : MonoBehaviour
             thiefAI.Setting(GameObject.Instantiate(typeData), GetThiefCommonDB(), playerSpeed, entryRoom, entryPoint);
 
             // --- 泥棒をthiefParentの子オブジェクトに設定
-            thief.transform.parent = thiefParent.transform;
+            //thief.transform.parent = thiefParent.transform;
 
             //--- 生成した泥棒の生成位置を選定
-            thief.transform.position = entryPoint.position;
+            //thief.transform.position = entryPoint.position;
 
             // 生成された泥棒の数を更新
             spawnCount[entry]++;
+            //=============================================
         }
 
         // 予定している生成数に達しているかどうかを確認

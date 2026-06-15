@@ -14,7 +14,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // 視界を管理するセンサー
-public class CS_VisionSensor
+public class CS_VisionSensor : MonoBehaviour
 {
     [Tooltip("ThiefAIスクリプトへの参照")]
     private CS_ThiefAI thiefAI;
@@ -43,6 +43,25 @@ public class CS_VisionSensor
         this.viewDistance = typeData.viewDistance;
         this.viewAngle = typeData.viewAngle;
 
+        // 対象のレイヤーと障害物のレイヤーを保存
+        this.targetLayer = targetLayer;
+        this.obstacleLayer = obstacleLayer;
+    }
+
+    /// <summary>
+    /// 視界の設定を行うメソッド（セッター）
+    /// </summary>
+    /// <param name="thiefAI"></param>
+    /// <param name="typeData"></param>
+    /// <param name="targetLayer"></param>
+    /// <param name="obstacleLayer"></param>
+    public void Setting(CS_ThiefAI thiefAI, CO_ThiefStatusData typeData, List<LayerMask> targetLayer, LayerMask obstacleLayer)
+    {
+        // ThiefAIスクリプトへの参照を保存
+        this.thiefAI = thiefAI;
+        // 視界の半径と角度を保存
+        this.viewDistance = typeData.viewDistance;
+        this.viewAngle = typeData.viewAngle;
         // 対象のレイヤーと障害物のレイヤーを保存
         this.targetLayer = targetLayer;
         this.obstacleLayer = obstacleLayer;
@@ -119,5 +138,17 @@ public class CS_VisionSensor
             return false;
 
         return true;
+    }
+
+    private void OnDrawGizmos()
+    {
+        // 視界の半径を表すワイヤースフィアを描画
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, viewDistance);
+        // 視界の角度を表す線を描画
+        Vector3 leftBoundary = Quaternion.Euler(0, -viewAngle / 2, 0) * transform.forward * viewDistance;
+        Vector3 rightBoundary = Quaternion.Euler(0, viewAngle / 2, 0) * transform.forward * viewDistance;
+        Gizmos.DrawLine(transform.position, transform.position + leftBoundary);
+        Gizmos.DrawLine(transform.position, transform.position + rightBoundary);
     }
 }
