@@ -88,7 +88,7 @@ public class CS_MoveSystem
     /// 現在の標的に応じて移動状態を更新する処理
     /// </summary>
     /// <param name="currentTarget">現在の標的オブジェクト</param>
-    public void UpdateMoveSpeed(CS_ThiefTarget currentTarget)
+    private void UpdateMoveSpeed(CS_ThiefTarget currentTarget)
     {
         if (currentTarget == null)
         {
@@ -126,10 +126,24 @@ public class CS_MoveSystem
     }
 
     /// <summary>
+    /// ナビメッシュエージェントを安全に停止させる処理
+    /// </summary>
+    public void Stop()
+    {
+        navMeshAgent.isStopped = true;
+    }
+
+    /// <summary>
     /// 移動要求を統一する。SmartNavAgent がある場合は DangerZone を考慮して移動する。
     /// </summary>
     public void MoveTo(Vector3 destination)
     {
+        // 漁り状態のときは移動要求を無視する
+        if (thiefAI.read_Animator.GetBool("IsHunting")) return;
+        navMeshAgent.isStopped = false; // SmartNavAgentを使用する場合はNavMeshAgentを停止状態から解除する
+
+        UpdateMoveSpeed(thiefAI.read_MemorySystem.read_CurrentTarget); // 現在の標的に応じて移動速度を更新する
+
         if (smartNavAgent != null)
         {
             smartNavAgent.MoveTo(destination);
@@ -188,6 +202,8 @@ public class CS_MoveSystem
     /// </summary>
     public void FixStuck()
     {
+        if(thiefAI.read_Animator.GetBool("IsHunting"))return; // 漁り状態のときはバグ対策を行わない
+
         if (Vector3.Distance(thiefAI.transform.position, debugPos) < 0.1f)
         {
             samePosFrameCount++;
