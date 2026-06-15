@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 611668079119231793}
   - component: {fileID: 6581943104313979994}
+  - component: {fileID: 4659597507293649210}
   m_Layer: 0
   m_Name: CutSceneManager
   m_TagString: Untagged
@@ -69,6 +70,23 @@ VideoPlayer:
   m_WaitForFirstFrame: 1
   m_FrameReadyEventEnabled: 0
   m_VideoShaders: []
+--- !u!114 &4659597507293649210
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 376577941564606191}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01d8c46aa0dc991418052a70bfd06946, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  videoPlayer: {fileID: 0}
+  rawImage: {fileID: 9194053554389050051}
+  cutSceneVideoDataBase: {fileID: 11400000, guid: 05e72c1333b1cba449eb7d06618cdda5,
+    type: 2}
+  situation: 
 --- !u!1 &1751255532391089403
 GameObject:
   m_ObjectHideFlags: 0
