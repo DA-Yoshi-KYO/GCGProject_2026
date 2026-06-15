@@ -39,7 +39,7 @@ public class CS_PlayerMove : MonoBehaviour
     [Tooltip("盗賊に捕まっているかどうか")]
     private bool isCaughtByThief;
 
-    [Header("ジャンプ開始するまでのマージン(フレーム単位)")]  private const int jumpMerginFrame = 5;
+    [Header("ジャンプ開始するまでのマージン(フレーム単位)")][SerializeField] private int jumpMerginFrame = 5;
     private int jumpMerginFrameCount = 5;
     bool isJumpMerging = false;
 
