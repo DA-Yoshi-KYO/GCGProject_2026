@@ -116,7 +116,7 @@ public class RockGimmick : GimmickBase
         //}
 
         // 下方向へのレイキャスト　※落下時の判定用
-        if (Physics.Raycast(rayOrigin, Vector3.down, out hit, rayDownLength, ~0, QueryTriggerInteraction.Ignore))
+        if (Physics.Raycast(rayOrigin, Vector3.down, out hit, rayDownLength, LayerMask.GetMask("Default", "VisionObstacle"), QueryTriggerInteraction.Ignore))
         {
             //サウンドループ用
             //if(!soundPlayed)
@@ -127,24 +127,12 @@ public class RockGimmick : GimmickBase
             //}
 
             // 自身または子に当たっているなら RaycastAll で次のヒットを探す
-            if (hit.collider != null && (hit.collider.gameObject == gameObject || hit.collider.transform.IsChildOf(transform)))
+            if (hit.collider.gameObject != gameObject && !hit.collider.transform.IsChildOf(transform))
             {
-                var hits = Physics.RaycastAll(rayOrigin, Vector3.down, rayDownLength);
-                foreach (var h in hits)
+                if (!hit.collider.isTrigger)
                 {
-                    //例外用処理
-                    if (h.collider == null) continue;
-                    if (h.collider.gameObject == gameObject) continue;
-                    if (h.collider.transform.IsChildOf(transform)) continue;
-                    
-                    hit = h;
                     hasValidHit = true;
-                    break;
                 }
-            }
-            else
-            {
-                hasValidHit = true;
             }
 
             //インタラクト時転がす
@@ -228,30 +216,33 @@ public class RockGimmick : GimmickBase
             // 地面判定
             float angle = Vector3.Angle(normal, Vector3.up);
             float speed = Mathf.Sin(angle * Mathf.Deg2Rad) * slideSpeed;
-            if (angle < slopeAngleLimit && transform.position.y < initPositionY - 0.1f/*落下判定の距離*/)
+            if (hit.collider.CompareTag("Plane") || hit.collider.CompareTag("Untagged"))
             {
-                //接地判定
-                //接地(滑らない床)は破壊※一定以上落下している場合のみ
-                //gimmickState = GimmickState.Broken;
-            }
-            else// if (hit.collider.CompareTag("Plane") || hit.collider.CompareTag("Untagged"))
-            {
-                // 滑り
-                pos += slopeDir * speed * Time.deltaTime;
-
-                // Yだけ補正
-                // 斜面の角度から補正値を計算
-                float angleCorrection;
-                angleCorrection = gravity / 3.141592f + angle / (3.141592f * 2f);
-                if (angle < 5f)
+                if (angle < slopeAngleLimit && transform.position.y < initPositionY - 0.1f/*落下判定の距離*/)
                 {
-                    pos.y = hit.point.y + 0.5f;
+                    //接地判定
+                    //接地(滑らない床)は破壊※一定以上落下している場合のみ
+                    gimmickState = GimmickState.Broken;
                 }
                 else
                 {
-                    pos.y = hit.point.y + 0.4f;
+                    // 滑り
+                    pos += slopeDir * speed * Time.deltaTime;
+
+                    // Yだけ補正
+                    // 斜面の角度から補正値を計算
+                    float angleCorrection;
+                    angleCorrection = gravity / 3.141592f + angle / (3.141592f * 2f);
+                    if (angle < 5f)
+                    {
+                        pos.y = hit.point.y + 0.5f;
+                    }
+                    else
+                    {
+                        pos.y = hit.point.y + 0.4f;
+                    }
+                    transform.position = new Vector3(pos.x, pos.y + debugUpdateOffset, pos.z);
                 }
-                transform.position = new Vector3(pos.x, pos.y + debugUpdateOffset, pos.z);
             }
         }
         else
