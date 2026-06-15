@@ -7,6 +7,7 @@
  * 2026-06-05 | バグの修正
  */
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 public class CS_GameFailureSelectButton : MonoBehaviour
@@ -22,6 +23,7 @@ public class CS_GameFailureSelectButton : MonoBehaviour
 
     private CustomInputAction inputActions;
     private int currentButton = 0;
+    private CS_BackGroundPlaySE backGroundPlaySE;
 
     [Header("フェード処理があるCanvasを格納")][SerializeField]private CS_SceneTransition sceneTransition;
 
@@ -30,36 +32,20 @@ public class CS_GameFailureSelectButton : MonoBehaviour
     {
         inputActions = new CustomInputAction();
         inputActions.GameOver.Enable();
+        inputActions.GameClear.MoveAxis.started += SelectInput;
 
         retryButtonImage = GameObject.Find("RetryButton").GetComponent<Image>();
         retryButtonImage.sprite = retryButtonSprite[currentButton];
 
         backTitleButtonImage = GameObject.Find("GameFailureBackTitleButton").GetComponent<Image>();
         backTitleButtonImage.sprite = backTitleButtonSprite[currentButton];
+        backGroundPlaySE = GameObject.Find("SE").GetComponent<CS_BackGroundPlaySE>();
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        //現在選択しているボタンの移動処理
-        if (inputActions.GameOver.MoveLeft.triggered)
-        {
-            currentButton--;
-            if (currentButton < 0)
-            {
-                currentButton = backTitleButtonSprite.Length - 1;
-            }
-        }
-
-        if (inputActions.GameOver.MoveRight.triggered)
-        {
-            currentButton++;
-            if (currentButton > backTitleButtonSprite.Length - 1)
-            {
-                currentButton = 0;
-            }
-        }
-
         retryButtonImage.sprite = retryButtonSprite[currentButton];
         backTitleButtonImage.sprite = backTitleButtonSprite[currentButton];
 
@@ -74,5 +60,33 @@ public class CS_GameFailureSelectButton : MonoBehaviour
     private void OnDestroy()
     {
         inputActions.GameOver.Disable();
+    }
+
+    void SelectInput(InputAction.CallbackContext context)
+    {
+        if (context.started)
+        {
+            float inputFloat = context.ReadValue<float>();
+
+            //現在選択しているボタンの移動処理
+            if (inputFloat > 0.0f)
+            {
+                backGroundPlaySE.PlaySE("Cusor");
+                currentButton--;
+                if (currentButton < 0)
+                {
+                    currentButton = backTitleButtonSprite.Length - 1;
+                }
+            }
+            else if (inputFloat < 0.0f)
+            {
+                backGroundPlaySE.PlaySE("Cusor");
+                currentButton++;
+                if (currentButton >= backTitleButtonSprite.Length)
+                {
+                    currentButton = 0;
+                }
+            }
+        }
     }
 }

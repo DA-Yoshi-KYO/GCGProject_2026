@@ -720,24 +720,6 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
             ""id"": ""a60c7eb2-1cec-46f5-b121-33a12a3c7d02"",
             ""actions"": [
                 {
-                    ""name"": ""MoveRight"",
-                    ""type"": ""Button"",
-                    ""id"": ""2292220b-8b17-459a-bade-635a1e31ee04"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
-                    ""name"": ""MoveLeft"",
-                    ""type"": ""Button"",
-                    ""id"": ""0641e0fd-1366-4c31-b0a7-3ea733849fd2"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
                     ""name"": ""Decision"",
                     ""type"": ""Button"",
                     ""id"": ""06d6d678-2046-47c6-8a9b-af5c42bd19c8"",
@@ -745,53 +727,18 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""MoveAxis"",
+                    ""type"": ""Value"",
+                    ""id"": ""01da50a1-0fd0-4557-b437-e9eaba4fd2fc"",
+                    ""expectedControlType"": ""Axis"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
-                {
-                    ""name"": """",
-                    ""id"": ""1769bb3f-fa65-4bd3-a622-0f9eadfe9864"",
-                    ""path"": ""<Keyboard>/d"",
-                    ""interactions"": ""Press(pressPoint=1)"",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""MoveRight"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""c6c92914-eb37-446b-80fe-7f91275c23a8"",
-                    ""path"": ""<Keyboard>/rightArrow"",
-                    ""interactions"": ""Press(pressPoint=1)"",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""MoveRight"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""c0f0ffe4-258e-4a24-bb38-9921e8a1ad0c"",
-                    ""path"": ""<Keyboard>/a"",
-                    ""interactions"": ""Press(pressPoint=1)"",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""MoveLeft"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""3ece3a00-f0f7-4c70-96d7-aae475d0dfeb"",
-                    ""path"": ""<Keyboard>/leftArrow"",
-                    ""interactions"": ""Press(pressPoint=1)"",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""MoveLeft"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
                 {
                     ""name"": """",
                     ""id"": ""0ffc347d-24a2-4e4f-8783-5e0d50f9078e"",
@@ -813,6 +760,149 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
                     ""action"": ""Decision"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""04f86554-db52-4d42-b827-03457914e093"",
+                    ""path"": ""<Gamepad>/buttonSouth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Decision"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""1D Axis"",
+                    ""id"": ""a05fe195-9085-4cd0-aca7-621b89ae1268"",
+                    ""path"": ""1DAxis"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveAxis"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""negative"",
+                    ""id"": ""d40d77d0-faf6-44c6-8b78-add5f0bd5872"",
+                    ""path"": ""<Gamepad>/leftStick/left"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveAxis"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""positive"",
+                    ""id"": ""777dd730-0509-471e-a930-549570cd010e"",
+                    ""path"": ""<Gamepad>/leftStick/right"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveAxis"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""1D Axis"",
+                    ""id"": ""6fa66fba-91c1-4d7f-a63a-a018f0dbce9a"",
+                    ""path"": ""1DAxis"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveAxis"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""negative"",
+                    ""id"": ""20c6a8e2-5230-4f16-adcd-234168e51c9f"",
+                    ""path"": ""<Keyboard>/a"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveAxis"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""positive"",
+                    ""id"": ""a4a6668d-fc0b-40f8-b76c-e949b1c607e3"",
+                    ""path"": ""<Keyboard>/d"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveAxis"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""1D Axis"",
+                    ""id"": ""d97bbd05-ef1a-49ff-be81-6d233724e8f4"",
+                    ""path"": ""1DAxis"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveAxis"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""negative"",
+                    ""id"": ""91d5cf29-f189-4116-9912-e6d53e8bce0c"",
+                    ""path"": ""<Keyboard>/leftArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveAxis"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""positive"",
+                    ""id"": ""1e87a87c-6da2-47ce-b734-ee9637c8becb"",
+                    ""path"": ""<Keyboard>/rightArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveAxis"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""1D Axis"",
+                    ""id"": ""50a14c4b-5958-4d2b-bee9-4fb304e0acfe"",
+                    ""path"": ""1DAxis"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveAxis"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""negative"",
+                    ""id"": ""c8a4fa21-f279-4565-a300-f5c2748bb946"",
+                    ""path"": ""<Gamepad>/dpad/left"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveAxis"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""positive"",
+                    ""id"": ""0caf8969-4006-4b93-a178-e3f692a0ccb8"",
+                    ""path"": ""<Gamepad>/dpad/right"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveAxis"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
                 }
             ]
         },
@@ -821,24 +911,6 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
             ""id"": ""b32df814-836c-469f-a7eb-319f130f9bf1"",
             ""actions"": [
                 {
-                    ""name"": ""MoveRight"",
-                    ""type"": ""Button"",
-                    ""id"": ""a62375e8-2ffb-4888-b140-c5212b183f8a"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
-                    ""name"": ""MoveLeft"",
-                    ""type"": ""Button"",
-                    ""id"": ""a66eb51f-9647-4de5-ac5f-13f853f0dc75"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
                     ""name"": ""Decision"",
                     ""type"": ""Button"",
                     ""id"": ""bdba9494-e4a8-48ba-8d43-508a9aaf8d22"",
@@ -846,53 +918,18 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""MoveAxis"",
+                    ""type"": ""Value"",
+                    ""id"": ""490af83f-e46b-4a1b-ab6c-acb0ed2b6ded"",
+                    ""expectedControlType"": ""Axis"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
-                {
-                    ""name"": """",
-                    ""id"": ""41806341-9d6e-4b44-b015-56bcb0ae2807"",
-                    ""path"": ""<Keyboard>/d"",
-                    ""interactions"": ""Press(pressPoint=1)"",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""MoveRight"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""67204c2e-8938-493a-9054-39c9dad47878"",
-                    ""path"": ""<Keyboard>/rightArrow"",
-                    ""interactions"": ""Press(pressPoint=1)"",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""MoveRight"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""dc4e08b2-3458-4cc4-9381-c7b6c5fcc938"",
-                    ""path"": ""<Keyboard>/a"",
-                    ""interactions"": ""Press(pressPoint=1)"",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""MoveLeft"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""07fbbdfd-4cdd-4239-8688-7a964982c174"",
-                    ""path"": ""<Keyboard>/leftArrow"",
-                    ""interactions"": ""Press(pressPoint=1)"",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""MoveLeft"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
                 {
                     ""name"": """",
                     ""id"": ""cc990745-4a02-4edd-a75c-050e6f863d98"",
@@ -914,6 +951,149 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
                     ""action"": ""Decision"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""29cf5960-be5b-4682-ba44-bd6417646233"",
+                    ""path"": ""<Gamepad>/buttonSouth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Decision"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""1D Axis"",
+                    ""id"": ""1160ad85-de07-4e0a-b8f0-0db5b62b9f5f"",
+                    ""path"": ""1DAxis"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveAxis"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""negative"",
+                    ""id"": ""bc523854-a910-4d50-8389-4fac9f879141"",
+                    ""path"": ""<Gamepad>/leftStick/left"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveAxis"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""positive"",
+                    ""id"": ""2ec10765-8d5f-41dd-b8c8-55e36e7e39a2"",
+                    ""path"": ""<Gamepad>/leftStick/right"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveAxis"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""1D Axis"",
+                    ""id"": ""b6b01b03-c24c-4226-9096-371f84cea982"",
+                    ""path"": ""1DAxis"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveAxis"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""negative"",
+                    ""id"": ""ad25b747-4091-415f-a524-c2ae62211833"",
+                    ""path"": ""<Keyboard>/a"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveAxis"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""positive"",
+                    ""id"": ""4e4e7c6f-9a79-4c09-a9b5-6d27768e1395"",
+                    ""path"": ""<Keyboard>/d"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveAxis"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""1D Axis"",
+                    ""id"": ""5eac31ae-c6ac-4da9-a281-47feae31bed3"",
+                    ""path"": ""1DAxis"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveAxis"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""negative"",
+                    ""id"": ""9dc3d63e-a801-45a2-9833-54fe8cbb896b"",
+                    ""path"": ""<Keyboard>/leftArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveAxis"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""positive"",
+                    ""id"": ""99d5f19e-a230-42bb-9f5a-0233ef6adb74"",
+                    ""path"": ""<Keyboard>/rightArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveAxis"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""1D Axis"",
+                    ""id"": ""c8d5db4c-083a-4c43-a31b-26e37070cb3e"",
+                    ""path"": ""1DAxis"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveAxis"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""negative"",
+                    ""id"": ""48e91c23-2374-4833-9e4c-84118d04aac8"",
+                    ""path"": ""<Gamepad>/dpad/left"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveAxis"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""positive"",
+                    ""id"": ""7ea922c4-b6ae-412b-b450-8a56c865e585"",
+                    ""path"": ""<Gamepad>/dpad/right"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveAxis"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
                 }
             ]
         },
@@ -992,6 +1172,28 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
+                    ""id"": ""6f6253db-7f57-4df0-9f55-e0639769c04f"",
+                    ""path"": ""<Gamepad>/dpad/up"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Up"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""0fb86923-b205-4182-a76a-b93c5b34561b"",
+                    ""path"": ""<Gamepad>/leftStick/up"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Up"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""c169070f-58b2-43db-8385-a461a6efcad9"",
                     ""path"": ""<Keyboard>/s"",
                     ""interactions"": """",
@@ -1005,6 +1207,28 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
                     ""name"": """",
                     ""id"": ""1b9de74b-deab-44f6-9c20-708e3a43d777"",
                     ""path"": ""<Keyboard>/downArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Down"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""5a53a8d4-b7b5-419b-b45f-8e5a08556942"",
+                    ""path"": ""<Gamepad>/dpad/down"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Down"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""206b7704-4e6f-42e6-a6a4-2ea36aeb4d65"",
+                    ""path"": ""<Gamepad>/leftStick/down"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -1036,6 +1260,17 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
+                    ""id"": ""3328e537-1244-4df3-b21a-71e6e9b1413a"",
+                    ""path"": ""<Gamepad>/buttonSouth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Decision"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""6dbecfe9-07c5-4232-8f7d-72cf43f81220"",
                     ""path"": ""<Keyboard>/a"",
                     ""interactions"": """",
@@ -1058,6 +1293,28 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
+                    ""id"": ""83d58deb-8d57-428e-8329-42ef779fbf67"",
+                    ""path"": ""<Gamepad>/leftStick/left"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Left"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""1188fbd3-baea-46bf-9a41-78cd0c3bc400"",
+                    ""path"": ""<Gamepad>/dpad/left"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Left"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""44a35b7d-cf7b-47fd-8393-150e0b0f2fc1"",
                     ""path"": ""<Keyboard>/d"",
                     ""interactions"": """",
@@ -1071,6 +1328,28 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
                     ""name"": """",
                     ""id"": ""a588a260-4d90-4177-929b-4afddcac247c"",
                     ""path"": ""<Keyboard>/rightArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Right"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""60a61322-7af8-4edc-b663-7693a6371088"",
+                    ""path"": ""<Gamepad>/leftStick/right"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Right"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""7e3f8a46-2226-4bd5-9126-9c1d3011906e"",
+                    ""path"": ""<Gamepad>/dpad/right"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -1103,14 +1382,12 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
         m_StageSelect_Decision = m_StageSelect.FindAction("Decision", throwIfNotFound: true);
         // GameClear
         m_GameClear = asset.FindActionMap("GameClear", throwIfNotFound: true);
-        m_GameClear_MoveRight = m_GameClear.FindAction("MoveRight", throwIfNotFound: true);
-        m_GameClear_MoveLeft = m_GameClear.FindAction("MoveLeft", throwIfNotFound: true);
         m_GameClear_Decision = m_GameClear.FindAction("Decision", throwIfNotFound: true);
+        m_GameClear_MoveAxis = m_GameClear.FindAction("MoveAxis", throwIfNotFound: true);
         // GameOver
         m_GameOver = asset.FindActionMap("GameOver", throwIfNotFound: true);
-        m_GameOver_MoveRight = m_GameOver.FindAction("MoveRight", throwIfNotFound: true);
-        m_GameOver_MoveLeft = m_GameOver.FindAction("MoveLeft", throwIfNotFound: true);
         m_GameOver_Decision = m_GameOver.FindAction("Decision", throwIfNotFound: true);
+        m_GameOver_MoveAxis = m_GameOver.FindAction("MoveAxis", throwIfNotFound: true);
         // Option
         m_Option = asset.FindActionMap("Option", throwIfNotFound: true);
         m_Option_Up = m_Option.FindAction("Up", throwIfNotFound: true);
@@ -1590,9 +1867,8 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
     // GameClear
     private readonly InputActionMap m_GameClear;
     private List<IGameClearActions> m_GameClearActionsCallbackInterfaces = new List<IGameClearActions>();
-    private readonly InputAction m_GameClear_MoveRight;
-    private readonly InputAction m_GameClear_MoveLeft;
     private readonly InputAction m_GameClear_Decision;
+    private readonly InputAction m_GameClear_MoveAxis;
     /// <summary>
     /// Provides access to input actions defined in input action map "GameClear".
     /// </summary>
@@ -1605,17 +1881,13 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
         /// </summary>
         public GameClearActions(@CustomInputAction wrapper) { m_Wrapper = wrapper; }
         /// <summary>
-        /// Provides access to the underlying input action "GameClear/MoveRight".
-        /// </summary>
-        public InputAction @MoveRight => m_Wrapper.m_GameClear_MoveRight;
-        /// <summary>
-        /// Provides access to the underlying input action "GameClear/MoveLeft".
-        /// </summary>
-        public InputAction @MoveLeft => m_Wrapper.m_GameClear_MoveLeft;
-        /// <summary>
         /// Provides access to the underlying input action "GameClear/Decision".
         /// </summary>
         public InputAction @Decision => m_Wrapper.m_GameClear_Decision;
+        /// <summary>
+        /// Provides access to the underlying input action "GameClear/MoveAxis".
+        /// </summary>
+        public InputAction @MoveAxis => m_Wrapper.m_GameClear_MoveAxis;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -1642,15 +1914,12 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
         {
             if (instance == null || m_Wrapper.m_GameClearActionsCallbackInterfaces.Contains(instance)) return;
             m_Wrapper.m_GameClearActionsCallbackInterfaces.Add(instance);
-            @MoveRight.started += instance.OnMoveRight;
-            @MoveRight.performed += instance.OnMoveRight;
-            @MoveRight.canceled += instance.OnMoveRight;
-            @MoveLeft.started += instance.OnMoveLeft;
-            @MoveLeft.performed += instance.OnMoveLeft;
-            @MoveLeft.canceled += instance.OnMoveLeft;
             @Decision.started += instance.OnDecision;
             @Decision.performed += instance.OnDecision;
             @Decision.canceled += instance.OnDecision;
+            @MoveAxis.started += instance.OnMoveAxis;
+            @MoveAxis.performed += instance.OnMoveAxis;
+            @MoveAxis.canceled += instance.OnMoveAxis;
         }
 
         /// <summary>
@@ -1662,15 +1931,12 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
         /// <seealso cref="GameClearActions" />
         private void UnregisterCallbacks(IGameClearActions instance)
         {
-            @MoveRight.started -= instance.OnMoveRight;
-            @MoveRight.performed -= instance.OnMoveRight;
-            @MoveRight.canceled -= instance.OnMoveRight;
-            @MoveLeft.started -= instance.OnMoveLeft;
-            @MoveLeft.performed -= instance.OnMoveLeft;
-            @MoveLeft.canceled -= instance.OnMoveLeft;
             @Decision.started -= instance.OnDecision;
             @Decision.performed -= instance.OnDecision;
             @Decision.canceled -= instance.OnDecision;
+            @MoveAxis.started -= instance.OnMoveAxis;
+            @MoveAxis.performed -= instance.OnMoveAxis;
+            @MoveAxis.canceled -= instance.OnMoveAxis;
         }
 
         /// <summary>
@@ -1708,9 +1974,8 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
     // GameOver
     private readonly InputActionMap m_GameOver;
     private List<IGameOverActions> m_GameOverActionsCallbackInterfaces = new List<IGameOverActions>();
-    private readonly InputAction m_GameOver_MoveRight;
-    private readonly InputAction m_GameOver_MoveLeft;
     private readonly InputAction m_GameOver_Decision;
+    private readonly InputAction m_GameOver_MoveAxis;
     /// <summary>
     /// Provides access to input actions defined in input action map "GameOver".
     /// </summary>
@@ -1723,17 +1988,13 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
         /// </summary>
         public GameOverActions(@CustomInputAction wrapper) { m_Wrapper = wrapper; }
         /// <summary>
-        /// Provides access to the underlying input action "GameOver/MoveRight".
-        /// </summary>
-        public InputAction @MoveRight => m_Wrapper.m_GameOver_MoveRight;
-        /// <summary>
-        /// Provides access to the underlying input action "GameOver/MoveLeft".
-        /// </summary>
-        public InputAction @MoveLeft => m_Wrapper.m_GameOver_MoveLeft;
-        /// <summary>
         /// Provides access to the underlying input action "GameOver/Decision".
         /// </summary>
         public InputAction @Decision => m_Wrapper.m_GameOver_Decision;
+        /// <summary>
+        /// Provides access to the underlying input action "GameOver/MoveAxis".
+        /// </summary>
+        public InputAction @MoveAxis => m_Wrapper.m_GameOver_MoveAxis;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -1760,15 +2021,12 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
         {
             if (instance == null || m_Wrapper.m_GameOverActionsCallbackInterfaces.Contains(instance)) return;
             m_Wrapper.m_GameOverActionsCallbackInterfaces.Add(instance);
-            @MoveRight.started += instance.OnMoveRight;
-            @MoveRight.performed += instance.OnMoveRight;
-            @MoveRight.canceled += instance.OnMoveRight;
-            @MoveLeft.started += instance.OnMoveLeft;
-            @MoveLeft.performed += instance.OnMoveLeft;
-            @MoveLeft.canceled += instance.OnMoveLeft;
             @Decision.started += instance.OnDecision;
             @Decision.performed += instance.OnDecision;
             @Decision.canceled += instance.OnDecision;
+            @MoveAxis.started += instance.OnMoveAxis;
+            @MoveAxis.performed += instance.OnMoveAxis;
+            @MoveAxis.canceled += instance.OnMoveAxis;
         }
 
         /// <summary>
@@ -1780,15 +2038,12 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
         /// <seealso cref="GameOverActions" />
         private void UnregisterCallbacks(IGameOverActions instance)
         {
-            @MoveRight.started -= instance.OnMoveRight;
-            @MoveRight.performed -= instance.OnMoveRight;
-            @MoveRight.canceled -= instance.OnMoveRight;
-            @MoveLeft.started -= instance.OnMoveLeft;
-            @MoveLeft.performed -= instance.OnMoveLeft;
-            @MoveLeft.canceled -= instance.OnMoveLeft;
             @Decision.started -= instance.OnDecision;
             @Decision.performed -= instance.OnDecision;
             @Decision.canceled -= instance.OnDecision;
+            @MoveAxis.started -= instance.OnMoveAxis;
+            @MoveAxis.performed -= instance.OnMoveAxis;
+            @MoveAxis.canceled -= instance.OnMoveAxis;
         }
 
         /// <summary>
@@ -2078,26 +2333,19 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
     public interface IGameClearActions
     {
         /// <summary>
-        /// Method invoked when associated input action "MoveRight" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
-        /// </summary>
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnMoveRight(InputAction.CallbackContext context);
-        /// <summary>
-        /// Method invoked when associated input action "MoveLeft" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
-        /// </summary>
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnMoveLeft(InputAction.CallbackContext context);
-        /// <summary>
         /// Method invoked when associated input action "Decision" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
         /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnDecision(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "MoveAxis" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnMoveAxis(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "GameOver" which allows adding and removing callbacks.
@@ -2107,26 +2355,19 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
     public interface IGameOverActions
     {
         /// <summary>
-        /// Method invoked when associated input action "MoveRight" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
-        /// </summary>
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnMoveRight(InputAction.CallbackContext context);
-        /// <summary>
-        /// Method invoked when associated input action "MoveLeft" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
-        /// </summary>
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnMoveLeft(InputAction.CallbackContext context);
-        /// <summary>
         /// Method invoked when associated input action "Decision" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
         /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnDecision(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "MoveAxis" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnMoveAxis(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Option" which allows adding and removing callbacks.
