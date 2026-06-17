@@ -7,6 +7,7 @@
  * 2026-06-05 | バグの修正
  */
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 public class CS_GameClearSelectButton : MonoBehaviour
@@ -23,44 +24,34 @@ public class CS_GameClearSelectButton : MonoBehaviour
     private int currentButton = 0;
 
     [Header("フェード処理があるCanvasを格納")][SerializeField] private CS_SceneTransition sceneTransition;
+    private CS_BackGroundPlaySE backGroundPlaySE;
 
     // Start is called before the first frame update
     void Start()
     {
         inputActions = new CustomInputAction();
         inputActions.GameClear.Enable();
+        inputActions.GameClear.MoveAxis.started += SelectInput;
 
         backTitleButtonImage = GameObject.Find("GameClearBackTitleButton").GetComponent<Image>();
         backTitleButtonImage.sprite = backTitleButtonSprite[currentButton];
 
-        stageSelectButtonImage = GameObject.Find("StageSelectButton").GetComponent<Image>();
-        stageSelectButtonImage.sprite = stageSelectButtonSprite[currentButton];
+        GameObject stageSelectButtonObject = GameObject.Find("StageSelectButton");
+        if (stageSelectButtonObject != null)
+        {
+            stageSelectButtonImage = GameObject.Find("StageSelectButton").GetComponent<Image>();
+            stageSelectButtonImage.sprite = stageSelectButtonSprite[currentButton];
+        }
+
+        backGroundPlaySE = GameObject.Find("SE").GetComponent<CS_BackGroundPlaySE>();
     }
 
     // Update is called once per frame
     void Update()
     {
         //現在選択しているボタンの移動処理
-        if (inputActions.GameClear.MoveLeft.triggered)
-        {
-            currentButton--;
-            if (currentButton < 0)
-            {
-                currentButton = backTitleButtonSprite.Length - 1;
-            }
-        }
-
-        if (inputActions.GameClear.MoveRight.triggered)
-        {
-            currentButton++;
-            if (currentButton > backTitleButtonSprite.Length - 1)
-            {
-                currentButton = 0;
-            }
-        }
-
         backTitleButtonImage.sprite = backTitleButtonSprite[currentButton];
-        stageSelectButtonImage.sprite = stageSelectButtonSprite[currentButton];
+        if (stageSelectButtonImage != null) stageSelectButtonImage.sprite = stageSelectButtonSprite[currentButton];
 
         //決定ボタンでシーン遷移
         if (inputActions.GameClear.Decision.triggered)
@@ -73,5 +64,33 @@ public class CS_GameClearSelectButton : MonoBehaviour
     private void OnDestroy()
     {
         inputActions.GameClear.Disable();
+    }
+
+    void SelectInput(InputAction.CallbackContext context)
+    {
+        if (context.started)
+        {
+            float inputFloat = context.ReadValue<float>();
+
+            //現在選択しているボタンの移動処理
+            if (inputFloat > 0.0f)
+            {
+                backGroundPlaySE.PlaySE("Cusor");
+                currentButton--;
+                if (currentButton < 0)
+                {
+                    currentButton = buttonList.Length - 1;
+                }
+            }
+            else if (inputFloat < 0.0f)
+            {
+                backGroundPlaySE.PlaySE("Cusor");
+                currentButton++;
+                if (currentButton >= buttonList.Length)
+                {
+                    currentButton = 0;
+                }
+            }
+        }
     }
 }

@@ -123,7 +123,7 @@ public class GimmickSelectUI : MonoBehaviour
 
         if (isAnimating)
         {
-            animT += Time.deltaTime * animationSpeed;
+            animT += Time.unscaledDeltaTime * animationSpeed;
             float t = Mathf.Clamp01(animT);
             float ease = 1f - Mathf.Pow(1f - t, 3f);
 
