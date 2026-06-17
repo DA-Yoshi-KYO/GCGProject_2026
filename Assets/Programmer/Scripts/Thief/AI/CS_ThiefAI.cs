@@ -130,6 +130,7 @@ public class CS_ThiefAI : MonoBehaviour
     private float remainingHoldCatTime = 0.0f;
     [Tooltip("猫を捕まえている時間の初期値")]
     private float initholdCatTime = 0.0f;
+    public float read_RemainingHoldCatTime => remainingHoldCatTime;
 
     [Tooltip("アニメーション用")]
     private Animator animator;

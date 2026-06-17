@@ -38,6 +38,7 @@ public class CS_PlayerMove : MonoBehaviour
 
     [Tooltip("盗賊に捕まっているかどうか")]
     private bool isCaughtByThief;
+    float catCaughtTime = 0.0f;
 
     [Header("ジャンプ開始するまでのマージン(フレーム単位)")][SerializeField] private int jumpMerginFrame = 5;
     private int jumpMerginFrameCount = 5;
@@ -89,6 +90,14 @@ public class CS_PlayerMove : MonoBehaviour
     /// </summary>
     private void Move()
     {
+        if (catCaughtTime > 0f)
+        {
+            Debug.Log(catCaughtTime);
+            catCaughtTime -= Time.deltaTime;
+            catCaughtTime = Mathf.Max(0.0f, catCaughtTime);
+            return;
+        }
+
         // ゲームが一時停止中の場合は移動処理を行わない
         if (Time.timeScale == 0) return;
         // ジャンプ待機中は移動処理を行わない
@@ -177,6 +186,13 @@ public class CS_PlayerMove : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (catCaughtTime > 0f)
+        {
+            catCaughtTime -= Time.deltaTime;
+            catCaughtTime = Mathf.Max(0.0f, catCaughtTime);
+            return;
+        }
+
         if (isJumpMerging)
         {
             if (jumpMerginFrameCount == 0)
@@ -270,10 +286,11 @@ public class CS_PlayerMove : MonoBehaviour
     /// <summary>
     /// 盗賊に捕まったときの処理
     /// </summary>
-    public void CaughtByThief()
+    public void CaughtByThief(float holdCatTime)
     {
         // フラグを立てる
         isCaughtByThief = true;
+        catCaughtTime = holdCatTime;
     }
 
     // ---InputActionのコールバック関数---

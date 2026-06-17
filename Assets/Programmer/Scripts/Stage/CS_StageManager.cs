@@ -45,6 +45,8 @@ public class CS_StageManager : MonoBehaviour
         stageCount = 1;
 
         maxWaveCount = enemyDatabase.stageThiefDataList[stageCount - 1].waveData.Count; // データベースから現在のステージの最大ウェーブ数を取得して設定する
+
+        Time.timeScale = 1.0f; // 時間のスケールをリセットする
     }
 
     /// <summary>

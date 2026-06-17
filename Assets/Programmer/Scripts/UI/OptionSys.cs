@@ -37,9 +37,9 @@ public class OptionSys : MonoBehaviour
     {
         inputActions = new CustomInputAction();
         inputActions.Enable();
-        inputActions.Option.Up.performed += Up;
-        inputActions.Option.Down.performed += Down;
-        inputActions.Option.Decision.performed += Enter;
+        inputActions.Option.Up.started += Up;
+        inputActions.Option.Down.started += Down;
+        inputActions.Option.Decision.started += Enter;
 
         _optionManager = GameObject.Find(ManagerName);
 

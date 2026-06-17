@@ -1088,7 +1088,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe4d5e07842250146aabdd6b91d5d8bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridDivision: {x: 9, y: 12}
+  gridDivision: {x: 17, y: 20}
   gridOrigin: 0
   floorMaterials:
   - {fileID: 2100000, guid: d855334199bca864fa48d2b712994899, type: 2}
@@ -3912,7 +3912,7 @@ Transform:
   m_GameObject: {fileID: 8391551230099247085}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -9270,6 +9270,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Wall
+      objectReference: {fileID: 0}
+    - target: {fileID: 5226452918498288379, guid: 2763a0e61476fbd438db74ca20a30a1b,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5910873283231257772, guid: 2763a0e61476fbd438db74ca20a30a1b,
         type: 3}

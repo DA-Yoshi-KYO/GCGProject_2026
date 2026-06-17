@@ -549,15 +549,15 @@ public class CS_MemorySystem
                 // 探索対象との距離が、探索済みとする距離の閾値以下になっている場合は、探索対象をリセットする
                 if (distanceToTarget <= thiefAI.read_ExploredDistanceThreshold)
                 {
+                    thiefAI.CatchCat();
+
                     // CS_PlayerMoveに通知
-                    ((CS_PlayerTarget)currentTarget).transform.GetComponent<CS_PlayerMove>().CaughtByThief();
+                    ((CS_PlayerTarget)currentTarget).transform.GetComponent<CS_PlayerMove>().CaughtByThief(thiefAI.read_RemainingHoldCatTime);
 
                     // 泥棒のアニメーション状態をHuntingに変更する
                     if (thiefAI.read_Animator != null) thiefAI.read_Animator.SetBool("IsHunting", true);
 
-                    thiefAI.CatchCat();
 
-                    ClearTarget();
                     return;
                 }
             }
