@@ -9,6 +9,7 @@ public class CSV_SandStormVolume : CSV_PostProcessVolumeBase
     public Vector2Parameter speed = new Vector2Parameter(new Vector2(-0.04f, 0.7f));
     public BoolParameter isTimeUpdate = new BoolParameter(true);
     public ClampedFloatParameter frequency = new ClampedFloatParameter(1f, 0f, 5f);
+    public ColorParameter mixColor = new ColorParameter(new Color(1f, 0.75f, 0.2f, 0f));
 
     public override void Apply(MaterialPropertyBlock materialBlock)
     {
@@ -17,5 +18,6 @@ public class CSV_SandStormVolume : CSV_PostProcessVolumeBase
         materialBlock.SetVector("_Speed", speed.value);
         materialBlock.SetFloat("_IsTimeUpdate", isTimeUpdate.value ? 1f : 0f);
         materialBlock.SetFloat("_Frequency", frequency.value);
+        materialBlock.SetColor("_MixColor", mixColor.value);
     }
 }

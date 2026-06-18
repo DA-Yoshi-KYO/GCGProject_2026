@@ -51,7 +51,7 @@ public class RockGimmick : GimmickBase
 
     Vector3 startPos;
     bool isStart = false;
-    private float debugIdleOffset = 0.9f;
+    private float debugIdleOffset = 0.0f;
     private float debugUpdateOffset = 0.4f;
     private HitChecker hitting;
     private Transform visualRoot;
@@ -64,7 +64,7 @@ public class RockGimmick : GimmickBase
             isStart = true;
             startPos = transform.position;
         }
-        transform.position = new Vector3(startPos.x, startPos.y + debugIdleOffset, startPos.z);
+        transform.position = new Vector3(startPos.x, startPos.y + gimmickSize.y * 0.5f, startPos.z);
     }
 
     protected override void ActiveUpdate()

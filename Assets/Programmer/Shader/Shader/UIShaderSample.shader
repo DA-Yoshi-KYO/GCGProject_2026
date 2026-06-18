@@ -47,7 +47,7 @@ Shader "Custom/SampleShader"
             // 主にこちらを記述する
             half4 frag(v2f i) : SV_Target
             {
-                half4 color = harf4(1,1,1,1);
+                half4 color = half4(1,1,1,1);
 
                 return color;
             }
