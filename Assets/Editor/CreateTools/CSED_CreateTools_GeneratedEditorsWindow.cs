@@ -158,10 +158,74 @@ public class CSED_CreateTools_GeneratedEditorsWindow : EditorWindow
         DeleteAssetIfExists(f_record.dataScriptPath);
         RemoveGeneratedEditorRecord(f_record);
 
+        DeleteGeneratedFolderIfEmpty(f_record.assetSaveFolderPath);
+        DeleteGeneratedFolderIfEmpty(f_record.dataScriptFolderPath);
+        DeleteGeneratedFolderIfEmpty(f_record.editorScriptFolderPath);
+
+        RemoveGeneratedEditorRecord(f_record);
+
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
 
         Repaint();
+    }
+
+    /// <summary>
+    /// 指定した生成フォルダーが空の場合に削除します。
+    /// </summary>
+    /// <param name="f_folderPath">削除対象フォルダーパス</param>
+    private void DeleteGeneratedFolderIfEmpty(string f_folderPath)
+    {
+        if (string.IsNullOrEmpty(f_folderPath))
+        {
+            return;
+        }
+
+        string folderPath = f_folderPath.Replace("\\", "/").TrimEnd('/');
+
+        if (IsProtectedGeneratedFolder(folderPath))
+        {
+            return;
+        }
+
+        if (AssetDatabase.IsValidFolder(folderPath) == false)
+        {
+            return;
+        }
+
+        string[] fileSystemEntries = System.IO.Directory.GetFileSystemEntries(folderPath);
+
+        if (fileSystemEntries != null && fileSystemEntries.Length > 0)
+        {
+            return;
+        }
+
+        AssetDatabase.DeleteAsset(folderPath);
+    }
+
+    /// <summary>
+    /// 削除してはいけないCreateToolsの親フォルダーか判定します。
+    /// </summary>
+    /// <param name="f_folderPath">確認するフォルダーパス</param>
+    /// <returns>削除禁止ならtrue</returns>
+    private bool IsProtectedGeneratedFolder(string f_folderPath)
+    {
+        if (f_folderPath == "Assets")
+        {
+            return true;
+        }
+
+        if (f_folderPath == "Assets/Editor")
+        {
+            return true;
+        }
+
+        if (f_folderPath == "Assets/Editor/CreateTools")
+        {
+            return true;
+        }
+
+        return false;
     }
 
     /// <summary>

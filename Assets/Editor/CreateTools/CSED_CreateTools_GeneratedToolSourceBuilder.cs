@@ -372,16 +372,16 @@ public partial class CSED_CreateTools
 
         if (enumTypeName == "int")
         {
-            f_builder.AppendLine(
-                "        " + f_variableName + " = EditorGUILayout.IntField(\"" +
-                EscapeString(f_labelName) + "\", " + f_variableName + ");");
-
+            f_builder.AppendLine("        " + f_variableName + " = EditorGUILayout.IntField(\"" + EscapeString(f_labelName) + "\", " + f_variableName + ");");
             return;
         }
 
-        f_builder.AppendLine(
-            "        " + f_variableName + " = (" + enumTypeName + ")EditorGUILayout.EnumPopup(\"" +
-            EscapeString(f_labelName) + "\", " + f_variableName + ");");
+        f_builder.AppendLine("        EditorGUILayout.BeginHorizontal();");
+        f_builder.AppendLine("        {");
+        f_builder.AppendLine("            EditorGUILayout.LabelField(\"" + EscapeString(f_labelName) + "\", GUILayout.Width(150.0f));");
+        f_builder.AppendLine("            " + f_variableName + " = (" + enumTypeName + ")EditorGUILayout.EnumPopup(" + f_variableName + ");");
+        f_builder.AppendLine("        }");
+        f_builder.AppendLine("        EditorGUILayout.EndHorizontal();");
     }
 
     /// <summary>
@@ -527,30 +527,41 @@ public partial class CSED_CreateTools
         string f_variableName,
         string f_labelName)
     {
-        f_builder.AppendLine("        EditorGUILayout.LabelField(\"" + EscapeString(f_labelName) + "\", EditorStyles.boldLabel);");
-        f_builder.AppendLine();
-        f_builder.AppendLine("        EditorGUILayout.BeginHorizontal();");
+        f_builder.AppendLine("        EditorGUILayout.BeginVertical(EditorStyles.helpBox);");
         f_builder.AppendLine("        {");
-        f_builder.AppendLine("            if (GUILayout.Button(\"-\", GUILayout.Width(24.0f)) && " + f_variableName + ".Count > 0)");
+
+        f_builder.AppendLine("            EditorGUILayout.BeginHorizontal();");
         f_builder.AppendLine("            {");
-        f_builder.AppendLine("                " + f_variableName + ".RemoveAt(" + f_variableName + ".Count - 1);");
+        f_builder.AppendLine("                EditorGUILayout.LabelField(\"" + EscapeString(f_labelName) + "\", EditorStyles.boldLabel);");
+        f_builder.AppendLine("                GUILayout.FlexibleSpace();");
+        f_builder.AppendLine();
+
+        f_builder.AppendLine("                if (GUILayout.Button(\"-\", GUILayout.Width(24.0f)) && " + f_variableName + ".Count > 0)");
+        f_builder.AppendLine("                {");
+        f_builder.AppendLine("                    " + f_variableName + ".RemoveAt(" + f_variableName + ".Count - 1);");
+        f_builder.AppendLine("                }");
+        f_builder.AppendLine();
+
+        f_builder.AppendLine("                if (GUILayout.Button(\"+\", GUILayout.Width(24.0f)))");
+        f_builder.AppendLine("                {");
+        f_builder.AppendLine("                    " + f_variableName + ".Add(" + GetGeneratedListElementDefaultValueText(f_fieldData) + ");");
+        f_builder.AppendLine("                }");
         f_builder.AppendLine("            }");
+        f_builder.AppendLine("            EditorGUILayout.EndHorizontal();");
         f_builder.AppendLine();
-        f_builder.AppendLine("            EditorGUILayout.LabelField(" + f_variableName + ".Count.ToString(), GUILayout.Width(32.0f));");
+
+        f_builder.AppendLine("            GUILayout.Space(4.0f);");
         f_builder.AppendLine();
-        f_builder.AppendLine("            if (GUILayout.Button(\"+\", GUILayout.Width(24.0f)))");
+
+        f_builder.AppendLine("            for (int i = 0; i < " + f_variableName + ".Count; i++)");
         f_builder.AppendLine("            {");
-        f_builder.AppendLine("                " + f_variableName + ".Add(" + GetGeneratedListElementDefaultValueText(f_fieldData) + ");");
-        f_builder.AppendLine("            }");
-        f_builder.AppendLine("        }");
-        f_builder.AppendLine("        EditorGUILayout.EndHorizontal();");
-        f_builder.AppendLine();
-        f_builder.AppendLine("        for (int i = 0; i < " + f_variableName + ".Count; i++)");
-        f_builder.AppendLine("        {");
 
         AppendGeneratedListElementOnGui(f_builder, f_fieldData, f_variableName);
 
+        f_builder.AppendLine("            }");
+
         f_builder.AppendLine("        }");
+        f_builder.AppendLine("        EditorGUILayout.EndVertical();");
     }
 
     /// <summary>
@@ -570,11 +581,11 @@ public partial class CSED_CreateTools
 
             if (enumTypeName == "int")
             {
-                f_builder.AppendLine("            " + f_variableName + "[i] = EditorGUILayout.IntField(\"Element \" + i.ToString(), " + f_variableName + "[i]);");
+                f_builder.AppendLine("                " + f_variableName + "[i] = EditorGUILayout.IntField(\"Element \" + i.ToString(), " + f_variableName + "[i]);");
                 return;
             }
 
-            f_builder.AppendLine("            " + f_variableName + "[i] = (" + enumTypeName + ")EditorGUILayout.EnumPopup(\"Element \" + i.ToString(), " + f_variableName + "[i]);");
+            f_builder.AppendLine("                " + f_variableName + "[i] = (" + enumTypeName + ")EditorGUILayout.EnumPopup(\"Element \" + i.ToString(), " + f_variableName + "[i]);");
             return;
         }
 
