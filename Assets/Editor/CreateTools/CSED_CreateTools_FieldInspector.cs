@@ -203,6 +203,12 @@ public partial class CSED_CreateTools
                 CSE_CreateTools_FieldLayoutType.Select
                 };
 
+            case CSE_CreateTools_FieldType.Enum:
+                return new CSE_CreateTools_FieldLayoutType[]
+                {
+                CSE_CreateTools_FieldLayoutType.Dropdown
+                };
+
             default:
                 return new CSE_CreateTools_FieldLayoutType[]
                 {
@@ -234,6 +240,9 @@ public partial class CSED_CreateTools
 
             case CSE_CreateTools_FieldLayoutType.TextArea:
                 return "Text Area";
+
+            case CSE_CreateTools_FieldLayoutType.Dropdown:
+                return "Dropdown";
 
             case CSE_CreateTools_FieldLayoutType.Select:
                 return "Select";
@@ -275,6 +284,9 @@ public partial class CSED_CreateTools
             case CSE_CreateTools_FieldType.Script:
             case CSE_CreateTools_FieldType.GameObject:
                 return CSE_CreateTools_FieldLayoutType.Select;
+
+            case CSE_CreateTools_FieldType.Enum:
+                return CSE_CreateTools_FieldLayoutType.Dropdown;
 
             default:
                 return CSE_CreateTools_FieldLayoutType.InputField;
@@ -325,6 +337,9 @@ public partial class CSED_CreateTools
 
             case CSE_CreateTools_FieldType.Bool:
                 return f_layoutType == CSE_CreateTools_FieldLayoutType.Toggle;
+
+            case CSE_CreateTools_FieldType.Enum:
+                return f_layoutType == CSE_CreateTools_FieldLayoutType.Dropdown;
 
             case CSE_CreateTools_FieldType.ScriptableObject:
             case CSE_CreateTools_FieldType.Script:
@@ -452,6 +467,15 @@ public partial class CSED_CreateTools
                 f_fieldData.ScriptableObjectTypeScript);
         }
 
+        if (ShouldShowEnumTypeField(f_fieldData))
+        {
+            GUILayout.Space(c_FieldInspectorRowSpacing);
+
+            f_fieldData.EnumTypeScript = DrawSmallEnumTypeField(
+                "  Enum Type",
+                f_fieldData.EnumTypeScript);
+        }
+
         GUILayout.Space(c_FieldInspectorRowSpacing);
 
         f_fieldData.FieldName = DrawSmallTextField(
@@ -496,6 +520,11 @@ public partial class CSED_CreateTools
             GUILayout.Space(c_FieldInspectorSectionTopSpacing);
             DrawSelectLayoutSettings(f_fieldData);
         }
+        else if (f_fieldData.FieldLayoutType == CSE_CreateTools_FieldLayoutType.Dropdown)
+        {
+            GUILayout.Space(c_FieldInspectorSectionTopSpacing);
+            DrawDropdownLayoutSettings(f_fieldData);
+        }
 
         GUILayout.Space(c_FieldInspectorSectionTopSpacing);
 
@@ -503,6 +532,229 @@ public partial class CSED_CreateTools
         {
             Repaint();
         }
+    }
+
+    /// <summary>
+    /// Dropdown用の詳細設定を描画します。
+    /// </summary>
+    private void DrawDropdownLayoutSettings(CSED_CreateTools_FieldData f_fieldData)
+    {
+        EditorGUILayout.LabelField("Dropdown設定", EditorStyles.boldLabel);
+
+        GUILayout.Space(c_FieldInspectorSectionTitleBottomSpacing);
+
+        DrawTagNameField(f_fieldData);
+
+        GUILayout.Space(c_FieldInspectorSectionTopSpacing);
+
+        if (f_fieldData.FieldType == CSE_CreateTools_FieldType.List)
+        {
+            DrawListDefaultValueSettingsByLayout(
+                f_fieldData,
+                CSE_CreateTools_FieldLayoutType.Dropdown);
+
+            return;
+        }
+
+        DrawDefaultEnumValueSettings(f_fieldData);
+    }
+
+    /// <summary>
+    /// Enum用のDefault設定を描画します。
+    /// </summary>
+    private void DrawDefaultEnumValueSettings(CSED_CreateTools_FieldData f_fieldData)
+    {
+        EditorGUILayout.LabelField("Default設定", EditorStyles.boldLabel);
+
+        GUILayout.Space(c_FieldInspectorSectionTitleBottomSpacing);
+
+        f_fieldData.IsDefaultValueNull = DrawSmallToggle(
+            "  Default Is Null",
+            f_fieldData.IsDefaultValueNull);
+
+        GUILayout.Space(c_FieldInspectorRowSpacing);
+
+        EditorGUI.BeginDisabledGroup(f_fieldData.IsDefaultValueNull);
+        {
+            f_fieldData.DefaultValueText = DrawSmallEnumValuePopup(
+                "  Default Value",
+                f_fieldData,
+                f_fieldData.DefaultValueText);
+        }
+        EditorGUI.EndDisabledGroup();
+    }
+
+    /// <summary>
+    /// Enum値選択Popupを描画します。
+    /// </summary>
+    private string DrawSmallEnumValuePopup(
+        string f_label,
+        CSED_CreateTools_FieldData f_fieldData,
+        string f_value)
+    {
+        Rect rowRect = GetFieldInspectorRowRect();
+        Rect labelRect = GetFieldInspectorLabelRect(rowRect);
+        Rect inputRect = GetFieldInspectorInputRect(rowRect);
+
+        EditorGUI.LabelField(labelRect, f_label);
+
+        System.Type enumType = GetEnumTypeFromMonoScript(f_fieldData.EnumTypeScript);
+
+        if (enumType == null)
+        {
+            EditorGUI.LabelField(inputRect, "Enum Type未設定");
+            return f_value;
+        }
+
+        string[] enumNames = System.Enum.GetNames(enumType);
+
+        if (enumNames == null || enumNames.Length <= 0)
+        {
+            EditorGUI.LabelField(inputRect, "Enum値なし");
+            return f_value;
+        }
+
+        int selectedIndex = 0;
+
+        for (int i = 0 ; i < enumNames.Length ; i++)
+        {
+            if (enumNames[i] == f_value)
+            {
+                selectedIndex = i;
+                break;
+            }
+        }
+
+        selectedIndex = EditorGUI.Popup(
+            inputRect,
+            selectedIndex,
+            enumNames);
+
+        return enumNames[selectedIndex];
+    }
+
+    /// <summary>
+    /// Enum Type項目を表示するか判定します。
+    /// </summary>
+    private bool ShouldShowEnumTypeField(CSED_CreateTools_FieldData f_fieldData)
+    {
+        if (f_fieldData.FieldType == CSE_CreateTools_FieldType.Enum)
+        {
+            return true;
+        }
+
+        if (f_fieldData.FieldType == CSE_CreateTools_FieldType.List &&
+            f_fieldData.ListElementFieldType == CSE_CreateTools_FieldType.Enum)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Enum型スクリプトを選択するFieldを描画します。
+    /// </summary>
+    private MonoScript DrawSmallEnumTypeField(
+        string f_label,
+        MonoScript f_value)
+    {
+        Rect rowRect = GetFieldInspectorRowRect();
+        Rect labelRect = GetFieldInspectorLabelRect(rowRect);
+        Rect inputRect = GetFieldInspectorInputRect(rowRect);
+
+        EditorGUI.LabelField(labelRect, f_label);
+
+        MonoScript selectedScript = (MonoScript)EditorGUI.ObjectField(
+            inputRect,
+            f_value,
+            typeof(MonoScript),
+            false);
+
+        if (selectedScript == null)
+        {
+            return null;
+        }
+
+        if (IsEnumMonoScript(selectedScript))
+        {
+            return selectedScript;
+        }
+
+        EditorUtility.DisplayDialog(
+            "Enum Type Error",
+            "enum定義のスクリプトだけ選択できます。",
+            "OK");
+
+        return f_value;
+    }
+
+    /// <summary>
+    /// MonoScriptがenumか判定します。
+    /// </summary>
+    private bool IsEnumMonoScript(MonoScript f_script)
+    {
+        System.Type enumType = GetEnumTypeFromMonoScript(f_script);
+
+        return enumType != null && enumType.IsEnum;
+    }
+
+    /// <summary>
+    /// MonoScriptからenum型を取得します。
+    /// </summary>
+    private System.Type GetEnumTypeFromMonoScript(MonoScript f_script)
+    {
+        if (f_script == null)
+        {
+            return null;
+        }
+
+        System.Type scriptType = f_script.GetClass();
+
+        if (scriptType != null && scriptType.IsEnum)
+        {
+            return scriptType;
+        }
+
+        string assetPath = AssetDatabase.GetAssetPath(f_script);
+        string scriptName = System.IO.Path.GetFileNameWithoutExtension(assetPath);
+
+        System.Reflection.Assembly[] assemblies =
+            System.AppDomain.CurrentDomain.GetAssemblies();
+
+        for (int i = 0 ; i < assemblies.Length ; i++)
+        {
+            System.Type[] types = null;
+
+            try
+            {
+                types = assemblies[i].GetTypes();
+            }
+            catch (System.Reflection.ReflectionTypeLoadException exception)
+            {
+                types = exception.Types;
+            }
+
+            if (types == null)
+            {
+                continue;
+            }
+
+            for (int j = 0 ; j < types.Length ; j++)
+            {
+                if (types[j] == null)
+                {
+                    continue;
+                }
+
+                if (types[j].IsEnum && types[j].Name == scriptName)
+                {
+                    return types[j];
+                }
+            }
+        }
+
+        return null;
     }
 
     /// <summary>
@@ -940,7 +1192,35 @@ public partial class CSED_CreateTools
             return;
         }
 
+        if (f_layoutType == CSE_CreateTools_FieldLayoutType.Dropdown)
+        {
+            DrawListDefaultEnumElement(f_fieldData, f_index);
+            return;
+        }
+
         DrawListDefaultSingleValueElement(f_fieldData, f_index);
+    }
+
+    /// <summary>
+    /// ListのEnum要素を描画します。
+    /// </summary>
+    private void DrawListDefaultEnumElement(
+        CSED_CreateTools_FieldData f_fieldData,
+        int f_index)
+    {
+        EnsureListDefaultElementValueList(f_fieldData);
+
+        if (f_index < 0 ||
+            f_index >= f_fieldData.ListDefaultElementValueTextList.Count)
+        {
+            return;
+        }
+
+        f_fieldData.ListDefaultElementValueTextList[f_index] =
+            DrawSmallEnumValuePopup(
+                "  Element " + f_index.ToString(),
+                f_fieldData,
+                f_fieldData.ListDefaultElementValueTextList[f_index]);
     }
 
     /// <summary>
@@ -2058,6 +2338,7 @@ public partial class CSED_CreateTools
         "Vector3",
         "string",
         "bool",
+        "enum",
         "ScriptableObject",
         "Script",
         "GameObject"
@@ -2073,6 +2354,7 @@ public partial class CSED_CreateTools
         CSE_CreateTools_FieldType.Vector3,
         CSE_CreateTools_FieldType.String,
         CSE_CreateTools_FieldType.Bool,
+        CSE_CreateTools_FieldType.Enum,
         CSE_CreateTools_FieldType.ScriptableObject,
         CSE_CreateTools_FieldType.Script,
         CSE_CreateTools_FieldType.GameObject

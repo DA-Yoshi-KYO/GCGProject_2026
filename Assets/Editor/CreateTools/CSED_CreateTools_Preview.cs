@@ -539,6 +539,10 @@ public partial class CSED_CreateTools
                 DrawPreviewTextArea(f_fieldData);
                 break;
 
+            case CSE_CreateTools_FieldLayoutType.Dropdown:
+                DrawPreviewDropdown(f_fieldData);
+                break;
+
             case CSE_CreateTools_FieldLayoutType.Select:
                 DrawPreviewSelect(f_fieldData);
                 break;
@@ -547,6 +551,74 @@ public partial class CSED_CreateTools
                 DrawPreviewInputField(f_fieldData);
                 break;
         }
+    }
+
+    /// <summary>
+    /// Dropdownの見本を描画します。
+    /// </summary>
+    /// <param name="f_fieldData">描画対象FieldData</param>
+    private void DrawPreviewDropdown(CSED_CreateTools_FieldData f_fieldData)
+    {
+        if (f_fieldData.FieldType == CSE_CreateTools_FieldType.Enum)
+        {
+            DrawPreviewEnumDropdown(f_fieldData);
+            return;
+        }
+
+        EditorGUILayout.LabelField(
+            GetPreviewLabel(f_fieldData),
+            "Dropdown未対応Type");
+    }
+
+    /// <summary>
+    /// Enum Dropdownの見本を描画します。
+    /// </summary>
+    /// <param name="f_fieldData">描画対象FieldData</param>
+    private void DrawPreviewEnumDropdown(CSED_CreateTools_FieldData f_fieldData)
+    {
+        string label = GetPreviewLabel(f_fieldData);
+
+        System.Type enumType = GetEnumTypeFromMonoScript(f_fieldData.EnumTypeScript);
+
+        if (enumType == null)
+        {
+            EditorGUILayout.Popup(
+                label,
+                0,
+                new string[] { "Enum Type未設定" });
+
+            return;
+        }
+
+        string[] enumNames = System.Enum.GetNames(enumType);
+
+        if (enumNames == null || enumNames.Length <= 0)
+        {
+            EditorGUILayout.Popup(
+                label,
+                0,
+                new string[] { "Enum値なし" });
+
+            return;
+        }
+
+        int selectedIndex = 0;
+
+        for (int i = 0 ; i < enumNames.Length ; i++)
+        {
+            if (enumNames[i] == f_fieldData.DefaultValueText)
+            {
+                selectedIndex = i;
+                break;
+            }
+        }
+
+        selectedIndex = EditorGUILayout.Popup(
+            label,
+            selectedIndex,
+            enumNames);
+
+        f_fieldData.DefaultValueText = enumNames[selectedIndex];
     }
 
     /// <summary>
@@ -677,8 +749,15 @@ public partial class CSED_CreateTools
         CSED_CreateTools_FieldData f_fieldData,
         int f_index)
     {
-        if (f_index < 0 || f_index >= f_fieldData.ListDefaultElementValueTextList.Count)
+        if (f_index < 0 ||
+            f_index >= f_fieldData.ListDefaultElementValueTextList.Count)
         {
+            return;
+        }
+
+        if (f_fieldData.ListElementFieldType == CSE_CreateTools_FieldType.Enum)
+        {
+            DrawPreviewListEnumElement(f_fieldData, f_index);
             return;
         }
 
@@ -719,6 +798,61 @@ public partial class CSED_CreateTools
         }
 
         DrawPreviewListInputFieldElement(f_fieldData, f_index);
+    }
+
+    /// <summary>
+    /// ListのEnum要素プレビューを描画します。
+    /// </summary>
+    /// <param name="f_fieldData">描画対象FieldData</param>
+    /// <param name="f_index">要素番号</param>
+    private void DrawPreviewListEnumElement(
+        CSED_CreateTools_FieldData f_fieldData,
+        int f_index)
+    {
+        string label = "Element " + f_index.ToString();
+
+        System.Type enumType = GetEnumTypeFromMonoScript(f_fieldData.EnumTypeScript);
+
+        if (enumType == null)
+        {
+            EditorGUILayout.Popup(
+                label,
+                0,
+                new string[] { "Enum Type未設定" });
+
+            return;
+        }
+
+        string[] enumNames = System.Enum.GetNames(enumType);
+
+        if (enumNames == null || enumNames.Length <= 0)
+        {
+            EditorGUILayout.Popup(
+                label,
+                0,
+                new string[] { "Enum値なし" });
+
+            return;
+        }
+
+        int selectedIndex = 0;
+
+        for (int i = 0 ; i < enumNames.Length ; i++)
+        {
+            if (enumNames[i] == f_fieldData.ListDefaultElementValueTextList[f_index])
+            {
+                selectedIndex = i;
+                break;
+            }
+        }
+
+        selectedIndex = EditorGUILayout.Popup(
+            label,
+            selectedIndex,
+            enumNames);
+
+        f_fieldData.ListDefaultElementValueTextList[f_index] =
+            enumNames[selectedIndex];
     }
 
     /// <summary>
