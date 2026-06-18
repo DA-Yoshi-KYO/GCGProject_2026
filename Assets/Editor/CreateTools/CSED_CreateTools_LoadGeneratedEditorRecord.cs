@@ -185,6 +185,7 @@ public partial class CSED_CreateTools
         saveData.sliderMaxValueText = f_fieldData.SliderMaxValueText;
 
         saveData.scriptableObjectTypeScript = f_fieldData.ScriptableObjectTypeScript;
+        saveData.enumTypeScript = f_fieldData.EnumTypeScript;
         saveData.defaultScriptableObjectValue = f_fieldData.DefaultScriptableObjectValue;
         saveData.defaultScriptValue = f_fieldData.DefaultScriptValue;
         saveData.defaultGameObjectValue = f_fieldData.DefaultGameObjectValue;
@@ -265,6 +266,7 @@ public partial class CSED_CreateTools
         fieldData.SliderMaxValueText = f_saveData.sliderMaxValueText;
 
         fieldData.ScriptableObjectTypeScript = f_saveData.scriptableObjectTypeScript;
+        fieldData.EnumTypeScript = f_saveData.enumTypeScript;
         fieldData.DefaultScriptableObjectValue = f_saveData.defaultScriptableObjectValue;
         fieldData.DefaultScriptValue = f_saveData.defaultScriptValue;
         fieldData.DefaultGameObjectValue = f_saveData.defaultGameObjectValue;

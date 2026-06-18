@@ -45,6 +45,7 @@ public class CSED_CreateTools_FieldDataSaveData
     public string sliderMaxValueText;
 
     public MonoScript scriptableObjectTypeScript;
+    public MonoScript enumTypeScript;
     public ScriptableObject defaultScriptableObjectValue;
     public MonoScript defaultScriptValue;
     public GameObject defaultGameObjectValue;

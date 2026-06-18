@@ -20,7 +20,7 @@ public class CSED_NewToolWindow : EditorWindow, IHasCustomMenu
     /// <summary>
     /// newEnumField01です。
     /// </summary>
-    private CSE_EffectType newEnumField01 = CSE_EffectType.None;
+    private CSE_EffectType newEnumField01 = CSE_EffectType.VAT;
 
     /// <summary>
     /// メイン画面のスクロール位置です。
