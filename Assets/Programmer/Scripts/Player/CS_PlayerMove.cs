@@ -35,13 +35,16 @@ public class CS_PlayerMove : MonoBehaviour
     private float createFootPrintTime = 100.0f;
 
     private Animator animator; // プレイヤーのアニメーター
+    [Header("移動→Idleに遷移するまでの時間")]
+    [SerializeField] float transMoveToIdleTime = 3f;
+    float transTimer = 0f;
 
     [Tooltip("盗賊に捕まっているかどうか")]
     private bool isCaughtByThief;
     float catCaughtTime = 0.0f;
 
-    [Header("ジャンプ開始するまでのマージン(フレーム単位)")][SerializeField] private int jumpMerginFrame = 5;
-    private int jumpMerginFrameCount = 5;
+    [Header("ジャンプ開始するまでのマージン(フレーム単位)")][SerializeField] private int jumpMerginFrame = 2;
+    private int jumpMerginFrameCount = 2;
     bool isJumpMerging = false;
 
     // Start is called before the first frame update
@@ -178,10 +181,30 @@ public class CS_PlayerMove : MonoBehaviour
 
         // CharacterControllerを使用して移動
         controller.Move(velocity * Time.deltaTime);
-
-        Vector2 verocityXZ = new Vector2(velocity.x, velocity.z);
+        
+        Vector2 velocityXZ = new Vector2(velocity.x, velocity.z);
+        bool isMove = velocityXZ.sqrMagnitude > 0;
+        if (controller.isGrounded)
+        {
+            if (isMove)
+            {
+                transTimer = 0f;
+                animator.speed = 1f;
+                animator.SetBool("IsMoving", true);
+            }
+            else
+            {
+                transTimer += Time.deltaTime;
+                if (transTimer > transMoveToIdleTime)
+                {
+                    transTimer = 0f;
+                    animator.SetBool("IsMoving", false);
+                    animator.speed = 1f;
+                }
+                else animator.speed = 0f;
+            }
+        }
         animator.SetBool("IsGround", controller.isGrounded);
-        animator.SetBool("IsMoving", verocityXZ.sqrMagnitude > 0);
     }
 
     private void FixedUpdate()
@@ -202,10 +225,6 @@ public class CS_PlayerMove : MonoBehaviour
                 jumpMerginFrameCount = jumpMerginFrame;
             }
             else jumpMerginFrameCount--;
-        }
-        else
-        {
-
         }
     }
 
