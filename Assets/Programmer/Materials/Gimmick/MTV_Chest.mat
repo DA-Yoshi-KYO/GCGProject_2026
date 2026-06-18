@@ -36,16 +36,28 @@ Material:
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
-    m_TexEnvs: []
+    m_TexEnvs:
+    - _ColorMap:
+        m_Texture: {fileID: 2800000, guid: dc4bb227d80aee64f8abf1b9c68284bc, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NormalMap:
+        m_Texture: {fileID: 2800000, guid: 174f982c471a7f546be94917c475fa8a, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ORMMap:
+        m_Texture: {fileID: 2800000, guid: 6e2dea49c688f264da929d074a429a3b, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
     - _Alpha: 1
     - _UseBaseColor: 0
-    - _UseColorMap: 0
-    - _UseMetallic: 0
-    - _UseNormalMap: 0
-    - _UseOcclusion: 0
-    - _UseSmoothness: 0
+    - _UseColorMap: 1
+    - _UseMetallic: 1
+    - _UseNormalMap: 1
+    - _UseOcclusion: 1
+    - _UseSmoothness: 1
     - _UseToon: 0
     m_Colors:
     - _BaseColor: {r: 0, g: 0.2243948, b: 1, a: 1}
