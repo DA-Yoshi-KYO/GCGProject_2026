@@ -252,10 +252,9 @@ public class GimmickManager : MonoBehaviour
     //=========================================================
     // ギミックのクラス単位での取得
     //=========================================================
-    GimmickBase GetGimmick(Gimmick gimmickTag, int Number)
+    List<ActiveGimmick> GetGimmickList()
     {
-
-
+        return activeGimmicks;
     }
 
     //=========================================================
