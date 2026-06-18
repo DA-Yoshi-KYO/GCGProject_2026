@@ -47,6 +47,9 @@ public partial class CSED_CreateTools
             case CSE_CreateTools_FieldType.Bool:
                 return "bool";
 
+            case CSE_CreateTools_FieldType.Enum:
+                return "Enum";
+
             case CSE_CreateTools_FieldType.ScriptableObject:
                 return "ScriptableObject";
 
@@ -87,6 +90,9 @@ public partial class CSED_CreateTools
 
             case CSE_CreateTools_FieldLayoutType.TextArea:
                 return "Text Area";
+
+            case CSE_CreateTools_FieldLayoutType.Dropdown:
+                return "Dropdown";
 
             default:
                 return "Unknown";

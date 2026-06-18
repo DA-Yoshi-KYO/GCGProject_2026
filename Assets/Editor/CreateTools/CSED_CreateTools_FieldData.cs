@@ -156,6 +156,11 @@ public class CSED_CreateTools_FieldData
     public string SliderMaxValueText { get; set; }
 
     /// <summary>
+    /// Enum型として使用するスクリプトです。
+    /// </summary>
+    public MonoScript EnumTypeScript { get; set; }
+
+    /// <summary>
     /// 変数データを作成します。
     /// </summary>
     /// <param name="f_fieldType">変数の型</param>
@@ -177,6 +182,7 @@ public class CSED_CreateTools_FieldData
         ListDefaultMaxValueTextList = new List<string>();
         ListDefaultObjectValueList = new List<UnityEngine.Object>();
 
+        EnumTypeScript = null;
         ScriptableObjectTypeScript = null;
         DefaultScriptableObjectValue = null;
         DefaultScriptValue = null;

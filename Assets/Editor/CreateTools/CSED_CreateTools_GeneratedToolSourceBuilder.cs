@@ -335,6 +335,17 @@ public partial class CSED_CreateTools
             return;
         }
 
+        if (f_fieldData.FieldLayoutType == CSE_CreateTools_FieldLayoutType.Dropdown)
+        {
+            AppendGeneratedEnumDropdownOnGui(
+                f_builder,
+                f_fieldData,
+                f_variableName,
+                f_labelName);
+
+            return;
+        }
+
         if (f_fieldData.FieldLayoutType == CSE_CreateTools_FieldLayoutType.Select)
         {
             f_builder.AppendLine("        " + f_variableName + " = (" + GetGeneratedFieldTypeName(f_fieldData) + ")EditorGUILayout.ObjectField(\"" + EscapeString(f_labelName) + "\", " + f_variableName + ", typeof(" + GetGeneratedFieldTypeName(f_fieldData) + "), false);");
@@ -342,6 +353,35 @@ public partial class CSED_CreateTools
         }
 
         AppendGeneratedInputFieldOnGui(f_builder, f_fieldData, f_variableName, f_labelName);
+    }
+
+    /// <summary>
+    /// 生成Editor用のEnum Dropdown描画処理を追加します。
+    /// </summary>
+    /// <param name="f_builder">StringBuilder</param>
+    /// <param name="f_fieldData">FieldData</param>
+    /// <param name="f_variableName">変数名</param>
+    /// <param name="f_labelName">表示名</param>
+    private void AppendGeneratedEnumDropdownOnGui(
+        StringBuilder f_builder,
+        CSED_CreateTools_FieldData f_fieldData,
+        string f_variableName,
+        string f_labelName)
+    {
+        string enumTypeName = GetGeneratedEnumTypeName(f_fieldData);
+
+        if (enumTypeName == "int")
+        {
+            f_builder.AppendLine(
+                "        " + f_variableName + " = EditorGUILayout.IntField(\"" +
+                EscapeString(f_labelName) + "\", " + f_variableName + ");");
+
+            return;
+        }
+
+        f_builder.AppendLine(
+            "        " + f_variableName + " = (" + enumTypeName + ")EditorGUILayout.EnumPopup(\"" +
+            EscapeString(f_labelName) + "\", " + f_variableName + ");");
     }
 
     /// <summary>
@@ -524,6 +564,20 @@ public partial class CSED_CreateTools
         CSED_CreateTools_FieldData f_fieldData,
         string f_variableName)
     {
+        if (f_fieldData.ListElementFieldType == CSE_CreateTools_FieldType.Enum)
+        {
+            string enumTypeName = GetGeneratedEnumTypeName(f_fieldData);
+
+            if (enumTypeName == "int")
+            {
+                f_builder.AppendLine("            " + f_variableName + "[i] = EditorGUILayout.IntField(\"Element \" + i.ToString(), " + f_variableName + "[i]);");
+                return;
+            }
+
+            f_builder.AppendLine("            " + f_variableName + "[i] = (" + enumTypeName + ")EditorGUILayout.EnumPopup(\"Element \" + i.ToString(), " + f_variableName + "[i]);");
+            return;
+        }
+
         if (f_fieldData.FieldLayoutType == CSE_CreateTools_FieldLayoutType.Toggle)
         {
             f_builder.AppendLine("            " + f_variableName + "[i] = EditorGUILayout.Toggle(\"Element \" + i.ToString(), " + f_variableName + "[i]);");
@@ -625,6 +679,9 @@ public partial class CSED_CreateTools
             case CSE_CreateTools_FieldType.Bool:
                 return "bool";
 
+            case CSE_CreateTools_FieldType.Enum:
+                return GetGeneratedEnumTypeName(f_fieldData);
+
             case CSE_CreateTools_FieldType.ScriptableObject:
                 return GetGeneratedScriptableObjectTypeName(f_fieldData);
 
@@ -672,6 +729,9 @@ public partial class CSED_CreateTools
             case CSE_CreateTools_FieldType.Bool:
                 return "bool";
 
+            case CSE_CreateTools_FieldType.Enum:
+                return GetGeneratedEnumTypeName(f_fieldData);
+
             case CSE_CreateTools_FieldType.ScriptableObject:
                 return GetGeneratedScriptableObjectTypeName(f_fieldData);
 
@@ -684,6 +744,23 @@ public partial class CSED_CreateTools
             default:
                 return "string";
         }
+    }
+
+    /// <summary>
+    /// 生成用のEnum型名を取得します。
+    /// </summary>
+    /// <param name="f_fieldData">FieldData</param>
+    /// <returns>Enum型名</returns>
+    private string GetGeneratedEnumTypeName(CSED_CreateTools_FieldData f_fieldData)
+    {
+        System.Type enumType = GetEnumTypeFromMonoScript(f_fieldData.EnumTypeScript);
+
+        if (enumType == null)
+        {
+            return "int";
+        }
+
+        return enumType.Name;
     }
 
     /// <summary>
@@ -718,6 +795,13 @@ public partial class CSED_CreateTools
         if (f_fieldData.FieldType == CSE_CreateTools_FieldType.List)
         {
             return GetGeneratedListDefaultValueText(f_fieldData);
+        }
+
+        if (f_fieldData.FieldType == CSE_CreateTools_FieldType.Enum)
+        {
+            return GetGeneratedEnumValueText(
+                f_fieldData,
+                f_fieldData.DefaultValueText);
         }
 
         if (f_fieldData.IsDefaultValueNull)
@@ -779,9 +863,49 @@ public partial class CSED_CreateTools
             case CSE_CreateTools_FieldType.Bool:
                 return GetGeneratedBoolText(f_fieldData.DefaultValueText);
 
+            case CSE_CreateTools_FieldType.Enum:
+                return GetGeneratedEnumValueText(
+                    f_fieldData,
+                    f_fieldData.DefaultValueText);
+
             default:
                 return "null";
         }
+    }
+
+    /// <summary>
+    /// 生成用のEnum初期値文字列を取得します。
+    /// </summary>
+    /// <param name="f_fieldData">FieldData</param>
+    /// <param name="f_value">Enum値名</param>
+    /// <returns>生成コード用Enum値</returns>
+    private string GetGeneratedEnumValueText(
+        CSED_CreateTools_FieldData f_fieldData,
+        string f_value)
+    {
+        System.Type enumType = GetEnumTypeFromMonoScript(f_fieldData.EnumTypeScript);
+
+        if (enumType == null)
+        {
+            return "0";
+        }
+
+        string enumTypeName = enumType.Name;
+        string[] enumNames = System.Enum.GetNames(enumType);
+
+        if (enumNames == null || enumNames.Length <= 0)
+        {
+            return "0";
+        }
+
+        string enumValueName = f_value;
+
+        if (string.IsNullOrEmpty(enumValueName))
+        {
+            enumValueName = enumNames[0];
+        }
+
+        return enumTypeName + "." + enumValueName;
     }
 
     /// <summary>
@@ -892,6 +1016,11 @@ public partial class CSED_CreateTools
             case CSE_CreateTools_FieldType.Bool:
                 return GetGeneratedBoolText(f_fieldData.ListDefaultElementValueTextList[f_index]);
 
+            case CSE_CreateTools_FieldType.Enum:
+                return GetGeneratedEnumValueText(
+                    f_fieldData,
+                    f_fieldData.ListDefaultElementValueTextList[f_index]);
+
             default:
                 return "null";
         }
@@ -929,6 +1058,11 @@ public partial class CSED_CreateTools
 
             case CSE_CreateTools_FieldType.Bool:
                 return "false";
+
+            case CSE_CreateTools_FieldType.Enum:
+                return GetGeneratedEnumValueText(
+                    f_fieldData,
+                    string.Empty);
 
             default:
                 return "null";
