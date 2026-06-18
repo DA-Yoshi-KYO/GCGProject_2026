@@ -1,7 +1,8 @@
 //|| PitfallGimmick.cs ||――――――――――
 //|| 作者 : 大瀧蓮
 //||
-//|| 更新 : 2026/06/081 作成開始
+//|| 更新 : 2026/06/08 作成開始
+//|| 
 //||―――――――――――――――――――――
 //|| 概要 : 落とし穴ギミック
 //||        一定時間敵拘束可能にする
@@ -9,7 +10,6 @@
 //||―――――――――――――――――――――
 
 using UnityEngine;
-
 public class PitfallGimmick : GimmickBase
 {
     [SerializeField]
@@ -31,7 +31,6 @@ public class PitfallGimmick : GimmickBase
             isFirstActive = true;
             DeleteHitChecker();
         }
-
         activeTime -= Time.deltaTime;
         if (activeTime <= 0)
         {//Active状態の時間が終わったら壊れる

@@ -1,38 +1,55 @@
+//|| NyakiGimmick.cs ||―――――――――――――――――
+//|| 作者 : 大瀧蓮
+//||
+//|| 更新 : 2026/未確認 作成開始
+//||        2026/0618   リファクタ(大瀧)
+//||
+//|| ――――――――――――――――――――――――――
+//|| 
+//|| 概要 : にゃきによって広範囲に渡り、
+//||        泥棒にダメージを与えられる。
+//||        
+//||        設置→インタラクトではなく
+//||        設置＝インタラクトなため、
+//||        設置した瞬間アクティブになるものとする。
+//||
+//|| ――――――――――――――――――――――――――
+
 using UnityEngine;
 using UnityEngine.Rendering;
-
 public class NyakiGimmick : GimmickBase
 {
-    //[SerializeField]
     private Volume volume;
 
-    [Header("校歌時間")]
+    [Header("効果時間")]
     [SerializeField]
     private float time;
 
     CSV_CatEye catEye;
     private bool isFirstActive = false;
 
-    // Start is called before the first frame update
     void Start()
     {
-        volume = FindFirstObjectByType<Volume>();
+        //設置ではなく発動方式なため
+        //設置＝発動となる
         gimmickState = GimmickState.Active;
+        volume = FindFirstObjectByType<Volume>();
     }
 
-    // Update is called once per frame
     protected override void ActiveUpdate()
     {
         if (!isFirstActive)
         {
             isFirstActive = true;
+            //エフェクト発生
             if (volume.profile.TryGet(out catEye))
             {
                 catEye.active = true;
                 catEye.isEnabled.value = true;
             }
+            //当たり判定追加
+            SetHitChecker(transform.position);
         }
-        SetHitChecker(transform.position);
         //時間でエフェクト消去
         time -= Time.deltaTime;
         if(time <= 0)
@@ -43,6 +60,7 @@ public class NyakiGimmick : GimmickBase
 
     protected override void BrokenUpdate()
     {
+        //破壊関数
         if (catEye != null)
         {
             catEye.isEnabled.value = false;

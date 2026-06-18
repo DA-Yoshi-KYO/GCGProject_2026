@@ -10,8 +10,6 @@
 //   ギミックの前方に設置する
 // ・当たり判定の大きさは、HitRangeX, HitRangeY
 
-
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class PotGimmick : GimmickBase
@@ -60,21 +58,20 @@ public class PotGimmick : GimmickBase
             //インタラクト時転がす
             float interactVecX = 0f;
             float interactVecZ = 0f;
-            if (gimmickDirection == GimmickDirection.Up)
-            {//Z+
-                interactVecZ = -roomGrid.gridSize.x;
-            }
-            else if (gimmickDirection == GimmickDirection.Down)
-            {//Z-
-                interactVecZ = roomGrid.gridSize.x;
-            }
-            else if (gimmickDirection == GimmickDirection.Left)
-            {//X-
-                interactVecX = roomGrid.gridSize.x;
-            }
-            else if (gimmickDirection == GimmickDirection.Right)
-            {//X+
-                interactVecX = -roomGrid.gridSize.x;
+            switch (gimmickDirection)
+            {
+                case GimmickDirection.Up:
+                    interactVecZ = -roomGrid.gridSize.x;
+                    break;
+                case GimmickDirection.Down:
+                    interactVecZ = roomGrid.gridSize.x;
+                    break;
+                case GimmickDirection.Left:
+                    interactVecX = roomGrid.gridSize.x;
+                    break;
+                case GimmickDirection.Right:
+                    interactVecX = -roomGrid.gridSize.x;
+                    break;
             }
             Vector3 originPos = transform.position + new Vector3(interactVecX, transform.position.y, interactVecZ);
             initPositionY = originPos.y;
@@ -94,6 +91,7 @@ public class PotGimmick : GimmickBase
             gimmickState = GimmickState.Broken;
         }
 
+        //壊れなかったとき用の時間破壊
         activeTime -= Time.deltaTime;
         if (activeTime <= 0)
         {

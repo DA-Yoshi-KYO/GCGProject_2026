@@ -346,16 +346,13 @@ public class CS_PlayerAction : MonoBehaviour
 
         // グリッド配置
         if (roomGrid == null)
-        {
             Debug.LogError("この部屋の床にRoomGridがついていません");
-        }
+
         Vector3 setPos = CalculateGimmickSetPosition();
 
         // 設置処理 //
         if (!roomGrid.SetGimmickInGrid(setPos, gimmick))
-        {
             return;
-        }
 
         // =========================
         // 実際に生成されたインスタンス取得
