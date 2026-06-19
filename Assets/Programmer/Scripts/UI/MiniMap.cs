@@ -17,6 +17,7 @@ public class MiniMap : MonoBehaviour
 
     private GameObject player;
     private GameObject parentThief;
+    private GimmickManager gimmickManager;
 
     struct MiniMapObjectInfo
     {
@@ -42,6 +43,7 @@ public class MiniMap : MonoBehaviour
     {
         player = GameObject.Find(playerTag);
         parentThief = GameObject.Find(thiefTag);
+  
         createRoomPints = GameObject.Find("RoomCreatePoints");
 
         miniMapObjectInfo = new List<MiniMapObjectInfo>(targetObjects.Length);
@@ -95,9 +97,14 @@ public class MiniMap : MonoBehaviour
             Debug.LogError("Thief found");
             return;
         }
+        if(gimmickManager == null)
+        {
+            gimmickManager = player.GetComponent<GimmickManager>();
+            return;
+        }
 
         // フラグのリセット
-        for(int i = 0; i < miniMapInfo.Count; i++)
+        for (int i = 0; i < miniMapInfo.Count; i++)
             {
                 MiniMapInfo info = miniMapInfo[i];
                 info.isPlayerIconActive = false;
