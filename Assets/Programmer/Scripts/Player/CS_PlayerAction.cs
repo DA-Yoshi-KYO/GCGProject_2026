@@ -535,9 +535,28 @@ public class CS_PlayerAction : MonoBehaviour
 
             }
         }
+        
 
         settingPos = spawnPos;
         return spawnPos;
+    }
+
+    private void DrawPreviewGimmick()
+    {
+        if (settingPos.magnitude == float.PositiveInfinity) return;
+        GameObject currentRoom = playerData.currentRoomData.GetPlayerFloorData();
+
+        // デバッグ用のギミック設置位置描画
+        if (currentRoom == null) { Debug.Log("currentRoomError_DDGS"); return; }
+        if (gimmickKind.Count == 0) { Debug.Log("gimmickKind.Count_DDGS"); return; }
+
+        var roomGrid = currentRoom.GetComponent<RoomGrid>();
+        GimmickBase gimmick = gimmickKind[currentGimmickIndex].GetComponent<GimmickBase>();
+
+        // ギミックの設置位置を計算
+        if (settingPos.magnitude == float.PositiveInfinity) return;
+
+
     }
 
     // ===== staticで保持※デバッグ用=====

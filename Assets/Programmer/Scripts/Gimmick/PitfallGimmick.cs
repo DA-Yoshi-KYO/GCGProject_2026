@@ -17,7 +17,7 @@ public class PitfallGimmick : GimmickBase
 
     private bool isFirstActive = false;
 
-    void Start()
+    protected override void IdleUpdate()
     {
         //Idle状態で当たり判定を設定して
         //当たったらActive状態にする

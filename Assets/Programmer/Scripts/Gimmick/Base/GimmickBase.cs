@@ -15,6 +15,7 @@ public enum Gimmick
 
 public enum GimmickState
 {
+    Preview,
     Spawn,
     Idle,
     Search,
@@ -97,6 +98,10 @@ public class GimmickBase : MonoBehaviour
     private float brokenAlpha = 1.0f;
     private bool brokenFadeStart = false;
 
+    [Header("プレビュー時の透明度")]
+    [SerializeField]
+    private float PreviewTranslucent;
+
     protected Vector2Int gimmickGridPos;
     protected Vector3 targetPoint;
     protected Vector3 currentPoint;
@@ -105,7 +110,7 @@ public class GimmickBase : MonoBehaviour
     protected BoxCollider searchColliderX;
     protected BoxCollider searchColliderZ;
     protected CS_3DPlaySE gimmickSound;
-    protected int roomIndex;
+    protected int roomIndex = -1;
 
     private HitChecker hit;
     public HitChecker read_Hit => hit;
@@ -136,7 +141,6 @@ public class GimmickBase : MonoBehaviour
         );
 
         InitMaterials();
-        roomIndex = CS_RoomCreatePointRaycast.GetRayRoomCreatePoint(this.gameObject).transform.GetSiblingIndex() + 1;
     }
 
     private void InitMaterials()
@@ -408,6 +412,10 @@ public class GimmickBase : MonoBehaviour
     {
         switch (gimmickState)
         {
+            case GimmickState.Preview:
+                PreviewUpdate();
+                break;
+
             case GimmickState.Spawn:
                 SpawnUpdate();
                 break;
@@ -431,6 +439,17 @@ public class GimmickBase : MonoBehaviour
             case GimmickState.Broken:
                 BrokenUpdate();
                 break;
+        }
+    }
+
+    protected virtual void PreviewUpdate()
+    {
+        foreach (Material mat in materials)
+        {
+            if (mat != null && mat.HasProperty("_Alpha"))
+            {
+                mat.SetFloat("_Alpha", PreviewTranslucent);
+            }
         }
     }
 
@@ -462,6 +481,7 @@ public class GimmickBase : MonoBehaviour
         {
             transform.position = targetPoint;
             gimmickState = GimmickState.Idle;
+            roomIndex = CS_RoomCreatePointRaycast.GetRayRoomCreatePoint(this.gameObject).transform.GetSiblingIndex() + 1;
         }
     }
 
