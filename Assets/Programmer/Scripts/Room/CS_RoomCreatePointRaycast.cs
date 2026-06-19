@@ -139,7 +139,7 @@ public static class CS_RoomCreatePointRaycast
             }
             else
             {
-                return treasureParent.parent.parent.parent.GetSiblingIndex() + 1;
+                return treasureParent.parent.parent.parent.GetSiblingIndex();
             }
         }
 
