@@ -314,6 +314,13 @@ public class CS_PlayerCamera : MonoBehaviour
         //更新を再開
         Time.timeScale = 1.0f;
 
+        ChangeCamera();
+       
+        transitionCamera = TransitionCamera.None;   // カメラの遷移終了
+    }
+
+    public void ChangeCamera()
+    {
         // 動かした前のカメラを無効にして、元の位置に戻す
         roomCamera = roomCameraObject.GetComponent<CS_RoomCamera>();
         roomCameraObject.GetComponent<Camera>().enabled = false;
@@ -330,8 +337,6 @@ public class CS_PlayerCamera : MonoBehaviour
         roomCameraObject = currentRoom.transform.GetComponentInChildren<Camera>().gameObject;
         roomCamera = roomCameraObject.GetComponent<CS_RoomCamera>();
         roomCameraObject.GetComponent<Camera>().enabled = true;
-       
-        transitionCamera = TransitionCamera.None;   // カメラの遷移終了
     }
 
     //========================
