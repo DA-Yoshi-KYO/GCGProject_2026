@@ -266,6 +266,9 @@ public class HitChecker : MonoBehaviour
                             parentGameObject.GetComponent<PitfallGimmick>();
                             parentGameObject.GetComponent<PitfallGimmick>().gimmickState = GimmickState.Active;
                             break;
+                        case Gimmick.HyperVoice:
+                            EnemyDame(enemy, effectDamage, false, effectEnemies[i], effect);
+                            break;
                     }
                 }
             }
@@ -312,6 +315,9 @@ public class HitChecker : MonoBehaviour
                             thiefGA.PitFallStart(transform.position);
                             parentGameObject.GetComponent<PitfallGimmick>();
                             parentGameObject.GetComponent<PitfallGimmick>().gimmickState = GimmickState.Active;
+                            break;
+                        case Gimmick.HyperVoice:
+                            EnemyDame(enemy, hitDamage, true, hitEnemies[i], hit);
                             break;
                     }
                 }
