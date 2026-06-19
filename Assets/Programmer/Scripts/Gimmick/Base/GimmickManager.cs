@@ -1,12 +1,15 @@
-//|| GimmickManager.cs ||――――――――――――
+//|| GimmickManager.cs ||―――――――――――――――――――――――――――――――
 //|| 作者 : 大瀧蓮
 //||
 //|| 更新 : 2026/05/24 作成開始
-//||―――――――――――――――――――――
+//||
+//|| ―――――――――――――――――――――――――――――――――――――――――
+//||
 //|| 概要 : ギミックのクールタイムとライフタイムを管理するクラス
 //||        使用可能量を管理するクラス
 //||        壊れた場合はクールタイムへ入り、クールタイム終了後に使用可能量が回復する
-//||―――――――――――――――――――――
+//||
+//|| ―――――――――――――――――――――――――――――――――――――――――
 
 using UnityEngine;
 using System.Collections.Generic;
@@ -47,7 +50,6 @@ public class GimmickManager : MonoBehaviour
         public Gimmick gimmickType;
 
         public float coolTimer;
-
         public bool isCoolTime;
         public bool isEnd;
         public ActiveGimmick(
@@ -117,7 +119,6 @@ public class GimmickManager : MonoBehaviour
         {
             Debug.LogWarning(
                 $"[Setting Failed] {type} : 設置可能数不足");
-
             return false;
         }
 
@@ -135,7 +136,6 @@ public class GimmickManager : MonoBehaviour
             new ActiveGimmick(gimmickBase);
 
         activeGimmicks.Add(active);
-
         Debug.Log(
             $"[Active Add] {type}");
 
@@ -153,16 +153,10 @@ public class GimmickManager : MonoBehaviour
 
             // 既に終了済みなら飛ばす
             if (active.isEnd)
-            {
                 continue;
-            }
 
             Gimmick type = active.gimmickType;
             info = gimmickInfo[type];
-            //Debug.Log(
-            //            $"[Recover Count] {type}" +
-            //            $" Remaining : " +
-            //            $"{info.currentNum}/{info.maxNum}");
 
             // 稼働中 _________________________________________
             if (!active.isCoolTime)
@@ -187,13 +181,6 @@ public class GimmickManager : MonoBehaviour
                     active.isEnd = true;
                     // リストから削除
                     activeGimmicks.RemoveAt(i);
-
-                    //Debug.Log(
-                    //    $"[CoolTime End] {type}" +
-                    //    $" Remaining : " +
-                    //    $"{info.currentNum}/{info.maxNum}");
-                    //Debug.Log(
-                    //    $"[Remove ActiveGimmick] {type}");
                 }
             }
         }
@@ -260,6 +247,14 @@ public class GimmickManager : MonoBehaviour
             $"[IsSetting] {gimmickTag} : 設置可能");
 
         return true;
+    }
+
+    //=========================================================
+    // ギミックのクラス単位での取得
+    //=========================================================
+    List<ActiveGimmick> GetGimmickList()
+    {
+        return activeGimmicks;
     }
 
     //=========================================================
