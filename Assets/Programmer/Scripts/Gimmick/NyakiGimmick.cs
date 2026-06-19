@@ -34,6 +34,7 @@ public class NyakiGimmick : GimmickBase
         //設置＝発動となる
         gimmickState = GimmickState.Active;
         volume = FindFirstObjectByType<Volume>();
+        volume.profile.TryGet(out catEye);
     }
 
     protected override void ActiveUpdate()
@@ -42,7 +43,7 @@ public class NyakiGimmick : GimmickBase
         {
             isFirstActive = true;
             //エフェクト発生
-            if (volume.profile.TryGet(out catEye))
+            if (catEye != null)
             {
                 catEye.active = true;
                 catEye.isEnabled.value = true;

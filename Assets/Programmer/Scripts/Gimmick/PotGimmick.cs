@@ -120,7 +120,11 @@ public class PotGimmick : GimmickBase
                 Debug.LogWarning("PotGimmick: dangerZone が未設定です。", this);
             }
         }
-        if(gimmickSound != null)gimmickSound.PlayOneShotSE("PotFall", gameObject.transform.position, "PotSound");
+        if (gimmickSound != null)
+        {
+            gimmickSound.PlayOneShotSE("PotFall", gameObject.transform.position, "PotSound");
+            Destroy(gimmickSound);
+        }
         isFirstUpdate = true;
         DeleteHitChecker();
     }

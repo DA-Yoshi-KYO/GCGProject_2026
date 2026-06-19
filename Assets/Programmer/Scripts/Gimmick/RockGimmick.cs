@@ -293,8 +293,12 @@ public class RockGimmick : GimmickBase
                 Debug.LogWarning("PotGimmick: dangerZone が未設定です。", this);
             }
         }
-        if (gimmickSound != null) gimmickSound.PlayOneShotSE("RockHit", gameObject.transform.position, "RockSound");
+        if (gimmickSound != null)
+        {
+            gimmickSound.PlayOneShotSE("RockHit", gameObject.transform.position, "RockSound");
+            Destroy(gimmickSound);
+        }
         if (checker != null)
-            Destroy(checker);
+        Destroy(checker);
     }
 }
