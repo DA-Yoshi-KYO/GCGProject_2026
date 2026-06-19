@@ -155,6 +155,16 @@ public class MiniMap : MonoBehaviour
 
     private void UpdateTreasureActive()
     {
+        // タグ "Treasure" を持つ全てのオブジェクトを検索
+        GameObject[] treasures = GameObject.FindGameObjectsWithTag("Treasure");
+        foreach (GameObject treasure in treasures)
+        {
+            int index = CS_RoomCreatePointRaycast.GetRoomIndex(treasure);
+            if(index == -1) continue;
+            MiniMapInfo info = miniMapInfo[index];
+            info.isTreasureIconActive = true;
+            miniMapInfo[index] = info;
+        }
     }
 
     private void UpdateGimmickActive()
