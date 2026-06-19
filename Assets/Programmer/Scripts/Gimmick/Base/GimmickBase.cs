@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public enum Gimmick
@@ -9,6 +10,7 @@ public enum Gimmick
     EmptyChest,
     Nyaki,
     Pitfall,
+    HyperVoice,
 }
 
 public enum GimmickState
@@ -103,6 +105,7 @@ public class GimmickBase : MonoBehaviour
     protected BoxCollider searchColliderX;
     protected BoxCollider searchColliderZ;
     protected CS_3DPlaySE gimmickSound;
+    protected int roomIndex;
 
     private HitChecker hit;
     public HitChecker read_Hit => hit;
@@ -133,6 +136,7 @@ public class GimmickBase : MonoBehaviour
         );
 
         InitMaterials();
+        roomIndex = CS_RoomCreatePointRaycast.GetRayRoomCreatePoint(this.gameObject).transform.GetSiblingIndex() + 1;
     }
 
     private void InitMaterials()
@@ -379,6 +383,11 @@ public class GimmickBase : MonoBehaviour
     public Vector3 GetEffectRange()
     {
         return effectRange;
+    }
+
+    public int GetRoomIndex()
+    {
+        return roomIndex;
     }
 
     private Collider[] OverlapBoxCollider(BoxCollider box)
