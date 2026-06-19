@@ -1,9 +1,9 @@
 ﻿/*
 +=====================================
- ファイル名 : CSED_NewToolWindowTestDes.cs
- 概要     : CreateToolsから自動生成されたEditorWindowデス
- 作者     : ヨシモト リョウデス
- 履歴     : 2026/05/22デス CreateToolsから自動生成
+ ファイル名 : CSED_NewToolWindow.cs
+ 概要     : CreateToolsから自動生成されたEditorWindow
+ 作者     : ヨシモト リョウ
+ 履歴     : 2026/06/18 CreateToolsから自動生成
 =====================================+
 */
 
@@ -15,34 +15,12 @@ using UnityEngine;
 /// <summary>
 /// CreateToolsから自動生成されたEditorWindowです。
 /// </summary>
-public class CSED_NewToolWindowTestDes : EditorWindow, IHasCustomMenu
+public class CSED_NewToolWindow : EditorWindow, IHasCustomMenu
 {
     /// <summary>
-    /// newVector2Field01です。
+    /// newEnumField01です。
     /// </summary>
-    private Vector2 newVector2Field01 = Vector2.zero;
-
-    /// <summary>
-    /// newVector2IntField02です。
-    /// </summary>
-    private Vector2Int newVector2IntField02 = Vector2Int.zero;
-
-    /// <summary>
-    /// newField03です。
-    /// </summary>
-    private GameObject newField03 = null;
-
-    /// <summary>
-    /// newListField04です。
-    /// </summary>
-    private List<Vector2> newListField04 = new List<Vector2>()
-    {};
-
-    /// <summary>
-    /// newListField05です。
-    /// </summary>
-    private List<Vector2Int> newListField05 = new List<Vector2Int>()
-    {};
+    private CSE_EffectType newEnumField01 = CSE_EffectType.VAT;
 
     /// <summary>
     /// メイン画面のスクロール位置です。
@@ -52,12 +30,12 @@ public class CSED_NewToolWindowTestDes : EditorWindow, IHasCustomMenu
     /// <summary>
     /// メニューからウィンドウを開きます。
     /// </summary>
-    [MenuItem("Tools/New Toolデス")]
+    [MenuItem("Tools/New Tool")]
     public static void ShowWindow()
     {
-        CSED_NewToolWindowTestDes window = GetWindow<CSED_NewToolWindowTestDes>("TestEditorデス");
+        CSED_NewToolWindow window = GetWindow<CSED_NewToolWindow>("Test");
         window.minSize = new Vector2(360.0f, 240.0f);
-        CSED_NewToolWindowTestDes_CreatedAssetsWindow.OpenWindow();
+        CSED_NewToolWindow_CreatedAssetsWindow.OpenWindow();
         window.Focus();
     }
 
@@ -78,7 +56,7 @@ public class CSED_NewToolWindowTestDes : EditorWindow, IHasCustomMenu
     /// </summary>
     private void OpenCreatedAssetsWindow()
     {
-        CSED_NewToolWindowTestDes_CreatedAssetsWindow.OpenWindow();
+        CSED_NewToolWindow_CreatedAssetsWindow.OpenWindow();
     }
 
     /// <summary>
@@ -96,61 +74,12 @@ public class CSED_NewToolWindowTestDes : EditorWindow, IHasCustomMenu
     {
         m_MainScrollPosition = EditorGUILayout.BeginScrollView(m_MainScrollPosition);
         {
-        newVector2Field01 = EditorGUILayout.Vector2Field("newVector2Field01", newVector2Field01);
-        GUILayout.Space(6.0f);
-
-        newVector2IntField02 = EditorGUILayout.Vector2IntField("newVector2IntField02", newVector2IntField02);
-        GUILayout.Space(6.0f);
-
-        newField03 = (GameObject)EditorGUILayout.ObjectField("newField03", newField03, typeof(GameObject), false);
-        GUILayout.Space(6.0f);
-
-        EditorGUILayout.LabelField("newListField04", EditorStyles.boldLabel);
-
         EditorGUILayout.BeginHorizontal();
         {
-            if (GUILayout.Button("-", GUILayout.Width(24.0f)) && newListField04.Count > 0)
-            {
-                newListField04.RemoveAt(newListField04.Count - 1);
-            }
-
-            EditorGUILayout.LabelField(newListField04.Count.ToString(), GUILayout.Width(32.0f));
-
-            if (GUILayout.Button("+", GUILayout.Width(24.0f)))
-            {
-                newListField04.Add(Vector2.zero);
-            }
+            EditorGUILayout.LabelField("newEnumField01", GUILayout.Width(150.0f));
+            newEnumField01 = (CSE_EffectType)EditorGUILayout.EnumPopup(newEnumField01);
         }
         EditorGUILayout.EndHorizontal();
-
-        for (int i = 0; i < newListField04.Count; i++)
-        {
-            newListField04[i] = EditorGUILayout.Vector2Field("Element " + i.ToString(), newListField04[i]);
-        }
-        GUILayout.Space(6.0f);
-
-        EditorGUILayout.LabelField("newListField05", EditorStyles.boldLabel);
-
-        EditorGUILayout.BeginHorizontal();
-        {
-            if (GUILayout.Button("-", GUILayout.Width(24.0f)) && newListField05.Count > 0)
-            {
-                newListField05.RemoveAt(newListField05.Count - 1);
-            }
-
-            EditorGUILayout.LabelField(newListField05.Count.ToString(), GUILayout.Width(32.0f));
-
-            if (GUILayout.Button("+", GUILayout.Width(24.0f)))
-            {
-                newListField05.Add(Vector2Int.zero);
-            }
-        }
-        EditorGUILayout.EndHorizontal();
-
-        for (int i = 0; i < newListField05.Count; i++)
-        {
-            newListField05[i] = EditorGUILayout.Vector2IntField("Element " + i.ToString(), newListField05[i]);
-        }
         GUILayout.Space(6.0f);
 
         GUILayout.Space(12.0f);
@@ -167,12 +96,12 @@ public class CSED_NewToolWindowTestDes : EditorWindow, IHasCustomMenu
     /// <summary>
     /// 作成するScriptableObjectアセット名です。
     /// </summary>
-    private string m_AssetFileName = "Des";
+    private string m_AssetFileName = "NewData";
 
     /// <summary>
     /// ScriptableObjectアセットの保存先です。
     /// </summary>
-    private string m_AssetOutputFolderPath = "Assets/Programmer/ScriptableObject/Des";
+    private string m_AssetOutputFolderPath = "Assets/Programmer/ScriptableObject";
 
     /// <summary>
     /// ScriptableObjectアセットを作成します。
@@ -184,12 +113,8 @@ public class CSED_NewToolWindowTestDes : EditorWindow, IHasCustomMenu
             System.IO.Directory.CreateDirectory(m_AssetOutputFolderPath);
         }
 
-        CSS_NewToolDatTestDes asset = CreateInstance<CSS_NewToolDatTestDes>();
-        asset.newVector2Field01 = newVector2Field01;
-        asset.newVector2IntField02 = newVector2IntField02;
-        asset.newField03 = newField03;
-        asset.newListField04 = new List<Vector2>(newListField04);
-        asset.newListField05 = new List<Vector2Int>(newListField05);
+        CSS_NewToolData asset = CreateInstance<CSS_NewToolData>();
+        asset.newEnumField01 = newEnumField01;
 
         string assetPath = AssetDatabase.GenerateUniqueAssetPath(
             System.IO.Path.Combine(m_AssetOutputFolderPath, m_AssetFileName + ".asset"));
@@ -198,7 +123,7 @@ public class CSED_NewToolWindowTestDes : EditorWindow, IHasCustomMenu
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
         Selection.activeObject = asset;
-        CSED_NewToolWindowTestDes_CreatedAssetsWindow.RepaintOpenedWindows();
+        CSED_NewToolWindow_CreatedAssetsWindow.RepaintOpenedWindows();
     }
 
     /// <summary>
@@ -209,13 +134,13 @@ public class CSED_NewToolWindowTestDes : EditorWindow, IHasCustomMenu
         /// <summary>
         /// 設定対象のEditorWindowです。
         /// </summary>
-        private CSED_NewToolWindowTestDes m_OwnerWindow;
+        private CSED_NewToolWindow m_OwnerWindow;
 
         /// <summary>
         /// Create Asset設定Windowを開きます。
         /// </summary>
         /// <param name="f_ownerWindow">設定対象のEditorWindow</param>
-        public static void Open(CSED_NewToolWindowTestDes f_ownerWindow)
+        public static void Open(CSED_NewToolWindow f_ownerWindow)
         {
             CreateAssetSettingsWindow window = CreateInstance<CreateAssetSettingsWindow>();
             window.titleContent = new GUIContent("Create Asset Settings");
@@ -256,9 +181,9 @@ public class CSED_NewToolWindowTestDes : EditorWindow, IHasCustomMenu
 }
 
 /// <summary>
-/// CSS_NewToolDatTestDesで作成されたScriptableObject一覧を表示するEditorWindowです。
+/// CSS_NewToolDataで作成されたScriptableObject一覧を表示するEditorWindowです。
 /// </summary>
-public class CSED_NewToolWindowTestDes_CreatedAssetsWindow : EditorWindow
+public class CSED_NewToolWindow_CreatedAssetsWindow : EditorWindow
 {
     /// <summary>
     /// Asset一覧のスクロール位置です。
@@ -280,10 +205,10 @@ public class CSED_NewToolWindowTestDes_CreatedAssetsWindow : EditorWindow
     /// </summary>
     public static void OpenWindow()
     {
-        CSED_NewToolWindowTestDes_CreatedAssetsWindow window = GetWindow<CSED_NewToolWindowTestDes_CreatedAssetsWindow>(
+        CSED_NewToolWindow_CreatedAssetsWindow window = GetWindow<CSED_NewToolWindow_CreatedAssetsWindow>(
             "Created Assets",
             false,
-            typeof(CSED_NewToolWindowTestDes));
+            typeof(CSED_NewToolWindow));
 
         window.minSize = new Vector2(420.0f, 300.0f);
     }
@@ -293,7 +218,7 @@ public class CSED_NewToolWindowTestDes_CreatedAssetsWindow : EditorWindow
     /// </summary>
     public static void RepaintOpenedWindows()
     {
-        CSED_NewToolWindowTestDes_CreatedAssetsWindow[] windows = Resources.FindObjectsOfTypeAll<CSED_NewToolWindowTestDes_CreatedAssetsWindow>();
+        CSED_NewToolWindow_CreatedAssetsWindow[] windows = Resources.FindObjectsOfTypeAll<CSED_NewToolWindow_CreatedAssetsWindow>();
 
         for (int i = 0; i < windows.Length; i++)
         {
@@ -317,7 +242,7 @@ public class CSED_NewToolWindowTestDes_CreatedAssetsWindow : EditorWindow
     {
         m_CachedAssetPathList.Clear();
 
-        string[] assetGuids = AssetDatabase.FindAssets("t:" + nameof(CSS_NewToolDatTestDes));
+        string[] assetGuids = AssetDatabase.FindAssets("t:" + nameof(CSS_NewToolData));
 
         for (int i = 0; i < assetGuids.Length; i++)
         {
@@ -365,7 +290,7 @@ public class CSED_NewToolWindowTestDes_CreatedAssetsWindow : EditorWindow
             for (int i = 0; i < m_CachedAssetPathList.Count; i++)
             {
                 string assetPath = m_CachedAssetPathList[i];
-                CSS_NewToolDatTestDes asset = AssetDatabase.LoadAssetAtPath<CSS_NewToolDatTestDes>(assetPath);
+                CSS_NewToolData asset = AssetDatabase.LoadAssetAtPath<CSS_NewToolData>(assetPath);
 
                 if (asset == null)
                 {
@@ -491,7 +416,7 @@ public class CSED_NewToolWindowTestDes_CreatedAssetsWindow : EditorWindow
     /// </summary>
     /// <param name="f_asset">対象Asset</param>
     /// <param name="f_assetPath">対象Assetパス</param>
-    private void DrawCreatedAssetListItem(CSS_NewToolDatTestDes f_asset, string f_assetPath)
+    private void DrawCreatedAssetListItem(CSS_NewToolData f_asset, string f_assetPath)
     {
         EditorGUILayout.BeginVertical(EditorStyles.helpBox);
         {
@@ -560,7 +485,7 @@ public class CSED_NewToolWindowTestDes_CreatedAssetsWindow : EditorWindow
     /// </summary>
     /// <param name="f_asset">対象Asset</param>
     /// <param name="f_assetPath">対象Assetパス</param>
-    private void DrawCreatedAssetSettings(CSS_NewToolDatTestDes f_asset, string f_assetPath)
+    private void DrawCreatedAssetSettings(CSS_NewToolData f_asset, string f_assetPath)
     {
         GUILayout.Space(4.0f);
 
@@ -610,32 +535,8 @@ public class CSED_NewToolWindowTestDes_CreatedAssetsWindow : EditorWindow
     {
         DrawCreatedAssetProperty(
             f_serializedObject,
-            "newVector2Field01",
-            "newVector2Field01");
-        GUILayout.Space(4.0f);
-
-        DrawCreatedAssetProperty(
-            f_serializedObject,
-            "newVector2IntField02",
-            "newVector2IntField02");
-        GUILayout.Space(4.0f);
-
-        DrawCreatedAssetProperty(
-            f_serializedObject,
-            "newField03",
-            "newField03");
-        GUILayout.Space(4.0f);
-
-        DrawCreatedAssetProperty(
-            f_serializedObject,
-            "newListField04",
-            "newListField04");
-        GUILayout.Space(4.0f);
-
-        DrawCreatedAssetProperty(
-            f_serializedObject,
-            "newListField05",
-            "newListField05");
+            "newEnumField01",
+            "newEnumField01");
         GUILayout.Space(4.0f);
 
     }
@@ -708,7 +609,7 @@ public class CSED_NewToolWindowTestDes_CreatedAssetsWindow : EditorWindow
     /// AssetをProject上で選択します。
     /// </summary>
     /// <param name="f_asset">選択するAsset</param>
-    private void SelectAsset(CSS_NewToolDatTestDes f_asset)
+    private void SelectAsset(CSS_NewToolData f_asset)
     {
         Selection.activeObject = f_asset;
         EditorGUIUtility.PingObject(f_asset);

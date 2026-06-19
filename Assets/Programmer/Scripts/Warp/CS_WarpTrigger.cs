@@ -108,5 +108,8 @@ public class CS_WarpTrigger : MonoBehaviour
         wp.targetPoint.warping = true;
         selfWarpPoint.warpTimeCount = warpCoolTime;
         wp.targetPoint.warpTimeCount = warpCoolTime;
+
+        CS_PlayerData playerdata = other.GetComponent<CS_PlayerData>();
+        playerdata.ChangePlayerRoomData();
     }
 }

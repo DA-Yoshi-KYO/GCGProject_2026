@@ -17,7 +17,6 @@
  * 2026-06-11 | ギミック設置時のEffect再生処理を追加：吉本
  */
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -346,16 +345,13 @@ public class CS_PlayerAction : MonoBehaviour
 
         // グリッド配置
         if (roomGrid == null)
-        {
             Debug.LogError("この部屋の床にRoomGridがついていません");
-        }
+
         Vector3 setPos = CalculateGimmickSetPosition();
 
         // 設置処理 //
         if (!roomGrid.SetGimmickInGrid(setPos, gimmick))
-        {
             return;
-        }
 
         // =========================
         // 実際に生成されたインスタンス取得
