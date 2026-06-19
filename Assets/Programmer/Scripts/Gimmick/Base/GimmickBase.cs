@@ -136,7 +136,7 @@ public class GimmickBase : MonoBehaviour
         );
 
         InitMaterials();
-        roomIndex = CS_RoomCreatePointRaycast.GetRayRoomCreatePoint(this.gameObject).transform.GetSiblingIndex() + 1;
+        roomIndex = CS_RoomCreatePointRaycast.GetRayRoomCreatePoint(this.gameObject).transform.GetSiblingIndex();
     }
 
     private void InitMaterials()

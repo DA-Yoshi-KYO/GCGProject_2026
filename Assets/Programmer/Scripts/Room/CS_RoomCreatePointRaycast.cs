@@ -115,7 +115,7 @@ public static class CS_RoomCreatePointRaycast
         CS_PlayerData playerData = obj.GetComponent<CS_PlayerData>();
         if (playerData != null)
         {
-            roomCreatePoint = playerData.currentRoomData.transform;
+            roomCreatePoint = playerData.currentRoomData.transform.GetComponent<CS_RoomPlayerPosition>().PlayerRoomData.transform;
 
             return roomCreatePoint.GetSiblingIndex();
         }
@@ -139,7 +139,7 @@ public static class CS_RoomCreatePointRaycast
             }
             else
             {
-                return treasureParent.parent.parent.parent.GetSiblingIndex() + 1;
+                return treasureParent.parent.parent.parent.GetSiblingIndex();
             }
         }
 
