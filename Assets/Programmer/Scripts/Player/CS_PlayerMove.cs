@@ -37,6 +37,7 @@ public class CS_PlayerMove : MonoBehaviour
     private Animator animator; // プレイヤーのアニメーター
     [Header("移動→Idleに遷移するまでの時間")]
     [SerializeField] float transMoveToIdleTime = 3f;
+    [SerializeField] float walkAnimationSpeed = 1.5f;
     float transTimer = 0f;
 
     [Tooltip("盗賊に捕まっているかどうか")]
@@ -181,9 +182,15 @@ public class CS_PlayerMove : MonoBehaviour
 
         // CharacterControllerを使用して移動
         controller.Move(velocity * Time.deltaTime);
-        
+
         Vector2 velocityXZ = new Vector2(velocity.x, velocity.z);
         bool isMove = velocityXZ.sqrMagnitude > 0;
+
+        AnimatorStateInfo info = animator.GetCurrentAnimatorStateInfo(0);
+        Debug.Log("IsMove" + info.IsTag("Walk"));
+        if (info.IsTag("Walk")) animator.speed = walkAnimationSpeed;
+        else animator.speed = 1f;
+            animator.SetBool("IsGround", controller.isGrounded);
         if (controller.isGrounded)
         {
             if (isMove)
@@ -197,14 +204,16 @@ public class CS_PlayerMove : MonoBehaviour
                 transTimer += Time.deltaTime;
                 if (transTimer > transMoveToIdleTime)
                 {
-                    transTimer = 0f;
                     animator.SetBool("IsMoving", false);
                     animator.speed = 1f;
                 }
-                else animator.speed = 0f;
+                else
+                {
+                    if (!animator.IsInTransition(0) && !info.IsName("Falling")) animator.speed = 0f;
+                }
             }
         }
-        animator.SetBool("IsGround", controller.isGrounded);
+
     }
 
     private void FixedUpdate()
@@ -323,6 +332,7 @@ public class CS_PlayerMove : MonoBehaviour
         if (controller.isGrounded)
         {
             animator.SetTrigger("JumpTrigger");
+            animator.speed = 1f;
             velocity.y = jumpAmount;
             isJumpMerging = true;
         }
