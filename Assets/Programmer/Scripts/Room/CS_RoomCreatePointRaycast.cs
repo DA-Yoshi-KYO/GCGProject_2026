@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 /*==================================================
@@ -5,7 +6,7 @@ using UnityEngine;
  *  制作者      : 吉本竜
  *  内容        : Playerの下方向へRaycastを行い、現在いるRoomCreatePointを取得するクラス
  *  履歴        : 2026/04/27 新規作成(ヨシモト)
- *                2026/04/29 RaycastAllでPlaneタグを探す形へ修正(ヨシモト)
+ *               2026/04/29 RaycastAllでPlaneタグを探す形へ修正(ヨシモト)
  *==================================================*/
 
 /// <summary>
@@ -92,6 +93,57 @@ public static class CS_RoomCreatePointRaycast
         Debug.DrawRay(rayStartPosition, Vector3.down * RAY_DISTANCE, Color.red, 3.0f);
 
         return null;
+    }
+
+    /// <summary>
+    /// ルームのindex番号を返します。
+    /// </summary>
+    /// <param name="obj">オブジェクト</param>
+    /// <returns></returns>
+    public static int GetRoomIndex(GameObject obj)
+    {
+        Transform roomCreatePoint = null;
+
+        CS_ThiefAI thifAI = obj.GetComponent<CS_ThiefAI>();
+        if (thifAI != null)
+        {
+            roomCreatePoint = thifAI.read_MemorySystem.read_CurrentRoomPoint;
+
+            return roomCreatePoint.GetSiblingIndex() + 1;
+        }
+
+        CS_PlayerData playerData = obj.GetComponent<CS_PlayerData>();
+        if (playerData != null)
+        {
+            roomCreatePoint = playerData.currentRoomData.transform;
+
+            return roomCreatePoint.GetSiblingIndex() + 1;
+        }
+
+        GimmickBase gimmickBase = obj.GetComponent<GimmickBase>();
+        if (gimmickBase != null)
+        {
+            return 1;
+        }
+
+        CS_VisionTarget visionTarget = obj.GetComponent<CS_VisionTarget>();
+        if (visionTarget != null && visionTarget.targetType == CS_VisionTarget.TargetType.Treasure)
+        {
+            Transform treasureParent = obj.transform.parent;
+            thifAI = treasureParent.GetComponent<CS_ThiefAI>();
+            if (thifAI != null)
+            {
+                roomCreatePoint = thifAI.read_MemorySystem.read_CurrentRoomPoint;
+
+                return roomCreatePoint.GetSiblingIndex() + 1;
+            }
+            else
+            {
+                return treasureParent.parent.parent.parent.GetSiblingIndex() + 1;
+            }
+        }
+
+        return 0;
     }
 
     /// <summary>
