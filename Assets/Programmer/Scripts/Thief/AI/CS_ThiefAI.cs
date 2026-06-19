@@ -86,7 +86,7 @@ public class CS_ThiefAI : MonoBehaviour
     public int read_MaxDurability => maxDurability;
 
     [Tooltip("持っている宝物オジェクト")]// 見つけたら設定する
-    private GameObject heldTreasure;
+    private GameObject holdTreasure;
 
     [Tooltip("攻撃を受けた後の気絶時間")]
     private float damageStunTime;
@@ -313,21 +313,21 @@ public class CS_ThiefAI : MonoBehaviour
     private void Found()
     {
         // 宝物を持つ
-        heldTreasure = memorySystem.read_CurrentTarget.gameObject;
-        heldTreasure.transform.parent = this.transform; // 泥棒の子オブジェクトにする
-        heldTreasure.GetComponent<Collider>().enabled = false; // 宝物のコライダーを無効にする
-        heldTreasure.transform.localScale *= 0.5f; // 宝物のサイズを半分にする
+        holdTreasure = memorySystem.read_CurrentTarget.gameObject;
+        holdTreasure.transform.parent = this.transform; // 泥棒の子オブジェクトにする
+        holdTreasure.GetComponent<Collider>().enabled = false; // 宝物のコライダーを無効にする
+        holdTreasure.transform.localScale *= 0.5f; // 宝物のサイズを半分にする
 
         //-- 体の前に持つ位置を設定
         // 泥棒の正面方向を基準に、少し前方に持つ位置を設定
         Vector3 holdPosition = transform.position + transform.forward * 0.5f + Vector3.up * -0.5f;
-        heldTreasure.transform.position = holdPosition;
+        holdTreasure.transform.position = holdPosition;
 
         // 状態を逃走に変更
         ChangeStatus(ThiefState.Escape);
 
         // 取得した宝物を他の泥棒の記憶から消去する
-        GameObject.FindObjectOfType<CS_ThiefManager>().EraseTheMemoryToAllThief(heldTreasure.GetComponent<CS_ThiefTarget>());
+        GameObject.FindObjectOfType<CS_ThiefManager>().EraseTheMemoryToAllThief(holdTreasure.GetComponent<CS_ThiefTarget>());
         // 探索対象をリセット
         memorySystem.ClearTarget();
     }
@@ -406,6 +406,58 @@ public class CS_ThiefAI : MonoBehaviour
                 {
                     // 気絶したときのSEを再生する処理を追加する
                     if (thiefSound != null) thiefSound.PlayOneShotSE("ThiefDeath", gameObject.transform.position, "ThiefDeath");
+
+                    // 宝物を現在の部屋のオブジェクトに親子付けする
+                    holdTreasure.transform.SetParent(memorySystem.read_CurrentRoom.read_ObjectParent.transform);
+
+                    // 宝物を設置するグリッドを探す
+                    // 真下のグリッドセルインデックスを取得
+                    RoomGrid roomGrid = memorySystem.read_CurrentRoomPoint.GetComponentInChildren<RoomGrid>();
+                    Vector2Int gridIndex = roomGrid.GetGridFromPos(transform.position);
+
+                    List<Vector2Int> targetGridOffset = new List<Vector2Int>();
+                    // 周囲3x3のグリッドセルを探索
+                    for (int x = -1 ; x <= 1 ; x++)
+                    {
+                        for (int y = -1 ; y <= 1 ; y++)
+                        {
+                            targetGridOffset.Add(new Vector2Int(x, y));
+
+                            if (roomGrid.gridSize.x <= gridIndex.x + x || gridIndex.x + x < 0 ||
+                                roomGrid.gridSize.y <= gridIndex.y + y || gridIndex.y + y < 0)
+                            {
+                                // グリッドの範囲外の場合は、対象から除外する
+                                targetGridOffset.RemoveAt(targetGridOffset.Count - 1);
+                            }
+                        }
+                    }
+                    Vector3 gridPos = Vector3.zero;
+                    while (true)
+                    {
+                        // ランダムにグリッドセルのオフセットを選択
+                        int randomIndex = Random.Range(0, targetGridOffset.Count);
+
+                        // 選択したグリッドセルの位置をワールド座標で
+                        gridPos = roomGrid.GetWorldPosFromGrid(gridIndex + targetGridOffset[randomIndex]);
+
+                        GameObject rayCastObject = new GameObject();
+                        rayCastObject.transform.position = gridPos;
+
+                        RaycastHit[] hits = Physics.RaycastAll(gridPos, Vector3.up, 20, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
+
+                        bool isStandFound = false;
+                        foreach (RaycastHit hit in hits)
+                        {
+                            // Standタグのオブジェクトに当たっている場合はフラグをtureにする
+                            if (hit.transform.name.Contains("Stand")) isStandFound = true;
+                        }
+
+                        // Standに当たっていない場合は、設置する位置を決定する
+                        if (!isStandFound) break;
+                    }
+
+                    // 宝物を設置する位置を設定
+                    holdTreasure.transform.position = new Vector3(gridPos.x, gridPos.y + holdTreasure.transform.localScale.y / 2, gridPos.z);
 
                     Destroy(this.gameObject);
                 }
