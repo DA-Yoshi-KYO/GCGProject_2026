@@ -109,7 +109,7 @@ public static class CS_RoomCreatePointRaycast
         {
             roomCreatePoint = thifAI.read_MemorySystem.read_CurrentRoomPoint;
 
-            return roomCreatePoint.GetSiblingIndex() + 1;
+            return roomCreatePoint.GetSiblingIndex();
         }
 
         CS_PlayerData playerData = obj.GetComponent<CS_PlayerData>();
@@ -117,7 +117,7 @@ public static class CS_RoomCreatePointRaycast
         {
             roomCreatePoint = playerData.currentRoomData.transform;
 
-            return roomCreatePoint.GetSiblingIndex() + 1;
+            return roomCreatePoint.GetSiblingIndex();
         }
 
         GimmickBase gimmickBase = obj.GetComponent<GimmickBase>();
@@ -135,7 +135,7 @@ public static class CS_RoomCreatePointRaycast
             {
                 roomCreatePoint = thifAI.read_MemorySystem.read_CurrentRoomPoint;
 
-                return roomCreatePoint.GetSiblingIndex() + 1;
+                return roomCreatePoint.GetSiblingIndex();
             }
             else
             {
