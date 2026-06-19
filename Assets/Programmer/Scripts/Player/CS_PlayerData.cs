@@ -29,4 +29,6 @@ public class CS_PlayerData : MonoBehaviour
         if (customInputAction != null)
             customInputAction.Player.Disable();
     }
+
+
 }
