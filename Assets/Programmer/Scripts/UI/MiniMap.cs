@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using static GimmickManager;
 
 public class MiniMap : MonoBehaviour
 {
@@ -126,10 +127,10 @@ public class MiniMap : MonoBehaviour
     private void UpdatePlayerActive()
     {
         int index = CS_RoomCreatePointRaycast.GetRoomIndex(player);
-        index -= 1;
         MiniMapInfo info = miniMapInfo[index];
         info.isPlayerIconActive = true;
         miniMapInfo[index] = info;
+        Debug.Log("Player is in room index: " + index);
     }
 
     private void UpdateThiefActive()
@@ -158,6 +159,15 @@ public class MiniMap : MonoBehaviour
 
     private void UpdateGimmickActive()
     {
+        List<ActiveGimmick> gimmicks = gimmickManager.GetGimmickList();
+        foreach (ActiveGimmick gimmick in gimmicks)
+        {
+            int index = gimmick.gimmick.GetRoomIndex();
+            if(index == -1) continue;
+            MiniMapInfo info = miniMapInfo[index];
+            info.isGimmickIconActive = true;
+            miniMapInfo[index] = info;
+        }
     }
 
     private void RenderSetting()
