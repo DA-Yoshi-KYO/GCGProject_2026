@@ -96,6 +96,18 @@ public class MiniMap : MonoBehaviour
             return;
         }
 
+        // フラグのリセット
+        for(int i = 0; i < miniMapInfo.Count; i++)
+            {
+                MiniMapInfo info = miniMapInfo[i];
+                info.isPlayerIconActive = false;
+                info.isThiefIconActive = false;
+                info.isTreasureIconActive = false;
+                info.isGimmickIconActive = false;
+                miniMapInfo[i] = info;
+        }
+
+
         UpdatePlayerActive();
         UpdateThiefActive();
         UpdateTreasureActive();
@@ -105,12 +117,32 @@ public class MiniMap : MonoBehaviour
     }
 
     private void UpdatePlayerActive()
-    { 
-
+    {
+        int index = CS_RoomCreatePointRaycast.GetRoomIndex(player);
+        index -= 1;
+        MiniMapInfo info = miniMapInfo[index];
+        info.isPlayerIconActive = true;
+        miniMapInfo[index] = info;
     }
 
     private void UpdateThiefActive()
     {
+        List<GameObject> thieves = new List<GameObject>();
+
+        foreach (Transform child in parentThief.transform)
+        {
+            thieves.Add(child.gameObject);
+        }
+
+        foreach (GameObject thief in thieves)
+        {
+            int index = CS_RoomCreatePointRaycast.GetRoomIndex(thief);
+            index -= 1;
+            MiniMapInfo info = miniMapInfo[index];
+            info.isThiefIconActive = true;
+            miniMapInfo[index] = info;
+        }
+
     }
 
     private void UpdateTreasureActive()
@@ -125,6 +157,11 @@ public class MiniMap : MonoBehaviour
     {
         for (int i = 0 ; i < targetObjects.Length ; i++)
         {
+            miniMapObjectInfo[i].playerIcon.SetActive(miniMapInfo[i].isPlayerIconActive);
+            miniMapObjectInfo[i].thiefIcon.SetActive(miniMapInfo[i].isThiefIconActive);
+            miniMapObjectInfo[i].treasureIcon.SetActive(miniMapInfo[i].isTreasureIconActive);
+            miniMapObjectInfo[i].gimmickIcon.SetActive(miniMapInfo[i].isGimmickIconActive);
+
             // アクティブなアイコンを優先順位(プレイヤー→泥棒→財宝→ギミック)で集める
             List<RectTransform> activeIcons = new List<RectTransform>(4);
 
@@ -147,11 +184,6 @@ public class MiniMap : MonoBehaviour
             {
                 activeIcons[j].anchoredPosition = positions[j];
             }
-
-            miniMapObjectInfo[i].playerIcon.SetActive(miniMapInfo[i].isPlayerIconActive);
-            miniMapObjectInfo[i].thiefIcon.SetActive(miniMapInfo[i].isThiefIconActive);
-            miniMapObjectInfo[i].treasureIcon.SetActive(miniMapInfo[i].isTreasureIconActive);
-            miniMapObjectInfo[i].gimmickIcon.SetActive(miniMapInfo[i].isGimmickIconActive);
         }
     }
 
@@ -169,7 +201,7 @@ public class MiniMap : MonoBehaviour
         switch (count)
         {
             case 1:
-                return new Vector2[] { Vector2.zero }; // 中央
+                return new Vector2[] { Vector2.zero };
 
             case 2:
                 return new Vector2[] { topLeft, topRight };
