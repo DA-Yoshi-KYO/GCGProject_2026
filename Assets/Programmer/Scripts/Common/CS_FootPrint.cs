@@ -22,7 +22,7 @@ public class CS_FootPrint : MonoBehaviour
 
     private void Start()
     {
-        pool = new CS_ObjectPool(footPrintPrefab);        
+        pool = new CS_ObjectPool(footPrintPrefab, new GameObject("FootParent"));        
     }
 
     //足跡の生成関数

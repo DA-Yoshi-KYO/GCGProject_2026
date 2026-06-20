@@ -13,12 +13,13 @@ public class CS_3DPlaySE : MonoBehaviour
 
     private float currentVolume = 1.0f;//現在の音量
 
+    [SerializeField] private GameObject objectPrent;//生成した3DSEオブジェクトをまとめる親オブジェクト
+
     public enum SEMode
     {
         Normal,
         Reverb,
     }
-
 
     void Awake()
     {
@@ -48,6 +49,7 @@ public class CS_3DPlaySE : MonoBehaviour
 
         // 再生処理
         GameObject obj = new GameObject(gameObjectName.ToString());
+        obj.transform.SetParent(objectPrent.transform);
         obj.transform.position = pos;
 
         AudioSource audioSource = obj.AddComponent<AudioSource>();
@@ -61,7 +63,6 @@ public class CS_3DPlaySE : MonoBehaviour
 
         return obj;
     }
-
 
     private void ChangeSnapshot(string currentSituation, string snapshotName, float time = 1.0f)
     {
@@ -86,7 +87,6 @@ public class CS_3DPlaySE : MonoBehaviour
             }
         }
     }
-
 
     public float GetAudioLength(string currentSituation)
     {
