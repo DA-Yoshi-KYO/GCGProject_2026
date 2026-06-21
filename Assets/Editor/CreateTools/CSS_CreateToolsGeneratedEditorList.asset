@@ -19,28 +19,30 @@ MonoBehaviour:
     titleName: Test
     authorName: "\u30E8\u30B7\u30E2\u30C8 \u30EA\u30E7\u30A6"
     createdDate: 2026/06/18 16:56:26
-    updatedDate: 2026/06/18 17:04:46
+    updatedDate: 2026/06/21 18:29:50
     editorClassName: CSED_NewToolWindow
     dataClassName: CSS_NewToolData
     menuPath: Tools/New Tool
     editorScriptPath: Assets/Editor/CreateTools/New Tools\CSED_NewToolWindow.cs
     dataScriptPath: Assets/Programmer/Scripts/CreateTools\CSS_NewToolData.cs
-    headerHistoryDate: 2026/06/18
+    headerHistoryDate: 2026/06/21
     editorHeaderContents: "CreateTools\u304B\u3089\u81EA\u52D5\u751F\u6210\u3055\u308C\u305FEditorWindow"
     dataHeaderContents: "CreateTools\u304B\u3089\u81EA\u52D5\u751F\u6210\u3055\u308C\u305FScriptableObject\u30C7\u30FC\u30BF"
     defaultAssetName: NewData
     defaultAssetFolder: Assets/Programmer/ScriptableObject
     fieldSaveDataList:
-    - fieldType: 8
-      fieldName: newEnumField01
-      fieldLayoutType: 5
-      tagName: newEnumField01
+    - fieldType: 0
+      fieldName: newIntField01
+      fieldLayoutType: 0
+      tagName: "\u30A4\u30F3\u30C8\u578B\u306E\u30C6\u30B9\u30C8"
       listElementFieldType: 6
       isListDefaultValueNull: 1
       isListDefaultCountNull: 1
       listDefaultCountText: 
-      isDefaultValueNull: 0
-      defaultValueText: VAT
+      isPublicSetter: 1
+      tooltipText: n_Test
+      isDefaultValueNull: 1
+      defaultValueText: 
       isDefaultMinValueNull: 1
       defaultMinValueText: 
       isDefaultMaxValueNull: 1
@@ -50,7 +52,36 @@ MonoBehaviour:
       isSliderMaxValueNull: 1
       sliderMaxValueText: 
       scriptableObjectTypeScript: {fileID: 0}
-      enumTypeScript: {fileID: 11500000, guid: 0e42b6bd11ef32444a9f0eae8c8f00c8, type: 3}
+      enumTypeScript: {fileID: 0}
+      defaultScriptableObjectValue: {fileID: 0}
+      defaultScriptValue: {fileID: 0}
+      defaultGameObjectValue: {fileID: 0}
+      listDefaultElementValueTextList: []
+      listDefaultMinValueTextList: []
+      listDefaultMaxValueTextList: []
+      listDefaultObjectValueList: []
+    - fieldType: 0
+      fieldName: n_Test_Not
+      fieldLayoutType: 0
+      tagName: "\u30A4\u30F3\u30C8\u578B\u306E\u30C6\u30B9\u30C8\u8A2D\u5B9A\u306A\u3057\u3067\u3059"
+      listElementFieldType: 6
+      isListDefaultValueNull: 1
+      isListDefaultCountNull: 1
+      listDefaultCountText: 
+      isPublicSetter: 0
+      tooltipText: 
+      isDefaultValueNull: 1
+      defaultValueText: 
+      isDefaultMinValueNull: 1
+      defaultMinValueText: 
+      isDefaultMaxValueNull: 1
+      defaultMaxValueText: 
+      isSliderMinValueNull: 1
+      sliderMinValueText: 
+      isSliderMaxValueNull: 1
+      sliderMaxValueText: 
+      scriptableObjectTypeScript: {fileID: 0}
+      enumTypeScript: {fileID: 0}
       defaultScriptableObjectValue: {fileID: 0}
       defaultScriptValue: {fileID: 0}
       defaultGameObjectValue: {fileID: 0}

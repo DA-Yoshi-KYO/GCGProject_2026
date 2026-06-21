@@ -3,7 +3,7 @@
  ファイル名 : CSED_NewToolWindow.cs
  概要     : CreateToolsから自動生成されたEditorWindow
  作者     : ヨシモト リョウ
- 履歴     : 2026/06/18 CreateToolsから自動生成
+ 履歴     : 2026/06/21 CreateToolsから自動生成
 =====================================+
 */
 
@@ -18,9 +18,14 @@ using UnityEngine;
 public class CSED_NewToolWindow : EditorWindow, IHasCustomMenu
 {
     /// <summary>
-    /// newEnumField01です。
+    /// newIntField01です。
     /// </summary>
-    private CSE_EffectType newEnumField01 = CSE_EffectType.VAT;
+    private int newIntField01 = 0;
+
+    /// <summary>
+    /// n_Test_Notです。
+    /// </summary>
+    private int n_Test_Not = 0;
 
     /// <summary>
     /// メイン画面のスクロール位置です。
@@ -74,12 +79,12 @@ public class CSED_NewToolWindow : EditorWindow, IHasCustomMenu
     {
         m_MainScrollPosition = EditorGUILayout.BeginScrollView(m_MainScrollPosition);
         {
-        EditorGUILayout.BeginHorizontal();
-        {
-            EditorGUILayout.LabelField("newEnumField01", GUILayout.Width(150.0f));
-            newEnumField01 = (CSE_EffectType)EditorGUILayout.EnumPopup(newEnumField01);
-        }
-        EditorGUILayout.EndHorizontal();
+            GUILayout.Space(8.0f);
+
+        newIntField01 = EditorGUILayout.IntField("イント型のテスト", newIntField01);
+        GUILayout.Space(6.0f);
+
+        n_Test_Not = EditorGUILayout.IntField("イント型のテスト設定なしです", n_Test_Not);
         GUILayout.Space(6.0f);
 
         GUILayout.Space(12.0f);
@@ -114,7 +119,10 @@ public class CSED_NewToolWindow : EditorWindow, IHasCustomMenu
         }
 
         CSS_NewToolData asset = CreateInstance<CSS_NewToolData>();
-        asset.newEnumField01 = newEnumField01;
+        asset.InitializeFromCreateTools(
+            newIntField01,
+            n_Test_Not
+        );
 
         string assetPath = AssetDatabase.GenerateUniqueAssetPath(
             System.IO.Path.Combine(m_AssetOutputFolderPath, m_AssetFileName + ".asset"));
@@ -185,6 +193,16 @@ public class CSED_NewToolWindow : EditorWindow, IHasCustomMenu
 /// </summary>
 public class CSED_NewToolWindow_CreatedAssetsWindow : EditorWindow
 {
+    /// <summary>
+    /// Created Assets側のラベル幅です。
+    /// </summary>
+    private const float c_CreatedAssetLabelWidth = 150.0f;
+
+    /// <summary>
+    /// Created Assets側の項目間の余白です。
+    /// </summary>
+    private const float c_CreatedAssetRowSpacing = 4.0f;
+
     /// <summary>
     /// Asset一覧のスクロール位置です。
     /// </summary>
@@ -490,7 +508,12 @@ public class CSED_NewToolWindow_CreatedAssetsWindow : EditorWindow
         GUILayout.Space(4.0f);
 
         EditorGUI.BeginChangeCheck();
+        float beforeLabelWidth = EditorGUIUtility.labelWidth;
+        EditorGUIUtility.labelWidth = 150.0f;
+
         string newAssetName = EditorGUILayout.DelayedTextField("Asset Name", f_asset.name);
+
+        EditorGUIUtility.labelWidth = beforeLabelWidth;
 
         if (EditorGUI.EndChangeCheck())
         {
@@ -501,8 +524,24 @@ public class CSED_NewToolWindow_CreatedAssetsWindow : EditorWindow
                 if (string.IsNullOrEmpty(renameError))
                 {
                     AssetDatabase.SaveAssets();
-                    AssetDatabase.Refresh();
-                    RefreshAssetPathList();
+
+                    string renamedAssetPath = AssetDatabase.GetAssetPath(f_asset);
+
+                    int cachedIndex = m_CachedAssetPathList.IndexOf(f_assetPath);
+
+                    if (cachedIndex >= 0)
+                    {
+                        m_CachedAssetPathList[cachedIndex] = renamedAssetPath;
+                    }
+
+                    if (m_AssetFoldoutStateDictionary.ContainsKey(f_assetPath))
+                    {
+                        bool foldoutState = m_AssetFoldoutStateDictionary[f_assetPath];
+
+                        m_AssetFoldoutStateDictionary.Remove(f_assetPath);
+                        m_AssetFoldoutStateDictionary[renamedAssetPath] = foldoutState;
+                    }
+
                     Repaint();
                     GUIUtility.ExitGUI();
                 }
@@ -512,6 +551,8 @@ public class CSED_NewToolWindow_CreatedAssetsWindow : EditorWindow
                 }
             }
         }
+
+        GUILayout.Space(4.0f);
 
         SerializedObject serializedObject = new SerializedObject(f_asset);
         serializedObject.Update();
@@ -535,8 +576,14 @@ public class CSED_NewToolWindow_CreatedAssetsWindow : EditorWindow
     {
         DrawCreatedAssetProperty(
             f_serializedObject,
-            "newEnumField01",
-            "newEnumField01");
+            "<NewIntField01>k__BackingField",
+            "イント型のテスト");
+        GUILayout.Space(4.0f);
+
+        DrawCreatedAssetProperty(
+            f_serializedObject,
+            "<N_Test_Not>k__BackingField",
+            "イント型のテスト設定なしです");
         GUILayout.Space(4.0f);
 
     }
@@ -559,50 +606,12 @@ public class CSED_NewToolWindow_CreatedAssetsWindow : EditorWindow
             return;
         }
 
-        EditorGUILayout.PropertyField(
-            property,
-            new GUIContent(f_labelName),
-            true);
-    }
+        float beforeLabelWidth = EditorGUIUtility.labelWidth;
+        EditorGUIUtility.labelWidth = 150.0f;
 
-    /// <summary>
-    /// MinMaxFieldを表示ラベル付きで描画します。
-    /// </summary>
-    /// <param name="f_labelName">表示ラベル</param>
-    /// <param name="f_minProperty">Min側Property</param>
-    /// <param name="f_maxProperty">Max側Property</param>
-    private void DrawCreatedAssetMinMaxField(
-        string f_labelName,
-        SerializedProperty f_minProperty,
-        SerializedProperty f_maxProperty)
-    {
-        if (f_minProperty == null || f_maxProperty == null)
-        {
-            return;
-        }
+        EditorGUILayout.PropertyField(property, new GUIContent(f_labelName), true);
 
-        Rect rowRect = EditorGUILayout.GetControlRect(false, EditorGUIUtility.singleLineHeight);
-
-        float mainLabelWidth = 120.0f;
-        float smallLabelWidth = 28.0f;
-        float spacing = 6.0f;
-
-        float valueAreaX = rowRect.x + mainLabelWidth + spacing;
-        float valueAreaWidth = rowRect.width - mainLabelWidth - spacing;
-        float fieldWidth = (valueAreaWidth - smallLabelWidth - smallLabelWidth - (spacing * 3.0f)) * 0.5f;
-        fieldWidth = Mathf.Max(35.0f, fieldWidth);
-
-        Rect labelRect = new Rect(rowRect.x, rowRect.y, mainLabelWidth, rowRect.height);
-        Rect minLabelRect = new Rect(valueAreaX, rowRect.y, smallLabelWidth, rowRect.height);
-        Rect minValueRect = new Rect(minLabelRect.xMax + spacing, rowRect.y, fieldWidth, rowRect.height);
-        Rect maxLabelRect = new Rect(minValueRect.xMax + spacing, rowRect.y, smallLabelWidth, rowRect.height);
-        Rect maxValueRect = new Rect(maxLabelRect.xMax + spacing, rowRect.y, fieldWidth, rowRect.height);
-
-        EditorGUI.LabelField(labelRect, f_labelName);
-        EditorGUI.LabelField(minLabelRect, "Min");
-        EditorGUI.PropertyField(minValueRect, f_minProperty, GUIContent.none);
-        EditorGUI.LabelField(maxLabelRect, "Max");
-        EditorGUI.PropertyField(maxValueRect, f_maxProperty, GUIContent.none);
+        EditorGUIUtility.labelWidth = beforeLabelWidth;
     }
 
     /// <summary>
