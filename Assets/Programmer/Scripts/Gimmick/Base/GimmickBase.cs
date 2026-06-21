@@ -15,6 +15,7 @@ public enum Gimmick
 
 public enum GimmickState
 {
+    Preview,
     Spawn,
     Idle,
     Search,
@@ -96,6 +97,10 @@ public class GimmickBase : MonoBehaviour
     [SerializeField] private float brokenFadeSpeed = 1.0f;
     private float brokenAlpha = 1.0f;
     private bool brokenFadeStart = false;
+
+    //設置プレビュー用
+    [Header("Preview")]
+    [SerializeField] private float previewAlpha = 0.5f;
 
     protected Vector2Int gimmickGridPos;
     protected Vector3 targetPoint;
@@ -408,6 +413,10 @@ public class GimmickBase : MonoBehaviour
     {
         switch (gimmickState)
         {
+            case GimmickState.Preview:
+                PreviewUpdate();
+                break;
+
             case GimmickState.Spawn:
                 SpawnUpdate();
                 break;
@@ -431,6 +440,17 @@ public class GimmickBase : MonoBehaviour
             case GimmickState.Broken:
                 BrokenUpdate();
                 break;
+        }
+    }
+
+    protected virtual void PreviewUpdate()
+    {
+        foreach (Material mat in materials)
+        {
+            if (mat != null && mat.HasProperty("_Alpha"))
+            {
+                mat.SetFloat("_Alpha", 0.4f);
+            }
         }
     }
 
@@ -461,6 +481,13 @@ public class GimmickBase : MonoBehaviour
         else
         {
             transform.position = targetPoint;
+            foreach (Material mat in materials)
+            {
+                if (mat != null && mat.HasProperty("_Alpha"))
+                {
+                    mat.SetFloat("_Alpha", 1f);
+                }
+            }
             gimmickState = GimmickState.Idle;
         }
     }

@@ -197,8 +197,8 @@ Transform:
   m_GameObject: {fileID: 7905465617219888894}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: -31.799995, y: 0, z: 39}
+  m_LocalScale: {x: 0.5827428, y: 0.5827428, z: 0.5827428}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 4788694987640629296}
@@ -243,6 +243,7 @@ MonoBehaviour:
   spawnVibrationSpeed: 0
   mesh: []
   brokenFadeSpeed: 1
+  previewAlpha: 0.5
   activeTime: 10
   gravity: 0.1
   dangerZone: {fileID: 1027198714623358771, guid: 1dc331ca8706d994f9348bb340bfb17e,
@@ -281,10 +282,20 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 3279101354686393898}
     m_Modifications:
+    - target: {fileID: 673135597934059757, guid: 04669349bd8eae5469e6e486cc2c28e1,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 933345628519016608, guid: 04669349bd8eae5469e6e486cc2c28e1,
         type: 3}
       propertyPath: m_Name
       value: Search
+      objectReference: {fileID: 0}
+    - target: {fileID: 5994039899918183061, guid: 04669349bd8eae5469e6e486cc2c28e1,
+        type: 3}
+      propertyPath: m_LocalScale.z
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 8563089307311750811, guid: 04669349bd8eae5469e6e486cc2c28e1,
         type: 3}

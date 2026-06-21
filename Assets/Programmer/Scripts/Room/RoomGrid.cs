@@ -243,14 +243,12 @@ public class RoomGrid : MonoBehaviour
             spawnPos.y = hitItem.point.y;
             break;
         }
-
         GameObject gimmickObject = Instantiate(gimmick.gameObject, spawnPos, Quaternion.identity);
         GimmickBase spawnGimmick = gimmickObject.GetComponent<GimmickBase>();
         spawnGimmick.roomGrid = this;
         gridGimmicks[grid.y][grid.x] = gimmickObject;
         spawnGimmick.SetGimmickPos(grid);
         spawnGimmick.AdjustScaleToGrid();
-
         return true;
     }
 

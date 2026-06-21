@@ -16,9 +16,12 @@
  * 2026-05-25 | インタラクトの範囲に入った泥棒に通知処理：吉田
  * 2026-06-11 | ギミック設置時のEffect再生処理を追加：吉本
  */
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using static UnityEditor.PlayerSettings;
 
 public class CS_PlayerAction : MonoBehaviour
 {
@@ -56,6 +59,9 @@ public class CS_PlayerAction : MonoBehaviour
     // インタラクト範囲Effect再生クラスへの参照
     private CS_PlayerInteractRangeEffectPlayer cs_PlayerInteractRangeEffectPlayer;
 
+
+    private bool isShowGimmickPreview = false;
+    private GimmickBase previewInstance;
     // Start is called before the first frame update
     void Start()
     {
@@ -197,9 +203,27 @@ public class CS_PlayerAction : MonoBehaviour
 
         }
 
+        if (playerData.currentMode == CS_PlayerData.PlayerMode.Setting)
+        {
+            ShowGimmickPreview();
+        }
+        else
+        {
+            if (isShowGimmickPreview)
+            {
+                // プレビューオブジェクトの削除
+                if (previewInstance != null)
+                {
+                    Destroy(previewInstance.gameObject);
+                    previewInstance = null;
+                }
+                isShowGimmickPreview = false;
+            }
+        }
+
 #if UNITY_EDITOR
         //デバッグ：ギミックの設置位置描画
-        DebugDrawGimmickSet();
+        //DebugDrawGimmickSet();
 #endif
     }
 
@@ -225,7 +249,6 @@ public class CS_PlayerAction : MonoBehaviour
 
             interactField.transform.localScale = Vector3.zero;
             isInteracting = true;
-
             if (cs_PlayerInteractRangeEffectPlayer != null)
             {
                 cs_PlayerInteractRangeEffectPlayer.PlayInteractRangeEffect(
@@ -241,7 +264,6 @@ public class CS_PlayerAction : MonoBehaviour
             {
                 cs_PlayerInteractRangeEffectPlayer.EndInteractRangeEffect();
             }
-
             if (interactTime < switchInteract)
             {
                 // 短押しは設置の処理を行う
@@ -348,6 +370,8 @@ public class CS_PlayerAction : MonoBehaviour
             Debug.LogError("この部屋の床にRoomGridがついていません");
 
         Vector3 setPos = CalculateGimmickSetPosition();
+
+        gimmick.gimmickState = GimmickState.Spawn;
 
         // 設置処理 //
         if (!roomGrid.SetGimmickInGrid(setPos, gimmick))
@@ -521,7 +545,6 @@ public class CS_PlayerAction : MonoBehaviour
             {//グリッド設置予定位置より右よりにいたら
              //グリッド設置予定位置+ギミックサイズより左にいたら
                 spawnPos.x += gridSize.x;
-
             }
         }
         else if (gimmick.GetGimmickSize().y % 2 == 0 && !forwardZ)
@@ -531,114 +554,130 @@ public class CS_PlayerAction : MonoBehaviour
             {//グリッド設置予定位置より右よりにいたら
              //グリッド設置予定位置+ギミックサイズより左にいたら
                 spawnPos.z += gridSize.y;
-
             }
         }
 
         settingPos = spawnPos;
         return spawnPos;
     }
-
-    // ===== staticで保持※デバッグ用=====
-    private LineRenderer line = null;
-    private Vector3[] points = new Vector3[10]; // 最大数
-
-    //ギミックの設置予定位置の取得とデバッグ用ボックス描画
-    private void DebugDrawGimmickSet()
+    //ギミックのプレビューを表示
+    // ギミックのプレビュー表示
+    private void ShowGimmickPreview()
     {
-        if (settingPos.magnitude == float.PositiveInfinity) return;
-        GameObject currentRoom = playerData.currentRoomData.GetPlayerFloorData();
+        if (gimmickKind.Count == 0)
+            return;
 
-        // デバッグ用のギミック設置位置描画
-        if (currentRoom == null) { Debug.Log("currentRoomError_DDGS"); return; }
-        if (gimmickKind.Count == 0) { Debug.Log("gimmickKind.Count_DDGS"); return; }
+        GameObject currentRoom =
+            playerData.currentRoomData.GetPlayerFloorData();
 
-        var roomGrid = currentRoom.GetComponent<RoomGrid>();
+        if (currentRoom == null)
+            return;
+
+        var roomGrid =
+            currentRoom.GetComponent<RoomGrid>();
+
+        if (roomGrid == null)
+            return;
+
+        if (gimmickKind[currentGimmickIndex] == null)
+        {
+            Debug.LogError("選択されたギミックが見つかりません");
+            return;
+        }
         GimmickBase gimmick = gimmickKind[currentGimmickIndex].GetComponent<GimmickBase>();
 
-        // ギミックの設置位置を計算
-        if (settingPos.magnitude == float.PositiveInfinity) return;
+        gimmick.roomGrid = roomGrid;
 
-        // グリッドサイズ取得
-        Vector3 gridSize = roomGrid.gridSize;
-
-        // ギミックのサイズ取得
-        float sizeX = gimmick.GetGimmickSize().x;
-        float sizeY = gimmick.GetGimmickSize().y;
+        if (gimmick == null)
+            return;
 
         Vector2Int grid = roomGrid.GetGridFromPos(settingPos);
-        settingPos = roomGrid.GimmickEvenNumberCorrection(settingPos, grid, gimmick);
+        settingPos = CalculateGimmickSetPosition();
+        Vector3 previewPos =
+            roomGrid.GimmickEvenNumberCorrection(
+                settingPos,
+                grid,
+                gimmick);
 
-        // ===============================
-        // LineRenderer生成※初回のみ
-        if (line == null)
+        Ray ray = new Ray();
+        ray.direction = Vector3.down;
+        const float rayOriginY = 255f;
+        ray.origin = new Vector3(previewPos.x, rayOriginY, previewPos.z);
+        // 床を確実に取れるようマージンを大きめに取りレイを飛ばす
+        RaycastHit[] roomhits = Physics.RaycastAll(ray, Mathf.Abs(rayOriginY - (gameObject.transform.position.y - 10.0f)), ~0,
+            QueryTriggerInteraction.Ignore);
+        Array.Sort(roomhits, (a, b) => a.distance.CompareTo(b.distance));
+
+        foreach (var hitItem in roomhits)
         {
-            GameObject lineObj = new GameObject("GimmickGridRenderer_Debug");
-            line = lineObj.AddComponent<LineRenderer>();
+            if (hitItem.transform.CompareTag("Player")) continue;
+            if (hitItem.transform.CompareTag("Thief")) continue;
 
-            line.material = new Material(Shader.Find("Sprites/Default"));
-            line.widthMultiplier = 0.03f;
-            line.useWorldSpace = true;
+            previewPos.y = hitItem.point.y;
+            break;
         }
-
-        line.material = new Material(Shader.Find("Sprites/Default"));
-        line.widthMultiplier = 0.03f;
-        line.useWorldSpace = true;
-
-        bool canPlace = true;
-
-        line.startColor = Color.green;
-        line.endColor = Color.green;
-        // 色設定
-        // 縦横サイズに合わせて判定を拡大
-        for (int sX = 0 ; sX < sizeX ; sX++)
+        gimmick.SetGimmickPos(previewPos);
+        gimmick.AdjustScaleToGrid();
+        //----------------------------------
+        // 初回のみ生成
+        //----------------------------------
+        if (!isShowGimmickPreview)
         {
-            for (int sY = 0 ; sY < sizeY ; sY++)
+            gimmick.gimmickState =
+                GimmickState.Preview;
+            if (!roomGrid.SetGimmickInGrid(
+                    previewPos,
+                    gimmick))
             {
-                Vector3 checkPos;
-                //偶数だけX軸がズレるから一マス修正
-                if (sizeX % 2 == 0)
-                {
-                    checkPos.x = settingPos.x + (sX * gridSize.x) - (gridSize.x * sizeX / 2f);
-                }
-                else
-                {
-                    checkPos.x = settingPos.x + (sX * gridSize.x);
-                }
-                checkPos.y = 0;
-                checkPos.z = settingPos.z + (sY * gridSize.y);
-                canPlace = !roomGrid.IsGridOnGimmick(roomGrid.GetGridFromPos(checkPos));
-                // どこか一箇所でも置けない場所があれば赤色にする
-                if (!canPlace)
-                {
-                    line.startColor = Color.red;
-                    line.endColor = Color.red;
-                }
+                return;
+            }
+
+            isShowGimmickPreview = true;
+
+            // =========================
+            // 実際に生成されたインスタンス取得
+            // =========================
+            Vector3 center = previewPos;          // 中心位置
+            Vector3 halfExtents = new Vector3(1f, 5f, 1f); // 半径ではなく「半サイズ」
+
+            Collider[] hits = Physics.OverlapBox(center, halfExtents);
+
+            foreach (var hit in hits)
+            {
+                GimmickBase gimmickBase = hit.GetComponent<GimmickBase>();
+
+                if (gimmickBase == null)
+                    continue;
+
+                // 同じ種類のみ
+                if (gimmickBase.GetGimmickTag() != gimmick.GetGimmickTag())
+                    continue;
+
+                previewInstance = gimmickBase;
+                break;
+            }
+
+            if (previewInstance == null)
+            {
+                Debug.LogError("配置後のGimmick取得失敗");
+                return;
             }
         }
+        //----------------------------------
+        // 生成済なら移動だけ
+        //----------------------------------
+        else
+        {
+            if (previewInstance != null)
+            {
+                previewInstance.transform.position =
+                    previewPos;
 
-        float width = sizeX * gridSize.x;
-        float depth = sizeY * gridSize.y;
-        float lineY = settingPos.y + 0.1f;
-
-        Vector3 p1 = new Vector3(settingPos.x - width / 2f, lineY, settingPos.z - depth / 2f);
-        Vector3 p2 = new Vector3(settingPos.x - width / 2f, lineY, settingPos.z + depth / 2f);
-        Vector3 p3 = new Vector3(settingPos.x + width / 2f, lineY, settingPos.z + depth / 2f);
-        Vector3 p4 = new Vector3(settingPos.x + width / 2f, lineY, settingPos.z - depth / 2f);
-
-        // 配列入れ込み
-        int i = 0;
-        points[i++] = p1; points[i++] = p2;
-        points[i++] = p2; points[i++] = p3;
-        points[i++] = p3; points[i++] = p4;
-        points[i++] = p4; points[i++] = p1;
-
-        points[i++] = settingPos;
-        points[i++] = settingPos + Vector3.up * 1.0f;
-
-        // 反映
-        line.positionCount = i;
-        line.SetPositions(points);
+                previewInstance.transform.rotation =
+                    Quaternion.LookRotation(
+                        transform.forward);
+            }
+        }
     }
 
     //ソウルの数を加算する関数
