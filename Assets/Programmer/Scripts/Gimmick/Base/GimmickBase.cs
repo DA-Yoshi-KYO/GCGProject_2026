@@ -142,6 +142,8 @@ public class GimmickBase : MonoBehaviour
 
         InitMaterials();
         roomIndex = CS_RoomCreatePointRaycast.GetRayRoomCreatePoint(this.gameObject).transform.GetSiblingIndex();
+
+
     }
 
     private void InitMaterials()
@@ -445,6 +447,26 @@ public class GimmickBase : MonoBehaviour
 
     protected virtual void PreviewUpdate()
     {
+        switch(gimmickDirection)
+        {
+            case GimmickDirection.Up:
+                transform.rotation = Quaternion.Euler(0, 0, 0);
+                Debug.Log("PreviewUpdate: Set rotation to Up (0, 0, 0)");
+                break;
+            case GimmickDirection.Down:
+                transform.rotation = Quaternion.Euler(0, 180, 0);
+                Debug.Log("PreviewUpdate: Set rotation to Down (0, 180, 0)");
+                break;
+            case GimmickDirection.Left:
+                transform.rotation = Quaternion.Euler(0, 90, 0);
+                Debug.Log("PreviewUpdate: Set rotation to Left (0, 90, 0)");
+                break;
+            case GimmickDirection.Right:
+                transform.rotation = Quaternion.Euler(0, -90, 0);
+                Debug.Log("PreviewUpdate: Set rotation to Right (0, -90, 0)");
+                break;
+        }
+
         foreach (Material mat in materials)
         {
             if (mat != null && mat.HasProperty("_Alpha"))
@@ -477,6 +499,21 @@ public class GimmickBase : MonoBehaviour
             }
             spawnVibrationCount++;
             transform.position = currentPoint;
+            switch (gimmickDirection)
+            {
+                case GimmickDirection.Up:
+                    transform.rotation = Quaternion.Euler(0, 0, 0);
+                    break;
+                case GimmickDirection.Down:
+                    transform.rotation = Quaternion.Euler(0, 180, 0);
+                    break;
+                case GimmickDirection.Left:
+                    transform.rotation = Quaternion.Euler(0, 90, 0);
+                    break;
+                case GimmickDirection.Right:
+                    transform.rotation = Quaternion.Euler(0, -90, 0);
+                    break;
+            }
         }
         else
         {

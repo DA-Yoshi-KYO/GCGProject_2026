@@ -560,7 +560,6 @@ public class CS_PlayerAction : MonoBehaviour
         settingPos = spawnPos;
         return spawnPos;
     }
-    //ギミックのプレビューを表示
     // ギミックのプレビュー表示
     private void ShowGimmickPreview()
     {
@@ -590,33 +589,12 @@ public class CS_PlayerAction : MonoBehaviour
 
         if (gimmick == null)
             return;
-
         Vector2Int grid = roomGrid.GetGridFromPos(settingPos);
+        settingPos = roomGrid.GetWorldPosFromGrid(grid);
         settingPos = CalculateGimmickSetPosition();
-        Vector3 previewPos =
-            roomGrid.GimmickEvenNumberCorrection(
-                settingPos,
-                grid,
-                gimmick);
+        settingPos = roomGrid.GimmickEvenNumberCorrection(settingPos, grid, gimmick);
 
-        Ray ray = new Ray();
-        ray.direction = Vector3.down;
-        const float rayOriginY = 255f;
-        ray.origin = new Vector3(previewPos.x, rayOriginY, previewPos.z);
-        // 床を確実に取れるようマージンを大きめに取りレイを飛ばす
-        RaycastHit[] roomhits = Physics.RaycastAll(ray, Mathf.Abs(rayOriginY - (gameObject.transform.position.y - 10.0f)), ~0,
-            QueryTriggerInteraction.Ignore);
-        Array.Sort(roomhits, (a, b) => a.distance.CompareTo(b.distance));
-
-        foreach (var hitItem in roomhits)
-        {
-            if (hitItem.transform.CompareTag("Player")) continue;
-            if (hitItem.transform.CompareTag("Thief")) continue;
-
-            previewPos.y = hitItem.point.y;
-            break;
-        }
-        gimmick.SetGimmickPos(previewPos);
+        gimmick.SetGimmickPos(settingPos);
         gimmick.AdjustScaleToGrid();
         //----------------------------------
         // 初回のみ生成
@@ -625,8 +603,9 @@ public class CS_PlayerAction : MonoBehaviour
         {
             gimmick.gimmickState =
                 GimmickState.Preview;
+
             if (!roomGrid.SetGimmickInGrid(
-                    previewPos,
+                    settingPos,
                     gimmick))
             {
                 return;
@@ -637,7 +616,7 @@ public class CS_PlayerAction : MonoBehaviour
             // =========================
             // 実際に生成されたインスタンス取得
             // =========================
-            Vector3 center = previewPos;          // 中心位置
+            Vector3 center = new Vector3(settingPos.x, settingPos.y + 1.0f, settingPos.z);// 中心位置
             Vector3 halfExtents = new Vector3(1f, 5f, 1f); // 半径ではなく「半サイズ」
 
             Collider[] hits = Physics.OverlapBox(center, halfExtents);
@@ -670,12 +649,15 @@ public class CS_PlayerAction : MonoBehaviour
         {
             if (previewInstance != null)
             {
-                previewInstance.transform.position =
-                    previewPos;
+                if (previewInstance.GetGimmickSize().y % 2 == 0)
+                {
+                    settingPos.y += previewInstance.GetGimmickSize().y * 0.5f;
+                }
 
-                previewInstance.transform.rotation =
-                    Quaternion.LookRotation(
-                        transform.forward);
+                previewInstance.transform.position =
+                    settingPos;
+                //プレイヤーとギミックとの位置でギミックの向きを設定
+                SettingGimmickDirection(previewInstance);
             }
         }
     }
