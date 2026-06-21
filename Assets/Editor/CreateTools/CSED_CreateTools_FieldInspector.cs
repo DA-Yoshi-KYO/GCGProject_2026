@@ -442,6 +442,18 @@ public partial class CSED_CreateTools
             f_fieldData.FieldLayoutType = GetDefaultAllowedFieldLayoutType(f_fieldData);
         }
 
+        GUILayout.Space(c_FieldInspectorRowSpacing);
+
+        f_fieldData.IsPublicSetter = DrawSmallToggle(
+            "  外部Set許可",
+            f_fieldData.IsPublicSetter);
+
+        GUILayout.Space(c_FieldInspectorRowSpacing);
+
+        f_fieldData.TooltipText = DrawSmallTextField(
+            "  Tooltip",
+            f_fieldData.TooltipText);
+
         if (f_fieldData.FieldType == CSE_CreateTools_FieldType.List)
         {
             GUILayout.Space(c_FieldInspectorRowSpacing);
