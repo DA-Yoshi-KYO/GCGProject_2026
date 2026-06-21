@@ -15,6 +15,7 @@
  * 2026-05-25 | SEを追加：吉田
  * 2026-05-25 | インタラクトの範囲に入った泥棒に通知処理：吉田
  * 2026-06-11 | ギミック設置時のEffect再生処理を追加：吉本
+ * 2026-06-22 | ギミック設置時のプレビュー表示を追加：大瀧
  */
 using System;
 using System.Collections.Generic;
@@ -59,6 +60,7 @@ public class CS_PlayerAction : MonoBehaviour
     // インタラクト範囲Effect再生クラスへの参照
     private CS_PlayerInteractRangeEffectPlayer cs_PlayerInteractRangeEffectPlayer;
 
+    private int saveGimmickIndex;// 現在のギミックインデックスを保存する変数
 
     private bool isShowGimmickPreview = false;
     private GimmickBase previewInstance;
@@ -209,16 +211,13 @@ public class CS_PlayerAction : MonoBehaviour
         }
         else
         {
-            if (isShowGimmickPreview)
+            // プレビューオブジェクトの削除
+            if (previewInstance != null)
             {
-                // プレビューオブジェクトの削除
-                if (previewInstance != null)
-                {
-                    Destroy(previewInstance.gameObject);
-                    previewInstance = null;
-                }
-                isShowGimmickPreview = false;
+                Destroy(previewInstance.gameObject);
+                previewInstance = null;
             }
+            isShowGimmickPreview = false;
         }
 
 #if UNITY_EDITOR
@@ -560,6 +559,7 @@ public class CS_PlayerAction : MonoBehaviour
         settingPos = spawnPos;
         return spawnPos;
     }
+
     // ギミックのプレビュー表示
     private void ShowGimmickPreview()
     {
@@ -599,8 +599,16 @@ public class CS_PlayerAction : MonoBehaviour
         //----------------------------------
         // 初回のみ生成
         //----------------------------------
-        if (!isShowGimmickPreview)
+        if (!isShowGimmickPreview || saveGimmickIndex != currentGimmickIndex)
         {
+            saveGimmickIndex = currentGimmickIndex;
+
+            if(previewInstance != null)
+            {
+                Destroy(previewInstance.gameObject);
+                previewInstance = null;
+            }
+
             gimmick.gimmickState =
                 GimmickState.Preview;
 
