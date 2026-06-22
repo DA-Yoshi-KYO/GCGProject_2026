@@ -17,7 +17,6 @@
  * 2026-06-11 | ギミック設置時のEffect再生処理を追加：吉本
  */
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -113,13 +112,10 @@ public class CS_PlayerAction : MonoBehaviour
                     foreach (var item in hitList)
                     {
                         if (item == null) continue;
-                        var renderers = item.GetComponentsInChildren<Renderer>();
-                        foreach (var renderer in renderers)
+                        GimmickBase gimmick = item.GetComponent<GimmickBase>();
+                        if (gimmick != null)
                         {
-                            if (renderer.materials.Length < 2) continue;
-
-                            Material material = renderer.materials[1];
-                            if (material != null) material.SetVector("_OutlineColor", Color.gray);
+                            gimmick.SetOutLineColor(Color.gray);
                         }
                     }
                 }
@@ -180,16 +176,7 @@ public class CS_PlayerAction : MonoBehaviour
                     if (gimmick != null)
                     {
                         if (gimmick.gimmickState != GimmickState.Idle) continue;
-                    }
-
-                    // アウトラインの色付け
-                    var renderers = hits[i].GetComponentsInChildren<Renderer>();
-                    foreach (var renderer in renderers)
-                    {
-                        if (renderer.materials.Length < 2) continue;
-
-                        Material material = renderer.materials[1];
-                        if (material != null) material.SetVector("_OutlineColor", Color.green);
+                        gimmick.SetOutLineColor(Color.green);
                     }
 
                     hitList.Add(hits[i]);
@@ -346,16 +333,13 @@ public class CS_PlayerAction : MonoBehaviour
 
         // グリッド配置
         if (roomGrid == null)
-        {
             Debug.LogError("この部屋の床にRoomGridがついていません");
-        }
+
         Vector3 setPos = CalculateGimmickSetPosition();
 
         // 設置処理 //
         if (!roomGrid.SetGimmickInGrid(setPos, gimmick))
-        {
             return;
-        }
 
         // =========================
         // 実際に生成されたインスタンス取得

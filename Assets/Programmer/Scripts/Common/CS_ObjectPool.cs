@@ -15,13 +15,17 @@ public class CS_ObjectPool
     private int initialSize = 10;
     private List<GameObject> poolList = new List<GameObject>();
 
+    private GameObject objectParent;
+
     // Start is called before the first frame update
-    public CS_ObjectPool(GameObject gameObject)
+    public CS_ObjectPool(GameObject gameObject, GameObject poolParent)
     {
         prefab = gameObject;
+        objectParent = poolParent;
         for (int i = 0 ; i < initialSize ; ++i)
         {
             GameObject obj = GameObject.Instantiate(gameObject);
+            obj.transform.SetParent(objectParent.transform);
             obj.SetActive(false);
             poolList.Add(obj);
         }
@@ -38,6 +42,7 @@ public class CS_ObjectPool
 
         //全部アクティブなら新しく作って作成
         GameObject newObject = GameObject.Instantiate(prefab);
+        newObject.transform.SetParent(objectParent.transform);
         poolList.Add(newObject);
         return newObject;
     }

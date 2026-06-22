@@ -92,6 +92,9 @@ public partial class CSED_CreateTools
             case CSE_CreateTools_FieldType.Bool:
                 return "newBoolField" + number.ToString("00");
 
+            case CSE_CreateTools_FieldType.Enum:
+                return "newEnumField" + number.ToString("00");
+
             case CSE_CreateTools_FieldType.ScriptableObject:
                 return "newScriptableObjectField" + number.ToString("00");
 
@@ -126,6 +129,9 @@ public partial class CSED_CreateTools
 
             case CSE_CreateTools_FieldType.Bool:
                 return CSE_CreateTools_FieldLayoutType.Toggle;
+
+            case CSE_CreateTools_FieldType.Enum:
+                return CSE_CreateTools_FieldLayoutType.Dropdown;
 
             case CSE_CreateTools_FieldType.List:
                 return CSE_CreateTools_FieldLayoutType.InputField;

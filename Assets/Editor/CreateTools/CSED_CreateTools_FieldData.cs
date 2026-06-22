@@ -22,6 +22,17 @@ using System.Collections.Generic;
 public class CSED_CreateTools_FieldData
 {
     /// <summary>
+    /// 外部からsetできるようにするかどうかです。
+    /// falseの場合は private set になります。
+    /// </summary>
+    public bool IsPublicSetter { get; set; }
+
+    /// <summary>
+    /// Tooltipに表示する説明文です。
+    /// </summary>
+    public string TooltipText { get; set; }
+
+    /// <summary>
     /// 初期値として設定するGameObjectです。
     /// </summary>
     public GameObject DefaultGameObjectValue { get; set; }
@@ -156,6 +167,11 @@ public class CSED_CreateTools_FieldData
     public string SliderMaxValueText { get; set; }
 
     /// <summary>
+    /// Enum型として使用するスクリプトです。
+    /// </summary>
+    public MonoScript EnumTypeScript { get; set; }
+
+    /// <summary>
     /// 変数データを作成します。
     /// </summary>
     /// <param name="f_fieldType">変数の型</param>
@@ -170,6 +186,8 @@ public class CSED_CreateTools_FieldData
         FieldName = f_fieldName;
         FieldLayoutType = f_fieldLayoutType;
         TagName = f_fieldName;
+        IsPublicSetter = false;
+        TooltipText = string.Empty;
 
         ListElementFieldType = CSE_CreateTools_FieldType.String;
         ListDefaultElementValueTextList = new List<string>();
@@ -177,6 +195,7 @@ public class CSED_CreateTools_FieldData
         ListDefaultMaxValueTextList = new List<string>();
         ListDefaultObjectValueList = new List<UnityEngine.Object>();
 
+        EnumTypeScript = null;
         ScriptableObjectTypeScript = null;
         DefaultScriptableObjectValue = null;
         DefaultScriptValue = null;

@@ -23,10 +23,20 @@ public class CS_PlayerData : MonoBehaviour
         currentRoomData = GameObject.Find("RoomManager").GetComponent<CS_RoomPlayerPosition>();
     }
 
+    public void ChangePlayerRoomData()
+    {
+        // プレイヤーの現在の部屋データを更新
+        currentRoomData = GameObject.Find("RoomManager").GetComponent<CS_RoomPlayerPosition>();
+        GameObject i = currentRoomData.GetPlayerRoomData();
+        Debug.Log("[RoomMovePoint] PlayerData.currentRoomDataを更新しました。" + i.name);
+    }
+
     private void OnDestroy()
     {
         // プレイヤーの入力アクションの無効化
         if (customInputAction != null)
             customInputAction.Player.Disable();
     }
+
+
 }

@@ -15,6 +15,8 @@ public class CS_WarpTrigger : MonoBehaviour
 
     private CS_RoomPlayerPosition roomPlayerPosition;
 
+    private CS_Mask mask;
+
     private void Start()
     {
         selfWarpPoint = GetComponent<CS_WarpPoint>();
@@ -25,6 +27,8 @@ public class CS_WarpTrigger : MonoBehaviour
             Debug.Log("RoomManagerが見つかりませんでした");
             return;
         }
+
+        mask = GameObject.Find("MaskCanvas").GetComponent<CS_Mask>();
     }
 
 
@@ -55,8 +59,11 @@ public class CS_WarpTrigger : MonoBehaviour
         if (wp == null || wp.targetPoint == null)
             return;
 
+        CS_PlayerCamera playerCamera = other.GetComponent<CS_PlayerCamera>();
+
+        mask.StartInMask(playerCamera.ChangeCamera);
+
         //プレイヤーの座標更新
-        Time.timeScale = 0.0f;
         controller.enabled = false;
 
         Rigidbody rb = other.attachedRigidbody;
@@ -82,7 +89,6 @@ public class CS_WarpTrigger : MonoBehaviour
 
         other.transform.position = exitPosition.position;
 
-        Time.timeScale = 1.0f;
         if (rb != null)
         {
             rb.isKinematic = false;
@@ -91,17 +97,19 @@ public class CS_WarpTrigger : MonoBehaviour
 
         //カメラ更新
         roomPlayerPosition.RefreshPlayerRoomData();
-        CS_PlayerCamera playerCamera = other.GetComponent<CS_PlayerCamera>();
-        if (playerCamera == null)
+       if (playerCamera == null)
         {
             Debug.Log("CS＿PlayerCameraが見つかりませんでした");
             return;
         }
-        playerCamera.OnRoomMove();
+        //playerCamera.ChangeCamera();
 
         selfWarpPoint.warping = true;
         wp.targetPoint.warping = true;
         selfWarpPoint.warpTimeCount = warpCoolTime;
         wp.targetPoint.warpTimeCount = warpCoolTime;
+
+        CS_PlayerData playerdata = other.GetComponent<CS_PlayerData>();
+        playerdata.ChangePlayerRoomData();
     }
 }

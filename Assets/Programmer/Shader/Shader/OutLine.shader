@@ -20,6 +20,7 @@ Shader "Custom/Outline"
             Cull Front
             ZWrite Off
             ZTest LEqual
+            Offset -1, -1
             Blend SrcAlpha OneMinusSrcAlpha
             HLSLPROGRAM
             #pragma vertex vert

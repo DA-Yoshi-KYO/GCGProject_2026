@@ -28,6 +28,10 @@ public class CS_RoomNode : MonoBehaviour
     [Header("部屋の初期探索度"), Range(0,100)]
     public int initialExplorationLevel = 0;
 
+    [Header("部屋のオブジェクトの親オブジェクト"), SerializeField]
+    private GameObject objectParent;
+    public GameObject read_ObjectParent => objectParent;
+
     [SerializeField, Header("ギズモを表示")]
     private bool showGizmos = false;
     [SerializeField, Header("ギズモの色")]

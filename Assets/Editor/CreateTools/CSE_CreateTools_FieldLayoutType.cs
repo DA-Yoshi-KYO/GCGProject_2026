@@ -42,6 +42,11 @@ public enum CSE_CreateTools_FieldLayoutType
     /// <summary>
     /// 候補から選択するタイプのレイアウトです。
     /// </summary>
+    Dropdown,
+
+    /// <summary>
+    /// 候補から選択するタイプのレイアウトです。
+    /// </summary>
     Select
 }
 #endif

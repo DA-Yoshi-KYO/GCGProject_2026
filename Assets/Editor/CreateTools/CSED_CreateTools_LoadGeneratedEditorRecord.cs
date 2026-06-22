@@ -169,6 +169,9 @@ public partial class CSED_CreateTools
         saveData.isListDefaultCountNull = f_fieldData.IsListDefaultCountNull;
         saveData.listDefaultCountText = f_fieldData.ListDefaultCountText;
 
+        saveData.isPublicSetter = f_fieldData.IsPublicSetter;
+        saveData.tooltipText = f_fieldData.TooltipText;
+
         saveData.isDefaultValueNull = f_fieldData.IsDefaultValueNull;
         saveData.defaultValueText = f_fieldData.DefaultValueText;
 
@@ -185,6 +188,7 @@ public partial class CSED_CreateTools
         saveData.sliderMaxValueText = f_fieldData.SliderMaxValueText;
 
         saveData.scriptableObjectTypeScript = f_fieldData.ScriptableObjectTypeScript;
+        saveData.enumTypeScript = f_fieldData.EnumTypeScript;
         saveData.defaultScriptableObjectValue = f_fieldData.DefaultScriptableObjectValue;
         saveData.defaultScriptValue = f_fieldData.DefaultScriptValue;
         saveData.defaultGameObjectValue = f_fieldData.DefaultGameObjectValue;
@@ -249,6 +253,9 @@ public partial class CSED_CreateTools
         fieldData.IsListDefaultCountNull = f_saveData.isListDefaultCountNull;
         fieldData.ListDefaultCountText = f_saveData.listDefaultCountText;
 
+        fieldData.IsPublicSetter = f_saveData.isPublicSetter;
+        fieldData.TooltipText = f_saveData.tooltipText;
+
         fieldData.IsDefaultValueNull = f_saveData.isDefaultValueNull;
         fieldData.DefaultValueText = f_saveData.defaultValueText;
 
@@ -265,6 +272,7 @@ public partial class CSED_CreateTools
         fieldData.SliderMaxValueText = f_saveData.sliderMaxValueText;
 
         fieldData.ScriptableObjectTypeScript = f_saveData.scriptableObjectTypeScript;
+        fieldData.EnumTypeScript = f_saveData.enumTypeScript;
         fieldData.DefaultScriptableObjectValue = f_saveData.defaultScriptableObjectValue;
         fieldData.DefaultScriptValue = f_saveData.defaultScriptValue;
         fieldData.DefaultGameObjectValue = f_saveData.defaultGameObjectValue;

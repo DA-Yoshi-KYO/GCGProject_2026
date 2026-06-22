@@ -5,10 +5,10 @@
  * ----------------------------------------------------------
  * 2026-04-26 | 初回作成(大瀧)
  * 2026-05-08 | リファクタリング(大瀧)
+ * 2026-06-18 | リファクタリング(大瀧)
  */
 
 using UnityEngine;
-using UnityEngine.SocialPlatforms;
 
 public class RockGimmick : GimmickBase
 {
@@ -19,8 +19,6 @@ public class RockGimmick : GimmickBase
 
     private Vector3 velocity = Vector3.zero;
     private GameObject checker;
-    [SerializeField]
-    private MeshRenderer meshRenderer;
     [Header("下方向へのレイの距離")]
     [SerializeField]
     private float rayDownLength = 1.2f;  //下方へのレイ
@@ -46,6 +44,7 @@ public class RockGimmick : GimmickBase
 
     private bool isDangerZoneSpawned;
 
+    //サウンドにストップができたら使う
     private float activeTimer = 0f;
     private bool soundPlayed = false;
 
@@ -84,16 +83,6 @@ public class RockGimmick : GimmickBase
             initPositionY = transform.position.y + debugIdleOffset;
             velocity = Vector3.zero;
 
-            if (visualRoot == null)
-            {
-                MeshRenderer renderer =
-                    GetComponentInChildren<MeshRenderer>();
-
-                if (renderer != null)
-                {
-                    visualRoot = renderer.transform;
-                }
-            }
             SetHitChecker(transform.position);
         }
 
@@ -105,7 +94,12 @@ public class RockGimmick : GimmickBase
 
         // レイ起点を少し上にずらして自身コライダへの衝突を回避する
         Vector3 rayOrigin = transform.position + Vector3.up * 0.1f;
+        Vector3 rayDirection = Vector3.zero;
         bool hasValidHit = false;   //ヒットが有効かどうか
+
+
+        //！！！ここら辺のサウンド周りは、ストップ関数ができたら使います！！！//
+
         //if (soundPlayed)
         //{
         //    activeTimer -= Time.deltaTime;
@@ -136,7 +130,6 @@ public class RockGimmick : GimmickBase
                     if (h.collider == null) continue;
                     if (h.collider.gameObject == gameObject) continue;
                     if (h.collider.transform.IsChildOf(transform)) continue;
-                    
                     hit = h;
                     hasValidHit = true;
                     break;
@@ -147,57 +140,43 @@ public class RockGimmick : GimmickBase
                 hasValidHit = true;
             }
 
-            //インタラクト時転がす
-            if (gimmickDirection == GimmickDirection.Down)
-            {//Z+
-                velocity = Vector3.back * rollSpeed;
-                transform.Rotate(
-                        Vector3.right,
-                        -rollSpeed * Time.deltaTime * 360f,
-                        Space.Self
-                    );
+            switch (gimmickDirection)
+            {
+                case GimmickDirection.Up:
+                    rayDirection = Vector3.back;
+                    velocity = Vector3.back * rollSpeed;
+                    transform.Rotate(Vector3.right,-rollSpeed * Time.deltaTime * 360f, Space.Self);
+                    break;
+
+                case GimmickDirection.Down:
+                    rayDirection = Vector3.forward;
+                    velocity = Vector3.forward * rollSpeed;
+                    transform.Rotate(Vector3.right, rollSpeed * Time.deltaTime * 360f, Space.Self);
+                    break;
+
+                case GimmickDirection.Left:
+                    rayDirection = Vector3.right;
+                    velocity = Vector3.right * rollSpeed;
+                    transform.Rotate(Vector3.forward, -rollSpeed * Time.deltaTime * 360f, Space.Self);
+                    break;
+
+                case GimmickDirection.Right:
+                    rayDirection = Vector3.left;
+                    velocity = Vector3.left * rollSpeed;
+                    transform.Rotate(Vector3.forward, rollSpeed * Time.deltaTime * 360f, Space.Self);
+                    break;
             }
-            else if (gimmickDirection == GimmickDirection.Up)
-            {//Z-
-                velocity = Vector3.forward * rollSpeed;
-                transform.Rotate(
-                        Vector3.right,
-                        rollSpeed * Time.deltaTime * 360f,
-                        Space.Self
-                    );
-            }
-            else if (gimmickDirection == GimmickDirection.Left)
-            {//X-
-                velocity = Vector3.right * rollSpeed;
-                transform.Rotate(
-                        Vector3.forward,
-                        -rollSpeed * Time.deltaTime * 360f,
-                        Space.Self
-                    );
-            }
-            else if (gimmickDirection == GimmickDirection.Right)
-            {//X+
-                velocity = Vector3.left * rollSpeed;
-                transform.Rotate(
-                        Vector3.forward,
-                        rollSpeed * Time.deltaTime * 360f,
-                        Space.Self
-                    );
-            }
+            //ベロシティ移動
             transform.position += velocity * Time.deltaTime;
+
             //！！デバッグ用応急処置！！//
             transform.position = new Vector3(transform.position.x, transform.position.y + debugIdleOffset, transform.position.z);
+            
             //---------------
             // 壁判定
             // XZ方向にレイを飛ばす
             // 大岩自体が大きいため前後左右レイを少し下に調整
             Vector3 rayXYOrigin = new Vector3(transform.position.x, transform.position.y - 1.5f, transform.position.z);
-            // velocityではなく、gimmickDirectionから直接方向を取得
-            Vector3 rayDirection = Vector3.zero;
-            if (gimmickDirection == GimmickDirection.Down) rayDirection = Vector3.back;
-            else if (gimmickDirection == GimmickDirection.Up) rayDirection = Vector3.forward;
-            else if (gimmickDirection == GimmickDirection.Left) rayDirection = Vector3.right;
-            else if (gimmickDirection == GimmickDirection.Right) rayDirection = Vector3.left;
 
             Debug.DrawRay(rayXYOrigin, rayDirection * raySideLength, Color.yellow);
 
@@ -232,9 +211,9 @@ public class RockGimmick : GimmickBase
             {
                 //接地判定
                 //接地(滑らない床)は破壊※一定以上落下している場合のみ
-                //gimmickState = GimmickState.Broken;
+                gimmickState = GimmickState.Broken;
             }
-            else// if (hit.collider.CompareTag("Plane") || hit.collider.CompareTag("Untagged"))
+            else
             {
                 // 滑り
                 pos += slopeDir * speed * Time.deltaTime;
@@ -295,7 +274,6 @@ public class RockGimmick : GimmickBase
         {
             GetThiefGimmickAction().IronBallEnd(this);
         }
-        //hitting.SearchEnemy(gimmick).IronBallEnd();
         //破壊時に1回だけ生成
         if (!isDangerZoneSpawned)
         {
@@ -315,8 +293,12 @@ public class RockGimmick : GimmickBase
                 Debug.LogWarning("PotGimmick: dangerZone が未設定です。", this);
             }
         }
-        if (gimmickSound != null) gimmickSound.PlayOneShotSE("RockHit", gameObject.transform.position, "RockSound");
+        if (gimmickSound != null)
+        {
+            gimmickSound.PlayOneShotSE("RockHit", gameObject.transform.position, "RockSound");
+            Destroy(gimmickSound);
+        }
         if (checker != null)
-            Destroy(checker);
+        Destroy(checker);
     }
 }

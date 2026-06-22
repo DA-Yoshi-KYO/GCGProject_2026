@@ -114,6 +114,8 @@ public partial class CSED_CreateTools
         builder.AppendLine("    {");
         builder.AppendLine("        m_MainScrollPosition = EditorGUILayout.BeginScrollView(m_MainScrollPosition);");
         builder.AppendLine("        {");
+        builder.AppendLine("            GUILayout.Space(8.0f);");
+        builder.AppendLine();
 
         AppendGeneratedOnGui(builder);
         AppendGeneratedCreateScriptableObjectButton(builder);
@@ -335,6 +337,17 @@ public partial class CSED_CreateTools
             return;
         }
 
+        if (f_fieldData.FieldLayoutType == CSE_CreateTools_FieldLayoutType.Dropdown)
+        {
+            AppendGeneratedEnumDropdownOnGui(
+                f_builder,
+                f_fieldData,
+                f_variableName,
+                f_labelName);
+
+            return;
+        }
+
         if (f_fieldData.FieldLayoutType == CSE_CreateTools_FieldLayoutType.Select)
         {
             f_builder.AppendLine("        " + f_variableName + " = (" + GetGeneratedFieldTypeName(f_fieldData) + ")EditorGUILayout.ObjectField(\"" + EscapeString(f_labelName) + "\", " + f_variableName + ", typeof(" + GetGeneratedFieldTypeName(f_fieldData) + "), false);");
@@ -342,6 +355,35 @@ public partial class CSED_CreateTools
         }
 
         AppendGeneratedInputFieldOnGui(f_builder, f_fieldData, f_variableName, f_labelName);
+    }
+
+    /// <summary>
+    /// 生成Editor用のEnum Dropdown描画処理を追加します。
+    /// </summary>
+    /// <param name="f_builder">StringBuilder</param>
+    /// <param name="f_fieldData">FieldData</param>
+    /// <param name="f_variableName">変数名</param>
+    /// <param name="f_labelName">表示名</param>
+    private void AppendGeneratedEnumDropdownOnGui(
+        StringBuilder f_builder,
+        CSED_CreateTools_FieldData f_fieldData,
+        string f_variableName,
+        string f_labelName)
+    {
+        string enumTypeName = GetGeneratedEnumTypeName(f_fieldData);
+
+        if (enumTypeName == "int")
+        {
+            f_builder.AppendLine("        " + f_variableName + " = EditorGUILayout.IntField(\"" + EscapeString(f_labelName) + "\", " + f_variableName + ");");
+            return;
+        }
+
+        f_builder.AppendLine("        EditorGUILayout.BeginHorizontal();");
+        f_builder.AppendLine("        {");
+        f_builder.AppendLine("            EditorGUILayout.LabelField(\"" + EscapeString(f_labelName) + "\", GUILayout.Width(150.0f));");
+        f_builder.AppendLine("            " + f_variableName + " = (" + enumTypeName + ")EditorGUILayout.EnumPopup(" + f_variableName + ");");
+        f_builder.AppendLine("        }");
+        f_builder.AppendLine("        EditorGUILayout.EndHorizontal();");
     }
 
     /// <summary>
@@ -487,30 +529,41 @@ public partial class CSED_CreateTools
         string f_variableName,
         string f_labelName)
     {
-        f_builder.AppendLine("        EditorGUILayout.LabelField(\"" + EscapeString(f_labelName) + "\", EditorStyles.boldLabel);");
-        f_builder.AppendLine();
-        f_builder.AppendLine("        EditorGUILayout.BeginHorizontal();");
+        f_builder.AppendLine("        EditorGUILayout.BeginVertical(EditorStyles.helpBox);");
         f_builder.AppendLine("        {");
-        f_builder.AppendLine("            if (GUILayout.Button(\"-\", GUILayout.Width(24.0f)) && " + f_variableName + ".Count > 0)");
+
+        f_builder.AppendLine("            EditorGUILayout.BeginHorizontal();");
         f_builder.AppendLine("            {");
-        f_builder.AppendLine("                " + f_variableName + ".RemoveAt(" + f_variableName + ".Count - 1);");
+        f_builder.AppendLine("                EditorGUILayout.LabelField(\"" + EscapeString(f_labelName) + "\", EditorStyles.boldLabel);");
+        f_builder.AppendLine("                GUILayout.FlexibleSpace();");
+        f_builder.AppendLine();
+
+        f_builder.AppendLine("                if (GUILayout.Button(\"-\", GUILayout.Width(24.0f)) && " + f_variableName + ".Count > 0)");
+        f_builder.AppendLine("                {");
+        f_builder.AppendLine("                    " + f_variableName + ".RemoveAt(" + f_variableName + ".Count - 1);");
+        f_builder.AppendLine("                }");
+        f_builder.AppendLine();
+
+        f_builder.AppendLine("                if (GUILayout.Button(\"+\", GUILayout.Width(24.0f)))");
+        f_builder.AppendLine("                {");
+        f_builder.AppendLine("                    " + f_variableName + ".Add(" + GetGeneratedListElementDefaultValueText(f_fieldData) + ");");
+        f_builder.AppendLine("                }");
         f_builder.AppendLine("            }");
+        f_builder.AppendLine("            EditorGUILayout.EndHorizontal();");
         f_builder.AppendLine();
-        f_builder.AppendLine("            EditorGUILayout.LabelField(" + f_variableName + ".Count.ToString(), GUILayout.Width(32.0f));");
+
+        f_builder.AppendLine("            GUILayout.Space(4.0f);");
         f_builder.AppendLine();
-        f_builder.AppendLine("            if (GUILayout.Button(\"+\", GUILayout.Width(24.0f)))");
+
+        f_builder.AppendLine("            for (int i = 0; i < " + f_variableName + ".Count; i++)");
         f_builder.AppendLine("            {");
-        f_builder.AppendLine("                " + f_variableName + ".Add(" + GetGeneratedListElementDefaultValueText(f_fieldData) + ");");
-        f_builder.AppendLine("            }");
-        f_builder.AppendLine("        }");
-        f_builder.AppendLine("        EditorGUILayout.EndHorizontal();");
-        f_builder.AppendLine();
-        f_builder.AppendLine("        for (int i = 0; i < " + f_variableName + ".Count; i++)");
-        f_builder.AppendLine("        {");
 
         AppendGeneratedListElementOnGui(f_builder, f_fieldData, f_variableName);
 
+        f_builder.AppendLine("            }");
+
         f_builder.AppendLine("        }");
+        f_builder.AppendLine("        EditorGUILayout.EndVertical();");
     }
 
     /// <summary>
@@ -524,6 +577,20 @@ public partial class CSED_CreateTools
         CSED_CreateTools_FieldData f_fieldData,
         string f_variableName)
     {
+        if (f_fieldData.ListElementFieldType == CSE_CreateTools_FieldType.Enum)
+        {
+            string enumTypeName = GetGeneratedEnumTypeName(f_fieldData);
+
+            if (enumTypeName == "int")
+            {
+                f_builder.AppendLine("                " + f_variableName + "[i] = EditorGUILayout.IntField(\"Element \" + i.ToString(), " + f_variableName + "[i]);");
+                return;
+            }
+
+            f_builder.AppendLine("                " + f_variableName + "[i] = (" + enumTypeName + ")EditorGUILayout.EnumPopup(\"Element \" + i.ToString(), " + f_variableName + "[i]);");
+            return;
+        }
+
         if (f_fieldData.FieldLayoutType == CSE_CreateTools_FieldLayoutType.Toggle)
         {
             f_builder.AppendLine("            " + f_variableName + "[i] = EditorGUILayout.Toggle(\"Element \" + i.ToString(), " + f_variableName + "[i]);");
@@ -625,6 +692,9 @@ public partial class CSED_CreateTools
             case CSE_CreateTools_FieldType.Bool:
                 return "bool";
 
+            case CSE_CreateTools_FieldType.Enum:
+                return GetGeneratedEnumTypeName(f_fieldData);
+
             case CSE_CreateTools_FieldType.ScriptableObject:
                 return GetGeneratedScriptableObjectTypeName(f_fieldData);
 
@@ -672,6 +742,9 @@ public partial class CSED_CreateTools
             case CSE_CreateTools_FieldType.Bool:
                 return "bool";
 
+            case CSE_CreateTools_FieldType.Enum:
+                return GetGeneratedEnumTypeName(f_fieldData);
+
             case CSE_CreateTools_FieldType.ScriptableObject:
                 return GetGeneratedScriptableObjectTypeName(f_fieldData);
 
@@ -684,6 +757,23 @@ public partial class CSED_CreateTools
             default:
                 return "string";
         }
+    }
+
+    /// <summary>
+    /// 生成用のEnum型名を取得します。
+    /// </summary>
+    /// <param name="f_fieldData">FieldData</param>
+    /// <returns>Enum型名</returns>
+    private string GetGeneratedEnumTypeName(CSED_CreateTools_FieldData f_fieldData)
+    {
+        System.Type enumType = GetEnumTypeFromMonoScript(f_fieldData.EnumTypeScript);
+
+        if (enumType == null)
+        {
+            return "int";
+        }
+
+        return enumType.Name;
     }
 
     /// <summary>
@@ -718,6 +808,13 @@ public partial class CSED_CreateTools
         if (f_fieldData.FieldType == CSE_CreateTools_FieldType.List)
         {
             return GetGeneratedListDefaultValueText(f_fieldData);
+        }
+
+        if (f_fieldData.FieldType == CSE_CreateTools_FieldType.Enum)
+        {
+            return GetGeneratedEnumValueText(
+                f_fieldData,
+                f_fieldData.DefaultValueText);
         }
 
         if (f_fieldData.IsDefaultValueNull)
@@ -779,9 +876,49 @@ public partial class CSED_CreateTools
             case CSE_CreateTools_FieldType.Bool:
                 return GetGeneratedBoolText(f_fieldData.DefaultValueText);
 
+            case CSE_CreateTools_FieldType.Enum:
+                return GetGeneratedEnumValueText(
+                    f_fieldData,
+                    f_fieldData.DefaultValueText);
+
             default:
                 return "null";
         }
+    }
+
+    /// <summary>
+    /// 生成用のEnum初期値文字列を取得します。
+    /// </summary>
+    /// <param name="f_fieldData">FieldData</param>
+    /// <param name="f_value">Enum値名</param>
+    /// <returns>生成コード用Enum値</returns>
+    private string GetGeneratedEnumValueText(
+        CSED_CreateTools_FieldData f_fieldData,
+        string f_value)
+    {
+        System.Type enumType = GetEnumTypeFromMonoScript(f_fieldData.EnumTypeScript);
+
+        if (enumType == null)
+        {
+            return "0";
+        }
+
+        string enumTypeName = enumType.Name;
+        string[] enumNames = System.Enum.GetNames(enumType);
+
+        if (enumNames == null || enumNames.Length <= 0)
+        {
+            return "0";
+        }
+
+        string enumValueName = f_value;
+
+        if (string.IsNullOrEmpty(enumValueName))
+        {
+            enumValueName = enumNames[0];
+        }
+
+        return enumTypeName + "." + enumValueName;
     }
 
     /// <summary>
@@ -892,6 +1029,11 @@ public partial class CSED_CreateTools
             case CSE_CreateTools_FieldType.Bool:
                 return GetGeneratedBoolText(f_fieldData.ListDefaultElementValueTextList[f_index]);
 
+            case CSE_CreateTools_FieldType.Enum:
+                return GetGeneratedEnumValueText(
+                    f_fieldData,
+                    f_fieldData.ListDefaultElementValueTextList[f_index]);
+
             default:
                 return "null";
         }
@@ -929,6 +1071,11 @@ public partial class CSED_CreateTools
 
             case CSE_CreateTools_FieldType.Bool:
                 return "false";
+
+            case CSE_CreateTools_FieldType.Enum:
+                return GetGeneratedEnumValueText(
+                    f_fieldData,
+                    string.Empty);
 
             default:
                 return "null";
@@ -1191,6 +1338,18 @@ public partial class CSED_CreateTools
         f_builder.AppendLine("/// </summary>");
         f_builder.AppendLine("public class " + assetWindowClassName + " : EditorWindow");
         f_builder.AppendLine("{");
+
+        f_builder.AppendLine("    /// <summary>");
+        f_builder.AppendLine("    /// Created Assets側のラベル幅です。");
+        f_builder.AppendLine("    /// </summary>");
+        f_builder.AppendLine("    private const float c_CreatedAssetLabelWidth = 150.0f;");
+        f_builder.AppendLine();
+
+        f_builder.AppendLine("    /// <summary>");
+        f_builder.AppendLine("    /// Created Assets側の項目間の余白です。");
+        f_builder.AppendLine("    /// </summary>");
+        f_builder.AppendLine("    private const float c_CreatedAssetRowSpacing = 4.0f;");
+        f_builder.AppendLine();
 
         f_builder.AppendLine("    /// <summary>");
         f_builder.AppendLine("    /// Asset一覧のスクロール位置です。");
@@ -1513,7 +1672,12 @@ public partial class CSED_CreateTools
         f_builder.AppendLine("        GUILayout.Space(4.0f);");
         f_builder.AppendLine();
         f_builder.AppendLine("        EditorGUI.BeginChangeCheck();");
+        f_builder.AppendLine("        float beforeLabelWidth = EditorGUIUtility.labelWidth;");
+        f_builder.AppendLine("        EditorGUIUtility.labelWidth = 150.0f;");
+        f_builder.AppendLine();
         f_builder.AppendLine("        string newAssetName = EditorGUILayout.DelayedTextField(\"Asset Name\", f_asset.name);");
+        f_builder.AppendLine();
+        f_builder.AppendLine("        EditorGUIUtility.labelWidth = beforeLabelWidth;");
         f_builder.AppendLine();
         f_builder.AppendLine("        if (EditorGUI.EndChangeCheck())");
         f_builder.AppendLine("        {");
@@ -1524,8 +1688,24 @@ public partial class CSED_CreateTools
         f_builder.AppendLine("                if (string.IsNullOrEmpty(renameError))");
         f_builder.AppendLine("                {");
         f_builder.AppendLine("                    AssetDatabase.SaveAssets();");
-        f_builder.AppendLine("                    AssetDatabase.Refresh();");
-        f_builder.AppendLine("                    RefreshAssetPathList();");
+        f_builder.AppendLine();
+        f_builder.AppendLine("                    string renamedAssetPath = AssetDatabase.GetAssetPath(f_asset);");
+        f_builder.AppendLine();
+        f_builder.AppendLine("                    int cachedIndex = m_CachedAssetPathList.IndexOf(f_assetPath);");
+        f_builder.AppendLine();
+        f_builder.AppendLine("                    if (cachedIndex >= 0)");
+        f_builder.AppendLine("                    {");
+        f_builder.AppendLine("                        m_CachedAssetPathList[cachedIndex] = renamedAssetPath;");
+        f_builder.AppendLine("                    }");
+        f_builder.AppendLine();
+        f_builder.AppendLine("                    if (m_AssetFoldoutStateDictionary.ContainsKey(f_assetPath))");
+        f_builder.AppendLine("                    {");
+        f_builder.AppendLine("                        bool foldoutState = m_AssetFoldoutStateDictionary[f_assetPath];");
+        f_builder.AppendLine();
+        f_builder.AppendLine("                        m_AssetFoldoutStateDictionary.Remove(f_assetPath);");
+        f_builder.AppendLine("                        m_AssetFoldoutStateDictionary[renamedAssetPath] = foldoutState;");
+        f_builder.AppendLine("                    }");
+        f_builder.AppendLine();
         f_builder.AppendLine("                    Repaint();");
         f_builder.AppendLine("                    GUIUtility.ExitGUI();");
         f_builder.AppendLine("                }");
@@ -1535,6 +1715,8 @@ public partial class CSED_CreateTools
         f_builder.AppendLine("                }");
         f_builder.AppendLine("            }");
         f_builder.AppendLine("        }");
+        f_builder.AppendLine();
+        f_builder.AppendLine("        GUILayout.Space(4.0f);");
         f_builder.AppendLine();
         f_builder.AppendLine("        SerializedObject serializedObject = new SerializedObject(f_asset);");
         f_builder.AppendLine("        serializedObject.Update();");
@@ -1586,6 +1768,8 @@ public partial class CSED_CreateTools
                 CSED_CreateTools_FieldData fieldData = m_FieldDataList[i];
 
                 string variableName = CreateGeneratedVariableName(fieldData.FieldName, i);
+                string propertyName = CreateGeneratedPropertyName(variableName, i);
+                string serializedPropertyName = CreateGeneratedAutoPropertySerializedName(propertyName);
                 string labelName = EscapeString(GetGeneratedLabelName(fieldData));
 
                 if (IsGeneratedSingleMinMaxField(fieldData))
@@ -1593,8 +1777,14 @@ public partial class CSED_CreateTools
                     string minVariableName = CreateGeneratedMinVariableName(variableName);
                     string maxVariableName = CreateGeneratedMaxVariableName(variableName);
 
-                    f_builder.AppendLine("        SerializedProperty " + minVariableName + "Property = f_serializedObject.FindProperty(\"" + minVariableName + "\");");
-                    f_builder.AppendLine("        SerializedProperty " + maxVariableName + "Property = f_serializedObject.FindProperty(\"" + maxVariableName + "\");");
+                    string minPropertyName = CreateGeneratedPropertyName(minVariableName, i);
+                    string maxPropertyName = CreateGeneratedPropertyName(maxVariableName, i);
+
+                    string minSerializedPropertyName = CreateGeneratedAutoPropertySerializedName(minPropertyName);
+                    string maxSerializedPropertyName = CreateGeneratedAutoPropertySerializedName(maxPropertyName);
+
+                    f_builder.AppendLine("        SerializedProperty " + minVariableName + "Property = f_serializedObject.FindProperty(\"" + minSerializedPropertyName + "\");");
+                    f_builder.AppendLine("        SerializedProperty " + maxVariableName + "Property = f_serializedObject.FindProperty(\"" + maxSerializedPropertyName + "\");");
                     f_builder.AppendLine("        DrawCreatedAssetMinMaxField(\"" + labelName + "\", " + minVariableName + "Property, " + maxVariableName + "Property);");
                     f_builder.AppendLine("        GUILayout.Space(4.0f);");
                     f_builder.AppendLine();
@@ -1603,7 +1793,7 @@ public partial class CSED_CreateTools
 
                 f_builder.AppendLine("        DrawCreatedAssetProperty(");
                 f_builder.AppendLine("            f_serializedObject,");
-                f_builder.AppendLine("            \"" + variableName + "\",");
+                f_builder.AppendLine("            \"" + serializedPropertyName + "\",");
                 f_builder.AppendLine("            \"" + labelName + "\");");
                 f_builder.AppendLine("        GUILayout.Space(4.0f);");
                 f_builder.AppendLine();
@@ -1631,62 +1821,28 @@ public partial class CSED_CreateTools
         f_builder.AppendLine("            return;");
         f_builder.AppendLine("        }");
         f_builder.AppendLine();
-        f_builder.AppendLine("        EditorGUILayout.PropertyField(");
-        f_builder.AppendLine("            property,");
-        f_builder.AppendLine("            new GUIContent(f_labelName),");
-        f_builder.AppendLine("            true);");
-        f_builder.AppendLine("    }");
+        f_builder.AppendLine("        float beforeLabelWidth = EditorGUIUtility.labelWidth;");
+        f_builder.AppendLine("        EditorGUIUtility.labelWidth = 150.0f;");
         f_builder.AppendLine();
-
-        f_builder.AppendLine("    /// <summary>");
-        f_builder.AppendLine("    /// MinMaxFieldを表示ラベル付きで描画します。");
-        f_builder.AppendLine("    /// </summary>");
-        f_builder.AppendLine("    /// <param name=\"f_labelName\">表示ラベル</param>");
-        f_builder.AppendLine("    /// <param name=\"f_minProperty\">Min側Property</param>");
-        f_builder.AppendLine("    /// <param name=\"f_maxProperty\">Max側Property</param>");
-        f_builder.AppendLine("    private void DrawCreatedAssetMinMaxField(");
-        f_builder.AppendLine("        string f_labelName,");
-        f_builder.AppendLine("        SerializedProperty f_minProperty,");
-        f_builder.AppendLine("        SerializedProperty f_maxProperty)");
-        f_builder.AppendLine("    {");
-        f_builder.AppendLine("        if (f_minProperty == null || f_maxProperty == null)");
-        f_builder.AppendLine("        {");
-        f_builder.AppendLine("            return;");
-        f_builder.AppendLine("        }");
+        f_builder.AppendLine("        EditorGUILayout.PropertyField(property, new GUIContent(f_labelName), true);");
         f_builder.AppendLine();
-
-        f_builder.AppendLine("        Rect rowRect = EditorGUILayout.GetControlRect(false, EditorGUIUtility.singleLineHeight);");
-        f_builder.AppendLine();
-
-        f_builder.AppendLine("        float mainLabelWidth = 120.0f;");
-        f_builder.AppendLine("        float smallLabelWidth = 28.0f;");
-        f_builder.AppendLine("        float spacing = 6.0f;");
-        f_builder.AppendLine();
-
-        f_builder.AppendLine("        float valueAreaX = rowRect.x + mainLabelWidth + spacing;");
-        f_builder.AppendLine("        float valueAreaWidth = rowRect.width - mainLabelWidth - spacing;");
-        f_builder.AppendLine("        float fieldWidth = (valueAreaWidth - smallLabelWidth - smallLabelWidth - (spacing * 3.0f)) * 0.5f;");
-        f_builder.AppendLine("        fieldWidth = Mathf.Max(35.0f, fieldWidth);");
-        f_builder.AppendLine();
-
-        f_builder.AppendLine("        Rect labelRect = new Rect(rowRect.x, rowRect.y, mainLabelWidth, rowRect.height);");
-        f_builder.AppendLine("        Rect minLabelRect = new Rect(valueAreaX, rowRect.y, smallLabelWidth, rowRect.height);");
-        f_builder.AppendLine("        Rect minValueRect = new Rect(minLabelRect.xMax + spacing, rowRect.y, fieldWidth, rowRect.height);");
-        f_builder.AppendLine("        Rect maxLabelRect = new Rect(minValueRect.xMax + spacing, rowRect.y, smallLabelWidth, rowRect.height);");
-        f_builder.AppendLine("        Rect maxValueRect = new Rect(maxLabelRect.xMax + spacing, rowRect.y, fieldWidth, rowRect.height);");
-        f_builder.AppendLine();
-
-        f_builder.AppendLine("        EditorGUI.LabelField(labelRect, f_labelName);");
-        f_builder.AppendLine("        EditorGUI.LabelField(minLabelRect, \"Min\");");
-        f_builder.AppendLine("        EditorGUI.PropertyField(minValueRect, f_minProperty, GUIContent.none);");
-        f_builder.AppendLine("        EditorGUI.LabelField(maxLabelRect, \"Max\");");
-        f_builder.AppendLine("        EditorGUI.PropertyField(maxValueRect, f_maxProperty, GUIContent.none);");
+        f_builder.AppendLine("        EditorGUIUtility.labelWidth = beforeLabelWidth;");
         f_builder.AppendLine("    }");
         f_builder.AppendLine();
     }
 
     /// <summary>
-    /// 生成EditorWindowの入力値をScriptableObjectへ代入する処理を追加します。
+    /// 自動プロパティのSerializedProperty名を作成します。
+    /// </summary>
+    /// <param name="f_propertyName">プロパティ名</param>
+    /// <returns>SerializedProperty名</returns>
+    private string CreateGeneratedAutoPropertySerializedName(string f_propertyName)
+    {
+        return "<" + f_propertyName + ">k__BackingField";
+    }
+
+    /// <summary>
+    /// 生成EditorWindowの入力値をScriptableObjectへ渡す処理を追加します。
     /// </summary>
     /// <param name="f_builder">StringBuilder</param>
     /// <param name="f_assetVariableName">代入先アセット変数名</param>
@@ -1694,10 +1850,30 @@ public partial class CSED_CreateTools
         StringBuilder f_builder,
         string f_assetVariableName)
     {
-        if (m_FieldDataList == null)
+        if (m_FieldDataList == null || m_FieldDataList.Count <= 0)
         {
             return;
         }
+
+        int argumentCount = 0;
+
+        for (int i = 0 ; i < m_FieldDataList.Count ; i++)
+        {
+            CSED_CreateTools_FieldData fieldData = m_FieldDataList[i];
+
+            if (IsGeneratedSingleMinMaxField(fieldData))
+            {
+                argumentCount += 2;
+            }
+            else
+            {
+                argumentCount++;
+            }
+        }
+
+        f_builder.AppendLine("        " + f_assetVariableName + ".InitializeFromCreateTools(");
+
+        int argumentIndex = 0;
 
         for (int i = 0 ; i < m_FieldDataList.Count ; i++)
         {
@@ -1710,21 +1886,53 @@ public partial class CSED_CreateTools
                 string minVariableName = CreateGeneratedMinVariableName(variableName);
                 string maxVariableName = CreateGeneratedMaxVariableName(variableName);
 
-                f_builder.AppendLine("        " + f_assetVariableName + "." + minVariableName + " = " + minVariableName + ";");
-                f_builder.AppendLine("        " + f_assetVariableName + "." + maxVariableName + " = " + maxVariableName + ";");
+                AppendGeneratedInitializeArgument(
+                    f_builder,
+                    minVariableName,
+                    argumentIndex,
+                    argumentCount);
+
+                argumentIndex++;
+
+                AppendGeneratedInitializeArgument(
+                    f_builder,
+                    maxVariableName,
+                    argumentIndex,
+                    argumentCount);
+
+                argumentIndex++;
 
                 continue;
             }
 
-            if (fieldData.FieldType == CSE_CreateTools_FieldType.List)
-            {
-                f_builder.AppendLine("        " + f_assetVariableName + "." + variableName + " = new " + GetGeneratedFieldTypeName(fieldData) + "(" + variableName + ");");
-            }
-            else
-            {
-                f_builder.AppendLine("        " + f_assetVariableName + "." + variableName + " = " + variableName + ";");
-            }
+            AppendGeneratedInitializeArgument(
+                f_builder,
+                variableName,
+                argumentIndex,
+                argumentCount);
+
+            argumentIndex++;
         }
+
+        f_builder.AppendLine("        );");
+    }
+
+    /// <summary>
+    /// InitializeFromCreateTools呼び出し用の引数を追加します。
+    /// </summary>
+    /// <param name="f_builder">StringBuilder</param>
+    /// <param name="f_variableName">変数名</param>
+    /// <param name="f_argumentIndex">引数番号</param>
+    /// <param name="f_argumentCount">引数数</param>
+    private void AppendGeneratedInitializeArgument(
+        StringBuilder f_builder,
+        string f_variableName,
+        int f_argumentIndex,
+        int f_argumentCount)
+    {
+        string commaText = f_argumentIndex < f_argumentCount - 1 ? "," : string.Empty;
+
+        f_builder.AppendLine("            " + f_variableName + commaText);
     }
 }
 #endif

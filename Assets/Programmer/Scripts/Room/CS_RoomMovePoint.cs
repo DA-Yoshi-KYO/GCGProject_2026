@@ -300,6 +300,12 @@ public class CS_RoomMovePoint : MonoBehaviour
 
         UpdatePlayerRoomData(playerTransform);
         UpdatePlayerCamera(playerTransform);
+
+        CS_PlayerData playerdata = playerTransform.GetComponent<CS_PlayerData>();
+        if (playerdata != null)
+        {
+            playerdata.ChangePlayerRoomData();
+        }
     }
 
     /// <summary>

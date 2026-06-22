@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public enum Gimmick
@@ -9,6 +10,7 @@ public enum Gimmick
     EmptyChest,
     Nyaki,
     Pitfall,
+    HyperVoice,
 }
 
 public enum GimmickState
@@ -103,9 +105,13 @@ public class GimmickBase : MonoBehaviour
     protected BoxCollider searchColliderX;
     protected BoxCollider searchColliderZ;
     protected CS_3DPlaySE gimmickSound;
+    protected int roomIndex;
 
     private HitChecker hit;
     public HitChecker read_Hit => hit;
+
+    protected CS_OutlineController outlineController;
+    protected float outlineWidth = 0.1f;
 
     private void Start()
     {
@@ -133,6 +139,10 @@ public class GimmickBase : MonoBehaviour
         );
 
         InitMaterials();
+        roomIndex = CS_RoomCreatePointRaycast.GetRayRoomCreatePoint(this.gameObject).transform.GetSiblingIndex();
+
+        outlineController = new CS_OutlineController(GetComponentInChildren<Renderer>());
+        outlineController.SetOutline(Color.gray, outlineWidth);
     }
 
     private void InitMaterials()
@@ -381,6 +391,11 @@ public class GimmickBase : MonoBehaviour
         return effectRange;
     }
 
+    public int GetRoomIndex()
+    {
+        return roomIndex;
+    }
+
     private Collider[] OverlapBoxCollider(BoxCollider box)
     {
         if (box == null)
@@ -554,9 +569,16 @@ public class GimmickBase : MonoBehaviour
             }
         }
 
+        outlineController.SetOutlineAlpha(0.0f);
+
         if (brokenAlpha <= 0.0f)
         {
             Destroy(gameObject);
         }
+    }
+
+    public void SetOutLineColor(Color col)
+    {
+        outlineController.SetOutlineColor(col);
     }
 }
