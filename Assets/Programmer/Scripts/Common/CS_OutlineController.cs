@@ -7,70 +7,81 @@ using UnityEngine;
 [RequireComponent(typeof(Renderer))]
 public class CS_OutlineController
 {
-    Renderer _renderer;
-    MaterialPropertyBlock _mpb;
+    Renderer renderer;
+    MaterialPropertyBlock mpb;
 
-    static readonly int ColorID = Shader.PropertyToID("_OutlineColor");
-    static readonly int WidthID = Shader.PropertyToID("_OutlineWidth");
+    static readonly int colorID = Shader.PropertyToID("_OutlineColor");
+    static readonly int widthID = Shader.PropertyToID("_OutlineWidth");
 
     // ── コンストラクタ ────────────────────────────────────────
 
     public CS_OutlineController(GameObject go)
     {
-        _renderer = go.GetComponent<Renderer>();
+        renderer = go.GetComponent<Renderer>();
         Init();
     }
 
-    public CS_OutlineController(Renderer renderer)
+    public CS_OutlineController(Renderer rend)
     {
-        _renderer = renderer;
+        renderer = rend;
         Init();
     }
 
     void Init()
     {
-        if (_renderer == null)
+        if (renderer == null)
         {
             Debug.LogWarning("[OutlineController] Renderer が見つかりません");
             return;
         }
-        _mpb = new MaterialPropertyBlock();
+        mpb = new MaterialPropertyBlock();
         // 既存のMPBがあれば引き継ぐ
-        _renderer.GetPropertyBlock(_mpb);
+        renderer.GetPropertyBlock(mpb);
     }
 
     // ── 外部API ───────────────────────────────────────────────
 
+    public void SetOutlineAlpha(float alpha)
+    {
+        if (renderer == null) return;
+        renderer.GetPropertyBlock(mpb);
+        Color currentColor = mpb.GetColor(colorID);
+        currentColor.a = alpha;
+        mpb.SetColor(colorID, currentColor);
+        Debug.Log("color" + currentColor.a);
+        renderer.SetPropertyBlock(mpb);
+    }
+
     public void SetOutlineColor(Color color)
     {
-        if (_renderer == null) return;
-        _renderer.GetPropertyBlock(_mpb);
-        _mpb.SetColor(ColorID, color);
-        _renderer.SetPropertyBlock(_mpb);
+        if (renderer == null) return;
+        renderer.GetPropertyBlock(mpb);
+        mpb.SetColor(colorID, color);
+        renderer.SetPropertyBlock(mpb);
     }
 
     public void SetOutlineWidth(float width)
     {
-        if (_renderer == null) return;
-        _renderer.GetPropertyBlock(_mpb);
-        _mpb.SetFloat(WidthID, width);
-        _renderer.SetPropertyBlock(_mpb);
+        if (renderer == null) return;
+        renderer.GetPropertyBlock(mpb);
+        mpb.SetFloat(widthID, width);
+        renderer.SetPropertyBlock(mpb);
     }
 
     public void SetOutline(Color color, float width)
     {
-        if (_renderer == null) return;
-        _renderer.GetPropertyBlock(_mpb);
-        _mpb.SetColor(ColorID, color);
-        _mpb.SetFloat(WidthID, width);
-        _renderer.SetPropertyBlock(_mpb);
+        if (renderer == null) return;
+        renderer.GetPropertyBlock(mpb);
+        mpb.SetColor(colorID, color);
+        mpb.SetFloat(widthID, width);
+        renderer.SetPropertyBlock(mpb);
     }
 
     /// <summary>MPBをリセットしてデフォルト値に戻す</summary>
     public void ResetOutline()
     {
-        if (_renderer == null) return;
-        _mpb.Clear();
-        _renderer.SetPropertyBlock(_mpb);
+        if (renderer == null) return;
+        mpb.Clear();
+        renderer.SetPropertyBlock(mpb);
     }
 }
