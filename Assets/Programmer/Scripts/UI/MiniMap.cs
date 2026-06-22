@@ -145,7 +145,7 @@ public class MiniMap : MonoBehaviour
         foreach (GameObject thief in thieves)
         {
             int index = CS_RoomCreatePointRaycast.GetRoomIndex(thief);
-            index -= 1;
+            Debug.Log("Thief is in room index: " + index);
             MiniMapInfo info = miniMapInfo[index];
             info.isThiefIconActive = true;
             miniMapInfo[index] = info;
