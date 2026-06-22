@@ -14,6 +14,7 @@ using UnityEngine;
 public enum SceneName
 {
     TitleScene,
+    OpenningMovieScene,
     StageSelectScene,
     MainScene,//MainSceneで切り替えて流すBGM
     ThiefEscape,//MainSceneで切り替えて流すBGM
@@ -22,6 +23,7 @@ public enum SceneName
 //バックグランド用のBGMのキューの名前
 public enum BackGroundBGMCueName
 {
+    NoneBGM,
     TitleBGM,
     SelectBGM,
     ThiefEscapeBGM,
