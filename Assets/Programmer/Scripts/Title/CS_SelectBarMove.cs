@@ -15,6 +15,8 @@ public class CS_SelectBarMove : MonoBehaviour
     [Header("ボタンのリスト（上から順に格納してください）")][SerializeField] private CS_TitleButton[] buttonList;
     [Header("選択バー")][SerializeField] private GameObject selectBar;
 
+    [Header("FadeCanvasのPrefab格納")][SerializeField] private GameObject fadeCanvas;
+
     private CustomInputAction inputActions;
     private int currentButton = 0;
 
@@ -64,7 +66,7 @@ public class CS_SelectBarMove : MonoBehaviour
             {
                 case 0:
                     sceneName = pressGameStartToSceneName;
-                    GetComponent<CS_SceneTransition>().StartSceneTransition(sceneName);
+                    fadeCanvas.GetComponent<CS_SceneTransition>().StartSceneTransition(sceneName);
                     break;
                 case 1:
                     Option.Instance.OpenOptionUI();
