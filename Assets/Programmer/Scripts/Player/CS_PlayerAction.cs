@@ -376,6 +376,12 @@ public class CS_PlayerAction : MonoBehaviour
         if (!roomGrid.SetGimmickInGrid(setPos, gimmick))
             return;
 
+        if (previewInstance != null)
+        {
+            Destroy(previewInstance.gameObject);
+            previewInstance = null;
+        }
+
         // =========================
         // 実際に生成されたインスタンス取得
         // =========================
@@ -589,11 +595,31 @@ public class CS_PlayerAction : MonoBehaviour
 
         if (gimmick == null)
             return;
+
+        // 設置位置の計算_______________________________________
         Vector2Int grid = roomGrid.GetGridFromPos(settingPos);
         settingPos = roomGrid.GetWorldPosFromGrid(grid);
         settingPos = CalculateGimmickSetPosition();
         settingPos = roomGrid.GimmickEvenNumberCorrection(settingPos, grid, gimmick);
 
+        // レイでギミックの設置位置を計算_______________________
+        Ray ray = new Ray();
+        ray.direction = Vector3.down;
+        const float rayOriginY = 255f;
+        ray.origin = new Vector3(settingPos.x, rayOriginY, settingPos.z);
+        // 床を確実に取れるようマージンを大きめに取りレイを飛ばす
+        RaycastHit[] rayHits = Physics.RaycastAll(ray, Mathf.Abs(rayOriginY - (gameObject.transform.position.y - 10.0f)), ~0,
+            QueryTriggerInteraction.Ignore);
+        Array.Sort(rayHits, (a, b) => a.distance.CompareTo(b.distance));
+        foreach (var hitItem in rayHits)
+        {
+            if (hitItem.transform.CompareTag("Player")) continue;
+            if (hitItem.transform.CompareTag("Thief")) continue;
+
+            settingPos.y = hitItem.point.y;
+            break;
+        }
+        // 設置位置補正_______________________________________
         gimmick.SetGimmickPos(settingPos);
         gimmick.AdjustScaleToGrid();
         //----------------------------------
