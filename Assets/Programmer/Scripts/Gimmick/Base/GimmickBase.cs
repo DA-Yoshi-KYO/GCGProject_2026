@@ -110,6 +110,8 @@ public class GimmickBase : MonoBehaviour
     private HitChecker hit;
     public HitChecker read_Hit => hit;
 
+    protected CS_OutlineController outlineController;
+
     private void Start()
     {
         GameObject X = search.transform.Find("X").gameObject;
@@ -137,6 +139,9 @@ public class GimmickBase : MonoBehaviour
 
         InitMaterials();
         roomIndex = CS_RoomCreatePointRaycast.GetRayRoomCreatePoint(this.gameObject).transform.GetSiblingIndex();
+
+        outlineController = new CS_OutlineController(GetComponentInChildren<Renderer>());
+        outlineController.SetOutline(Color.gray, 0.2f);
     }
 
     private void InitMaterials()
@@ -567,5 +572,10 @@ public class GimmickBase : MonoBehaviour
         {
             Destroy(gameObject);
         }
+    }
+
+    public void SetOutLineColor(Color col)
+    {
+        outlineController.SetOutlineColor(col);
     }
 }
