@@ -74,7 +74,7 @@ public class CS_RoomCreatePointDoorPositionDebugger : MonoBehaviour
             CSE_RoomDoorUsageType e_UsageType =
                 cs_TargetRoomCreatePoint.GetDoorUsageType(e_Direction);
 
-            Vector3 vec_DoorPosition =
+            Transform tr_DoorPoint =
                 cs_TargetRoomCreatePoint.GetRoomDoorPosition(e_Direction);
 
             bool bool_HasConnection =
@@ -83,11 +83,26 @@ public class CS_RoomCreatePointDoorPositionDebugger : MonoBehaviour
             int int_EnemyEntryCount =
                 cs_TargetRoomCreatePoint.GetEnemyEntryCount(e_Direction);
 
+            string str_DoorName = "未取得";
+            string str_DoorPosition = "未取得";
             string str_PositionWarning = "";
 
-            if (e_UsageType != CSE_RoomDoorUsageType.None && vec_DoorPosition == Vector3.zero)
+            if (tr_DoorPoint != null)
             {
-                str_PositionWarning = "  ※注意：ドア設定ありなのに座標が Vector3.zero です";
+                str_DoorName = tr_DoorPoint.name;
+                str_DoorPosition = tr_DoorPoint.position.ToString();
+
+                if (e_UsageType != CSE_RoomDoorUsageType.None && tr_DoorPoint.position == Vector3.zero)
+                {
+                    str_PositionWarning = "  ※注意：ドア設定ありですが座標が Vector3.zero です";
+                }
+            }
+            else
+            {
+                if (e_UsageType != CSE_RoomDoorUsageType.None)
+                {
+                    str_PositionWarning = "  ※注意：ドア設定ありなのにTransformが取得できていません";
+                }
             }
 
             Debug.Log(
@@ -96,7 +111,8 @@ public class CS_RoomCreatePointDoorPositionDebugger : MonoBehaviour
                 $"用途:{e_UsageType} / " +
                 $"接続あり:{bool_HasConnection} / " +
                 $"敵数:{int_EnemyEntryCount} / " +
-                $"座標:{vec_DoorPosition}" +
+                $"ドア名:{str_DoorName} / " +
+                $"座標:{str_DoorPosition}" +
                 str_PositionWarning,
                 cs_TargetRoomCreatePoint
             );
@@ -134,8 +150,15 @@ public class CS_RoomCreatePointDoorPositionDebugger : MonoBehaviour
                 continue;
             }
 
-            Vector3 vec_DoorPosition =
+            Transform tr_DoorPoint =
                 cs_TargetRoomCreatePoint.GetRoomDoorPosition(e_Direction);
+
+            if (tr_DoorPoint == null)
+            {
+                continue;
+            }
+
+            Vector3 vec_DoorPosition = tr_DoorPoint.position;
 
             Gizmos.DrawSphere(vec_DoorPosition, float_GizmoSphereSize);
             Gizmos.DrawLine(cs_TargetRoomCreatePoint.transform.position, vec_DoorPosition);
