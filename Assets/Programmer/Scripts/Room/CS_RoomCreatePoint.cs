@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
 /*==================================================
@@ -36,24 +37,22 @@ public class CS_RoomCreatePoint : MonoBehaviour
     /// <summary>
     /// 右のドアのワールド座標
     /// </summary>
-    private Vector3 RightDoorPoints = new Vector3(0.0f, 0.0f, 0.0f);
+    private Transform RightDoorPoints;
 
     /// <summary>
     /// 左のドアのワールド座標
     /// </summary>
-    private Vector3 LeftDoorPoints = new Vector3(0.0f, 0.0f, 0.0f);
+    private Transform LeftDoorPoints;
 
     /// <summary>
     /// 前のドアのワールド座標
     /// </summary>
-    [Tooltip("前のドア座標")]
-    private Vector3 FrontDoorPoints = new Vector3(0.0f, 0.0f, 0.0f);
+    private Transform FrontDoorPoints;
 
     /// <summary>
     /// 後ろのドアのワールド座標
     /// </summary>
-    [Tooltip("後ろのドア座標")]
-    private Vector3 BackDoorPoints = new Vector3(0.0f, 0.0f, 0.0f);
+    private Transform BackDoorPoints;
 
     /// <summary>
     /// 指定方向のワープ接続情報を取得します。
@@ -292,7 +291,7 @@ public class CS_RoomCreatePoint : MonoBehaviour
                 if (components[i].MoveDirection == CSE_RoomDoorDirection.Right)
                 {
                     // ワールド座標を設定
-                    RightDoorPoints = components[i].transform.position;
+                    RightDoorPoints = components[i].transform;
                 }
             }
         }
@@ -305,7 +304,7 @@ public class CS_RoomCreatePoint : MonoBehaviour
             {
                 if (components[i].MoveDirection == CSE_RoomDoorDirection.Left)
                 {
-                    LeftDoorPoints = components[i].transform.position;
+                    LeftDoorPoints = components[i].transform;
                 }
             }
         }
@@ -318,7 +317,7 @@ public class CS_RoomCreatePoint : MonoBehaviour
             {
                 if (components[i].MoveDirection == CSE_RoomDoorDirection.Front)
                 {
-                    FrontDoorPoints = components[i].transform.position;
+                    FrontDoorPoints = components[i].transform;
                 }
             }
         }
@@ -331,7 +330,7 @@ public class CS_RoomCreatePoint : MonoBehaviour
             {
                 if (components[i].MoveDirection == CSE_RoomDoorDirection.Back)
                 {
-                    BackDoorPoints = components[i].transform.position;
+                    BackDoorPoints = components[i].transform;
                 }
             }
         }
@@ -342,7 +341,7 @@ public class CS_RoomCreatePoint : MonoBehaviour
     /// </summary>
     /// <param name="data">取得したい方向</param>
     /// <returns></returns>
-    public Vector3 GetRoomDoorPosition(CSE_RoomDoorDirection data)
+    public Transform GetRoomDoorPosition(CSE_RoomDoorDirection data)
     {
         SetDoorWorldPosition();
 
@@ -357,7 +356,7 @@ public class CS_RoomCreatePoint : MonoBehaviour
         case CSE_RoomDoorDirection.Back:
             return BackDoorPoints;
         default:
-            return Vector3.zero;
+            return null;
         }
     }
 }
