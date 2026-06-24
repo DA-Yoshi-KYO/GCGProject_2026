@@ -83,13 +83,13 @@ public class CS_RoomMoveConnection
             // ここでステージマネージャーからデータを設定する
             CS_StageManager cs_StageManager = GameObject.FindObjectOfType<CS_StageManager>();
             // ステージマネージャーが存在する場合は、データを設定してもらう
-            if (cs_StageManager != null) cs_StageManager.SetStageEnemyEntryData();
+            //if (cs_StageManager != null) cs_StageManager.SetStageEnemyEntryData();
 
             // 再度確認して、データが設定されていない場合は0を返す
             if (!HasEnemyEntryData) return 0;
         }
 
-        return cs_RoomEnemyEntryDataSO.GetMaxEnemySpawnCount();
+        return cs_RoomEnemyEntryDataSO.GetThiefStatusDataCount();
     }
 
     /// <summary>

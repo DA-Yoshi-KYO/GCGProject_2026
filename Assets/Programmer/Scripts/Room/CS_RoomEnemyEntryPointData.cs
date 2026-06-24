@@ -125,7 +125,7 @@ public class CS_RoomEnemyEntryPointData
                     continue;
                 }
 
-                totalMaxEnemySpawnCount += roomEnemyEntryData.GetMaxEnemySpawnCount();
+                totalMaxEnemySpawnCount += roomEnemyEntryData.GetThiefStatusDataCount();
             }
 
             return totalMaxEnemySpawnCount;

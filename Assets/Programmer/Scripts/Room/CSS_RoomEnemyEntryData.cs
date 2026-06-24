@@ -18,32 +18,9 @@ using UnityEngine;
     menuName = "ScriptableObjects/RoomEnemyEntryData")]
 public class CSS_RoomEnemyEntryData : ScriptableObject
 {
-    [Header("敵出現設定")]
-    [SerializeField, Min(0)]
-    private int int_MaxEnemySpawnCount = 1;
-
     [Header("出現候補の盗賊データ")]
     [SerializeField]
     private List<CO_ThiefStatusData> list_ThiefStatusData = new List<CO_ThiefStatusData>();
-
-    /// <summary>
-    /// この敵出入口から出現できる敵の最大数を取得します。
-    /// </summary>
-    /// <returns>敵の最大出現数。</returns>
-    public int GetMaxEnemySpawnCount()
-    {
-        return int_MaxEnemySpawnCount;
-    }
-
-    /// <summary>
-    /// 敵の侵入数を取得します。
-    /// 互換用として、最大出現数を返します。
-    /// </summary>
-    /// <returns>敵の最大出現数。</returns>
-    public int GetEnemyEntryCount()
-    {
-        return GetMaxEnemySpawnCount();
-    }
 
     /// <summary>
     /// 出現候補の盗賊データリストを取得します。
