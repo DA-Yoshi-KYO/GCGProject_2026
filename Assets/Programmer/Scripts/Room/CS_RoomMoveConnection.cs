@@ -34,7 +34,7 @@ public class CS_RoomMoveConnection
     /// <summary>
     /// 出入口の用途を取得します。
     /// </summary>
-    public CSE_RoomDoorUsageType DoorUsageType => e_DoorUsageType;
+    public CSE_RoomDoorUsageType GetDoorUsageType => e_DoorUsageType;
 
     /// <summary>
     /// この出入口がルーム移動用かどうかを取得します。

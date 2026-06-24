@@ -1,4 +1,7 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
 /*==================================================
@@ -30,6 +33,26 @@ public class CS_RoomCreatePoint : MonoBehaviour
     [Header("後ろ出口の設定")]
     [SerializeField]
     private CS_RoomMoveConnection cs_BackConnection = new CS_RoomMoveConnection();
+
+    /// <summary>
+    /// 右のドアのワールド座標
+    /// </summary>
+    private Transform RightDoorPoints;
+
+    /// <summary>
+    /// 左のドアのワールド座標
+    /// </summary>
+    private Transform LeftDoorPoints;
+
+    /// <summary>
+    /// 前のドアのワールド座標
+    /// </summary>
+    private Transform FrontDoorPoints;
+
+    /// <summary>
+    /// 後ろのドアのワールド座標
+    /// </summary>
+    private Transform BackDoorPoints;
 
     /// <summary>
     /// 指定方向のワープ接続情報を取得します。
@@ -124,7 +147,7 @@ public class CS_RoomCreatePoint : MonoBehaviour
             return CSE_RoomDoorUsageType.None;
         }
 
-        return cs_Connection.DoorUsageType;
+        return cs_Connection.GetDoorUsageType;
     }
 
     /// <summary>
@@ -245,5 +268,95 @@ public class CS_RoomCreatePoint : MonoBehaviour
             return;
         }
         cs_Connection.SetEnemyEntryData(newData);
+    }
+
+    /// <summary>
+    /// 各ドアのワールド座標を設定します。
+    /// </summary>
+    private void SetDoorWorldPosition()
+    {
+        // 自分と子オブジェクトのCS_RoomMovePointコンポーネントを全て取得
+        CS_RoomMovePoint[] components = GetComponentsInChildren<CS_RoomMovePoint>();
+
+        // チェック用データ
+        CSE_RoomDoorUsageType data = cs_RightConnection.GetDoorUsageType;
+
+        // ドアがある場合のみ、ワールド座標を設定
+        if (data != CSE_RoomDoorUsageType.None)
+        {
+            // 取得したコンポーネントの数だけループ
+            for (int i = 0 ; i < components.Length ; i++)
+            {
+                // 右のドア座標を設定
+                if (components[i].MoveDirection == CSE_RoomDoorDirection.Right)
+                {
+                    // ワールド座標を設定
+                    RightDoorPoints = components[i].transform;
+                }
+            }
+        }
+
+        // 左のドア座標を設定
+        data = cs_LeftConnection.GetDoorUsageType;
+        if (data != CSE_RoomDoorUsageType.None)
+        {
+            for (int i = 0 ; i < components.Length ; i++)
+            {
+                if (components[i].MoveDirection == CSE_RoomDoorDirection.Left)
+                {
+                    LeftDoorPoints = components[i].transform;
+                }
+            }
+        }
+
+        // 前のドア座標を設定
+        data = cs_FrontConnection.GetDoorUsageType;
+        if (data != CSE_RoomDoorUsageType.None)
+        {
+            for (int i = 0 ; i < components.Length ; i++)
+            {
+                if (components[i].MoveDirection == CSE_RoomDoorDirection.Front)
+                {
+                    FrontDoorPoints = components[i].transform;
+                }
+            }
+        }
+
+        // 後ろのドア座標を設定
+        data = cs_BackConnection.GetDoorUsageType;
+        if (data != CSE_RoomDoorUsageType.None)
+        {
+            for (int i = 0 ; i < components.Length ; i++)
+            {
+                if (components[i].MoveDirection == CSE_RoomDoorDirection.Back)
+                {
+                    BackDoorPoints = components[i].transform;
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// ドアのワールド座標を取得します。(RoomCreatePointをゲットコンポオ―ネントする前提)
+    /// </summary>
+    /// <param name="data">取得したい方向</param>
+    /// <returns></returns>
+    public Transform GetRoomDoorPosition(CSE_RoomDoorDirection data)
+    {
+        SetDoorWorldPosition();
+
+        switch (data)
+        {
+        case CSE_RoomDoorDirection.Right:
+            return RightDoorPoints;
+        case CSE_RoomDoorDirection.Left:
+            return LeftDoorPoints;
+        case CSE_RoomDoorDirection.Front:
+            return FrontDoorPoints;
+        case CSE_RoomDoorDirection.Back:
+            return BackDoorPoints;
+        default:
+            return null;
+        }
     }
 }

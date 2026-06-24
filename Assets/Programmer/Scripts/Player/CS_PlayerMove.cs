@@ -77,12 +77,30 @@ public class CS_PlayerMove : MonoBehaviour
         jumpMerginFrameCount = jumpMerginFrame;
     }
 
-    void Update()
+    void FixedUpdate()
     {
         createFootPrintTime += Time.deltaTime;
 
         // 移動処理
         Move();
+
+        if (catCaughtTime > 0f)
+        {
+            catCaughtTime -= Time.deltaTime;
+            catCaughtTime = Mathf.Max(0.0f, catCaughtTime);
+            return;
+        }
+
+        if (isJumpMerging)
+        {
+            if (jumpMerginFrameCount == 0)
+            {
+                isJumping = true;
+                isJumpMerging = false;
+                jumpMerginFrameCount = jumpMerginFrame;
+            }
+            else jumpMerginFrameCount--;
+        }
     }
 
     /// <summary>
@@ -179,35 +197,12 @@ public class CS_PlayerMove : MonoBehaviour
         // CharacterControllerを使用して移動
         controller.Move(velocity * Time.deltaTime);
 
-        Vector2 verocityXZ = new Vector2(velocity.x, velocity.z);
+        Vector2 velocityXZ = new Vector2(velocity.x, velocity.z);
         animator.SetBool("IsGround", controller.isGrounded);
-        animator.SetBool("IsMoving", verocityXZ.sqrMagnitude > 0);
+        animator.SetBool("IsMoving", velocityXZ.sqrMagnitude > 0);
     }
 
-    private void FixedUpdate()
-    {
-        if (catCaughtTime > 0f)
-        {
-            catCaughtTime -= Time.deltaTime;
-            catCaughtTime = Mathf.Max(0.0f, catCaughtTime);
-            return;
-        }
 
-        if (isJumpMerging)
-        {
-            if (jumpMerginFrameCount == 0)
-            {
-                isJumping = true;
-                isJumpMerging = false;
-                jumpMerginFrameCount = jumpMerginFrame;
-            }
-            else jumpMerginFrameCount--;
-        }
-        else
-        {
-
-        }
-    }
 
     /// <summary>
     /// 基準となるプレイヤーの移動速度を取得します。
