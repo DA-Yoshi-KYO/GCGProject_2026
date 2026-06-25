@@ -18,6 +18,18 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public class CS_RoomCreatePoint : MonoBehaviour
 {
+    [Header("部屋のタイプ")]
+    [SerializeField]
+    private CSE_RoomTypeEnum e_RoomType;
+
+    /// <summary>
+    /// 部屋の種類
+    /// </summary>
+    public CSE_RoomTypeEnum RoomType
+    {
+        get { return e_RoomType; }
+    }
+
     [Header("右出口の設定")]
     [SerializeField]
     private CS_RoomMoveConnection cs_RightConnection = new CS_RoomMoveConnection();
