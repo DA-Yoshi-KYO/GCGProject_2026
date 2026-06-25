@@ -15,6 +15,7 @@ public enum Gimmick
 
 public enum GimmickState
 {
+    Preview,
     Spawn,
     Idle,
     Search,
@@ -96,6 +97,10 @@ public class GimmickBase : MonoBehaviour
     [SerializeField] private float brokenFadeSpeed = 1.0f;
     private float brokenAlpha = 1.0f;
     private bool brokenFadeStart = false;
+
+    //設置プレビュー用
+    [Header("Preview")]
+    [SerializeField] private float previewAlpha = 0.5f;
 
     protected Vector2Int gimmickGridPos;
     protected Vector3 targetPoint;
@@ -414,6 +419,10 @@ public class GimmickBase : MonoBehaviour
     {
         switch (gimmickState)
         {
+            case GimmickState.Preview:
+                PreviewUpdate();
+                break;
+
             case GimmickState.Spawn:
                 SpawnUpdate();
                 break;
@@ -440,6 +449,37 @@ public class GimmickBase : MonoBehaviour
         }
     }
 
+    protected virtual void PreviewUpdate()
+    {
+        switch(gimmickDirection)
+        {
+            case GimmickDirection.Up:
+                transform.rotation = Quaternion.Euler(0, 0, 0);
+                Debug.Log("PreviewUpdate: Set rotation to Up (0, 0, 0)");
+                break;
+            case GimmickDirection.Down:
+                transform.rotation = Quaternion.Euler(0, 180, 0);
+                Debug.Log("PreviewUpdate: Set rotation to Down (0, 180, 0)");
+                break;
+            case GimmickDirection.Left:
+                transform.rotation = Quaternion.Euler(0, 90, 0);
+                Debug.Log("PreviewUpdate: Set rotation to Left (0, 90, 0)");
+                break;
+            case GimmickDirection.Right:
+                transform.rotation = Quaternion.Euler(0, -90, 0);
+                Debug.Log("PreviewUpdate: Set rotation to Right (0, -90, 0)");
+                break;
+        }
+
+        foreach (Material mat in materials)
+        {
+            if (mat != null && mat.HasProperty("_Alpha"))
+            {
+                mat.SetFloat("_Alpha", 0.4f);
+            }
+        }
+    }
+
     protected virtual void SpawnUpdate()
     {
         if (transform.position.y < targetPoint.y + transform.localScale.y / 2.0f)
@@ -463,10 +503,32 @@ public class GimmickBase : MonoBehaviour
             }
             spawnVibrationCount++;
             transform.position = currentPoint;
+            switch (gimmickDirection)
+            {
+                case GimmickDirection.Up:
+                    transform.rotation = Quaternion.Euler(0, 0, 0);
+                    break;
+                case GimmickDirection.Down:
+                    transform.rotation = Quaternion.Euler(0, 180, 0);
+                    break;
+                case GimmickDirection.Left:
+                    transform.rotation = Quaternion.Euler(0, 90, 0);
+                    break;
+                case GimmickDirection.Right:
+                    transform.rotation = Quaternion.Euler(0, -90, 0);
+                    break;
+            }
         }
         else
         {
             transform.position = targetPoint;
+            foreach (Material mat in materials)
+            {
+                if (mat != null && mat.HasProperty("_Alpha"))
+                {
+                    mat.SetFloat("_Alpha", 1f);
+                }
+            }
             gimmickState = GimmickState.Idle;
         }
     }

@@ -21,7 +21,7 @@ public class RockGimmick : GimmickBase
     private GameObject checker;
     [Header("下方向へのレイの距離")]
     [SerializeField]
-    private float rayDownLength = 1.2f;  //下方へのレイ
+    private float rayDownLength = 1.0f;  //下方へのレイ
     [Header("前後左右へのレイの距離")]
     [SerializeField]
     private float raySideLength = 0.6f;  //前後左右へのレイ
@@ -140,43 +140,11 @@ public class RockGimmick : GimmickBase
                 hasValidHit = true;
             }
 
-            switch (gimmickDirection)
-            {
-                case GimmickDirection.Up:
-                    rayDirection = Vector3.back;
-                    velocity = Vector3.back * rollSpeed;
-                    transform.Rotate(Vector3.right,-rollSpeed * Time.deltaTime * 360f, Space.Self);
-                    break;
-
-                case GimmickDirection.Down:
-                    rayDirection = Vector3.forward;
-                    velocity = Vector3.forward * rollSpeed;
-                    transform.Rotate(Vector3.right, rollSpeed * Time.deltaTime * 360f, Space.Self);
-                    break;
-
-                case GimmickDirection.Left:
-                    rayDirection = Vector3.right;
-                    velocity = Vector3.right * rollSpeed;
-                    transform.Rotate(Vector3.forward, -rollSpeed * Time.deltaTime * 360f, Space.Self);
-                    break;
-
-                case GimmickDirection.Right:
-                    rayDirection = Vector3.left;
-                    velocity = Vector3.left * rollSpeed;
-                    transform.Rotate(Vector3.forward, rollSpeed * Time.deltaTime * 360f, Space.Self);
-                    break;
-            }
-            //ベロシティ移動
-            transform.position += velocity * Time.deltaTime;
-
-            //！！デバッグ用応急処置！！//
-            transform.position = new Vector3(transform.position.x, transform.position.y + debugIdleOffset, transform.position.z);
-            
             //---------------
             // 壁判定
             // XZ方向にレイを飛ばす
             // 大岩自体が大きいため前後左右レイを少し下に調整
-            Vector3 rayXYOrigin = new Vector3(transform.position.x, transform.position.y - 1.5f, transform.position.z);
+            Vector3 rayXYOrigin = new Vector3(transform.position.x, transform.position.y, transform.position.z);
 
             Debug.DrawRay(rayXYOrigin, rayDirection * raySideLength, Color.yellow);
 
@@ -195,6 +163,44 @@ public class RockGimmick : GimmickBase
                     }
                 }
             }
+            Debug.Log("レイの長さ" + hit.distance);
+            if (rayDownLength - 0.1f < hit.distance || true)
+            {
+                hasValidHit = false;
+                Debug.Log("段差無視");
+                switch (gimmickDirection)
+                {
+                    case GimmickDirection.Up:
+                        rayDirection = Vector3.back;
+                        velocity = Vector3.back * rollSpeed;
+                        transform.Rotate(Vector3.right, rollSpeed * Time.deltaTime * 360f, Space.Self);
+                        break;
+
+                    case GimmickDirection.Down:
+                        rayDirection = Vector3.forward;
+                        velocity = Vector3.forward * rollSpeed;
+                        transform.Rotate(Vector3.right, -rollSpeed * Time.deltaTime * 360f, Space.Self);
+                        break;
+
+                    case GimmickDirection.Left:
+                        rayDirection = Vector3.right;
+                        velocity = Vector3.right * rollSpeed;
+                        transform.Rotate(Vector3.forward, -rollSpeed * Time.deltaTime * 360f, Space.Self);
+                        break;
+
+                    case GimmickDirection.Right:
+                        rayDirection = Vector3.left;
+                        velocity = Vector3.left * rollSpeed;
+                        transform.Rotate(Vector3.forward, rollSpeed * Time.deltaTime * 360f, Space.Self);
+                        break;
+                }
+                //ベロシティ移動
+                transform.position += velocity * Time.deltaTime;
+
+                //！！デバッグ用応急処置！！//
+                transform.position = new Vector3(transform.position.x, transform.position.y + debugIdleOffset, transform.position.z);
+
+            }
         }
 
         if (hasValidHit)
@@ -207,7 +213,7 @@ public class RockGimmick : GimmickBase
             // 地面判定
             float angle = Vector3.Angle(normal, Vector3.up);
             float speed = Mathf.Sin(angle * Mathf.Deg2Rad) * slideSpeed;
-            if (angle < slopeAngleLimit && transform.position.y < initPositionY - 0.1f/*落下判定の距離*/)
+            if (angle < slopeAngleLimit && transform.position.y < initPositionY - 1f / 2f/*落下判定の距離*/)
             {
                 //接地判定
                 //接地(滑らない床)は破壊※一定以上落下している場合のみ
@@ -215,20 +221,29 @@ public class RockGimmick : GimmickBase
             }
             else
             {
+                Debug.Log("滑り");
                 // 滑り
                 pos += slopeDir * speed * Time.deltaTime;
 
                 // Yだけ補正
                 // 斜面の角度から補正値を計算
-                float angleCorrection;
-                angleCorrection = gravity / 3.141592f + angle / (3.141592f * 2f);
                 if (angle < 5f)
                 {
+                    Debug.Log("平面");
                     pos.y = hit.point.y + 0.5f;
                 }
                 else
                 {
-                    pos.y = hit.point.y + 0.4f;
+                    while (hasValidHit)
+                    {
+                        Debug.Log("斜面");
+                        pos.y -= 0.01f;
+                        if (pos.y <= hit.point.y)
+                        {
+                            hasValidHit = false;
+                        }
+                    }
+                    initPositionY = transform.position.y;
                 }
                 transform.position = new Vector3(pos.x, pos.y + debugUpdateOffset, pos.z);
             }
