@@ -4,15 +4,22 @@ using UnityEngine;
 public class CS_GimmickSpawn : MonoBehaviour
 {
     [Header("ポップさせるギミックの候補")]
-    [SerializeField] GameObject[] spawnGimmicks;
+    [SerializeField] List<GameObject> spawnGimmicks;
     [Header("ポップさせるギミックの数")]
     [SerializeField] int spawnGimmicksNum = 3;
-    [Header("ポップさせる部屋の候補(デバッグ用)")]
-    [SerializeField] GameObject[] spawnRooms;
+    [Header("ポップさせる部屋の親オブジェクト")]
+    [SerializeField] GameObject roomParent;
+    private List<GameObject> spawnRooms;
 
     void Start()
     {
+        CS_RoomCreatePoint[] rooms = roomParent.GetComponentsInChildren<CS_RoomCreatePoint>();
 
+        foreach (var item in rooms)
+        {
+            if (item.RoomType == CSE_RoomTypeEnum.Normal)
+                spawnRooms.Add(item.gameObject);
+        }
     }
 
     private void Update()
@@ -27,20 +34,20 @@ public class CS_GimmickSpawn : MonoBehaviour
             Debug.LogWarning("ポップするギミックの数に0以下が指定されています。");
             return;
         }
-        if (spawnRooms.Length <= 0)
+        if (spawnRooms.Count <= 0)
         {
             Debug.LogWarning("ポップさせる部屋の候補数に0以下が指定されています。");
             return;
         }
-        if (spawnGimmicks.Length <= 0)
+        if (spawnGimmicks.Count <= 0)
         {
             Debug.LogWarning("ポップさせるギミックの候補数に0以下が指定されています。");
             return;
         }
         // 一部実行するもの
-        if (spawnGimmicksNum > spawnGimmicks.Length)
+        if (spawnGimmicksNum > spawnGimmicks.Count)
             Debug.LogWarning("ポップするギミックの数が候補数を上回っています。ギミックの候補数分のみポップさせます。");
-        else if (spawnGimmicksNum > spawnRooms.Length)
+        else if (spawnGimmicksNum > spawnRooms.Count)
             Debug.LogWarning("ポップするギミックの数が部屋の候補数を上回っています。部屋の候補数分のみポップさせます。");
 
         // 生成処理
