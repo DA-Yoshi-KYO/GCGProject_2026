@@ -4,12 +4,14 @@ using UnityEngine;
 public class CS_GimmickSpawn : MonoBehaviour
 {
     [Header("ポップさせるギミックの候補")]
-    [SerializeField] List<GameObject> spawnGimmicks;
+    [SerializeField] List<GameObject> spawnGimmicks = new List<GameObject>();
     [Header("ポップさせるギミックの数")]
     [SerializeField] int spawnGimmicksNum = 3;
     [Header("ポップさせる部屋の親オブジェクト")]
     [SerializeField] GameObject roomParent;
-    private List<GameObject> spawnRooms;
+    private List<GameObject> spawnRooms = new List<GameObject>();
+
+    bool doOnce = false;
 
     void Start()
     {
@@ -26,6 +28,8 @@ public class CS_GimmickSpawn : MonoBehaviour
     {
         // 部屋が生成されるまで待つ
         if (spawnRooms[0].transform.childCount == 0) return;
+
+        if (doOnce) return;
 
         // 条件確認
         // 即時終了するもの
@@ -75,5 +79,7 @@ public class CS_GimmickSpawn : MonoBehaviour
             roomList.Remove(roomObject);
             gimmickList.Remove(gimmickObject);
         }
+
+        doOnce = true;
     }
 }

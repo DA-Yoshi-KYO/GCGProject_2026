@@ -11,6 +11,6 @@ public class CS_GimmickSpawnPoint : MonoBehaviour
         }
 
         Transform gimmickTransform = Instantiate(gimmick, transform.position, Quaternion.identity).transform;
-        transform.SetParent(GameObject.Find("DropItems").transform);
+        gimmickTransform.SetParent(GameObject.Find("DropItems").transform);
     }
 }

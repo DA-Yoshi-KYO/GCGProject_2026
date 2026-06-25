@@ -199,6 +199,20 @@ public class GimmickManager : MonoBehaviour
         {
             if (data.itemPrefab.name == itemName)
             {
+                // TODO: 映像の再生処理を追加
+                // 大瀧くんはこの辺ちゃんとリファクタしてください
+                switch (itemName)
+                {
+                    case "ItemEmptyChest":
+                        break;
+                    case "ItemPitFall":
+                        break;
+                    case "ItemHyperVoice":
+                        break;
+                    default:
+                        break;
+                }
+
                 AddCurrentGimmick(data.gimmickTag);
                 Destroy(other.gameObject);
                 IsSetItemGetNow(data.gimmickTag, true);
