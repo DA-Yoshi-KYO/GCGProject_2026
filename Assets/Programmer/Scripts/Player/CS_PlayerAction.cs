@@ -19,10 +19,8 @@
  */
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using static UnityEditor.PlayerSettings;
 
 public class CS_PlayerAction : MonoBehaviour
 {

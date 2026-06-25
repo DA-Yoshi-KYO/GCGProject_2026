@@ -1,12 +1,8 @@
 // == HitChecker.cs ==
 // 作者 :秋野翔太
 // 更新 :2026/04/24 作成開始
-using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using Unity.Burst.CompilerServices;
 using UnityEngine;
-using static CriWare.CriAtomExMic;
 
 public class HitChecker : MonoBehaviour
 {
