@@ -27,20 +27,9 @@ public class CS_ThiefManager : MonoBehaviour
     [SerializeField, Tooltip("泥棒の種類共通パラメーターのデータベース")]
     private CO_ThiefCommonStatusData thiefCommonDB;
     public CO_ThiefCommonStatusData GetThiefCommonDB() { return GameObject.Instantiate(thiefCommonDB); }
+
     [SerializeField, Tooltip("泥棒のプレハブ")]
     private GameObject thiefPrefab;
-
-    [Tooltip("敵の出入口のデータと、次にそこから泥棒が生成されるまでの時間を管理する辞書")]
-    private Dictionary<CS_RoomEnemyEntryPointData, float> createTime = new Dictionary<CS_RoomEnemyEntryPointData, float>();
-    [Tooltip("敵の出入口のデータと、そこから生成された泥棒の数を管理する辞書")]
-    private Dictionary<CS_RoomEnemyEntryPointData, int> spawnCount = new Dictionary<CS_RoomEnemyEntryPointData, int>();
-
-    [Tooltip("最初の生成間隔")]
-    private float firstCreateInterval = 0.0f;
-    [Tooltip("ウェーブ進行後泥棒を生成するまでの間隔")]
-    private float nextWaveCreateInterval = 0.0f;
-    [Tooltip("泥棒を生成する間隔の基本値")]
-    private float createInterval = 0.0f;
 
     [Tooltip("初回生成が完了しているかどうか")]
     private bool isFirstGenerationComplete = false;
@@ -54,15 +43,60 @@ public class CS_ThiefManager : MonoBehaviour
     private bool isResetAfterWaveProgress = true;
     public bool read_IsResetAfterWaveProgress => isResetAfterWaveProgress;
 
-    private void Start()
+    [Tooltip("ゲーム開始から一体目を生成するまでの時間")]
+    private float firstSpawnDelay = 5.0f;
+    [Tooltip("ウェーブ進行後に一体目を生成するまでの時間")]
+    private float waveProgressSpawnDelay = 5.0f;
+    [Tooltip("泥棒を生成する間隔の時間")]
+    private float spawnInterval = 5.0f;
+
+
+    [Tooltip("生成する泥棒スタック情報")]
+    public class ThiefSpawnInfo
+    {
+        [Tooltip("入ってくる部屋の情報")]
+        public class ThiefEntryInfo
+        {
+            [Tooltip("部屋の名前")]
+            public string roomName;
+            [Tooltip("出入口の方向")]
+            public CSE_RoomDoorDirection entryDirection;
+        }
+
+        [Tooltip("入ってくる部屋の情報")]
+        public ThiefEntryInfo entryInfo;
+
+        [Tooltip("生成する泥棒のタイプ")]
+        public CO_ThiefStatusData thiefTypeData;
+
+        [Tooltip("生成されるまでの秒数")]
+        public float spawnDelay;
+
+        public ThiefSpawnInfo(string roomName, CSE_RoomDoorDirection entryDirection, CO_ThiefStatusData thiefTypeData, float spawnDelay)
+        {
+            this.entryInfo = new ThiefEntryInfo
+            {
+                roomName = roomName,
+                entryDirection = entryDirection
+            };
+            this.thiefTypeData = thiefTypeData;
+            this.spawnDelay = spawnDelay;
+        }
+    }
+
+    [Tooltip("敵の生成情報のスタック")]
+    private List<Stack<ThiefSpawnInfo>> thiefWaveStack = new List<Stack<ThiefSpawnInfo>>();
+
+
+    private void Awake()
     {
         // 泥棒の親オブジェクトを生成
         new GameObject("ThiefParent");
 
-        // データベースから生成間隔の値を取得して設定する
-        firstCreateInterval = thiefCommonDB.firstCreateInterval;
-        nextWaveCreateInterval = thiefCommonDB.nextWaveCreateInterval;
-        createInterval = thiefCommonDB.createInterval;
+        CO_ThiefCommonStatusData commonStatusData = GetThiefCommonDB();
+        firstSpawnDelay = commonStatusData.firstCreateInterval;
+        waveProgressSpawnDelay = commonStatusData.nextWaveCreateInterval;
+        spawnInterval = commonStatusData.createInterval;
     }
 
     /// <summary>
@@ -70,157 +104,136 @@ public class CS_ThiefManager : MonoBehaviour
     /// </summary>
     private void Update()
     {
-        Notify();
+        // スタックされた生成情報が存在する場合、生成処理を行う
+        if (thiefWaveStack.Count <= 0) return;
+
+        // スタック情報をスナップショット
+        var thiefWaveStackSnapshot = new List<Stack<ThiefSpawnInfo>>(thiefWaveStack);
+
+        foreach (var item in thiefWaveStackSnapshot)
+        {
+            if (item.Count <= 0)
+            {
+                thiefWaveStack.Remove(item);
+                continue;
+            }
+
+            // 生成までの時間を減らす
+            item.Peek().spawnDelay -= Time.deltaTime;
+
+            if (item.Peek().spawnDelay <= 0)
+            {
+                // 泥棒を生成する処理
+                Create(item.Peek());
+                // スタックから生成情報を削除
+                item.Pop();
+            }
+        }
     }
 
-    // 泥棒を生成するメソッド
-    public void Notify()
+    /// <summary>
+    /// 指定された生成情報に基づいて泥棒を生成する処理
+    /// </summary>
+    /// <param name="Info">生成情報</param>
+    private void Create(ThiefSpawnInfo Info)
     {
-        CS_RoomEnemyEntryPointCollector collector = GameObject.Find("RoomCreatePoints").GetComponent<CS_RoomEnemyEntryPointCollector>();
-        if (collector == null) return;
-        // 敵の出入口を取得
-        IReadOnlyList<CS_RoomEnemyEntryPointData> EntryList = collector.EnemyEntryPointDataList;
-        if (EntryList.Count == 0) return; // 出入口が存在しない場合は、処理を終了
-
-        foreach (var entry in EntryList)
+        // 生成する泥棒の親オブジェクトを取得、存在しない場合は生成
+        GameObject thiefParent = GameObject.Find("ThiefParent");
+        if (thiefParent == null)
         {
-            // 出入口データから、そこに設定されている敵出入口データを取得
-            IReadOnlyList<CSS_RoomEnemyEntryData> list_RoomEnemyEntryData = entry.RoomEnemyEntryDataList;
+            thiefParent = new GameObject("ThiefParent");
+        }
 
-            // 敵出入口データが存在しない場合は、次の出入口の処理に移る
-            if (list_RoomEnemyEntryData == null || list_RoomEnemyEntryData.Count <= 0) continue;
+        GameObject roomObject = GameObject.Find(Info.entryInfo.roomName);
 
-            CSS_RoomEnemyEntryData roomEnemyEntryData = list_RoomEnemyEntryData[0];
+        CS_RoomEnemyEntryPointCollector collector = GameObject.Find("RoomCreatePoints").GetComponent<CS_RoomEnemyEntryPointCollector>();
 
-            if (roomEnemyEntryData == null) continue;
+        // 生成位置の取得
+        Transform entryPoint = roomObject.transform.GetComponent<CS_RoomCreatePoint>().GetRoomDoorPosition(Info.entryInfo.entryDirection);
 
-            IReadOnlyList<CO_ThiefStatusData> list_ThiefStatusData = roomEnemyEntryData.GetThiefStatusDataList();
+        // 生成される初期部屋の取得
+        CS_RoomNode entryRoom = roomObject.transform.GetComponentInChildren<CS_RoomNode>();
 
-            if (list_ThiefStatusData == null) continue;
 
-            // 生成数の管理
-            if (spawnCount.ContainsKey(entry))
+        // ============================================ 応急処置
+        //泥棒の生成
+        GameObject thief = GameObject.Instantiate(
+            thiefPrefab,
+            entryPoint.position,
+            entryPoint.rotation,
+            thiefParent.transform
+        );
+
+        thief.name = "Thief_" + thiefParent.transform.childCount;
+
+        // 近くのNavMesh上の位置を検索して、泥棒をそこにワープさせる
+        UnityEngine.AI.NavMeshAgent agent = thief.GetComponent<UnityEngine.AI.NavMeshAgent>();
+
+        if (agent != null && UnityEngine.AI.NavMesh.SamplePosition(entryPoint.position, out UnityEngine.AI.NavMeshHit hit, 5.0f, UnityEngine.AI.NavMesh.AllAreas))
+        {
+            agent.Warp(hit.position);
+        }
+
+        // 基準となるプレイヤーの速度を取得
+        float playerSpeed = GameObject.FindGameObjectWithTag("Player").GetComponent<CS_PlayerMove>().GetBasePlayerSpeed();
+
+        // 泥棒のタイプに応じたデータを取得
+        CO_ThiefStatusData typeData = Info.thiefTypeData;
+
+        // 行動AIの設定
+        CS_ThiefAI thiefAI = thief.GetComponent<CS_ThiefAI>();
+        thiefAI.Setting(GameObject.Instantiate(typeData), GetThiefCommonDB(), playerSpeed, entryRoom, entryPoint);
+    }
+
+    /// <summary>
+    /// 指定されたウェーブ泥棒データを元に、生成情報を登録する処理
+    /// </summary>
+    /// <param name="waveThiefData">ウェーブ泥棒データ</param>
+    /// <param name="isFirstWave">最初のウェーブかどうか</param>
+    public void RegistGenerationInfo(CO_StageThiefDB.StageThiefData.WaveThiefData waveThiefData, bool isFirstWave)
+    {
+        // 新しいスタックを作成し、生成情報を追加
+        Dictionary<string, Stack<ThiefSpawnInfo>> newStacks = new Dictionary<string, Stack<ThiefSpawnInfo>>();
+
+        foreach (var entryData in waveThiefData.enemtEntryDatas)
+        {
+            foreach (var thief in entryData.thiefEntryDoorDirInfos[0].thiefStatusDatas)
             {
-                if (spawnCount[entry] >= list_ThiefStatusData.Count) continue;
+                ThiefSpawnInfo spawnInfo;
 
-            }
-            else
-            {
-                spawnCount.Add(entry, 0);
-            }
-
-            // 生成タイムの登録と更新
-            if (createTime.ContainsKey(entry))
-            {
-                if (createTime[entry] <= 0)
+                if (newStacks.ContainsKey(entryData.roomName))
                 {
-                    // 泥棒を生成する処理
-                    createTime[entry] = createInterval; // 次の生成までの時間をリセット
+                    spawnInfo = new ThiefSpawnInfo(
+                        entryData.roomName,                                         // 部屋の名前
+                        entryData.thiefEntryDoorDirInfos[0].enemyDoorDir,           // 出入口の方向
+                        thief,                                                      // 泥棒のタイプデータ
+                        spawnInterval                                               // 生成されるまでの秒数
+                    );
+
+                    newStacks[entryData.roomName].Push(spawnInfo);
+
                 }
                 else
                 {
-                    // 生成タイムを減らす
-                    createTime[entry] -= Time.deltaTime;
-                    continue; // 生成タイムがまだ残っている場合は、次の出入口の処理に移る
+                    spawnInfo = new ThiefSpawnInfo(
+                        entryData.roomName,                                         // 部屋の名前
+                        entryData.thiefEntryDoorDirInfos[0].enemyDoorDir,           // 出入口の方向
+                        thief,                                                      // 泥棒のタイプデータ
+                        isFirstWave ? firstSpawnDelay : waveProgressSpawnDelay      // 生成されるまでの秒数
+                        );
+
+                    Stack<ThiefSpawnInfo> newStack = new Stack<ThiefSpawnInfo>();
+                    newStack.Push(spawnInfo);
+                    newStacks.Add(entryData.roomName, newStack);
                 }
             }
-            // 新しい出入口を辞書に追加
-            else
-            {
-                // 最初の生成間隔を設定して登録
-                if (!isFirstGenerationComplete) createTime.Add(entry, firstCreateInterval);
-                // ウェーブ進行後の生成間隔を設定して登録
-                else createTime.Add(entry, nextWaveCreateInterval);
-
-                continue; // 最初の生成間隔を待つため、次の出入口の処理に移る
-            }
-
-
-            // 生成する泥棒の親オブジェクトを取得、存在しない場合は生成
-            GameObject thiefParent = GameObject.Find("ThiefParent");
-            if (thiefParent == null)
-            {
-                thiefParent = new GameObject("ThiefParent");
-            }
-
-            // 生成位置の取得
-            Transform entryPoint = entry.RoomMovePointObject.transform;
-
-            // 生成される初期部屋の取得
-            CS_RoomNode entryRoom = entry.RoomCreatePoint.transform.GetComponentInChildren<CS_RoomNode>();
-
-
-            // ============================================ 応急処置
-            //泥棒の生成
-            GameObject thief = GameObject.Instantiate(
-                thiefPrefab,
-                entryPoint.position,
-                entryPoint.rotation,
-                thiefParent.transform
-            );
-
-            //GameObject thief = GameObject.Instantiate(thiefPrefab);
-
-            thief.name = "Thief_" + thiefParent.transform.childCount;
-
-            // 近くのNavMesh上の位置を検索して、泥棒をそこにワープさせる
-            UnityEngine.AI.NavMeshAgent agent = thief.GetComponent<UnityEngine.AI.NavMeshAgent>();
-
-            if (agent != null && UnityEngine.AI.NavMesh.SamplePosition(entryPoint.position, out UnityEngine.AI.NavMeshHit hit, 5.0f, UnityEngine.AI.NavMesh.AllAreas))
-            {
-                agent.Warp(hit.position);
-            }
-
-            // 基準となるプレイヤーの速度を取得
-            float playerSpeed = GameObject.FindGameObjectWithTag("Player").GetComponent<CS_PlayerMove>().GetBasePlayerSpeed();
-
-            // 泥棒のタイプに応じたデータを取得
-            //CO_ThiefStatusData typeData = entry.RoomEnemyEntryData.GetThiefStatusDataList()[spawnCount[entry]];
-            CO_ThiefStatusData typeData = list_ThiefStatusData[spawnCount[entry]];
-
-            // 行動AIの設定
-            CS_ThiefAI thiefAI = thief.GetComponent<CS_ThiefAI>();
-            thiefAI.Setting(GameObject.Instantiate(typeData), GetThiefCommonDB(), playerSpeed, entryRoom, entryPoint);
-
-            // --- 泥棒をthiefParentの子オブジェクトに設定
-            //thief.transform.parent = thiefParent.transform;
-
-            //--- 生成した泥棒の生成位置を選定
-            //thief.transform.position = entryPoint.position;
-
-            // 生成された泥棒の数を更新
-            spawnCount[entry]++;
-            //=============================================
         }
 
-        // 予定している生成数に達しているかどうかを確認
-        bool allSpawned = true;
-        foreach (var entry in EntryList)
+        // 新しいスタックをリストに追加
+        foreach (var stack in newStacks.Values)
         {
-            if (!spawnCount.ContainsKey(entry) || spawnCount[entry] < entry.RoomEnemyEntryDataList[0].GetThiefStatusDataList().Count)
-            {
-                allSpawned = false;
-                break;
-            }
+            thiefWaveStack.Add(stack);
         }
-
-        if (allSpawned)
-        {
-            // 最初の生成が完了したことを記録
-            if (!isFirstGenerationComplete) isFirstGenerationComplete = true;
-            // 生成が完了したことを記録
-            isGenerationComplete = true;
-            // ウェーブ進行後のリセットを行うようにする
-            isResetAfterWaveProgress = true;
-        }
-    }
-
-    // 泥棒の生成数をリセットする処理
-    public void ResetSpawnCount()
-    {
-        spawnCount.Clear();
-        isGenerationComplete = false;
-        isResetAfterWaveProgress = false;
     }
 
     /// <summary>
@@ -272,7 +285,10 @@ public class CS_ThiefManager : MonoBehaviour
         return false;
     }
 
-    // 指定の危険地帯IDを全ての泥棒の記憶から消す処理
+    /// <summary>
+    /// 全ての泥棒の記憶から指定された危険地帯IDを消す処理
+    /// </summary>
+    /// <param name="zoneID">記憶から消す危険地帯ID</param>
     public void EraseTheAvoidZoneIDToAllThief(int zoneID)
     {
         // 泥棒の親オブジェクトを取得
@@ -293,24 +309,4 @@ public class CS_ThiefManager : MonoBehaviour
             }
         }
     }
-
-    //////////////////////////////////////////////////////////////////
-    /// デバック用の処理
-
-    [ContextMenu("泥棒を再生成")]
-    private void DebugNotify()
-    {
-        // 生成した泥棒を全て削除
-        GameObject thiefParent = GameObject.Find("ThiefParent");
-        if (thiefParent != null)
-        {
-            Destroy(thiefParent);
-        }
-
-        spawnCount.Clear(); // 生成数の管理をリセット
-
-        // 泥棒を再生成
-        Notify();
-    }
-
 }

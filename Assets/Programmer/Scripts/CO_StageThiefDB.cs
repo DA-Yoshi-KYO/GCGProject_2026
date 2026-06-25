@@ -23,8 +23,8 @@ public class CO_StageThiefDB : ScriptableObject
                     [Header("敵の入ってくる方向")]
                     public CSE_RoomDoorDirection enemyDoorDir;
 
-                    [Header("敵生成位置として使うRoomMovePoint")]
-                    public CSS_RoomEnemyEntryData waveDataBase;
+                    [Header("出現候補の盗賊データ")]
+                    public List<CO_ThiefStatusData> thiefStatusDatas;
                 }
                 [Header("登録する敵出入口データ")]
                 public List<ThiefEntryDoorDirInfo> thiefEntryDoorDirInfos;
