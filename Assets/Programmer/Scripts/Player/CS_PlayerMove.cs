@@ -31,6 +31,9 @@ public class CS_PlayerMove : MonoBehaviour
     private bool isJumping = false;     // ジャンプ中かどうか
     private bool isSneaking = false;    // スニーク中かどうか
 
+    private bool isInvincible = false;  // 無敵状態かどうか
+    public bool IsInvincible => isInvincible; // 無敵状態かどうかの取得
+
     private CS_FootPrint footPrint;
     private float createFootPrintTime = 100.0f;
 

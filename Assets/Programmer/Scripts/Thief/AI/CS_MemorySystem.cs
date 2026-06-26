@@ -181,6 +181,9 @@ public class CS_MemorySystem
             // プレイヤーオブジェクトの場合
             if (entry is CS_PlayerTarget)
             {
+                // 無敵状態のプレイヤーは探索対象にしない
+                if (entry.transform.GetComponent<CS_PlayerMove>().IsInvincible) continue;
+
                 // プレイヤー視認フラグを立てる
                 isPlayerObject = true;
                 continue;
