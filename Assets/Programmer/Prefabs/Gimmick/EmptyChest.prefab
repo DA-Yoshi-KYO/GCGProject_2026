@@ -29,7 +29,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.27, y: 0.27, z: 0.27}
+  m_LocalScale: {x: 1.2366409, y: 1.7022659, z: 2.1678908}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 1614142643958187905}
@@ -95,6 +95,7 @@ MonoBehaviour:
   spawnVibrationSpeed: 0
   mesh: []
   brokenFadeSpeed: 1
+  previewAlpha: 0.5
   durability: 10
 --- !u!114 &2817741669643907525
 MonoBehaviour:
@@ -202,10 +203,20 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 4221160367055552894}
     m_Modifications:
+    - target: {fileID: 673135597934059757, guid: 04669349bd8eae5469e6e486cc2c28e1,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 933345628519016608, guid: 04669349bd8eae5469e6e486cc2c28e1,
         type: 3}
       propertyPath: m_Name
       value: Search
+      objectReference: {fileID: 0}
+    - target: {fileID: 5994039899918183061, guid: 04669349bd8eae5469e6e486cc2c28e1,
+        type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8563089307311750811, guid: 04669349bd8eae5469e6e486cc2c28e1,
         type: 3}
