@@ -40,7 +40,7 @@ public class CS_BackGroundPlayBGM : MonoBehaviour
         criAtomExAcbsList = new CriAtomExAcb[dataBase.bgmDatas.Length];
 
         //BGMの設定と再生
-        SettingBGM();
+        SettingBGM(currentScene);
     }
 
     public void Start()
@@ -84,33 +84,52 @@ public class CS_BackGroundPlayBGM : MonoBehaviour
 
 
     //BGM設定
-    private void SettingBGM()
+    private void SettingBGM(string CurrentScene)
     {
-        for (int i = 0 ; i < dataBase.bgmDatas.Length ; ++i)
-        {
-            if (currentScene == dataBase.bgmDatas[i].sceneName.ToString())
-            {
-                if (dataBase.bgmDatas[i].cueName.ToString() != "NoneBGM")
-                {
-                    playerInfo.SetCue(criAtomExAcbsList[0], dataBase.bgmDatas[i].cueName.ToString());
-                    playerInfo.Loop(true);
-                    playerInfo.SetVoicePriority(255);
-                    playerInfo.Prepare();
-                    playerInfo.Start();
-                }
-                else
-                {
-                    playerInfo.Stop();
-                }
+        BackGroundBGMData data = dataBase.bgmData[CurrentScene];
 
-                currentData = dataBase.bgmDatas[i];
-            }
-            
-            if (dataBase.bgmDatas[i].sceneName.ToString() == "ThiefEscape")
-            {
-                thiefData = dataBase.bgmDatas[i];
-            }
+        if (data.cueName.ToString() != "NoneBGM")
+        {
+            playerInfo.SetCue(criAtomExAcbsList[0], data.cueName.ToString());
+            playerInfo.Loop(true);
+            playerInfo.SetVoicePriority(255);
+            playerInfo.Prepare();
+            playerInfo.Start();
         }
+        else
+        {
+            playerInfo.Stop();
+        }
+
+        currentData = data;
+
+        thiefData = dataBase.bgmData["ThiefEscape"];
+
+        //for (int i = 0 ; i < dataBase.bgmDatas.Length ; ++i)
+        //{
+        //    if (currentScene == dataBase.bgmDatas[i].sceneName.ToString())
+        //    {
+        //        if (dataBase.bgmDatas[i].cueName.ToString() != "NoneBGM")
+        //        {
+        //            playerInfo.SetCue(criAtomExAcbsList[0], dataBase.bgmDatas[i].cueName.ToString());
+        //            playerInfo.Loop(true);
+        //            playerInfo.SetVoicePriority(255);
+        //            playerInfo.Prepare();
+        //            playerInfo.Start();
+        //        }
+        //        else
+        //        {
+        //            playerInfo.Stop();
+        //        }
+
+        //        currentData = dataBase.bgmDatas[i];
+        //    }
+            
+        //    if (dataBase.bgmDatas[i].sceneName.ToString() == "ThiefEscape")
+        //    {
+        //        thiefData = dataBase.bgmDatas[i];
+        //    }
+        //}
     }
 
     //BGMのフェードアウト

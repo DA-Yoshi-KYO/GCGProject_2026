@@ -8,6 +8,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public enum BackGrondSECueName
@@ -30,4 +31,13 @@ public class BackGroundSEData
 public class SO_BackGroundSEDataBase : ScriptableObject
 {
     public BackGroundSEData[] seDatas;
+    public Dictionary<string, BackGroundSEData> seData;
+    private void OnEnable()
+    {
+        seData = new Dictionary<string, BackGroundSEData>();
+        foreach (var item in seDatas)
+        {
+            seData[item.situation] = item;
+        }
+    }
 }
