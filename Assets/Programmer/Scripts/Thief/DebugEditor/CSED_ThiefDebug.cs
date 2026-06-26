@@ -51,7 +51,11 @@ public sealed class CSED_ThiefDebug : EditorWindow
     public static void Open()
     {
         //既存があれば再利用、無ければ生成して表示
-        GetWindow<CSED_ThiefDebug>("ThiefDebug");
+        // GetWindow<CSED_ThiefDebug>("ThiefDebug");
+        // 既存があっても新しいウィンドウを開くように変更
+        var window = CreateInstance<CSED_ThiefDebug>();
+        window.titleContent = new GUIContent("ThiefDebug");
+        window.Show();
     }
 
     /// <summary>
