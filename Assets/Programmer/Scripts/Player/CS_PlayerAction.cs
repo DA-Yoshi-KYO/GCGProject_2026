@@ -257,7 +257,7 @@ public class CS_PlayerAction : MonoBehaviour
                         break;
                     case CS_PlayerData.PlayerMode.Setting:
                         SettingAction();
-                        playSE.PlayOneShotSE("CatInteract", gameObject.transform.position, "InteractSE");
+                        playSE.PlayOneShotSE("Cat_Interact1", gameObject.transform.position, "InteractSE");
                         playerData.currentMode = CS_PlayerData.PlayerMode.Normal;
                         break;
                     default:
@@ -274,7 +274,7 @@ public class CS_PlayerAction : MonoBehaviour
 
                 // 長押しはギミックの起動を行う
                 interactField.GetComponent<Renderer>().enabled = false;
-                playSE.PlayOneShotSE("CatInteract", gameObject.transform.position, "InteractSE");
+                playSE.PlayOneShotSE("Cat_Interact1", gameObject.transform.position, "InteractSE");
 
                 foreach (Collider hit in hitList)
                 {

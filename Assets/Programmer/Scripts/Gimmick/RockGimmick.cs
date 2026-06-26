@@ -76,8 +76,11 @@ public class RockGimmick : GimmickBase
             isFirstActive = false;
             Vector2Int directionVec = GetDirectionVec();
 
-            if (gimmickSound != null) gimmickSound.PlayOneShotSE("RockRolling", gameObject.transform.position, "RockRolling");
-            activeTimer = gimmickSound.GetAudioLength("RockRolling");
+            if (gimmickSound != null)
+            {
+                gimmickSound.PlayOneShotSE("Gimmick_RockRoll", gameObject.transform.position, "RockRolling");
+                activeTimer = gimmickSound.GetAudioLength("Gimmick_RockRoll");
+            }
             soundPlayed = true;
 
             initPositionY = transform.position.y + debugIdleOffset;
@@ -310,7 +313,7 @@ public class RockGimmick : GimmickBase
         }
         if (gimmickSound != null)
         {
-            gimmickSound.PlayOneShotSE("RockHit", gameObject.transform.position, "RockSound");
+            gimmickSound.PlayOneShotSE("Gimmick_RockHit", gameObject.transform.position, "RockSound");
             Destroy(gimmickSound);
         }
         if (checker != null)

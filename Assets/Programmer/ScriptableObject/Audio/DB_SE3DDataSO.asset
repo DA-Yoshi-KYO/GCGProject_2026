@@ -13,74 +13,158 @@ MonoBehaviour:
   m_Name: DB_SE3DDataSO
   m_EditorClassIdentifier: 
   seDatas:
-  - situation: PlayerWalkNormal
-    audioClip: {fileID: 8300000, guid: 78128abc4b72c9042bd9668ea0fee91b, type: 3}
+  - situation: Cat_HitThief
+    audioClip: {fileID: 8300000, guid: de7919429d6d9604e86456764040a35b, type: 3}
     audioMixerGroup:
     - {fileID: -8415375543701046544, guid: 14355cf5183a3d84b956067123018296, type: 2}
     audioMixerSnapshot:
     - {fileID: 24500006, guid: 14355cf5183a3d84b956067123018296, type: 2}
-  - situation: PlayerWalkReverb
-    audioClip: {fileID: 8300000, guid: 78128abc4b72c9042bd9668ea0fee91b, type: 3}
-    audioMixerGroup:
-    - {fileID: -1226411138578654961, guid: 14355cf5183a3d84b956067123018296, type: 2}
-    audioMixerSnapshot:
-    - {fileID: 7302809386422976832, guid: 14355cf5183a3d84b956067123018296, type: 2}
-  - situation: CatDamage
-    audioClip: {fileID: 8300000, guid: 1f81b7b6f4f52904ea5a8932612b2104, type: 3}
+  - situation: Cat_Interact1
+    audioClip: {fileID: 8300000, guid: 478b47b18166dea46b89d603db0a5517, type: 3}
     audioMixerGroup:
     - {fileID: -8415375543701046544, guid: 14355cf5183a3d84b956067123018296, type: 2}
     audioMixerSnapshot:
     - {fileID: 24500006, guid: 14355cf5183a3d84b956067123018296, type: 2}
-  - situation: CatInteract
-    audioClip: {fileID: 8300000, guid: c3ed654ec98cbe9428433caad92bce66, type: 3}
+  - situation: Cat_Interact2
+    audioClip: {fileID: 8300000, guid: 707fb8028e218b24cba8aa410004706c, type: 3}
     audioMixerGroup:
     - {fileID: -8415375543701046544, guid: 14355cf5183a3d84b956067123018296, type: 2}
     audioMixerSnapshot:
     - {fileID: 24500006, guid: 14355cf5183a3d84b956067123018296, type: 2}
-  - situation: PotFall
-    audioClip: {fileID: 8300000, guid: 8bfdff9c51c39954498e28a45b20c45e, type: 3}
+  - situation: Cat_Interact3
+    audioClip: {fileID: 8300000, guid: 2ee31006cb3e6e843a6e053d4ae9d4d1, type: 3}
     audioMixerGroup:
     - {fileID: -8415375543701046544, guid: 14355cf5183a3d84b956067123018296, type: 2}
     audioMixerSnapshot:
     - {fileID: 24500006, guid: 14355cf5183a3d84b956067123018296, type: 2}
-  - situation: RockHit
-    audioClip: {fileID: 8300000, guid: 69f127ce8f937374c902fa2463ef60fb, type: 3}
+  - situation: Cat_Walk
+    audioClip: {fileID: 8300000, guid: 57ecc1def68157243984a59f3b785c10, type: 3}
     audioMixerGroup:
     - {fileID: -8415375543701046544, guid: 14355cf5183a3d84b956067123018296, type: 2}
     audioMixerSnapshot:
     - {fileID: 24500006, guid: 14355cf5183a3d84b956067123018296, type: 2}
-  - situation: RockRolling
-    audioClip: {fileID: 8300000, guid: 6e86667cad1bf2b449b3078656dfb6c8, type: 3}
+  - situation: Cat_WinVoice
+    audioClip: {fileID: 8300000, guid: f80ca9d851a7f9746826e73f2faad28f, type: 3}
     audioMixerGroup:
     - {fileID: -8415375543701046544, guid: 14355cf5183a3d84b956067123018296, type: 2}
     audioMixerSnapshot:
     - {fileID: 24500006, guid: 14355cf5183a3d84b956067123018296, type: 2}
-  - situation: OpenTreasureChest
-    audioClip: {fileID: 8300000, guid: e1d8df59ad3fae44a9c6e8fb6fe45570, type: 3}
+  - situation: Gimmick_Clone
+    audioClip: {fileID: 8300000, guid: b88020ce98572ef4e8db48d64fcf1fd8, type: 3}
     audioMixerGroup:
     - {fileID: -8415375543701046544, guid: 14355cf5183a3d84b956067123018296, type: 2}
     audioMixerSnapshot:
     - {fileID: 24500006, guid: 14355cf5183a3d84b956067123018296, type: 2}
-  - situation: ThiefCatch
-    audioClip: {fileID: 8300000, guid: 0e9d0ef8f8e705549aefe2d18ea40eaf, type: 3}
+  - situation: Gimmick_Nyaki
+    audioClip: {fileID: 8300000, guid: 92be303bce12a5240ab5612fb76b6f25, type: 3}
     audioMixerGroup:
     - {fileID: -8415375543701046544, guid: 14355cf5183a3d84b956067123018296, type: 2}
     audioMixerSnapshot:
     - {fileID: 24500006, guid: 14355cf5183a3d84b956067123018296, type: 2}
-  - situation: ThiefDamage
-    audioClip: {fileID: 8300000, guid: b3226da82d4c77b40a55c27dcac90921, type: 3}
+  - situation: Gimmick_PitFall
+    audioClip: {fileID: 8300000, guid: 9c0ed203c4605d94297a9b6f9f25548b, type: 3}
     audioMixerGroup:
     - {fileID: -8415375543701046544, guid: 14355cf5183a3d84b956067123018296, type: 2}
     audioMixerSnapshot:
     - {fileID: 24500006, guid: 14355cf5183a3d84b956067123018296, type: 2}
-  - situation: ThiefDeath
-    audioClip: {fileID: 8300000, guid: 7bad722cdf6aff241b05b69a11338bf9, type: 3}
+  - situation: Gimmick_PotBreak
+    audioClip: {fileID: 8300000, guid: 7fb4003028927b148af0baec135d0103, type: 3}
     audioMixerGroup:
     - {fileID: -8415375543701046544, guid: 14355cf5183a3d84b956067123018296, type: 2}
     audioMixerSnapshot:
     - {fileID: 24500006, guid: 14355cf5183a3d84b956067123018296, type: 2}
-  - situation: ThiefDiscover
-    audioClip: {fileID: 8300000, guid: ad931f9551327a8418a25fe8812d87b6, type: 3}
+  - situation: Gimmick_PotFall
+    audioClip: {fileID: 8300000, guid: 6b2b03fe7603b214081b8a06ddc14071, type: 3}
+    audioMixerGroup:
+    - {fileID: -8415375543701046544, guid: 14355cf5183a3d84b956067123018296, type: 2}
+    audioMixerSnapshot:
+    - {fileID: 24500006, guid: 14355cf5183a3d84b956067123018296, type: 2}
+  - situation: Gimmick_RockHit
+    audioClip: {fileID: 8300000, guid: afde20ced42cd434cbbe53ad822405a4, type: 3}
+    audioMixerGroup:
+    - {fileID: -8415375543701046544, guid: 14355cf5183a3d84b956067123018296, type: 2}
+    audioMixerSnapshot:
+    - {fileID: 24500006, guid: 14355cf5183a3d84b956067123018296, type: 2}
+  - situation: Gimmick_RockHitBreak
+    audioClip: {fileID: 8300000, guid: 8237274a0577a15438372086d4320fd2, type: 3}
+    audioMixerGroup:
+    - {fileID: -8415375543701046544, guid: 14355cf5183a3d84b956067123018296, type: 2}
+    audioMixerSnapshot:
+    - {fileID: 24500006, guid: 14355cf5183a3d84b956067123018296, type: 2}
+  - situation: Gimmick_RockRoll
+    audioClip: {fileID: 8300000, guid: ecb18699647de4848b5385101aea586b, type: 3}
+    audioMixerGroup:
+    - {fileID: -8415375543701046544, guid: 14355cf5183a3d84b956067123018296, type: 2}
+    audioMixerSnapshot:
+    - {fileID: 24500006, guid: 14355cf5183a3d84b956067123018296, type: 2}
+  - situation: Gimmick_Summon
+    audioClip: {fileID: 8300000, guid: 8c34eaf34fcd6f54384187f3a425047d, type: 3}
+    audioMixerGroup:
+    - {fileID: -8415375543701046544, guid: 14355cf5183a3d84b956067123018296, type: 2}
+    audioMixerSnapshot:
+    - {fileID: 24500006, guid: 14355cf5183a3d84b956067123018296, type: 2}
+  - situation: Thief_BringTreature
+    audioClip: {fileID: 8300000, guid: 6fd48df79d35df342accb59660df367c, type: 3}
+    audioMixerGroup:
+    - {fileID: -8415375543701046544, guid: 14355cf5183a3d84b956067123018296, type: 2}
+    audioMixerSnapshot:
+    - {fileID: 24500006, guid: 14355cf5183a3d84b956067123018296, type: 2}
+  - situation: Thief_Dead
+    audioClip: {fileID: 8300000, guid: 16de863aa1d5774478fe214d0a599a30, type: 3}
+    audioMixerGroup:
+    - {fileID: -8415375543701046544, guid: 14355cf5183a3d84b956067123018296, type: 2}
+    audioMixerSnapshot:
+    - {fileID: 24500006, guid: 14355cf5183a3d84b956067123018296, type: 2}
+  - situation: Thief_DeadFade
+    audioClip: {fileID: 8300000, guid: 1fb4cd32dd7706949ab20480e822e5cb, type: 3}
+    audioMixerGroup:
+    - {fileID: -8415375543701046544, guid: 14355cf5183a3d84b956067123018296, type: 2}
+    audioMixerSnapshot:
+    - {fileID: 24500006, guid: 14355cf5183a3d84b956067123018296, type: 2}
+  - situation: Thief_DropTreature
+    audioClip: {fileID: 8300000, guid: 1db569fdaed3e0e4199b276983dd8167, type: 3}
+    audioMixerGroup:
+    - {fileID: -8415375543701046544, guid: 14355cf5183a3d84b956067123018296, type: 2}
+    audioMixerSnapshot:
+    - {fileID: 24500006, guid: 14355cf5183a3d84b956067123018296, type: 2}
+  - situation: Thief_DropTreatureHit
+    audioClip: {fileID: 8300000, guid: 36154fc1caa7e434b9847dd11bf7e14d, type: 3}
+    audioMixerGroup:
+    - {fileID: -8415375543701046544, guid: 14355cf5183a3d84b956067123018296, type: 2}
+    audioMixerSnapshot:
+    - {fileID: 24500006, guid: 14355cf5183a3d84b956067123018296, type: 2}
+  - situation: Thief_Hit1
+    audioClip: {fileID: 8300000, guid: 602ab03c1100cb04d8f9b99e2f4a5e6c, type: 3}
+    audioMixerGroup:
+    - {fileID: -8415375543701046544, guid: 14355cf5183a3d84b956067123018296, type: 2}
+    audioMixerSnapshot:
+    - {fileID: 24500006, guid: 14355cf5183a3d84b956067123018296, type: 2}
+  - situation: Thief_Hit2
+    audioClip: {fileID: 8300000, guid: d0bd6c242cd4d7c4b8d148882e0b66a0, type: 3}
+    audioMixerGroup:
+    - {fileID: -8415375543701046544, guid: 14355cf5183a3d84b956067123018296, type: 2}
+    audioMixerSnapshot:
+    - {fileID: 24500006, guid: 14355cf5183a3d84b956067123018296, type: 2}
+  - situation: Thief_Hit3
+    audioClip: {fileID: 8300000, guid: b2ae677c391d13d4f84d03e2747e65ed, type: 3}
+    audioMixerGroup:
+    - {fileID: -8415375543701046544, guid: 14355cf5183a3d84b956067123018296, type: 2}
+    audioMixerSnapshot:
+    - {fileID: 24500006, guid: 14355cf5183a3d84b956067123018296, type: 2}
+  - situation: Thief_HitCat
+    audioClip: {fileID: 8300000, guid: 261f572c10018f1499b4c10dc39ea981, type: 3}
+    audioMixerGroup:
+    - {fileID: -8415375543701046544, guid: 14355cf5183a3d84b956067123018296, type: 2}
+    audioMixerSnapshot:
+    - {fileID: 24500006, guid: 14355cf5183a3d84b956067123018296, type: 2}
+  - situation: Thief_RockRunAway
+    audioClip: {fileID: 8300000, guid: 7b35e1a81790be543b04e6c4f788e975, type: 3}
+    audioMixerGroup:
+    - {fileID: -8415375543701046544, guid: 14355cf5183a3d84b956067123018296, type: 2}
+    audioMixerSnapshot:
+    - {fileID: 24500006, guid: 14355cf5183a3d84b956067123018296, type: 2}
+  - situation: Thief_Serach
+    audioClip: {fileID: 8300000, guid: 9b23f7b3059235746b18ceb6daabe974, type: 3}
     audioMixerGroup:
     - {fileID: -8415375543701046544, guid: 14355cf5183a3d84b956067123018296, type: 2}
     audioMixerSnapshot:
