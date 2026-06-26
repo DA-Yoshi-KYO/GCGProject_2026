@@ -47,16 +47,12 @@ public class CS_BackGroundPlaySE : MonoBehaviour
     //SE設定
     private void SettingSE(string currentSituation)
     {
-        for (int i = 0 ; i < dataBase.seDatas.Length ; ++i)
-        {
-            if (currentSituation == dataBase.seDatas[i].situation.ToString())
-            {
-                playerInfo.SetCue(criAtomExAcbsList[0], dataBase.seDatas[i].cueName.ToString());
-                playerInfo.Loop(false);
-                playerInfo.SetVoicePriority(50);
-                playerInfo.Prepare();
-            }
-        }
+        BackGroundSEData data = dataBase.seData[currentSituation];
+
+        playerInfo.SetCue(criAtomExAcbsList[0], data.cueName.ToString());
+        playerInfo.Loop(false);
+        playerInfo.SetVoicePriority(50);
+        playerInfo.Prepare();
     }
 
     public void PlaySE(string currentSituation)
