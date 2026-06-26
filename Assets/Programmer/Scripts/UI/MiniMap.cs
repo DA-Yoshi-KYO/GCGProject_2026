@@ -89,13 +89,11 @@ public class MiniMap : MonoBehaviour
         if(player == null)
         {
             player = GameObject.Find(playerTag);
-            Debug.LogError("Player found");
             return;
         }
         if(parentThief == null)
         {
             parentThief = GameObject.Find(thiefTag);
-            Debug.LogError("Thief found");
             return;
         }
         if(gimmickManager == null)
