@@ -28,7 +28,7 @@ public class NyakiGimmick : GimmickBase
     CSV_CatEye catEye;
     private bool isFirstActive = false;
 
-    void Start()
+    protected override void IdleUpdate()
     {
         //設置ではなく発動方式なため
         //設置＝発動となる
@@ -36,11 +36,11 @@ public class NyakiGimmick : GimmickBase
         volume = FindFirstObjectByType<Volume>();
         volume.profile.TryGet(out catEye);
     }
-
     protected override void ActiveUpdate()
     {
         if (!isFirstActive)
         {
+            Debug.Log("にゃき発動");
             isFirstActive = true;
             //エフェクト発生
             if (catEye != null)

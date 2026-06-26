@@ -55,6 +55,8 @@ public class RockGimmick : GimmickBase
     private HitChecker hitting;
     private Transform visualRoot;
 
+    private bool isBrokenFirst = false;
+
     protected override void IdleUpdate()
     {
         //！！デバッグ用応急処置！！//
@@ -286,37 +288,41 @@ public class RockGimmick : GimmickBase
     // =========================
     protected override void BrokenUpdate()
     {
-        DeleteHitChecker();
         base.BrokenUpdate();
-        if (GetThiefGimmickAction() != null)
-        {
-            GetThiefGimmickAction().IronBallEnd(this);
-        }
-        //破壊時に1回だけ生成
-        if (!isDangerZoneSpawned)
-        {
-            isDangerZoneSpawned = true;
 
-            if (dangerZone != null)
-            {
-                // ThiefCommonDBから残存時間を取得
-                CO_ThiefCommonStatusData common = null;
-                var thiefManager = GameObject.FindObjectOfType<CS_ThiefManager>();
-                if (thiefManager != null) common = thiefManager.GetThiefCommonDB();
-
-                CS_DangerZoneSpawner.SpawnAndRegisterFromGimmick(dangerZone, transform.position, this, common, thiefLayer);
-            }
-            else
-            {
-                Debug.LogWarning("PotGimmick: dangerZone が未設定です。", this);
-            }
-        }
-        if (gimmickSound != null)
+        if (isBrokenFirst)
         {
-            gimmickSound.PlayOneShotSE("Gimmick_RockHit", gameObject.transform.position, "RockSound");
-            Destroy(gimmickSound);
+            DeleteHitChecker();
+            if (GetThiefGimmickAction() != null)
+            {
+                GetThiefGimmickAction().IronBallEnd(this);
+            }
+            //破壊時に1回だけ生成
+            if (!isDangerZoneSpawned)
+            {
+                isDangerZoneSpawned = true;
+
+                if (dangerZone != null)
+                {
+                    // ThiefCommonDBから残存時間を取得
+                    CO_ThiefCommonStatusData common = null;
+                    var thiefManager = GameObject.FindObjectOfType<CS_ThiefManager>();
+                    if (thiefManager != null) common = thiefManager.GetThiefCommonDB();
+
+                    CS_DangerZoneSpawner.SpawnAndRegisterFromGimmick(dangerZone, transform.position, this, common, thiefLayer);
+                }
+                else
+                {
+                    Debug.LogWarning("PotGimmick: dangerZone が未設定です。", this);
+                }
+            }
+            if (gimmickSound != null)
+            {
+                gimmickSound.PlayOneShotSE("Gimmick_RockHit", gameObject.transform.position, "RockSound");
+                Destroy(gimmickSound);
+            }
+            if (checker != null)
+                Destroy(checker);
         }
-        if (checker != null)
-        Destroy(checker);
     }
 }
