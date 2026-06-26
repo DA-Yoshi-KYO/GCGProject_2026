@@ -289,6 +289,13 @@ public class CS_ThiefAI : MonoBehaviour
         }
     }
 
+    private void OnDestroy()
+    {
+        // 退場したときにウェーブ数を増加させる
+        CS_StageManager stageManager = GameObject.FindObjectOfType<CS_StageManager>();
+        if(stageManager != null) stageManager.WaveCountUp();
+    }
+
     // 探索状態の行動
     private void Explore()
     {
@@ -408,57 +415,59 @@ public class CS_ThiefAI : MonoBehaviour
                     if (thiefSound != null) thiefSound.PlayOneShotSE("ThiefDeath", gameObject.transform.position, "ThiefDeath");
 
                     // 宝物を現在の部屋のオブジェクトに親子付けする
-                    holdTreasure.transform.SetParent(memorySystem.read_CurrentRoom.read_ObjectParent.transform);
-
-                    // 宝物を設置するグリッドを探す
-                    // 真下のグリッドセルインデックスを取得
-                    RoomGrid roomGrid = memorySystem.read_CurrentRoomPoint.GetComponentInChildren<RoomGrid>();
-                    Vector2Int gridIndex = roomGrid.GetGridFromPos(transform.position);
-
-                    List<Vector2Int> targetGridOffset = new List<Vector2Int>();
-                    // 周囲3x3のグリッドセルを探索
-                    for (int x = -1 ; x <= 1 ; x++)
+                    if (holdTreasure != null)
                     {
-                        for (int y = -1 ; y <= 1 ; y++)
-                        {
-                            targetGridOffset.Add(new Vector2Int(x, y));
+                        holdTreasure.transform.SetParent(memorySystem.read_CurrentRoom.read_ObjectParent.transform);
 
-                            if (roomGrid.gridSize.x <= gridIndex.x + x || gridIndex.x + x < 0 ||
-                                roomGrid.gridSize.y <= gridIndex.y + y || gridIndex.y + y < 0)
+                        // 宝物を設置するグリッドを探す
+                        // 真下のグリッドセルインデックスを取得
+                        RoomGrid roomGrid = memorySystem.read_CurrentRoomPoint.GetComponentInChildren<RoomGrid>();
+                        Vector2Int gridIndex = roomGrid.GetGridFromPos(transform.position);
+
+                        List<Vector2Int> targetGridOffset = new List<Vector2Int>();
+                        // 周囲3x3のグリッドセルを探索
+                        for (int x = -1 ; x <= 1 ; x++)
+                        {
+                            for (int y = -1 ; y <= 1 ; y++)
                             {
-                                // グリッドの範囲外の場合は、対象から除外する
-                                targetGridOffset.RemoveAt(targetGridOffset.Count - 1);
+                                targetGridOffset.Add(new Vector2Int(x, y));
+
+                                if (roomGrid.gridSize.x <= gridIndex.x + x || gridIndex.x + x < 0 ||
+                                    roomGrid.gridSize.y <= gridIndex.y + y || gridIndex.y + y < 0)
+                                {
+                                    // グリッドの範囲外の場合は、対象から除外する
+                                    targetGridOffset.RemoveAt(targetGridOffset.Count - 1);
+                                }
                             }
                         }
-                    }
-                    Vector3 gridPos = Vector3.zero;
-                    while (true)
-                    {
-                        // ランダムにグリッドセルのオフセットを選択
-                        int randomIndex = Random.Range(0, targetGridOffset.Count);
-
-                        // 選択したグリッドセルの位置をワールド座標で
-                        gridPos = roomGrid.GetWorldPosFromGrid(gridIndex + targetGridOffset[randomIndex]);
-
-                        GameObject rayCastObject = new GameObject();
-                        rayCastObject.transform.position = gridPos;
-
-                        RaycastHit[] hits = Physics.RaycastAll(gridPos, Vector3.up, 20, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
-
-                        bool isStandFound = false;
-                        foreach (RaycastHit hit in hits)
+                        Vector3 gridPos = Vector3.zero;
+                        while (true)
                         {
-                            // Standタグのオブジェクトに当たっている場合はフラグをtureにする
-                            if (hit.transform.name.Contains("Stand")) isStandFound = true;
+                            // ランダムにグリッドセルのオフセットを選択
+                            int randomIndex = Random.Range(0, targetGridOffset.Count);
+
+                            // 選択したグリッドセルの位置をワールド座標で
+                            gridPos = roomGrid.GetWorldPosFromGrid(gridIndex + targetGridOffset[randomIndex]);
+
+                            GameObject rayCastObject = new GameObject();
+                            rayCastObject.transform.position = gridPos;
+
+                            RaycastHit[] hits = Physics.RaycastAll(gridPos, Vector3.up, 20, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
+
+                            bool isStandFound = false;
+                            foreach (RaycastHit hit in hits)
+                            {
+                                // Standタグのオブジェクトに当たっている場合はフラグをtureにする
+                                if (hit.transform.name.Contains("Stand")) isStandFound = true;
+                            }
+
+                            // Standに当たっていない場合は、設置する位置を決定する
+                            if (!isStandFound) break;
                         }
 
-                        // Standに当たっていない場合は、設置する位置を決定する
-                        if (!isStandFound) break;
+                        // 宝物を設置する位置を設定
+                        holdTreasure.transform.position = new Vector3(gridPos.x, gridPos.y + holdTreasure.transform.localScale.y / 2, gridPos.z);
                     }
-
-                    // 宝物を設置する位置を設定
-                    holdTreasure.transform.position = new Vector3(gridPos.x, gridPos.y + holdTreasure.transform.localScale.y / 2, gridPos.z);
-
                     Destroy(this.gameObject);
                 }
             }

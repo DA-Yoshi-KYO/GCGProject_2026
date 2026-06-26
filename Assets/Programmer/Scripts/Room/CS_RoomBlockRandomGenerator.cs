@@ -29,6 +29,11 @@ public class CS_RoomBlockRandomGenerator : MonoBehaviour
     private bool bool_IsRuntimeRegenerating = false;
 
     /// <summary>
+    /// 部屋生成完了フラグ
+    /// </summary>
+    public bool b_IsRuntimeRegenerating {get; private set;}
+
+    /// <summary>
     /// Reset時に同じGameObjectからRoom生成本体を取得します。
     /// </summary>
     private void Reset()
@@ -41,6 +46,8 @@ public class CS_RoomBlockRandomGenerator : MonoBehaviour
     /// </summary>
     private void Awake()
     {
+        b_IsRuntimeRegenerating = false;
+
         if (!Application.isPlaying)
         {
             return;
@@ -122,6 +129,9 @@ public class CS_RoomBlockRandomGenerator : MonoBehaviour
             true);
 
         yield return null;
+
+        // 部屋生成完了フラグをtrueに設定します。
+        b_IsRuntimeRegenerating = true;
 
         // ワープ生成はRoom生成後に行う必要があるため、ここで実行します。
         if (cs_WarpSpawn != null)

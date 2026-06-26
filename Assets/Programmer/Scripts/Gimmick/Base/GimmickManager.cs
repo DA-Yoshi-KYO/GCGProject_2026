@@ -2,6 +2,7 @@
 //|| 作者 : 大瀧蓮
 //||
 //|| 更新 : 2026/05/24 作成開始
+//|| 追加 : 2026/06/26 チュートリアル動画再生処理追加
 //||
 //|| ―――――――――――――――――――――――――――――――――――――――――
 //||
@@ -11,8 +12,9 @@
 //||
 //|| ―――――――――――――――――――――――――――――――――――――――――
 
-using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine;
+using static UnityEngine.InputSystem.HID.HID;
 
 public class GimmickManager : MonoBehaviour
 {
@@ -93,6 +95,11 @@ public class GimmickManager : MonoBehaviour
 
     GimmickInfo info;
 
+    //=========================================================
+    // チュートリアル動画再生に必要な変数
+    //=========================================================
+    private GameObject cutSceneManager;
+
     private void Awake()
     {
         gimmickInfo = new Dictionary<Gimmick, GimmickInfo>();
@@ -103,6 +110,12 @@ public class GimmickManager : MonoBehaviour
         {
             gimmickInfo[data.gimmickTag] = data.gimmickInfo;
         }
+    }
+
+    private void Start()
+    {
+
+        cutSceneManager = GameObject.Find("CutSceneManager");
     }
 
     //=========================================================
@@ -199,6 +212,28 @@ public class GimmickManager : MonoBehaviour
         {
             if (data.itemPrefab.name == itemName)
             {
+                string situation = "";
+
+                // TODO: 映像の再生処理を追加
+                // 大瀧くんはこの辺ちゃんとリファクタしてください
+                switch (itemName)
+                {
+                    case "ItemEmptyChest":
+                        situation = "ItemEmptyChest";
+                        break;
+                    case "ItemPitFall":
+                        situation = "ItemPitFall";
+                        break;
+                    case "ItemHyperVoice":
+                        situation = "ItemHyperVoice";
+                        break;
+                    default:
+                        break;
+                }
+
+                cutSceneManager.GetComponent<CS_CutSceneVideo>().SetVideoInfo(situation);
+                cutSceneManager.GetComponent<CS_CutSceneVideo>().PlayVideo();
+
                 AddCurrentGimmick(data.gimmickTag);
                 Destroy(other.gameObject);
                 IsSetItemGetNow(data.gimmickTag, true);
