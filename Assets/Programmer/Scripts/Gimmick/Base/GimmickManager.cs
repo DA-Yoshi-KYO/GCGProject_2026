@@ -2,6 +2,7 @@
 //|| 作者 : 大瀧蓮
 //||
 //|| 更新 : 2026/05/24 作成開始
+//|| 追加 : 2026/06/26 チュートリアル動画再生処理追加
 //||
 //|| ―――――――――――――――――――――――――――――――――――――――――
 //||
@@ -11,8 +12,8 @@
 //||
 //|| ―――――――――――――――――――――――――――――――――――――――――
 
-using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class GimmickManager : MonoBehaviour
 {
@@ -93,6 +94,11 @@ public class GimmickManager : MonoBehaviour
 
     GimmickInfo info;
 
+    //=========================================================
+    // チュートリアル動画再生に必要な変数
+    //=========================================================
+    private GameObject cutSceneManager;
+
     private void Awake()
     {
         gimmickInfo = new Dictionary<Gimmick, GimmickInfo>();
@@ -103,6 +109,12 @@ public class GimmickManager : MonoBehaviour
         {
             gimmickInfo[data.gimmickTag] = data.gimmickInfo;
         }
+    }
+
+    private void Start()
+    {
+
+        cutSceneManager = GameObject.Find("CutSceneManager");
     }
 
     //=========================================================
@@ -204,6 +216,7 @@ public class GimmickManager : MonoBehaviour
                 Destroy(other.gameObject);
                 IsSetItemGetNow(item.GetGimmickTag(), true);
 
+                string situation = "";
                 switch (item.GetGimmickTag())
                 {
                     case Gimmick.Pot:
@@ -211,18 +224,21 @@ public class GimmickManager : MonoBehaviour
                     case Gimmick.IronBall:
                         break;
                     case Gimmick.EmptyChest:
+                        situation = "ItemEmptyChest";
                         break;
                     case Gimmick.Nyaki:
                         break;
                     case Gimmick.Pitfall:
+                        situation = "ItemPitFall";
                         break;
                     case Gimmick.HyperVoice:
+                        situation = "ItemHyperVoice";
                         break;
                     case Gimmick.None:
                         break;
                 }
-
-                Debug.Log($"{data.gimmickTag}HaveAdd");
+                cutSceneManager.GetComponent<CS_CutSceneVideo>().SetVideoInfo(situation);
+                cutSceneManager.GetComponent<CS_CutSceneVideo>().PlayVideo();
             }
         }
     }

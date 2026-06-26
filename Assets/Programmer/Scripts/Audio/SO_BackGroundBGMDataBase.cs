@@ -8,6 +8,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 //シーンの名前
@@ -50,4 +51,13 @@ public class BackGroundBGMData
 public class SO_BackGroundBGMDataBase : ScriptableObject
 {
     public BackGroundBGMData[] bgmDatas;
+    public Dictionary<string, BackGroundBGMData> bgmData;
+    private void OnEnable()
+    {
+        bgmData = new Dictionary<string, BackGroundBGMData>();
+        foreach (var item in bgmDatas)
+        {
+            bgmData[item.sceneName.ToString()] = item;
+        }
+    }
 }
