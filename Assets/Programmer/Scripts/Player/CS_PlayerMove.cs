@@ -311,4 +311,13 @@ public class CS_PlayerMove : MonoBehaviour
         if (context.canceled) isSneaking = false;
         else isSneaking = true;
     }
+
+    /// <summary>
+    /// 無敵状態のフラグを設定する
+    /// </summary>
+    /// <param name="isFlag">無敵状態にする場合はtrue、解除する場合はfalse</param>
+    public void SetInvincibleFlag(bool isFlag)
+    {
+        isInvincible = isFlag;
+    }
 }
