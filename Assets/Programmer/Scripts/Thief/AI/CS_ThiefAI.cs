@@ -544,6 +544,7 @@ public class CS_ThiefAI : MonoBehaviour
         }
 
         ChangeStatus(ThiefState.Stunned); // 状態を気絶に変更
+        memorySystem.ClearTarget();
         elapsedTimeAfterStun = 0.0f; // 気絶時間の経過時間をリセット
 
         remainingInvincibleTime = invincibleTime; // 無敵時間を付与

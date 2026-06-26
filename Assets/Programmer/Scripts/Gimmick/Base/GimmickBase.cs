@@ -10,6 +10,7 @@ public enum Gimmick
     Nyaki,
     Pitfall,
     HyperVoice,
+    CloneCat,
 }
 
 public enum GimmickState
