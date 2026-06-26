@@ -13,6 +13,9 @@ using UnityEngine;
 /// <summary>
 /// 泥棒が狙う対象を示すクラス
 /// </summary>
+/// <memo>
+///  移動ポイント用 + 標的設定用のベースクラスとして使用する
+/// </memo>
 public class CS_ThiefTarget : MonoBehaviour
 {
 }
