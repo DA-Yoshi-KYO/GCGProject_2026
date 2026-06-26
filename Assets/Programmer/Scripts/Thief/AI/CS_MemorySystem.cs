@@ -383,20 +383,26 @@ public class CS_MemorySystem
             }
 
             // 現在の耐久値が1以下の場合
-            if (thiefAI.read_Durability <= 1)
+            if (thiefAI.read_Durability <=1)
             {
                 // 探索対象に設定
-                SetTarget(playerTarget);
+                if (CS_ThiefDebugFlags.ChasePlayer)
+                {
+                    SetTarget(playerTarget);
+                }
             }
             else
             {
                 // プレイヤーを無視するフラグが立っていない場合は、探索対象に設定する
                 if (!ignorePlayer)
                 {
-                    //　無敵状態ではないときは、プレイヤーを無視する
-                    if (thiefAI.read_RemainingInvincibleTime <= 0) return;
+                    //無敵状態ではないときは、プレイヤーを無視する
+                    if (thiefAI.read_RemainingInvincibleTime <=0) return;
 
-                    SetTarget(playerTarget);
+                    if (CS_ThiefDebugFlags.ChasePlayer)
+                    {
+                        SetTarget(playerTarget);
+                    }
                 }
             }
 
@@ -549,16 +555,26 @@ public class CS_MemorySystem
                 // 探索対象との距離が、探索済みとする距離の閾値以下になっている場合は、探索対象をリセットする
                 if (distanceToTarget <= thiefAI.read_ExploredDistanceThreshold)
                 {
-                    thiefAI.CatchCat();
+                    // フラグでプレイヤーを捕まえる挙動を制御
+                    if (CS_ThiefDebugFlags.CatchPlayer)
+                    {
+                        thiefAI.CatchCat();
 
-                    // CS_PlayerMoveに通知
-                    ((CS_PlayerTarget)currentTarget).transform.GetComponent<CS_PlayerMove>().CaughtByThief(thiefAI.read_RemainingHoldCatTime);
+                        // CS_PlayerMoveに通知
+                        ((CS_PlayerTarget)currentTarget).transform.GetComponent<CS_PlayerMove>().CaughtByThief(thiefAI.read_RemainingHoldCatTime);
 
-                    // 泥棒のアニメーション状態をHuntingに変更する
-                    if (thiefAI.read_Animator != null) thiefAI.read_Animator.SetBool("IsHunting", true);
+                        // 泥棒のアニメーション状態をHuntingに変更する
+                        if (thiefAI.read_Animator != null) thiefAI.read_Animator.SetBool("IsHunting", true);
 
 
-                    return;
+                        return;
+                    }
+                    else
+                    {
+                        // フラグがオフの場合は捕まえず、探索対象を解除しておく
+                        ClearTarget();
+                        return;
+                    }
                 }
             }
             // 部屋の移動ポイントの場合
@@ -1053,7 +1069,7 @@ public class CS_MemorySystem
         if (currentRoomObject == null)
         {
             FindNowRoomNode();
-            Debug.LogError("【泥棒】現在いる部屋のオブジェクトが見つかりませんでした。ThiefAIのHasUnvisitedNextRoomsメソッドで、次の部屋候補の中に行ったことのない部屋があるかどうかを判定する処理が正常に動作しない可能性があります。");
+            Debug.LogError("【泥棒】現在いる部屋のオブジェクトが見つかりませんでした。ThiefAIのHasUnvisitedNextRoomsメソッドで、次の部屋候補の中に行ったことのない部屋があるかどうかを判定する処理가 정상に 동작하지 않는 가능성이 있습니다。");
             return false;
         }
         CS_RoomCreatePoint roomCreatePoint = currentRoomObject.transform.GetComponent<CS_RoomCreatePoint>();
@@ -1066,7 +1082,7 @@ public class CS_MemorySystem
         List<CSE_RoomDoorDirection> connectDirs = roomCreatePoint.GetConnectDirections();
         if (connectDirs.Count == 0)
         {
-            Debug.LogWarning("【泥棒】現在いる部屋の接続方向が見つかりませんでした。ThiefAIのHasUnvisitedNextRoomsメソッドで、次の部屋候補の中に行ったことのない部屋があるかどうかを判定する処理が正常に動作しない可能性があります。");
+            Debug.LogWarning("【泥棒】現在いる部屋の接続方向が見つかりませんでした。ThiefAIのHasUnvisitedNextRoomsメソッドで、次의 방 후보 중 방문하지 않은 방이 있는지를 판별하는 처리가 정상적으로 동작하지 않을 수 있습니다.");
             return false;
         }
         // 接続している部屋の中に行ったことのない部屋があるかどうかを判定
