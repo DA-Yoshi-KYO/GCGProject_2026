@@ -205,11 +205,6 @@ public class CS_PlayerAction : MonoBehaviour
             }
             isShowGimmickPreview = false;
         }
-
-#if UNITY_EDITOR
-        //デバッグ：ギミックの設置位置描画
-        //DebugDrawGimmickSet();
-#endif
     }
 
     private void OnSelect(InputAction.CallbackContext context)
@@ -428,25 +423,21 @@ public class CS_PlayerAction : MonoBehaviour
         {
             // プレイヤーがギミックの「前（+Z）側の三角形」：Up
             gimmick.SetGimmickDirection(GimmickDirection.Up);
-            Debug.Log("Up");
         }
         else if (-dz > adx + eps)
         {
             // プレイヤーがギミックの「後（-Z）側の三角形」：Down
             gimmick.SetGimmickDirection(GimmickDirection.Down);
-            Debug.Log("Down");
         }
         else if (dx > adz + eps)
         {
             // プレイヤーがギミックの「右（+X）側の三角形」：Right
             gimmick.SetGimmickDirection(GimmickDirection.Right);
-            Debug.Log("Right");
         }
         else if (-dx > adz + eps)
         {
             // プレイヤーがギミックの「左（-X）側の三角形」：Left
             gimmick.SetGimmickDirection(GimmickDirection.Left);
-            Debug.Log("Left");
         }
         else
         {

@@ -194,31 +194,35 @@ public class GimmickManager : MonoBehaviour
         if (!other.CompareTag("Item"))
             return;
 
-        string itemName = other.gameObject.name.Replace("(Clone)", "");
+        ItemBase item = other.GetComponent<ItemBase>();
+
         foreach (var data in gimmickInfoList)
         {
-            if (data.itemPrefab.name == itemName)
+            if (item.GetGimmickTag() == data.gimmickTag)
             {
-                // TODO: 映像の再生処理を追加
-                // 大瀧くんはこの辺ちゃんとリファクタしてください
-                switch (itemName)
+                AddCurrentGimmick(item.GetGimmickTag());
+                Destroy(other.gameObject);
+                IsSetItemGetNow(item.GetGimmickTag(), true);
+
+                switch (item.GetGimmickTag())
                 {
-                    case "ItemEmptyChest":
+                    case Gimmick.Pot:
                         break;
-                    case "ItemPitFall":
+                    case Gimmick.IronBall:
                         break;
-                    case "ItemHyperVoice":
+                    case Gimmick.EmptyChest:
                         break;
-                    default:
+                    case Gimmick.Nyaki:
+                        break;
+                    case Gimmick.Pitfall:
+                        break;
+                    case Gimmick.HyperVoice:
+                        break;
+                    case Gimmick.None:
                         break;
                 }
 
-                AddCurrentGimmick(data.gimmickTag);
-                Destroy(other.gameObject);
-                IsSetItemGetNow(data.gimmickTag, true);
-
                 Debug.Log($"{data.gimmickTag}HaveAdd");
-                break;
             }
         }
     }
