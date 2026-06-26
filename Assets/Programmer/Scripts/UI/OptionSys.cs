@@ -1,326 +1,319 @@
-// using UnityEditor.Experimental.GraphView; // ← 削除（Editor専用。ビルドエラーの原因）
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using static HoudiniEngineUnity.HEU_InputNode;
 
 public class OptionSys : MonoBehaviour
 {
-    [SerializeField] private string ManagerName = "GameOptionManager";
+    [SerializeField] string optionManagerStr = "";
+    [SerializeField] GameObject[] optionUI;
+    [SerializeField] Sprite[] detailSprite;
+    [SerializeField] GameObject detail;
+    [SerializeField] GameObject bgmCursor;
+    [SerializeField] GameObject seCursor;
+    [SerializeField] Image bgmSoundBar;
+    [SerializeField] Image seSoundBar;
 
-    [SerializeField] private GameObject UI;
-    [SerializeField] private GameObject VolumeUI;
-    [SerializeField] private GameObject KeyUI;
-    [SerializeField] private GameObject SelectedUI;
-    [SerializeField] private GameObject[] OptionButtons;
-    [SerializeField] private GameObject[] VolumeObject;
-    [SerializeField] private GameObject[] KeyObject;
-    [SerializeField] private Slider BGM;
-    [SerializeField] private Slider SE;
+    struct SelectGameObject
+    {
+        public GameObject Object_True;
+        public GameObject Object_False;
+    }
 
-    [SerializeField] private float animationSpeed = 5.0f;
-    // 修正5: 音量変化速度を定数化（フレームレート依存を防ぐ）
-    [SerializeField] private float volumeChangeSpeed = 0.5f;
+    List<SelectGameObject> selectGameObjects = new List<SelectGameObject>();
+    [SerializeField] private int selected = 0;
+    CustomInputAction inputAction;
+    GameObject optionMangerObj;
+    Option option;
 
-    private GameObject _optionManager;
-    private Option _option;
-
-    private bool _isOptionUIActive = true;
-    private int _selectedIndex = 0;
-    private int _volumeSelectedIndex = 0;
-    private int _keySelectedIndex = 0;
-    private CustomInputAction inputActions;
-
-    public bool IsVolumeUIActive { get; private set; } = false;
-    public bool IsKeyUIActive { get; private set; } = false;
+    float seSoundValue = 0;
+    float bgmSoundValue = 0;
 
     private void Awake()
     {
-        inputActions = new CustomInputAction();
-        inputActions.Enable();
-        inputActions.Option.Up.started += Up;
-        inputActions.Option.Down.started += Down;
-        inputActions.Option.Decision.started += Enter;
-
-        _optionManager = GameObject.Find(ManagerName);
-
-        if (_optionManager == null)
+        for (int i = 0 ; i < optionUI.Length ; i++)
         {
-            Debug.LogError("GameOptionManagerが見つかりません");
+            SelectGameObject TempSelectObject = new SelectGameObject();
+            TempSelectObject.Object_True = optionUI[i].transform.Find("Select_true").gameObject;
+            TempSelectObject.Object_False = optionUI[i].transform.Find("Select_false").gameObject;
+            selectGameObjects.Add(TempSelectObject);
+        }
+        inputAction = new CustomInputAction();
+        inputAction.Enable();
+        inputAction.Option.Up.started += Up;
+        inputAction.Option.Down.started += Down;
+        inputAction.Option.Decision.started += Enter;
+
+        optionMangerObj = GameObject.Find(optionManagerStr);
+        if (optionMangerObj == null)
+        {
+            Debug.Log("OptionManagerが見つかりません");
+            return;
+        }
+        option = optionMangerObj.GetComponent<Option>();
+        if (option == null)
+        {
+            Debug.Log("Optionコンポーネントが見つかりません");
             return;
         }
 
-        _option = _optionManager.GetComponent<Option>();
+        seSoundValue = option.GetSEVolume();
+        bgmSoundValue = option.GetBGMVolume();
 
-        if (_option == null)
-        {
-            Debug.LogError("Optionコンポーネントが見つかりません");
-            return;
-        }
+        Vector3 bgmSoundBarPos = bgmSoundBar.transform.position;
+        Vector2 bgmSoundBarSize = bgmSoundBar.rectTransform.sizeDelta;
 
-        BGM.value = _option.GetBGMVolume();
-        SE.value = _option.GetSEVolume();
+        float barLeftX = bgmSoundBarPos.x - (bgmSoundBarSize.x / 2.0f);
+        float tempX = barLeftX + (bgmSoundBarSize.x * bgmSoundBar.fillAmount);
 
-        VolumeUI.SetActive(false);
-        KeyUI.SetActive(false);
+        Vector3 cursor = bgmCursor.transform.position;
+        cursor.x = tempX;
+        bgmCursor.transform.position = cursor;
 
-        IsVolumeUIActive = false;
-        IsKeyUIActive = false;
 
-        UI.transform.localScale = Vector3.zero;
-    }
 
-    // 修正4: OnDestroyでイベント解除・InputActions破棄
-    private void OnDestroy()
-    {
-        if (inputActions != null)
-        {
-            inputActions.Option.Up.performed -= Up;
-            inputActions.Option.Down.performed -= Down;
-            inputActions.Option.Decision.performed -= Enter;
-            inputActions.Disable();
-            inputActions.Dispose();
-        }
+        Vector3 seSoundBarPos = seSoundBar.transform.position;
+        Vector2 seSoundBarSize = seSoundBar.rectTransform.sizeDelta;
+
+        float barLeftX2 = seSoundBarPos.x - (seSoundBarSize.x / 2.0f);
+        float tempX2 = barLeftX2 + (seSoundBarSize.x * seSoundBar.fillAmount);
+
+        Vector3 cursor2 = seCursor.transform.position;
+        cursor2.x = tempX2;
+        seCursor.transform.position = cursor2;
+
+
     }
 
     private void Update()
     {
-        float delta = Time.unscaledDeltaTime;
-
-        if (_isOptionUIActive)
+        if (inputAction.Option.Left.IsPressed())
         {
-            UI.transform.localScale = Vector3.Lerp(
-                UI.transform.localScale,
-                Vector3.one,
-                animationSpeed * delta
-            );
+            Left();
+        }
+        if (inputAction.Option.Right.IsPressed())
+        {
+            Right();
+        }
 
-            if (Vector3.Distance(UI.transform.localScale, Vector3.one) < 0.01f)
+            if (selected < 0)
+        {
+            selected = selectGameObjects.Count - 1;
+        }
+        else if(selected >= selectGameObjects.Count)
+        {
+            selected = 0;
+        }
+
+        bgmSoundBar.fillAmount = bgmSoundValue / 100f;
+        seSoundBar.fillAmount = seSoundValue / 100f;
+
+        Image image = detail.GetComponent<Image>();
+        image.sprite = detailSprite[selected];
+
+        // Cursor計算
+        Vector3 bgmSoundBarPos = bgmSoundBar.transform.position;
+        Vector2 bgmSoundBarSize = bgmSoundBar.rectTransform.sizeDelta;
+
+        float barLeftX = bgmSoundBarPos.x - (bgmSoundBarSize.x / 2.0f);
+        float tempX = barLeftX + (bgmSoundBarSize.x * bgmSoundBar.fillAmount);
+
+        Vector3 cursor = bgmCursor.transform.position;
+        cursor.x = tempX;
+        bgmCursor.transform.position = cursor;
+
+        Vector3 seSoundBarPos = seSoundBar.transform.position;
+        Vector2 seSoundBarSize = seSoundBar.rectTransform.sizeDelta;
+
+        float barLeftX2 = seSoundBarPos.x - (seSoundBarSize.x / 2.0f);
+        float tempX2 = barLeftX2 + (seSoundBarSize.x * seSoundBar.fillAmount);
+
+        Vector3 cursor2 = seCursor.transform.position;
+        cursor2.x = tempX2;
+        seCursor.transform.position = cursor2;
+
+
+
+
+
+
+        for (int i = 0 ; i < selectGameObjects.Count ; i++)
+        {
+            if (i == selected)
             {
-                UI.transform.localScale = Vector3.one;
-            }
-
-            if (UI.transform.localScale.x < 0.95f)
-            {
-                return;
-            }
-
-            bool isSubUIActive = false;
-
-            if (IsVolumeUIActive)
-            {
-                VolumeUI.SetActive(true);
-                isSubUIActive = true;
+                selectGameObjects[i].Object_True.SetActive(true);
+                selectGameObjects[i].Object_False.SetActive(false);
             }
             else
             {
-                VolumeUI.SetActive(false);
+                selectGameObjects[i].Object_True.SetActive(false);
+                selectGameObjects[i].Object_False.SetActive(true);
             }
-
-            if (IsKeyUIActive)
-            {
-                KeyUI.SetActive(true);
-                isSubUIActive = true;
-            }
-            else
-            {
-                KeyUI.SetActive(false);
-            }
-
-            UI.SetActive(!isSubUIActive);
-        }
-        else
-        {
-            UI.transform.localScale = Vector3.Lerp(
-                UI.transform.localScale,
-                Vector3.zero,
-                animationSpeed * delta
-            );
-
-            if (UI.transform.localScale.magnitude < 0.01f)
-            {
-                UI.transform.localScale = Vector3.zero;
-
-                _option.SetIsOptionUIActive(false);
-
-                Time.timeScale = 1f;
-
-                Destroy(this.gameObject);
-            }
-        }
-
-        if (IsVolumeUIActive)
-        {
-            SelectedUI.transform.position = VolumeObject[_volumeSelectedIndex].transform.position;
-
-            if (_volumeSelectedIndex == 0)
-            {
-                if (inputActions.Option.Left.IsPressed())
-                {
-                    // 修正1: delta を掛けてフレームレート非依存に。Mathf.Clampで範囲保証
-                    BGM.value = Mathf.Clamp(BGM.value - volumeChangeSpeed * delta, BGM.minValue, BGM.maxValue);
-                    SetBGM(BGM.value);
-                }
-                if (inputActions.Option.Right.IsPressed())
-                {
-                    BGM.value = Mathf.Clamp(BGM.value + volumeChangeSpeed * delta, BGM.minValue, BGM.maxValue);
-                    SetBGM(BGM.value);
-                }
-            }
-            if (_volumeSelectedIndex == 1)
-            {
-                if (inputActions.Option.Left.IsPressed())
-                {
-                    SE.value = Mathf.Clamp(SE.value - volumeChangeSpeed * delta, SE.minValue, SE.maxValue);
-                    SetSE(SE.value);
-                }
-                if (inputActions.Option.Right.IsPressed())
-                {
-                    SE.value = Mathf.Clamp(SE.value + volumeChangeSpeed * delta, SE.minValue, SE.maxValue);
-                    SetSE(SE.value);
-                }
-            }
-            return;
-        }
-
-        if (IsKeyUIActive)
-        {
-            SelectedUI.transform.position = KeyObject[_keySelectedIndex].transform.position;
-            return;
-        }
-
-        if (OptionButtons.Length > _selectedIndex)
-        {
-            SelectedUI.transform.position = OptionButtons[_selectedIndex].transform.position;
-        }
-    }
-
-    public void CloseOptionUI()
-    {
-        _isOptionUIActive = false;
-    }
-
-    public void Volume()
-    {
-        IsVolumeUIActive = true;
-        _volumeSelectedIndex = 0;
-    }
-
-    public void CloseVolumeUI()
-    {
-        IsVolumeUIActive = false;
-        VolumeUI.SetActive(false);
-    }
-
-    public void Key()
-    {
-        IsKeyUIActive = true;
-        _keySelectedIndex = 0;
-    }
-
-    public void CloseKeyUI()
-    {
-        IsKeyUIActive = false;
-        KeyUI.SetActive(false);
-    }
-
-    public void Continue()
-    {
-        _option.CloseOptionUI();
-    }
-
-    public void Back()
-    {
-        if (IsVolumeUIActive)
-        {
-            CloseVolumeUI();
-            return;
-        }
-
-        if (IsKeyUIActive)
-        {
-            CloseKeyUI();
-            return;
-        }
-
-        CloseOptionUI();
-        // 修正3: FindObjectOfType → FindFirstObjectByType（Unity 2023以降の推奨API）
-        CS_SceneTransition sceneTransition = GameObject.FindFirstObjectByType<CS_SceneTransition>();
-        if (sceneTransition != null)
-        {
-            sceneTransition.StartSceneTransition("TitleScene");
-        }
-        else
-        {
-            Debug.LogError("CS_SceneTransitionが見つかりません");
         }
     }
 
     private void Up(InputAction.CallbackContext context)
     {
-        if (IsVolumeUIActive)
-        {
-            _volumeSelectedIndex--;
-            if (_volumeSelectedIndex < 0) _volumeSelectedIndex = VolumeObject.Length - 1;
-            return;
-        }
-        if (IsKeyUIActive)
-        {
-            _keySelectedIndex--;
-            if (_keySelectedIndex < 0) _keySelectedIndex = KeyObject.Length - 1;
-            return;
-        }
-        _selectedIndex--;
-        if (_selectedIndex < 0) _selectedIndex = OptionButtons.Length - 1;
+        selected--;
     }
 
     private void Down(InputAction.CallbackContext context)
     {
-        if (IsVolumeUIActive)
-        {
-            _volumeSelectedIndex++;
-            if (_volumeSelectedIndex >= VolumeObject.Length) _volumeSelectedIndex = 0;
-            return;
-        }
-        if (IsKeyUIActive)
-        {
-            _keySelectedIndex++;
-            if (_keySelectedIndex >= KeyObject.Length) _keySelectedIndex = 0;
-            return;
-        }
-        _selectedIndex++;
-        if (_selectedIndex >= OptionButtons.Length) _selectedIndex = 0;
+        selected++;
     }
-
     private void Enter(InputAction.CallbackContext context)
     {
-        if (IsVolumeUIActive)
+        string DebugStr = "Enterが押されました。選択中の項目は" + selected + "です。";
+        Debug.Log(DebugStr);
+        switch (selected)
         {
-            if (_volumeSelectedIndex == 2) CloseVolumeUI();
-            return;
-        }
-        if (IsKeyUIActive)
-        {
-            if (_keySelectedIndex == 1) CloseKeyUI();
-            return;
-        }
-        switch (_selectedIndex)
-        {
-            case 0: Continue(); break;
-            case 1: Volume(); break;
-            case 2: Key(); break;
-            case 3: Back(); break;
+            case 0:
+                break;
+            case 1:
+                break;
+            case 2:
+            {
+                if (option == null)
+                {
+                    if (optionMangerObj == null)
+                    {
+                        optionMangerObj = GameObject.Find(optionManagerStr);
+                        if (optionMangerObj == null)
+                        {
+                            Debug.Log("OptionManagerが見つかりません");
+                            return;
+                        }
+                    }
+                    option = optionMangerObj.GetComponent<Option>();
+                    if (option == null)
+                    {
+                        Debug.Log("Optionコンポーネントが見つかりません");
+                        return;
+                    }
+                }
+                option.CloseOptionUI();
+            }
+                break;
+            case 3:
+                {
+                    if (option == null)
+                    {
+                        if (optionMangerObj == null)
+                        {
+                            optionMangerObj = GameObject.Find(optionManagerStr);
+                            if (optionMangerObj == null)
+                            {
+                                Debug.Log("OptionManagerが見つかりません");
+                                return;
+                            }
+                        }
+                        option = optionMangerObj.GetComponent<Option>();
+                        if (option == null)
+                        {
+                            Debug.Log("Optionコンポーネントが見つかりません");
+                            return;
+                        }
+                    }
+                    option.CloseOptionUI();
+                    CS_SceneTransition sceneTransition = FindFirstObjectByType<CS_SceneTransition>();
+                    if (sceneTransition != null)
+                    {
+                        sceneTransition.StartSceneTransition("TitleScene");
+                    }
+                    else
+                    {
+                        Debug.LogError("CS_SceneTransitionが見つかりません");
+                    }
+                    break;
+                }
         }
     }
 
-    public void SetBGM(float volume)
+    private void Left()
     {
-        _option.SetBGMVolume(volume);
-        Debug.Log($"BGM Volume set to {volume}");
+        if (option == null)
+        {
+            if (optionMangerObj == null)
+            {
+                optionMangerObj = GameObject.Find(optionManagerStr);
+                if (optionMangerObj == null)
+                {
+                    Debug.Log("OptionManagerが見つかりません");
+                    return;
+                }
+            }
+            option = optionMangerObj.GetComponent<Option>();
+            if (option == null)
+            {
+                Debug.Log("Optionコンポーネントが見つかりません");
+                return;
+            }
+        }
+
+
+        if (selected == 0)
+        {
+            bgmSoundValue = option.GetBGMVolume();
+            bgmSoundValue -= 0.1f;
+            if (bgmSoundValue < 0) bgmSoundValue = 0;
+            option.SetBGMVolume(bgmSoundValue);
+        }
+        else if (selected == 1)
+        {
+            seSoundValue = option.GetSEVolume();
+            seSoundValue -= 0.1f;
+            if (seSoundValue < 0) seSoundValue = 0;
+            option.SetSEVolume(seSoundValue);
+        }
     }
 
-    public void SetSE(float volume)
+    private void Right()
     {
-        _option.SetSEVolume(volume);
-        Debug.Log($"SE Volume set to {volume}");
+        if (option == null)
+        {
+            if (optionMangerObj == null)
+            {
+                optionMangerObj = GameObject.Find(optionManagerStr);
+                if (optionMangerObj == null)
+                {
+                    Debug.Log("OptionManagerが見つかりません");
+                    return;
+                }
+            }
+            option = optionMangerObj.GetComponent<Option>();
+            if (option == null)
+            {
+                Debug.Log("Optionコンポーネントが見つかりません");
+                return;
+            }
+        }
+
+        if (selected == 0)
+        {
+            bgmSoundValue = option.GetBGMVolume();
+            bgmSoundValue += 0.1f;
+            if (bgmSoundValue > 100) bgmSoundValue = 100;
+            option.SetBGMVolume(bgmSoundValue);
+        }
+        else if (selected == 1)
+        {
+            seSoundValue = option.GetSEVolume();
+            seSoundValue += 0.1f;
+            if (seSoundValue > 100) seSoundValue = 100;
+            option.SetSEVolume(seSoundValue);
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (inputAction != null)
+        {
+            inputAction.Option.Up.started -= Up;
+            inputAction.Option.Down.started -= Down;
+            inputAction.Option.Decision.started -= Enter;
+            inputAction.Disable();
+            inputAction.Dispose();
+        }
     }
 }

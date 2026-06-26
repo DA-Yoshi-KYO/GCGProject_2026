@@ -15,6 +15,7 @@ public class Option : MonoBehaviour
     [SerializeField] private float _bgmVolume = 100.0f; // BGMの音量
     [SerializeField] private float _seVolume = 100.0f;  // SEの音量
     [SerializeField] private GameObject OptionUI;
+    private GameObject GameUI;
 
     private bool _isOptionUIActive = false; // OptionUIがアクティブかどうか
 
@@ -67,6 +68,10 @@ public class Option : MonoBehaviour
 
         // Input有効化
         _input.Enable();
+
+        GameObject canvase = GameObject.Find("Canvases");
+        GameUI = canvase.transform.Find("GameUICavas").gameObject;
+
     }
 
     /// <summary>
@@ -94,18 +99,6 @@ public class Option : MonoBehaviour
                 return;
             }
 
-            if (optionSys.IsVolumeUIActive)
-            {
-                optionSys.CloseVolumeUI();
-                return;
-            }
-
-            if (optionSys.IsKeyUIActive)
-            {
-                optionSys.CloseKeyUI();
-                return;
-            }
-
             CloseOptionUI();
         }
     }
@@ -122,6 +115,18 @@ public class Option : MonoBehaviour
             // Canvasを探してその子オブジェクトとしてOptionUIを生成
             GameObject canvas = GameObject.Find("OptionCanvas");
             _prevOption = Instantiate(OptionUI, Vector3.zero, Quaternion.identity, canvas.transform);
+            RectTransform rectTransform = _prevOption.GetComponent<RectTransform>();
+            rectTransform.anchoredPosition = Vector2.zero;
+        }
+
+        if(GameUI == null)
+        {
+            GameObject canvase = GameObject.Find("Canvases");
+            GameUI = canvase.transform.Find("GameUICavas").gameObject;
+        }
+        if (GameUI != null)
+        {
+            GameUI.SetActive(false);
         }
 
         // ゲーム停止
@@ -133,19 +138,22 @@ public class Option : MonoBehaviour
     /// </summary>
     public void CloseOptionUI()
     {
-        OptionSys optionSys = _prevOption.GetComponent<OptionSys>();
-
-        if (optionSys == null)
+        if (GameUI == null)
         {
-            Debug.LogError("OptionUIにOptionSysコンポーネントがアタッチされていません。");
-            return;
+            GameObject canvase = GameObject.Find("Canvases");
+            GameUI = canvase.transform.Find("GameUICavas").gameObject;
+        }
+        if (GameUI != null)
+        {
+            GameUI.SetActive(true);
         }
 
-        optionSys.CloseOptionUI();
+        Destroy(_prevOption);
 
         _prevOption = null;
 
         _isOptionUIActive = false;
+        Time.timeScale = 1f;
     }
 
     
