@@ -122,7 +122,7 @@ public class PotGimmick : GimmickBase
         }
         if (gimmickSound != null)
         {
-            gimmickSound.PlayOneShotSE("PotFall", gameObject.transform.position, "PotSound");
+            gimmickSound.PlayOneShotSE("Gimmick_PotFall", gameObject.transform.position, "PotSound");
             Destroy(gimmickSound);
         }
         isFirstUpdate = true;

@@ -412,7 +412,7 @@ public class CS_ThiefAI : MonoBehaviour
                 if (fadeAmount <= 0.0f)
                 {
                     // 気絶したときのSEを再生する処理を追加する
-                    if (thiefSound != null) thiefSound.PlayOneShotSE("ThiefDeath", gameObject.transform.position, "ThiefDeath");
+                    if (thiefSound != null) thiefSound.PlayOneShotSE("Thief_Dead", gameObject.transform.position, "Thief_Dead");
 
                     // 宝物を現在の部屋のオブジェクトに親子付けする
                     if (holdTreasure != null)
@@ -519,7 +519,7 @@ public class CS_ThiefAI : MonoBehaviour
             thiefReaction.ChangeReaction(CS_ThiefReaction.ThiefReactionType.NearHitTrap);
         }
         // ダメージを受けたときのSEを再生する処理を追加する
-        if (thiefSound != null) thiefSound.PlayOneShotSE("ThiefDamage", gameObject.transform.position, "ThiefDamage");
+        if (thiefSound != null) thiefSound.PlayOneShotSE("Thief_Hit1", gameObject.transform.position, "Thief_Hit1");
 
         // プレイヤーの追跡情報をリセットする
         memorySystem.ResetIgnorePlayer();
@@ -595,7 +595,7 @@ public class CS_ThiefAI : MonoBehaviour
         remainingHoldCatTime = initholdCatTime;
 
         // 猫を捕まえているSEを再生する
-        if (thiefSound != null) thiefSound.PlayOneShotSE("ThiefCatch", gameObject.transform.position, "ThiefCatch");
+        if (thiefSound != null) thiefSound.PlayOneShotSE("Cat_HitThief", gameObject.transform.position, "Cat_HitThief");
     }
 
     /// <summary>

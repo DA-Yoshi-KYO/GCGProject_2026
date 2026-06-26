@@ -14,7 +14,6 @@
 
 using System.Collections.Generic;
 using UnityEngine;
-using static UnityEngine.InputSystem.HID.HID;
 
 public class GimmickManager : MonoBehaviour
 {
@@ -207,39 +206,39 @@ public class GimmickManager : MonoBehaviour
         if (!other.CompareTag("Item"))
             return;
 
-        string itemName = other.gameObject.name.Replace("(Clone)", "");
+        ItemBase item = other.GetComponent<ItemBase>();
+
         foreach (var data in gimmickInfoList)
         {
-            if (data.itemPrefab.name == itemName)
+            if (item.GetGimmickTag() == data.gimmickTag)
             {
-                string situation = "";
+                AddCurrentGimmick(item.GetGimmickTag());
+                Destroy(other.gameObject);
+                IsSetItemGetNow(item.GetGimmickTag(), true);
 
-                // TODO: 映像の再生処理を追加
-                // 大瀧くんはこの辺ちゃんとリファクタしてください
-                switch (itemName)
+                string situation = "";
+                switch (item.GetGimmickTag())
                 {
-                    case "ItemEmptyChest":
+                    case Gimmick.Pot:
+                        break;
+                    case Gimmick.IronBall:
+                        break;
+                    case Gimmick.EmptyChest:
                         situation = "ItemEmptyChest";
                         break;
-                    case "ItemPitFall":
+                    case Gimmick.Nyaki:
+                        break;
+                    case Gimmick.Pitfall:
                         situation = "ItemPitFall";
                         break;
-                    case "ItemHyperVoice":
+                    case Gimmick.HyperVoice:
                         situation = "ItemHyperVoice";
                         break;
-                    default:
+                    case Gimmick.None:
                         break;
                 }
-
                 cutSceneManager.GetComponent<CS_CutSceneVideo>().SetVideoInfo(situation);
                 cutSceneManager.GetComponent<CS_CutSceneVideo>().PlayVideo();
-
-                AddCurrentGimmick(data.gimmickTag);
-                Destroy(other.gameObject);
-                IsSetItemGetNow(data.gimmickTag, true);
-
-                Debug.Log($"{data.gimmickTag}HaveAdd");
-                break;
             }
         }
     }

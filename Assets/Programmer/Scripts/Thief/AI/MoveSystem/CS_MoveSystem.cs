@@ -70,7 +70,7 @@ public class CS_MoveSystem
         this.smartNavAgent = smartNavAgent;
 
         // ナビメッシュエージェントの初期設定
-        navMeshAgent.baseOffset = 1.0f;
+        navMeshAgent.baseOffset = 0.65f;
 
         // 移動速度の設定
         this.walkSpeed = playerSpeed * typedata.walkSpeedMultiplier;
