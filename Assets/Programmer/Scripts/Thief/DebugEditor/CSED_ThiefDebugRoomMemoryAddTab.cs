@@ -241,7 +241,6 @@ public sealed class CSED_ThiefDebugRoomMemoryAddTab
             selectedRoomNodeIndex = EditorGUILayout.Popup("選択RoomNode", selectedRoomNodeIndex, roomOptions);
         }
 
-        // exploration level slider0-100
         explorationLevel = EditorGUILayout.IntSlider("探索度", explorationLevel,0,100);
 
         // 個別追加ボタン（選択部屋/現在の部屋）
@@ -299,7 +298,6 @@ public sealed class CSED_ThiefDebugRoomMemoryAddTab
             }
         }
 
-        // Bulk add selected-room to all thieves
         using (new EditorGUILayout.HorizontalScope())
         {
             using (new EditorGUI.DisabledScope(roomNodeList.Count ==0 || targets.Count ==0))
@@ -329,7 +327,6 @@ public sealed class CSED_ThiefDebugRoomMemoryAddTab
             }
         }
 
-        // New bulk button: update each thief's current room exploration level
         using (new EditorGUILayout.HorizontalScope())
         {
             using (new EditorGUI.DisabledScope(targets.Count ==0))

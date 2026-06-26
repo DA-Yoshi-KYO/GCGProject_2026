@@ -2,6 +2,7 @@
 //|| 作者 : 大瀧蓮
 //||
 //|| 更新 : 2026/05/24 作成開始
+//|| 追加 : 2026/06/26 チュートリアル動画再生処理追加
 //||
 //|| ―――――――――――――――――――――――――――――――――――――――――
 //||
@@ -11,8 +12,8 @@
 //||
 //|| ―――――――――――――――――――――――――――――――――――――――――
 
-using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class GimmickManager : MonoBehaviour
 {
@@ -93,6 +94,11 @@ public class GimmickManager : MonoBehaviour
 
     GimmickInfo info;
 
+    //=========================================================
+    // チュートリアル動画再生に必要な変数
+    //=========================================================
+    private GameObject cutSceneManager;
+
     private void Awake()
     {
         gimmickInfo = new Dictionary<Gimmick, GimmickInfo>();
@@ -103,6 +109,12 @@ public class GimmickManager : MonoBehaviour
         {
             gimmickInfo[data.gimmickTag] = data.gimmickInfo;
         }
+    }
+
+    private void Start()
+    {
+
+        cutSceneManager = GameObject.Find("CutSceneManager");
     }
 
     //=========================================================
@@ -194,31 +206,39 @@ public class GimmickManager : MonoBehaviour
         if (!other.CompareTag("Item"))
             return;
 
-        string itemName = other.gameObject.name.Replace("(Clone)", "");
+        ItemBase item = other.GetComponent<ItemBase>();
+
         foreach (var data in gimmickInfoList)
         {
-            if (data.itemPrefab.name == itemName)
+            if (item.GetGimmickTag() == data.gimmickTag)
             {
-                // TODO: 映像の再生処理を追加
-                // 大瀧くんはこの辺ちゃんとリファクタしてください
-                switch (itemName)
+                AddCurrentGimmick(item.GetGimmickTag());
+                Destroy(other.gameObject);
+                IsSetItemGetNow(item.GetGimmickTag(), true);
+
+                string situation = "";
+                switch (item.GetGimmickTag())
                 {
-                    case "ItemEmptyChest":
+                    case Gimmick.Pot:
                         break;
-                    case "ItemPitFall":
+                    case Gimmick.IronBall:
                         break;
-                    case "ItemHyperVoice":
+                    case Gimmick.EmptyChest:
+                        situation = "ItemEmptyChest";
                         break;
-                    default:
+                    case Gimmick.Nyaki:
+                        break;
+                    case Gimmick.Pitfall:
+                        situation = "ItemPitFall";
+                        break;
+                    case Gimmick.HyperVoice:
+                        situation = "ItemHyperVoice";
+                        break;
+                    case Gimmick.None:
                         break;
                 }
-
-                AddCurrentGimmick(data.gimmickTag);
-                Destroy(other.gameObject);
-                IsSetItemGetNow(data.gimmickTag, true);
-
-                Debug.Log($"{data.gimmickTag}HaveAdd");
-                break;
+                cutSceneManager.GetComponent<CS_CutSceneVideo>().SetVideoInfo(situation);
+                cutSceneManager.GetComponent<CS_CutSceneVideo>().PlayVideo();
             }
         }
     }

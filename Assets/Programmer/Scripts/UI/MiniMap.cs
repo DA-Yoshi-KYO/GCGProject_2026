@@ -89,13 +89,11 @@ public class MiniMap : MonoBehaviour
         if(player == null)
         {
             player = GameObject.Find(playerTag);
-            Debug.LogError("Player found");
             return;
         }
         if(parentThief == null)
         {
             parentThief = GameObject.Find(thiefTag);
-            Debug.LogError("Thief found");
             return;
         }
         if(gimmickManager == null)
@@ -130,7 +128,6 @@ public class MiniMap : MonoBehaviour
         MiniMapInfo info = miniMapInfo[index];
         info.isPlayerIconActive = true;
         miniMapInfo[index] = info;
-        Debug.Log("Player is in room index: " + index);
     }
 
     private void UpdateThiefActive()
@@ -145,7 +142,6 @@ public class MiniMap : MonoBehaviour
         foreach (GameObject thief in thieves)
         {
             int index = CS_RoomCreatePointRaycast.GetRoomIndex(thief);
-            Debug.Log("Thief is in room index: " + index);
             MiniMapInfo info = miniMapInfo[index];
             info.isThiefIconActive = true;
             miniMapInfo[index] = info;

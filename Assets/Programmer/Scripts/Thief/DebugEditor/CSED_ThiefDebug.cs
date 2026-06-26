@@ -28,6 +28,8 @@ public sealed class CSED_ThiefDebug : EditorWindow
         RoomMemoryView,
         /// <summary>部屋記憶（追加）</summary>
         RoomMemoryAdd,
+        /// <summary>機能フラグ</summary>
+        Flags,
     }
 
     // 現在表示しているタブ
@@ -40,6 +42,7 @@ public sealed class CSED_ThiefDebug : EditorWindow
     private CSED_ThiefDebugDamageTab damageTab;
     private CSED_ThiefDebugRoomMemoryTab roomMemoryTab;
     private CSED_ThiefDebugRoomMemoryAddTab roomMemoryAddTab;
+    private CSED_ThiefDebugFlagTab flagTab;
 
     /// <summary>
     /// Unityメニューからデバッグウィンドウを開く
@@ -48,7 +51,11 @@ public sealed class CSED_ThiefDebug : EditorWindow
     public static void Open()
     {
         //既存があれば再利用、無ければ生成して表示
-        GetWindow<CSED_ThiefDebug>("ThiefDebug");
+        // GetWindow<CSED_ThiefDebug>("ThiefDebug");
+        // 既存があっても新しいウィンドウを開くように変更
+        var window = CreateInstance<CSED_ThiefDebug>();
+        window.titleContent = new GUIContent("ThiefDebug");
+        window.Show();
     }
 
     /// <summary>
@@ -60,6 +67,7 @@ public sealed class CSED_ThiefDebug : EditorWindow
         if (damageTab == null) damageTab = new CSED_ThiefDebugDamageTab();
         if (roomMemoryTab == null) roomMemoryTab = new CSED_ThiefDebugRoomMemoryTab();
         if (roomMemoryAddTab == null) roomMemoryAddTab = new CSED_ThiefDebugRoomMemoryAddTab();
+        if (flagTab == null) flagTab = new CSED_ThiefDebugFlagTab();
     }
 
     /// <summary>
@@ -87,6 +95,9 @@ public sealed class CSED_ThiefDebug : EditorWindow
                 case CSE_Tab.RoomMemoryAdd:
                     roomMemoryAddTab.Draw();
                     break;
+                case CSE_Tab.Flags:
+                    flagTab.Draw();
+                    break;
             }
         }
     }
@@ -97,7 +108,7 @@ public sealed class CSED_ThiefDebug : EditorWindow
     private void DrawToolbar()
     {
         EditorGUILayout.Space(4);
-        currentTab = (CSE_Tab)GUILayout.Toolbar((int)currentTab, new[] { "ダメージ", "記憶参照", "記憶追加" });
+        currentTab = (CSE_Tab)GUILayout.Toolbar((int)currentTab, new[] { "ダメージ", "記憶参照", "記憶追加", "フラグ" });
         EditorGUILayout.Space(8);
     }
 }

@@ -62,6 +62,9 @@ public class CS_PlayerAction : MonoBehaviour
 
     private bool isShowGimmickPreview = false;
     private GimmickBase previewInstance;
+
+    private bool isViewPreview = true;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -191,7 +194,7 @@ public class CS_PlayerAction : MonoBehaviour
 
         }
 
-        if (playerData.currentMode == CS_PlayerData.PlayerMode.Setting)
+        if (playerData.currentMode == CS_PlayerData.PlayerMode.Setting && isViewPreview)
         {
             ShowGimmickPreview();
         }
@@ -205,11 +208,6 @@ public class CS_PlayerAction : MonoBehaviour
             }
             isShowGimmickPreview = false;
         }
-
-#if UNITY_EDITOR
-        //デバッグ：ギミックの設置位置描画
-        //DebugDrawGimmickSet();
-#endif
     }
 
     private void OnSelect(InputAction.CallbackContext context)
@@ -259,7 +257,7 @@ public class CS_PlayerAction : MonoBehaviour
                         break;
                     case CS_PlayerData.PlayerMode.Setting:
                         SettingAction();
-                        playSE.PlayOneShotSE("CatInteract", gameObject.transform.position, "InteractSE");
+                        playSE.PlayOneShotSE("Cat_Interact1", gameObject.transform.position, "InteractSE");
                         playerData.currentMode = CS_PlayerData.PlayerMode.Normal;
                         break;
                     default:
@@ -276,7 +274,7 @@ public class CS_PlayerAction : MonoBehaviour
 
                 // 長押しはギミックの起動を行う
                 interactField.GetComponent<Renderer>().enabled = false;
-                playSE.PlayOneShotSE("CatInteract", gameObject.transform.position, "InteractSE");
+                playSE.PlayOneShotSE("Cat_Interact1", gameObject.transform.position, "InteractSE");
 
                 foreach (Collider hit in hitList)
                 {
@@ -428,25 +426,21 @@ public class CS_PlayerAction : MonoBehaviour
         {
             // プレイヤーがギミックの「前（+Z）側の三角形」：Up
             gimmick.SetGimmickDirection(GimmickDirection.Up);
-            Debug.Log("Up");
         }
         else if (-dz > adx + eps)
         {
             // プレイヤーがギミックの「後（-Z）側の三角形」：Down
             gimmick.SetGimmickDirection(GimmickDirection.Down);
-            Debug.Log("Down");
         }
         else if (dx > adz + eps)
         {
             // プレイヤーがギミックの「右（+X）側の三角形」：Right
             gimmick.SetGimmickDirection(GimmickDirection.Right);
-            Debug.Log("Right");
         }
         else if (-dx > adz + eps)
         {
             // プレイヤーがギミックの「左（-X）側の三角形」：Left
             gimmick.SetGimmickDirection(GimmickDirection.Left);
-            Debug.Log("Left");
         }
         else
         {
@@ -680,6 +674,10 @@ public class CS_PlayerAction : MonoBehaviour
                 SettingGimmickDirection(previewInstance);
             }
         }
+    }
+    public void SetViewPreview(bool isView)
+    {
+        isViewPreview = isView;
     }
 
     //ソウルの数を加算する関数
