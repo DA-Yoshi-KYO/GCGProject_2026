@@ -62,6 +62,9 @@ public class CS_PlayerAction : MonoBehaviour
 
     private bool isShowGimmickPreview = false;
     private GimmickBase previewInstance;
+
+    private bool isViewPreview = true;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -191,7 +194,7 @@ public class CS_PlayerAction : MonoBehaviour
 
         }
 
-        if (playerData.currentMode == CS_PlayerData.PlayerMode.Setting)
+        if (playerData.currentMode == CS_PlayerData.PlayerMode.Setting && isViewPreview)
         {
             ShowGimmickPreview();
         }
@@ -680,6 +683,10 @@ public class CS_PlayerAction : MonoBehaviour
                 SettingGimmickDirection(previewInstance);
             }
         }
+    }
+    public void SetViewPreview(bool isView)
+    {
+        isViewPreview = isView;
     }
 
     //ソウルの数を加算する関数
