@@ -13,6 +13,8 @@
  * 2026-05-22 | ファイル名を変更（ThiefManager.cs → CS_ThiefManager.cs）
  *            | クラス名を変更（ThiefManager → CS_ThiefManager）
  *            | データベースから生成間隔の値を取得して設定する処理の記載
+ * 2026-05-24 | 生成情報のスタックをリストに変更し、複数の部屋から同時に泥棒を生成できるように変更
+ *            | 生成情報のスタックを辞書に変更し、部屋ごとに泥棒を生成できるように変更
  * 
  */
 using System.Collections.Generic;
