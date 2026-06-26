@@ -130,7 +130,6 @@ public class MiniMap : MonoBehaviour
         MiniMapInfo info = miniMapInfo[index];
         info.isPlayerIconActive = true;
         miniMapInfo[index] = info;
-        Debug.Log("Player is in room index: " + index);
     }
 
     private void UpdateThiefActive()
@@ -145,7 +144,6 @@ public class MiniMap : MonoBehaviour
         foreach (GameObject thief in thieves)
         {
             int index = CS_RoomCreatePointRaycast.GetRoomIndex(thief);
-            Debug.Log("Thief is in room index: " + index);
             MiniMapInfo info = miniMapInfo[index];
             info.isThiefIconActive = true;
             miniMapInfo[index] = info;
