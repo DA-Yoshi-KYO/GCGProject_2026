@@ -15,7 +15,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GimmickManager : MonoBehaviour
+public class GimmickList : MonoBehaviour
 {
     //=========================================================
     // ギミック種類ごとの設定情報
@@ -70,16 +70,18 @@ public class GimmickManager : MonoBehaviour
     // ギミック設定
     //=========================================================
     [System.Serializable]
-    private class GimmickInfoData
+    public class GimmickInfoData
     {
         public Gimmick gimmickTag;
         public GimmickInfo gimmickInfo;
         public GameObject itemPrefab;
+        public GameObject previewPrefab;
+        public GameObject gimmickPrefab;
     }
 
     [SerializeField]
     private List<GimmickInfoData> gimmickInfoList;
-
+    
     private Dictionary<Gimmick, GimmickInfo> gimmickInfo =
         new Dictionary<Gimmick, GimmickInfo>();
 
@@ -113,7 +115,6 @@ public class GimmickManager : MonoBehaviour
 
     private void Start()
     {
-
         cutSceneManager = GameObject.Find("CutSceneManager");
     }
 
@@ -289,6 +290,10 @@ public class GimmickManager : MonoBehaviour
     public List<ActiveGimmick> GetGimmickList()
     {
         return activeGimmicks;
+    }
+    public List<GimmickInfoData> GetGimmickInfoDataList()
+    {
+        return gimmickInfoList;
     }
 
     //=========================================================

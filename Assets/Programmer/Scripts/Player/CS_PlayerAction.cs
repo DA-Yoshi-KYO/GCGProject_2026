@@ -39,10 +39,8 @@ public class CS_PlayerAction : MonoBehaviour
     [HideInInspector] public int currentSoul { private set; get; } = 0;//現在のソウルの数
     [HideInInspector] public int currentGimmickIndex { private set; get; } = 0;//現在選択しているギミック
 
-    [SerializeField] private List<GameObject> previewPrefabList;
     private GameObject previewBase;
 
-    public List<GameObject> gimmickKind;//所持しているギミックの種類
     private CS_OutlineController outlineController; // プレイヤーのアウトラインを制御
 
     private CS_PlayerData playerData;
@@ -52,7 +50,7 @@ public class CS_PlayerAction : MonoBehaviour
 
     Vector3 settingPos = Vector3.zero;  // 設置予定場所
 
-    private GimmickManager gimmickManager;
+    private GimmickList gimmickManager;
     private CS_3DPlaySE playSE;
     List<Collider> hitList = new List<Collider>();
 
@@ -74,7 +72,7 @@ public class CS_PlayerAction : MonoBehaviour
         //現在のソウルの数
         playerData = GetComponent<CS_PlayerData>();
 
-        gimmickManager = GetComponent<GimmickManager>();
+        gimmickManager = GetComponent<GimmickList>();
 
         // インプットアクションの登録
         playerData.customInputAction.Player.GimmickChange.started += OnSelect;
@@ -228,9 +226,9 @@ public class CS_PlayerAction : MonoBehaviour
         //キー操作でUIのギミックの選択
         if (contextValue == 1) currentGimmickIndex++;
         else if (contextValue == -1) currentGimmickIndex--;
-        currentGimmickIndex = (currentGimmickIndex % gimmickKind.Count + gimmickKind.Count) % gimmickKind.Count;
-        Debug.Log("ギミックの数：" + gimmickKind.Count);
-        Debug.Log("現在選択中のギミック：" + gimmickKind[currentGimmickIndex].name);
+        currentGimmickIndex = (currentGimmickIndex % gimmickManager.GetGimmickInfoDataList().Count + gimmickManager.GetGimmickInfoDataList().Count) % gimmickManager.GetGimmickInfoDataList().Count;
+        Debug.Log("ギミックの数：" + gimmickManager.GetGimmickInfoDataList().Count);
+        Debug.Log("現在選択中のギミック：" + gimmickManager.GetGimmickInfoDataList()[currentGimmickIndex].gimmickPrefab.name);
     }
 
     private void OnInteract(InputAction.CallbackContext context)
@@ -329,12 +327,13 @@ public class CS_PlayerAction : MonoBehaviour
     {
         if (settingPos.magnitude == float.PositiveInfinity) return;
 
-        if (gimmickKind[currentGimmickIndex] == null)
+        if (gimmickManager.GetGimmickInfoDataList()[currentGimmickIndex] == null)
         {
             Debug.LogError("選択されたギミックが見つかりません");
             return;
         }
-        GimmickBase gimmick = gimmickKind[currentGimmickIndex].GetComponent<GimmickBase>();
+        GimmickBase gimmick = 
+            gimmickManager.GetGimmickInfoDataList()[currentGimmickIndex].gimmickPrefab.GetComponent<GimmickBase>();
         if (gimmick == null)
         {
             Debug.LogError("選択されたギミックにGimmickBaseコンポーネントが付いていません"); return;
@@ -474,7 +473,7 @@ public class CS_PlayerAction : MonoBehaviour
 
         var roomGrid = currentRoom.GetComponent<RoomGrid>();
         if (roomGrid == null) return Vector3.positiveInfinity;
-        GimmickBase gimmick = gimmickKind[currentGimmickIndex].GetComponent<GimmickBase>();
+        GimmickBase gimmick = gimmickManager.GetGimmickInfoDataList()[currentGimmickIndex].gimmickPrefab.GetComponent<GimmickBase>();
 
         settingPos = transform.position;
 
@@ -567,7 +566,7 @@ public class CS_PlayerAction : MonoBehaviour
     {
         int currentPreview = 0;
 
-        if (gimmickKind.Count == 0)
+        if (gimmickManager.GetGimmickInfoDataList().Count == 0)
             return;
 
         GameObject currentRoom =
@@ -582,13 +581,13 @@ public class CS_PlayerAction : MonoBehaviour
         if (roomGrid == null)
             return;
 
-        if (gimmickKind[currentGimmickIndex] == null)
+        if (gimmickManager.GetGimmickInfoDataList()[currentGimmickIndex] == null)
         {
             Debug.LogError("選択されたギミックが見つかりません");
             return;
         }
         //選択しているギミックのタグを選択
-        GimmickBase gimmick = gimmickKind[currentGimmickIndex].GetComponent<GimmickBase>();
+        GimmickBase gimmick = gimmickManager.GetGimmickInfoDataList()[currentGimmickIndex].gimmickPrefab.GetComponent<GimmickBase>();
 
         //現在の部屋
         gimmick.roomGrid = roomGrid;
@@ -634,7 +633,7 @@ public class CS_PlayerAction : MonoBehaviour
 
             gimmick.gimmickState =
                 GimmickState.Preview;
-            if (previewPrefabList == null)
+            if (gimmickManager.GetGimmickInfoDataList()[currentGimmickIndex] == null)
             {
                 Debug.Log("previewInstance取得失敗");
                 return;
@@ -642,10 +641,9 @@ public class CS_PlayerAction : MonoBehaviour
 
             // プレビューオブジェクト
             GameObject gameObj;
-            for (int i = 0 ; previewPrefabList.Count > i ; i++)
+            for (int i = 0 ; gimmickManager.GetGimmickInfoDataList().Count > i ; i++)
             {
-                gameObj = previewPrefabList[i];
-                if (gameObj.GetComponent<PreviewBase>().GetGimmickTag() == gimmick.gimmick)
+                if (gimmickManager.GetGimmickInfoDataList()[i].gimmickTag == gimmick.gimmick)
                 {
                     currentPreview = i;
                 }
@@ -657,15 +655,18 @@ public class CS_PlayerAction : MonoBehaviour
                 Destroy(previewBase.gameObject);
                 previewBase = null;
             }
-            Debug.Log("新しいプレビューの表示" + previewBase);
+            if(gimmickManager.GetGimmickInfoDataList()[currentPreview].previewPrefab == null)
+            {
+                return;
+            }
             //ギミックじゃなかった場合　※発動系だった場合は無視
-            if (!previewPrefabList[currentPreview].GetComponent<PreviewBase>().GetIsGimmick())
+            if (!gimmickManager.GetGimmickInfoDataList()[currentPreview].previewPrefab.GetComponent<PreviewBase>().GetIsGimmick())
             {
                 Debug.Log("発動式なため描画を無視");
                 return;
             }
 
-            previewBase = Instantiate(previewPrefabList[currentPreview]);
+            previewBase = Instantiate(gimmickManager.GetGimmickInfoDataList()[currentPreview].previewPrefab);
             isShowGimmickPreview = true;
 
             // =========================
@@ -696,6 +697,7 @@ public class CS_PlayerAction : MonoBehaviour
                 Debug.LogError("配置後のPreview取得失敗");
                 return;
             }
+            Debug.Log("新しいプレビューの表示" + previewBase.name);
         }
         //----------------------------------
         // 生成済なら移動だけ

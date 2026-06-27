@@ -518,6 +518,8 @@ public class GimmickBase : MonoBehaviour
         else
         {
             transform.position = targetPoint;
+            if (materials == null)
+                return;
             foreach (Material mat in materials)
             {
                 if (mat != null && mat.HasProperty("_Alpha"))
