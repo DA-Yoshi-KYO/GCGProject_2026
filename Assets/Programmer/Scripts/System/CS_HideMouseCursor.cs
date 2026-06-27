@@ -12,9 +12,4 @@ public class CS_HideMouseCursor : MonoBehaviour
         Cursor.visible = false;
 #endif
     }
-
-    void Update()
-    {
-        
-    }
 }

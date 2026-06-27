@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
-using static GimmickManager;
+using static GimmickList;
 
 public class MiniMap : MonoBehaviour
 {
@@ -18,7 +18,7 @@ public class MiniMap : MonoBehaviour
 
     private GameObject player;
     private GameObject parentThief;
-    private GimmickManager gimmickManager;
+    private GimmickList gimmickManager;
 
     struct MiniMapObjectInfo
     {
@@ -89,18 +89,16 @@ public class MiniMap : MonoBehaviour
         if(player == null)
         {
             player = GameObject.Find(playerTag);
-            Debug.LogError("Player found");
             return;
         }
         if(parentThief == null)
         {
             parentThief = GameObject.Find(thiefTag);
-            Debug.LogError("Thief found");
             return;
         }
         if(gimmickManager == null)
         {
-            gimmickManager = player.GetComponent<GimmickManager>();
+            gimmickManager = player.GetComponent<GimmickList>();
             return;
         }
 
@@ -130,7 +128,6 @@ public class MiniMap : MonoBehaviour
         MiniMapInfo info = miniMapInfo[index];
         info.isPlayerIconActive = true;
         miniMapInfo[index] = info;
-        Debug.Log("Player is in room index: " + index);
     }
 
     private void UpdateThiefActive()
@@ -145,7 +142,6 @@ public class MiniMap : MonoBehaviour
         foreach (GameObject thief in thieves)
         {
             int index = CS_RoomCreatePointRaycast.GetRoomIndex(thief);
-            Debug.Log("Thief is in room index: " + index);
             MiniMapInfo info = miniMapInfo[index];
             info.isThiefIconActive = true;
             miniMapInfo[index] = info;
