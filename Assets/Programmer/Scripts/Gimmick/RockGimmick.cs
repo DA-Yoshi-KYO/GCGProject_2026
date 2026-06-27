@@ -14,26 +14,26 @@ public class RockGimmick : GimmickBase
 {
     private bool isFirstActive = true;
 
-    private float slopeAngleLimit = 10f;    //破壊判定がおこる斜面の角度限度値
-    private float initPositionY;  //初期位置Y
+    private float slopeAngleLimit;   //破壊判定がおこる斜面の角度限度値
+    private float initPositionY;     //初期位置Y
 
     private Vector3 velocity = Vector3.zero;
     private GameObject checker;
     [Header("下方向へのレイの距離")]
     [SerializeField]
-    private float rayDownLength = 1.0f;  //下方へのレイ
+    private float rayDownLength;     //下方へのレイ
     [Header("前後左右へのレイの距離")]
     [SerializeField]
-    private float raySideLength = 0.6f;  //前後左右へのレイ
+    private float raySideLength;     //前後左右へのレイ
     [Header("滑り係数")]
     [SerializeField]
-    private float slideSpeed = 1f;       // 滑る強さ
+    private float slideSpeed;        // 滑る強さ
     [Header("重力値")]
     [SerializeField]
-    private float gravity = 2f;          // 重力
+    private float gravity;           // 重力
     [Header("平面の転がり速度")]
     [SerializeField]
-    private float rollSpeed = 0.6f;       // 平面の転がり速度
+    private float rollSpeed;         // 平面の転がり速度
 
     [Header("DangerZone")]
     [SerializeField, Tooltip("破壊時に生成する DangerZone")]
@@ -49,11 +49,14 @@ public class RockGimmick : GimmickBase
     private bool soundPlayed = false;
 
     Vector3 startPos;
+
     bool isStart = false;
     private float debugIdleOffset = 0.0f;
     private float debugUpdateOffset = 0.4f;
     private HitChecker hitting;
     private Transform visualRoot;
+
+    private bool isBrokenFirst = false;
 
     protected override void IdleUpdate()
     {
@@ -142,31 +145,7 @@ public class RockGimmick : GimmickBase
             {
                 hasValidHit = true;
             }
-
-            //---------------
-            // 壁判定
-            // XZ方向にレイを飛ばす
-            // 大岩自体が大きいため前後左右レイを少し下に調整
-            Vector3 rayXYOrigin = new Vector3(transform.position.x, transform.position.y, transform.position.z);
-
-            Debug.DrawRay(rayXYOrigin, rayDirection * raySideLength, Color.yellow);
-
-            // レイが当たったかチェック
-            if (Physics.Raycast(rayXYOrigin, rayDirection, out check, raySideLength))
-            {
-                // 自身や子オブジェクトに当たっていないか確認
-                if (check.collider.gameObject != gameObject && !check.collider.transform.IsChildOf(transform))
-                {
-                    if (HitBrokeAngle(check, rayDirection, 85f))
-                    {
-                        if (check.collider.CompareTag("Plane") || check.collider.CompareTag("Untagged"))
-                        {
-                            gimmickState = GimmickState.Broken;
-                        }
-                    }
-                }
-            }
-            Debug.Log("レイの長さ" + hit.distance);
+            //Debug.Log("レイの長さ" + hit.distance);
             if (rayDownLength - 0.1f < hit.distance || true)
             {
                 hasValidHit = false;
@@ -199,15 +178,37 @@ public class RockGimmick : GimmickBase
                 }
                 //ベロシティ移動
                 transform.position += velocity * Time.deltaTime;
-
-                //！！デバッグ用応急処置！！//
-                transform.position = new Vector3(transform.position.x, transform.position.y + debugIdleOffset, transform.position.z);
-
             }
-        }
 
+            //！！デバッグ用応急処置！！//
+            transform.position = new Vector3(transform.position.x, transform.position.y + debugIdleOffset, transform.position.z);
+            //---------------
+            // 壁判定
+            // XZ方向にレイを飛ばす
+            // 大岩自体が大きいため前後左右レイを少し下に調整
+            Vector3 rayXYOrigin = new Vector3(transform.position.x, transform.position.y, transform.position.z);
+
+            Debug.DrawRay(rayXYOrigin, rayDirection * raySideLength, Color.red);
+
+            // レイが当たったかチェック
+            if (Physics.Raycast(rayXYOrigin, rayDirection, out check, raySideLength))
+            {
+                // 自身や子オブジェクトに当たっていないか確認
+                if (check.collider.gameObject != gameObject && !check.collider.transform.IsChildOf(transform))
+                {
+                    if (HitBrokeAngle(check, rayDirection, 85f))
+                    {
+                        if (check.collider.CompareTag("Plane") || check.collider.CompareTag("Untagged"))
+                        {
+                            gimmickState = GimmickState.Broken;
+                        }
+                    }
+                }
+            }
+
+        }
         if (hasValidHit)
-        {//地面接触時
+        {   //地面接触時
             Vector3 normal = hit.normal;
             Vector3 slopeDir = Vector3.ProjectOnPlane(Vector3.down, normal);
             Vector3 pos = transform.position;
@@ -286,37 +287,41 @@ public class RockGimmick : GimmickBase
     // =========================
     protected override void BrokenUpdate()
     {
-        DeleteHitChecker();
         base.BrokenUpdate();
-        if (GetThiefGimmickAction() != null)
-        {
-            GetThiefGimmickAction().IronBallEnd(this);
-        }
-        //破壊時に1回だけ生成
-        if (!isDangerZoneSpawned)
-        {
-            isDangerZoneSpawned = true;
 
-            if (dangerZone != null)
-            {
-                // ThiefCommonDBから残存時間を取得
-                CO_ThiefCommonStatusData common = null;
-                var thiefManager = GameObject.FindObjectOfType<CS_ThiefManager>();
-                if (thiefManager != null) common = thiefManager.GetThiefCommonDB();
-
-                CS_DangerZoneSpawner.SpawnAndRegisterFromGimmick(dangerZone, transform.position, this, common, thiefLayer);
-            }
-            else
-            {
-                Debug.LogWarning("PotGimmick: dangerZone が未設定です。", this);
-            }
-        }
-        if (gimmickSound != null)
+        if (isBrokenFirst)
         {
-            gimmickSound.PlayOneShotSE("Gimmick_RockHit", gameObject.transform.position, "RockSound");
-            Destroy(gimmickSound);
+            DeleteHitChecker();
+            if (GetThiefGimmickAction() != null)
+            {
+                GetThiefGimmickAction().IronBallEnd(this);
+            }
+            //破壊時に1回だけ生成
+            if (!isDangerZoneSpawned)
+            {
+                isDangerZoneSpawned = true;
+
+                if (dangerZone != null)
+                {
+                    // ThiefCommonDBから残存時間を取得
+                    CO_ThiefCommonStatusData common = null;
+                    var thiefManager = GameObject.FindObjectOfType<CS_ThiefManager>();
+                    if (thiefManager != null) common = thiefManager.GetThiefCommonDB();
+
+                    CS_DangerZoneSpawner.SpawnAndRegisterFromGimmick(dangerZone, transform.position, this, common, thiefLayer);
+                }
+                else
+                {
+                    Debug.LogWarning("PotGimmick: dangerZone が未設定です。", this);
+                }
+            }
+            if (gimmickSound != null)
+            {
+                gimmickSound.PlayOneShotSE("Gimmick_RockHit", gameObject.transform.position, "RockSound");
+                Destroy(gimmickSound);
+            }
+            if (checker != null)
+                Destroy(checker);
         }
-        if (checker != null)
-        Destroy(checker);
     }
 }

@@ -455,19 +455,15 @@ public class GimmickBase : MonoBehaviour
         {
             case GimmickDirection.Up:
                 transform.rotation = Quaternion.Euler(0, 0, 0);
-                Debug.Log("PreviewUpdate: Set rotation to Up (0, 0, 0)");
                 break;
             case GimmickDirection.Down:
                 transform.rotation = Quaternion.Euler(0, 180, 0);
-                Debug.Log("PreviewUpdate: Set rotation to Down (0, 180, 0)");
                 break;
             case GimmickDirection.Left:
                 transform.rotation = Quaternion.Euler(0, 90, 0);
-                Debug.Log("PreviewUpdate: Set rotation to Left (0, 90, 0)");
                 break;
             case GimmickDirection.Right:
                 transform.rotation = Quaternion.Euler(0, -90, 0);
-                Debug.Log("PreviewUpdate: Set rotation to Right (0, -90, 0)");
                 break;
         }
 

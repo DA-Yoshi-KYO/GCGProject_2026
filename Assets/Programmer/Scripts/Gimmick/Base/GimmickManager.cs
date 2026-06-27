@@ -101,7 +101,7 @@ public class GimmickManager : MonoBehaviour
 
     private void Awake()
     {
-        gimmickInfo = new Dictionary<Gimmick, GimmickInfo>();
+        //gimmickInfo = new Dictionary<Gimmick, GimmickInfo>();
 
         activeGimmicks.Clear();
 
@@ -212,9 +212,9 @@ public class GimmickManager : MonoBehaviour
         {
             if (item.GetGimmickTag() == data.gimmickTag)
             {
-                AddCurrentGimmick(item.GetGimmickTag());
+                AddCurrentGimmick(data.gimmickTag);
                 Destroy(other.gameObject);
-                IsSetItemGetNow(item.GetGimmickTag(), true);
+                IsSetItemGetNow(data.gimmickTag, true);
 
                 string situation = "";
                 switch (item.GetGimmickTag())

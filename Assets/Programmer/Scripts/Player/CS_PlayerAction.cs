@@ -18,6 +18,7 @@
  * 2026-06-22 | ギミック設置時のプレビュー表示を追加：大瀧
  */
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -37,6 +38,9 @@ public class CS_PlayerAction : MonoBehaviour
     [SerializeField] private InteractSyllinder interactMax = new InteractSyllinder { radius = 5f, height = 5f };//インタラクトの範囲の最大値
     [HideInInspector] public int currentSoul { private set; get; } = 0;//現在のソウルの数
     [HideInInspector] public int currentGimmickIndex { private set; get; } = 0;//現在選択しているギミック
+
+    [SerializeField] private List<GameObject> previewPrefabList;
+    private GameObject previewBase;
 
     public List<GameObject> gimmickKind;//所持しているギミックの種類
     private CS_OutlineController outlineController; // プレイヤーのアウトラインを制御
@@ -61,7 +65,6 @@ public class CS_PlayerAction : MonoBehaviour
     private int saveGimmickIndex;// 現在のギミックインデックスを保存する変数
 
     private bool isShowGimmickPreview = false;
-    private GimmickBase previewInstance;
 
     private bool isViewPreview = true;
 
@@ -193,21 +196,28 @@ public class CS_PlayerAction : MonoBehaviour
             }
 
         }
-
         if (playerData.currentMode == CS_PlayerData.PlayerMode.Setting && isViewPreview)
         {
             ShowGimmickPreview();
         }
         else
         {
-            // プレビューオブジェクトの削除
-            if (previewInstance != null)
+            // 残ったプレビューオブジェクトの削除
+            if (previewBase != null)
             {
-                Destroy(previewInstance.gameObject);
-                previewInstance = null;
+                Destroy(previewBase.gameObject);
+                previewBase = null;
             }
-            isShowGimmickPreview = false;
         }
+
+    }
+    private IEnumerator ExecuteSettingSequence()
+    {
+        playerData.currentMode = CS_PlayerData.PlayerMode.Normal;
+        //一フレーム遅らせる処理
+        yield return null;
+        SettingAction();
+        playSE.PlayOneShotSE("Cat_Interact1", gameObject.transform.position, "InteractSE");
     }
 
     private void OnSelect(InputAction.CallbackContext context)
@@ -256,9 +266,7 @@ public class CS_PlayerAction : MonoBehaviour
                         playerData.currentMode = CS_PlayerData.PlayerMode.Setting;
                         break;
                     case CS_PlayerData.PlayerMode.Setting:
-                        SettingAction();
-                        playSE.PlayOneShotSE("Cat_Interact1", gameObject.transform.position, "InteractSE");
-                        playerData.currentMode = CS_PlayerData.PlayerMode.Normal;
+                        StartCoroutine(ExecuteSettingSequence());
                         break;
                     default:
                         break;
@@ -360,17 +368,11 @@ public class CS_PlayerAction : MonoBehaviour
         if (!roomGrid.SetGimmickInGrid(setPos, gimmick))
             return;
 
-        if (previewInstance != null)
-        {
-            Destroy(previewInstance.gameObject);
-            previewInstance = null;
-        }
-
         // =========================
         // 実際に生成されたインスタンス取得
         // =========================
         Vector3 center = setPos;          // 中心位置
-        Vector3 halfExtents = new Vector3(1f, 5f, 1f); // 半径ではなく「半サイズ」
+        Vector3 halfExtents = new Vector3(2f, 5f, 2f); // 半径ではなく「半サイズ」
 
         Collider[] hits = Physics.OverlapBox(center, halfExtents);
         GimmickBase instance = null;
@@ -396,9 +398,22 @@ public class CS_PlayerAction : MonoBehaviour
             return;
         }
 
+        bool isEffect = true;
+
+        //ギミックごとに魔法陣の位置を調整可能に
+        switch(instance.gimmick)
+        {
+            case Gimmick.Nyaki:
+                instance.transform.position = transform.position;
+                break;
+            case Gimmick.HyperVoice:
+                instance.transform.position = transform.position;
+                break;
+        }
+
         // ギミック直下に魔法陣Effectを生成して再生
         // ギミック設置時Effectを再生
-        if (cs_GimmickSetEffectPlayer != null)
+        if (cs_GimmickSetEffectPlayer != null && isEffect)
         {
             cs_GimmickSetEffectPlayer.PlayGimmickSetEffect(
                 instance.transform.position,
@@ -549,6 +564,8 @@ public class CS_PlayerAction : MonoBehaviour
     // ギミックのプレビュー表示
     private void ShowGimmickPreview()
     {
+        int currentPreview = 0;
+
         if (gimmickKind.Count == 0)
             return;
 
@@ -569,8 +586,10 @@ public class CS_PlayerAction : MonoBehaviour
             Debug.LogError("選択されたギミックが見つかりません");
             return;
         }
+        //選択しているギミックのタグを選択
         GimmickBase gimmick = gimmickKind[currentGimmickIndex].GetComponent<GimmickBase>();
 
+        //現在の部屋
         gimmick.roomGrid = roomGrid;
 
         if (gimmick == null)
@@ -601,7 +620,10 @@ public class CS_PlayerAction : MonoBehaviour
         }
         // 設置位置補正_______________________________________
         gimmick.SetGimmickPos(settingPos);
-        gimmick.AdjustScaleToGrid();
+        MeshFilter meshFilter = gimmick.GetComponentInChildren<MeshFilter>();
+        if (meshFilter != null && meshFilter.sharedMesh != null)
+            gimmick.AdjustScaleToGrid();
+
         //----------------------------------
         // 初回のみ生成
         //----------------------------------
@@ -609,50 +631,68 @@ public class CS_PlayerAction : MonoBehaviour
         {
             saveGimmickIndex = currentGimmickIndex;
 
-            if(previewInstance != null)
-            {
-                Destroy(previewInstance.gameObject);
-                previewInstance = null;
-            }
-
             gimmick.gimmickState =
                 GimmickState.Preview;
-
-            if (!roomGrid.SetGimmickInGrid(
-                    settingPos,
-                    gimmick))
+            if (previewPrefabList == null)
             {
+                Debug.Log("previewInstance取得失敗");
                 return;
             }
 
+            // プレビューオブジェクト
+            GameObject gameObj;
+            for (int i = 0 ; previewPrefabList.Count > i ; i++)
+            {
+                gameObj = previewPrefabList[i];
+                if (gameObj.GetComponent<PreviewBase>().GetGimmickTag() == gimmick.gimmick)
+                {
+                    currentPreview = i;
+                }
+            }
+
+            // 設置前破壊
+            if(previewBase != null)
+            {
+                Destroy(previewBase.gameObject);
+                previewBase = null;
+            }
+            Debug.Log("新しいプレビューの表示" + previewBase);
+            //ギミックじゃなかった場合　※発動系だった場合は無視
+            if (!previewPrefabList[currentPreview].GetComponent<PreviewBase>().GetIsGimmick())
+            {
+                Debug.Log("発動式なため描画を無視");
+                return;
+            }
+
+            previewBase = Instantiate(previewPrefabList[currentPreview]);
             isShowGimmickPreview = true;
 
             // =========================
             // 実際に生成されたインスタンス取得
             // =========================
-            Vector3 center = new Vector3(settingPos.x, settingPos.y + 1.0f, settingPos.z);// 中心位置
-            Vector3 halfExtents = new Vector3(1f, 5f, 1f); // 半径ではなく「半サイズ」
+            Vector3 center = new Vector3(settingPos.x, settingPos.y, settingPos.z);// 中心位置
+            Vector3 halfExtents = new Vector3(2f, 10f, 2f); // 半径ではなく「半サイズ」
 
             Collider[] hits = Physics.OverlapBox(center, halfExtents);
 
             foreach (var hit in hits)
             {
-                GimmickBase gimmickBase = hit.GetComponent<GimmickBase>();
+                PreviewBase prevBase = hit.GetComponent<PreviewBase>();
 
-                if (gimmickBase == null)
+                if (prevBase == null)
                     continue;
 
                 // 同じ種類のみ
-                if (gimmickBase.GetGimmickTag() != gimmick.GetGimmickTag())
+                if (prevBase.GetGimmickTag() != gimmick.GetGimmickTag())
                     continue;
 
-                previewInstance = gimmickBase;
+                previewBase = prevBase.gameObject;
                 break;
             }
 
-            if (previewInstance == null)
+            if (previewBase == null)
             {
-                Debug.LogError("配置後のGimmick取得失敗");
+                Debug.LogError("配置後のPreview取得失敗");
                 return;
             }
         }
@@ -661,17 +701,19 @@ public class CS_PlayerAction : MonoBehaviour
         //----------------------------------
         else
         {
-            if (previewInstance != null)
+            if (previewBase != null)
             {
-                if (previewInstance.GetGimmickSize().y % 2 == 0)
+                GameObject prevObj;
+                prevObj = previewBase.gameObject;
+                if (prevObj.GetComponent<PreviewBase>().GetPreviewSize().y % 2 == 0)
                 {
-                    settingPos.y += previewInstance.GetGimmickSize().y * 0.5f;
+                    settingPos.y += prevObj.GetComponent<PreviewBase>().GetPreviewSize().y * 0.5f;
                 }
 
-                previewInstance.transform.position =
+                previewBase.transform.position =
                     settingPos;
                 //プレイヤーとギミックとの位置でギミックの向きを設定
-                SettingGimmickDirection(previewInstance);
+                //SettingGimmickDirection(previewInstance);
             }
         }
     }
