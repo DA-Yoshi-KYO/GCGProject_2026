@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
-using static GimmickManager;
+using static GimmickList;
 
 public class MiniMap : MonoBehaviour
 {
@@ -18,7 +18,7 @@ public class MiniMap : MonoBehaviour
 
     private GameObject player;
     private GameObject parentThief;
-    private GimmickManager gimmickManager;
+    private GimmickList gimmickManager;
 
     struct MiniMapObjectInfo
     {
@@ -98,7 +98,7 @@ public class MiniMap : MonoBehaviour
         }
         if(gimmickManager == null)
         {
-            gimmickManager = player.GetComponent<GimmickManager>();
+            gimmickManager = player.GetComponent<GimmickList>();
             return;
         }
 

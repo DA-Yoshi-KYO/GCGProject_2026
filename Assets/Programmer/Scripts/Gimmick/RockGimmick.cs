@@ -284,14 +284,16 @@ public class RockGimmick : GimmickBase
         {
             case GimmickDirection.Up:
                 rayPos = new Vector3(
-                    transform.position.x + cicleHit * radius,
+                    transform.position.x
+                        + cicleHit * radius * 0.75f,
                     transform.position.y,
                     transform.position.z
                     );
                 break;
             case GimmickDirection.Down:
                 rayPos = new Vector3(
-                    transform.position.x + cicleHit * radius,
+                    transform.position.x
+                        + cicleHit * radius * 0.75f,
                     transform.position.y,
                     transform.position.z
                     );
@@ -300,14 +302,16 @@ public class RockGimmick : GimmickBase
                 rayPos = new Vector3(
                     transform.position.x,
                     transform.position.y,
-                    transform.position.z + cicleHit * radius
+                    transform.position.z
+                        + cicleHit * radius * 0.75f
                     );
                 break;
             case GimmickDirection.Right:
                 rayPos = new Vector3(
                     transform.position.x,
                     transform.position.y,
-                    transform.position.z + cicleHit * radius
+                    transform.position.z
+                        + cicleHit * radius * 0.75f
                     );
                 break;
         }
