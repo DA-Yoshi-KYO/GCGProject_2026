@@ -208,6 +208,7 @@ public class CS_PlayerAction : MonoBehaviour
                 Destroy(previewBase.gameObject);
                 previewBase = null;
             }
+            isShowGimmickPreview = false;
         }
 
     }
