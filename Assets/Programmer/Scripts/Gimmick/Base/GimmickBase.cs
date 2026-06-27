@@ -609,6 +609,23 @@ public class GimmickBase : MonoBehaviour
             brokenAlpha = 1.0f;
             brokenFadeStart = true;
 
+            if (materials != null)
+            {
+                foreach (Material mat in materials)
+                {
+                    if (mat != null && mat.HasProperty("_Alpha"))
+                    {
+                        mat.SetFloat("_Alpha", brokenAlpha);
+                    }
+                }
+            }
+        }
+
+        brokenAlpha -= brokenFadeSpeed * Time.deltaTime;
+        brokenAlpha = Mathf.Clamp01(brokenAlpha);
+
+        if (materials != null)
+        {
             foreach (Material mat in materials)
             {
                 if (mat != null && mat.HasProperty("_Alpha"))
@@ -617,19 +634,8 @@ public class GimmickBase : MonoBehaviour
                 }
             }
         }
-
-        brokenAlpha -= brokenFadeSpeed * Time.deltaTime;
-        brokenAlpha = Mathf.Clamp01(brokenAlpha);
-
-        foreach (Material mat in materials)
-        {
-            if (mat != null && mat.HasProperty("_Alpha"))
-            {
-                mat.SetFloat("_Alpha", brokenAlpha);
-            }
-        }
-
-        outlineController.SetOutlineAlpha(0.0f);
+        if (outlineController != null)
+            outlineController.SetOutlineAlpha(0.0f);
 
         if (brokenAlpha <= 0.0f)
         {
