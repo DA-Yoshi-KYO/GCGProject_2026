@@ -455,19 +455,15 @@ public class GimmickBase : MonoBehaviour
         {
             case GimmickDirection.Up:
                 transform.rotation = Quaternion.Euler(0, 0, 0);
-                Debug.Log("PreviewUpdate: Set rotation to Up (0, 0, 0)");
                 break;
             case GimmickDirection.Down:
                 transform.rotation = Quaternion.Euler(0, 180, 0);
-                Debug.Log("PreviewUpdate: Set rotation to Down (0, 180, 0)");
                 break;
             case GimmickDirection.Left:
                 transform.rotation = Quaternion.Euler(0, 90, 0);
-                Debug.Log("PreviewUpdate: Set rotation to Left (0, 90, 0)");
                 break;
             case GimmickDirection.Right:
                 transform.rotation = Quaternion.Euler(0, -90, 0);
-                Debug.Log("PreviewUpdate: Set rotation to Right (0, -90, 0)");
                 break;
         }
 
@@ -522,6 +518,8 @@ public class GimmickBase : MonoBehaviour
         else
         {
             transform.position = targetPoint;
+            if (materials == null)
+                return;
             foreach (Material mat in materials)
             {
                 if (mat != null && mat.HasProperty("_Alpha"))
@@ -611,6 +609,23 @@ public class GimmickBase : MonoBehaviour
             brokenAlpha = 1.0f;
             brokenFadeStart = true;
 
+            if (materials != null)
+            {
+                foreach (Material mat in materials)
+                {
+                    if (mat != null && mat.HasProperty("_Alpha"))
+                    {
+                        mat.SetFloat("_Alpha", brokenAlpha);
+                    }
+                }
+            }
+        }
+
+        brokenAlpha -= brokenFadeSpeed * Time.deltaTime;
+        brokenAlpha = Mathf.Clamp01(brokenAlpha);
+
+        if (materials != null)
+        {
             foreach (Material mat in materials)
             {
                 if (mat != null && mat.HasProperty("_Alpha"))
@@ -619,19 +634,8 @@ public class GimmickBase : MonoBehaviour
                 }
             }
         }
-
-        brokenAlpha -= brokenFadeSpeed * Time.deltaTime;
-        brokenAlpha = Mathf.Clamp01(brokenAlpha);
-
-        foreach (Material mat in materials)
-        {
-            if (mat != null && mat.HasProperty("_Alpha"))
-            {
-                mat.SetFloat("_Alpha", brokenAlpha);
-            }
-        }
-
-        outlineController.SetOutlineAlpha(0.0f);
+        if (outlineController != null)
+            outlineController.SetOutlineAlpha(0.0f);
 
         if (brokenAlpha <= 0.0f)
         {
