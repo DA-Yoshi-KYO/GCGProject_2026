@@ -9,7 +9,7 @@ public enum Gimmick
     EmptyChest,
     Nyaki,
     Pitfall,
-    HyperVoice,
+    MagicAnkh,
     CloneCat,
 }
 
