@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CS_FailureUIAnimation : MonoBehaviour
+public class CS_FailureUIAnimation : CS_ResultUIAnimationBase
 {
     // アニメーションの遷移
     private enum AnimationPhase
@@ -19,16 +19,15 @@ public class CS_FailureUIAnimation : MonoBehaviour
         FailureMessage,
     }
 
-
     // 外部から格納するUI情報
     [Serializable]
     public class InputUIData
     {
-        [Tooltip("アニメーションに使用するオブジェクト")] public GameObject imageObject;  // アニメーションに使用するオブジェクト
         [Tooltip("アニメーションの種類")] public ImageKind kind;          // アニメーションの種類
-
+        [Tooltip("アニメーション用データ登録")] public TransitionData data;
     }
     [Header("外部から格納するUI情報"), SerializeField] private InputUIData[] inputDatas = null;
+
 
     // 内部で使用するUIのMap
     struct UIData
@@ -36,7 +35,7 @@ public class CS_FailureUIAnimation : MonoBehaviour
         public Image image;
         public RectTransform rectTransform;
     }
-    private Dictionary<ImageKind, UIData> datas = new Dictionary<ImageKind, UIData>();
+    private Dictionary<ImageKind, TransitionData> datas = new Dictionary<ImageKind, TransitionData>();
 
     // 経過時間計測
     float timer = 0.0f;
@@ -44,13 +43,9 @@ public class CS_FailureUIAnimation : MonoBehaviour
     private void Awake()
     {
         // データ登録
-        UIData data;
         foreach (var item in inputDatas)
         {
-            data.image = item.imageObject.GetComponent<Image>();
-            data.rectTransform = item.imageObject.GetComponent<RectTransform>();
-
-            datas[item.kind] = data;
+            datas[item.kind] = item.data;
         }
     }
 
