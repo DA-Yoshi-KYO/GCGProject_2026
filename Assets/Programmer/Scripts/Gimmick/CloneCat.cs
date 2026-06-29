@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class CloneCat : GimmickBase
@@ -8,26 +9,30 @@ public class CloneCat : GimmickBase
     [SerializeField] private float ActiveTime = 20.0f;//秒数
     [SerializeField] private GameObject CloneCatActor;
 
+    [Header("Player透明度")]
+    [SerializeField] private float IdleAlpha = 0.5f;
+    [SerializeField] private float BrokenAlpha = 1.0f;
+
     GameObject player;
     GameObject cloneCatActor;
     CS_RoomPlayerPosition roomPlayerPosition;
     float activeTimer = 0.0f;
     bool bFirstBroken = true;
+    private SkinnedMeshRenderer[] mesh;
 
     protected override void IdleUpdate()
     {
         base.IdleUpdate();
         gimmickState = GimmickState.Active;
-        player = GameObject.Find("Player(Clone)"); 
+        player = GameObject.Find("Player(Clone)");
 
-        if(player != null)
-        {
-            Debug.Log("CloneCat: Player found");
-        }
+
         roomPlayerPosition = GameObject.Find("RoomManager").GetComponent<CS_RoomPlayerPosition>();
 
         if (player == null) return;
         CS_PlayerMove move = player.GetComponent<CS_PlayerMove>();
+
+
 
         if (move == null) return;
         move.SetInvincibleFlag(true);
@@ -39,7 +44,7 @@ public class CloneCat : GimmickBase
 
 
         cloneCatActor = GameObject.Find("CloneCatActor(Clone)");
-        if(cloneCatActor != null)
+        if (cloneCatActor != null)
         {
             player.transform.position = cloneCatActor.transform.position;
             ChengePosProcess();
@@ -47,18 +52,19 @@ public class CloneCat : GimmickBase
 
         ViewGimmickUI(false);
 
+        SetPlayerAlpha(IdleAlpha);
     }
 
     protected override void ActiveUpdate()
     {
         // アクティブ状態の時間をカウント
         activeTimer += Time.deltaTime;
-        if(activeTimer >= ActiveTime)
+        if (activeTimer >= ActiveTime)
         {
             gimmickState = GimmickState.Broken;
         }
     }
-    
+
     protected override void BrokenUpdate()
     {
         base.BrokenUpdate();
@@ -71,7 +77,7 @@ public class CloneCat : GimmickBase
         if (player != null)
         {
             cloneCatActor = GameObject.Find("CloneCatActor(Clone)");
-            if(cloneCatActor == null)
+            if (cloneCatActor == null)
             {
                 cloneCatActor = Instantiate(CloneCatActor, this.transform.position, Quaternion.identity);
             }
@@ -94,6 +100,8 @@ public class CloneCat : GimmickBase
                 action.SetViewPreview(true);
                 action.SetSelectGimmickActive(true);
             }
+
+            SetPlayerAlpha(BrokenAlpha);
         }
     }
 
@@ -116,6 +124,29 @@ public class CloneCat : GimmickBase
         }
     }
 
+    void SetPlayerAlpha(float alpha)
+    {
+        if (player == null) return;
+
+        if (mesh == null || mesh.Length == 0)
+        {
+            mesh = player.GetComponentsInChildren<SkinnedMeshRenderer>();
+        }
+
+        foreach (var renderer in mesh)
+        {
+            if (renderer == null) continue;
+
+            Material[] mats = renderer.materials;
+            foreach (var mat in mats)
+            {
+                if (mat == null || !mat.HasProperty("_Alpha")) continue;
+
+                mat.SetFloat("_Alpha", alpha);
+            }
+        }
+    }
+
     void ViewGimmickUI(bool bView)
     {
         GameObject Canvase = GameObject.Find("Canvases");
@@ -124,20 +155,20 @@ public class CloneCat : GimmickBase
             Debug.Log("Canvase not found");
             return;
         }
-        GameObject　gimmickUI = GameObject.Find("GameUICavas");
+        GameObject gimmickUI = GameObject.Find("GameUICavas");
         if (gimmickUI == null)
         {
             Debug.Log("gimmickUI not found");
             return;
         }
         GameObject gimmikF = gimmickUI.transform.Find("GimmickF").gameObject;
-        if(gimmikF != null)gimmikF.SetActive(bView);
+        if (gimmikF != null) gimmikF.SetActive(bView);
         GameObject ctMask1 = gimmickUI.transform.Find("CTMask1").gameObject;
-        if(ctMask1 != null)ctMask1.SetActive(bView);
+        if (ctMask1 != null) ctMask1.SetActive(bView);
         GameObject ctMask2 = gimmickUI.transform.Find("CTMask2").gameObject;
-        if(ctMask2 != null)ctMask2.SetActive(bView);
+        if (ctMask2 != null) ctMask2.SetActive(bView);
         GameObject gimmick = gimmickUI.transform.Find("Gimmick").gameObject;
-        if(gimmick != null)gimmick.SetActive(bView);
+        if (gimmick != null) gimmick.SetActive(bView);
         GameObject gimmickSelectUI = gimmickUI.transform.Find("GimmickSelectUI").gameObject;
         if (gimmickSelectUI != null) gimmickSelectUI.SetActive(bView);
     }
