@@ -262,7 +262,7 @@ public class HitChecker : MonoBehaviour
                             parentGameObject.GetComponent<PitfallGimmick>();
                             parentGameObject.GetComponent<PitfallGimmick>().gimmickState = GimmickState.Active;
                             break;
-                        case Gimmick.HyperVoice:
+                        case Gimmick.MagicAnkh:
                             EnemyDame(enemy, effectDamage, false, effectEnemies[i], effect);
                             break;
                     }
@@ -312,7 +312,7 @@ public class HitChecker : MonoBehaviour
                             parentGameObject.GetComponent<PitfallGimmick>();
                             parentGameObject.GetComponent<PitfallGimmick>().gimmickState = GimmickState.Active;
                             break;
-                        case Gimmick.HyperVoice:
+                        case Gimmick.MagicAnkh:
                             EnemyDame(enemy, hitDamage, true, hitEnemies[i], hit);
                             break;
                     }
