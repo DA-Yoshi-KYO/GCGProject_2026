@@ -192,8 +192,9 @@ public class CS_PlayerAction : MonoBehaviour
                     hitList.Add(hits[i]);
                 }
             }
-
         }
+        gimmickManager.SetIsSetting(false);
+        isViewPreview = gimmickManager.GetIsSetting();
         if (playerData.currentMode == CS_PlayerData.PlayerMode.Setting && isViewPreview)
         {
             ShowGimmickPreview();
@@ -406,7 +407,7 @@ public class CS_PlayerAction : MonoBehaviour
             case Gimmick.Nyaki:
                 instance.transform.position = transform.position;
                 break;
-            case Gimmick.HyperVoice:
+            case Gimmick.MagicAnkh:
                 instance.transform.position = transform.position;
                 break;
         }
