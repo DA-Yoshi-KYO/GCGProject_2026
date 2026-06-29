@@ -221,13 +221,16 @@ public class GimmickList : MonoBehaviour
                 switch (item.GetGimmickTag())
                 {
                     case Gimmick.Pot:
+                        situation = "None";
                         break;
                     case Gimmick.IronBall:
+                        situation = "None";
                         break;
                     case Gimmick.EmptyChest:
                         situation = "ItemEmptyChest";
                         break;
                     case Gimmick.Nyaki:
+                        situation = "Nyaki";
                         break;
                     case Gimmick.Pitfall:
                         situation = "ItemPitFall";
@@ -238,8 +241,12 @@ public class GimmickList : MonoBehaviour
                     case Gimmick.None:
                         break;
                 }
-                cutSceneManager.GetComponent<CS_CutSceneVideo>().SetVideoInfo(situation);
-                cutSceneManager.GetComponent<CS_CutSceneVideo>().PlayVideo();
+
+                if (situation != "None")
+                {
+                    cutSceneManager.GetComponent<CS_CutSceneVideo>().SetVideoInfo(situation);
+                    cutSceneManager.GetComponent<CS_CutSceneVideo>().PlayVideo();
+                }
             }
         }
     }
