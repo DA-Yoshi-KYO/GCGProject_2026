@@ -31,6 +31,8 @@ public class GimmickList : MonoBehaviour
         public int maxNum;
         // 現在設置可能な数
         public int currentNum;
+        // 今まで設置した数
+        public int totalNum;
         public GimmickInfo(float coolTime, int maxNum)
         {
             this.coolTime = coolTime;
@@ -88,6 +90,8 @@ public class GimmickList : MonoBehaviour
     private Dictionary<Gimmick, bool> isItemGetNow = 
         new Dictionary<Gimmick, bool>();
 
+    private bool isSetting = true;
+
     //=========================================================
     // 設置中ギミック
     //=========================================================
@@ -139,10 +143,10 @@ public class GimmickList : MonoBehaviour
 
         // 設置可能数を減らす
         info.currentNum--;
-
+        info.totalNum++;
         Debug.Log(
             $"[Set Success] {type}" +
-            $" Remaining : {info.currentNum}/{info.maxNum}");
+            $" Remaining : {info.currentNum}/{info.maxNum}/{info.totalNum}");
 
         // 実体追加
         ActiveGimmick active =
@@ -221,25 +225,32 @@ public class GimmickList : MonoBehaviour
                 switch (item.GetGimmickTag())
                 {
                     case Gimmick.Pot:
+                        situation = "None";
                         break;
                     case Gimmick.IronBall:
+                        situation = "None";
                         break;
                     case Gimmick.EmptyChest:
                         situation = "ItemEmptyChest";
                         break;
                     case Gimmick.Nyaki:
+                        situation = "Nyaki";
                         break;
                     case Gimmick.Pitfall:
                         situation = "ItemPitFall";
                         break;
-                    case Gimmick.HyperVoice:
+                    case Gimmick.MagicAnkh:
                         situation = "ItemHyperVoice";
                         break;
                     case Gimmick.None:
                         break;
                 }
-                cutSceneManager.GetComponent<CS_CutSceneVideo>().SetVideoInfo(situation);
-                cutSceneManager.GetComponent<CS_CutSceneVideo>().PlayVideo();
+
+                if (situation != "None")
+                {
+                    cutSceneManager.GetComponent<CS_CutSceneVideo>().SetVideoInfo(situation);
+                    cutSceneManager.GetComponent<CS_CutSceneVideo>().PlayVideo();
+                }
             }
         }
     }
@@ -249,6 +260,13 @@ public class GimmickList : MonoBehaviour
     //=========================================================
     public bool IsSetting(Gimmick gimmickTag)
     {
+        // 設置可能状態か？
+        if(!isSetting)
+        {
+            Debug.Log("設置可能状態になっていません");
+            return false;
+        }
+
         // 登録されていない
         if (!gimmickInfo.ContainsKey(gimmickTag))
         {
@@ -282,6 +300,17 @@ public class GimmickList : MonoBehaviour
             $"[IsSetting] {gimmickTag} : 設置可能");
 
         return true;
+    }
+
+    // 設置可能状態設定___________
+    public void SetIsSetting(bool isSet)
+    {
+        isSetting = isSet;
+    }
+    // 設置可能状態取得___________
+    public bool GetIsSetting()
+    {
+        return isSetting;
     }
 
     //=========================================================
@@ -339,8 +368,15 @@ public class GimmickList : MonoBehaviour
     }
 
     //=========================================================
-    // クールタイム取得
+    // クールタイム
     //==========================================================
+    
+    // 設定 :::::::::::::::::::::
+    public void SetMaxCoolTime(Gimmick gimmickTag, float setTime)
+    {
+        gimmickInfo[gimmickTag].coolTime = setTime;
+    }
+    // 取得 :::::::::::::::::::::
     public float GetCoolTime(Gimmick gimmickTag)
     {//クールタイムの最大値を取得
         float maxTime = 0.0f;
@@ -355,6 +391,14 @@ public class GimmickList : MonoBehaviour
         }
 
         return maxTime;
+    }
+
+    //=========================================================
+    // 設置数の取得
+    //=========================================================
+    public int GetTotalSetGimmick(Gimmick gimmickTag)
+    {
+        return gimmickInfo[gimmickTag].totalNum;
     }
 
     //=========================================================
