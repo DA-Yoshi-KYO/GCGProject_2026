@@ -62,7 +62,7 @@ public class RockGimmick : GimmickBase
     private bool isBrokenFirst = false;
     int cicleHit;
 
-    private float rotateSpeedOffset = 0.75f; //転がる速度(見た目)の調整用
+    private float rotateSpeedOffset = 0.5f; //転がる速度(見た目)の調整用
     protected override void IdleUpdate()
     {
         //！！デバッグ用応急処置！！//

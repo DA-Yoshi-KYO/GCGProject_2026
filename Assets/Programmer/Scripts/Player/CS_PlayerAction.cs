@@ -193,8 +193,6 @@ public class CS_PlayerAction : MonoBehaviour
                 }
             }
         }
-        gimmickManager.SetIsSetting(false);
-        isViewPreview = gimmickManager.GetIsSetting();
         if (playerData.currentMode == CS_PlayerData.PlayerMode.Setting && isViewPreview)
         {
             ShowGimmickPreview();
