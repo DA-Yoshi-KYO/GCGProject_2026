@@ -346,8 +346,18 @@ public class GimmickList : MonoBehaviour
     }
 
     //=========================================================
-    // クールタイム取得
+    // クールタイム
     //==========================================================
+    public void SetMaxCoolTime(Gimmick gimmickTag, float setTime)
+    {
+        foreach (var infoList in gimmickInfoList)
+        {
+            if (infoList.gimmickTag == gimmickTag)
+            {
+                infoList.gimmickInfo.coolTime = setTime;
+            }
+        }
+    }
     public float GetCoolTime(Gimmick gimmickTag)
     {//クールタイムの最大値を取得
         float maxTime = 0.0f;
