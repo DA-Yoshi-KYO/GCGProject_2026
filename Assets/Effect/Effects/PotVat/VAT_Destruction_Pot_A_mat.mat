@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: VAT_Destruction_Pot_A_mat
-  m_Shader: {fileID: -6465566751694194690, guid: 085ef3ec3a5a70d4790c0957d30c9f63,
+  m_Shader: {fileID: -6465566751694194690, guid: ee3ec63d96e43a14f8e22b2caa4becf7,
     type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -27,6 +27,10 @@ Material:
     m_TexEnvs:
     - _BumpMap:
         m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ColorMap:
+        m_Texture: {fileID: 2800000, guid: 717a9726510129b4ca290883ec803ea9, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailAlbedoMap:
@@ -53,6 +57,14 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _NormalMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ORMMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -69,8 +81,20 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _Texture2DAsset_55e183a3da22458dadca163b40674151_Out_0_Texture2D:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Texture2DAsset_70d267d921e8469891e1745920baa198_Out_0_Texture2D:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Texture2DAsset_c19853167d3445c99f21beec785f9f39_Out_0_Texture2D:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _colTexture:
-        m_Texture: {fileID: 2800000, guid: 717a9726510129b4ca290883ec803ea9, type: 3}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _posTexture:
@@ -103,6 +127,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _Alpha: 1
     - _B_LOAD_COL_TEX: 1
     - _B_LOAD_NORM_TEX: 0
     - _B_LOAD_POS_TWO_TEX: 0
@@ -116,7 +141,9 @@ Material:
     - _B_stretchByVel: 0
     - _B_surfaceNormals: 1
     - _B_twoSidedNorms: 0
+    - _Birghtness: 0.1
     - _BumpScale: 1
+    - _Contrast: 1.5
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
@@ -132,7 +159,15 @@ Material:
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
+    - _ToonLevel: 5
     - _UVSec: 0
+    - _UseBaseColor: 0
+    - _UseColorMap: 1
+    - _UseMetallic: 0
+    - _UseNormalMap: 0
+    - _UseOcclusion: 0
+    - _UseSmoothness: 0
+    - _UseToon: 0
     - _ZWrite: 1
     - _boundMaxX: 210.5
     - _boundMaxY: 272.8
@@ -148,8 +183,10 @@ Material:
     - _playbackSpeed: 1
     - _stretchByVelAmount: 0
     m_Colors:
+    - _BaseColor: {r: 0.3820755, g: 0.61470586, b: 1, a: 0}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _ToonEdgeColor: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
 --- !u!114 &7757231986875989953
 MonoBehaviour:
