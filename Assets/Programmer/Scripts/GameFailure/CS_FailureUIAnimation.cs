@@ -1,53 +1,8 @@
-using System;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class CS_FailureUIAnimation : CS_ResultUIAnimationBase
 {
-    // アニメーションの遷移
-    private enum AnimationPhase
-    {
-        FallFailureMessage
-    }
-    AnimationPhase phase = AnimationPhase.FallFailureMessage;
-
-    // アニメーションに使用するオブジェクトの種類
-    public enum ImageKind
-    {
-        FailureMessageBack,
-        FailureMessage,
-    }
-
-    // 外部から格納するUI情報
-    [Serializable]
-    public class InputUIData
-    {
-        [Tooltip("アニメーションの種類")] public ImageKind kind;          // アニメーションの種類
-        [Tooltip("アニメーション用データ登録")] public TransitionData data;
-    }
-    [Header("外部から格納するUI情報"), SerializeField] private InputUIData[] inputDatas = null;
-
-
-    // 内部で使用するUIのMap
-    struct UIData
-    {
-        public Image image;
-        public RectTransform rectTransform;
-    }
-    private Dictionary<ImageKind, TransitionData> datas = new Dictionary<ImageKind, TransitionData>();
-
-    // 経過時間計測
-    float timer = 0.0f;
-
-    private void Awake()
-    {
-        // データ登録
-        foreach (var item in inputDatas)
-        {
-            datas[item.kind] = item.data;
-        }
-    }
+    [Header("外部から格納するUI情報"), SerializeField] private TransitionData[] inputDatas = null;
 
     void Start()
     {
@@ -56,18 +11,49 @@ public class CS_FailureUIAnimation : CS_ResultUIAnimationBase
 
     void Update()
     {
-        switch (phase)
+        if (phase.Length <= progressIndex)
+            return;
+
+        float duration = phase[progressIndex].animationDuration;
+        timer += Time.deltaTime;
+
+        foreach (int index in phase[progressIndex].sameTimeAnimationIndex)
         {
-            case AnimationPhase.FallFailureMessage:
-                PhaseFallFailureMessage();
-                break;
-            default:
-                break;
+            TransitionData data = inputDatas[index];
+            GameObject imageObject = data.imageObject;
+            RectTransform rectTransform = imageObject.GetComponent<RectTransform>();
+            if (!data.useInitPos)
+            {
+                rectTransform.anchoredPosition = data.transitionPos.init +
+                (data.transitionPos.target - data.transitionPos.init) *
+                Easing.Ease(data.posEaseKind, timer, duration);
+            }
+            if (!data.useInitScale)
+            {
+                rectTransform.localScale = data.transitionScale.init +
+                (data.transitionScale.target - data.transitionScale.init) *
+                Easing.Ease(data.scaleEaseKind, timer, duration);
+            }
+            if (!data.useInitRotate)
+            {
+                Vector3 initRotateRadian = new Vector3(
+                    data.transitionRotate.init.x * Mathf.Deg2Rad,
+                    data.transitionRotate.init.y * Mathf.Deg2Rad,
+                    data.transitionRotate.init.z * Mathf.Deg2Rad);
+                Vector3 targetRotateRadian = new Vector3(
+                    data.transitionRotate.target.x * Mathf.Deg2Rad,
+                    data.transitionRotate.target.y * Mathf.Deg2Rad,
+                    data.transitionRotate.target.z * Mathf.Deg2Rad);
+                rectTransform.Rotate(initRotateRadian +
+                (targetRotateRadian - initRotateRadian) *
+                Easing.Ease(data.rotateEaseKind, timer, duration));
+            }
         }
-    }
 
-    private void PhaseFallFailureMessage()
-    {
-
+        if (timer > duration)
+        {
+            progressIndex++;
+            timer = 0f;
+        }
     }
 }

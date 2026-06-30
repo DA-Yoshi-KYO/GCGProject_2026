@@ -22,7 +22,12 @@ public class CS_ResultUIAnimationBase : MonoBehaviour
         [Tooltip("座標を固定")] public bool useInitPos;
         [Tooltip("スケールを固定")] public bool useInitScale;
         [Tooltip("回転を固定")] public bool useInitRotate;
-        
+
+        [Header("遷移方法")]
+        [Tooltip("座標移動に使用するイージング")] public Easing.EaseKind posEaseKind;
+        [Tooltip("拡縮に使用するイージング")] public Easing.EaseKind scaleEaseKind;
+        [Tooltip("回転に使用するイージング")] public Easing.EaseKind rotateEaseKind;
+
         [Header("オブジェクト")]
         [Tooltip("アニメーションに使用するオブジェクト")] public GameObject imageObject;  // アニメーションに使用するオブジェクト
     }
@@ -34,6 +39,10 @@ public class CS_ResultUIAnimationBase : MonoBehaviour
         public float animationDuration;
     }
     [SerializeField] protected TransitionPhase[] phase;
+    protected int progressIndex = 0;
+    // 経過時間計測
+    protected float timer = 0.0f;
+
 
     // Start is called before the first frame update
     void Start()

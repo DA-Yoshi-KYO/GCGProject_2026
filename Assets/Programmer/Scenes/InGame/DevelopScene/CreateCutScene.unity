@@ -753,7 +753,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 0
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 5
   m_TargetDisplay: 0
 --- !u!114 &358831383
 MonoBehaviour:
@@ -769,38 +769,40 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   phase:
   - sameTimeAnimationIndex: 0000000001000000
-    animationDuration: 2
+    animationDuration: 1
   inputDatas:
-  - kind: 0
-    data:
-      transitionPos:
-        init: {x: 0, y: 0, z: 0}
-        target: {x: 0, y: 0, z: 0}
-      transitionScale:
-        init: {x: 0, y: 0, z: 0}
-        target: {x: 0, y: 0, z: 0}
-      transitionRotate:
-        init: {x: 0, y: 0, z: 0}
-        target: {x: 0, y: 0, z: 0}
-      useInitPos: 0
-      useInitScale: 0
-      useInitRotate: 0
-      imageObject: {fileID: 0}
-  - kind: 1
-    data:
-      transitionPos:
-        init: {x: 0, y: 0, z: 0}
-        target: {x: 0, y: 0, z: 0}
-      transitionScale:
-        init: {x: 0, y: 0, z: 0}
-        target: {x: 0, y: 0, z: 0}
-      transitionRotate:
-        init: {x: 0, y: 0, z: 0}
-        target: {x: 0, y: 0, z: 0}
-      useInitPos: 0
-      useInitScale: 0
-      useInitRotate: 0
-      imageObject: {fileID: 0}
+  - transitionPos:
+      init: {x: 0, y: 700, z: 0}
+      target: {x: 0, y: 0, z: 0}
+    transitionScale:
+      init: {x: 0, y: 0, z: 0}
+      target: {x: 0, y: 0, z: 0}
+    transitionRotate:
+      init: {x: 0, y: 0, z: 0}
+      target: {x: 0, y: 0, z: 0}
+    useInitPos: 0
+    useInitScale: 1
+    useInitRotate: 1
+    posEaseKind: 0
+    scaleEaseKind: 0
+    rotateEaseKind: 0
+    imageObject: {fileID: 1502649595}
+  - transitionPos:
+      init: {x: 0, y: 700, z: 0}
+      target: {x: 0, y: 0, z: 0}
+    transitionScale:
+      init: {x: 0, y: 0, z: 0}
+      target: {x: 0, y: 0, z: 0}
+    transitionRotate:
+      init: {x: 0, y: 0, z: 0}
+      target: {x: 0, y: 0, z: 0}
+    useInitPos: 0
+    useInitScale: 1
+    useInitRotate: 1
+    posEaseKind: 0
+    scaleEaseKind: 0
+    rotateEaseKind: 0
+    imageObject: {fileID: 208196753}
 --- !u!1 &360445280
 GameObject:
   m_ObjectHideFlags: 0
@@ -1693,6 +1695,51 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!1 &1283067486
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1283067487}
+  - component: {fileID: 1283067488}
+  m_Layer: 0
+  m_Name: NextScene
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1283067487
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1283067486}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1532923186}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1283067488
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1283067486}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a91dab106a9fde49a820fcb20f8c8a2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneName: TitleScene
 --- !u!1 &1502649595
 GameObject:
   m_ObjectHideFlags: 0
@@ -1803,6 +1850,7 @@ Transform:
   - {fileID: 676463458}
   - {fileID: 1192875595}
   - {fileID: 358831379}
+  - {fileID: 1283067487}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!320 &1532923187
@@ -1842,6 +1890,8 @@ PlayableDirector:
     value: {fileID: 1192875594}
   - key: {fileID: -7866289199746473751, guid: 348f4041a2e722f4fbddff7c0dcac633, type: 2}
     value: {fileID: 358831378}
+  - key: {fileID: -1740328975492219618, guid: 348f4041a2e722f4fbddff7c0dcac633, type: 2}
+    value: {fileID: 1283067486}
   m_ExposedReferences:
     m_References: []
 --- !u!1001 &1647054154
