@@ -61,6 +61,8 @@ public class RockGimmick : GimmickBase
 
     private bool isBrokenFirst = false;
     int cicleHit;
+
+    private float rotateSpeedOffset = 0.5f; //転がる速度(見た目)の調整用
     protected override void IdleUpdate()
     {
         //！！デバッグ用応急処置！！//
@@ -256,7 +258,7 @@ public class RockGimmick : GimmickBase
 
             transform.Rotate(
                 rotateAxis,
-                rotateAmount * rotateSign,
+                rotateAmount * rotateSign * rotateSpeedOffset,
                 Space.Self);
         }
         //-----------------------------------------
@@ -322,15 +324,26 @@ public class RockGimmick : GimmickBase
             out wallHit,
             raySideLength))
         {
-            if (wallHit.collider.gameObject != gameObject &&
-                !wallHit.collider.transform.IsChildOf(transform))
+            Transform hitRoot = wallHit.collider.transform.root;
+
+            if (hitRoot.gameObject != gameObject &&
+                !hitRoot.IsChildOf(transform))
             {
                 if (HitBrokeAngle(wallHit, moveDir, 85f))
                 {
-                    if (wallHit.collider.CompareTag("Plane") ||
-                        wallHit.collider.CompareTag("Untagged"))
+                    foreach (var h in Physics.RaycastAll(rayPos, moveDir, raySideLength))
                     {
-                        gimmickState = GimmickState.Broken;
+                        if (h.collider.gameObject == gameObject) continue;
+                        if (h.collider.transform.IsChildOf(transform)) continue;
+                        wallHit = h;
+                        //地面とオブジェクト以外は無視
+                        if (h.collider.CompareTag("Plane") ||
+                            h.collider.CompareTag("Untagged"))
+                        {
+                            Debug.Log(h.collider.name);
+                            gimmickState = GimmickState.Broken;
+                        }
+                        break;
                     }
                 }
             }

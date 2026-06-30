@@ -52,6 +52,8 @@ public class GimmickSelectUI : MonoBehaviour
     private Vector2 centerFrom, leftFrom, rightFrom;
     private Vector2 centerTo, leftTo, rightTo;
 
+    private bool isActive = true;
+
     // ──────────────────────────────
     private void Start()
     {
