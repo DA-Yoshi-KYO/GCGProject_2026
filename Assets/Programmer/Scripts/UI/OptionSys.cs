@@ -38,7 +38,7 @@ public class OptionSys : MonoBehaviour
     private void Awake()
     {
         string sceneName = SceneManager.GetActiveScene().name.ToString();
-        if (sceneName == "InGame")
+        if (sceneName == "MainScene")
         {
             isInGame = true;
         }
