@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using static HoudiniEngineUnity.HEU_InputNode;
 
@@ -14,6 +15,8 @@ public class OptionSys : MonoBehaviour
     [SerializeField] GameObject seCursor;
     [SerializeField] Image bgmSoundBar;
     [SerializeField] Image seSoundBar;
+    [SerializeField] Sprite closeImg;
+
 
     struct SelectGameObject
     {
@@ -30,10 +33,36 @@ public class OptionSys : MonoBehaviour
     float seSoundValue = 0;
     float bgmSoundValue = 0;
 
+    bool isInGame = false;
+
     private void Awake()
     {
+        string sceneName = SceneManager.GetActiveScene().name.ToString();
+        if (sceneName == "MainScene")
+        {
+            isInGame = true;
+        }
+
+        if (!isInGame)
+        {
+            optionUI[2].SetActive(false);
+            GameObject text = optionUI[3].transform.Find("Text").gameObject;
+            if(text != null)
+            {
+                Image textImge = text.GetComponent<Image>();
+                if (textImge != null)
+                {
+                    textImge.sprite = closeImg;
+                }
+            }
+        }
+
         for (int i = 0 ; i < optionUI.Length ; i++)
         {
+            if(!isInGame && i == 2)
+            {
+                continue;
+            }
             SelectGameObject TempSelectObject = new SelectGameObject();
             TempSelectObject.Object_True = optionUI[i].transform.Find("Select_true").gameObject;
             TempSelectObject.Object_False = optionUI[i].transform.Find("Select_false").gameObject;
@@ -82,8 +111,6 @@ public class OptionSys : MonoBehaviour
         Vector3 cursor2 = seCursor.transform.position;
         cursor2.x = tempX2;
         seCursor.transform.position = cursor2;
-
-
     }
 
     private void Update()
@@ -97,7 +124,7 @@ public class OptionSys : MonoBehaviour
             Right();
         }
 
-            if (selected < 0)
+        if (selected < 0)
         {
             selected = selectGameObjects.Count - 1;
         }
@@ -132,11 +159,6 @@ public class OptionSys : MonoBehaviour
         Vector3 cursor2 = seCursor.transform.position;
         cursor2.x = tempX2;
         seCursor.transform.position = cursor2;
-
-
-
-
-
 
         for (int i = 0 ; i < selectGameObjects.Count ; i++)
         {

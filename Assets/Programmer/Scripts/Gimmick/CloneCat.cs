@@ -18,7 +18,7 @@ public class CloneCat : GimmickBase
     CS_RoomPlayerPosition roomPlayerPosition;
     float activeTimer = 0.0f;
     bool bFirstBroken = true;
-    private SkinnedMeshRenderer[] mesh;
+    private SkinnedMeshRenderer[] smesh;
 
     protected override void IdleUpdate()
     {
@@ -128,12 +128,12 @@ public class CloneCat : GimmickBase
     {
         if (player == null) return;
 
-        if (mesh == null || mesh.Length == 0)
+        if (smesh == null || smesh.Length == 0)
         {
-            mesh = player.GetComponentsInChildren<SkinnedMeshRenderer>();
+            smesh = player.GetComponentsInChildren<SkinnedMeshRenderer>();
         }
 
-        foreach (var renderer in mesh)
+        foreach (var renderer in smesh)
         {
             if (renderer == null) continue;
 
