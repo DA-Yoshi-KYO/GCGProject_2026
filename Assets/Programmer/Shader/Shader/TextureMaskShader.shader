@@ -10,8 +10,8 @@ Shader "Custom/TextureMask"
         // 例 _Alpha("FillAmount", Range(0,1)) = 0.5 // 0~1の範囲指定のfloat
         // 例 _Speed("Speed", Float) = 0.5           // 自由指定のfloat
 
-        [Toggle] _InColorBoolean("InColorBoolean", Float) = 1
-        _ScaleFloat("Scale", Float) = 0.5
+        _CurrentScaleFloat("CurrentScale", Float) = 0.5
+        _ScaleFloat("Scale", Float) = 1.0
         _MaskTexture("Texture", 2D) = "white"{}
         _AlphaScaleFloat("AlphaScale", Float) = 0.5
         _MaskColor("MaskColor", Color) =  (1.0, 1.0, 1.0, 1.0)
@@ -36,7 +36,7 @@ Shader "Custom/TextureMask"
             // sampler2D _Texture;  // sampler2D...テクスチャの格納先
             // float _Alpha;
             // float _Speed;
-            float _InColorBoolean;
+            float _CurrentScaleFloat;
             float _ScaleFloat;
             sampler2D _MaskTexture;
             float _AlphaScaleFloat;
@@ -67,7 +67,7 @@ Shader "Custom/TextureMask"
 
                 float maxScale = 20;
 
-                float clampScaleFloat = clamp(_ScaleFloat, 0.0, maxScale);
+                float clampScaleFloat = clamp(_CurrentScaleFloat, 0.0, maxScale) * _ScaleFloat;
 
                 float2 multiplayValue = float2(subtractValue.x, subtractValue.y) * float2(clampScaleFloat, clampScaleFloat);
 
@@ -82,8 +82,7 @@ Shader "Custom/TextureMask"
                     float4 textureColor = tex2D(_MaskTexture, uvXY);
 
                     multiplayAlpha = textureColor.w * _AlphaScaleFloat;
-
-                    
+         
                     textureColor.xyz = _MaskColor.xyz;
                     color.xyz = textureColor.xyz;
                 }
@@ -96,14 +95,7 @@ Shader "Custom/TextureMask"
 
                 float alpha = 0.0;
 
-                if(_InColorBoolean == 0)
-                {
-                    alpha = 1.0 - multiplayAlpha;
-                }
-                else
-                {      
-                    alpha = multiplayAlpha;
-                }
+                alpha = 1.0 - multiplayAlpha;
 
                 color.w = alpha;
 
