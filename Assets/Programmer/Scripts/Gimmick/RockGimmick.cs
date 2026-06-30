@@ -9,6 +9,7 @@
  */
 
 using UnityEngine;
+using static UnityEditor.Recorder.OutputPath;
 
 public class RockGimmick : GimmickBase
 {
@@ -324,27 +325,33 @@ public class RockGimmick : GimmickBase
             out wallHit,
             raySideLength))
         {
-            Transform hitRoot = wallHit.collider.transform.root;
-
-            if (hitRoot.gameObject != gameObject &&
-                !hitRoot.IsChildOf(transform))
+            if (HitBrokeAngle(wallHit, moveDir, 85f))
             {
-                if (HitBrokeAngle(wallHit, moveDir, 85f))
+                bool isHit = false;
+                //親オブジェクトの当たり判定のみを対象とする
+                foreach (var h in Physics.RaycastAll(rayPos, moveDir, raySideLength))
                 {
-                    foreach (var h in Physics.RaycastAll(rayPos, moveDir, raySideLength))
+                    var root = h.collider.transform.root;
+
+                    //自身に当たっていたら
+                    if (root == transform.root)
+                        continue;
+                    //親が存在しなかったら
+
+                    //タグ指定※playerやthiefに当たらないようにする
+                    if (root.CompareTag("Plane") ||
+                             root.CompareTag("Untagged"))
                     {
-                        if (h.collider.gameObject == gameObject) continue;
-                        if (h.collider.transform.IsChildOf(transform)) continue;
+                        Debug.Log(root.name);
                         wallHit = h;
-                        //地面とオブジェクト以外は無視
-                        if (h.collider.CompareTag("Plane") ||
-                            h.collider.CompareTag("Untagged"))
-                        {
-                            Debug.Log(h.collider.name);
-                            gimmickState = GimmickState.Broken;
-                        }
+                        isHit = true;
                         break;
                     }
+                }
+                if(isHit)
+                {
+                    gimmickState = GimmickState.Broken;
+
                 }
             }
         }
