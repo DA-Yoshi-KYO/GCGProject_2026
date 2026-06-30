@@ -7,13 +7,12 @@
  */
 using System;
 using UnityEngine;
-using UnityEngine.Events;
-using UnityEngine.Rendering;
 using UnityEngine.UI;
 
 public class CS_Mask : MonoBehaviour
 {
-    [Header("マスク画像")] public Image maskImage;
+    [Header("マスク画像のIn")] public Image maskImageIn;
+    [Header("マスク画像のOut")] public Image maskImageOut;
     [Header("時間の間隔")][SerializeField] public float durationTime = 1.0f;
     [Header("Startの大きさ")][SerializeField] public float startScale = 0.0f;
     [Header("Endの大きさ")][SerializeField] public float endScale = 0.0f;
@@ -22,8 +21,6 @@ public class CS_Mask : MonoBehaviour
 
 
     //処理用の変数
-    [HideInInspector] public Image mainImage;
-    [HideInInspector] public Material mainMaterial;
     private float startScaleValue;
     private float endScaleValue;
     private float startAlphaValue;
@@ -38,11 +35,11 @@ public class CS_Mask : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        mainImage = maskImage;
-        mainMaterial = mainImage.material;
+        maskImageIn.material.SetFloat("_CurrentScaleFloat", 0.0f);
+        maskImageIn.material.SetFloat("_AlphaScaleFloat", 1.0f);
 
-        mainMaterial.SetFloat("_ScaleFloat", 0.0f);
-        mainMaterial.SetFloat("_AlphaScaleFloat", 1.0f);
+        maskImageOut.material.SetFloat("_CurrentScaleFloat", 0.0f);
+        maskImageOut.material.SetFloat("_AlphaScaleFloat", 1.0f);
     }
 
     // Update is called once per frame
@@ -114,13 +111,17 @@ public class CS_Mask : MonoBehaviour
     private void ScaleChage()
     {
         float scale = Mathf.Lerp(startScaleValue, endScaleValue, time / durationTime);
-        mainMaterial.SetFloat("_ScaleFloat", scale);
+
+        maskImageIn.material.SetFloat("_CurrentScaleFloat", scale);
+        maskImageOut.material.SetFloat("_CurrentScaleFloat", scale);
     }
 
     //アルファ値変化の処理
     private void AlphaChage()
     {
         float alpha = Mathf.Lerp(startAlphaValue, endAlphaValue, time / durationTime);
-        mainMaterial.SetFloat("_AlphaScaleFloat", alpha);
+
+        maskImageOut.material.SetFloat("_AlphaScaleFloat", alpha);
+        maskImageIn.material.SetFloat("_AlphaScaleFloat", alpha);
     }
 }
