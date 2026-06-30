@@ -9,6 +9,36 @@ using UnityEngine;
 
 public class Easing : MonoBehaviour
 {
+    public enum EaseKind
+    {
+        Linear,
+        EaseInSine,
+        EaseInOutSine,
+        EaseInOutCubic,
+        EaseInOutQuintic,
+        EaseInBack,
+        EaseOutBack,
+        EaseInCubic
+    }
+
+    public static float Ease(EaseKind kind, float time, float timeMax = 1.0f)
+    {
+        float t = time / timeMax;
+
+        switch (kind)
+        {
+            case EaseKind.Linear: return Linear(t);
+            case EaseKind.EaseInSine: return EaseInSine(t);
+            case EaseKind.EaseInOutSine: return EaseInOutSine(t);
+            case EaseKind.EaseInOutCubic: return EaseInOutCubic(t);
+            case EaseKind.EaseInOutQuintic: return EaseInOutQuintic(t);
+            case EaseKind.EaseInBack: return EaseInBack(t);
+            case EaseKind.EaseOutBack: return EaseOutBack(t);
+            case EaseKind.EaseInCubic: return EaseInCubic(t);
+            default: return 0.0f;
+        }
+    }
+
     public static float Linear(float time, float timeMax = 1.0f)
     {
         if (timeMax <= 0.0f)

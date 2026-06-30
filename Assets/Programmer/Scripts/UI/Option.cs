@@ -70,8 +70,17 @@ public class Option : MonoBehaviour
         _input.Enable();
 
         GameObject canvase = GameObject.Find("Canvases");
+        if(canvase == null)
+        {
+            Debug.Log("Canvasesオブジェクトが見つかりません。");
+            return;
+        }
         GameUI = canvase.transform.Find("GameUICavas").gameObject;
-
+        if(GameUI == null)
+        {
+            Debug.Log("GameUICavasオブジェクトが見つかりません。");
+            return;
+        }
     }
 
     /// <summary>
@@ -122,6 +131,11 @@ public class Option : MonoBehaviour
         if(GameUI == null)
         {
             GameObject canvase = GameObject.Find("Canvases");
+            if(canvase == null)
+            {
+                Debug.Log("Canvasesオブジェクトが見つかりません。");
+                return;
+            }
             GameUI = canvase.transform.Find("GameUICavas").gameObject;
         }
         if (GameUI != null)
@@ -141,7 +155,14 @@ public class Option : MonoBehaviour
         if (GameUI == null)
         {
             GameObject canvase = GameObject.Find("Canvases");
-            GameUI = canvase.transform.Find("GameUICavas").gameObject;
+            if (canvase == null)
+            {
+                Debug.Log("Canvasesオブジェクトが見つかりません。");
+            }
+            else
+            {
+                GameUI = canvase.transform.Find("GameUICavas").gameObject;
+            }
         }
         if (GameUI != null)
         {
