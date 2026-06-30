@@ -11,10 +11,11 @@ using UnityEngine;
 public class CS_GameResult : MonoBehaviour
 {
     [Header("ゲームクリアのPrefab格納")][SerializeField] private GameObject gameClear;
-    [Header("ゲーム失敗のPrefab格納")][SerializeField] private GameObject gameFailure;
+    //[Header("ゲーム失敗のPrefab格納")][SerializeField] private GameObject gameFailure;
+
+    [Header("ゲーム失敗のカットシーンのPrefab格納")][SerializeField] private GameObject gameFailureCutScene;
 
     private CS_EndManager endManager;
-    bool end = false;
 
     [Header("デバッグの確認時用")][SerializeField] public bool debugEnd;
     [Header("デバッグコマンド　GameClearへのキー")][SerializeField] public KeyCode gameClearKey;
@@ -31,7 +32,9 @@ public class CS_GameResult : MonoBehaviour
         backGroundPlaySE = GameObject.Find("SE").GetComponent<CS_BackGroundPlaySE>();
 
         gameClear.SetActive(false);
-        gameFailure.SetActive(false);
+        //gameFailure.SetActive(false);
+
+        //gameFailureCutScene.SetActive(false);
     }
 
     // Update is called once per frame
@@ -51,12 +54,15 @@ public class CS_GameResult : MonoBehaviour
 
             if(Input.GetKeyDown(gameFailureKey))
             {
-                gameFailure.SetActive(true);
-                if (!startJingle)
-                {
-                    backGroundPlaySE.PlaySE("LoseJingle");
-                    startJingle = true;
-                }
+                GameObject gameObject = Instantiate(gameFailureCutScene);
+                //gameFailureCutScene.SetActive(true);
+
+                //gameFailure.SetActive(true);
+                //if (!startJingle)
+                //{
+                //    backGroundPlaySE.PlaySE("LoseJingle");
+                //    startJingle = true;
+                //}
             }
         }
         else
@@ -74,12 +80,15 @@ public class CS_GameResult : MonoBehaviour
                 }
                 else
                 {
-                    gameFailure.SetActive(true);
-                    if (!startJingle)
-                    {
-                        backGroundPlaySE.PlaySE("LoseJingle");
-                        startJingle = true;
-                    }
+
+                    GameObject gameObject = Instantiate(gameFailureCutScene);
+                    //gameFailureCutScene.SetActive(true);
+                    //gameFailure.SetActive(true);
+                    //if (!startJingle)
+                    //{
+                    //    backGroundPlaySE.PlaySE("LoseJingle");
+                    //    startJingle = true;
+                    //}
                 }
             }
         }
