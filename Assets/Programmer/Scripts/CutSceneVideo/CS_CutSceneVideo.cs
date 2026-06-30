@@ -19,7 +19,6 @@ public class CS_CutSceneVideo : MonoBehaviour
     [HideInInspector] public CutSceneData data;
     [HideInInspector] public CutSceneData nextData;
     private bool nextWait = false;
-   // [HideInInspector] public int setNumber;
 
     // Start is called before the first frame update
     void Start()
