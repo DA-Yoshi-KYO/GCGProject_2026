@@ -8,7 +8,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
-using static UnityEngine.InputSystem.HID.HID;
 
 public class CS_CutSceneVideo : MonoBehaviour
 {
@@ -18,6 +17,8 @@ public class CS_CutSceneVideo : MonoBehaviour
     [SerializeField] private SO_CutSceneVideo cutSceneVideoDataBase;
 
     [HideInInspector] public CutSceneData data;
+    [HideInInspector] public CutSceneData nextData;
+    private bool nextWait = false;
    // [HideInInspector] public int setNumber;
 
     // Start is called before the first frame update
@@ -54,7 +55,13 @@ public class CS_CutSceneVideo : MonoBehaviour
     //ビデオの情報設定
     public void SetVideoInfo(string Situation)
     {
-        data = cutSceneVideoDataBase.cutSceneData[Situation];
+        if (!data.played)
+            data = cutSceneVideoDataBase.cutSceneData[Situation];
+        else
+        {
+            nextWait = true;
+            nextData = cutSceneVideoDataBase.cutSceneData[Situation];
+        }
     }
 
     //ビデオの再生準備
@@ -78,5 +85,9 @@ public class CS_CutSceneVideo : MonoBehaviour
         rawImage.enabled = false;
         frameImage.enabled = false;
         videoPlayer.Stop();
+
+        if (nextWait)
+            data = nextData;
+            PlayVideo();
     }
 }

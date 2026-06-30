@@ -66,6 +66,8 @@ public class CS_PlayerAction : MonoBehaviour
 
     private bool isViewPreview = true;
 
+    private bool isSelectGimmickActive = true;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -192,7 +194,6 @@ public class CS_PlayerAction : MonoBehaviour
                     hitList.Add(hits[i]);
                 }
             }
-
         }
         if (playerData.currentMode == CS_PlayerData.PlayerMode.Setting && isViewPreview)
         {
@@ -221,6 +222,7 @@ public class CS_PlayerAction : MonoBehaviour
 
     private void OnSelect(InputAction.CallbackContext context)
     {
+        if (!isSelectGimmickActive) return;
         float contextValue = context.ReadValue<float>();
 
         //キー操作でUIのギミックの選択
@@ -406,7 +408,7 @@ public class CS_PlayerAction : MonoBehaviour
             case Gimmick.Nyaki:
                 instance.transform.position = transform.position;
                 break;
-            case Gimmick.HyperVoice:
+            case Gimmick.MagicAnkh:
                 instance.transform.position = transform.position;
                 break;
         }
@@ -729,5 +731,10 @@ public class CS_PlayerAction : MonoBehaviour
     public void AddSoul(int addnum)
     {
         currentSoul += addnum;
+    }
+
+    public void SetSelectGimmickActive(bool isActive)
+    {
+        isSelectGimmickActive = isActive;
     }
 }
