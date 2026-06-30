@@ -125,13 +125,16 @@ MonoBehaviour:
   spawnVibration: 0
   spawnVibrationSpeed: 0
   mesh: []
-  brokenFadeSpeed: 1
+  brokenFadeSpeed: 100
   previewAlpha: 0.5
-  ActiveTime: 30
-  CloneCatActor: {fileID: 2941656284057256870, guid: 7d095b5bf66ea984ba83e1bff577fd92,
+  activeTime: 30
+  cloneCatActorPrefab: {fileID: 2941656284057256870, guid: 7d095b5bf66ea984ba83e1bff577fd92,
     type: 3}
-  IdleAlpha: 0.5
-  BrokenAlpha: 1
+  CoolTime: 10
+  Addition_multiplier: 0.2
+  idleAlpha: 0.5
+  brokenAlpha: 1
+  warpPositionY: 5
 --- !u!1001 &1623611615946963347
 PrefabInstance:
   m_ObjectHideFlags: 0

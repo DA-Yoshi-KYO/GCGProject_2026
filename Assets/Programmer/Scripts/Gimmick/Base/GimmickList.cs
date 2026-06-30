@@ -1,5 +1,6 @@
 //|| GimmickManager.cs ||―――――――――――――――――――――――――――――――
 //|| 作者 : 大瀧蓮
+//|| 更新 : 秋野翔太
 //||
 //|| 更新 : 2026/05/24 作成開始
 //|| 追加 : 2026/06/26 チュートリアル動画再生処理追加
@@ -323,6 +324,17 @@ public class GimmickList : MonoBehaviour
     public List<GimmickInfoData> GetGimmickInfoDataList()
     {
         return gimmickInfoList;
+    }
+
+    
+    public void SetActiveGimmickCoolTime(int index, float coolTime)
+    {
+        if (index < 0 || index >= activeGimmicks.Count)
+        {
+            Debug.LogError($"[SetActiveGimmickCoolTime Error] Index {index} is out of range.");
+            return;
+        }
+        activeGimmicks[index].coolTimer = coolTime;
     }
 
     //=========================================================
