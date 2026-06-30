@@ -13,6 +13,8 @@ public class MagicAnkhGimmick : GimmickBase
         //アンク指定時に鳴き声発生でアクティブ
         SetHitChecker(transform.position);
         gimmickState = GimmickState.Broken;
+
+        Debug.Log("アンク起動");
     }
     protected override void BrokenUpdate()
     {
@@ -22,7 +24,6 @@ public class MagicAnkhGimmick : GimmickBase
         {
             isBrokenFirst = true;
             DeleteHitChecker();
-            Destroy(gameObject);
         }
     }
 }

@@ -285,6 +285,20 @@ public class CS_PlayerAction : MonoBehaviour
                 interactField.GetComponent<Renderer>().enabled = false;
                 playSE.PlayOneShotSE("Cat_Interact1", gameObject.transform.position, "InteractSE");
 
+                //アンク用動作
+                if(gimmickManager.GetGimmickInfoDataList()[currentGimmickIndex].gimmickTag ==
+                    Gimmick.MagicAnkh)
+                {//カーソルがアンクの時インタラクト発動
+                    foreach(var GM in gimmickManager.GetGimmickList())
+                    {
+                        //タグでアンク判定→アクティブへ
+                        if (GM.gimmick.GetGimmickTag() == Gimmick.MagicAnkh)
+                        {
+                            GM.gimmick.gimmickState = GimmickState.Active;
+                        }
+                    }
+                }
+
                 foreach (Collider hit in hitList)
                 {
                     var renderers = hit.GetComponentsInChildren<Renderer>();
@@ -403,12 +417,10 @@ public class CS_PlayerAction : MonoBehaviour
         bool isEffect = true;
 
         //ギミックごとに魔法陣の位置を調整可能に
+        //ギミックの場所も変わる
         switch(instance.gimmick)
         {
             case Gimmick.Nyaki:
-                instance.transform.position = transform.position;
-                break;
-            case Gimmick.MagicAnkh:
                 instance.transform.position = transform.position;
                 break;
         }
