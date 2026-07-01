@@ -504,6 +504,12 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 1207170353}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &265681021 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8592597873369175759, guid: b0427632504844645979238724b00e65,
+    type: 3}
+  m_PrefabInstance: {fileID: 920497083}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &301767379
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2059,8 +2065,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gameClear: {fileID: 1857534760}
-  gameFailure: {fileID: 1740040293}
+  gameFailure: {fileID: 265681021}
+  gameFailureCutScene: {fileID: 8162511618876211785, guid: ac455d1ab2faada42a6f2f41d41869ba,
+    type: 3}
+  gameFailureCutScenePos: {fileID: 2067910355}
   debugEnd: 1
+  isOldFailure: 0
   gameClearKey: 282
   gameFailureKey: 283
 --- !u!1 &1168664981
@@ -2511,6 +2521,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tr_RoomCreatePointsRoot: {fileID: 1795546730}
+  e_TargetRoomType: 1
   i_ActiveTreasureCount: 1
   str_TreasureObjectName: Treasure
   bool_IsDebugLog: 1
@@ -2830,12 +2841,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7786881513857309976, guid: 115e0ea21b2d1464fa46799fcc24c27c,
     type: 3}
   m_PrefabInstance: {fileID: 2115804502}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &1740040293 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8592597873369175759, guid: b0427632504844645979238724b00e65,
-    type: 3}
-  m_PrefabInstance: {fileID: 920497083}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &1751631094
 GameObject:
@@ -3483,6 +3488,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1dd62ab88ad5e7b4b8f0d673a9179748, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &2067910354
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2067910355}
+  m_Layer: 0
+  m_Name: CutSceneFailurePoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2067910355
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2067910354}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
+  m_LocalPosition: {x: -6, y: 0, z: 155}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!1001 &2115804502
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3872,3 +3908,4 @@ SceneRoots:
   - {fileID: 1168664982}
   - {fileID: 551290931739923717}
   - {fileID: 2990935490476093454}
+  - {fileID: 2067910355}
