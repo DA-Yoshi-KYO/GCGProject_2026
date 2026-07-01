@@ -9,6 +9,13 @@ public class CS_ResultUIAnimationBase : MonoBehaviour
         [Tooltip("初期値")] public Vector3 init;
         [Tooltip("目標値")] public Vector3 target;
     }
+
+    [Serializable]
+    public struct ColorData
+    {
+        [Tooltip("初期値")] public Color init;
+        [Tooltip("目標値")] public Color target;
+    }
     
     [Serializable]
     public struct TransitionData
@@ -17,16 +24,19 @@ public class CS_ResultUIAnimationBase : MonoBehaviour
         [Tooltip("Canvas上の座標")] public Vector3Data transitionPos;
         [Tooltip("Canvas上のスケール")] public Vector3Data transitionScale;
         [Tooltip("回転")] public Vector3Data transitionRotate;
+        [Tooltip("色")] public ColorData transitionColor;
         
         [Header("遷移フラグ")]
         [Tooltip("座標を固定")] public bool useInitPos;
         [Tooltip("スケールを固定")] public bool useInitScale;
         [Tooltip("回転を固定")] public bool useInitRotate;
+        [Tooltip("色を固定")] public bool useInitColor;
 
         [Header("遷移方法")]
         [Tooltip("座標移動に使用するイージング")] public Easing.EaseKind posEaseKind;
         [Tooltip("拡縮に使用するイージング")] public Easing.EaseKind scaleEaseKind;
         [Tooltip("回転に使用するイージング")] public Easing.EaseKind rotateEaseKind;
+        [Tooltip("色遷移に使用するイージング")] public Easing.EaseKind colorEaseKind;
 
         [Header("オブジェクト")]
         [Tooltip("アニメーションに使用するオブジェクト")] public GameObject imageObject;  // アニメーションに使用するオブジェクト
