@@ -2,6 +2,9 @@ using UnityEngine;
 
 public class MagicAnkhGimmick : GimmickBase
 {
+    [SerializeField]
+    private float activeTime = 0.5f;
+
     bool isBrokenFirst = false;
 
     protected override void IdleUpdate()
@@ -12,18 +15,20 @@ public class MagicAnkhGimmick : GimmickBase
         //プレイヤーアクションで
         //アンク指定時に鳴き声発生でアクティブ
         SetHitChecker(transform.position);
-        gimmickState = GimmickState.Broken;
+        
+        if(activeTime <= 0)
+        {
+            gimmickState = GimmickState.Broken;
+        }
 
-        Debug.Log("アンク起動");
+        activeTime -= Time.deltaTime;
     }
     protected override void BrokenUpdate()
     {
         base.BrokenUpdate();
 
-        if (!isBrokenFirst)
-        {
+        if (isBrokenFirst) return;
             isBrokenFirst = true;
             DeleteHitChecker();
-        }
     }
 }

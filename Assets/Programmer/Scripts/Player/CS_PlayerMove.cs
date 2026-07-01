@@ -306,6 +306,7 @@ public class CS_PlayerMove : MonoBehaviour
     // 猫のスタン状態用処理※Ankh用
     public void SetAnkhCatStunTime(float stunTime)
     {
+        Debug.Log("アンクスタン");
         isCatStunByAnkh = true;
         ankhStunTimeToCatStun = stunTime;
     }
