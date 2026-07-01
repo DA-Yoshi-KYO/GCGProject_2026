@@ -191,7 +191,19 @@ public class CS_WarpSpawn : MonoBehaviour
     }
 
     /// <summary>
+    /// Room接続確認用の方向一覧です。
+    /// </summary>
+    private readonly CSE_RoomDoorDirection[] e_RoomDoorDirections =
+    {
+    CSE_RoomDoorDirection.Right,
+    CSE_RoomDoorDirection.Left,
+    CSE_RoomDoorDirection.Front,
+    CSE_RoomDoorDirection.Back
+};
+
+    /// <summary>
     /// WarpWall同士をランダムにペアにします。
+    /// 扉移動で繋がっているRoom同士はワープペアにしません。
     /// ペアに使われなかったWarpWallは無効化します。
     /// </summary>
     private void CreateRandomWarpWallPairs()
@@ -215,7 +227,65 @@ public class CS_WarpSpawn : MonoBehaviour
         List<GameObject> candidateList = new List<GameObject>(lgo_warpWallObjects);
         candidateList.RemoveAll(obj => obj == null);
 
-        // シャッフル
+        ShuffleWarpWallList(candidateList);
+
+        int createdPairCount = 0;
+
+        while (createdPairCount < warpCount && candidateList.Count >= 2)
+        {
+            GameObject warpWallA = candidateList[0];
+            candidateList.RemoveAt(0);
+
+            int pairTargetIndex = FindValidWarpWallPairIndex(warpWallA, candidateList);
+
+            if (pairTargetIndex < 0)
+            {
+                SetWarpWallFlag(warpWallA, false);
+
+                Debug.Log(
+                    "[CS_WarpSpawn] 有効なワープ相手がないため無効化 : "
+                    + warpWallA.name,
+                    this);
+
+                continue;
+            }
+
+            GameObject warpWallB = candidateList[pairTargetIndex];
+            candidateList.RemoveAt(pairTargetIndex);
+
+            warpWallPairList.Add(new GameObject[] { warpWallA, warpWallB });
+
+            SetWarpWallFlag(warpWallA, true);
+            SetWarpWallFlag(warpWallB, true);
+
+            CreateWarpPointPair(warpWallA, warpWallB);
+
+            createdPairCount++;
+
+            Debug.Log(
+                "[CS_WarpSpawn] WarpWallペア : "
+                + warpWallA.name
+                + " <-> "
+                + warpWallB.name,
+                this);
+        }
+
+        foreach (GameObject warpWall in candidateList)
+        {
+            SetWarpWallFlag(warpWall, false);
+
+            Debug.Log(
+                "[CS_WarpSpawn] 未使用WarpWallを無効化 : "
+                + warpWall.name,
+                this);
+        }
+    }
+
+    /// <summary>
+    /// WarpWall候補リストをシャッフルします。
+    /// </summary>
+    private void ShuffleWarpWallList(List<GameObject> candidateList)
+    {
         for (int i = candidateList.Count - 1 ; i > 0 ; i--)
         {
             int randomIndex = Random.Range(0, i + 1);
@@ -224,51 +294,140 @@ public class CS_WarpSpawn : MonoBehaviour
             candidateList[i] = candidateList[randomIndex];
             candidateList[randomIndex] = temp;
         }
+    }
 
-        int pairCount = Mathf.Min(warpCount, candidateList.Count / 2);
-
-        HashSet<GameObject> usedWarpWalls = new HashSet<GameObject>();
-
-        for (int i = 0 ; i < pairCount ; i++)
+    /// <summary>
+    /// warpWallA とペアにできるWarpWallの番号を探します。
+    /// 扉移動で繋がっているRoom同士は対象外にします。
+    /// </summary>
+    private int FindValidWarpWallPairIndex(
+        GameObject warpWallA,
+        List<GameObject> candidateList)
+    {
+        for (int i = 0 ; i < candidateList.Count ; i++)
         {
-            GameObject warpWallA = candidateList[i * 2];
-            GameObject warpWallB = candidateList[i * 2 + 1];
+            GameObject warpWallB = candidateList[i];
 
-            warpWallPairList.Add(new GameObject[] { warpWallA, warpWallB });
-
-            usedWarpWalls.Add(warpWallA);
-            usedWarpWalls.Add(warpWallB);
-
-            SetWarpWallFlag(warpWallA, true);
-            SetWarpWallFlag(warpWallB, true);
-
-            CreateWarpPointPair(warpWallA, warpWallB);
-
-            Debug.Log(
-                "[CS_WarpSpawn] WarpWallペア : "
-                + warpWallA.name
-                + " <-> "
-                + warpWallB.name,
-                this
-            );
-        }
-
-        // ペアに使われなかったWarpWallを無効化
-        foreach (GameObject warpWall in candidateList)
-        {
-            if (usedWarpWalls.Contains(warpWall))
+            if (warpWallB == null)
             {
                 continue;
             }
 
-            SetWarpWallFlag(warpWall, false);
+            if (IsInvalidWarpWallPair(warpWallA, warpWallB))
+            {
+                continue;
+            }
 
-            Debug.Log(
-                "[CS_WarpSpawn] 未使用WarpWallを無効化 : "
-                + warpWall.name,
-                this
-            );
+            return i;
         }
+
+        return -1;
+    }
+
+    /// <summary>
+    /// ワープペアにしてはいけない組み合わせか判定します。
+    /// </summary>
+    private bool IsInvalidWarpWallPair(GameObject warpWallA, GameObject warpWallB)
+    {
+        CS_RoomCreatePoint roomCreatePointA = FindOwnerRoomCreatePoint(warpWallA);
+        CS_RoomCreatePoint roomCreatePointB = FindOwnerRoomCreatePoint(warpWallB);
+
+        if (roomCreatePointA == null || roomCreatePointB == null)
+        {
+            Debug.LogWarning(
+                "[CS_WarpSpawn] WarpWallの親RoomCreatePointを取得できません。"
+                + " / A : " + warpWallA.name
+                + " / B : " + warpWallB.name,
+                this);
+
+            // RoomCreatePointが取れない場合は安全側でペア禁止にする
+            return true;
+        }
+
+        // 同じRoom内のWarpWall同士はペアにしない
+        if (roomCreatePointA == roomCreatePointB)
+        {
+            return true;
+        }
+
+        // AからBへ扉移動できるならペア禁止
+        if (IsRoomConnectedToTarget(roomCreatePointA, roomCreatePointB))
+        {
+            return true;
+        }
+
+        // BからAへ扉移動できるならペア禁止
+        if (IsRoomConnectedToTarget(roomCreatePointB, roomCreatePointA))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// WarpWallが所属しているRoomCreatePointを親階層から探します。
+    /// </summary>
+    private CS_RoomCreatePoint FindOwnerRoomCreatePoint(GameObject warpWallObject)
+    {
+        if (warpWallObject == null)
+        {
+            return null;
+        }
+
+        Transform current = warpWallObject.transform;
+
+        while (current != null)
+        {
+            CS_RoomCreatePoint roomCreatePoint =
+                current.GetComponent<CS_RoomCreatePoint>();
+
+            if (roomCreatePoint != null)
+            {
+                return roomCreatePoint;
+            }
+
+            current = current.parent;
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// fromRoom から targetRoom に扉移動できるか確認します。
+    /// </summary>
+    private bool IsRoomConnectedToTarget(
+        CS_RoomCreatePoint fromRoom,
+        CS_RoomCreatePoint targetRoom)
+    {
+        if (fromRoom == null || targetRoom == null)
+        {
+            return false;
+        }
+
+        for (int i = 0 ; i < e_RoomDoorDirections.Length ; i++)
+        {
+            CSE_RoomDoorDirection direction = e_RoomDoorDirections[i];
+
+            if (!fromRoom.TryGetConnection(
+                    direction,
+                    out CS_RoomMoveConnection connection))
+            {
+                continue;
+            }
+
+            if (connection == null)
+            {
+                continue;
+            }
+
+            if (connection.TargetCreatePoint == targetRoom)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>
