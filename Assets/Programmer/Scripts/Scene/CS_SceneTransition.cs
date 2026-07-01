@@ -12,7 +12,15 @@ using UnityEngine.UI;
 
 public class CS_SceneTransition : MonoBehaviour
 {
-    [Header("フェードの画像")][SerializeField]private Image fadeImage;//フェードの画像
+    enum FadeKind
+    { 
+        BlackFade,
+        CatFade,
+    }
+
+    [Header("フェードの種類")][SerializeField] private FadeKind fadeKind;//フェードの種類
+    [Header("ブラックフェードの画像")][SerializeField]private Image blackFadeImage;//フェードの画像
+    [Header("猫フェードの画像")][SerializeField]private Image catFadeImage;//フェードの画像
     [Header("フェードにかける時間")][SerializeField] private float fadeDuration = 1.0f;//フェードにかける時間
     private bool transition = false;//遷移したかどうか
 
@@ -25,12 +33,20 @@ public class CS_SceneTransition : MonoBehaviour
     {
         backGroundPlayBGM = GameObject.Find("BGM").GetComponent<CS_BackGroundPlayBGM>();
 
-        fadeImage.color = new Color(fadeImage.color.r, fadeImage.color.g, fadeImage.color.b, 1.0f);
-        fadeImage.raycastTarget = false;
+        switch(fadeKind)
+        {
+            case FadeKind.BlackFade:
+                blackFadeImage.color = new Color(blackFadeImage.color.r, blackFadeImage.color.g, blackFadeImage.color.b, 1.0f);
+                catFadeImage.color = new Color(1.0f, 1.0f, 1.0f, 0.0f);
+                blackFadeImage.raycastTarget = false;
 
-        //フェードイン
-        fadeOut = false;
-        StartCoroutine(FadeProcessing(0.0f));
+                //フェードイン
+                fadeOut = false;
+                StartCoroutine(BlackFadeProcessing(0.0f));
+                break;
+            case FadeKind.CatFade:
+                break;
+        }
     }
 
     void Update()
@@ -54,7 +70,8 @@ public class CS_SceneTransition : MonoBehaviour
 
         //フェードアウト
         fadeOut = true;
-        yield return StartCoroutine(FadeProcessing(1.0f));
+
+        yield return StartCoroutine(BlackFadeProcessing(1.0f));      
 
         //シーンの切り替え
         SceneManager.LoadScene(sceneName);
@@ -64,16 +81,16 @@ public class CS_SceneTransition : MonoBehaviour
     }
 
     //フェードの処理
-    private IEnumerator FadeProcessing(float targetAlpha)
+    private IEnumerator BlackFadeProcessing(float targetAlpha)
     {
-        float startAlpha = fadeImage.color.a;
+        float startAlpha = blackFadeImage.color.a;
         float time = 0.0f;
 
         while (time < fadeDuration)
         {
             time += Time.unscaledDeltaTime;
             float alpha = Mathf.Lerp(startAlpha, targetAlpha, time / fadeDuration);
-            fadeImage.color = new Color(fadeImage.color.r, fadeImage.color.g, fadeImage.color.b, alpha);
+            blackFadeImage.color = new Color(blackFadeImage.color.r, blackFadeImage.color.g, blackFadeImage.color.b, alpha);
 
             if (fadeOut)
             {
@@ -87,6 +104,6 @@ public class CS_SceneTransition : MonoBehaviour
             yield return null;
         }
 
-        fadeImage.color = new Color(fadeImage.color.r, fadeImage.color.g, fadeImage.color.b, targetAlpha);
+        blackFadeImage.color = new Color(blackFadeImage.color.r, blackFadeImage.color.g, blackFadeImage.color.b, targetAlpha);
     }
 }
