@@ -4,7 +4,7 @@ using UnityEngine;
 /*==================================================
  *  ファイル名  : CS_RoomTreasureRandomActivator.cs
  *  制作者      : 吉本竜
- *  内容        : 指定RoomTypeの生成済みRoom内Treasureをランダムに有効化する
+ *  内容        : 指定RoomTypeの生成済みRoom内Treasureだけをランダムに有効化する
  *  履歴        : 2026/07/01 新規作成
  *==================================================*/
 
@@ -34,15 +34,15 @@ public class CS_RoomTreasureRandomActivator : MonoBehaviour
     [SerializeField]
     private bool bool_IsDebugLog = true;
 
-    private readonly List<GameObject> list_AllTreasures = new List<GameObject>();
     private readonly List<GameObject> list_TargetTreasures = new List<GameObject>();
 
     [ContextMenu("Treasureをランダム表示")]
     public void ActivateRandomTreasures()
     {
-        CollectTreasures();
+        CollectTargetTreasures();
 
-        SetTreasureListActive(list_AllTreasures, false);
+        // 対象RoomTypeのTreasureだけを全部OFFにします。
+        SetTreasureListActive(list_TargetTreasures, false);
 
         int activeCount = Mathf.Clamp(
             i_ActiveTreasureCount,
@@ -64,9 +64,7 @@ public class CS_RoomTreasureRandomActivator : MonoBehaviour
         if (bool_IsDebugLog)
         {
             Debug.Log(
-                "[RoomTreasureRandomActivator] 全Treasure数 : "
-                + list_AllTreasures.Count
-                + " / RoomType "
+                "[RoomTreasureRandomActivator] RoomType "
                 + e_TargetRoomType
                 + " 対象Treasure数 : "
                 + list_TargetTreasures.Count
@@ -75,9 +73,8 @@ public class CS_RoomTreasureRandomActivator : MonoBehaviour
         }
     }
 
-    private void CollectTreasures()
+    private void CollectTargetTreasures()
     {
-        list_AllTreasures.Clear();
         list_TargetTreasures.Clear();
 
         if (tr_RoomCreatePointsRoot == null)
@@ -94,6 +91,12 @@ public class CS_RoomTreasureRandomActivator : MonoBehaviour
             CS_RoomCreatePoint roomCreatePoint = roomCreatePoints[i];
 
             if (roomCreatePoint == null)
+            {
+                continue;
+            }
+
+            // 指定したRoomType以外は完全に無視します。
+            if (roomCreatePoint.RoomType != e_TargetRoomType)
             {
                 continue;
             }
@@ -118,19 +121,6 @@ public class CS_RoomTreasureRandomActivator : MonoBehaviour
             List<GameObject> treasuresInRoom =
                 FindTreasuresInRoom(generatedRoomTransform);
 
-            if (bool_IsDebugLog)
-            {
-                Debug.Log(
-                    "[RoomTreasureRandomActivator] 確認 : "
-                    + roomCreatePoint.name
-                    + " / RoomType : "
-                    + roomCreatePoint.RoomType
-                    + " / 生成Room : "
-                    + generatedRoomTransform.name
-                    + " / Treasure数 : "
-                    + treasuresInRoom.Count);
-            }
-
             for (int treasureIndex = 0 ; treasureIndex < treasuresInRoom.Count ; treasureIndex++)
             {
                 GameObject treasure = treasuresInRoom[treasureIndex];
@@ -140,12 +130,20 @@ public class CS_RoomTreasureRandomActivator : MonoBehaviour
                     continue;
                 }
 
-                list_AllTreasures.Add(treasure);
+                list_TargetTreasures.Add(treasure);
+            }
 
-                if (roomCreatePoint.RoomType == e_TargetRoomType)
-                {
-                    list_TargetTreasures.Add(treasure);
-                }
+            if (bool_IsDebugLog)
+            {
+                Debug.Log(
+                    "[RoomTreasureRandomActivator] 対象Room : "
+                    + roomCreatePoint.name
+                    + " / RoomType : "
+                    + roomCreatePoint.RoomType
+                    + " / 生成Room : "
+                    + generatedRoomTransform.name
+                    + " / Treasure数 : "
+                    + treasuresInRoom.Count);
             }
         }
     }
