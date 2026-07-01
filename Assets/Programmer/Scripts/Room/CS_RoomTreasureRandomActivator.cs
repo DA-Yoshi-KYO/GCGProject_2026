@@ -1,0 +1,217 @@
+using System.Collections.Generic;
+using UnityEngine;
+
+/*==================================================
+ *  ファイル名  : CS_RoomTreasureRandomActivator.cs
+ *  制作者      : 吉本竜
+ *  内容        : RoomTypeがNoneの生成済みRoom内Treasureをランダムに有効化する
+ *  履歴        : 2026/07/01 新規作成
+ *==================================================*/
+
+[DisallowMultipleComponent]
+public class CS_RoomTreasureRandomActivator : MonoBehaviour
+{
+    private const string GENERATED_NAME_PREFIX = "__GeneratedRoom_";
+    private const string DELETING_NAME_PREFIX = "__DeletingRoom_";
+
+    [Header("RoomCreatePointsの親")]
+    [SerializeField]
+    private Transform tr_RoomCreatePointsRoot;
+
+    [Header("有効化するTreasure数")]
+    [SerializeField, Min(0)]
+    private int i_ActiveTreasureCount = 1;
+
+    [Header("探すTreasureの名前")]
+    [SerializeField]
+    private string str_TreasureObjectName = "Treasure";
+
+    [Header("デバッグログを出すか")]
+    [SerializeField]
+    private bool bool_IsDebugLog = true;
+
+    private readonly List<GameObject> list_AllTreasures = new List<GameObject>();
+    private readonly List<GameObject> list_TargetTreasures = new List<GameObject>();
+
+    [ContextMenu("Treasureをランダム表示")]
+    public void ActivateRandomTreasures()
+    {
+        CollectTreasures();
+
+        SetTreasureListActive(list_AllTreasures, false);
+
+        int activeCount = Mathf.Clamp(
+            i_ActiveTreasureCount,
+            0,
+            list_TargetTreasures.Count);
+
+        ShuffleTreasures(list_TargetTreasures);
+
+        for (int i = 0 ; i < activeCount ; i++)
+        {
+            list_TargetTreasures[i].SetActive(true);
+        }
+
+        if (bool_IsDebugLog)
+        {
+            Debug.Log(
+                "[RoomTreasureRandomActivator] 全Treasure数 : "
+                + list_AllTreasures.Count
+                + " / RoomType None対象Treasure数 : "
+                + list_TargetTreasures.Count
+                + " / 表示数 : "
+                + activeCount);
+        }
+    }
+
+    private void CollectTreasures()
+    {
+        list_AllTreasures.Clear();
+        list_TargetTreasures.Clear();
+
+        if (tr_RoomCreatePointsRoot == null)
+        {
+            Debug.LogWarning("[RoomTreasureRandomActivator] RoomCreatePointsRootが設定されていません。");
+            return;
+        }
+
+        for (int i = 0 ; i < tr_RoomCreatePointsRoot.childCount ; i++)
+        {
+            Transform roomCreatePointTransform = tr_RoomCreatePointsRoot.GetChild(i);
+
+            CS_RoomCreatePoint roomCreatePoint =
+                roomCreatePointTransform.GetComponent<CS_RoomCreatePoint>();
+
+            if (roomCreatePoint == null)
+            {
+                continue;
+            }
+
+            Transform generatedRoomTransform =
+                FindGeneratedRoomChild(roomCreatePointTransform);
+
+            if (generatedRoomTransform == null)
+            {
+                continue;
+            }
+
+            Transform treasureTransform =
+                FindTreasureDirectChild(generatedRoomTransform);
+
+            if (treasureTransform == null)
+            {
+                continue;
+            }
+
+            list_AllTreasures.Add(treasureTransform.gameObject);
+
+            if (roomCreatePoint.RoomType == CSE_RoomTypeEnum.None)
+            {
+                list_TargetTreasures.Add(treasureTransform.gameObject);
+            }
+        }
+    }
+
+    private Transform FindGeneratedRoomChild(Transform roomCreatePointTransform)
+    {
+        if (roomCreatePointTransform == null)
+        {
+            return null;
+        }
+
+        for (int i = 0 ; i < roomCreatePointTransform.childCount ; i++)
+        {
+            Transform child = roomCreatePointTransform.GetChild(i);
+
+            if (!IsGeneratedRoomName(child.name))
+            {
+                continue;
+            }
+
+            if (!child.gameObject.activeInHierarchy)
+            {
+                continue;
+            }
+
+            return child;
+        }
+
+        return null;
+    }
+
+    private bool IsGeneratedRoomName(string objectName)
+    {
+        if (string.IsNullOrEmpty(objectName))
+        {
+            return false;
+        }
+
+        if (objectName.StartsWith(DELETING_NAME_PREFIX))
+        {
+            return false;
+        }
+
+        return objectName.StartsWith(GENERATED_NAME_PREFIX)
+               || objectName.Contains("_Generated_");
+    }
+
+    private Transform FindTreasureDirectChild(Transform generatedRoomTransform)
+    {
+        if (generatedRoomTransform == null)
+        {
+            return null;
+        }
+
+        for (int i = 0 ; i < generatedRoomTransform.childCount ; i++)
+        {
+            Transform child = generatedRoomTransform.GetChild(i);
+
+            if (IsTreasureName(child.name))
+            {
+                return child;
+            }
+        }
+
+        return null;
+    }
+
+    private bool IsTreasureName(string objectName)
+    {
+        if (string.IsNullOrEmpty(objectName))
+        {
+            return false;
+        }
+
+        return objectName == str_TreasureObjectName;
+    }
+
+    private void SetTreasureListActive(List<GameObject> treasureList, bool isActive)
+    {
+        for (int i = 0 ; i < treasureList.Count ; i++)
+        {
+            if (treasureList[i] == null)
+            {
+                continue;
+            }
+
+            treasureList[i].SetActive(isActive);
+        }
+    }
+
+    private void ShuffleTreasures(List<GameObject> treasureList)
+    {
+        if (treasureList == null)
+        {
+            return;
+        }
+
+        for (int i = 0 ; i < treasureList.Count ; i++)
+        {
+            int randomIndex = Random.Range(i, treasureList.Count);
+
+            GameObject temp = treasureList[i];
+            treasureList[i] = treasureList[randomIndex];
+            treasureList[randomIndex] = temp;
+        }
+    }
+}

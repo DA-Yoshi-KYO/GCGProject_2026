@@ -26,6 +26,10 @@ public class CS_RoomBlockRandomGenerator : MonoBehaviour
     [SerializeField]
     private CS_WarpSpawn cs_WarpSpawn;
 
+    [Header("Treasureランダム表示")]
+    [SerializeField]
+    private CS_RoomTreasureRandomActivator cs_RoomTreasureRandomActivator;
+
     private bool bool_IsRuntimeRegenerating = false;
 
     /// <summary>
@@ -61,12 +65,28 @@ public class CS_RoomBlockRandomGenerator : MonoBehaviour
         if (!bool_IsAutoRegenerateRandomOnStart)
         {
             cs_RoomBlockPrefabGenerator.RebuildGeneratedRoomLinks();
+            ActivateRandomTreasures();
             cs_RoomBlockPrefabGenerator.CreatePlayerAtFirstRoomStartPoint();
             return;
         }
 
         StartCoroutine(RegenerateRandomRoomBlocksRuntimeCoroutine());
     }
+
+
+    /// <summary>
+    /// 生成済みRoom内のTreasureをランダム表示します。
+    /// </summary>
+    private void ActivateRandomTreasures()
+    {
+        if (cs_RoomTreasureRandomActivator == null)
+        {
+            return;
+        }
+
+        cs_RoomTreasureRandomActivator.ActivateRandomTreasures();
+    }
+
 
     /// <summary>
     /// Random設定のRoomを生成します。
@@ -127,6 +147,11 @@ public class CS_RoomBlockRandomGenerator : MonoBehaviour
         cs_RoomBlockPrefabGenerator.GenerateRoomBlocksByType(
             CSE_RoomBlockGenerateType.Random,
             true);
+
+        yield return null;
+
+        // Room生成後にTreasureの表示数を決めます。
+        ActivateRandomTreasures();
 
         yield return null;
 
