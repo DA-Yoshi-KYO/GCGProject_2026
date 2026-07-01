@@ -17,6 +17,12 @@ public class CS_WarpTrigger : MonoBehaviour
 
     private CS_Mask mask;
 
+    private GameObject g_SEDataObject;
+    private CS_3DPlaySE cs_3DPlaySE;
+    private string s_seName = "Cat_RoomMove";
+    private string s_seObjectName = "Cat_Warp";
+
+
     private void Start()
     {
         selfWarpPoint = GetComponent<CS_WarpPoint>();
@@ -29,6 +35,10 @@ public class CS_WarpTrigger : MonoBehaviour
         }
 
         mask = GameObject.Find("MaskCanvas").GetComponent<CS_Mask>();
+
+        // SE取得
+        g_SEDataObject = GameObject.Find("3DSE");
+        cs_3DPlaySE = g_SEDataObject.GetComponent<CS_3DPlaySE>();
     }
 
 
@@ -60,6 +70,16 @@ public class CS_WarpTrigger : MonoBehaviour
             return;
 
         CS_PlayerCamera playerCamera = other.GetComponent<CS_PlayerCamera>();
+
+
+
+        // SEを鳴らす
+        if (cs_3DPlaySE != null)
+        {
+            cs_3DPlaySE.PlayOneShotSE(s_seName, other.transform.position, s_seObjectName, CS_3DPlaySE.SEMode.Normal);
+        }
+
+
 
         mask.StartInMask(playerCamera.ChangeCamera);
 
