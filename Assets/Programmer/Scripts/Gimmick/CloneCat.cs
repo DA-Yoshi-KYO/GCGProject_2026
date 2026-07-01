@@ -14,10 +14,10 @@ public class CloneCat : GimmickBase
     [SerializeField] private float CoolTime = 10.0f;
 
     [Header("倍率加算")]
-    [SerializeField] private float Addition_multiplier = 0.2f;
+    [SerializeField] private float addition_multiplier = 0.2f;
 
     [Header("Player透明度")]
-    [SerializeField] private float ActiveAlpha = 0.5f;
+    [SerializeField] private float activeAlpha = 0.5f;
 
     [Header("Broken時ワープY座標")]
     [SerializeField] private float warpPositionY = 5.0f;
@@ -56,7 +56,7 @@ public class CloneCat : GimmickBase
         }
 
         ViewGimmickUI(false);
-        SetPlayerAlpha(ActiveAlpha);
+        SetPlayerAlpha(activeAlpha);
     }
 
     protected override void ActiveUpdate()
@@ -76,7 +76,7 @@ public class CloneCat : GimmickBase
 
         float Multiplier = 1.0f;
         int Count = (int)(activeTimer / CoolTime);
-        Multiplier += Count * Addition_multiplier;
+        Multiplier += Count * addition_multiplier;
         float CT = activeTimer * Multiplier;
 
         List<GimmickList.ActiveGimmick> activeGimmicks = gimmickList.GetGimmickList();
