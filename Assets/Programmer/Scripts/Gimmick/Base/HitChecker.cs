@@ -4,6 +4,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum HitTargetType
+{
+    Enemy,
+    Player,
+}
+
 public class HitChecker : MonoBehaviour
 {
     [Header("命中範囲")]
@@ -14,7 +20,7 @@ public class HitChecker : MonoBehaviour
     public BoxCollider search;
     [Header("敵のレイヤー")]
     public LayerMask enemyLayer;
-
+    
     // ギミック命中時のHitEffect再生クラス
     private CS_GimmickHitEffectPlayer cs_GimmickHitEffectPlayer;
 
@@ -48,7 +54,7 @@ public class HitChecker : MonoBehaviour
     /// <returns></returns>
     public Collider[] GetHitEnemies()
     {
-        return OverlapBoxCollider(hit);
+        return OverlapBoxCollider(hit, HitTargetType.Enemy);
     }
 
     /// <summary>
@@ -57,31 +63,74 @@ public class HitChecker : MonoBehaviour
     /// <returns></returns>
     public Collider[] GetEffectEnemies()
     {
-        return OverlapBoxCollider(effect);
+        return OverlapBoxCollider(effect, HitTargetType.Enemy);
     }
 
     // 索敵範囲の設定
     public Collider[] GetSearchEnemies()
     {
-        return OverlapBoxCollider(search);
+        return OverlapBoxCollider(search, HitTargetType.Enemy);
     }
 
-    /// <summary>
-    /// BoxColliderを使用して、命中範囲内の敵を検出する関数
-    /// </summary>
-    /// <param name="box">検出範囲のBoxCollider</param>
-    /// <returns>検出された敵のコライダー配列</returns>
-    private Collider[] OverlapBoxCollider(BoxCollider box)
+    public Collider[] GetHitObject(HitTargetType targetType)
     {
-        if (box == null) return new Collider[0];
-
-        // コライダーのワールド座標でのCenter・Size・回転を取得
-        Vector3 worldCenter = box.transform.TransformPoint(box.center);
-        Vector3 worldHalfExtents = Vector3.Scale(box.size * 0.5f, box.transform.lossyScale);
-        Quaternion worldRotation = box.transform.rotation;
-
-        return Physics.OverlapBox(worldCenter, worldHalfExtents, worldRotation, enemyLayer);
+        return OverlapBoxCollider(hit, targetType);
     }
+
+    public Collider[] GetEffectObject(HitTargetType targetType)
+    {
+        return OverlapBoxCollider(effect, targetType);
+    }
+
+    private Collider[] OverlapBoxCollider(BoxCollider box, HitTargetType targetType)
+    {
+        if (box == null)
+            return System.Array.Empty<Collider>();
+
+        Vector3 worldCenter =
+            box.transform.TransformPoint(box.center);
+
+        Vector3 worldHalfExtents =
+            Vector3.Scale(box.size * 0.5f, box.transform.lossyScale);
+
+        Quaternion worldRotation =
+            box.transform.rotation;
+
+        switch (targetType)
+        {
+            //敵:::::::::::::::::
+            case HitTargetType.Enemy:
+                return Physics.OverlapBox(
+                    worldCenter,
+                    worldHalfExtents,
+                    worldRotation,
+                    enemyLayer);
+            //プレイヤー:::::::::
+            case HitTargetType.Player:
+                    Collider[] hitColliders =
+                        Physics.OverlapBox(
+                            worldCenter,
+                            worldHalfExtents,
+                            worldRotation);
+
+                    foreach (Collider hitCollider in hitColliders)
+                    {
+                        Transform root =
+                            hitCollider.transform.root;
+
+                        if (root.CompareTag("Player"))
+                        {
+                            return new Collider[] { hitCollider };
+                        }
+                    }
+                    break;
+            //それ以外:::::::::::
+            default:
+                return System.Array.Empty<Collider>();
+        }
+        return System.Array.Empty<Collider>();
+    }
+
 
     /// <summary>
     /// 命中範囲内の敵に与えるダメージを設定する関数
@@ -176,15 +225,90 @@ public class HitChecker : MonoBehaviour
         if (firstUpdate || isLoop)
         {
             firstUpdate = false;
-
             Collider[] hitEnemies =
                 GetHitEnemies();
-
             Collider[] effectEnemies =
                 GetEffectEnemies();
-
             Collider[] searchEnemies =
                 GetSearchEnemies();
+            Collider[] hitPlayer = 
+                GetHitObject(HitTargetType.Player);
+            Collider[] effectPlayer = 
+                GetEffectObject(HitTargetType.Player);
+
+            //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            // プレイヤーの判定
+
+            //==================================================
+            // 命中範囲
+            //==================================================
+            for (int i = 0 ; i < hitPlayer.Length ; i++)
+            {
+                Transform root =
+                    hitPlayer[i].transform.root;
+
+                if (!root.CompareTag("Player"))
+                    continue;
+
+                CS_PlayerMove playerMove =
+                    root.GetComponent<CS_PlayerMove>();
+
+                if (playerMove == null)
+                    continue;
+
+                switch (gimmick)
+                {
+                    case Gimmick.MagicAnkh:
+                        playerMove.SetAnkhCatStunTime(5.0f);
+                        break;
+                }
+
+                break;
+            }
+            //==================================================
+            // 効果範囲
+            //==================================================
+            for (int i = 0 ; i < effectPlayer.Length ; i++)
+            {
+                bool isInHitRange = false;
+
+                for (int j = 0 ; j < hitPlayer.Length ; j++)
+                {
+                    if (effectPlayer[i].transform.root ==
+                        hitPlayer[j].transform.root)
+                    {
+                        isInHitRange = true;
+                        break;
+                    }
+                }
+
+                if (isInHitRange)
+                    continue;
+
+                Transform root =
+                    effectPlayer[i].transform.root;
+
+                if (!root.CompareTag("Player"))
+                    continue;
+
+                CS_PlayerMove playerMove =
+                    root.GetComponent<CS_PlayerMove>();
+
+                if (playerMove == null)
+                    continue;
+
+                switch (gimmick)
+                {
+                    case Gimmick.MagicAnkh:
+                        playerMove.SetAnkhCatStunTime(5.0f);
+                        break;
+                }
+
+                break;
+            }
+
+            //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            // 敵の判定
 
             //======================================================
             // 索敵範囲
