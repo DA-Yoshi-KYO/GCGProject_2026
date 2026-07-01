@@ -154,8 +154,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Active: 1
   settings:
-    outlineMaterial: {fileID: 2100000, guid: 6b3bafe46a1bf374aac55a90620d66d7, type: 2}
-    layerMask:
+    outlineLayer:
       serializedVersion: 2
-      m_Bits: 67108864
-    renderPassEvent: 300
+      m_Bits: 0
+    maskMaterial: {fileID: 2100000, guid: 4c4a72f1e5bf23d4280e6db0e17d4211, type: 2}
+    edgeMaterial: {fileID: 2100000, guid: 3eb6c49a39cd9394eab63c0cf354e43a, type: 2}
+    maskEvent: 300
+    edgeEvent: 500
