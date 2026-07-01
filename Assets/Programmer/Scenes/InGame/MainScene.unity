@@ -2353,6 +2353,7 @@ GameObject:
   - component: {fileID: 1425979534}
   - component: {fileID: 1425979533}
   - component: {fileID: 1425979532}
+  - component: {fileID: 1425979538}
   m_Layer: 0
   m_Name: RoomManager
   m_TagString: Untagged
@@ -2375,6 +2376,7 @@ MonoBehaviour:
   cs_RoomBlockPrefabGenerator: {fileID: 1425979534}
   bool_IsAutoRegenerateRandomOnStart: 1
   cs_WarpSpawn: {fileID: 654711340}
+  cs_RoomTreasureRandomActivator: {fileID: 0}
 --- !u!114 &1425979533
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2496,6 +2498,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1168664982}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1425979538
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1425979531}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 61ca6e905c961fe45bd4f8d4474097e8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tr_RoomCreatePointsRoot: {fileID: 1795546730}
+  i_ActiveTreasureCount: 1
+  str_TreasureObjectName: Treasure
+  bool_IsDebugLog: 1
 --- !u!1 &1435468785
 GameObject:
   m_ObjectHideFlags: 0
