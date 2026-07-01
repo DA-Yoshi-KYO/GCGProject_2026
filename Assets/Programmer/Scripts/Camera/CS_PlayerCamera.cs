@@ -287,6 +287,9 @@ public class CS_PlayerCamera : MonoBehaviour
     //次の部屋のカメラの回転移動処理
     private void TransitionCameraOut()
     {
+        //新しい部屋のカメラに切り替える
+        ChangeCamera();
+
         //時間の更新
         transTimer += Time.unscaledDeltaTime;
 
@@ -294,7 +297,16 @@ public class CS_PlayerCamera : MonoBehaviour
         //タイマーを0から1の範囲に正規化して、イージング関数を適用
         float t = Mathf.Clamp01(transTimer / rotateDuration);
         t = Easing.EaseInOutCubic(t);
-        roomCameraObject.transform.position = Vector3.Lerp(prevInfo.position, newInfo.position, t);
+
+        //視点がプレイヤーから始まるように補正
+        Vector3 moveAmount = roomCenter - transform.position;
+        moveAmount.y = 0.0f;
+
+        //カメラの移動に制限をかける
+        moveAmount.x = Mathf.Clamp(moveAmount.x, -roomCamera.moveAmountLimit.x, roomCamera.moveAmountLimit.x);
+        moveAmount.z = Mathf.Clamp(moveAmount.z, -roomCamera.moveAmountLimit.z, roomCamera.moveAmountLimit.z);
+
+        roomCameraObject.transform.position = Vector3.Lerp(prevInfo.position, newInfo.position - moveAmount, t);
         roomCameraObject.transform.rotation = Quaternion.Slerp(prevInfo.rotation, newInfo.rotation, t);
 
         //回転完了
@@ -313,8 +325,6 @@ public class CS_PlayerCamera : MonoBehaviour
     {
         //更新を再開
         Time.timeScale = 1.0f;
-
-        ChangeCamera();
        
         transitionCamera = TransitionCamera.None;   // カメラの遷移終了
     }

@@ -2,7 +2,28 @@ using UnityEngine;
 
 public class CS_FailureUIAnimation : CS_ResultUIAnimationBase
 {
-    [Header("外部から格納するUI情報"), SerializeField] private TransitionData[] inputDatas = null;
+    [Header("外部から格納するUI情報"), SerializeField] private TransitionData[] inputDatas =
+    {
+        new TransitionData()
+        {
+            transitionPos = new Vector3Data() { init = new Vector3(0f, 0f, 0f), target = new Vector3(0f, 0f, 0f) },
+            transitionScale = new Vector3Data() { init = new Vector3(1f, 1f, 1f), target = new Vector3(1f, 1f, 1f) },
+            transitionRotate = new Vector3Data() { init = new Vector3(0f, 0f, 0f), target = new Vector3(0f, 0f, 0f) },
+            transitionColor = new ColorData() { init = new Color(1f, 1f, 1f, 1f), target = new Color(1f, 1f, 1f, 1f) },
+
+            useInitPos = true,
+            useInitScale = true,
+            useInitRotate = true,
+            useInitColor = true,
+
+            posEaseKind = Easing.EaseKind.Linear,
+            scaleEaseKind = Easing.EaseKind.Linear,
+            rotateEaseKind = Easing.EaseKind.Linear,
+            colorEaseKind = Easing.EaseKind.Linear,
+
+            imageObject = null
+        }
+    };
 
     void Start()
     {
@@ -47,6 +68,13 @@ public class CS_FailureUIAnimation : CS_ResultUIAnimationBase
                 rectTransform.Rotate(initRotateRadian +
                 (targetRotateRadian - initRotateRadian) *
                 Easing.Ease(data.rotateEaseKind, timer, duration));
+            }
+            if (!data.useInitColor)
+            {
+                UnityEngine.UI.Image image = imageObject.GetComponent<UnityEngine.UI.Image>();
+                image.color = data.transitionColor.init +
+                (data.transitionColor.target - data.transitionColor.init) *
+                Easing.Ease(data.colorEaseKind, timer, duration);
             }
         }
 
