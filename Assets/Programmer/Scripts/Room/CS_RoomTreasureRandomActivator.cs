@@ -4,7 +4,7 @@ using UnityEngine;
 /*==================================================
  *  ファイル名  : CS_RoomTreasureRandomActivator.cs
  *  制作者      : 吉本竜
- *  内容        : RoomTypeがNoneの生成済みRoom内Treasureをランダムに有効化する
+ *  内容        : 指定RoomTypeの生成済みRoom内Treasureをランダムに有効化する
  *  履歴        : 2026/07/01 新規作成
  *==================================================*/
 
@@ -17,6 +17,10 @@ public class CS_RoomTreasureRandomActivator : MonoBehaviour
     [Header("RoomCreatePointsの親")]
     [SerializeField]
     private Transform tr_RoomCreatePointsRoot;
+
+    [Header("Treasureを出す対象RoomType")]
+    [SerializeField]
+    private CSE_RoomTypeEnum e_TargetRoomType = CSE_RoomTypeEnum.Normal;
 
     [Header("有効化するTreasure数")]
     [SerializeField, Min(0)]
@@ -49,6 +53,11 @@ public class CS_RoomTreasureRandomActivator : MonoBehaviour
 
         for (int i = 0 ; i < activeCount ; i++)
         {
+            if (list_TargetTreasures[i] == null)
+            {
+                continue;
+            }
+
             list_TargetTreasures[i].SetActive(true);
         }
 
@@ -57,7 +66,9 @@ public class CS_RoomTreasureRandomActivator : MonoBehaviour
             Debug.Log(
                 "[RoomTreasureRandomActivator] 全Treasure数 : "
                 + list_AllTreasures.Count
-                + " / RoomType None対象Treasure数 : "
+                + " / RoomType "
+                + e_TargetRoomType
+                + " 対象Treasure数 : "
                 + list_TargetTreasures.Count
                 + " / 表示数 : "
                 + activeCount);
@@ -75,12 +86,12 @@ public class CS_RoomTreasureRandomActivator : MonoBehaviour
             return;
         }
 
-        for (int i = 0 ; i < tr_RoomCreatePointsRoot.childCount ; i++)
-        {
-            Transform roomCreatePointTransform = tr_RoomCreatePointsRoot.GetChild(i);
+        CS_RoomCreatePoint[] roomCreatePoints =
+            tr_RoomCreatePointsRoot.GetComponentsInChildren<CS_RoomCreatePoint>(true);
 
-            CS_RoomCreatePoint roomCreatePoint =
-                roomCreatePointTransform.GetComponent<CS_RoomCreatePoint>();
+        for (int i = 0 ; i < roomCreatePoints.Length ; i++)
+        {
+            CS_RoomCreatePoint roomCreatePoint = roomCreatePoints[i];
 
             if (roomCreatePoint == null)
             {
@@ -88,26 +99,53 @@ public class CS_RoomTreasureRandomActivator : MonoBehaviour
             }
 
             Transform generatedRoomTransform =
-                FindGeneratedRoomChild(roomCreatePointTransform);
+                FindGeneratedRoomChild(roomCreatePoint.transform);
 
             if (generatedRoomTransform == null)
             {
+                if (bool_IsDebugLog)
+                {
+                    Debug.Log(
+                        "[RoomTreasureRandomActivator] 生成Roomなし : "
+                        + roomCreatePoint.name
+                        + " / RoomType : "
+                        + roomCreatePoint.RoomType);
+                }
+
                 continue;
             }
 
-            Transform treasureTransform =
-                FindTreasureDirectChild(generatedRoomTransform);
+            List<GameObject> treasuresInRoom =
+                FindTreasuresInRoom(generatedRoomTransform);
 
-            if (treasureTransform == null)
+            if (bool_IsDebugLog)
             {
-                continue;
+                Debug.Log(
+                    "[RoomTreasureRandomActivator] 確認 : "
+                    + roomCreatePoint.name
+                    + " / RoomType : "
+                    + roomCreatePoint.RoomType
+                    + " / 生成Room : "
+                    + generatedRoomTransform.name
+                    + " / Treasure数 : "
+                    + treasuresInRoom.Count);
             }
 
-            list_AllTreasures.Add(treasureTransform.gameObject);
-
-            if (roomCreatePoint.RoomType == CSE_RoomTypeEnum.None)
+            for (int treasureIndex = 0 ; treasureIndex < treasuresInRoom.Count ; treasureIndex++)
             {
-                list_TargetTreasures.Add(treasureTransform.gameObject);
+                GameObject treasure = treasuresInRoom[treasureIndex];
+
+                if (treasure == null)
+                {
+                    continue;
+                }
+
+                list_AllTreasures.Add(treasure);
+
+                if (roomCreatePoint.RoomType == e_TargetRoomType)
+                {
+                    list_TargetTreasures.Add(treasure);
+                }
             }
         }
     }
@@ -155,24 +193,36 @@ public class CS_RoomTreasureRandomActivator : MonoBehaviour
                || objectName.Contains("_Generated_");
     }
 
-    private Transform FindTreasureDirectChild(Transform generatedRoomTransform)
+    private List<GameObject> FindTreasuresInRoom(Transform generatedRoomTransform)
     {
+        List<GameObject> treasures = new List<GameObject>();
+
         if (generatedRoomTransform == null)
         {
-            return null;
+            return treasures;
         }
 
-        for (int i = 0 ; i < generatedRoomTransform.childCount ; i++)
+        Transform[] childTransforms =
+            generatedRoomTransform.GetComponentsInChildren<Transform>(true);
+
+        for (int i = 0 ; i < childTransforms.Length ; i++)
         {
-            Transform child = generatedRoomTransform.GetChild(i);
+            Transform child = childTransforms[i];
 
-            if (IsTreasureName(child.name))
+            if (child == generatedRoomTransform)
             {
-                return child;
+                continue;
             }
+
+            if (!IsTreasureName(child.name))
+            {
+                continue;
+            }
+
+            treasures.Add(child.gameObject);
         }
 
-        return null;
+        return treasures;
     }
 
     private bool IsTreasureName(string objectName)
@@ -182,7 +232,9 @@ public class CS_RoomTreasureRandomActivator : MonoBehaviour
             return false;
         }
 
-        return objectName == str_TreasureObjectName;
+        return objectName == str_TreasureObjectName
+               || objectName.StartsWith(str_TreasureObjectName + " ")
+               || objectName.StartsWith(str_TreasureObjectName + "(");
     }
 
     private void SetTreasureListActive(List<GameObject> treasureList, bool isActive)

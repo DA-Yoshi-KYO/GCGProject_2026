@@ -35,14 +35,15 @@ public class CS_RoomBlockRandomGenerator : MonoBehaviour
     /// <summary>
     /// 部屋生成完了フラグ
     /// </summary>
-    public bool b_IsRuntimeRegenerating {get; private set;}
+    public bool b_IsRuntimeRegenerating { get; private set; }
 
     /// <summary>
-    /// Reset時に同じGameObjectからRoom生成本体を取得します。
+    /// Reset時に同じGameObjectから必要なコンポーネントを取得します。
     /// </summary>
     private void Reset()
     {
         cs_RoomBlockPrefabGenerator = GetComponent<CS_RoomBlockPrefabGenerator>();
+        cs_RoomTreasureRandomActivator = GetComponent<CS_RoomTreasureRandomActivator>();
     }
 
     /// <summary>
@@ -73,13 +74,12 @@ public class CS_RoomBlockRandomGenerator : MonoBehaviour
         StartCoroutine(RegenerateRandomRoomBlocksRuntimeCoroutine());
     }
 
-
     /// <summary>
     /// 生成済みRoom内のTreasureをランダム表示します。
     /// </summary>
     private void ActivateRandomTreasures()
     {
-        if (cs_RoomTreasureRandomActivator == null)
+        if (!TryGetTreasureRandomActivator())
         {
             return;
         }
@@ -87,6 +87,25 @@ public class CS_RoomBlockRandomGenerator : MonoBehaviour
         cs_RoomTreasureRandomActivator.ActivateRandomTreasures();
     }
 
+    /// <summary>
+    /// Treasureランダム表示処理を取得できるか確認します。
+    /// </summary>
+    /// <returns>取得できる場合はtrue。</returns>
+    private bool TryGetTreasureRandomActivator()
+    {
+        if (cs_RoomTreasureRandomActivator == null)
+        {
+            cs_RoomTreasureRandomActivator = GetComponent<CS_RoomTreasureRandomActivator>();
+        }
+
+        if (cs_RoomTreasureRandomActivator == null)
+        {
+            Debug.LogWarning("[RoomBlockRandomGenerator] CS_RoomTreasureRandomActivatorが同じGameObjectに付いていません。");
+            return false;
+        }
+
+        return true;
+    }
 
     /// <summary>
     /// Random設定のRoomを生成します。
@@ -129,7 +148,7 @@ public class CS_RoomBlockRandomGenerator : MonoBehaviour
     }
 
     /// <summary>
-    /// Play中用のRandom Room再生成処理です。生成ごワープの生成も行います。
+    /// Play中用のRandom Room再生成処理です。生成後ワープの生成も行います。
     /// </summary>
     private IEnumerator RegenerateRandomRoomBlocksRuntimeCoroutine()
     {
