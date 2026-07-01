@@ -17,8 +17,7 @@ public class CloneCat : GimmickBase
     [SerializeField] private float Addition_multiplier = 0.2f;
 
     [Header("Player透明度")]
-    [SerializeField] private float idleAlpha = 0.5f;
-    [SerializeField] private float brokenAlpha = 1.0f;
+    [SerializeField] private float ActiveAlpha = 0.5f;
 
     [Header("Broken時ワープY座標")]
     [SerializeField] private float warpPositionY = 5.0f;
@@ -57,7 +56,7 @@ public class CloneCat : GimmickBase
         }
 
         ViewGimmickUI(false);
-        SetPlayerAlpha(idleAlpha);
+        SetPlayerAlpha(ActiveAlpha);
     }
 
     protected override void ActiveUpdate()
@@ -111,7 +110,7 @@ public class CloneCat : GimmickBase
         ChangePosProcess();
 
         SetPlayerControl(true);
-        SetPlayerAlpha(brokenAlpha);
+        SetPlayerAlpha(1.0f);
     }
 
 
