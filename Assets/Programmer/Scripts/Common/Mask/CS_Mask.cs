@@ -19,7 +19,6 @@ public class CS_Mask : MonoBehaviour
     [Header("Startのアルファ値")][SerializeField] public float startAlpha= 0.0f;
     [Header("Endのアルファ値")][SerializeField] public float endAlpha = 0.0f;
 
-
     //処理用の変数
     private float startScaleValue;
     private float endScaleValue;
