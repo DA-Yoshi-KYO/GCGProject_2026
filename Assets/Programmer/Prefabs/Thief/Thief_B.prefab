@@ -374,7 +374,7 @@ PrefabInstance:
     - target: {fileID: -7347752991125921688, guid: eb0700089a07b8e4e90035b22aef1c91,
         type: 3}
       propertyPath: m_Layer
-      value: 26
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: eb0700089a07b8e4e90035b22aef1c91,
         type: 3}
@@ -404,6 +404,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 1618081277952418930}
+    - targetCorrespondingSourceObject: {fileID: -7347752991125921688, guid: eb0700089a07b8e4e90035b22aef1c91,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5297821427785321648}
   m_SourcePrefab: {fileID: 100100000, guid: eb0700089a07b8e4e90035b22aef1c91, type: 3}
 --- !u!4 &7427244252274467675 stripped
 Transform:
@@ -438,3 +442,24 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!1 &8836044477299483864 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -7347752991125921688, guid: eb0700089a07b8e4e90035b22aef1c91,
+    type: 3}
+  m_PrefabInstance: {fileID: 6960425609073575088}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &5297821427785321648
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8836044477299483864}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11f78dff6c482044bacba515260bfaae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  outlineColor: {r: 1, g: 0, b: 0, a: 1}
+  outlineWidth: 6
+  emissionIntensity: 6
