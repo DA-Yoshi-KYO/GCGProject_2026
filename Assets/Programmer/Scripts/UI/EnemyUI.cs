@@ -100,7 +100,7 @@ public class EnemyUI : MonoBehaviour
             RectTransform rt = kv.Value.GetComponent<RectTransform>();
             if (rt != null)
             {
-                rt.anchoredPosition = actorRT.anchoredPosition + new Vector2(0, index * iconSpacing);
+                rt.anchoredPosition = actorRT.anchoredPosition + new Vector2(0, -index * iconSpacing);
             }
             index++;
         }
