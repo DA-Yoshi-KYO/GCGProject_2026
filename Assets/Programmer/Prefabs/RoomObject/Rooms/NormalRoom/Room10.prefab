@@ -75,6 +75,7 @@ Transform:
   - {fileID: 2015467791217391283}
   - {fileID: 763784766706349794}
   - {fileID: 48357924883946094}
+  - {fileID: 1520303259381591906}
   m_Father: {fileID: 3968754921928230485}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &183452431112124263
@@ -345,7 +346,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2092190855234103252}
-  m_Father: {fileID: 2387615772063805625}
+  m_Father: {fileID: 334508182658747006}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &5347333827189296879
 BoxCollider:
@@ -380,7 +381,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a522c4a2bffae8b4f9a3a2b1c1674f46, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  e_MoveDirection: 1
+  e_MoveDirection: 2
   tf_PlayerSpawnPoint: {fileID: 2092190855234103252}
   go_OpenDoorObject: {fileID: 0}
   go_ClosedWallObject: {fileID: 0}
@@ -1245,7 +1246,6 @@ Transform:
   - {fileID: 8667843816435744038}
   - {fileID: 7369807178704675199}
   - {fileID: 2664267307088037227}
-  - {fileID: 6316481527333570568}
   m_Father: {fileID: 3968754921928230485}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2474023301386482053
@@ -2417,13 +2417,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3884210350849854337}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -11, y: 4, z: -9}
   m_LocalScale: {x: 1, y: 2, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3201185897796741057}
-  m_Father: {fileID: 335936991991463172}
+  m_Father: {fileID: 45543823627387321}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &6936243313001914881
 BoxCollider:
@@ -2458,7 +2458,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a522c4a2bffae8b4f9a3a2b1c1674f46, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  e_MoveDirection: 0
+  e_MoveDirection: 3
   tf_PlayerSpawnPoint: {fileID: 3201185897796741057}
   go_OpenDoorObject: {fileID: 0}
   go_ClosedWallObject: {fileID: 0}
@@ -2615,7 +2615,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3711696034272227750}
-  - {fileID: 1520303259381591906}
   - {fileID: 2901565196875790382}
   - {fileID: 6143134612262930124}
   - {fileID: 7706931874821242995}
@@ -4662,6 +4661,7 @@ Transform:
   - {fileID: 2843415669344087673}
   - {fileID: 1180503618568479243}
   - {fileID: 1355922274341578068}
+  - {fileID: 6316481527333570568}
   m_Father: {fileID: 3968754921928230485}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &58466321931576830
