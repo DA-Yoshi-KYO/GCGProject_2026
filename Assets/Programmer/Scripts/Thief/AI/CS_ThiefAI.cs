@@ -136,6 +136,10 @@ public class CS_ThiefAI : MonoBehaviour
     private Animator animator;
     public Animator read_Animator => animator;
 
+    [Tooltip("種類アイコン")]
+    private Sprite iconSprite;
+    public Sprite read_IconSprite => iconSprite;
+
     // 分解したクラス一覧
     [Tooltip("移動システム")]
     private CS_MoveSystem moveSystem;
@@ -171,7 +175,7 @@ public class CS_ThiefAI : MonoBehaviour
     /// <param name="entryPoint">最初に入ってくるドアの位置</param>
     public void Setting(CO_ThiefStatusData typedata, CO_ThiefCommonStatusData data, float playerSpeed, CS_RoomNode entryRoom, Transform entryPoint)
     {
-        /*未実装、未設定　*///data.jumpHeight;
+        iconSprite = typedata.thiefTypeIcon;
 
         durability = typedata.durability;
         maxDurability = typedata.durability;

@@ -514,6 +514,9 @@ public class CS_MemorySystem
                     visionTargetMemories[((CS_VisionTarget)currentTarget)].searchThief = thiefAI.gameObject;
                     (( CS_VisionTarget)currentTarget).searchThief = thiefAI.gameObject;
 
+                    // 探索しているオブジェクトの方を向くように回転させる
+                    thiefAI.transform.LookAt(new Vector3(currentTarget.transform.position.x, thiefAI.transform.position.y, currentTarget.transform.position.z));
+
                     // 泥棒のアニメーション状態をHuntingに変更する
                     if (thiefAI.read_Animator != null) thiefAI.read_Animator.SetBool("IsHunting", true);
 
@@ -531,6 +534,8 @@ public class CS_MemorySystem
                 {
                     // 探索対象との距離が、探索済みとする距離の閾値よりも大きい場合は、探索度をリセットする
                     ResetCurrentTargetExplorationProgress();
+                    // 探索対象の方へ移動する
+                    thiefAI.read_MoveSystem.MoveTo(currentTarget.transform.position);
                 }
             }
             // プレイヤーの場合
