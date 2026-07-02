@@ -30,9 +30,6 @@ public class CS_ThiefManager : MonoBehaviour
     private CO_ThiefCommonStatusData thiefCommonDB;
     public CO_ThiefCommonStatusData GetThiefCommonDB() { return GameObject.Instantiate(thiefCommonDB); }
 
-    [SerializeField, Tooltip("泥棒のプレハブ")]
-    private GameObject thiefPrefab;
-
     [Tooltip("初回生成が完了しているかどうか")]
     private bool isFirstGenerationComplete = false;
     public bool read_IsFirstGenerationComplete => isFirstGenerationComplete;
@@ -156,11 +153,13 @@ public class CS_ThiefManager : MonoBehaviour
         // 生成される初期部屋の取得
         CS_RoomNode entryRoom = roomObject.transform.GetComponentInChildren<CS_RoomNode>();
 
+        // 泥棒のタイプに応じたデータを取得
+        CO_ThiefStatusData typeData = Info.thiefTypeData;
 
         // ============================================ 応急処置
         //泥棒の生成
         GameObject thief = GameObject.Instantiate(
-            thiefPrefab,
+            typeData.thiefPrefab,
             entryPoint.position,
             entryPoint.rotation,
             thiefParent.transform
@@ -178,9 +177,6 @@ public class CS_ThiefManager : MonoBehaviour
 
         // 基準となるプレイヤーの速度を取得
         float playerSpeed = GameObject.FindGameObjectWithTag("Player").GetComponent<CS_PlayerMove>().GetBasePlayerSpeed();
-
-        // 泥棒のタイプに応じたデータを取得
-        CO_ThiefStatusData typeData = Info.thiefTypeData;
 
         // 行動AIの設定
         CS_ThiefAI thiefAI = thief.GetComponent<CS_ThiefAI>();
