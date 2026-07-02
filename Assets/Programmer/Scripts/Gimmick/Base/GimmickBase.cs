@@ -93,6 +93,9 @@ public class GimmickBase : MonoBehaviour
     [SerializeField] private MeshRenderer[] mesh;
     private Material[] materials;
 
+    [Header("MeshScaleAdaptation")]
+    [SerializeField] private bool isMeshScaleAdaptation;
+
     [Header("Broken Fade")]
     [SerializeField] private float brokenFadeSpeed = 1.0f;
     private float brokenAlpha = 1.0f;
@@ -187,8 +190,14 @@ public class GimmickBase : MonoBehaviour
         float targetSizeX = gimmickSize.x * roomGrid.gridSize.x;
         float targetSizeZ = gimmickSize.y * roomGrid.gridSize.y;
 
-        float scaleX = targetSizeX / meshSize.x;
-        float scaleZ = targetSizeZ / meshSize.z;
+        float scaleX = targetSizeX;
+        float scaleZ = targetSizeZ;
+
+        if (isMeshScaleAdaptation)
+        {//メッシュスケール適応
+            scaleX /= meshSize.x;
+            scaleZ /= meshSize.z;
+        }
         float scaleY = (scaleX + scaleZ) / 2f;
 
         scaleX = scaleX * gimmickScale / 100f;

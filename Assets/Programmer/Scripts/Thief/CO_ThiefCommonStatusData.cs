@@ -35,10 +35,6 @@ public class CO_ThiefCommonStatusData : ScriptableObject
     [Tooltip("泥棒を生成する間隔の基本値")]
     public float createInterval;
 
-    [Header("泥棒のジャンプの高さ(マス目)"), Min(0)]
-    [Tooltip("ジャンプ可能な高さ(マス目)")]
-    public int jumpHeight;
-
     [Header("攻撃命中後の気絶時間(秒)")]
     [Tooltip("泥棒が攻撃を受けた後の気絶時間"),Min(0)]
     public int stunTime;
