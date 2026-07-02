@@ -247,7 +247,7 @@ public class RoomGrid : MonoBehaviour
             foreach (var hitItem in hitList)
             {
                 // 床のマテリアルに穴の位置を伝える
-                Material material = hitItem.collider.gameObject.GetComponent<Renderer>().material;
+                Material material = hitItem.collider.gameObject.GetComponentInChildren<Renderer>().material;
                 material.SetFloat("_UseHole", 1.0f);
                 material.SetVector("_HoleCenter", new Vector4(spawnPos.x, spawnPos.z, 0, 0));
                 break;
