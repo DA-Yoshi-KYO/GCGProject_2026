@@ -17,4 +17,7 @@ public static class CS_ThiefDebugFlags
 
     [Tooltip("プレイヤーを追跡するかどうか")]
     public static bool ChasePlayer = true;
+
+    [Tooltip("ダメージを受けた後の無敵時間を設定するかどうか")]
+    public static bool EnableInvincibilityAfterDamage = true;
 }
