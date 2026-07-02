@@ -257,6 +257,12 @@ public class CS_PlayerCamera : MonoBehaviour
         float t = Mathf.Clamp01(transTimer / moveDuration);
         t = Easing.EaseInOutCubic(t);
 
+        //プレイヤーの頭上にくるように補正
+        Vector3 newPlayerPos = transform.position;
+        newPlayerPos.y = prevInfo.position.y;
+
+        newInfo.position = newPlayerPos;
+
         roomCameraObject.transform.position = Vector3.Lerp(prevInfo.position, newInfo.position, t);
         roomCameraObject.transform.rotation = Quaternion.Slerp(prevInfo.rotation, newInfo.rotation, t);
 
