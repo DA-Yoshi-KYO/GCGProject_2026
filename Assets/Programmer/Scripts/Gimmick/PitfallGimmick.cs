@@ -9,6 +9,7 @@
 //||        拘束自体はHitManager.csで行う
 //||―――――――――――――――――――――
 
+using System.Collections.Generic;
 using UnityEngine;
 public class PitfallGimmick : GimmickBase
 {
@@ -16,6 +17,7 @@ public class PitfallGimmick : GimmickBase
     [Header("ギミックが有効な時間")] private float activeTime = 5f;
 
     private bool isFirstActive = false;
+    public List<RaycastHit> hitHoles;   // 落とし穴としてアルファクリッピングする為にレイキャストでヒットしたオブジェクトを格納するリスト
 
     void Start()
     {
@@ -41,5 +43,21 @@ public class PitfallGimmick : GimmickBase
     {
         GetThiefGimmickAction().PitFallEnd();
         base.BrokenUpdate();
+    }
+
+    void OnDestroy()
+    {
+        foreach (var hit in hitHoles)
+        {
+            if (hit.collider != null)
+            {
+                var renderer = hit.collider.GetComponentInChildren<Renderer>();
+                if (renderer != null)
+                {
+                    // アルファクリッピングを元に戻す処理
+                    renderer.material.SetFloat("_UseHole", 0f);
+                }
+            }
+        }
     }
 }
