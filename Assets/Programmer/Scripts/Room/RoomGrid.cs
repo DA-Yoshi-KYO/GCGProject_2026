@@ -235,13 +235,26 @@ public class RoomGrid : MonoBehaviour
         RaycastHit[] hits = Physics.RaycastAll(ray, Mathf.Abs(rayOriginY - (gameObject.transform.position.y - 10.0f)), ~0,
             QueryTriggerInteraction.Ignore);
         Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
-        foreach (var hitItem in hits)
-        {
-            if (hitItem.transform.CompareTag("Player")) continue;
-            if (hitItem.transform.CompareTag("Thief")) continue;
 
-            spawnPos.y = hitItem.point.y;
-            break;
+        List<RaycastHit> hitList = new List<RaycastHit>(hits);
+        hitList.RemoveAll(hit => hit.transform.CompareTag("Player") || hit.transform.CompareTag("Thief"));
+        spawnPos.y = hitList[0].point.y;
+
+        // ギミックが落とし穴ギミックだった場合、床のマテリアルに穴の位置を伝える
+        PitfallGimmick pitfallGimmick = gimmick.GetComponent<PitfallGimmick>();
+        if (pitfallGimmick != null)
+        {
+            foreach (var hitItem in hitList)
+            {
+                // 床のマテリアルに穴の位置を伝える
+                Material material = hitItem.collider.gameObject.GetComponentInChildren<Renderer>().material;
+                material.SetFloat("_UseHole", 1.0f);
+                material.SetVector("_HoleCenter", new Vector4(spawnPos.x, spawnPos.z, 0, 0));
+                break;
+            }
+
+            // ギミック削除時にアルファクリッピングを元に戻すため、ヒットしたオブジェクトをリストに格納する
+            pitfallGimmick.hitHoles = hitList;
         }
         GameObject gimmickObject = Instantiate(gimmick.gameObject, spawnPos, Quaternion.identity);
         GimmickBase spawnGimmick = gimmickObject.GetComponent<GimmickBase>();
