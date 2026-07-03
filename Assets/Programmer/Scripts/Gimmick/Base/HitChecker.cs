@@ -322,7 +322,7 @@ public class HitChecker : MonoBehaviour
                 switch (gimmick)
                 {
                     case Gimmick.IronBall:
-                        //thiefGA.IronBallStart(gimmickBase);
+                        thiefGA.IronBallStart(gimmickBase);
                         //Debug.Log("泥棒逃げる！");
                         break;
                 }
