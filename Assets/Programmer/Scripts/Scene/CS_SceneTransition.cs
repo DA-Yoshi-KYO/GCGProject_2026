@@ -13,7 +13,7 @@ using UnityEngine.UI;
 public class CS_SceneTransition : MonoBehaviour
 {
     //フェードの種類
-    enum FadeKind
+    public enum FadeKind
     { 
         BlackFade,
         CatFade,
@@ -76,6 +76,15 @@ public class CS_SceneTransition : MonoBehaviour
     //遷移開始
     public void StartSceneTransition(string sceneName)
     {
+        if (!transition)
+        {
+            StartCoroutine(SwitchScene(sceneName));
+        }
+    }
+
+    public void StartSceneTransition(string sceneName, FadeKind kind)
+    {
+        fadeKind = kind;
         if (!transition)
         {
             StartCoroutine(SwitchScene(sceneName));

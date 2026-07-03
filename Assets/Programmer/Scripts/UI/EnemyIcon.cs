@@ -10,7 +10,8 @@ public class EnemyIcon : MonoBehaviour
     [Header("アイコンのImage")]
     [SerializeField] private Image iconImage;
 
-
+    [Header("アイコンのサイズ")]
+    [SerializeField] private Vector3 iconSize = new Vector3(1f, 1f, 1f);
 
 
     private CS_ThiefAI thiefAI;
@@ -40,11 +41,14 @@ public class EnemyIcon : MonoBehaviour
         // 同じ部屋にいる場合サイズを大きくする
         if (thiefAI.read_MemorySystem.read_CurrentRoomPoint == roomPlayerPosition.PlayerRoomData.transform)
         {
-            transform.localScale = Vector3.Lerp(transform.localScale, Vector3.one * 1.2f, Time.deltaTime * 5f);
+
+
+
+            transform.localScale = Vector3.Lerp(transform.localScale, iconSize * 1.2f, Time.deltaTime * 5f);
         }
         else
         {
-            transform.localScale = Vector3.Lerp(transform.localScale, Vector3.one * 1.0f, Time.deltaTime * 5f);
+            transform.localScale = Vector3.Lerp(transform.localScale, iconSize * 1.0f, Time.deltaTime * 5f);
         }
 
     }
