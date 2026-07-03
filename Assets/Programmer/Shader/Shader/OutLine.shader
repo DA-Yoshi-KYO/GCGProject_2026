@@ -3,7 +3,7 @@ Shader "Custom/Outline"
     Properties
     {
         [HDR] _OutlineColor ("Outline Color", Color) = (0.03, 0.03, 0.03, 1)
-        _OutlineWidth ("Outline Width", Range(0.0, 1.0)) = 1
+        _OutlineWidth ("Outline Width", Range(0.0, 10.0)) = 6
         _EmissionIntensity ("Emission Intensity", Range(1.0, 30.0)) = 6.0
     }
     SubShader

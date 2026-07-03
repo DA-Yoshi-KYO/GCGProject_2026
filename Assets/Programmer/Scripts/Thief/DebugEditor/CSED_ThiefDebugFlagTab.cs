@@ -18,12 +18,14 @@ internal sealed class CSED_ThiefDebugFlagTab
     // ローカル編集用（GUIの初期表示に使う）
     private bool isCatchPlayer = false;
     private bool isChasePlayer = false;
+    private bool isEnableInvincibilityAfterDamage = false;
 
     public CSED_ThiefDebugFlagTab()
     {
         // 初期化時に現在のグローバル値を読み込む
         isCatchPlayer = CS_ThiefDebugFlags.CatchPlayer;
         isChasePlayer = CS_ThiefDebugFlags.ChasePlayer;
+        isEnableInvincibilityAfterDamage = CS_ThiefDebugFlags.EnableInvincibilityAfterDamage;
     }
 
     /// <summary>
@@ -42,6 +44,7 @@ internal sealed class CSED_ThiefDebugFlagTab
         // フラグ群（必要に応じてここに増やす）
         isCatchPlayer = EditorGUILayout.ToggleLeft("プレイヤーを捕まえる", isCatchPlayer);
         isChasePlayer = EditorGUILayout.ToggleLeft("プレイヤーを追跡する", isChasePlayer);
+        isEnableInvincibilityAfterDamage = EditorGUILayout.ToggleLeft("ダメージ後の無敵時間を有効にする", isEnableInvincibilityAfterDamage);
 
         EditorGUILayout.Space(8);
 
@@ -69,6 +72,7 @@ internal sealed class CSED_ThiefDebugFlagTab
         EditorGUILayout.LabelField("現在のランタイム値", EditorStyles.boldLabel);
         EditorGUILayout.LabelField("CatchPlayer = " + CS_ThiefDebugFlags.CatchPlayer.ToString());
         EditorGUILayout.LabelField("ChasePlayer = " + CS_ThiefDebugFlags.ChasePlayer.ToString());
+        EditorGUILayout.LabelField("EnableInvincibilityAfterDamage = " + CS_ThiefDebugFlags.EnableInvincibilityAfterDamage.ToString());
     }
 
     /// <summary>
@@ -78,7 +82,8 @@ internal sealed class CSED_ThiefDebugFlagTab
     {
         CS_ThiefDebugFlags.CatchPlayer = isCatchPlayer;
         CS_ThiefDebugFlags.ChasePlayer = isChasePlayer;
-        Debug.Log("[ThiefDebug] フラグを適用しました: CatchPlayer = " + isCatchPlayer + ", ChasePlayer = " + isChasePlayer);
+        CS_ThiefDebugFlags.EnableInvincibilityAfterDamage = isEnableInvincibilityAfterDamage;
+        Debug.Log("[ThiefDebug] フラグを適用しました: CatchPlayer = " + isCatchPlayer + ", ChasePlayer = " + isChasePlayer + ", EnableInvincibilityAfterDamage = " + isEnableInvincibilityAfterDamage);
     }
 
     /// <summary>

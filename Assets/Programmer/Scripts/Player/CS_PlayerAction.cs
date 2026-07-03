@@ -34,8 +34,8 @@ public class CS_PlayerAction : MonoBehaviour
         public float radius;    // 円柱の直径
         public float height;    // 円柱の高さ
     }
-    [SerializeField] private InteractSyllinder interactMin = new InteractSyllinder { radius = 3f, height = 3f };//インタラクトの範囲の最小値
-    [SerializeField] private InteractSyllinder interactMax = new InteractSyllinder { radius = 5f, height = 5f };//インタラクトの範囲の最大値
+    [SerializeField] public InteractSyllinder interactMin = new InteractSyllinder { radius = 3f, height = 3f };//インタラクトの範囲の最小値
+    [SerializeField] public InteractSyllinder interactMax = new InteractSyllinder { radius = 5f, height = 5f };//インタラクトの範囲の最大値
     [HideInInspector] public int currentSoul { private set; get; } = 0;//現在のソウルの数
     [HideInInspector] public int currentGimmickIndex { private set; get; } = 0;//現在選択しているギミック
 
@@ -285,6 +285,20 @@ public class CS_PlayerAction : MonoBehaviour
                 interactField.GetComponent<Renderer>().enabled = false;
                 playSE.PlayOneShotSE("Cat_Interact1", gameObject.transform.position, "InteractSE");
 
+                //アンク用動作
+                if(gimmickManager.GetGimmickInfoDataList()[currentGimmickIndex].gimmickTag ==
+                    Gimmick.MagicAnkh)
+                {//カーソルがアンクの時インタラクト発動
+                    foreach(var GM in gimmickManager.GetGimmickList())
+                    {
+                        //タグでアンク判定→アクティブへ
+                        if (GM.gimmick.GetGimmickTag() == Gimmick.MagicAnkh)
+                        {
+                            GM.gimmick.gimmickState = GimmickState.Active;
+                        }
+                    }
+                }
+
                 foreach (Collider hit in hitList)
                 {
                     var renderers = hit.GetComponentsInChildren<Renderer>();
@@ -403,12 +417,10 @@ public class CS_PlayerAction : MonoBehaviour
         bool isEffect = true;
 
         //ギミックごとに魔法陣の位置を調整可能に
+        //ギミックの場所も変わる
         switch(instance.gimmick)
         {
             case Gimmick.Nyaki:
-                instance.transform.position = transform.position;
-                break;
-            case Gimmick.MagicAnkh:
                 instance.transform.position = transform.position;
                 break;
         }
@@ -625,6 +637,9 @@ public class CS_PlayerAction : MonoBehaviour
         MeshFilter meshFilter = gimmick.GetComponentInChildren<MeshFilter>();
         if (meshFilter != null && meshFilter.sharedMesh != null)
             gimmick.AdjustScaleToGrid();
+
+        // infinity例外
+        if (settingPos.magnitude == float.PositiveInfinity) return;
 
         //----------------------------------
         // 初回のみ生成

@@ -13,10 +13,13 @@ public class CS_GameResult : MonoBehaviour
     [Header("ゲームクリアのPrefab格納")][SerializeField] private GameObject gameClear;
     [Header("ゲーム失敗のPrefab格納")][SerializeField] private GameObject gameFailure;
 
-    private CS_EndManager endManager;
-    bool end = false;
+    [Header("ゲーム失敗のカットシーンのPrefab格納")][SerializeField] private GameObject gameFailureCutScene;
+    [Header("ゲーム失敗のカットシーンの座標")][SerializeField] private Transform gameFailureCutScenePos;
 
-    [Header("デバッグの確認時用")][SerializeField] public bool debugEnd;
+    private CS_EndManager endManager;
+
+    [Header("デバッグの確認時用")][SerializeField] private bool debugEnd;
+    [Header("失敗演出の設定（もし前の物の場合True）")][SerializeField]private bool isOldFailure;
     [Header("デバッグコマンド　GameClearへのキー")][SerializeField] public KeyCode gameClearKey;
     [Header("デバッグコマンド　GameFailureへのキー")][SerializeField] public KeyCode gameFailureKey;
 
@@ -31,7 +34,11 @@ public class CS_GameResult : MonoBehaviour
         backGroundPlaySE = GameObject.Find("SE").GetComponent<CS_BackGroundPlaySE>();
 
         gameClear.SetActive(false);
-        gameFailure.SetActive(false);
+
+        if (isOldFailure)
+        {
+            gameFailure.SetActive(false);
+        }
     }
 
     // Update is called once per frame
@@ -51,11 +58,18 @@ public class CS_GameResult : MonoBehaviour
 
             if(Input.GetKeyDown(gameFailureKey))
             {
-                gameFailure.SetActive(true);
-                if (!startJingle)
+                if (isOldFailure)
                 {
-                    backGroundPlaySE.PlaySE("LoseJingle");
-                    startJingle = true;
+                    gameFailure.SetActive(true);
+                    if (!startJingle)
+                    {
+                        backGroundPlaySE.PlaySE("LoseJingle");
+                        startJingle = true;
+                    }
+                }
+                else
+                {
+                    GameObject gameObject = Instantiate(gameFailureCutScene, gameFailureCutScenePos.position, gameFailureCutScenePos.rotation);
                 }
             }
         }
@@ -74,11 +88,18 @@ public class CS_GameResult : MonoBehaviour
                 }
                 else
                 {
-                    gameFailure.SetActive(true);
-                    if (!startJingle)
+                    if (isOldFailure)
                     {
-                        backGroundPlaySE.PlaySE("LoseJingle");
-                        startJingle = true;
+                        gameFailure.SetActive(true);
+                        if (!startJingle)
+                        {
+                            backGroundPlaySE.PlaySE("LoseJingle");
+                            startJingle = true;
+                        }
+                    }
+                    else
+                    {
+                        GameObject gameObject = Instantiate(gameFailureCutScene, gameFailureCutScenePos.position, gameFailureCutScenePos.rotation);
                     }
                 }
             }

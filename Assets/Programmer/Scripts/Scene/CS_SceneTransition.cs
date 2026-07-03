@@ -12,7 +12,17 @@ using UnityEngine.UI;
 
 public class CS_SceneTransition : MonoBehaviour
 {
-    [Header("フェードの画像")][SerializeField]private Image fadeImage;//フェードの画像
+    //フェードの種類
+    enum FadeKind
+    { 
+        BlackFade,
+        CatFade,
+    }
+
+    [Header("フェードの種類")][SerializeField] private FadeKind fadeKind;//フェードの種類
+    [Header("ブラックフェードの画像")][SerializeField]private Image blackFadeImage;//フェードの画像
+    [Header("猫フェードの画像")][SerializeField]private Image catInFadeImage;//フェードの画像
+    [Header("猫フェードの画像")][SerializeField]private Image catOutFadeImage;//フェードの画像
     [Header("フェードにかける時間")][SerializeField] private float fadeDuration = 1.0f;//フェードにかける時間
     private bool transition = false;//遷移したかどうか
 
@@ -25,12 +35,37 @@ public class CS_SceneTransition : MonoBehaviour
     {
         backGroundPlayBGM = GameObject.Find("BGM").GetComponent<CS_BackGroundPlayBGM>();
 
-        fadeImage.color = new Color(fadeImage.color.r, fadeImage.color.g, fadeImage.color.b, 1.0f);
-        fadeImage.raycastTarget = false;
+        blackFadeImage.raycastTarget = false;
+        catInFadeImage.raycastTarget = false;
+        catOutFadeImage.raycastTarget = false;
 
-        //フェードイン
-        fadeOut = false;
-        StartCoroutine(FadeProcessing(0.0f));
+        switch (fadeKind)
+        {
+            case FadeKind.BlackFade:
+                blackFadeImage.color = new Color(blackFadeImage.color.r, blackFadeImage.color.g, blackFadeImage.color.b, 1.0f);
+                catInFadeImage.material.SetFloat("_AlphaScaleFloat", 1.0f);
+                catInFadeImage.material.SetFloat("_CurrentScaleFloat", 0.0f);
+
+                catOutFadeImage.material.SetFloat("_AlphaScaleFloat", 1.0f);
+                catOutFadeImage.material.SetFloat("_CurrentScaleFloat", 0.0f);
+
+                //フェードイン
+                fadeOut = false;
+                StartCoroutine(BlackFadeProcessing(0.0f));
+                break;
+            case FadeKind.CatFade:
+                blackFadeImage.color = new Color(blackFadeImage.color.r, blackFadeImage.color.g, blackFadeImage.color.b, 0.0f);
+                catInFadeImage.material.SetFloat("_CurrentScaleFloat", 18.0f);
+                catInFadeImage.material.SetFloat("_AlphaScaleFloat", 0.0f);
+
+                catOutFadeImage.material.SetFloat("_CurrentScaleFloat", 18.0f);
+                catOutFadeImage.material.SetFloat("_AlphaScaleFloat", 0.0f);
+
+                //フェードイン
+                fadeOut = false;
+                StartCoroutine(CatFadeProcessing(0.0f, 18.0f, 1.0f, 0.0f));
+                break;
+        }
     }
 
     void Update()
@@ -54,7 +89,16 @@ public class CS_SceneTransition : MonoBehaviour
 
         //フェードアウト
         fadeOut = true;
-        yield return StartCoroutine(FadeProcessing(1.0f));
+
+        switch(fadeKind)
+        {
+            case FadeKind.BlackFade:
+                yield return StartCoroutine(BlackFadeProcessing(1.0f));
+                break;
+            case FadeKind.CatFade:
+                yield return StartCoroutine(CatFadeProcessing(1.0f, 0.0f, 0.0f, 18.0f));
+                break;
+        }
 
         //シーンの切り替え
         SceneManager.LoadScene(sceneName);
@@ -64,16 +108,16 @@ public class CS_SceneTransition : MonoBehaviour
     }
 
     //フェードの処理
-    private IEnumerator FadeProcessing(float targetAlpha)
+    private IEnumerator BlackFadeProcessing(float targetAlpha)
     {
-        float startAlpha = fadeImage.color.a;
+        float startAlpha = blackFadeImage.color.a;
         float time = 0.0f;
 
         while (time < fadeDuration)
         {
             time += Time.unscaledDeltaTime;
             float alpha = Mathf.Lerp(startAlpha, targetAlpha, time / fadeDuration);
-            fadeImage.color = new Color(fadeImage.color.r, fadeImage.color.g, fadeImage.color.b, alpha);
+            blackFadeImage.color = new Color(blackFadeImage.color.r, blackFadeImage.color.g, blackFadeImage.color.b, alpha);
 
             if (fadeOut)
             {
@@ -87,6 +131,42 @@ public class CS_SceneTransition : MonoBehaviour
             yield return null;
         }
 
-        fadeImage.color = new Color(fadeImage.color.r, fadeImage.color.g, fadeImage.color.b, targetAlpha);
+        blackFadeImage.color = new Color(blackFadeImage.color.r, blackFadeImage.color.g, blackFadeImage.color.b, targetAlpha);
+    }
+
+    private IEnumerator CatFadeProcessing(float startAlpha, float startScale, float endAlpha, float endScale)
+    {
+        float time = 0.0f;
+
+        while (time < fadeDuration)
+        {
+            time += Time.unscaledDeltaTime;
+
+            float scale = Mathf.Lerp(startScale, endScale, time / fadeDuration);
+            float alpha = Mathf.Lerp(startAlpha, endAlpha, time / fadeDuration);
+
+            catInFadeImage.material.SetFloat("_CurrentScaleFloat", scale);
+            catOutFadeImage.material.SetFloat("_CurrentScaleFloat", scale);
+
+            catInFadeImage.material.SetFloat("_AlphaScaleFloat", alpha);
+            catOutFadeImage.material.SetFloat("_AlphaScaleFloat", alpha);
+
+            if (fadeOut)
+            {
+                backGroundPlayBGM.BGMFadeOut(time, fadeDuration);
+            }
+            else
+            {
+                backGroundPlayBGM.BGMFadeIn(time, fadeDuration);
+            }
+
+            yield return null;
+        }
+
+        catInFadeImage.material.SetFloat("_CurrentScaleFloat", endScale);
+        catOutFadeImage.material.SetFloat("_CurrentScaleFloat", endScale);
+
+        catInFadeImage.material.SetFloat("_AlphaScaleFloat", endAlpha);
+        catOutFadeImage.material.SetFloat("_AlphaScaleFloat", endAlpha);
     }
 }

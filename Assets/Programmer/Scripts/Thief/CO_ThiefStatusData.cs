@@ -23,6 +23,14 @@ using UnityEngine;
     menuName = "ScriptableObjects/Thief/TypeStatusData")]
 public class CO_ThiefStatusData : ScriptableObject
 {
+    [Header("使用する泥棒のプレハブ")]
+    [Tooltip("使用する泥棒のプレハブ"), SerializeField]
+    public GameObject thiefPrefab;
+
+    [Header("使用する泥棒のミニマップアイコン")]
+    [Tooltip("使用する泥棒のミニマップアイコン"), SerializeField]
+    public Sprite thiefTypeIcon;
+
     [Header("耐久値")]
     [Tooltip("泥棒の耐久値"), Min(1)]
     public int durability;

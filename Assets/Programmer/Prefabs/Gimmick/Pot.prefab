@@ -43,6 +43,7 @@ GameObject:
   - component: {fileID: 9110499996423704542}
   - component: {fileID: 1677323501732178438}
   - component: {fileID: 7212266173044372162}
+  - component: {fileID: 2030175298342817497}
   m_Layer: 26
   m_Name: Body
   m_TagString: Untagged
@@ -115,6 +116,21 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &2030175298342817497
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5722442906969350540}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11f78dff6c482044bacba515260bfaae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  outlineColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  outlineWidth: 6
+  emissionIntensity: 6
 --- !u!1 &5735771377558649148
 GameObject:
   m_ObjectHideFlags: 0
@@ -217,7 +233,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ffa5d34ad5ff3ed4dbf3b2fb96be98ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gimmickImage: {fileID: 21300000, guid: ef0a22a2a0e100b40ab966865b36c4d0, type: 3}
+  gimmickImage: {fileID: 21300000, guid: af86a4f1e0bc9994ab86685d1454fa7c, type: 3}
   gimmickTextImage: {fileID: 21300000, guid: e91321f727fb13d45a3102fba42e3ac2, type: 3}
   gimmickSize: {x: 1, y: 1}
   gimmickScale: 50
@@ -242,6 +258,7 @@ MonoBehaviour:
   spawnVibration: 0
   spawnVibrationSpeed: 0
   mesh: []
+  isMeshScaleAdaptation: 1
   brokenFadeSpeed: 1
   previewAlpha: 0.5
   activeTime: 10

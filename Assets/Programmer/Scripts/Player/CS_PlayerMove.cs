@@ -43,6 +43,10 @@ public class CS_PlayerMove : MonoBehaviour
     private bool isCaughtByThief;
     float catCaughtTime = 0.0f;
 
+    //スタン状態はどうか
+    private bool isCatStunByAnkh;
+    float ankhStunTimeToCatStun = 0.0f;
+
     [Header("ジャンプ開始するまでのマージン(フレーム単位)")][SerializeField] private int jumpMerginFrame = 5;
     private int jumpMerginFrameCount = 5;
     bool isJumpMerging = false;
@@ -116,6 +120,14 @@ public class CS_PlayerMove : MonoBehaviour
             Debug.Log(catCaughtTime);
             catCaughtTime -= Time.deltaTime;
             catCaughtTime = Mathf.Max(0.0f, catCaughtTime);
+            return;
+        }
+
+        if (ankhStunTimeToCatStun > 0.0f)
+        {//猫がスタンしている場合動かせない
+            Debug.Log(ankhStunTimeToCatStun);
+            ankhStunTimeToCatStun -= Time.deltaTime;
+            ankhStunTimeToCatStun = Mathf.Max(0.0f,ankhStunTimeToCatStun);
             return;
         }
 
@@ -289,6 +301,14 @@ public class CS_PlayerMove : MonoBehaviour
         // フラグを立てる
         isCaughtByThief = true;
         catCaughtTime = holdCatTime;
+    }
+
+    // 猫のスタン状態用処理※Ankh用
+    public void SetAnkhCatStunTime(float stunTime)
+    {
+        Debug.Log("アンクスタン");
+        isCatStunByAnkh = true;
+        ankhStunTimeToCatStun = stunTime;
     }
 
     // ---InputActionのコールバック関数---
