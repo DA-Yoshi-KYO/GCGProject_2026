@@ -169,7 +169,11 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: f25265d2b5115364f8a4a65f46644a57,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3664484620380418165}
   m_SourcePrefab: {fileID: 100100000, guid: f25265d2b5115364f8a4a65f46644a57, type: 3}
 --- !u!4 &325513110181814563 stripped
 Transform:
@@ -177,6 +181,27 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 220338898388371144}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1139310505961126809 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: f25265d2b5115364f8a4a65f46644a57,
+    type: 3}
+  m_PrefabInstance: {fileID: 220338898388371144}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3664484620380418165
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1139310505961126809}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11f78dff6c482044bacba515260bfaae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  outlineColor: {r: 0.5019608, g: 0.5019608, b: 0.5019608, a: 1}
+  outlineWidth: 6
+  emissionIntensity: 6
 --- !u!23 &1499514706795256396 stripped
 MeshRenderer:
   m_CorrespondingSourceObject: {fileID: -7511558181221131132, guid: f25265d2b5115364f8a4a65f46644a57,
