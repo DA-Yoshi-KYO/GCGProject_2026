@@ -7,6 +7,9 @@ public class EnemyIcon : MonoBehaviour
     [Header("HPゲージのUI")]
     [SerializeField] private TextMeshProUGUI Hp;
 
+    [Header("アイコンのImage")]
+    [SerializeField] private Image iconImage;
+
 
 
 
@@ -15,6 +18,7 @@ public class EnemyIcon : MonoBehaviour
     private void Start()
     {
         roomPlayerPosition = GameObject.Find("RoomManager").GetComponent<CS_RoomPlayerPosition>();
+
     }
     void Update()
     {
@@ -48,6 +52,7 @@ public class EnemyIcon : MonoBehaviour
     public void SetScript(CS_ThiefAI thiefAI)
     {
         this.thiefAI = thiefAI;
+        iconImage.sprite = thiefAI.read_IconSprite;
     }
 
 
