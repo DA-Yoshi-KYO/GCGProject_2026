@@ -22,6 +22,9 @@ public class CloneCat : GimmickBase
     [Header("Broken時ワープY座標")]
     [SerializeField] private float warpPositionY = 5.0f;
 
+    [Header("インタラクト範囲倍率")]
+    [SerializeField] private float interactRangeMultiplier = 0.5f;
+
     GameObject player;
     GameObject cloneCatActor;
     CS_RoomPlayerPosition roomPlayerPosition;
@@ -30,6 +33,9 @@ public class CloneCat : GimmickBase
     GimmickList gimmickList;
     SkinnedMeshRenderer[] smesh;
     GameObject gimmickUI;
+
+    CS_PlayerAction.InteractSyllinder defaultMaxSyllinder;
+    CS_PlayerAction.InteractSyllinder defaultMinSyllinder;
 
     float activeTimer = 0.0f;
     bool bFirstBroken = true;
@@ -47,6 +53,10 @@ public class CloneCat : GimmickBase
         CachePlayerComponents();
 
         SetPlayerControl(false);
+        defaultMaxSyllinder = playerAction.interactMax;
+        defaultMinSyllinder = playerAction.interactMin;
+        playerAction.interactMax = new CS_PlayerAction.InteractSyllinder { radius = defaultMaxSyllinder.radius * interactRangeMultiplier, height = defaultMaxSyllinder.height };
+        playerAction.interactMin = new CS_PlayerAction.InteractSyllinder { radius = defaultMinSyllinder.radius * interactRangeMultiplier, height = defaultMinSyllinder.height };
 
         cloneCatActor = GameObject.Find("CloneCatActor(Clone)");
         if (cloneCatActor != null)
@@ -98,6 +108,8 @@ public class CloneCat : GimmickBase
         if (player == null) return;
 
         cloneCatActor = GameObject.Find("CloneCatActor(Clone)");
+        playerAction.interactMax = defaultMaxSyllinder;
+        playerAction.interactMin = defaultMinSyllinder;
         if (cloneCatActor == null)
         {
             cloneCatActor = Instantiate(cloneCatActorPrefab, transform.position, Quaternion.identity);
