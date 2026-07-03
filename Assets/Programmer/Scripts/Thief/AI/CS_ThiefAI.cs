@@ -364,6 +364,9 @@ public class CS_ThiefAI : MonoBehaviour
         // 最終目的地に十分近づいたら、退場する
         if (Vector3.Distance(transform.position, aStarSystem.GetTargetPoint()) < 1.0f)
         {
+            GameObject Thief_BringTreature = GameObject.Find("Thief_BringTreature_" + transform.name);
+            if (Thief_BringTreature == null)
+                thiefSound.PlayOneShotSE("Thief_BringTreature", gameObject.transform.position, "Thief_BringTreature_" + transform.name);
             Debug.Log("泥棒が退場しました。");
             Destroy(this.gameObject);
         }
@@ -410,14 +413,15 @@ public class CS_ThiefAI : MonoBehaviour
 
                 outlineController.SetOutlineColor(new Color(1.0f, 0.0f, 0.0f, 0.0f));
 
+                GameObject Thief_DeadFade = GameObject.Find("Thief_DeadFade_" + transform.name);
+                if (Thief_DeadFade == null)
+                    thiefSound.PlayOneShotSE("Thief_DeadFade", gameObject.transform.position, "Thief_DeadFade_" + transform.name);
+
                 // 退場移動
                 moveSystem.StunMove();
 
                 if (fadeAmount <= 0.0f)
                 {
-                    // 気絶したときのSEを再生する処理を追加する
-                    if (thiefSound != null) thiefSound.PlayOneShotSE("Thief_Dead", gameObject.transform.position, "Thief_Dead");
-
                     // 宝物を現在の部屋のオブジェクトに親子付けする
                     if (holdTreasure != null)
                     {
@@ -469,6 +473,10 @@ public class CS_ThiefAI : MonoBehaviour
                             if (!isStandFound) break;
                         }
 
+                        GameObject Thief_DropTreatureHit = GameObject.Find("Thief_DropTreatureHit" + transform.name);
+                        if (Thief_DropTreatureHit == null)
+                            thiefSound.PlayOneShotSE("Thief_DropTreatureHit", gameObject.transform.position, "Thief_DropTreatureHit");
+
                         // 宝物を設置する位置を設定
                         holdTreasure.transform.position = new Vector3(gridPos.x, gridPos.y + holdTreasure.transform.localScale.y / 2, gridPos.z);
                     }
@@ -502,6 +510,10 @@ public class CS_ThiefAI : MonoBehaviour
 
         durability -= damage;
 
+        // ※intのRangeはmin以上max未満の範囲でランダムな整数を返すため、1～3の範囲でランダムな整数を取得する場合は、Random.Range(1, 4)とする必要がある
+        int soundIndex = Random.Range(1, 4);
+        thiefSound.PlayOneShotSE("Thief_Hit" + soundIndex, gameObject.transform.position, "Thief_Hit" + soundIndex);
+
         // ギミックの方を向く
         Vector3 directionToGimmick = gimmickPoint - transform.position;
         directionToGimmick.y = 0; // 水平方向のみにする
@@ -522,8 +534,6 @@ public class CS_ThiefAI : MonoBehaviour
             // 間接的にダメージを受けたときのリアクションに変更
             thiefReaction.ChangeReaction(CS_ThiefReaction.ThiefReactionType.NearHitTrap);
         }
-        // ダメージを受けたときのSEを再生する処理を追加する
-        if (thiefSound != null) thiefSound.PlayOneShotSE("Thief_Hit1", gameObject.transform.position, "Thief_Hit1");
 
         // プレイヤーの追跡情報をリセットする
         memorySystem.ResetIgnorePlayer();
@@ -547,6 +557,10 @@ public class CS_ThiefAI : MonoBehaviour
         if (durability <= 0)
         {
             durability = 0;
+
+            GameObject Thief_Dead = GameObject.Find("Thief_Dead_" + transform.name);
+            if (Thief_Dead == null)
+                thiefSound.PlayOneShotSE("Thief_Dead", gameObject.transform.position, "Thief_Dead");
 
             // StunThiefTargetに通知する
             GetComponent<CS_StunThiefTarget>().Notify();
@@ -587,7 +601,9 @@ public class CS_ThiefAI : MonoBehaviour
         remainingHoldCatTime = initholdCatTime;
 
         // 猫を捕まえているSEを再生する
-        if (thiefSound != null) thiefSound.PlayOneShotSE("Cat_HitThief", gameObject.transform.position, "Cat_HitThief");
+        GameObject Thief_HitCat = GameObject.Find("Thief_HitCat_" + transform.name);
+        if (Thief_HitCat == null)
+            thiefSound.PlayOneShotSE("Thief_HitCat", gameObject.transform.position, "Thief_HitCat_" + transform.name);
     }
 
     /// <summary>

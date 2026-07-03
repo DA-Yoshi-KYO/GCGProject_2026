@@ -9,7 +9,6 @@
  */
 
 using UnityEngine;
-using static UnityEditor.Recorder.OutputPath;
 
 public class RockGimmick : GimmickBase
 {

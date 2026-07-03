@@ -65,15 +65,29 @@ class OutlineMaskPass : ScriptableRenderPass
     {
         var desc = renderingData.cameraData.cameraTargetDescriptor;
         desc.colorFormat = RenderTextureFormat.ARGB32;
-        desc.depthBufferBits = 0;
-        desc.msaaSamples = 1;
+        desc.depthBufferBits = 0;   // 深度はカメラの深度バッファを共有するのでここでは持たない
+        // desc.msaaSamples はカメラ設定のまま変更しない。
+        // ここを 1 に固定すると、Game View で URP Asset の MSAA が有効な場合に
+        // カラー(maskHandle)と深度(cameraDepthTarget)のサンプル数が食い違い、
+        // 画面が白く壊れる不具合が発生する。
         RenderingUtils.ReAllocateIfNeeded(ref maskHandle, desc, name: "_OutlineMaskTex");
+
+        // カメラの深度バッファ(cameraDepthTargetHandle)を読み書き対象として使うことを明示
+        ConfigureInput(ScriptableRenderPassInput.Depth);
     }
 
     public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
     {
+        // OnCameraSetup がまだ呼ばれていない/RTが無効なケースへの対処
+        if (maskHandle == null || maskHandle.rt == null) return;
+
         var cmd = CommandBufferPool.Get("Outline Mask");
-        CoreUtils.SetRenderTarget(cmd, maskHandle, ClearFlag.Color, Color.clear);
+
+        // カラーは専用RT(maskHandle)、深度は「既存のシーン深度バッファ」を使う。
+        // ZWrite Off なので深度は書き換わらず、ZTest だけが機能する。
+        // これで xRayOutline=false のとき正しく遮蔽物越しは隠れるようになる。
+        var cameraDepthTarget = renderingData.cameraData.renderer.cameraDepthTargetHandle;
+        CoreUtils.SetRenderTarget(cmd, maskHandle, cameraDepthTarget, ClearFlag.Color, Color.clear);
 
         foreach (var t in targets)
         {
@@ -109,7 +123,8 @@ class OutlineEdgePass : ScriptableRenderPass
 
     public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
     {
-        if (maskHandle == null || edgeMaterial == null) return;
+        // maskHandle.rt が null/破棄済みのケース(Scene View等の別カメラ実行順やウィンドウ未表示時)への対処
+        if (maskHandle == null || maskHandle.rt == null || edgeMaterial == null) return;
 
         var cmd = CommandBufferPool.Get("Outline Edge");
         var cameraTarget = renderingData.cameraData.renderer.cameraColorTargetHandle;

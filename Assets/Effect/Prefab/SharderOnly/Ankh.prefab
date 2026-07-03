@@ -111,7 +111,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 10, y: 1, z: 10}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6622007154270073649}
@@ -143,9 +143,13 @@ MonoBehaviour:
   f_RippleInterval: 0.5
   n_RippleShotCount: 5
   f_StartProgress: 0
+  f_BlackCutStartProgress: 0.3
   f_TargetProgress: 0.4
   f_StartBlackCut: 0
   f_TargetBlackCut: 0.6
+  b_UseRandomRotation: 1
+  f_RandomRotationMin: 0
+  f_RandomRotationMax: 360
 --- !u!114 &8134687761730506798
 MonoBehaviour:
   m_ObjectHideFlags: 0

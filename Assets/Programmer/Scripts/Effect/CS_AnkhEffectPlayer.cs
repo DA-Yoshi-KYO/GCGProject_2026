@@ -45,9 +45,13 @@ public class CS_AnkhEffectPlayer : CSAD_EffectCommonProcessBase
     [SerializeField]
     private float f_StartProgress = 0.0f;
 
-    [Header("Progress到達値")]
+    [Header("BlackCut開始Progress")]
     [SerializeField]
-    private float f_TargetProgress = 0.4f;
+    private float f_BlackCutStartProgress = 0.3f;
+
+    [Header("Progress最終到達値")]
+    [SerializeField]
+    private float f_TargetProgress = 0.5f;
 
     [Header("BlackCut開始値")]
     [SerializeField]
@@ -56,6 +60,23 @@ public class CS_AnkhEffectPlayer : CSAD_EffectCommonProcessBase
     [Header("BlackCut到達値")]
     [SerializeField]
     private float f_TargetBlackCut = 0.6f;
+
+    [Header("波紋をランダム回転するか")]
+    [SerializeField]
+    private bool b_UseRandomRotation = true;
+
+    [Header("ランダム回転最小角度")]
+    [SerializeField]
+    private float f_RandomRotationMin = 0.0f;
+
+    [Header("ランダム回転最大角度")]
+    [SerializeField]
+    private float f_RandomRotationMax = 360.0f;
+
+    /// <summary>
+    /// テンプレートObjectの元のLocalRotationです。
+    /// </summary>
+    private Quaternion q_TemplateLocalRotation;
 
     /// <summary>
     /// 波紋Unit一覧です。
@@ -82,6 +103,7 @@ public class CS_AnkhEffectPlayer : CSAD_EffectCommonProcessBase
     /// 終了待機Coroutineです。
     /// </summary>
     private Coroutine co_EndWaitCoroutine;
+
 
     /// <summary>
     /// 初期化処理です。
@@ -169,6 +191,7 @@ public class CS_AnkhEffectPlayer : CSAD_EffectCommonProcessBase
 
         go_RippleTemplateObject = rd_TemplateRenderer.gameObject;
         tr_RippleParent = go_RippleTemplateObject.transform.parent;
+        q_TemplateLocalRotation = go_RippleTemplateObject.transform.localRotation;
     }
 
     /// <summary>
@@ -298,6 +321,8 @@ public class CS_AnkhEffectPlayer : CSAD_EffectCommonProcessBase
             StopCoroutine(cs_RippleUnit.co_PlayCoroutine);
             cs_RippleUnit.co_PlayCoroutine = null;
         }
+
+        ApplyRandomRotation(cs_RippleUnit);
 
         cs_RippleUnit.go_RippleObject.SetActive(true);
 
@@ -436,7 +461,8 @@ public class CS_AnkhEffectPlayer : CSAD_EffectCommonProcessBase
     }
 
     /// <summary>
-    /// Progressを進めます。
+    /// Progressを開始値からBlackCut開始位置まで進めます。
+    /// BlackCutは開始値のままです。
     /// </summary>
     private IEnumerator ProgressCoroutine(CS_AnkhRippleUnit f_RippleUnit)
     {
@@ -446,7 +472,7 @@ public class CS_AnkhEffectPlayer : CSAD_EffectCommonProcessBase
         {
             ApplyShaderValue(
                 f_RippleUnit,
-                f_TargetProgress,
+                f_BlackCutStartProgress,
                 f_StartBlackCut);
 
             yield break;
@@ -462,7 +488,7 @@ public class CS_AnkhEffectPlayer : CSAD_EffectCommonProcessBase
 
             float f_Progress = Mathf.Lerp(
                 f_StartProgress,
-                f_TargetProgress,
+                f_BlackCutStartProgress,
                 f_Rate);
 
             ApplyShaderValue(
@@ -475,12 +501,13 @@ public class CS_AnkhEffectPlayer : CSAD_EffectCommonProcessBase
 
         ApplyShaderValue(
             f_RippleUnit,
-            f_TargetProgress,
+            f_BlackCutStartProgress,
             f_StartBlackCut);
     }
 
     /// <summary>
-    /// Progressを固定したままBlackCutを進めます。
+    /// ProgressをBlackCut開始位置から最終位置まで進めながら、
+    /// BlackCutも開始値から到達値まで進めます。
     /// </summary>
     private IEnumerator BlackCutCoroutine(CS_AnkhRippleUnit f_RippleUnit)
     {
@@ -504,6 +531,11 @@ public class CS_AnkhEffectPlayer : CSAD_EffectCommonProcessBase
 
             float f_Rate = Mathf.Clamp01(f_CurrentTime / f_EndTime);
 
+            float f_Progress = Mathf.Lerp(
+                f_BlackCutStartProgress,
+                f_TargetProgress,
+                f_Rate);
+
             float f_BlackCut = Mathf.Lerp(
                 f_StartBlackCut,
                 f_TargetBlackCut,
@@ -511,7 +543,7 @@ public class CS_AnkhEffectPlayer : CSAD_EffectCommonProcessBase
 
             ApplyShaderValue(
                 f_RippleUnit,
-                f_TargetProgress,
+                f_Progress,
                 f_BlackCut);
 
             yield return null;
@@ -596,6 +628,9 @@ public class CS_AnkhEffectPlayer : CSAD_EffectCommonProcessBase
 
             if (cs_RippleUnit.go_RippleObject != null)
             {
+                cs_RippleUnit.go_RippleObject.transform.localRotation =
+                    q_TemplateLocalRotation;
+
                 cs_RippleUnit.go_RippleObject.SetActive(false);
             }
         }
@@ -760,5 +795,35 @@ public class CS_AnkhEffectPlayer : CSAD_EffectCommonProcessBase
         }
 
         return csst_EffectPlayData.b_LoopFlag.Value;
+    }
+
+    /// <summary>
+    /// 波紋Objectをランダム角度に回転します。
+    /// </summary>
+    /// <param name="f_RippleUnit">回転させる波紋Unit。</param>
+    private void ApplyRandomRotation(CS_AnkhRippleUnit f_RippleUnit)
+    {
+        if (b_UseRandomRotation == false)
+        {
+            return;
+        }
+
+        if (f_RippleUnit == null)
+        {
+            return;
+        }
+
+        if (f_RippleUnit.go_RippleObject == null)
+        {
+            return;
+        }
+
+        float f_RandomAngle = Random.Range(
+            f_RandomRotationMin,
+            f_RandomRotationMax);
+
+        f_RippleUnit.go_RippleObject.transform.localRotation =
+            Quaternion.Euler(0.0f, f_RandomAngle, 0.0f) *
+            q_TemplateLocalRotation;
     }
 }

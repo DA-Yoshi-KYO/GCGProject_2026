@@ -3,8 +3,16 @@ Shader "Custom/OutlineMask"
     Properties
     {
         [HDR] _OutlineColor      ("Outline Color",      Color)        = (1, 1, 1, 1)
-        _OutlineWidth            ("Outline Width (px)", Range(0, 10)) = 2
+        _OutlineWidth            ("Outline Width (px)", Range(0, 10)) = 6
         _EmissionIntensity       ("Emission Intensity", Range(1, 30)) = 6.0
+
+        // 0 = LEqual(通常の深度テスト・遮蔽物越しは見えない)
+        // 1 = Always(深度無視・オブジェクトを透過して常に見える)
+        [Enum(Occlude,0,XRay,1)] _OutlineXRay ("Occlusion Mode", Float) = 0
+
+        // _OutlineXRay を元に C# 側から実際の CompareFunction 値をセットする
+        // (LEqual=4, Always=8)。シェーダー内では直接この値を ZTest に渡す。
+        [HideInInspector] _ZTestMode ("ZTest Mode", Float) = 4
     }
     SubShader
     {
@@ -13,7 +21,7 @@ Shader "Custom/OutlineMask"
         {
             Name "OutlineMask"
             ZWrite Off
-            ZTest LEqual
+            ZTest [_ZTestMode]   // マテリアルプロパティで LEqual/Always を切り替え
             Cull Off
             HLSLPROGRAM
             #pragma vertex vert
