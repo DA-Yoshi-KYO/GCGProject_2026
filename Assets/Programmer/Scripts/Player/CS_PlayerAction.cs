@@ -638,6 +638,9 @@ public class CS_PlayerAction : MonoBehaviour
         if (meshFilter != null && meshFilter.sharedMesh != null)
             gimmick.AdjustScaleToGrid();
 
+        // infinity例外
+        if (settingPos.magnitude == float.PositiveInfinity) return;
+
         //----------------------------------
         // 初回のみ生成
         //----------------------------------
