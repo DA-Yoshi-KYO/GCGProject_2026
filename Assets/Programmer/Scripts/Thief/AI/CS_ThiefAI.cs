@@ -217,7 +217,7 @@ public class CS_ThiefAI : MonoBehaviour
         rb.useGravity = false; // 重力の影響を受けないようにする
 
         // 泥棒のリアクションUIを管理するコンポーネントを取得
-        thiefReactionUI = GetComponent<CS_ThiefReactionUI>();
+        thiefReactionUI = GameObject.FindAnyObjectByType<CS_ThiefReactionUI>();
         thiefReactionUI.RegisterReaction(data.reactionUISprites);
 
         // 泥棒のリアクションを管理するコンポーネントを取得
@@ -528,30 +528,17 @@ public class CS_ThiefAI : MonoBehaviour
         // プレイヤーの追跡情報をリセットする
         memorySystem.ResetIgnorePlayer();
 
-
-        switch (type)
-        {
-            case Gimmick.Pot:
-                // 泥棒のアニメーション状態をDamageにする
-                if (animator != null) animator.SetBool("IsStun", true);
-                thiefReactionUI.SetReactionUI(CS_ThiefReactionUI.ThiefReactionUIType.Pot);
-                break;
-            case Gimmick.IronBall:
-                // 泥棒のアニメーション状態をDamageにする
-                if (animator != null) animator.SetBool("IsDamage", true);
-                thiefReactionUI.SetReactionUI(CS_ThiefReactionUI.ThiefReactionUIType.IronBall);
-                break;
-            case Gimmick.EmptyChest:
-            case Gimmick.None:
-            default:
-                break;
-        }
+        // リアクションUIを更新する
+        thiefReactionUI.SetReactionUI();
 
         ChangeStatus(ThiefState.Stunned); // 状態を気絶に変更
         memorySystem.ClearTarget();
         elapsedTimeAfterStun = 0.0f; // 気絶時間の経過時間をリセット
 
-        remainingInvincibleTime = invincibleTime; // 無敵時間を付与
+        if (CS_ThiefDebugFlags.EnableInvincibilityAfterDamage)
+        {
+            remainingInvincibleTime = invincibleTime; // 無敵時間を付与
+        }
 
         memorySystem.ResetIgnorePlayer(); // プレイヤーを無視する状態をリセット
 

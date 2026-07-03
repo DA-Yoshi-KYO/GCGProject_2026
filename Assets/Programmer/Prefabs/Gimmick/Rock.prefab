@@ -69,7 +69,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c36819ff44560ab4aaa9c2fcdf01b110, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gimmickImage: {fileID: 21300000, guid: a504e442915cc904782286017d5fa384, type: 3}
+  gimmickImage: {fileID: 21300000, guid: c843f7c313a070745a473eedf8a928f6, type: 3}
   gimmickTextImage: {fileID: 21300000, guid: 41a291d905d9ea741a6ecb21f958fffa, type: 3}
   gimmickSize: {x: 2, y: 2}
   gimmickScale: 100
@@ -134,6 +134,7 @@ GameObject:
   - component: {fileID: 5266267011370479474}
   - component: {fileID: 8445343213754529174}
   - component: {fileID: 7231338705601677269}
+  - component: {fileID: 1171596490052382450}
   m_Layer: 26
   m_Name: RockModel
   m_TagString: Untagged
@@ -206,6 +207,21 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &1171596490052382450
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7403022301308067105}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11f78dff6c482044bacba515260bfaae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  outlineColor: {r: 0.5019608, g: 0.5019608, b: 0.5019608, a: 1}
+  outlineWidth: 6
+  emissionIntensity: 6
 --- !u!1001 &7102488724510636985
 PrefabInstance:
   m_ObjectHideFlags: 0
