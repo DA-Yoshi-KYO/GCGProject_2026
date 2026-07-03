@@ -13,7 +13,9 @@ public class CS_GameResult : MonoBehaviour
     [Header("ゲームクリアのPrefab格納")][SerializeField] private GameObject gameClear;
     [Header("ゲーム失敗のPrefab格納")][SerializeField] private GameObject gameFailure;
 
+    [Header("ゲームクリアのカットシーンのPrefab格納")][SerializeField] private GameObject gameClearCutScene;
     [Header("ゲーム失敗のカットシーンのPrefab格納")][SerializeField] private GameObject gameFailureCutScene;
+    [Header("ゲームクリアのカットシーンの座標")][SerializeField] private Transform gameClearCutScenePos;
     [Header("ゲーム失敗のカットシーンの座標")][SerializeField] private Transform gameFailureCutScenePos;
 
     private CS_EndManager endManager;
@@ -46,31 +48,38 @@ public class CS_GameResult : MonoBehaviour
     {
         if (debugEnd)
         {
-            if(Input.GetKeyDown(gameClearKey))
-            {
-                gameClear.SetActive(true);
-                if (!startJingle)
-                {
-                    backGroundPlaySE.PlaySE("WinJingle");
-                    startJingle = true;
-                }
-            }
-
-            if(Input.GetKeyDown(gameFailureKey))
+            if (Input.GetKeyDown(gameClearKey))
             {
                 if (isOldFailure)
                 {
-                    gameFailure.SetActive(true);
+                    gameClear.SetActive(true);
                     if (!startJingle)
                     {
-                        backGroundPlaySE.PlaySE("LoseJingle");
+                        backGroundPlaySE.PlaySE("WinJingle");
                         startJingle = true;
                     }
                 }
                 else
                 {
-                    GameObject gameObject = Instantiate(gameFailureCutScene, gameFailureCutScenePos.position, gameFailureCutScenePos.rotation);
+                    GameObject gameObject = Instantiate(gameClearCutScene, gameClearCutScenePos.position, gameClearCutScenePos.rotation);
                 }
+            }
+        }
+
+        if (Input.GetKeyDown(gameFailureKey))
+        {
+            if (isOldFailure)
+            {
+                gameFailure.SetActive(true);
+                if (!startJingle)
+                {
+                    backGroundPlaySE.PlaySE("LoseJingle");
+                    startJingle = true;
+                }
+            }
+            else
+            {
+                GameObject gameObject = Instantiate(gameFailureCutScene, gameFailureCutScenePos.position, gameFailureCutScenePos.rotation);
             }
         }
         else
@@ -79,11 +88,18 @@ public class CS_GameResult : MonoBehaviour
             {
                 if (endManager.read_IsWin)
                 {
-                    gameClear.SetActive(true);
-                    if (!startJingle)
+                    if (isOldFailure)
                     {
-                        backGroundPlaySE.PlaySE("WinJingle");
-                        startJingle = true;
+                        gameClear.SetActive(true);
+                        if (!startJingle)
+                        {
+                            backGroundPlaySE.PlaySE("WinJingle");
+                            startJingle = true;
+                        }
+                    }
+                    else
+                    {
+                        GameObject gameObject = Instantiate(gameClearCutScene, gameClearCutScenePos.position, gameClearCutScenePos.rotation);
                     }
                 }
                 else

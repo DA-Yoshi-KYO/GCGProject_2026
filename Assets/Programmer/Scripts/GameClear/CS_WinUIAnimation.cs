@@ -1,4 +1,4 @@
-public class CS_FailureUIAnimation : CS_ResultUIAnimationBase
+public class CS_WinUIAnimation : CS_ResultUIAnimationBase
 {
     protected override void Start()
     {

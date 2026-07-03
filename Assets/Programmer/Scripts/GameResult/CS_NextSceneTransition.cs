@@ -20,6 +20,6 @@ public class CS_NextSceneTransition : MonoBehaviour
         if (transition == null)
             SceneManager.LoadScene(sceneName);
         else
-            transition.StartSceneTransition(sceneName);
+            transition.StartSceneTransition(sceneName, CS_SceneTransition.FadeKind.CatFade);
     }
 }
