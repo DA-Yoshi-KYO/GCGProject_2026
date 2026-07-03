@@ -1,18 +1,20 @@
 using UnityEngine;
 
-// ========================================================
-// アウトライン対象にアタッチするコンポーネント
-// AddComponent するだけで登録/解除が自動管理される
-// CS_OutlineController の置き換え（APIは同じ）
-// ========================================================
+/// <summary>
+/// アウトライン対象にアタッチするコンポーネント。
+/// 自身のMaskMaterial(インスタンス)を持ち、色・太さを直接セットする。
+/// </summary>
 [RequireComponent(typeof(Renderer))]
 public class CS_OutlineTarget : MonoBehaviour
 {
     [Header("Outline Settings")]
     [ColorUsage(true, true)]
-    public Color outlineColor = Color.gray;
-    public float outlineWidth = 6f;
+    public Color outlineColor = Color.white;
+    public float outlineWidth = 2f;
     public float emissionIntensity = 6f;
+
+    [Tooltip("ONにすると遮蔽物越しにアウトラインが透けて見える（Editorの選択アウトラインと同じ挙動）")]
+    public bool xRayOutline = false;
 
     public Renderer CachedRenderer => cachedRenderer;
     public Material MaskMaterial => maskMaterial;   // Pass1 はこれで描く
@@ -23,6 +25,11 @@ public class CS_OutlineTarget : MonoBehaviour
     static readonly int ColorId = Shader.PropertyToID("_OutlineColor");
     static readonly int WidthId = Shader.PropertyToID("_OutlineWidth");
     static readonly int IntensityId = Shader.PropertyToID("_EmissionIntensity");
+    static readonly int ZTestModeId = Shader.PropertyToID("_ZTestMode");
+
+    // UnityEngine.Rendering.CompareFunction の実値
+    const float ZTEST_LEQUAL = 4f; // 通常の深度テスト(遮蔽物越しは見えない)
+    const float ZTEST_ALWAYS = 8f; // 深度無視(常に見える = X線表示)
 
     void Awake()
     {
@@ -78,6 +85,12 @@ public class CS_OutlineTarget : MonoBehaviour
         ApplyToMaterial();
     }
 
+    public void SetXRay(bool enabled)
+    {
+        xRayOutline = enabled;
+        ApplyToMaterial();
+    }
+
     public void ResetOutline()
     {
         outlineColor = Color.white;
@@ -101,6 +114,7 @@ public class CS_OutlineTarget : MonoBehaviour
         maskMaterial.SetColor(ColorId, outlineColor);
         maskMaterial.SetFloat(WidthId, outlineWidth);
         maskMaterial.SetFloat(IntensityId, emissionIntensity);
+        maskMaterial.SetFloat(ZTestModeId, xRayOutline ? ZTEST_ALWAYS : ZTEST_LEQUAL);
     }
 
 #if UNITY_EDITOR
