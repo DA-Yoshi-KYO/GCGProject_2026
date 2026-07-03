@@ -510,6 +510,8 @@ public class CS_MemorySystem
                 // 探索対象との距離が、探索済みとする距離の閾値以下になっている場合
                 if (distanceToTarget <= ((CS_VisionTarget)currentTarget).exploredDistanceThreshold)
                 {
+                    thiefAI.read_MoveSystem.Stop();
+
                     // 探索対象の探索している人を自分に設定する
                     visionTargetMemories[((CS_VisionTarget)currentTarget)].searchThief = thiefAI.gameObject;
                     (( CS_VisionTarget)currentTarget).searchThief = thiefAI.gameObject;
