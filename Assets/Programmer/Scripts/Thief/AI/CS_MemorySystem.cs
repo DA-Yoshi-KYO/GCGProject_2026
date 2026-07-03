@@ -281,15 +281,15 @@ public class CS_MemorySystem
                         isTreasureObject = true;
                     }
                     break;
-                case Gimmick.IronBall:
-                    {
-                        // 現在の状態がActiveの場合でないときは、スキップする
-                        if (trap.gimmickScript.gimmickState != GimmickState.Active) continue;
+                //case Gimmick.IronBall:
+                //    {
+                //        // 現在の状態がActiveの場合でないときは、スキップする
+                //        if (trap.gimmickScript.gimmickState != GimmickState.Active) continue;
 
-                        // 泥棒の大岩用ギミックアクションの開始処理を呼び出す
-                        thiefAI.read_ThiefGimmickAction.IronBallStart(trap.gimmickScript);
-                    }
-                    break;
+                //        // 泥棒の大岩用ギミックアクションの開始処理を呼び出す
+                //        thiefAI.read_ThiefGimmickAction.IronBallStart(trap.gimmickScript);
+                //    }
+                //    break;
             }
         }
 
@@ -788,6 +788,10 @@ public class CS_MemorySystem
         //　((VisionTarget)currentTarget).explorationProgress　: 対象の探索度(MAX : 100.0f)
         // searchTime : 探索対象の探索にかかる時間
         visionTargetMemories[((CS_VisionTarget)currentTarget)].explorationProgress += (100.0f / searchTime[((int)((CS_VisionTarget)currentTarget).targetType)]) * Time.deltaTime;
+
+        GameObject Thief_Serach = GameObject.Find("Thief_Serach_" + thiefAI.transform.name);
+        if (Thief_Serach == null)
+            thiefAI.read_ThiefSound.PlayOneShotSE("Thief_Serach", thiefAI.transform.position, "Thief_Serach_" + thiefAI.transform.name);
 
         // 探索度が100%以上になった場合は、探索が終了していると判定してtrueを返す
         if (visionTargetMemories[((CS_VisionTarget)currentTarget)].explorationProgress >= 100.0f)
