@@ -37,6 +37,51 @@ Transform:
   - {fileID: 2773105342718968979}
   m_Father: {fileID: 7585980640544363119}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &6086885688636183735
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5214246729122606404}
+  - component: {fileID: 1099179752301923162}
+  m_Layer: 0
+  m_Name: NextScene
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &5214246729122606404
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6086885688636183735}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7585980640544363119}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1099179752301923162
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6086885688636183735}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a91dab106a9fde49a820fcb20f8c8a2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneName: TitleScene
 --- !u!1 &7779621066821693960
 GameObject:
   m_ObjectHideFlags: 0
@@ -62,7 +107,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7779621066821693960}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0, y: 0.0002617804, z: 0, w: 1}
   m_LocalPosition: {x: 960, y: 687.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -71,8 +116,9 @@ Transform:
   - {fileID: 2643915813690713987}
   - {fileID: 8904486527572604209}
   - {fileID: 1336636636134050401}
+  - {fileID: 5214246729122606404}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0.03, z: 0}
 --- !u!320 &1524794733027689764
 PlayableDirector:
   m_ObjectHideFlags: 0
@@ -114,6 +160,8 @@ PlayableDirector:
     value: {fileID: 3080603198199365607}
   - key: {fileID: 6058733953715579952, guid: 7b96ec8f187c1414a98286ef542c9656, type: 2}
     value: {fileID: 2083026736701094841}
+  - key: {fileID: -8255642834268171398, guid: 7b96ec8f187c1414a98286ef542c9656, type: 2}
+    value: {fileID: 6086885688636183735}
   m_ExposedReferences:
     m_References: []
 --- !u!1 &8415444164803897282
@@ -245,6 +293,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: ANM_Thief_Win_Cut1_01
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: bee8aa93a6e8b9e46a2b6b4ec2783a5a,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -349,6 +402,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: ANM_Thief_Win_Cut2_02
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 03350a86b339bfb48817f56fc744d13d,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -455,6 +513,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: ANM_Thief_Win_Cut3_01
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 2819ff733e4747b47a7af5949d3892cc,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -560,6 +623,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: ANM_Thief_Win_Cut2_03
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: ba76fb00003bf1248a676b73840c6fe1,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -610,6 +678,31 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2643915813690713987}
     m_Modifications:
+    - target: {fileID: -8737204920524100739, guid: 836814c075a327d49b175bf5bce1ee6f,
+        type: 3}
+      propertyPath: m_Depth
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8737204920524100739, guid: 836814c075a327d49b175bf5bce1ee6f,
+        type: 3}
+      propertyPath: m_BackGroundColor.a
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8737204920524100739, guid: 836814c075a327d49b175bf5bce1ee6f,
+        type: 3}
+      propertyPath: m_BackGroundColor.b
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8737204920524100739, guid: 836814c075a327d49b175bf5bce1ee6f,
+        type: 3}
+      propertyPath: m_BackGroundColor.g
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8737204920524100739, guid: 836814c075a327d49b175bf5bce1ee6f,
+        type: 3}
+      propertyPath: m_BackGroundColor.r
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 836814c075a327d49b175bf5bce1ee6f,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -664,6 +757,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: ANM_Camera_Win_Cut02
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 836814c075a327d49b175bf5bce1ee6f,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -770,6 +868,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: ANM_Thief_Win_Cut2_01
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: ffeab99574d021f44b660026e7836d8a,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -820,6 +923,31 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2643915813690713987}
     m_Modifications:
+    - target: {fileID: -8737204920524100739, guid: abde07fd6899a6e4f818e76aef249151,
+        type: 3}
+      propertyPath: m_Depth
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8737204920524100739, guid: abde07fd6899a6e4f818e76aef249151,
+        type: 3}
+      propertyPath: m_BackGroundColor.a
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8737204920524100739, guid: abde07fd6899a6e4f818e76aef249151,
+        type: 3}
+      propertyPath: m_BackGroundColor.b
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8737204920524100739, guid: abde07fd6899a6e4f818e76aef249151,
+        type: 3}
+      propertyPath: m_BackGroundColor.g
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8737204920524100739, guid: abde07fd6899a6e4f818e76aef249151,
+        type: 3}
+      propertyPath: m_BackGroundColor.r
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: abde07fd6899a6e4f818e76aef249151,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -874,6 +1002,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: ANM_Camera_Win_Cut01
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: abde07fd6899a6e4f818e76aef249151,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -980,6 +1113,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: ANM_Bastet_Win_Cut3_01
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 0c8d82c9531271a44b3ffed5d13a98c5,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1030,6 +1168,31 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2643915813690713987}
     m_Modifications:
+    - target: {fileID: -8737204920524100739, guid: 1ba39053c254c254e9c3fed3432b8548,
+        type: 3}
+      propertyPath: m_Depth
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8737204920524100739, guid: 1ba39053c254c254e9c3fed3432b8548,
+        type: 3}
+      propertyPath: m_BackGroundColor.a
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8737204920524100739, guid: 1ba39053c254c254e9c3fed3432b8548,
+        type: 3}
+      propertyPath: m_BackGroundColor.b
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8737204920524100739, guid: 1ba39053c254c254e9c3fed3432b8548,
+        type: 3}
+      propertyPath: m_BackGroundColor.g
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8737204920524100739, guid: 1ba39053c254c254e9c3fed3432b8548,
+        type: 3}
+      propertyPath: m_BackGroundColor.r
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 1ba39053c254c254e9c3fed3432b8548,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1084,6 +1247,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: ANM_Camera_Win_Cut03
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 1ba39053c254c254e9c3fed3432b8548,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1190,6 +1358,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: ANM_Thief_Win_Cut2_04
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 0eb5b181a521fed4b90bc37af56606f4,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1218,7 +1391,7 @@ Animator:
   m_Controller: {fileID: 9100000, guid: 58cc277b4b6f6c84f86c7a07b9be1600, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
-  m_ApplyRootMotion: 0
+  m_ApplyRootMotion: 1
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
   m_WarningMessage: 
@@ -1245,10 +1418,30 @@ PrefabInstance:
       propertyPath: m_Name
       value: Canvas
       objectReference: {fileID: 0}
+    - target: {fileID: 5119195144936329607, guid: 725dfecaee1c6644b844957bb18243e0,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5510729303287745361, guid: 725dfecaee1c6644b844957bb18243e0,
         type: 3}
       propertyPath: phase.Array.data[0].animationDuration
       value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5845693516000515440, guid: 725dfecaee1c6644b844957bb18243e0,
+        type: 3}
+      propertyPath: m_VertexColorAlwaysGammaSpace
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8152620687819462105, guid: 725dfecaee1c6644b844957bb18243e0,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8355126923309547843, guid: 725dfecaee1c6644b844957bb18243e0,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9171342484092249089, guid: 725dfecaee1c6644b844957bb18243e0,
         type: 3}

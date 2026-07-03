@@ -91,6 +91,7 @@ public class CS_ResultUIAnimationBase : MonoBehaviour
 
         float duration = phase[progressIndex].animationDuration;
         timer += Time.deltaTime;
+        timer = Mathf.Clamp(timer, 0f, duration);
 
         foreach (int index in phase[progressIndex].sameTimeAnimationIndex)
         {
@@ -132,7 +133,7 @@ public class CS_ResultUIAnimationBase : MonoBehaviour
             }
         }
 
-        if (timer > duration)
+        if (timer >= duration)
         {
             progressIndex++;
             timer = 0f;
