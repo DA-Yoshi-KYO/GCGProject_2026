@@ -44,6 +44,18 @@ public class CS_VisionTarget : CS_ThiefTarget
     [SerializeField, Header("このオブジェクトを探索している敵")]
     public GameObject searchThief;
 
+    [Tooltip("盗まれて移動中かどうか")]
+    private bool isStolenMoveing = false;
+    public bool read_IsStolenMoveing => isStolenMoveing;
+
+    [Tooltip("出口までの距離")]
+    private int exitDistance = 0;
+    public int read_ExitDistance => exitDistance;
+
+    [Tooltip("盗んで移動中の敵のAI")]
+    private CS_ThiefAI thiefAI;
+
+
     private void Start()
     {
         // ターゲットの種類が宝物の場合
@@ -61,8 +73,27 @@ public class CS_VisionTarget : CS_ThiefTarget
             }
 
             // EndManagerに宝物を追加
-            endManager.AddTreasure();
+            endManager.AddTreasure(this);
         }
+    }
+
+    private void Update()
+    {
+        // 盗まれて移動中の場合、出口までの距離を計算
+        if (isStolenMoveing)
+        {
+            exitDistance = thiefAI.read_AStarSystem.GetRouteDistance();
+        }
+    }
+
+    /// <summary>
+    /// 盗まれて移動中の敵のAIを設定
+    /// </summary>
+    /// <param name="thiefAI">盗まれて移動中の敵のAI</param>
+    public void PlayStolen(CS_ThiefAI thiefAI)
+    {
+        this.thiefAI = thiefAI;
+        isStolenMoveing = true;
     }
 
     private void OnDestroy()
@@ -74,9 +105,10 @@ public class CS_VisionTarget : CS_ThiefTarget
             CS_EndManager endManager = GameObject.FindObjectOfType<CS_EndManager>();
             if (endManager == null) return;
             // EndManagerから宝物を減らす
-            endManager.StolenTreasure();
+            endManager.StolenTreasure(this);
         }
     }
+
 
     /// <summary>
     /// ギズモの表示
