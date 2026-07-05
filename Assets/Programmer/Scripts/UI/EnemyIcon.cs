@@ -4,14 +4,13 @@ using UnityEngine.UI;
 
 public class EnemyIcon : MonoBehaviour
 {
-    [Header("HPゲージのUI")]
-    [SerializeField] private TextMeshProUGUI Hp;
-
     [Header("アイコンのImage")]
     [SerializeField] private Image iconImage;
 
     [Header("アイコンのサイズ")]
     [SerializeField] private Vector3 iconSize = new Vector3(1f, 1f, 1f);
+
+    [SerializeField] private NumberView numberView;
 
 
     private CS_ThiefAI thiefAI;
@@ -19,6 +18,7 @@ public class EnemyIcon : MonoBehaviour
     private void Start()
     {
         roomPlayerPosition = GameObject.Find("RoomManager").GetComponent<CS_RoomPlayerPosition>();
+        numberView.SetTensView(false);
 
     }
     void Update()
@@ -32,12 +32,9 @@ public class EnemyIcon : MonoBehaviour
         {
             return;
         }
-        if(Hp == null)
-        {
-            return;
-        }
+ 
         int currentHP = thiefAI.read_Durability;
-        Hp.text = currentHP.ToString();
+        numberView.SetNumber(currentHP);
         // 同じ部屋にいる場合サイズを大きくする
         if (thiefAI.read_MemorySystem.read_CurrentRoomPoint == roomPlayerPosition.PlayerRoomData.transform)
         {
