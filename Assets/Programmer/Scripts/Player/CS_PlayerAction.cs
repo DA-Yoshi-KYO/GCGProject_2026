@@ -41,7 +41,7 @@ public class CS_PlayerAction : MonoBehaviour
 
     private GameObject previewBase;
 
-    private CS_OutlineController outlineController; // プレイヤーのアウトラインを制御
+    private CS_OutlineTarget outlineTarget; // プレイヤーのアウトラインを制御
 
     private CS_PlayerData playerData;
     float interactTime = 0.0f;
@@ -88,8 +88,8 @@ public class CS_PlayerAction : MonoBehaviour
         interactField.GetComponent<Renderer>().enabled = false;
 
         // アウトラインコントローラーの初期化
-        outlineController = new CS_OutlineController(GetComponentInChildren<SkinnedMeshRenderer>());
-        outlineController.SetOutlineColor(Color.gray);
+        outlineTarget = GetComponentInChildren<CS_OutlineTarget>();
+        outlineTarget.SetOutlineColor(Color.gray);
 
         playSE = GameObject.Find("3DSE").GetComponent<CS_3DPlaySE>();
 
@@ -106,11 +106,11 @@ public class CS_PlayerAction : MonoBehaviour
 
         if (playerData.currentMode == CS_PlayerData.PlayerMode.Normal)
         {
-            outlineController.SetOutlineColor(Color.gray);
+            outlineTarget.SetOutlineColor(Color.gray);
         }
         else
         {
-            outlineController.SetOutlineColor(Color.yellow);
+            outlineTarget.SetOutlineColor(Color.yellow);
         }
 
         if (isInteracting)
@@ -132,7 +132,7 @@ public class CS_PlayerAction : MonoBehaviour
                     }
                 }
 
-                outlineController.SetOutlineColor(Color.green);
+                outlineTarget.SetOutlineColor(Color.green);
 
                 // インタラクト範囲を拡大
                 interactScale.x = Mathf.Max(interactTime - switchInteract, 0f) + interactMin.radius;
