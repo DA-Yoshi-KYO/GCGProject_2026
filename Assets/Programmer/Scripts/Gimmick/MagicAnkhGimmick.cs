@@ -2,8 +2,9 @@ using UnityEngine;
 
 public class MagicAnkhGimmick : GimmickBase
 {
+    [Header("アンクの発動時間")]
     [SerializeField]
-    private float activeTime = 1.5f;
+    private float f_ActiveDuration = 2.0f;
 
     [Header("アンク発動時Effect")]
     [SerializeField]
@@ -12,6 +13,8 @@ public class MagicAnkhGimmick : GimmickBase
     [Header("Effect位置Offset")]
     [SerializeField]
     private Vector3 v3_EffectOffset = Vector3.zero;
+
+    private float f_CurrentActiveTime = 0.0f;
 
     private bool isActiveFirst = false;
     private bool isBrokenFirst = false;
@@ -27,17 +30,21 @@ public class MagicAnkhGimmick : GimmickBase
         if (isActiveFirst == false)
         {
             isActiveFirst = true;
+
+            // ここで必ず発動時間を入れ直す
+            f_CurrentActiveTime = f_ActiveDuration;
+
             PlayAnkhEffect();
         }
 
         SetHitChecker(transform.position);
 
-        if (activeTime <= 0)
+        f_CurrentActiveTime -= Time.deltaTime;
+
+        if (f_CurrentActiveTime <= 0.0f)
         {
             gimmickState = GimmickState.Broken;
         }
-
-        activeTime -= Time.deltaTime;
     }
 
     protected override void BrokenUpdate()
