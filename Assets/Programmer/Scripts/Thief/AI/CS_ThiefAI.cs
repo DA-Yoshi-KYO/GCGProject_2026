@@ -165,6 +165,19 @@ public class CS_ThiefAI : MonoBehaviour
     private CS_ThiefGimmickAction thiefGimmickAction;
     public CS_ThiefGimmickAction read_ThiefGimmickAction => thiefGimmickAction;
 
+    [Header("猫拘束中Effect")]
+    [SerializeField]
+    private GameObject go_PettingEffectPrefab;
+
+    [Header("猫拘束中Effectの表示位置Offset")]
+    [SerializeField]
+    private Vector3 v3_PettingEffectOffset = new Vector3(0.0f, 1.2f, 0.0f);
+
+    /// <summary>
+    /// 再生中の猫拘束Effectです。
+    /// </summary>
+    private CSAD_EffectCommonProcessBase csad_PettingEffect;
+
     /// <summary>
     /// 泥棒のステータスを設定する処理
     /// </summary>
@@ -270,6 +283,9 @@ public class CS_ThiefAI : MonoBehaviour
             if (remainingHoldCatTime < 0.0f)
             {
                 remainingHoldCatTime = 0.0f;
+
+                EndPettingEffect();
+
                 memorySystem.ClearTarget();
             }
             return;
@@ -600,10 +616,64 @@ public class CS_ThiefAI : MonoBehaviour
         // 猫を捕まえている時間を設定
         remainingHoldCatTime = initholdCatTime;
 
+        // 猫拘束中Effectを再生
+        PlayPettingEffect();
+
         // 猫を捕まえているSEを再生する
         GameObject Thief_HitCat = GameObject.Find("Thief_HitCat_" + transform.name);
         if (Thief_HitCat == null)
             thiefSound.PlayOneShotSE("Thief_HitCat", gameObject.transform.position, "Thief_HitCat_" + transform.name);
+    }
+
+    /// <summary>
+    /// 猫拘束中Effectを再生します。
+    /// </summary>
+    private void PlayPettingEffect()
+    {
+        if (go_PettingEffectPrefab == null)
+        {
+            return;
+        }
+
+        Vector3 v3_EffectPosition =
+            transform.position + v3_PettingEffectOffset;
+
+        Quaternion q_EffectRotation =
+            go_PettingEffectPrefab.transform.rotation;
+
+        CSST_EffectPlayData csst_EffectPlayData = new CSST_EffectPlayData();
+        csst_EffectPlayData.CSST_EffectPlayData_Init();
+        csst_EffectPlayData.SetPosition(v3_EffectPosition);
+        csst_EffectPlayData.SetRotation(q_EffectRotation);
+
+        if (csad_PettingEffect == null)
+        {
+            csad_PettingEffect = CS_EffectFactory.CreateEffect(
+                go_PettingEffectPrefab,
+                v3_EffectPosition,
+                q_EffectRotation,
+                transform);
+        }
+
+        if (csad_PettingEffect == null)
+        {
+            return;
+        }
+
+        csad_PettingEffect.PlayEffect(csst_EffectPlayData);
+    }
+
+    /// <summary>
+    /// 猫拘束中Effectを終了します。
+    /// </summary>
+    private void EndPettingEffect()
+    {
+        if (csad_PettingEffect == null)
+        {
+            return;
+        }
+
+        csad_PettingEffect.EndEffect();
     }
 
     /// <summary>
