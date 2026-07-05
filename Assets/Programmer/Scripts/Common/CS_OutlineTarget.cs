@@ -10,7 +10,7 @@ public class CS_OutlineTarget : MonoBehaviour
     [Header("Outline Settings")]
     [ColorUsage(true, true)]
     public Color outlineColor = Color.white;
-    public float outlineWidth = 2f;
+    public float outlineWidth = 6f;
     public float emissionIntensity = 6f;
 
     [Tooltip("ONにすると遮蔽物越しにアウトラインが透けて見える（Editorの選択アウトラインと同じ挙動）")]

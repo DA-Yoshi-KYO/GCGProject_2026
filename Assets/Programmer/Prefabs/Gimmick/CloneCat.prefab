@@ -212,6 +212,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 7540014579853123337}
+    - targetCorrespondingSourceObject: {fileID: -3396506489417211948, guid: 9c49b8b12bbcdc74bb519e7d7c2f72c0,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8901527643335042999}
   m_SourcePrefab: {fileID: 100100000, guid: 9c49b8b12bbcdc74bb519e7d7c2f72c0, type: 3}
 --- !u!4 &1225686449341996664 stripped
 Transform:
@@ -246,6 +250,28 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!1 &5067980588486305351 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -3396506489417211948, guid: 9c49b8b12bbcdc74bb519e7d7c2f72c0,
+    type: 3}
+  m_PrefabInstance: {fileID: 1623611615946963347}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8901527643335042999
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5067980588486305351}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11f78dff6c482044bacba515260bfaae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineWidth: 6
+  emissionIntensity: 6
+  xRayOutline: 0
 --- !u!1001 &3115770665615982946
 PrefabInstance:
   m_ObjectHideFlags: 0
