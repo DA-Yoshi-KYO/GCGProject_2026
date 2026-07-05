@@ -9,7 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1540414805785360791}
-  m_Layer: 0
+  - component: {fileID: 3880390297241485430}
+  m_Layer: 27
   m_Name: Model
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -32,6 +33,28 @@ Transform:
   - {fileID: 1943813980429150334}
   m_Father: {fileID: 2062024832296711870}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!64 &3880390297241485430
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1015015678390056489}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 0}
 --- !u!1 &4877168968123032387
 GameObject:
   m_ObjectHideFlags: 0
@@ -43,9 +66,9 @@ GameObject:
   - component: {fileID: 2062024832296711870}
   - component: {fileID: 5365317646100919884}
   - component: {fileID: 3117468721445263130}
-  m_Layer: 0
+  m_Layer: 27
   m_Name: PotVat
-  m_TagString: Untagged
+  m_TagString: Gimmick
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -150,6 +173,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: VAT_Destruction_Pot_A_mesh
       objectReference: {fileID: 0}
+    - target: {fileID: 3720059890988954575, guid: 222ab3ef26c245540a8b10687134dadb,
+        type: 3}
+      propertyPath: m_Layer
+      value: 27
+      objectReference: {fileID: 0}
     - target: {fileID: 4101546082060953973, guid: 222ab3ef26c245540a8b10687134dadb,
         type: 3}
       propertyPath: m_LocalScale.x
@@ -214,6 +242,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4308255880921843646, guid: 222ab3ef26c245540a8b10687134dadb,
+        type: 3}
+      propertyPath: m_Layer
+      value: 27
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -280,6 +313,11 @@ PrefabInstance:
       propertyPath: m_Center.y
       value: 10
       objectReference: {fileID: 0}
+    - target: {fileID: 621804040960485242, guid: 04669349bd8eae5469e6e486cc2c28e1,
+        type: 3}
+      propertyPath: m_Layer
+      value: 27
+      objectReference: {fileID: 0}
     - target: {fileID: 673135597934059757, guid: 04669349bd8eae5469e6e486cc2c28e1,
         type: 3}
       propertyPath: m_LocalScale.x
@@ -289,6 +327,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Search
+      objectReference: {fileID: 0}
+    - target: {fileID: 933345628519016608, guid: 04669349bd8eae5469e6e486cc2c28e1,
+        type: 3}
+      propertyPath: m_Layer
+      value: 27
+      objectReference: {fileID: 0}
+    - target: {fileID: 3782406196879605838, guid: 04669349bd8eae5469e6e486cc2c28e1,
+        type: 3}
+      propertyPath: m_Layer
+      value: 27
       objectReference: {fileID: 0}
     - target: {fileID: 5994039899918183061, guid: 04669349bd8eae5469e6e486cc2c28e1,
         type: 3}
