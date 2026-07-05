@@ -104,32 +104,6 @@ public class CS_BackGroundPlayBGM : MonoBehaviour
         currentData = data;
 
         thiefData = dataBase.bgmData["ThiefEscape"];
-
-        //for (int i = 0 ; i < dataBase.bgmDatas.Length ; ++i)
-        //{
-        //    if (currentScene == dataBase.bgmDatas[i].sceneName.ToString())
-        //    {
-        //        if (dataBase.bgmDatas[i].cueName.ToString() != "NoneBGM")
-        //        {
-        //            playerInfo.SetCue(criAtomExAcbsList[0], dataBase.bgmDatas[i].cueName.ToString());
-        //            playerInfo.Loop(true);
-        //            playerInfo.SetVoicePriority(255);
-        //            playerInfo.Prepare();
-        //            playerInfo.Start();
-        //        }
-        //        else
-        //        {
-        //            playerInfo.Stop();
-        //        }
-
-        //        currentData = dataBase.bgmDatas[i];
-        //    }
-            
-        //    if (dataBase.bgmDatas[i].sceneName.ToString() == "ThiefEscape")
-        //    {
-        //        thiefData = dataBase.bgmDatas[i];
-        //    }
-        //}
     }
 
     //BGMのフェードアウト
