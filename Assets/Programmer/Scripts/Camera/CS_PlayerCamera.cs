@@ -100,10 +100,9 @@ public class CS_PlayerCamera : MonoBehaviour
         //プレイヤーに追従して移動
         Vector3 moveAmount = roomCenter - transform.position;
 
-        moveAmount.y = 0.0f;
-
         //カメラの移動に制限をかける
         moveAmount.x = Mathf.Clamp(moveAmount.x, -roomCamera.moveAmountLimit.x, roomCamera.moveAmountLimit.x);
+        moveAmount.y = Mathf.Clamp(moveAmount.y, -roomCamera.moveAmountLimit.y, roomCamera.moveAmountLimit.y);
         moveAmount.z = Mathf.Clamp(moveAmount.z, -roomCamera.moveAmountLimit.z, roomCamera.moveAmountLimit.z);
 
         //カメラの移動

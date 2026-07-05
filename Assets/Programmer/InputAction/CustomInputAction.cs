@@ -400,7 +400,7 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": true
                 },
                 {
-                    ""name"": ""positive"",
+                    ""name"": ""Negative"",
                     ""id"": ""a1b9277f-8e04-412e-a297-c7fbd7fa2a26"",
                     ""path"": ""<XInputController>/leftShoulder"",
                     ""interactions"": """",
@@ -1358,6 +1358,34 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""Openning"",
+            ""id"": ""47c28b0c-df81-4276-8d4c-9de63b778c72"",
+            ""actions"": [
+                {
+                    ""name"": ""SkipButton"",
+                    ""type"": ""Button"",
+                    ""id"": ""7aae6388-f438-461c-b5e4-1d604ea13f1a"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""a5ecf7df-373f-4915-8c81-f39403b4b4f4"",
+                    ""path"": ""<Keyboard>/space"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SkipButton"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": []
@@ -1395,6 +1423,9 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
         m_Option_Left = m_Option.FindAction("Left", throwIfNotFound: true);
         m_Option_Right = m_Option.FindAction("Right", throwIfNotFound: true);
         m_Option_Decision = m_Option.FindAction("Decision", throwIfNotFound: true);
+        // Openning
+        m_Openning = asset.FindActionMap("Openning", throwIfNotFound: true);
+        m_Openning_SkipButton = m_Openning.FindAction("SkipButton", throwIfNotFound: true);
     }
 
     ~@CustomInputAction()
@@ -1405,6 +1436,7 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
         UnityEngine.Debug.Assert(!m_GameClear.enabled, "This will cause a leak and performance issues, CustomInputAction.GameClear.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_GameOver.enabled, "This will cause a leak and performance issues, CustomInputAction.GameOver.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_Option.enabled, "This will cause a leak and performance issues, CustomInputAction.Option.Disable() has not been called.");
+        UnityEngine.Debug.Assert(!m_Openning.enabled, "This will cause a leak and performance issues, CustomInputAction.Openning.Disable() has not been called.");
     }
 
     /// <summary>
@@ -2217,6 +2249,102 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
     /// Provides a new <see cref="OptionActions" /> instance referencing this action map.
     /// </summary>
     public OptionActions @Option => new OptionActions(this);
+
+    // Openning
+    private readonly InputActionMap m_Openning;
+    private List<IOpenningActions> m_OpenningActionsCallbackInterfaces = new List<IOpenningActions>();
+    private readonly InputAction m_Openning_SkipButton;
+    /// <summary>
+    /// Provides access to input actions defined in input action map "Openning".
+    /// </summary>
+    public struct OpenningActions
+    {
+        private @CustomInputAction m_Wrapper;
+
+        /// <summary>
+        /// Construct a new instance of the input action map wrapper class.
+        /// </summary>
+        public OpenningActions(@CustomInputAction wrapper) { m_Wrapper = wrapper; }
+        /// <summary>
+        /// Provides access to the underlying input action "Openning/SkipButton".
+        /// </summary>
+        public InputAction @SkipButton => m_Wrapper.m_Openning_SkipButton;
+        /// <summary>
+        /// Provides access to the underlying input action map instance.
+        /// </summary>
+        public InputActionMap Get() { return m_Wrapper.m_Openning; }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Enable()" />
+        public void Enable() { Get().Enable(); }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Disable()" />
+        public void Disable() { Get().Disable(); }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.enabled" />
+        public bool enabled => Get().enabled;
+        /// <summary>
+        /// Implicitly converts an <see ref="OpenningActions" /> to an <see ref="InputActionMap" /> instance.
+        /// </summary>
+        public static implicit operator InputActionMap(OpenningActions set) { return set.Get(); }
+        /// <summary>
+        /// Adds <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+        /// </summary>
+        /// <param name="instance">Callback instance.</param>
+        /// <remarks>
+        /// If <paramref name="instance" /> is <c>null</c> or <paramref name="instance"/> have already been added this method does nothing.
+        /// </remarks>
+        /// <seealso cref="OpenningActions" />
+        public void AddCallbacks(IOpenningActions instance)
+        {
+            if (instance == null || m_Wrapper.m_OpenningActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_OpenningActionsCallbackInterfaces.Add(instance);
+            @SkipButton.started += instance.OnSkipButton;
+            @SkipButton.performed += instance.OnSkipButton;
+            @SkipButton.canceled += instance.OnSkipButton;
+        }
+
+        /// <summary>
+        /// Removes <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+        /// </summary>
+        /// <remarks>
+        /// Calling this method when <paramref name="instance" /> have not previously been registered has no side-effects.
+        /// </remarks>
+        /// <seealso cref="OpenningActions" />
+        private void UnregisterCallbacks(IOpenningActions instance)
+        {
+            @SkipButton.started -= instance.OnSkipButton;
+            @SkipButton.performed -= instance.OnSkipButton;
+            @SkipButton.canceled -= instance.OnSkipButton;
+        }
+
+        /// <summary>
+        /// Unregisters <param cref="instance" /> and unregisters all input action callbacks via <see cref="OpenningActions.UnregisterCallbacks(IOpenningActions)" />.
+        /// </summary>
+        /// <seealso cref="OpenningActions.UnregisterCallbacks(IOpenningActions)" />
+        public void RemoveCallbacks(IOpenningActions instance)
+        {
+            if (m_Wrapper.m_OpenningActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        /// <summary>
+        /// Replaces all existing callback instances and previously registered input action callbacks associated with them with callbacks provided via <param cref="instance" />.
+        /// </summary>
+        /// <remarks>
+        /// If <paramref name="instance" /> is <c>null</c>, calling this method will only unregister all existing callbacks but not register any new callbacks.
+        /// </remarks>
+        /// <seealso cref="OpenningActions.AddCallbacks(IOpenningActions)" />
+        /// <seealso cref="OpenningActions.RemoveCallbacks(IOpenningActions)" />
+        /// <seealso cref="OpenningActions.UnregisterCallbacks(IOpenningActions)" />
+        public void SetCallbacks(IOpenningActions instance)
+        {
+            foreach (var item in m_Wrapper.m_OpenningActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_OpenningActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    /// <summary>
+    /// Provides a new <see cref="OpenningActions" /> instance referencing this action map.
+    /// </summary>
+    public OpenningActions @Openning => new OpenningActions(this);
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Player" which allows adding and removing callbacks.
     /// </summary>
@@ -2411,5 +2539,20 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnDecision(InputAction.CallbackContext context);
+    }
+    /// <summary>
+    /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Openning" which allows adding and removing callbacks.
+    /// </summary>
+    /// <seealso cref="OpenningActions.AddCallbacks(IOpenningActions)" />
+    /// <seealso cref="OpenningActions.RemoveCallbacks(IOpenningActions)" />
+    public interface IOpenningActions
+    {
+        /// <summary>
+        /// Method invoked when associated input action "SkipButton" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnSkipButton(InputAction.CallbackContext context);
     }
 }
