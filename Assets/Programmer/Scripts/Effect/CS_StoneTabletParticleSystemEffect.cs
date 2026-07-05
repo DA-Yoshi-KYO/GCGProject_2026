@@ -117,12 +117,7 @@ public class CS_StoneTabletParticleSystemEffect : CS_EffectParticleSystem
         Transform tr_Instance = go_Instance.transform;
         tr_Instance.localPosition = tr_Template.localPosition;
         tr_Instance.localScale = tr_Template.localScale;
-
-        float f_RandomZRotation = Random.Range(0.0f, 360.0f);
-
-        tr_Instance.localRotation =
-            tr_Template.localRotation *
-            Quaternion.Euler(0.0f, 0.0f, f_RandomZRotation);
+        tr_Instance.localRotation = tr_Template.localRotation;
 
         go_Instance.SetActive(true);
 
