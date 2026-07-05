@@ -400,7 +400,7 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": true
                 },
                 {
-                    ""name"": ""positive"",
+                    ""name"": ""Negative"",
                     ""id"": ""a1b9277f-8e04-412e-a297-c7fbd7fa2a26"",
                     ""path"": ""<XInputController>/leftShoulder"",
                     ""interactions"": """",
