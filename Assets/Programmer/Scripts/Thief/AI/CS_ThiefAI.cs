@@ -350,6 +350,8 @@ public class CS_ThiefAI : MonoBehaviour
         Vector3 holdPosition = transform.position + transform.forward * 0.5f + Vector3.up * -0.5f;
         holdTreasure.transform.position = holdPosition;
 
+        holdTreasure.GetComponent<CS_VisionTarget>().PlayStolen(this);
+
         // 状態を逃走に変更
         ChangeStatus(ThiefState.Escape);
 
