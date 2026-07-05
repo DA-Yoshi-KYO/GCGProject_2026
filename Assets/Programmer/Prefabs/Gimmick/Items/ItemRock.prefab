@@ -11,6 +11,8 @@ GameObject:
   - component: {fileID: 3331863103707182569}
   - component: {fileID: 2839236251990300030}
   - component: {fileID: 6787999086471262518}
+  - component: {fileID: 7997705058993115281}
+  - component: {fileID: 3834268673009054749}
   m_Layer: 0
   m_Name: ItemRock
   m_TagString: Item
@@ -70,6 +72,33 @@ CapsuleCollider:
   m_Height: 0.7
   m_Direction: 1
   m_Center: {x: 0, y: 0.28, z: 0}
+--- !u!114 &7997705058993115281
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1657490478714675189}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 392ec5ac6ab66b645a01a679dbd2d422, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  go_EffectPrefab: {fileID: 6358640125595540416, guid: 48bf997f6c6a9b645af2a1cdcc030dbb,
+    type: 3}
+--- !u!114 &3834268673009054749
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1657490478714675189}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b15753af12f619a47b87f2b1cbaade08, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cs_EffectPlayer: {fileID: 7997705058993115281}
 --- !u!1001 &8287104776392502606
 PrefabInstance:
   m_ObjectHideFlags: 0
