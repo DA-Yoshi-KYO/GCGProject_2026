@@ -12,7 +12,7 @@ public class GimmickSelectUI : MonoBehaviour
     [SerializeField] private GameObject TextImage;
 
     [Header("所持数テキスト（TMP_Text）")]
-    [SerializeField] private TMP_Text countText;
+    [SerializeField] private NumberView countText;
 
     [Header("アニメーションスピード")]
     [SerializeField] private float animationSpeed = 8f;
@@ -74,6 +74,8 @@ public class GimmickSelectUI : MonoBehaviour
 
         InitCTMask(ctMask1, ctColor1, ref ctMaskMat1);
         InitCTMask(ctMask2, ctColor2, ref ctMaskMat2);
+
+        countText.SetTensView(false);
     }
 
     private void Update()
@@ -250,7 +252,7 @@ public class GimmickSelectUI : MonoBehaviour
         GimmickBase gb = GetGimmickBase(idx);
         if (gb == null) return;
         int current = gimmickManager.GetCurrentNum(gb.GetGimmickTag());
-        countText.text = current.ToString();
+        countText.SetNumber(current);
     }
 
     private void RefreshImages(int idx)
