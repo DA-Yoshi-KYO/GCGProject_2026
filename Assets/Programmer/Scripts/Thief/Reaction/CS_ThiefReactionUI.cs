@@ -286,13 +286,6 @@ public class CS_ThiefReactionUI : MonoBehaviour
                 fadeOutTime             // フェードアウトさせる時間
                 );
 
-            //reactionObject.initialPosition = reactionObject.targetPosition = new Vector3(
-            //    -40.0f * (parentThiefReaction.transform.childCount - 1),
-            //    30.0f * (parentThiefReaction.transform.childCount - 1),
-            //    0.0f
-            //    );
-
-
             // 大きさを調整
             imageUI.SetNativeSize();
 
@@ -307,11 +300,6 @@ public class CS_ThiefReactionUI : MonoBehaviour
                     PreviousChildPoint.x - (rectTransform.sizeDelta.x * 0.1f),
                     PreviousChildPoint.y + (rectTransform.sizeDelta.y * 0.2f),
                     0.0f
-                    );
-
-                Debug.Log(
-                    "リアクションUIWidth: " + rectTransform.sizeDelta.x +
-                    "リアクションUIHeight: " + rectTransform.sizeDelta.y
                     );
             }
 
