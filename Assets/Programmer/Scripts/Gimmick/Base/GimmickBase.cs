@@ -118,8 +118,8 @@ public class GimmickBase : MonoBehaviour
     private HitChecker hit;
     public HitChecker read_Hit => hit;
 
-    protected CS_OutlineController outlineController;
-    protected float outlineWidth = 0.1f;
+    protected CS_OutlineTarget outlineTarget;
+    protected float outlineWidth = 6f;
 
     private void Start()
     {
@@ -149,8 +149,8 @@ public class GimmickBase : MonoBehaviour
         InitMaterials();
         roomIndex = CS_RoomCreatePointRaycast.GetRayRoomCreatePoint(this.gameObject).transform.GetSiblingIndex();
 
-        outlineController = new CS_OutlineController(GetComponentInChildren<Renderer>());
-        outlineController.SetOutline(Color.gray, outlineWidth);
+        outlineTarget = GetComponentInChildren<CS_OutlineTarget>();
+        outlineTarget.SetOutline(Color.gray, outlineWidth);
     }
 
     private void InitMaterials()
@@ -643,8 +643,8 @@ public class GimmickBase : MonoBehaviour
                 }
             }
         }
-        if (outlineController != null)
-            outlineController.SetOutlineAlpha(0.0f);
+        if (outlineTarget != null)
+            outlineTarget.SetOutlineAlpha(0.0f);
 
         if (brokenAlpha <= 0.0f)
         {
@@ -654,6 +654,6 @@ public class GimmickBase : MonoBehaviour
 
     public void SetOutLineColor(Color col)
     {
-        outlineController.SetOutlineColor(col);
+        outlineTarget.SetOutlineColor(col);
     }
 }

@@ -74,8 +74,8 @@ public class CS_ThiefAI : MonoBehaviour
     [Tooltip("泥棒のマテリアルのフェードアウトにかかる時間")]
     private float fadeAfterStunTime;
 
-    [Tooltip("アウトラインコントローラー")]
-    private CS_OutlineController outlineController;
+    [Tooltip("アウトラインターゲット")]
+    private CS_OutlineTarget outlineTarget;
 
     [SerializeField, Tooltip("泥棒の耐久力")]
     private int durability;
@@ -228,8 +228,8 @@ public class CS_ThiefAI : MonoBehaviour
         // マテリアルの取得
         thiefMaterial = transform.GetComponentInChildren<SkinnedMeshRenderer>().materials;
 
-        // アウトラインコントローラーの作成
-        outlineController = new CS_OutlineController(transform.GetComponentInChildren<SkinnedMeshRenderer>().gameObject);
+        // アウトラインターゲットの取得
+        outlineTarget = GetComponentInChildren<CS_OutlineTarget>();
 
         // アニメーション用のコンポーネントを取得
         animator = GetComponentInChildren<Animator>();
@@ -411,7 +411,7 @@ public class CS_ThiefAI : MonoBehaviour
                     mat.SetFloat("_Alpha", fadeAmount);
                 }
 
-                outlineController.SetOutlineColor(new Color(1.0f, 0.0f, 0.0f, 0.0f));
+                outlineTarget.SetOutlineColor(new Color(1.0f, 0.0f, 0.0f, 0.0f));
 
                 GameObject Thief_DeadFade = GameObject.Find("Thief_DeadFade_" + transform.name);
                 if (Thief_DeadFade == null)
