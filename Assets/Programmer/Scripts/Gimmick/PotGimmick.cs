@@ -79,6 +79,11 @@ public class PotGimmick : GimmickBase
             //落下地点に移動
             originPos.y = transform.position.y;
             transform.position = originPos;
+
+            if (gimmickSound != null)
+            {
+                gimmickSound.PlayOneShotSE("Gimmick_PotFall", gameObject.transform.position, "PotSound");
+            }
         }
 
         //落下
@@ -122,9 +127,9 @@ public class PotGimmick : GimmickBase
         }
         if (gimmickSound != null)
         {
-            gimmickSound.PlayOneShotSE("Gimmick_PotFall", gameObject.transform.position, "PotSound");
-            Destroy(gimmickSound);
+            gimmickSound.PlayOneShotSE("Gimmick_PotBreak", gameObject.transform.position, "PotSound");
         }
+        Destroy(gimmickSound);
         isFirstUpdate = true;
         DeleteHitChecker();
     }
