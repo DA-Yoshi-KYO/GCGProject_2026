@@ -11,6 +11,8 @@ GameObject:
   - component: {fileID: 4221160367055552894}
   - component: {fileID: 871646911902770009}
   - component: {fileID: 7652356455327654769}
+  - component: {fileID: 5630094201181765365}
+  - component: {fileID: 7335539101836190310}
   m_Layer: 30
   m_Name: ItemEmptyChest
   m_TagString: Item
@@ -70,6 +72,33 @@ CapsuleCollider:
   m_Height: 0.7
   m_Direction: 1
   m_Center: {x: 0, y: 0.28, z: 0}
+--- !u!114 &5630094201181765365
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8099441442987179503}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 392ec5ac6ab66b645a01a679dbd2d422, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  go_EffectPrefab: {fileID: 6358640125595540416, guid: 48bf997f6c6a9b645af2a1cdcc030dbb,
+    type: 3}
+--- !u!114 &7335539101836190310
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8099441442987179503}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b15753af12f619a47b87f2b1cbaade08, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cs_EffectPlayer: {fileID: 5630094201181765365}
 --- !u!1001 &895649834916539530
 PrefabInstance:
   m_ObjectHideFlags: 0

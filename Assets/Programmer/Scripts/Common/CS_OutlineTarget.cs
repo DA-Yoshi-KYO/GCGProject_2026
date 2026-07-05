@@ -4,6 +4,7 @@ using UnityEngine;
 /// アウトライン対象にアタッチするコンポーネント。
 /// 自身のMaskMaterial(インスタンス)を持ち、色・太さを直接セットする。
 /// </summary>
+[ExecuteAlways]
 [RequireComponent(typeof(Renderer))]
 public class CS_OutlineTarget : MonoBehaviour
 {

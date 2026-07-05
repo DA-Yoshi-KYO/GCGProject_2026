@@ -5,6 +5,7 @@
  * ----------------------------------------------------------
  * 2026-05-18 | 初回作成
  */
+using CriWare;
 using UnityEngine;
 
 public class CS_3DPlaySE : MonoBehaviour
@@ -21,19 +22,26 @@ public class CS_3DPlaySE : MonoBehaviour
         Reverb,
     }
 
-    void Awake()
-    {
-    }
-
     // Start is called before the first frame update
     void Start()
     {
+        if (Option.Instance != null)
+        {
+            currentVolume = Option.Instance.GetSEVolume() / 100.0f;
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
-
+        //オプション画面開いたら音源調整の関数呼び出す
+        if (Option.Instance != null)
+        {
+            if (Option.Instance.GetIsOptionUIActive())
+            {
+                SE3DOption();
+            }
+        }
     }
 
 
@@ -91,5 +99,12 @@ public class CS_3DPlaySE : MonoBehaviour
     public float GetAudioLength(string currentSituation)
     {
         return dataBase.seData[currentSituation].audioClip.length;
+    }
+
+
+    //SE3Dのオプションでの音量調整
+    public void SE3DOption()
+    {
+        currentVolume = Option.Instance.GetSEVolume() / 100.0f;
     }
 }
