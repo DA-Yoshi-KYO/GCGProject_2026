@@ -412,6 +412,11 @@ public class HitChecker : MonoBehaviour
                             break;
                         case Gimmick.IronBall:
                             EnemyDame(enemy, hitDamage, true, hitEnemies[i], hit);
+                            gimmickBase.GetGimmickSound().
+                                PlayOneShotSE(
+                                "Gimmick_RockHit",
+                                gimmickBase.transform.position,
+                                "RockSound");
                             break;
                         case Gimmick.EmptyChest:
                             EmptyChestGimmick emptyChestGimmick =
@@ -431,7 +436,6 @@ public class HitChecker : MonoBehaviour
                             break;
                         case Gimmick.Pitfall:
                             Debug.Log("Pitfall hit enemy");
-                            //シーフ落とす関数追加する//
                             thiefGA.PitFallStart(transform.position);
                             parentGameObject.GetComponent<PitfallGimmick>();
                             parentGameObject.GetComponent<PitfallGimmick>().gimmickState = GimmickState.Active;
