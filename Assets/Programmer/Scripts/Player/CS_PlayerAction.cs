@@ -319,8 +319,10 @@ public class CS_PlayerAction : MonoBehaviour
                     {
                         if (gimmick.gimmickState != GimmickState.Idle) continue;
 
+                        SettingGimmickDirection(gimmick);
+
                         //ギミックをアクティブにする
-                        Debug.Log($"ギミック：" + hit.name + "がアクティブになりました");
+                        Debug.Log($"ギミック：" + hit.name + "がアクティブになりました" + gimmick.GetDirectionVec());
                         gimmick.ActivateGimmick();
                         continue;
                     }
