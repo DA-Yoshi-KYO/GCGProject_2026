@@ -592,7 +592,7 @@ public class CS_ThiefAI : MonoBehaviour
                                 thiefSound.PlayOneShotSE("Thief_DropTreatureHit", gameObject.transform.position, "Thief_DropTreatureHit");
 
                         // 宝物を設置する位置を設定
-                        holdTreasure.transform.position = new Vector3(gridPos.x, gridPos.y + holdTreasure.transform.localScale.y / 2, gridPos.z);
+                        holdTreasure.transform.position = gridPos;
                     }
                     Destroy(this.gameObject);
                 }
