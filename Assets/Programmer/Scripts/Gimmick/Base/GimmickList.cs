@@ -185,6 +185,8 @@ public class GimmickList : MonoBehaviour
                     // クールタイム開始
                     active.isCoolTime = true;
                     active.coolTimer = info.coolTime;
+                    // クールタイム状態なら無効状態(-1)
+                    active.gimmick.SetRoomIndex(-1);
                 }
             }
             // クールタイム中 _________________________________
@@ -197,8 +199,6 @@ public class GimmickList : MonoBehaviour
                     // 設置可能数回復
                     info.currentNum++;
                     active.isEnd = true;
-                    // リストから削除
-                    activeGimmicks.RemoveAt(i);
                 }
             }
         }
@@ -218,9 +218,10 @@ public class GimmickList : MonoBehaviour
         {
             if (item.GetGimmickTag() == data.gimmickTag)
             {
-                AddCurrentGimmick(data.gimmickTag);
+                //入手したら所持数を最大値にする
+                SetCurrentGimmick(item.GetGimmickTag(), gimmickInfo[item.GetGimmickTag()].maxNum);
                 Destroy(other.gameObject);
-                IsSetItemGetNow(data.gimmickTag, true);
+                IsSetItemGetNow(item.GetGimmickTag(), true);
 
                 string situation = "";
                 switch (item.GetGimmickTag())

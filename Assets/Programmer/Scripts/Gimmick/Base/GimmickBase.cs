@@ -415,6 +415,10 @@ public class GimmickBase : MonoBehaviour
     {
         return roomIndex;
     }
+    public void SetRoomIndex(int index)
+    {
+        roomIndex = index;
+    }
 
     private Collider[] OverlapBoxCollider(BoxCollider box)
     {
