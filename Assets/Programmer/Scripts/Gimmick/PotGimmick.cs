@@ -30,6 +30,12 @@ public class PotGimmick : GimmickBase
     [SerializeField, Tooltip("泥棒のLayer。未設定なら全レイヤー")]
     private LayerMask thiefLayer;
 
+    [Header("壺破壊VAT")]
+    [SerializeField]
+    private CS_EffectVAT cs_PotVatEffect;
+
+    private bool isVatPlayed = false;
+
     private bool isFall = false;
     private float initPositionY;
     private bool isFirstUpdate = true;
@@ -79,6 +85,11 @@ public class PotGimmick : GimmickBase
             //落下地点に移動
             originPos.y = transform.position.y;
             transform.position = originPos;
+
+            if (gimmickSound != null)
+            {
+                gimmickSound.PlayOneShotSE("Gimmick_PotFall", gameObject.transform.position, "PotSound");
+            }
         }
 
         //落下
@@ -102,7 +113,11 @@ public class PotGimmick : GimmickBase
     protected override void BrokenUpdate()
     {
         base.BrokenUpdate();
+
         //破壊時に1回だけ生成
+        PlayPotVatEffect();
+
+
         if (!isDangerZoneSpawned)
         {
             isDangerZoneSpawned = true;
@@ -122,10 +137,52 @@ public class PotGimmick : GimmickBase
         }
         if (gimmickSound != null)
         {
-            gimmickSound.PlayOneShotSE("Gimmick_PotFall", gameObject.transform.position, "PotSound");
-            Destroy(gimmickSound);
+            gimmickSound.PlayOneShotSE("Gimmick_PotBreak", gameObject.transform.position, "PotSound");
         }
+        Destroy(gimmickSound);
         isFirstUpdate = true;
         DeleteHitChecker();
+    }
+
+    private void PlayPotVatEffect()
+    {
+        if (isVatPlayed)
+        {
+            return;
+        }
+
+        isVatPlayed = true;
+
+        if (cs_PotVatEffect == null)
+        {
+            cs_PotVatEffect = GetComponentInChildren<CS_EffectVAT>(true);
+        }
+
+        if (cs_PotVatEffect == null)
+        {
+            return;
+        }
+
+        CSST_EffectPlayData csst_EffectPlayData = new CSST_EffectPlayData();
+        csst_EffectPlayData.CSST_EffectPlayData_Init();
+
+        csst_EffectPlayData.SetPosition(cs_PotVatEffect.transform.position);
+        csst_EffectPlayData.SetRotation(cs_PotVatEffect.transform.rotation);
+
+        // VAT再生時はアウトラインをOFFにする
+        CS_OutlineTarget[] outlineTargets =
+            cs_PotVatEffect.GetComponentsInChildren<CS_OutlineTarget>(true);
+
+        for (int i = 0 ; i < outlineTargets.Length ; i++)
+        {
+            if (outlineTargets[i] == null)
+            {
+                continue;
+            }
+
+            outlineTargets[i].enabled = false;
+        }
+
+        cs_PotVatEffect.PlayEffect(csst_EffectPlayData);
     }
 }

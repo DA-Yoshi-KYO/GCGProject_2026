@@ -68,6 +68,8 @@ public class CS_PlayerAction : MonoBehaviour
 
     private bool isSelectGimmickActive = true;
 
+    private bool b_IsPlayingAnkhStandEffect = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -119,6 +121,12 @@ public class CS_PlayerAction : MonoBehaviour
             // インタラクト範囲の拡大
             if (interactTime >= switchInteract)
             {
+                if (IsCurrentGimmickMagicAnkh())
+                {
+                    PlayAllAnkhStandEffect();
+                }
+
+
                 if (hitList != null)
                 {
                     foreach (var item in hitList)
@@ -253,6 +261,8 @@ public class CS_PlayerAction : MonoBehaviour
         {
             isInteracting = false;
 
+            EndAllAnkhStandEffect();
+
             // Effectの停止
             if (cs_PlayerInteractRangeEffectPlayer != null)
             {
@@ -330,6 +340,103 @@ public class CS_PlayerAction : MonoBehaviour
                 hitList.Clear();
             }
 
+        }
+    }
+
+    /// <summary>
+    /// 現在選択中のギミックがアンクか確認します。
+    /// </summary>
+    private bool IsCurrentGimmickMagicAnkh()
+    {
+        if (gimmickManager == null)
+        {
+            return false;
+        }
+
+        if (gimmickManager.GetGimmickInfoDataList() == null)
+        {
+            return false;
+        }
+
+        if (currentGimmickIndex < 0 ||
+            currentGimmickIndex >= gimmickManager.GetGimmickInfoDataList().Count)
+        {
+            return false;
+        }
+
+        return gimmickManager.GetGimmickInfoDataList()[currentGimmickIndex].gimmickTag ==
+               Gimmick.MagicAnkh;
+    }
+
+    /// <summary>
+    /// 配置済みの全アンクから待機Effectを再生します。
+    /// </summary>
+    private void PlayAllAnkhStandEffect()
+    {
+        if (b_IsPlayingAnkhStandEffect)
+        {
+            return;
+        }
+
+        b_IsPlayingAnkhStandEffect = true;
+
+        foreach (var GM in gimmickManager.GetGimmickList())
+        {
+            if (GM.gimmick == null)
+            {
+                continue;
+            }
+
+            if (GM.gimmick.GetGimmickTag() != Gimmick.MagicAnkh)
+            {
+                continue;
+            }
+
+            MagicAnkhGimmick magicAnkhGimmick =
+                GM.gimmick.GetComponent<MagicAnkhGimmick>();
+
+            if (magicAnkhGimmick == null)
+            {
+                continue;
+            }
+
+            magicAnkhGimmick.PlayAnkhStandEffect();
+        }
+    }
+
+    /// <summary>
+    /// 配置済みの全アンクの待機Effectを終了します。
+    /// </summary>
+    private void EndAllAnkhStandEffect()
+    {
+        if (b_IsPlayingAnkhStandEffect == false)
+        {
+            return;
+        }
+
+        b_IsPlayingAnkhStandEffect = false;
+
+        foreach (var GM in gimmickManager.GetGimmickList())
+        {
+            if (GM.gimmick == null)
+            {
+                continue;
+            }
+
+            if (GM.gimmick.GetGimmickTag() != Gimmick.MagicAnkh)
+            {
+                continue;
+            }
+
+            MagicAnkhGimmick magicAnkhGimmick =
+                GM.gimmick.GetComponent<MagicAnkhGimmick>();
+
+            if (magicAnkhGimmick == null)
+            {
+                continue;
+            }
+
+            magicAnkhGimmick.EndAnkhStandEffect();
         }
     }
 

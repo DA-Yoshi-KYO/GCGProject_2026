@@ -26,7 +26,7 @@ public class TreasureUI : MonoBehaviour
             Debug.LogError("CS_EndManagerが見つかりません。");
         }
 
-        int count = endManager.read_TotalTreasureCount;
+        int count = endManager.read_TreasureList.Count;
 
         for (int i = 0; i < count; i++)
         {
