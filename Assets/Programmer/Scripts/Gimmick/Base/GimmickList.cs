@@ -232,22 +232,18 @@ public class GimmickList : MonoBehaviour
                         situation = "None";
                         break;
                     case Gimmick.EmptyChest:
-                        situation = "EmptyChest";
+                        situation = "ItemEmptyChest";
                         break;
                     case Gimmick.Nyaki:
                         situation = "Nyaki";
                         break;
                     case Gimmick.Pitfall:
-                        situation = "Pitfall";
+                        situation = "ItemPitFall";
                         break;
                     case Gimmick.MagicAnkh:
-                        situation = "MagicAnkh";
-                        break;
-                    case Gimmick.CloneCat:
-                        situation = "CloneCat";
+                        situation = "ItemHyperVoice";
                         break;
                     case Gimmick.None:
-                        situation = "None";
                         break;
                 }
 
