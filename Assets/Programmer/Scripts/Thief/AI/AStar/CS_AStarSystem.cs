@@ -382,7 +382,7 @@ public class CS_AStarSystem
         // 移動システムを使って移動
         if (isRouteUpdated)
         {
-            thiefAI.read_MoveSystem.MoveTo(targetPoint.position);
+            thiefAI?.read_MoveSystem?.MoveTo(targetPoint.position);
             isRouteUpdated = false;
         }
     }
