@@ -436,7 +436,10 @@ public class CS_ThiefAI : MonoBehaviour
                     // 宝物を現在の部屋のオブジェクトに親子付けする
                     if (holdTreasure != null)
                     {
+                        holdTreasure.GetComponent<Collider>().enabled = true;
+                        holdTreasure.transform.localScale = Vector3.one;
                         holdTreasure.transform.SetParent(memorySystem.read_CurrentRoom.read_ObjectParent.transform);
+                        holdTreasure.GetComponent<CS_VisionTarget>().StopStolen();
 
                         // 宝物を設置するグリッドを探す
                         // 真下のグリッドセルインデックスを取得
@@ -451,17 +454,26 @@ public class CS_ThiefAI : MonoBehaviour
                             {
                                 targetGridOffset.Add(new Vector2Int(x, y));
 
-                                if (roomGrid.gridSize.x <= gridIndex.x + x || gridIndex.x + x < 0 ||
-                                    roomGrid.gridSize.y <= gridIndex.y + y || gridIndex.y + y < 0)
+                                if (roomGrid.read_GridDivision.x <= gridIndex.x + x || gridIndex.x + x < 0 ||
+                                    roomGrid.read_GridDivision.y <= gridIndex.y + y || gridIndex.y + y < 0)
                                 {
                                     // グリッドの範囲外の場合は、対象から除外する
                                     targetGridOffset.RemoveAt(targetGridOffset.Count - 1);
                                 }
                             }
                         }
+
                         Vector3 gridPos = Vector3.zero;
                         while (true)
                         {
+                            // リストが空の場合はループを抜ける
+                            if (targetGridOffset.Count == 0)
+                            {
+                                Debug.LogWarning("有効なグリッドセルが見つからなかったため、宝物をデフォルト位置にドロップします。");
+                                gridPos = transform.position; // デフォルトの位置として現在の位置を使用
+                                break;
+                            }
+
                             // ランダムにグリッドセルのオフセットを選択
                             int randomIndex = Random.Range(0, targetGridOffset.Count);
 
@@ -482,6 +494,9 @@ public class CS_ThiefAI : MonoBehaviour
 
                             // Standに当たっていない場合は、設置する位置を決定する
                             if (!isStandFound) break;
+
+                            // チェックしたグリッドはリストから削除する
+                            targetGridOffset.RemoveAt(randomIndex);
                         }
 
                         GameObject Thief_DropTreatureHit = GameObject.Find("Thief_DropTreatureHit" + transform.name);
