@@ -210,7 +210,7 @@ public class GimmickBase : MonoBehaviour
         scaleY = scaleY * gimmickScale / 100f;
         scaleZ = scaleZ * gimmickScale / 100f;
 
-        transform.localScale = new Vector3(scaleX, scaleY, scaleZ);
+        transform.localScale = new Vector3(scaleX, scaleY, scaleX);
 
         Vector3 set = search.transform.position;
         set.y = 0.0f;
