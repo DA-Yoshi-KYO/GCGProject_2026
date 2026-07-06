@@ -1,0 +1,162 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3622599746150389592
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7997420753640809904}
+  - component: {fileID: 2749151024479796673}
+  - component: {fileID: 192720129870196079}
+  - component: {fileID: 8133474233265878679}
+  - component: {fileID: 4088981893081069747}
+  - component: {fileID: 5114174272098829931}
+  m_Layer: 0
+  m_Name: RoomManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7997420753640809904
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3622599746150389592}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2749151024479796673
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3622599746150389592}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d06428832aaa10943a333fa66fc80289, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 91267025467519389, guid: c5f61974942052e4885cf10b80a7166b, type: 3}
+  bool_IsDebugCurrentRoom: 1
+--- !u!114 &192720129870196079
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3622599746150389592}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1291b9dfc0ef6e640b58f1feb3508486, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cs_RoomEnemyEntryPointCollector: {fileID: 0}
+--- !u!114 &8133474233265878679
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3622599746150389592}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3580d4acadb9264689556c071cb6415, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  list_RoomCreatePointGenerateData:
+  - go_RoomCreatePointObject: {fileID: 0}
+    e_GenerateType: 0
+    go_FixedRoomPrefab: {fileID: 6147376731150322047, guid: 1f59a1f70c099bc4aaf5a8280b6122f4,
+      type: 3}
+    list_RandomRoomBlockPrefabs: []
+  - go_RoomCreatePointObject: {fileID: 0}
+    e_GenerateType: 1
+    go_FixedRoomPrefab: {fileID: 0}
+    list_RandomRoomBlockPrefabs:
+    - {fileID: 5652029755238022159, guid: b82a5a0f060d3d34097f2653320103c7, type: 3}
+    - {fileID: 432796890172666503, guid: 02bfc1ecc727f1746acfef929873fc58, type: 3}
+  - go_RoomCreatePointObject: {fileID: 0}
+    e_GenerateType: 1
+    go_FixedRoomPrefab: {fileID: 0}
+    list_RandomRoomBlockPrefabs:
+    - {fileID: 5652029755238022159, guid: b82a5a0f060d3d34097f2653320103c7, type: 3}
+    - {fileID: 432796890172666503, guid: 02bfc1ecc727f1746acfef929873fc58, type: 3}
+  - go_RoomCreatePointObject: {fileID: 0}
+    e_GenerateType: 1
+    go_FixedRoomPrefab: {fileID: 0}
+    list_RandomRoomBlockPrefabs:
+    - {fileID: 2474023301386482053, guid: 8e43a7d250eb8114dbf94858574140f5, type: 3}
+  - go_RoomCreatePointObject: {fileID: 0}
+    e_GenerateType: 1
+    go_FixedRoomPrefab: {fileID: 0}
+    list_RandomRoomBlockPrefabs:
+    - {fileID: 2349549601360469598, guid: 3d1814a6690727d469aa0aa162e123ba, type: 3}
+    - {fileID: 881961616291614114, guid: 337c2a167223d394b8b61d492cd54840, type: 3}
+    - {fileID: 6190820968897657137, guid: c137b263ac5756a43aecd2abb7f96fd9, type: 3}
+    - {fileID: 5646823382267403765, guid: f7823d91226fd6048aed6a1a1504ab70, type: 3}
+    - {fileID: 3999996320122052757, guid: ed75475646200a043bcb291b005fec20, type: 3}
+    - {fileID: 2474023301386482053, guid: 8e43a7d250eb8114dbf94858574140f5, type: 3}
+  - go_RoomCreatePointObject: {fileID: 0}
+    e_GenerateType: 1
+    go_FixedRoomPrefab: {fileID: 0}
+    list_RandomRoomBlockPrefabs:
+    - {fileID: 5652029755238022159, guid: b82a5a0f060d3d34097f2653320103c7, type: 3}
+    - {fileID: 432796890172666503, guid: 02bfc1ecc727f1746acfef929873fc58, type: 3}
+  - go_RoomCreatePointObject: {fileID: 0}
+    e_GenerateType: 1
+    go_FixedRoomPrefab: {fileID: 0}
+    list_RandomRoomBlockPrefabs:
+    - {fileID: 5652029755238022159, guid: b82a5a0f060d3d34097f2653320103c7, type: 3}
+    - {fileID: 432796890172666503, guid: 02bfc1ecc727f1746acfef929873fc58, type: 3}
+  - go_RoomCreatePointObject: {fileID: 0}
+    e_GenerateType: 0
+    go_FixedRoomPrefab: {fileID: 4706649935196176157, guid: 8e1a2530a5fdd8e4ab76018ba7e1e22f,
+      type: 3}
+    list_RandomRoomBlockPrefabs: []
+  - go_RoomCreatePointObject: {fileID: 0}
+    e_GenerateType: 0
+    go_FixedRoomPrefab: {fileID: 4706649935196176157, guid: 8e1a2530a5fdd8e4ab76018ba7e1e22f,
+      type: 3}
+    list_RandomRoomBlockPrefabs: []
+--- !u!114 &4088981893081069747
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3622599746150389592}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec5bfade8fb25004085e0bc5140da0e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cs_RoomBlockPrefabGenerator: {fileID: 8133474233265878679}
+--- !u!114 &5114174272098829931
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3622599746150389592}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 61ca6e905c961fe45bd4f8d4474097e8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tr_RoomCreatePointsRoot: {fileID: 0}
+  e_TargetRoomType: 1
+  i_ActiveTreasureCount: 1
+  str_TreasureObjectName: Treasure
+  bool_IsDebugLog: 1
