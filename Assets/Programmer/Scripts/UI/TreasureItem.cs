@@ -17,6 +17,7 @@ public class TreasureItem : MonoBehaviour
     CS_VisionTarget visionTarget;
     NumberView numberView;
     int Distance = 100;
+    bool isDestroyCheck = false;
 
     private void Awake()
     {
@@ -29,17 +30,22 @@ public class TreasureItem : MonoBehaviour
     {
         if (visionTarget == null)
         {
-            return;
-        }
-        else
-        {
+            if (!isDestroyCheck)
+            {
+                isDestroyCheck = true;
+                return;
+            }
+            Debug.Log("宝物が破棄されました。");
             BastetIcon.SetActive(false);
             BastetOutLineIcon.SetActive(false);
             DetailTextImage.SetActive(false);
             DistanceImage.SetActive(false);
             NumberView.SetActive(false);
             FrameIcon.SetActive(true);
+            return;
         }
+
+        isDestroyCheck = false;
 
         // 宝物が盗まれているかどうかを確認
 
@@ -49,7 +55,9 @@ public class TreasureItem : MonoBehaviour
         }
         else
         {
-
+            BastetIcon.SetActive(true);
+            BastetOutLineIcon.SetActive(false);
+            DetailTextImage.SetActive(false);
         }
 
         Distance = visionTarget.read_ExitDistance;
@@ -71,11 +79,11 @@ public class TreasureItem : MonoBehaviour
 
         if (Distance <= 10)
         {
-            DistanceImage.GetComponent<UnityEngine.UI.Image>().sprite = Pinch;
+            DetailTextImage.GetComponent<UnityEngine.UI.Image>().sprite = Pinch;
         }
         else
         {
-            DistanceImage.GetComponent<UnityEngine.UI.Image>().sprite = Moveing;
+            DetailTextImage.GetComponent<UnityEngine.UI.Image>().sprite = Moveing;
         }
     }
     
