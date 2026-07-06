@@ -218,9 +218,10 @@ public class GimmickList : MonoBehaviour
         {
             if (item.GetGimmickTag() == data.gimmickTag)
             {
-                AddCurrentGimmick(data.gimmickTag);
+                //入手したら所持数を最大値にする
+                SetCurrentGimmick(item.GetGimmickTag(), gimmickInfo[item.GetGimmickTag()].maxNum);
                 Destroy(other.gameObject);
-                IsSetItemGetNow(data.gimmickTag, true);
+                IsSetItemGetNow(item.GetGimmickTag(), true);
 
                 string situation = "";
                 switch (item.GetGimmickTag())
