@@ -96,6 +96,12 @@ public class CS_VisionTarget : CS_ThiefTarget
         isStolenMoveing = true;
     }
 
+    public void StopStolen()
+    {
+        isStolenMoveing = false;
+        thiefAI = null;
+    }
+
     private void OnDestroy()
     {
         // ターゲットの種類が宝物の場合、EndManagerから宝物を減らす
