@@ -86,6 +86,11 @@ public class CS_PlayerMove : MonoBehaviour
 
         playSE = GameObject.Find("3DSE").GetComponent<CS_3DPlaySE>();
 
+        if (playSE == null)
+        {
+            Debug.LogWarning("[PlayerMove] 3DSE が見つかりません。SE再生は無効になります。");
+        }
+
     }
 
     void FixedUpdate()
