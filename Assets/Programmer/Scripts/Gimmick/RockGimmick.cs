@@ -138,13 +138,13 @@ public class RockGimmick : GimmickBase
             case GimmickDirection.Left:
                 moveDir = Vector3.right;
                 rotateAxis = Vector3.forward;
-                rotateSign = -1.0f;
+                rotateSign = 1.0f;
                 break;
 
             case GimmickDirection.Right:
                 moveDir = Vector3.left;
                 rotateAxis = Vector3.forward;
-                rotateSign = 1.0f;
+                rotateSign = -1.0f;
                 break;
         }
 
@@ -253,13 +253,13 @@ public class RockGimmick : GimmickBase
                     case GimmickDirection.Left:
                         moveDir = Vector3.left;
                         rotateAxis = Vector3.forward;
-                        rotateSign = -1.0f;
+                        rotateSign = 1.0f;
                         break;
 
                     case GimmickDirection.Right:
                         moveDir = Vector3.right;
                         rotateAxis = Vector3.forward;
-                        rotateSign = 1.0f;
+                        rotateSign = -1.0f;
                         break;
                 }
 
@@ -291,32 +291,6 @@ public class RockGimmick : GimmickBase
 
             Vector3 frameMove =
                 rollDir * speed * Time.deltaTime;
-
-            //------------------------------------------------
-            // 方向補正
-            //------------------------------------------------
-            switch (gimmickDirection)
-            {
-                case GimmickDirection.Up:
-                    rotateAxis = Vector3.right;
-                    rotateSign = 1.0f;
-                    break;
-
-                case GimmickDirection.Down:
-                    rotateAxis = Vector3.right;
-                    rotateSign = -1.0f;
-                    break;
-
-                case GimmickDirection.Left:
-                    rotateAxis = Vector3.forward;
-                    rotateSign = -1.0f;
-                    break;
-
-                case GimmickDirection.Right:
-                    rotateAxis = Vector3.forward;
-                    rotateSign = 1.0f;
-                    break;
-            }
 
             //------------------------------------------------
             // 移動
