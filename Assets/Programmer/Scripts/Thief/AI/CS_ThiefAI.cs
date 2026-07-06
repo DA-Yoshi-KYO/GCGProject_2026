@@ -119,7 +119,19 @@ public class CS_ThiefAI : MonoBehaviour
 
     [Tooltip("泥棒関係のサウンド")]
     private CS_3DPlaySE thiefSound;
-    public CS_3DPlaySE read_ThiefSound => thiefSound;
+    public CS_3DPlaySE read_ThiefSound 
+    {
+        get 
+        {
+            if (thiefSound == null)
+            {
+                thiefSound = GameObject.Find("AudioManager").GetComponentInChildren<CS_3DPlaySE>();
+            }
+            if (thiefSound == null) Debug.LogWarning("【泥棒】CS_3DPlaySEコンポーネントが見つかりません。サウンドが再生されません。");
+
+            return thiefSound;
+        } 
+    }
 
     [SerializeField, Tooltip("視界に入る対象のレイヤー"), Header("視界に入る対象のレイヤー")]
     private List<LayerMask> targetLayer;
@@ -134,7 +146,19 @@ public class CS_ThiefAI : MonoBehaviour
 
     [Tooltip("アニメーション用")]
     private Animator animator;
-    public Animator read_Animator => animator;
+    public Animator read_Animator
+    {
+        get
+        {
+            if (animator == null)
+            {
+                animator = GetComponentInChildren<Animator>();
+            }
+            if (animator == null) Debug.LogWarning("【泥棒】Animatorコンポーネントが見つかりません。アニメーションが再生されません。");
+
+            return animator;
+        }
+    }
 
     [Tooltip("種類アイコン")]
     private Sprite iconSprite;
@@ -143,27 +167,88 @@ public class CS_ThiefAI : MonoBehaviour
     // 分解したクラス一覧
     [Tooltip("移動システム")]
     private CS_MoveSystem moveSystem;
-    public CS_MoveSystem read_MoveSystem => moveSystem;
+    public CS_MoveSystem read_MoveSystem
+    {
+        get
+        {
+            if (moveSystem == null)
+            {
+                Debug.LogWarning("【泥棒】CS_MoveSystemが見つかりません。移動処理が正しく動作しません。");
+            }
+            return moveSystem;
+        }
+    }
 
     [Tooltip("記憶システム")]
     private CS_MemorySystem memorySystem;
-    public CS_MemorySystem read_MemorySystem => memorySystem;
+    public CS_MemorySystem read_MemorySystem
+    {
+        get
+        {
+            if (memorySystem == null)
+            {
+                Debug.LogWarning("【泥棒】CS_MemorySystemが見つかりません。記憶処理が正しく動作しません。");
+            }
+            return memorySystem;
+        }
+    }
 
     [Tooltip("聴覚システム")]
     private CS_HearingSystem hearingSystem;
-    public CS_HearingSystem read_HearingSystem => hearingSystem;
+    public CS_HearingSystem read_HearingSystem
+    {
+        get
+        {
+            if (hearingSystem == null)
+            {
+                Debug.LogWarning("【泥棒】CS_HearingSystemが見つかりません。聴覚処理が正しく動作しません。");
+            }
+            return hearingSystem;
+        }
+    }
 
     [Tooltip("視覚システム")]
     private CS_VisionSensor visionSensor;
-    public CS_VisionSensor read_VisionSensor => visionSensor;
+    public CS_VisionSensor read_VisionSensor
+    {
+        get
+        {
+            if (visionSensor == null)
+            {
+                visionSensor = GetComponentInChildren<CS_VisionSensor>();
+            }
+            if (visionSensor == null) Debug.LogWarning("【泥棒】CS_VisionSensorが見つかりません。視覚処理が正しく動作しません。");
+            return visionSensor;
+        }
+    }
 
     [Tooltip("A*アルゴリズムシステム")]
     private CS_AStarSystem aStarSystem;
-    public CS_AStarSystem read_AStarSystem => aStarSystem;
+    public CS_AStarSystem read_AStarSystem
+    {
+        get
+        {
+            if (aStarSystem == null)
+            {
+                Debug.LogWarning("【泥棒】CS_AStarSystemが見つかりません。A*アルゴリズム処理が正しく動作しません。");
+            }
+            return aStarSystem;
+        }
+    }
 
     [Tooltip("ギミック行動システム")]
     private CS_ThiefGimmickAction thiefGimmickAction;
-    public CS_ThiefGimmickAction read_ThiefGimmickAction => thiefGimmickAction;
+    public CS_ThiefGimmickAction read_ThiefGimmickAction
+    {
+        get
+        {
+            if (thiefGimmickAction == null)
+            {
+                Debug.LogWarning("【泥棒】CS_ThiefGimmickActionが見つかりません。ギミック行動処理が正しく動作しません。");
+            }
+            return thiefGimmickAction;
+        }
+    }
 
     [Header("猫拘束中Effect")]
     [SerializeField]
@@ -378,7 +463,8 @@ public class CS_ThiefAI : MonoBehaviour
         {
             GameObject Thief_BringTreature = GameObject.Find("Thief_BringTreature_" + transform.name);
             if (Thief_BringTreature == null)
-                thiefSound.PlayOneShotSE("Thief_BringTreature", gameObject.transform.position, "Thief_BringTreature_" + transform.name);
+                if (thiefSound != null)
+                    thiefSound.PlayOneShotSE("Thief_BringTreature", gameObject.transform.position, "Thief_BringTreature_" + transform.name);
             Debug.Log("泥棒が退場しました。");
             Destroy(this.gameObject);
         }
@@ -426,7 +512,8 @@ public class CS_ThiefAI : MonoBehaviour
 
                 GameObject Thief_DeadFade = GameObject.Find("Thief_DeadFade_" + transform.name);
                 if (Thief_DeadFade == null)
-                    thiefSound.PlayOneShotSE("Thief_DeadFade", gameObject.transform.position, "Thief_DeadFade_" + transform.name);
+                    if (thiefSound != null)
+                        thiefSound.PlayOneShotSE("Thief_DeadFade", gameObject.transform.position, "Thief_DeadFade_" + transform.name);
 
                 // 退場移動
                 moveSystem.StunMove();
@@ -501,10 +588,11 @@ public class CS_ThiefAI : MonoBehaviour
 
                         GameObject Thief_DropTreatureHit = GameObject.Find("Thief_DropTreatureHit" + transform.name);
                         if (Thief_DropTreatureHit == null)
-                            thiefSound.PlayOneShotSE("Thief_DropTreatureHit", gameObject.transform.position, "Thief_DropTreatureHit");
+                            if (thiefSound != null)
+                                thiefSound.PlayOneShotSE("Thief_DropTreatureHit", gameObject.transform.position, "Thief_DropTreatureHit");
 
                         // 宝物を設置する位置を設定
-                        holdTreasure.transform.position = new Vector3(gridPos.x, gridPos.y + holdTreasure.transform.localScale.y / 2, gridPos.z);
+                        holdTreasure.transform.position = gridPos;
                     }
                     Destroy(this.gameObject);
                 }
@@ -538,7 +626,8 @@ public class CS_ThiefAI : MonoBehaviour
 
         // ※intのRangeはmin以上max未満の範囲でランダムな整数を返すため、1～3の範囲でランダムな整数を取得する場合は、Random.Range(1, 4)とする必要がある
         int soundIndex = Random.Range(1, 4);
-        thiefSound.PlayOneShotSE("Thief_Hit" + soundIndex, gameObject.transform.position, "Thief_Hit" + soundIndex);
+        if (thiefSound != null)
+            thiefSound.PlayOneShotSE("Thief_Hit" + soundIndex, gameObject.transform.position, "Thief_Hit" + soundIndex);
 
         // ギミックの方を向く
         Vector3 directionToGimmick = gimmickPoint - transform.position;
@@ -586,7 +675,8 @@ public class CS_ThiefAI : MonoBehaviour
 
             GameObject Thief_Dead = GameObject.Find("Thief_Dead_" + transform.name);
             if (Thief_Dead == null)
-                thiefSound.PlayOneShotSE("Thief_Dead", gameObject.transform.position, "Thief_Dead");
+                if (thiefSound != null)
+                    thiefSound.PlayOneShotSE("Thief_Dead", gameObject.transform.position, "Thief_Dead");
 
             // StunThiefTargetに通知する
             GetComponent<CS_StunThiefTarget>().Notify();
@@ -632,7 +722,8 @@ public class CS_ThiefAI : MonoBehaviour
         // 猫を捕まえているSEを再生する
         GameObject Thief_HitCat = GameObject.Find("Thief_HitCat_" + transform.name);
         if (Thief_HitCat == null)
-            thiefSound.PlayOneShotSE("Thief_HitCat", gameObject.transform.position, "Thief_HitCat_" + transform.name);
+            if (thiefSound != null)
+                thiefSound.PlayOneShotSE("Thief_HitCat", gameObject.transform.position, "Thief_HitCat_" + transform.name);
     }
 
     /// <summary>

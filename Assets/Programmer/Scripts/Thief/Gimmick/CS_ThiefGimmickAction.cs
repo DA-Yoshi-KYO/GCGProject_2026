@@ -92,7 +92,9 @@ public class CS_ThiefGimmickAction
             targetGimmick.Add(ironBall);
             GameObject Thief_RockRunAway = GameObject.Find("Thief_RockRunAway_" + thiefAI.transform.name);
             if (Thief_RockRunAway == null)
-                thiefAI.read_ThiefSound.PlayOneShotSE("Thief_RockRunAway", thiefAI.transform.position, "Thief_RockRunAway_" + thiefAI.transform.name);
+                if (thiefAI != null)
+                    if (thiefAI.read_ThiefSound != null)
+                        thiefAI.read_ThiefSound.PlayOneShotSE("Thief_RockRunAway", thiefAI.transform.position, "Thief_RockRunAway_" + thiefAI.transform.name);
         }
     }
 

@@ -793,7 +793,9 @@ public class CS_MemorySystem
 
         GameObject Thief_Serach = GameObject.Find("Thief_Serach_" + thiefAI.transform.name);
         if (Thief_Serach == null)
-            thiefAI.read_ThiefSound.PlayOneShotSE("Thief_Serach", thiefAI.transform.position, "Thief_Serach_" + thiefAI.transform.name);
+            if (thiefAI != null)
+                if (thiefAI.read_ThiefSound != null)
+                    thiefAI.read_ThiefSound.PlayOneShotSE("Thief_Serach", thiefAI.transform.position, "Thief_Serach_" + thiefAI.transform.name);
 
         // 探索度が100%以上になった場合は、探索が終了していると判定してtrueを返す
         if (visionTargetMemories[((CS_VisionTarget)currentTarget)].explorationProgress >= 100.0f)
