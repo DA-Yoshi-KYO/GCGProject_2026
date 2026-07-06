@@ -51,6 +51,8 @@ public class TreasureItem : MonoBehaviour
             return;
         }
 
+        FrameIcon.SetActive(false);
+
         isDestroyCheck = false;
 
         // 宝物が盗まれているかどうかを確認

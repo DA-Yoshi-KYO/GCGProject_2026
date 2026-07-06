@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem.Android;
 
 public class TreasureUI : MonoBehaviour
 {
@@ -21,6 +22,10 @@ public class TreasureUI : MonoBehaviour
 
     List<GameObject> treasureIcons = new List<GameObject>();
 
+    int tikcCount = 0;
+
+    CS_RoomBlockRandomGenerator roomBlockRandomGenerator;
+
     private void Start()
     {
         endManager = GameObject.FindObjectOfType<CS_EndManager>();
@@ -29,12 +34,22 @@ public class TreasureUI : MonoBehaviour
         {
             Debug.LogError("CS_EndManagerが見つかりません。");
         }
+
+        roomBlockRandomGenerator = GameObject.FindObjectOfType<CS_RoomBlockRandomGenerator>();
+        if(roomBlockRandomGenerator == null)
+        {
+            Debug.LogError("CS_RoomBlockRandomGeneratorが見つかりません。");
+        }
+
     }
 
     private void Update()
     {
-        int count = endManager.read_TreasureList.Count;
+        if(roomBlockRandomGenerator == null || endManager == null) return;
 
+        if(!roomBlockRandomGenerator.b_IsRuntimeRegenerating) return;
+
+        int count = endManager.read_TreasureList.Count;
         if (count < MaxTreasureCount || !isFirstUpdate) return;
         
         isFirstUpdate = false;
