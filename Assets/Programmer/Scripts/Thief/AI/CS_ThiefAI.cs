@@ -319,9 +319,6 @@ public class CS_ThiefAI : MonoBehaviour
     // 探索状態の行動
     private void Explore()
     {
-        // 移動システムのスタックを修正する処理
-        moveSystem.FixStuck();
-
         if(thiefGimmickAction.UpdateAction()) return;
 
         thiefReaction.ClearReaction();
@@ -364,9 +361,6 @@ public class CS_ThiefAI : MonoBehaviour
     // 逃走状態の行動
     private void Escape()
     {
-        // 移動システムのスタックを修正する処理
-        moveSystem.FixStuck();
-
         // 宝物を見つけたときのリアクションに変更
         thiefReaction.ChangeReaction(CS_ThiefReaction.ThiefReactionType.FoundTreasure);
 

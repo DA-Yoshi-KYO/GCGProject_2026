@@ -202,45 +202,4 @@ public class CS_MoveSystem
         exitPosition.y = thiefAI.transform.position.y; // 高さは変えない
         thiefAI.transform.position = Vector3.MoveTowards(thiefAI.transform.position, exitPosition, walkSpeed * 0.5f * Time.deltaTime);
     }
-
-    /// <summary>
-    /// バグ対策：同じ位置に一定フレーム以上いる場合、MoveToを呼び出す
-    /// </summary>
-    public void FixStuck()
-    {
-        if(thiefAI.read_Animator.GetBool("IsHunting"))return; // 漁り状態のときはバグ対策を行わない
-
-        if (Vector3.Distance(thiefAI.transform.position, debugPos) < 0.1f)
-        {
-            samePosFrameCount++;
-            if (samePosFrameCount > 120) // 2秒以上同じ位置にいる場合
-            {
-                // 少し位置をずらす
-                thiefAI.transform.position += new Vector3(0.1f, 0, 0.1f);
-
-                // 音に反応しているとき
-                if (thiefAI.read_HearingSystem.read_IsReactingToSound)
-                {
-                    MoveTo(thiefAI.read_HearingSystem.read_SoundReactionPosition);
-                }
-                // A*システムにルートがあるとき
-                else if (thiefAI.read_AStarSystem.HasRoute)
-                {
-                    MoveTo(thiefAI.read_AStarSystem.read_MoveRoute[0].position);
-                }
-                // 現在の標的があるとき
-                else if (thiefAI.read_MemorySystem.read_CurrentTarget != null)
-                {
-                    MoveTo(thiefAI.read_MemorySystem.read_CurrentTarget.transform.position);
-                }
-
-                samePosFrameCount = 0;
-            }
-        }
-        else
-        {
-            samePosFrameCount = 0;
-            debugPos = thiefAI.transform.position;
-        }
-    }
 }
