@@ -15,15 +15,20 @@ public class TreasureItem : MonoBehaviour
     [SerializeField] private Sprite Pinch;
 
     CS_VisionTarget visionTarget;
+    RectTransform rectTransform;
     NumberView numberView;
     int Distance = 100;
     bool isDestroyCheck = false;
+
+    Vector3 scale;
 
     private void Awake()
     {
         BastetOutLineIcon.SetActive(false);
         DetailTextImage.SetActive(false);
         numberView = NumberView.GetComponent<NumberView>();
+        rectTransform = GetComponent<RectTransform>();
+        scale =rectTransform.localScale;
     }
 
     private void FixedUpdate()
@@ -36,6 +41,7 @@ public class TreasureItem : MonoBehaviour
                 return;
             }
             Debug.Log("宝物が破棄されました。");
+            rectTransform.localScale = Vector3.Lerp(rectTransform.localScale, scale, Time.deltaTime * 5f);
             BastetIcon.SetActive(false);
             BastetOutLineIcon.SetActive(false);
             DetailTextImage.SetActive(false);
@@ -80,6 +86,7 @@ public class TreasureItem : MonoBehaviour
         if (Distance <= 10)
         {
             DetailTextImage.GetComponent<UnityEngine.UI.Image>().sprite = Pinch;
+            rectTransform.localScale = Vector3.Lerp(rectTransform.localScale, scale * 1.25f, Time.deltaTime * 5f);
         }
         else
         {
