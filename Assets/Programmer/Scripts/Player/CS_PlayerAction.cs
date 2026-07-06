@@ -243,7 +243,6 @@ public class CS_PlayerAction : MonoBehaviour
 
     private void OnInteract(InputAction.CallbackContext context)
     {
-        Debug.Log("Interact: " + context.phase);
         if (context.started)
         {
             interactTime = 0.0f;

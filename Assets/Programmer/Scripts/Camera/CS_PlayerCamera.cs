@@ -93,25 +93,6 @@ public class CS_PlayerCamera : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //現在のカメラのベクトルを更新
-        cameraRight = roomCameraObject.transform.right;
-        cameraForward = roomCameraObject.transform.forward;
-
-        //プレイヤーに追従して移動
-        Vector3 moveAmount = roomCenter - transform.position;
-
-        //カメラの移動に制限をかける
-        moveAmount.x = Mathf.Clamp(moveAmount.x, -roomCamera.moveAmountLimit.x, roomCamera.moveAmountLimit.x);
-        moveAmount.y = Mathf.Clamp(moveAmount.y, -roomCamera.moveAmountLimit.y, roomCamera.moveAmountLimit.y);
-        moveAmount.z = Mathf.Clamp(moveAmount.z, -roomCamera.moveAmountLimit.z, roomCamera.moveAmountLimit.z);
-
-        //カメラの移動
-        roomCameraObject.transform.position = 
-            Vector3.Lerp(roomCameraObject.transform.position, roomCamera.initPos - moveAmount, trackingTime * Time.deltaTime);
-
-        // レイキャストによるオブジェクトの透過処理
-        //RayCastTransparent();
-
         //カメラの遷移演出の処理
         switch (transitionCamera)
         {
@@ -135,56 +116,32 @@ public class CS_PlayerCamera : MonoBehaviour
         }
     }
 
+    private void LateUpdate()
+    {
+        //現在のカメラのベクトルを更新
+        cameraRight = roomCameraObject.transform.right;
+        cameraForward = roomCameraObject.transform.forward;
+
+        //プレイヤーに追従して移動
+        Vector3 moveAmount = roomCenter - transform.position;
+
+        //カメラの移動に制限をかける
+        moveAmount.x = Mathf.Clamp(moveAmount.x, -roomCamera.moveAmountLimit.x, roomCamera.moveAmountLimit.x);
+        moveAmount.y = Mathf.Clamp(moveAmount.y, -roomCamera.moveAmountLimit.y, roomCamera.moveAmountLimit.y);
+        moveAmount.z = Mathf.Clamp(moveAmount.z, -roomCamera.moveAmountLimit.z, roomCamera.moveAmountLimit.z);
+
+        //カメラの移動
+        roomCameraObject.transform.position =
+            Vector3.Lerp(roomCameraObject.transform.position, roomCamera.initPos - moveAmount, trackingTime * Time.deltaTime);
+            Vector3.Lerp(roomCameraObject.transform.position, roomCamera.initPos - moveAmount, trackingTime * Time.deltaTime);
+    }
+
     /// <summary>
     /// 部屋移動した際のカメラ情報更新
     /// </summary>
     public void OnRoomMove()
     {
         transitionCamera = TransitionCamera.Start;
-    }
-
-    /// <summary>
-    /// カメラのレイとプレイヤーの間にあるオブジェクトを透過させる処理
-    /// </summary>
-    private void RayCastTransparent()
-    {
-        // 前フレームのリセット
-        foreach (var r in currentHits)
-        {
-            if (mpbCache.TryGetValue(r, out var mpb))
-            {
-                mpb.SetFloat("_Alpha", 1);
-                r.SetPropertyBlock(mpb);
-            }
-        }
-        currentHits.Clear();
-
-        // カメラとプレイヤーの距離の間でレイを制限してキャストを行う
-        Vector3 camPos = roomCameraObject.transform.position;
-        Vector3 playerPos = gameObject.transform.position;
-        float playerDist = Vector3.Distance(playerPos, camPos);
-        Ray ray = new Ray(camPos, (playerPos - camPos).normalized);
-        RaycastHit[] hits = Physics.RaycastAll(ray, playerDist);
-
-        foreach (var hit in hits)
-        {
-            // 衝突したRendererオブジェクトの取得
-            Renderer r = hit.collider.GetComponentInChildren<Renderer>();
-            if (r == null) continue;
-
-            // マテリアルの取得
-            if (!mpbCache.TryGetValue(r, out var mpb))
-            {
-                mpb = new MaterialPropertyBlock();
-                mpbCache[r] = mpb;
-            }
-
-            // マテリアルのパラメータを設定
-            mpb.SetFloat("_Alpha", 1.0f);
-            r.SetPropertyBlock(mpb);
-
-            currentHits.Add(r);
-        }
     }
 
     //==カメラの遷移の演出の処理==

@@ -23,7 +23,7 @@ GameObject:
   - component: {fileID: 7810285461319049957}
   - component: {fileID: 7310053250420180615}
   m_Layer: 30
-  m_Name: Player
+  m_Name: TutorialPlayer
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -204,87 +204,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 14e145a7355cc5a408220387544180e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gimmickInfoList:
-  - gimmickTag: 1
-    gimmickInfo:
-      coolTime: 5
-      maxNum: 5
-      currentNum: 5
-      totalNum: 0
-    itemPrefab: {fileID: 7905465617219888894, guid: ea9bc9bbcf651ed43b2221a4dcb8d0c4,
-      type: 3}
-    previewPrefab: {fileID: 7905465617219888894, guid: 3bbc83263c5915945a441225b71b798c,
-      type: 3}
-    gimmickPrefab: {fileID: 4877168968123032387, guid: d7e1022ca6ddac643ad7e4a772826d60,
-      type: 3}
-  - gimmickTag: 2
-    gimmickInfo:
-      coolTime: 10
-      maxNum: 2
-      currentNum: 2
-      totalNum: 0
-    itemPrefab: {fileID: 1657490478714675189, guid: 96291b85c9fdb7d49afd3a58f5702762,
-      type: 3}
-    previewPrefab: {fileID: 5619306240066455382, guid: dd482d498a4aff246acacf665d5711ea,
-      type: 3}
-    gimmickPrefab: {fileID: 5619306240066455382, guid: 5e378c29cd580be41bc52314b073ea6b,
-      type: 3}
-  - gimmickTag: 3
-    gimmickInfo:
-      coolTime: 10
-      maxNum: 2
-      currentNum: 0
-      totalNum: 0
-    itemPrefab: {fileID: 8099441442987179503, guid: 5a19a6247af65e74d8197a1e82c9564c,
-      type: 3}
-    previewPrefab: {fileID: 8099441442987179503, guid: 5f533338cc2b2bd43af43cc50ce6e253,
-      type: 3}
-    gimmickPrefab: {fileID: 8099441442987179503, guid: 80f55bafd488bf04fa703cb32b598578,
-      type: 3}
-  - gimmickTag: 4
-    gimmickInfo:
-      coolTime: 20
-      maxNum: 1
-      currentNum: 0
-      totalNum: 0
-    itemPrefab: {fileID: 0}
-    previewPrefab: {fileID: 0}
-    gimmickPrefab: {fileID: 2109292754562999017, guid: 5439714f3877a314ba01e6c958ee03e4,
-      type: 3}
-  - gimmickTag: 5
-    gimmickInfo:
-      coolTime: 20
-      maxNum: 1
-      currentNum: 0
-      totalNum: 0
-    itemPrefab: {fileID: 3784575776439470413, guid: 9988d2f929e240744b330f3925377dfb,
-      type: 3}
-    previewPrefab: {fileID: 2268929153101709382, guid: 1050028b9b76c6a40bb4cd6201081adc,
-      type: 3}
-    gimmickPrefab: {fileID: 3784575776439470413, guid: a63d42d6ca6f2954c85516c1b177b14d,
-      type: 3}
-  - gimmickTag: 6
-    gimmickInfo:
-      coolTime: 25
-      maxNum: 2
-      currentNum: 0
-      totalNum: 0
-    itemPrefab: {fileID: 0}
-    previewPrefab: {fileID: 1489878763450881206, guid: 5e6df8dac4832cc4b87524ece603b7d0,
-      type: 3}
-    gimmickPrefab: {fileID: 1489878763450881206, guid: 8473af0b8d1462a459b65f9f712bf41d,
-      type: 3}
-  - gimmickTag: 7
-    gimmickInfo:
-      coolTime: 20
-      maxNum: 1
-      currentNum: 0
-      totalNum: 0
-    itemPrefab: {fileID: 0}
-    previewPrefab: {fileID: 7506170590698890803, guid: 269c04346fb368b42835df1885b8ea20,
-      type: 3}
-    gimmickPrefab: {fileID: 7506170590698890803, guid: fbfd6c82c3f4fbe488b79648cf1664e6,
-      type: 3}
+  gimmickInfoList: []
 --- !u!114 &5981317033681182906
 MonoBehaviour:
   m_ObjectHideFlags: 0

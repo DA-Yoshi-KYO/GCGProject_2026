@@ -46,10 +46,14 @@ public class CS_OutlineTarget : MonoBehaviour
     void OnDisable()
     {
         OutlineMaskPass.Unregister(this);
-        if (maskMaterial != null)
+
+        if (Application.isPlaying)
         {
-            Destroy(maskMaterial);
-            maskMaterial = null;
+            if (maskMaterial != null)
+            {
+                Destroy(maskMaterial);
+                maskMaterial = null;
+            }
         }
     }
 
