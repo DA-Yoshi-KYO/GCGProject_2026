@@ -376,6 +376,13 @@ public class CS_ThiefAI : MonoBehaviour
             return;
         }
 
+        // 耐久値が0以下になった場合は、耐久値を0に補正して気絶状態にする
+        if (durability <= 0)
+        {
+            durability = 0;
+            currentState = ThiefState.Stunned;
+        }
+
         // 現在の状態に応じた行動を実行
         switch (currentState)
         {
