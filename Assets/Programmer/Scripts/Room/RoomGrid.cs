@@ -237,7 +237,7 @@ public class RoomGrid : MonoBehaviour
         Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
 
         List<RaycastHit> hitList = new List<RaycastHit>(hits);
-        hitList.RemoveAll(hit => hit.transform.CompareTag("Player") || hit.transform.CompareTag("Thief"));
+        hitList.RemoveAll(hit => hit.transform.CompareTag("Player") || hit.transform.CompareTag("Thief") || hit.transform.CompareTag("Treasure"));
         spawnPos.y = hitList[0].point.y;
 
         // ギミックが落とし穴ギミックだった場合、床のマテリアルに穴の位置を伝える
