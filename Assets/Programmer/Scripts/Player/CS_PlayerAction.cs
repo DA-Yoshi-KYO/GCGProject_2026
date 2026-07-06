@@ -36,7 +36,6 @@ public class CS_PlayerAction : MonoBehaviour
     }
     [SerializeField] public InteractSyllinder interactMin = new InteractSyllinder { radius = 3f, height = 3f };//インタラクトの範囲の最小値
     [SerializeField] public InteractSyllinder interactMax = new InteractSyllinder { radius = 5f, height = 5f };//インタラクトの範囲の最大値
-    [HideInInspector] public int currentSoul { private set; get; } = 0;//現在のソウルの数
     [HideInInspector] public int currentGimmickIndex { private set; get; } = 0;//現在選択しているギミック
 
     private GameObject previewBase;
@@ -225,7 +224,8 @@ public class CS_PlayerAction : MonoBehaviour
         //一フレーム遅らせる処理
         yield return null;
         SettingAction();
-        playSE.PlayOneShotSE("Cat_Interact1", gameObject.transform.position, "InteractSE");
+        int interactSEIndex = UnityEngine.Random.Range(1, 4);
+        playSE.PlayOneShotSE("Cat_Interact" + interactSEIndex.ToString(), gameObject.transform.position, "InteractSE");
     }
 
     private void OnSelect(InputAction.CallbackContext context)
@@ -285,15 +285,10 @@ public class CS_PlayerAction : MonoBehaviour
             }
             else
             {
-
-
-                //! ここにギミック起動範囲のエフェクトを入れる。
-
-
-
                 // 長押しはギミックの起動を行う
+                int interactSEIndex = UnityEngine.Random.Range(1, 4);
                 interactField.GetComponent<Renderer>().enabled = false;
-                playSE.PlayOneShotSE("Cat_Interact1", gameObject.transform.position, "InteractSE");
+                playSE.PlayOneShotSE("Cat_Interact" + interactSEIndex.ToString(), gameObject.transform.position, "InteractSE");
 
                 //アンク用動作
                 if(gimmickManager.GetGimmickInfoDataList()[currentGimmickIndex].gimmickTag ==
@@ -764,7 +759,6 @@ public class CS_PlayerAction : MonoBehaviour
             }
 
             // プレビューオブジェクト
-            GameObject gameObj;
             for (int i = 0 ; gimmickManager.GetGimmickInfoDataList().Count > i ; i++)
             {
                 if (gimmickManager.GetGimmickInfoDataList()[i].gimmickTag == gimmick.gimmick)
@@ -847,12 +841,6 @@ public class CS_PlayerAction : MonoBehaviour
     public void SetViewPreview(bool isView)
     {
         isViewPreview = isView;
-    }
-
-    //ソウルの数を加算する関数
-    public void AddSoul(int addnum)
-    {
-        currentSoul += addnum;
     }
 
     public void SetSelectGimmickActive(bool isActive)
