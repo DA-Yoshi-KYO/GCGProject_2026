@@ -2151,10 +2151,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameClear: {fileID: 1857534760}
   gameFailure: {fileID: 265681021}
-  gameClearCutScene: {fileID: 0}
+  gameClearCutScene: {fileID: 7779621066821693960, guid: ba9b62d3b838422419449a6f8e2f543f,
+    type: 3}
   gameFailureCutScene: {fileID: 8162511618876211785, guid: ac455d1ab2faada42a6f2f41d41869ba,
     type: 3}
-  gameClearCutScenePos: {fileID: 0}
+  gameClearCutScenePos: {fileID: 2020262215}
   gameFailureCutScenePos: {fileID: 2067910355}
   debugEnd: 1
   isOldFailure: 0
@@ -3581,6 +3582,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1dd62ab88ad5e7b4b8f0d673a9179748, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &2020262214
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2020262215}
+  m_Layer: 0
+  m_Name: CutSceneWinPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2020262215
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2020262214}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
+  m_LocalPosition: {x: -6, y: 0.03, z: 155}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!1 &2067910354
 GameObject:
   m_ObjectHideFlags: 0
@@ -4120,3 +4152,4 @@ SceneRoots:
   - {fileID: 551290931739923717}
   - {fileID: 2990935490476093454}
   - {fileID: 2067910355}
+  - {fileID: 2020262215}
