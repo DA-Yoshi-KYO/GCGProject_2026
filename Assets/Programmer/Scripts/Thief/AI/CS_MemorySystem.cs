@@ -160,7 +160,7 @@ public class CS_MemorySystem
     public void RecognizeObjects()
     {
         // 視界内オブジェクトを取得
-        List<CS_ThiefTarget> visionTargets = thiefAI.read_VisionSensor.Scan();
+        List<CS_ThiefTarget> visionTargets = thiefAI?.read_VisionSensor?.Scan();
 
         // 現在の部屋の記憶がない場合は新たに作成
         CS_RoomMemory roomMemory;
@@ -195,9 +195,9 @@ public class CS_MemorySystem
                 // そのオブジェクトの危険ゾーンを回避ゾーンとして記憶する
                 AddAvoidZoneID(((CS_StunThiefTarget)entry).read_DangerZone.ZoneID);
                 // 移動システムに回避ゾーンを設定する
-                thiefAI.read_MoveSystem.read_SmartNavAgent.SetAvoidZoneIDs(avoidZoneIDs.ToArray());
+                thiefAI?.read_MoveSystem?.read_SmartNavAgent?.SetAvoidZoneIDs(avoidZoneIDs.ToArray());
                 // 移動システムを再構築する
-                thiefAI.read_MoveSystem.read_SmartNavAgent.RefreshPath();
+                thiefAI?.read_MoveSystem?.read_SmartNavAgent?.RefreshPath();
 
                 continue;
             }
@@ -206,7 +206,7 @@ public class CS_MemorySystem
             if (!(entry is CS_VisionTarget)) continue;
 
             // 視界内に宝物がある場合は、isTreasureObjectをtrueにする
-            if (((CS_VisionTarget)entry).targetType == CS_VisionTarget.TargetType.Treasure)isTreasureObject = true;
+            if (((CS_VisionTarget)entry).targetType == CS_VisionTarget.TargetType.Treasure) isTreasureObject = true;
 
             // 現在の部屋の認識しているオブジェクトのリストがない場合は、新たに作成する
             if (roomMemory.recognizedObjects == null) roomMemory.recognizedObjects = new List<CS_ThiefTarget>();
@@ -272,24 +272,15 @@ public class CS_MemorySystem
 
         foreach (CS_TrapTarget trap in gimmickObjectsMemories)
         {
-            switch(trap.gimmickScript.gimmick)
+            switch (trap.gimmickScript.gimmick)
             {
                 // 空の宝箱罠の場合は、宝物があるフラグを立てる
                 case Gimmick.EmptyChest:
                     {
-                        thiefAI.read_ThiefGimmickAction.EmptyChestStart(trap.gimmickScript);
+                        thiefAI?.read_ThiefGimmickAction?.EmptyChestStart(trap.gimmickScript);
                         isTreasureObject = true;
                     }
                     break;
-                //case Gimmick.IronBall:
-                //    {
-                //        // 現在の状態がActiveの場合でないときは、スキップする
-                //        if (trap.gimmickScript.gimmickState != GimmickState.Active) continue;
-
-                //        // 泥棒の大岩用ギミックアクションの開始処理を呼び出す
-                //        thiefAI.read_ThiefGimmickAction.IronBallStart(trap.gimmickScript);
-                //    }
-                //    break;
             }
         }
 
@@ -363,7 +354,7 @@ public class CS_MemorySystem
 
 
             // 宝物を探索対象に設定した後は、A*システムのルートをクリアする
-            if (thiefAI.read_AStarSystem.HasRoute) thiefAI.read_AStarSystem.ClearRoute();
+            if (thiefAI.read_AStarSystem.HasRoute) thiefAI?.read_AStarSystem?.ClearRoute();
 
             return;
         }
@@ -386,7 +377,7 @@ public class CS_MemorySystem
             }
 
             // 現在の耐久値が1以下の場合
-            if (thiefAI.read_Durability <=1)
+            if (thiefAI?.read_Durability <= 1)
             {
                 // 探索対象に設定
                 if (CS_ThiefDebugFlags.ChasePlayer)
@@ -400,7 +391,7 @@ public class CS_MemorySystem
                 if (!ignorePlayer)
                 {
                     //無敵状態ではないときは、プレイヤーを無視する
-                    if (thiefAI.read_RemainingInvincibleTime <=0) return;
+                    if (thiefAI?.read_RemainingInvincibleTime <= 0) return;
 
                     if (CS_ThiefDebugFlags.ChasePlayer)
                     {
@@ -410,7 +401,7 @@ public class CS_MemorySystem
             }
 
             // プレイヤーを探索対象に設定した後は、A*システムのルートをクリアする
-            if (thiefAI.read_AStarSystem.HasRoute) thiefAI.read_AStarSystem.ClearRoute();
+            if (thiefAI.read_AStarSystem.HasRoute) thiefAI?.read_AStarSystem?.ClearRoute();
 
             return;
         }
@@ -418,7 +409,7 @@ public class CS_MemorySystem
         else
         {
             // 追跡のリアクションをクリアする
-            thiefAI.read_ThiefReaction.ClearReactionByType(CS_ThiefReaction.ThiefReactionType.ChasingCat);
+            thiefAI?.read_ThiefReaction?.ClearReactionByType(CS_ThiefReaction.ThiefReactionType.ChasingCat);
 
             // 現在の探索対象がプレイヤーの場合は、探索対象をリセットする
             if (currentTarget is CS_PlayerTarget) ClearTarget();
@@ -437,7 +428,7 @@ public class CS_MemorySystem
             ClearTarget();
 
             // 音に反応しているオブジェクトを探索対象に設定する
-            thiefAI.read_MoveSystem.MoveTo(thiefAI.read_HearingSystem.read_SoundReactionPosition);
+            thiefAI?.read_MoveSystem?.MoveTo(thiefAI.read_HearingSystem.read_SoundReactionPosition);
 
             return;
         }
@@ -473,7 +464,7 @@ public class CS_MemorySystem
                 }
             }
             // 最も近い未探索の記憶オブジェクトを探索対象に設定する
-            if (target != null)SetTarget(target);
+            if (target != null) SetTarget(target);
 
             return;
         }
@@ -493,7 +484,7 @@ public class CS_MemorySystem
         if (thiefAI.read_AStarSystem.HasRoute)
         {
             // ルートを更新
-            thiefAI.read_AStarSystem.UpdateRoute(thiefAI.read_ExploredDistanceThreshold);
+            thiefAI?.read_AStarSystem?.UpdateRoute(thiefAI.read_ExploredDistanceThreshold);
             return;
         }
 
@@ -510,20 +501,20 @@ public class CS_MemorySystem
                 // 探索対象との距離が、探索済みとする距離の閾値以下になっている場合
                 if (distanceToTarget <= ((CS_VisionTarget)currentTarget).exploredDistanceThreshold)
                 {
-                    thiefAI.read_MoveSystem.Stop();
+                    thiefAI?.read_MoveSystem?.Stop();
 
                     // 探索対象の探索している人を自分に設定する
                     visionTargetMemories[((CS_VisionTarget)currentTarget)].searchThief = thiefAI.gameObject;
-                    (( CS_VisionTarget)currentTarget).searchThief = thiefAI.gameObject;
+                    ((CS_VisionTarget)currentTarget).searchThief = thiefAI.gameObject;
 
                     // 探索しているオブジェクトの方を向くように回転させる
-                    thiefAI.transform.LookAt(new Vector3(currentTarget.transform.position.x, thiefAI.transform.position.y, currentTarget.transform.position.z));
+                    thiefAI?.transform.LookAt(new Vector3(currentTarget.transform.position.x, thiefAI.transform.position.y, currentTarget.transform.position.z));
 
                     // 泥棒のアニメーション状態をHuntingに変更する
-                    if (thiefAI.read_Animator != null) thiefAI.read_Animator.SetBool("IsHunting", true);
+                    thiefAI?.read_Animator?.SetBool("IsHunting", true);
 
                     // 泥棒のリアクションを探索に変更する
-                    thiefAI.read_ThiefReaction.ChangeReaction(CS_ThiefReaction.ThiefReactionType.Searching);
+                    thiefAI?.read_ThiefReaction?.ChangeReaction(CS_ThiefReaction.ThiefReactionType.Searching);
 
                     // 探索対象の探索にかかる時間を経過させる
                     if (ProgressTargetSearchTime())
@@ -537,14 +528,14 @@ public class CS_MemorySystem
                     // 探索対象との距離が、探索済みとする距離の閾値よりも大きい場合は、探索度をリセットする
                     ResetCurrentTargetExplorationProgress();
                     // 探索対象の方へ移動する
-                    thiefAI.read_MoveSystem.MoveTo(currentTarget.transform.position);
+                    thiefAI?.read_MoveSystem?.MoveTo(currentTarget.transform.position);
                 }
             }
             // プレイヤーの場合
             else if (currentTarget is CS_PlayerTarget)
             {
                 // 常にプレイヤーの方を向くように回転させる
-                thiefAI.transform.LookAt(new Vector3(currentTarget.transform.position.x, thiefAI.transform.position.y, currentTarget.transform.position.z));
+                thiefAI?.transform.LookAt(new Vector3(currentTarget.transform.position.x, thiefAI.transform.position.y, currentTarget.transform.position.z));
 
                 // 現在の耐久値が1より大きい場合
                 if (thiefAI.read_Durability > 1)
@@ -560,7 +551,7 @@ public class CS_MemorySystem
                 }
 
                 // 泥棒のリアクションを追跡に変更する
-                thiefAI.read_ThiefReaction.ChangeReaction(CS_ThiefReaction.ThiefReactionType.ChasingCat);
+                thiefAI?.read_ThiefReaction?.ChangeReaction(CS_ThiefReaction.ThiefReactionType.ChasingCat);
 
                 // 探索対象との距離が、探索済みとする距離の閾値以下になっている場合は、探索対象をリセットする
                 if (distanceToTarget <= thiefAI.read_ExploredDistanceThreshold)
@@ -574,8 +565,7 @@ public class CS_MemorySystem
                         ((CS_PlayerTarget)currentTarget).transform.GetComponent<CS_PlayerMove>().CaughtByThief(thiefAI.read_RemainingHoldCatTime);
 
                         // 泥棒のアニメーション状態をHuntingに変更する
-                        if (thiefAI.read_Animator != null) thiefAI.read_Animator.SetBool("IsHunting", true);
-
+                        thiefAI?.read_Animator?.SetBool("IsHunting", true);
 
                         return;
                     }
@@ -627,7 +617,7 @@ public class CS_MemorySystem
                             // リストを減算して次の移動ポイントを探索対象に設定
                             currentTarget = currentRoom.movePoints[nextIndex];
                         }
-                        thiefAI.read_MoveSystem.MoveTo(currentTarget.transform.position);
+                        thiefAI?.read_MoveSystem?.MoveTo(currentTarget.transform.position);
                         break;
                     }
                 }
@@ -640,12 +630,12 @@ public class CS_MemorySystem
             if (thiefAI.read_HearingSystem.read_IsReactingToSound)
             {
                 // 泥棒のリアクションを警戒に変更する
-                thiefAI.read_ThiefReaction.ChangeReaction(CS_ThiefReaction.ThiefReactionType.Alert);
+                thiefAI?.read_ThiefReaction?.ChangeReaction(CS_ThiefReaction.ThiefReactionType.Alert);
 
                 // 音に反応している位置との距離が、探索済みとする距離の閾値以下になっている場合は、その位置を探索対象に設定する
                 if (!thiefAI.read_HearingSystem.IsAtSoundReactionPosition(thiefAI.read_ExploredDistanceThreshold)) return;
             }
-            else thiefAI.read_ThiefReaction.ClearReactionByType(CS_ThiefReaction.ThiefReactionType.Alert);
+            else thiefAI?.read_ThiefReaction?.ClearReactionByType(CS_ThiefReaction.ThiefReactionType.Alert);
         }
     }
 
@@ -706,7 +696,7 @@ public class CS_MemorySystem
                 {
                     distanceToTarget = distance;
                     currentTarget = target;
-                    thiefAI.read_MoveSystem.MoveTo(currentTarget.transform.position);
+                    thiefAI?.read_MoveSystem?.MoveTo(currentTarget.transform.position);
                 }
                 else continue;
             }
@@ -726,7 +716,8 @@ public class CS_MemorySystem
         {
             return;
         }
-        if (target == null) {
+        if (target == null)
+        {
             ClearTarget();
             return;
         }
@@ -734,7 +725,7 @@ public class CS_MemorySystem
         currentTarget = target;
 
         // 探索対象に向かって移動
-        thiefAI.read_MoveSystem.MoveTo(currentTarget.transform.position);
+        thiefAI?.read_MoveSystem?.MoveTo(currentTarget.transform.position);
     }
 
     /// <summary>
@@ -761,7 +752,7 @@ public class CS_MemorySystem
 
         currentTarget = null;
         // 泥棒のアニメーション状態をHuntingに変更する
-        if (thiefAI.read_Animator != null) thiefAI.read_Animator.SetBool("IsHunting", false);
+        thiefAI?.read_Animator?.SetBool("IsHunting", false);
     }
 
     /// <summary>
@@ -793,24 +784,22 @@ public class CS_MemorySystem
 
         GameObject Thief_Serach = GameObject.Find("Thief_Serach_" + thiefAI.transform.name);
         if (Thief_Serach == null)
-            if (thiefAI != null)
-                if (thiefAI.read_ThiefSound != null)
-                    thiefAI.read_ThiefSound.PlayOneShotSE("Thief_Serach", thiefAI.transform.position, "Thief_Serach_" + thiefAI.transform.name);
+            thiefAI?.read_ThiefSound?.PlayOneShotSE("Thief_Serach", thiefAI.transform.position, "Thief_Serach_" + thiefAI.transform.name);
 
         // 探索度が100%以上になった場合は、探索が終了していると判定してtrueを返す
         if (visionTargetMemories[((CS_VisionTarget)currentTarget)].explorationProgress >= 100.0f)
         {
-            thiefAI.read_ThiefReaction.ClearReaction(); // 探索が終了したときのリアクションをクリアする
+            thiefAI?.read_ThiefReaction?.ClearReaction(); // 探索が終了したときのリアクションをクリアする
 
             // 探索対象が宝物の場合は、そのままtrueを返す
             if (((CS_VisionTarget)currentTarget).targetType == CS_VisionTarget.TargetType.Treasure)
             {
                 // 泥棒のアニメーション状態をHuntingに変更する
-                if (thiefAI.read_Animator != null) thiefAI.read_Animator.SetBool("IsHunting", false);
+                thiefAI?.read_Animator?.SetBool("IsHunting", false);
                 // 泥棒のアニメーション状態をHuntingに変更する
-                if (thiefAI.read_Animator != null) thiefAI.read_Animator.SetTrigger("FoundTrigger");
+                thiefAI?.read_Animator?.SetTrigger("FoundTrigger");
                 // 泥棒の状態をFoundに変更する
-                thiefAI.ChangeStatus(CS_ThiefAI.ThiefState.Found);
+                thiefAI?.ChangeStatus(CS_ThiefAI.ThiefState.Found);
 
                 return true;
             }
@@ -859,7 +848,7 @@ public class CS_MemorySystem
     /// </summary>
     public void FindNowRoomNode()
     {
-        GameObject currentobject = CS_RoomCreatePointRaycast.GetRayRoomCreatePoint(thiefAI.gameObject);
+        GameObject currentobject = CS_RoomCreatePointRaycast.GetRayRoomCreatePoint(thiefAI?.gameObject);
         if (currentobject == null)
         {
             Debug.LogWarning("【泥棒】現在いる部屋に関するオブジェクトの取得に失敗しました");
@@ -993,8 +982,8 @@ public class CS_MemorySystem
         // connectDirs が空になる可能性があるため、念のためチェックして早期リターンする
         if (connectDirs == null || connectDirs.Count == 0)
         {
-            Debug.LogWarning("【泥棒】NextDoorElection: 選択可能な接続方向が見つかりませんでした。処理を中断します。", thiefAI.gameObject);
-            Debug.LogWarning("名前：" + thiefAI.gameObject.name);
+            Debug.LogWarning("【泥棒】NextDoorElection: 選択可能な接続方向が見つかりませんでした。処理を中断します。", thiefAI?.gameObject);
+            Debug.LogWarning("名前：" + thiefAI?.gameObject.name);
             return;
         }
 
@@ -1021,7 +1010,7 @@ public class CS_MemorySystem
             }
 
             // 選択した方向にあるドアの位置を次の移動ポイントに設定
-            thiefAI.read_AStarSystem.ConstructionRoute(currentRoom.GetDirectionWallToDoor(connectDirs[randomIndex]), false);
+            thiefAI?.read_AStarSystem?.ConstructionRoute(currentRoom.GetDirectionWallToDoor(connectDirs[randomIndex]), false);
         }
         else
         {
@@ -1051,7 +1040,7 @@ public class CS_MemorySystem
                 // 選択したドアの位置を取得
                 if (targetRoomNode == null)
                 {
-                    Debug.LogWarning("【泥棒】NextDoorElection: 選択したドアの所有部屋が見つかりませんでした。処理を中断します。", thiefAI.gameObject);
+                    Debug.LogWarning("【泥棒】NextDoorElection: 選択したドアの所有部屋が見つかりませんでした。処理を中断します。", thiefAI?.gameObject);
                     return;
                 }
 
@@ -1064,12 +1053,12 @@ public class CS_MemorySystem
                 }
 
                 // ドアの位置を最終目的位置としてルートを構築
-                thiefAI.read_AStarSystem.ConstructionRoute(targetDoorPos, false);
+                thiefAI?.read_AStarSystem.ConstructionRoute(targetDoorPos, false);
             }
-            else 
+            else
             {
                 // 選択した方向にあるドアの位置を次の移動ポイントに設定
-                thiefAI.read_AStarSystem.ConstructionRoute(currentRoom.GetDirectionWallToDoor(connectDirs[randomIndex]), false);
+                thiefAI?.read_AStarSystem.ConstructionRoute(currentRoom.GetDirectionWallToDoor(connectDirs[randomIndex]), false);
             }
         }
     }
@@ -1121,10 +1110,7 @@ public class CS_MemorySystem
         if (!avoidZoneIDs.Contains(zoneID)) avoidZoneIDs.Add(zoneID);
 
         // SmartNavAgent がある場合は即時反映
-        if (thiefAI.read_MoveSystem.read_SmartNavAgent != null)
-        {
-            thiefAI.read_MoveSystem.read_SmartNavAgent.SetAvoidZoneIDs(avoidZoneIDs);
-        }
+        thiefAI?.read_MoveSystem?.read_SmartNavAgent?.SetAvoidZoneIDs(avoidZoneIDs);
     }
 
     /// <summary>
@@ -1136,10 +1122,7 @@ public class CS_MemorySystem
         if (avoidZoneIDs == null) return;
         if (avoidZoneIDs.Contains(zoneID)) avoidZoneIDs.Remove(zoneID);
         // SmartNavAgent がある場合は即時反映
-        if (thiefAI.read_MoveSystem.read_SmartNavAgent != null)
-        {
-            thiefAI.read_MoveSystem.read_SmartNavAgent.SetAvoidZoneIDs(avoidZoneIDs);
-        }
+        thiefAI?.read_MoveSystem?.read_SmartNavAgent?.SetAvoidZoneIDs(avoidZoneIDs); 
     }
 
     /// <summary>
@@ -1173,6 +1156,6 @@ public class CS_MemorySystem
         }
 
         // owner が設定されていて、自分以外なら対象にしない
-        return owner == null || owner == thiefAI.gameObject;
+        return owner == null || owner == thiefAI?.gameObject;
     }
 }

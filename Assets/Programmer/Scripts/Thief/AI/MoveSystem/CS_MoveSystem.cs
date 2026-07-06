@@ -176,10 +176,10 @@ public class CS_MoveSystem
         thiefAI.transform.position = targetPos;
 
         // ワープ後に、ThiefAIのA*システムにワープアクションを通知する
-        thiefAI.read_AStarSystem.WarpAction();
+        thiefAI?.read_AStarSystem?.WarpAction();
 
         // ワープ後に、ThiefAIの記憶システムにワープアクションを通知する
-        thiefAI.read_MemorySystem.WarpAction(entryDoorDir);
+        thiefAI?.read_MemorySystem?.WarpAction(entryDoorDir);
     }
 
     /// <summary>
