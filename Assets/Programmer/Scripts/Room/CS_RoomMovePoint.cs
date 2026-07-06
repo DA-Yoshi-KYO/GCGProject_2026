@@ -291,7 +291,17 @@ public class CS_RoomMovePoint : MonoBehaviour
             characterController.enabled = false;
         }
 
-        playerTransform.SetPositionAndRotation(targetTransform.position, targetTransform.rotation);
+        Vector3 lookDir = targetTransform.position - targetTransform.parent.position;
+        lookDir.y = 0.0f;
+
+        Quaternion spawnRotation = targetTransform.rotation;
+
+        if (lookDir.sqrMagnitude > 0.001f)
+        {
+            spawnRotation = Quaternion.LookRotation(lookDir);
+        }
+
+        playerTransform.SetPositionAndRotation(targetTransform.position, spawnRotation);
 
         if (characterController != null)
         {
