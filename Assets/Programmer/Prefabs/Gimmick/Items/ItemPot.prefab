@@ -11,6 +11,8 @@ GameObject:
   - component: {fileID: 3279101354686393898}
   - component: {fileID: 5322579241517293808}
   - component: {fileID: 6548285118755774186}
+  - component: {fileID: 3773457934691775449}
+  - component: {fileID: 2945923530979891570}
   m_Layer: 0
   m_Name: ItemPot
   m_TagString: Item
@@ -70,6 +72,33 @@ CapsuleCollider:
   m_Height: 0.7
   m_Direction: 1
   m_Center: {x: 0, y: 0.28, z: 0}
+--- !u!114 &3773457934691775449
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7905465617219888894}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 392ec5ac6ab66b645a01a679dbd2d422, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  go_EffectPrefab: {fileID: 6358640125595540416, guid: 48bf997f6c6a9b645af2a1cdcc030dbb,
+    type: 3}
+--- !u!114 &2945923530979891570
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7905465617219888894}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b15753af12f619a47b87f2b1cbaade08, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cs_EffectPlayer: {fileID: 3773457934691775449}
 --- !u!1001 &1781112524836442516
 PrefabInstance:
   m_ObjectHideFlags: 0

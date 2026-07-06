@@ -128,17 +128,6 @@ public class GimmickBase : MonoBehaviour
         searchColliderX = X.GetComponent<BoxCollider>();
         searchColliderZ = Z.GetComponent<BoxCollider>();
 
-        GameObject soundManager = GameObject.Find("AudioManager");
-        if (soundManager != null)
-        {
-            gimmickSound = soundManager.GetComponentInChildren<CS_3DPlaySE>();
-        }
-
-        if (gimmickSound == null)
-        {
-            Debug.LogWarning("CS_3DPlaySEコンポーネントが見つかりません。サウンドが再生されません。");
-        }
-
         targetPoint = transform.position;
         transform.position = new Vector3(
             transform.position.x,
@@ -146,11 +135,28 @@ public class GimmickBase : MonoBehaviour
             transform.position.z
         );
 
-        InitMaterials();
+        GameObject soundManager = GameObject.Find("AudioManager/3DSE");
+        if (soundManager != null)
+        {
+            gimmickSound = soundManager.GetComponent<CS_3DPlaySE>();
+        }
+
+        if (gimmickSound == null)
+        {
+            Debug.LogWarning("CS_3DPlaySEコンポーネントが見つかりません。サウンドが再生されません。");
+        }
+        else
+        {
+            //召喚SE再生
+            gimmickSound.PlayOneShotSE("Gimmick_Summon", transform.position, "Summon");
+        }
+
+            InitMaterials();
         roomIndex = CS_RoomCreatePointRaycast.GetRayRoomCreatePoint(this.gameObject).transform.GetSiblingIndex();
 
         outlineTarget = GetComponentInChildren<CS_OutlineTarget>();
         outlineTarget.SetOutline(Color.gray, outlineWidth);
+
     }
 
     private void InitMaterials()
@@ -204,7 +210,7 @@ public class GimmickBase : MonoBehaviour
         scaleY = scaleY * gimmickScale / 100f;
         scaleZ = scaleZ * gimmickScale / 100f;
 
-        transform.localScale = new Vector3(scaleX, scaleY, scaleZ);
+        transform.localScale = new Vector3(scaleX, scaleY, scaleX);
 
         Vector3 set = search.transform.position;
         set.y = 0.0f;
@@ -655,5 +661,10 @@ public class GimmickBase : MonoBehaviour
     public void SetOutLineColor(Color col)
     {
         outlineTarget.SetOutlineColor(col);
+    }
+
+    public CS_3DPlaySE GetGimmickSound()
+    {
+        return gimmickSound;
     }
 }

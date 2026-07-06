@@ -97,7 +97,12 @@ MonoBehaviour:
   isMeshScaleAdaptation: 0
   brokenFadeSpeed: 0.4
   previewAlpha: 0.5
-  activeTime: 0.5
+  f_ActiveDuration: 2
+  go_AnkhEffectPrefab: {fileID: 6150299503232469888, guid: ea2fe816ac77e0943884d7d5af71c746,
+    type: 3}
+  go_AnkhStandEffectPrefab: {fileID: 6150299503232469888, guid: e08568735e7449a4b89e475babff1aa1,
+    type: 3}
+  v3_EffectOffset: {x: 0, y: 0.1, z: 0}
 --- !u!1001 &220338898388371144
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -202,6 +207,7 @@ MonoBehaviour:
   outlineColor: {r: 0.5019608, g: 0.5019608, b: 0.5019608, a: 1}
   outlineWidth: 6
   emissionIntensity: 6
+  xRayOutline: 0
 --- !u!23 &1499514706795256396 stripped
 MeshRenderer:
   m_CorrespondingSourceObject: {fileID: -7511558181221131132, guid: f25265d2b5115364f8a4a65f46644a57,

@@ -6,6 +6,7 @@
  * 2026-05-27 | 初回作成
  * 
  */
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -420,5 +421,59 @@ public class CS_AStarSystem
         {
             return Vector3.zero;
         }
+    }
+
+    /// <summary>
+    /// ルートの距離を取得する処理
+    /// </summary>
+    /// <returns>ルートの距離</returns>
+    public int GetRouteDistance()
+    {
+        if (moveRoute == null) return 0;
+
+        int distance = 0;
+        Transform connectionRoomDoorPos = thiefAI.transform;
+
+        for (int i = 0 ; i < moveRoute.Count ; i++)
+        {
+
+            // ルートの距離を計算する
+            distance += (int)Vector3.Distance(connectionRoomDoorPos.position, moveRoute[i].position);
+
+            // 次のルートの始点位置を取得する
+            Transform wallDir = moveRoute[i].parent;
+
+            string wallDirName = wallDir.name;
+
+            Transform RoomCreatePoint = wallDir.parent.parent.parent.parent;
+
+            CSE_RoomDoorDirection doordir;
+
+            switch (wallDirName)
+            {
+                case "Right":
+                    doordir = CSE_RoomDoorDirection.Right;
+                    break;
+                case "Left":
+                    doordir = CSE_RoomDoorDirection.Left;
+                    break;
+                case "Front":
+                    doordir = CSE_RoomDoorDirection.Front;
+                    break;
+                case "Back":
+                    doordir = CSE_RoomDoorDirection.Back;
+                    break;
+                default:
+                    doordir = CSE_RoomDoorDirection.Right;
+                    break;
+            }
+
+            CS_RoomMoveConnection connectionRoom = RoomCreatePoint.GetComponent<CS_RoomCreatePoint>().GetConnection(doordir);
+
+            if (connectionRoom.TargetCreatePoint != null)
+                connectionRoomDoorPos = connectionRoom.TargetCreatePoint.GetRoomDoorPosition(connectionRoom.TargetOutDirection);
+        }
+
+        return distance;
     }
 }

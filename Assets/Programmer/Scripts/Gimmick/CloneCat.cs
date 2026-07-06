@@ -38,6 +38,7 @@ public class CloneCat : GimmickBase
     CS_PlayerAction.InteractSyllinder defaultMinSyllinder;
 
     float activeTimer = 0.0f;
+    bool bFirstActive = true;
     bool bFirstBroken = true;
 
     protected override void IdleUpdate()
@@ -75,6 +76,16 @@ public class CloneCat : GimmickBase
         if (activeTimer >= activeTime)
         {
             gimmickState = GimmickState.Broken;
+        }
+
+        if (bFirstActive && gimmickSound != null)
+        {
+            gimmickSound.PlayOneShotSE(
+            "Gimmick_Clone",
+            transform.position,
+            "GimmickCloneSound"
+            );
+            bFirstActive = false;
         }
     }
 

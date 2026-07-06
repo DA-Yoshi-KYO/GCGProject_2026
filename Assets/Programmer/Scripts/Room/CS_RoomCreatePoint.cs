@@ -240,7 +240,7 @@ public class CS_RoomCreatePoint : MonoBehaviour
     /// </summary>
     /// <param name="e_FromDirection">取得したい方向。</param>
     /// <returns>接続情報。</returns>
-    private CS_RoomMoveConnection GetConnection(CSE_RoomDoorDirection e_FromDirection)
+    public CS_RoomMoveConnection GetConnection(CSE_RoomDoorDirection e_FromDirection)
     {
         switch (e_FromDirection)
         {
