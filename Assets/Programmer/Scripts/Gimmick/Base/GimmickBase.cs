@@ -121,7 +121,7 @@ public class GimmickBase : MonoBehaviour
     protected CS_OutlineTarget outlineTarget;
     protected float outlineWidth = 6f;
 
-    private void Start()
+    protected virtual void Start()
     {
         GameObject X = search.transform.Find("X").gameObject;
         GameObject Z = search.transform.Find("Z").gameObject;
@@ -151,12 +151,17 @@ public class GimmickBase : MonoBehaviour
             gimmickSound.PlayOneShotSE("Gimmick_Summon", transform.position, "Summon");
         }
 
-            InitMaterials();
         roomIndex = CS_RoomCreatePointRaycast.GetRayRoomCreatePoint(this.gameObject).transform.GetSiblingIndex();
 
-        outlineTarget = GetComponentInChildren<CS_OutlineTarget>();
-        outlineTarget.SetOutline(Color.gray, outlineWidth);
-
+        if (materials != null)
+        {
+            InitMaterials();
+        }
+        if (outlineTarget != null)
+        {
+            outlineTarget = GetComponentInChildren<CS_OutlineTarget>();
+            outlineTarget.SetOutline(Color.gray, outlineWidth);
+        }
     }
 
     private void InitMaterials()

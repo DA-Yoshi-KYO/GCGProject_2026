@@ -28,8 +28,9 @@ public class NyakiGimmick : GimmickBase
     CSV_CatEye catEye;
     private bool isFirstActive = false;
 
-    private void Start()
+    protected override void Start()
     {
+        base.Start();
         //設置ではなく発動方式なため
         //設置＝発動となる
         gimmickState = GimmickState.Active;
