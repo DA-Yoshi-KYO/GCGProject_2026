@@ -25,6 +25,9 @@ public class CloneCat : GimmickBase
     [Header("インタラクト範囲倍率")]
     [SerializeField] private float interactRangeMultiplier = 0.5f;
 
+    [Header("削除回避時間")]
+    [SerializeField] private float noBrokenTime = 2.0f;
+
     GameObject player;
     GameObject cloneCatActor;
     CS_RoomPlayerPosition roomPlayerPosition;
@@ -40,6 +43,8 @@ public class CloneCat : GimmickBase
     float activeTimer = 0.0f;
     bool bFirstActive = true;
     bool bFirstBroken = true;
+
+
 
     protected override void IdleUpdate()
     {
@@ -77,6 +82,8 @@ public class CloneCat : GimmickBase
         {
             gimmickState = GimmickState.Broken;
         }
+
+        noBrokenTime -= Time.deltaTime;
 
         if (bFirstActive && gimmickSound != null)
         {
@@ -212,6 +219,7 @@ public class CloneCat : GimmickBase
 
     private void OnTriggerEnter(Collider other)
     {
+        if(noBrokenTime > 0.0f) return;
         if (other.CompareTag("Player"))
         {
             gimmickState = GimmickState.Broken;
