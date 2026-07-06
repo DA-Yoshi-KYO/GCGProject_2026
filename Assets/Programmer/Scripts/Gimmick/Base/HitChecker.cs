@@ -412,11 +412,14 @@ public class HitChecker : MonoBehaviour
                             break;
                         case Gimmick.IronBall:
                             EnemyDame(enemy, hitDamage, true, hitEnemies[i], hit);
-                            gimmickBase.GetGimmickSound().
-                                PlayOneShotSE(
-                                "Gimmick_RockHit",
-                                gimmickBase.transform.position,
-                                "RockSound");
+                            if(gimmickBase.GetGimmickSound() != null)
+                            {
+                                gimmickBase.GetGimmickSound().
+                                    PlayOneShotSE(
+                                    "Gimmick_RockHit",
+                                    gimmickBase.transform.position,
+                                    "RockSound");
+                            }
                             break;
                         case Gimmick.EmptyChest:
                             EmptyChestGimmick emptyChestGimmick =

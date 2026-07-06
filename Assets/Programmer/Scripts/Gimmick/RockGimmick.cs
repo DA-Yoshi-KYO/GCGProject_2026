@@ -94,6 +94,15 @@ public class RockGimmick : GimmickBase
         //    soundPlayed = true;
         //}
 
+
+        //-----------------------------------------
+        // 進行方向決定
+        //-----------------------------------------
+
+        Vector3 moveDir = Vector3.zero;
+        Vector3 rotateAxis = Vector3.zero;
+        float rotateSign = 1.0f;
+
         //=========================================
         // 初期化
         //=========================================
@@ -111,14 +120,6 @@ public class RockGimmick : GimmickBase
 
             SetHitChecker(transform.position);
         }
-
-        //-----------------------------------------
-        // 進行方向決定
-        //-----------------------------------------
-
-        Vector3 moveDir = Vector3.zero;
-        Vector3 rotateAxis = Vector3.zero;
-        float rotateSign = 1.0f;
 
         switch (gimmickDirection)
         {
@@ -166,7 +167,6 @@ public class RockGimmick : GimmickBase
             {
                 foreach (var h in Physics.RaycastAll(rayOrigin, Vector3.down, rayDownLength))
                 {
-
                     if (h.collider.gameObject == gameObject) continue;
                     if (h.collider.transform.IsChildOf(transform)) continue;
                     isGround = true;
@@ -205,7 +205,10 @@ public class RockGimmick : GimmickBase
             if (isRolling)
             {
                 Vector3 pos = transform.position;
-                pos.y = hit.point.y + radius;
+
+                float normalY = Mathf.Max(hit.normal.y, 0.2f);
+                pos.y = hit.point.y + hit.distance;
+
                 transform.position = pos;
             }
             //------------------------------------------------
@@ -215,51 +218,209 @@ public class RockGimmick : GimmickBase
             float angle =
                 Vector3.Angle(hit.normal, Vector3.up);
 
+            // 指定方向を坂面に沿わせた方向
             Vector3 moveOnGround =
-            Vector3.ProjectOnPlane(moveDir, hit.normal).normalized;
+                Vector3.ProjectOnPlane(moveDir, hit.normal);
 
+            if (moveOnGround.sqrMagnitude > 0.0001f)
+            {
+                moveOnGround.Normalize();
+            }
+            else
+            {
+                moveOnGround = moveDir;
+            }
+
+            // 上方向へ進もうとしていたら反転する
+            if (angle > 1.0f && moveOnGround.y > 0.01f)
+            {
+                ReverseGimmickDirection();
+
+                switch (gimmickDirection)
+                {
+                    case GimmickDirection.Up:
+                        moveDir = Vector3.back;
+                        rotateAxis = Vector3.right;
+                        rotateSign = 1.0f;
+                        break;
+
+                    case GimmickDirection.Down:
+                        moveDir = Vector3.forward;
+                        rotateAxis = Vector3.right;
+                        rotateSign = -1.0f;
+                        break;
+
+                    case GimmickDirection.Left:
+                        moveDir = Vector3.left;
+                        rotateAxis = Vector3.forward;
+                        rotateSign = -1.0f;
+                        break;
+
+                    case GimmickDirection.Right:
+                        moveDir = Vector3.right;
+                        rotateAxis = Vector3.forward;
+                        rotateSign = 1.0f;
+                        break;
+                }
+
+                moveOnGround =
+                    Vector3.ProjectOnPlane(moveDir, hit.normal);
+
+                if (moveOnGround.sqrMagnitude > 0.0001f)
+                {
+                    moveOnGround.Normalize();
+                }
+                else
+                {
+                    moveOnGround = moveDir;
+                }
+            }
+
+            // 坂の方向 = Dirの方向
+            Vector3 rollDir = moveOnGround;
+            
             //------------------------------------------------
-            // 基本速度
+            // 速度計算
             //------------------------------------------------
 
-            Vector3 moveVelocity =
-                moveDir * rollSpeed;
-
-            //------------------------------------------------
-            // 合成
-            //------------------------------------------------
+            float slopePower =
+                Mathf.Sin(angle * Mathf.Deg2Rad);
 
             float speed =
-                rollSpeed +
-                Mathf.Sin(angle * Mathf.Deg2Rad) * slideSpeed;
+                rollSpeed + slopePower * slideSpeed;
 
-            //逆に遅くなってたら元速に戻す
-            if(speed <= rollSpeed)
-                speed = rollSpeed;
+            Vector3 frameMove =
+                rollDir * speed * Time.deltaTime;
 
-            velocity =
-                moveOnGround * speed;
+            //------------------------------------------------
+            // 方向補正
+            //------------------------------------------------
+            switch (gimmickDirection)
+            {
+                case GimmickDirection.Up:
+                    rotateAxis = Vector3.right;
+                    rotateSign = 1.0f;
+                    break;
 
-            velocity *= Time.deltaTime;
+                case GimmickDirection.Down:
+                    rotateAxis = Vector3.right;
+                    rotateSign = -1.0f;
+                    break;
+
+                case GimmickDirection.Left:
+                    rotateAxis = Vector3.forward;
+                    rotateSign = -1.0f;
+                    break;
+
+                case GimmickDirection.Right:
+                    rotateAxis = Vector3.forward;
+                    rotateSign = 1.0f;
+                    break;
+            }
 
             //------------------------------------------------
             // 移動
             //------------------------------------------------
 
-            transform.position += velocity;
+            transform.position += frameMove;
 
             //------------------------------------------------
             // 回転
             //------------------------------------------------
 
             float rotateAmount =
-                velocity.magnitude *
+                frameMove.magnitude *
                 360.0f;
 
             transform.Rotate(
                 rotateAxis,
                 rotateAmount * rotateSign * rotateSpeedOffset,
                 Space.Self);
+
+
+            //-----------------------------------------
+            // 壁判定
+            //-----------------------------------------
+            RaycastHit wallHit;
+
+            //三本レイをサイクルで管理
+            Vector3 rayPos = transform.position;
+            if (cicleHit > 1)
+                cicleHit = -1;
+
+            switch (gimmickDirection)
+            {
+                case GimmickDirection.Up:
+                    rayPos = new Vector3(
+                        transform.position.x
+                            + cicleHit * radius * 0.75f,
+                        transform.position.y,
+                        transform.position.z
+                        );
+                    break;
+                case GimmickDirection.Down:
+                    rayPos = new Vector3(
+                        transform.position.x
+                            + cicleHit * radius * 0.75f,
+                        transform.position.y,
+                        transform.position.z
+                        );
+                    break;
+                case GimmickDirection.Left:
+                    rayPos = new Vector3(
+                        transform.position.x,
+                        transform.position.y,
+                        transform.position.z
+                            + cicleHit * radius * 0.75f
+                        );
+                    break;
+                case GimmickDirection.Right:
+                    rayPos = new Vector3(
+                        transform.position.x,
+                        transform.position.y,
+                        transform.position.z
+                            + cicleHit * radius * 0.75f
+                        );
+                    break;
+            }
+            Debug.DrawRay(rayPos, rollDir, Color.yellow);
+            if (Physics.Raycast(
+                rayPos,
+                rollDir,
+                out wallHit,
+                raySideLength))
+            {
+                if (HitBrokeAngle(wallHit, rollDir, 85f))
+                {
+                    bool isHit = false;
+                    //親オブジェクトの当たり判定のみを対象とする
+                    foreach (var h in Physics.RaycastAll(rayPos, rollDir, raySideLength))
+                    {
+                        var root = h.collider.transform.root;
+
+                        //自身に当たっていたら
+                        if (root == transform.root)
+                            continue;
+                        //親が存在しなかったら
+
+                        //タグ指定※playerやthiefに当たらないようにする
+                        if (root.CompareTag("Plane") ||
+                                 root.CompareTag("Untagged"))
+                        {
+                            Debug.Log(root.name);
+                            wallHit = h;
+                            isHit = true;
+                            break;
+                        }
+                    }
+                    if (isHit)
+                    {
+                        gimmickState = GimmickState.Broken;
+
+                    }
+                }
+            }
+            cicleHit++;
         }
         //-----------------------------------------
         // 落下
@@ -271,97 +432,12 @@ public class RockGimmick : GimmickBase
             transform.position +=
                 velocity * Time.deltaTime;
         }
-
-        //-----------------------------------------
-        // 壁判定
-        //-----------------------------------------
-        RaycastHit wallHit;
-
-        //三本レイをサイクルで管理
-        Vector3 rayPos = transform.position;
-        if(cicleHit > 1)
-            cicleHit = -1;
-
-        switch (gimmickDirection)
-        {
-            case GimmickDirection.Up:
-                rayPos = new Vector3(
-                    transform.position.x
-                        + cicleHit * radius * 0.75f,
-                    transform.position.y,
-                    transform.position.z
-                    );
-                break;
-            case GimmickDirection.Down:
-                rayPos = new Vector3(
-                    transform.position.x
-                        + cicleHit * radius * 0.75f,
-                    transform.position.y,
-                    transform.position.z
-                    );
-                break;
-            case GimmickDirection.Left:
-                rayPos = new Vector3(
-                    transform.position.x,
-                    transform.position.y,
-                    transform.position.z
-                        + cicleHit * radius * 0.75f
-                    );
-                break;
-            case GimmickDirection.Right:
-                rayPos = new Vector3(
-                    transform.position.x,
-                    transform.position.y,
-                    transform.position.z
-                        + cicleHit * radius * 0.75f
-                    );
-                break;
-        }
-        Debug.DrawRay(rayPos, moveDir, Color.yellow);
-        if (Physics.Raycast(
-            rayPos,
-            moveDir,
-            out wallHit,
-            raySideLength))
-        {
-            if (HitBrokeAngle(wallHit, moveDir, 85f))
-            {
-                bool isHit = false;
-                //親オブジェクトの当たり判定のみを対象とする
-                foreach (var h in Physics.RaycastAll(rayPos, moveDir, raySideLength))
-                {
-                    var root = h.collider.transform.root;
-
-                    //自身に当たっていたら
-                    if (root == transform.root)
-                        continue;
-                    //親が存在しなかったら
-
-                    //タグ指定※playerやthiefに当たらないようにする
-                    if (root.CompareTag("Plane") ||
-                             root.CompareTag("Untagged"))
-                    {
-                        Debug.Log(root.name);
-                        wallHit = h;
-                        isHit = true;
-                        break;
-                    }
-                }
-                if(isHit)
-                {
-                    gimmickState = GimmickState.Broken;
-
-                }
-            }
-        }
-        cicleHit++;
         //-----------------------------------------
         // ヒット判定
         //-----------------------------------------
 
         Hit();
     }
-
 
     // =========================
     // ヒット処理
@@ -423,6 +499,27 @@ public class RockGimmick : GimmickBase
             }
             if (checker != null)
                 Destroy(checker);
+        }
+    }
+    private void ReverseGimmickDirection()
+    {
+        switch (gimmickDirection)
+        {
+            case GimmickDirection.Up:
+                gimmickDirection = GimmickDirection.Down;
+                break;
+
+            case GimmickDirection.Down:
+                gimmickDirection = GimmickDirection.Up;
+                break;
+
+            case GimmickDirection.Left:
+                gimmickDirection = GimmickDirection.Right;
+                break;
+
+            case GimmickDirection.Right:
+                gimmickDirection = GimmickDirection.Left;
+                break;
         }
     }
 }
