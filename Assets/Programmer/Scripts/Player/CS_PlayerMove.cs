@@ -28,6 +28,14 @@ public class CS_PlayerMove : MonoBehaviour
     private CS_PlayerCamera playerCamera;   // プレイヤーのカメラ
     private CS_3DPlaySE playSE;
 
+    // ロジックと見た目を揃える為の保存変数
+    public Transform visualModel; // 見た目のモデル
+
+    private Vector3 previousPosition;
+    private Vector3 currentPosition;
+    private Quaternion previousRotation;
+    private Quaternion currentRotation;
+
     private float rotateSpeed = 10.0f;  // 回転のスピード
     private bool isJumping = false;     // ジャンプ中かどうか
     private bool isSneaking = false;    // スニーク中かどうか
@@ -48,9 +56,10 @@ public class CS_PlayerMove : MonoBehaviour
     private bool isCatStunByAnkh;
     float ankhStunTimeToCatStun = 0.0f;
 
-    [Header("ジャンプ開始するまでのマージン(フレーム単位)")][SerializeField] private int jumpMerginFrame = 5;
-    private int jumpMerginFrameCount = 5;
-    bool isJumpMerging = false;
+    [Header("ジャンプ開始するまでのマージン(秒数単位)")]
+    [SerializeField] private float jumpMerginDuration;
+    private float jumpMerginTimer;
+    private bool isJumpMerging = false;
 
     // Start is called before the first frame update
     void Start()
@@ -82,7 +91,7 @@ public class CS_PlayerMove : MonoBehaviour
 
         // アニメーターの取得
         animator = GetComponentInChildren<Animator>();
-        jumpMerginFrameCount = jumpMerginFrame;
+        jumpMerginTimer = jumpMerginDuration;
 
         playSE = GameObject.Find("3DSE").GetComponent<CS_3DPlaySE>();
 
@@ -96,27 +105,35 @@ public class CS_PlayerMove : MonoBehaviour
     void FixedUpdate()
     {
         createFootPrintTime += Time.deltaTime;
+        previousPosition = currentPosition;
+        previousRotation = currentRotation;
 
-        // 移動処理
         Move();
-
-        if (catCaughtTime > 0f)
-        {
-            catCaughtTime -= Time.deltaTime;
-            catCaughtTime = Mathf.Max(0.0f, catCaughtTime);
-            return;
-        }
 
         if (isJumpMerging)
         {
-            if (jumpMerginFrameCount == 0)
+            if (jumpMerginTimer <= 0f)
             {
                 isJumping = true;
                 isJumpMerging = false;
-                jumpMerginFrameCount = jumpMerginFrame;
+                jumpMerginTimer = jumpMerginDuration;
             }
-            else jumpMerginFrameCount--;
+            else jumpMerginTimer -= Time.fixedDeltaTime;
         }
+
+        currentPosition = transform.position; // CharacterController.Move後の実位置
+        currentRotation = rb.rotation;
+    }
+
+    void Update()
+    {
+        // FixedUpdate間の経過割合を計算
+        float t = (Time.time - Time.fixedTime) / Time.fixedDeltaTime;
+        t = Mathf.Clamp01(t);
+
+        // 見た目だけ補間して滑らかに動かす
+        visualModel.position = Vector3.Lerp(previousPosition, currentPosition, t);
+        visualModel.rotation = Quaternion.Slerp(previousRotation, currentRotation, t);
     }
 
     /// <summary>
@@ -127,7 +144,7 @@ public class CS_PlayerMove : MonoBehaviour
         if (catCaughtTime > 0f)
         {
             Debug.Log(catCaughtTime);
-            catCaughtTime -= Time.deltaTime;
+            catCaughtTime -= Time.fixedDeltaTime;
             catCaughtTime = Mathf.Max(0.0f, catCaughtTime);
             return;
         }
@@ -135,7 +152,7 @@ public class CS_PlayerMove : MonoBehaviour
         if (ankhStunTimeToCatStun > 0.0f)
         {//猫がスタンしている場合動かせない
             Debug.Log(ankhStunTimeToCatStun);
-            ankhStunTimeToCatStun -= Time.deltaTime;
+            ankhStunTimeToCatStun -= Time.fixedDeltaTime;
             ankhStunTimeToCatStun = Mathf.Max(0.0f,ankhStunTimeToCatStun);
             return;
         }
@@ -183,7 +200,7 @@ public class CS_PlayerMove : MonoBehaviour
             Quaternion playerRotate = Quaternion.LookRotation(horizontalMove);
             // Rigidbodyを使用して滑らかに回転させる
             rb.MoveRotation(Quaternion.Slerp(
-                rb.rotation, playerRotate, Time.deltaTime * rotateSpeed));
+                rb.rotation, playerRotate, Time.fixedDeltaTime * rotateSpeed));
         }
 
         // 接地
@@ -216,10 +233,10 @@ public class CS_PlayerMove : MonoBehaviour
         }
 
         // 重力
-        velocity.y += gravity * Time.deltaTime;
+        velocity.y += gravity * Time.fixedDeltaTime;
 
         // CharacterControllerを使用して移動
-        controller.Move(velocity * Time.deltaTime);
+        controller.Move(velocity * Time.fixedDeltaTime);
 
         Vector2 velocityXZ = new Vector2(velocity.x, velocity.z);
         animator.SetBool("IsGround", controller.isGrounded);
