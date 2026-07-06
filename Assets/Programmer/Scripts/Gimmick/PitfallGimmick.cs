@@ -24,6 +24,7 @@ public class PitfallGimmick : GimmickBase
         //Idle状態で当たり判定を設定して
         //当たったらActive状態にする
         //※消えるまでの時間計算用(Active)
+        hitHoles = new List<RaycastHit>();
         SetHitChecker(transform.position);
     }
     protected override void ActiveUpdate()

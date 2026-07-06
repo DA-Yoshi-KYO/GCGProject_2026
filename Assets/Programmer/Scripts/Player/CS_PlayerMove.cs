@@ -26,6 +26,7 @@ public class CS_PlayerMove : MonoBehaviour
     private Vector3 velocity = Vector3.zero;        // 現在の移動速度
     private CS_PlayerData playerData;       // プレイヤーのデータ
     private CS_PlayerCamera playerCamera;   // プレイヤーのカメラ
+    private CS_3DPlaySE playSE;
 
     private float rotateSpeed = 10.0f;  // 回転のスピード
     private bool isJumping = false;     // ジャンプ中かどうか
@@ -82,6 +83,14 @@ public class CS_PlayerMove : MonoBehaviour
         // アニメーターの取得
         animator = GetComponentInChildren<Animator>();
         jumpMerginFrameCount = jumpMerginFrame;
+
+        playSE = GameObject.Find("3DSE").GetComponent<CS_3DPlaySE>();
+
+        if (playSE == null)
+        {
+            Debug.LogWarning("[PlayerMove] 3DSE が見つかりません。SE再生は無効になります。");
+        }
+
     }
 
     void FixedUpdate()
@@ -301,6 +310,7 @@ public class CS_PlayerMove : MonoBehaviour
         // フラグを立てる
         isCaughtByThief = true;
         catCaughtTime = holdCatTime;
+        playSE.PlayOneShotSE("Cat_HitThief", gameObject.transform.position, "Cat_HitThief");
     }
 
     // 猫のスタン状態用処理※Ankh用

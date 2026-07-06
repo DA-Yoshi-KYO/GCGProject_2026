@@ -319,12 +319,9 @@ public class CS_ThiefAI : MonoBehaviour
     // 探索状態の行動
     private void Explore()
     {
-        // 移動システムのスタックを修正する処理
-        moveSystem.FixStuck();
+        thiefReaction.ClearReaction();
 
         if(thiefGimmickAction.UpdateAction()) return;
-
-        thiefReaction.ClearReaction();
 
         // 探索対象を決定
         memorySystem.RecognizeObjects();
@@ -364,9 +361,6 @@ public class CS_ThiefAI : MonoBehaviour
     // 逃走状態の行動
     private void Escape()
     {
-        // 移動システムのスタックを修正する処理
-        moveSystem.FixStuck();
-
         // 宝物を見つけたときのリアクションに変更
         thiefReaction.ChangeReaction(CS_ThiefReaction.ThiefReactionType.FoundTreasure);
 
@@ -394,7 +388,7 @@ public class CS_ThiefAI : MonoBehaviour
     private void Stunned()
     {
         // ナビメッシュエージェントを停止させる（安全に）
-        SetAgentStopped(true);
+        moveSystem.Stop();
 
         // 経過時間を加算
         if(isUpdatingStunState) elapsedTimeAfterStun += Time.deltaTime;
@@ -406,7 +400,6 @@ public class CS_ThiefAI : MonoBehaviour
             if (elapsedTimeAfterStun >= damageStunTime)
             {
                 currentState = ThiefState.Explore; // 状態を探索に戻す
-                SetAgentStopped(false); // ナビメッシュエージェントを再開させる（安全に）
 
                 // アニメーションの状態を解除(歩き状態に戻す)
                 if (animator != null)
@@ -689,30 +682,6 @@ public class CS_ThiefAI : MonoBehaviour
     public void SetAnimation(string parameter)
     {
         if (animator != null) animator.SetTrigger(parameter);
-    }
-
-    /// <summary>
-    /// ナビメッシュエージェントを安全に停止させる処理
-    /// </summary>
-    /// <param name="stop">停止させるかどうか</param>
-    private void SetAgentStopped(bool stop)
-    {
-        var agent = moveSystem?.read_NavMeshAgent;
-        if (agent == null) return;
-
-        // エージェントが無効化されている場合は操作しない（PitFall中など）
-        if (!agent.enabled) return;
-
-        // NavMesh上に置かれていないエージェントに対して isStopped を呼ぶと例外になるためチェック
-        if (agent.isOnNavMesh)
-        {
-            agent.isStopped = stop;
-        }
-        else
-        {
-            // 安全のためログを残す（頻発する場合は削除）
-            Debug.LogWarning("SetAgentStopped: NavMeshAgent が NavMesh 上にありません。操作をスキップします。", this);
-        }
     }
 
     /// <summary>

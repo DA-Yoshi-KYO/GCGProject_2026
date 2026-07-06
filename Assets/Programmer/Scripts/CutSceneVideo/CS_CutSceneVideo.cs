@@ -13,7 +13,6 @@ public class CS_CutSceneVideo : MonoBehaviour
 {
     private VideoPlayer videoPlayer;
     [SerializeField] private RawImage rawImage;
-    [SerializeField] private Image frameImage;
     [SerializeField] private SO_CutSceneVideo cutSceneVideoDataBase;
 
     [HideInInspector] public CutSceneData data;
@@ -27,7 +26,6 @@ public class CS_CutSceneVideo : MonoBehaviour
 
         //非表示
         rawImage.enabled = false;
-        frameImage.enabled = false;
 
         for (int i = 0 ; i < cutSceneVideoDataBase.cutSceneDatas.Length; ++i)
         {
@@ -54,8 +52,10 @@ public class CS_CutSceneVideo : MonoBehaviour
     //ビデオの情報設定
     public void SetVideoInfo(string Situation)
     {
-        if (!data.played)
+        if (!videoPlayer.isPlaying)
+        {
             data = cutSceneVideoDataBase.cutSceneData[Situation];
+        }
         else
         {
             nextWait = true;
@@ -75,14 +75,12 @@ public class CS_CutSceneVideo : MonoBehaviour
         
         //表示
         rawImage.enabled = true;
-        frameImage.enabled = true;
     }
 
     //再生し終わったら停止
     private void OnMovieFinished(VideoPlayer vp)
     {
         rawImage.enabled = false;
-        frameImage.enabled = false;
         videoPlayer.Stop();
 
         if (nextWait)
