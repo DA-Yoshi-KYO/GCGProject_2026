@@ -48,12 +48,12 @@ public class CS_ThiefGimmickAction
     public void PitFallStart(Vector3 pitfallPoint)
     {
         // 状態を気絶に変更
-        thiefAI.ChangeStatus(CS_ThiefAI.ThiefState.Stunned);
+        thiefAI?.ChangeStatus(CS_ThiefAI.ThiefState.Stunned);
         // 気絶状態の更新処理を実行しないようにする
-        thiefAI.SetStunnedUpdateFlag(false);
+        thiefAI?.SetStunnedUpdateFlag(false);
 
         // NavMeshAgentを停止させる
-        thiefAI.read_MoveSystem.read_NavMeshAgent.ResetPath();
+        thiefAI?.read_MoveSystem?.read_NavMeshAgent?.ResetPath();
         thiefAI.read_MoveSystem.read_NavMeshAgent.enabled = false;
         // SmartNavAgentも停止させる
         thiefAI.read_MoveSystem.read_SmartNavAgent.enabled = false;
@@ -70,7 +70,7 @@ public class CS_ThiefGimmickAction
     public void PitFallEnd()
     {
         // 気絶状態の更新処理を実行するようにする
-        thiefAI.SetStunnedUpdateFlag(true);
+        thiefAI?.SetStunnedUpdateFlag(true);
         // NavMeshAgentを再度有効にする
         thiefAI.read_MoveSystem.read_NavMeshAgent.enabled = true;
         // SmartNavAgentも再度有効にする
@@ -92,7 +92,7 @@ public class CS_ThiefGimmickAction
             targetGimmick.Add(ironBall);
             GameObject Thief_RockRunAway = GameObject.Find("Thief_RockRunAway_" + thiefAI.transform.name);
             if (Thief_RockRunAway == null)
-                thiefAI.read_ThiefSound.PlayOneShotSE("Thief_RockRunAway", thiefAI.transform.position, "Thief_RockRunAway_" + thiefAI.transform.name);
+                thiefAI?.read_ThiefSound?.PlayOneShotSE("Thief_RockRunAway", thiefAI.transform.position, "Thief_RockRunAway_" + thiefAI.transform.name);
         }
     }
 
@@ -226,10 +226,8 @@ public class CS_ThiefGimmickAction
         {
             targetGimmick.Remove(rockGimmick);
         }
-        if (thiefAI?.read_MoveSystem?.read_NavMeshAgent != null)
-        {
-            thiefAI.read_MoveSystem.read_NavMeshAgent.ResetPath();
-        }
+        thiefAI?.read_MoveSystem?.read_NavMeshAgent?.ResetPath();
+        
     }
 
     /// <summary>
@@ -306,6 +304,6 @@ public class CS_ThiefGimmickAction
         if (thiefAI.read_Animator != null) thiefAI.read_Animator.SetBool("IsHunting", false);
 
         // 泥棒の反応状態をChasingCatに変更する
-        thiefAI.read_ThiefReaction.ChangeReaction(CS_ThiefReaction.ThiefReactionType.Alert, 2.0f);
+        thiefAI?.read_ThiefReaction?.ChangeReaction(CS_ThiefReaction.ThiefReactionType.Alert, 2.0f);
     }
 }
