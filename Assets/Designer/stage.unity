@@ -198,7 +198,7 @@ PrefabInstance:
     - target: {fileID: -1149704563061529616, guid: b41ff4453dc826e4a9d70364b4cabc25,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -1149704563061529616, guid: b41ff4453dc826e4a9d70364b4cabc25,
         type: 3}
@@ -210,11 +210,52 @@ PrefabInstance:
       propertyPath: m_Name
       value: Char_Thief_B_Pose
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: b41ff4453dc826e4a9d70364b4cabc25,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8558510394789145221, guid: b41ff4453dc826e4a9d70364b4cabc25,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 80fe9a0b4e955294da6105d3efde26fa, type: 2}
+    - target: {fileID: 8558510394789145221, guid: b41ff4453dc826e4a9d70364b4cabc25,
+        type: 3}
+      propertyPath: m_Materials.Array.data[2]
+      value: 
+      objectReference: {fileID: 2100000, guid: a45a0128a237df841969c5a34dbd0850, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: -1149704563061529616, guid: b41ff4453dc826e4a9d70364b4cabc25,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1767714671}
   m_SourcePrefab: {fileID: 100100000, guid: b41ff4453dc826e4a9d70364b4cabc25, type: 3}
+--- !u!1 &81956332 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -522981104799257758, guid: e82b00641de3fb9498e9b791058724a8,
+    type: 3}
+  m_PrefabInstance: {fileID: 788021668}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &81956334
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 81956332}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11f78dff6c482044bacba515260bfaae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  outlineColor: {r: 0, g: 0, b: 0, a: 1}
+  outlineWidth: 8
+  emissionIntensity: 6
+  xRayOutline: 0
 --- !u!1 &456362875
 GameObject:
   m_ObjectHideFlags: 0
@@ -396,10 +437,29 @@ PrefabInstance:
       propertyPath: m_Name
       value: Char_Thief_A_Pose
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: e82b00641de3fb9498e9b791058724a8,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7795335157179193811, guid: e82b00641de3fb9498e9b791058724a8,
+        type: 3}
+      propertyPath: m_Materials.Array.data[1]
+      value: 
+      objectReference: {fileID: 2100000, guid: 842bfa5fcaabf284ba87f595514f82e7, type: 2}
+    - target: {fileID: 7795335157179193811, guid: e82b00641de3fb9498e9b791058724a8,
+        type: 3}
+      propertyPath: m_Materials.Array.data[2]
+      value: 
+      objectReference: {fileID: 2100000, guid: 18d4c04661f59094392b52e48c94c340, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: -522981104799257758, guid: e82b00641de3fb9498e9b791058724a8,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 81956334}
   m_SourcePrefab: {fileID: 100100000, guid: e82b00641de3fb9498e9b791058724a8, type: 3}
 --- !u!1 &831024724
 GameObject:
@@ -519,6 +579,28 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 127.17999, y: -37.052002, z: -27.207}
+--- !u!1 &1767714668 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -1149704563061529616, guid: b41ff4453dc826e4a9d70364b4cabc25,
+    type: 3}
+  m_PrefabInstance: {fileID: 65347647}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1767714671
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1767714668}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11f78dff6c482044bacba515260bfaae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineWidth: 8
+  emissionIntensity: 6
+  xRayOutline: 0
 --- !u!1 &1992160181
 GameObject:
   m_ObjectHideFlags: 0
@@ -650,7 +732,7 @@ Transform:
   m_GameObject: {fileID: 1992160181}
   serializedVersion: 2
   m_LocalRotation: {x: 0.010836069, y: 0.96956563, z: -0.043655694, w: 0.24066417}
-  m_LocalPosition: {x: -1.1442757, y: 1.1454158, z: 1.935318}
+  m_LocalPosition: {x: -1.21, y: 1.16, z: 2.06}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -662,6 +744,6 @@ SceneRoots:
   m_Roots:
   - {fileID: 456362878}
   - {fileID: 788021668}
+  - {fileID: 65347647}
   - {fileID: 1992160185}
   - {fileID: 831024727}
-  - {fileID: 65347647}
