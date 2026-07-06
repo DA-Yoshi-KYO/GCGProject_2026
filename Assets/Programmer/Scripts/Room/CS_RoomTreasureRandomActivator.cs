@@ -41,9 +41,6 @@ public class CS_RoomTreasureRandomActivator : MonoBehaviour
     {
         CollectTargetTreasures();
 
-        // 対象RoomTypeのTreasureだけを全部OFFにします。
-        SetTreasureListActive(list_TargetTreasures, false);
-
         int activeCount = Mathf.Clamp(
             i_ActiveTreasureCount,
             0,
@@ -51,14 +48,24 @@ public class CS_RoomTreasureRandomActivator : MonoBehaviour
 
         ShuffleTreasures(list_TargetTreasures);
 
-        for (int i = 0 ; i < activeCount ; i++)
+        for (int i = 0 ; i < list_TargetTreasures.Count; i++)
         {
             if (list_TargetTreasures[i] == null)
             {
                 continue;
             }
 
-            list_TargetTreasures[i].SetActive(true);
+            // ランダムに選ばれたTreasureだけをONにします。
+            if (i < activeCount)
+            {
+                list_TargetTreasures[i].SetActive(true);
+                continue;
+            }
+            else
+            {
+                // それ以外は削除します。
+                DeleteTreasure(list_TargetTreasures[i]);
+            }
         }
 
         if (bool_IsDebugLog)
@@ -71,6 +78,26 @@ public class CS_RoomTreasureRandomActivator : MonoBehaviour
                 + " / 表示数 : "
                 + activeCount);
         }
+    }
+
+    /// <summary>
+    /// Treasureを破棄します。
+    /// </summary>
+    /// <param name="treasure"></param>
+    private void DeleteTreasure(GameObject treasure)
+    {
+        if (treasure == null)
+        {
+            return;
+        }
+
+        if (Application.isPlaying)
+        {
+            Destroy(treasure);
+            return;
+        }
+
+        DestroyImmediate(treasure);
     }
 
     private void CollectTargetTreasures()
