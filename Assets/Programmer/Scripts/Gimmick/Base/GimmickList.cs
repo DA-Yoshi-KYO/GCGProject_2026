@@ -257,6 +257,7 @@ public class GimmickList : MonoBehaviour
                     cutSceneManager.GetComponent<CS_CutSceneVideo>().SetVideoInfo(situation);
                     cutSceneManager.GetComponent<CS_CutSceneVideo>().PlayVideo();
                 }
+                break;
             }
         }
     }
