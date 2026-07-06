@@ -469,7 +469,6 @@ public class RockGimmick : GimmickBase
             if (gimmickSound != null)
             {
                 gimmickSound.PlayOneShotSE("Gimmick_RockHitBreak", gameObject.transform.position, "RockSound");
-                Destroy(gimmickSound);
             }
             if (checker != null)
                 Destroy(checker);

@@ -35,14 +35,11 @@ public class NyakiGimmick : GimmickBase
         gimmickState = GimmickState.Active;
         volume = FindFirstObjectByType<Volume>();
         volume.profile.TryGet(out catEye);
-
-        Debug.Log("にゃきにゃきあくてぃぶ");
     }
     protected override void ActiveUpdate()
     {
         if (!isFirstActive)
         {
-            Debug.Log("にゃきにゃきあっぷでーと");
             isFirstActive = true;
             //エフェクト発生
             if (catEye != null)
@@ -52,6 +49,8 @@ public class NyakiGimmick : GimmickBase
             }
             //当たり判定追加
             SetHitChecker(transform.position);
+
+            gimmickSound.PlayOneShotSE("Gimmick_Nyaki", gameObject.transform.position, "NyakiSound");
         }
         //時間でエフェクト消去
         time -= Time.deltaTime;
