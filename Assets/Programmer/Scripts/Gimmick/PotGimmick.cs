@@ -41,6 +41,7 @@ public class PotGimmick : GimmickBase
     private float initPositionY;
     private float initOffsetY = 0.2f;
     private bool isFirstUpdate = true;
+    private bool isFirstBroken = true;
     private bool isDangerZoneSpawned;
     private float downRayLength = 0.5f;
 
@@ -138,34 +139,35 @@ public class PotGimmick : GimmickBase
     {
         base.BrokenUpdate();
 
-        //破壊時に1回だけ生成
-        PlayPotVatEffect();
-
-
-        if (!isDangerZoneSpawned)
+        if (isFirstBroken)
         {
-            isDangerZoneSpawned = true;
+            //破壊時に1回だけ生成
+            PlayPotVatEffect();
 
-            if (dangerZone != null)
+            if (!isDangerZoneSpawned)
             {
-                // ThiefCommonDBから残存時間を取得
-                CO_ThiefCommonStatusData common = null;
-                var thiefManager = GameObject.FindObjectOfType<CS_ThiefManager>();
-                if (thiefManager != null) common = thiefManager.GetThiefCommonDB();
-                CS_DangerZoneSpawner.SpawnAndRegisterFromGimmick(dangerZone, transform.position, this, common, thiefLayer);
+                isDangerZoneSpawned = true;
+
+                if (dangerZone != null)
+                {
+                    // ThiefCommonDBから残存時間を取得
+                    CO_ThiefCommonStatusData common = null;
+                    var thiefManager = GameObject.FindObjectOfType<CS_ThiefManager>();
+                    if (thiefManager != null) common = thiefManager.GetThiefCommonDB();
+                    CS_DangerZoneSpawner.SpawnAndRegisterFromGimmick(dangerZone, transform.position, this, common, thiefLayer);
+                }
+                else
+                {
+                    Debug.LogWarning("PotGimmick: dangerZone が未設定です。", this);
+                }
             }
-            else
+            if (gimmickSound != null)
             {
-                Debug.LogWarning("PotGimmick: dangerZone が未設定です。", this);
+                gimmickSound.PlayOneShotSE("Gimmick_PotBreak", gameObject.transform.position, "PotSound");
             }
+            isFirstBroken = false;
+            DeleteHitChecker();
         }
-        if (gimmickSound != null)
-        {
-            gimmickSound.PlayOneShotSE("Gimmick_PotBreak", gameObject.transform.position, "PotSound");
-        }
-        Destroy(gimmickSound);
-        isFirstUpdate = true;
-        DeleteHitChecker();
     }
 
     private void PlayPotVatEffect()
