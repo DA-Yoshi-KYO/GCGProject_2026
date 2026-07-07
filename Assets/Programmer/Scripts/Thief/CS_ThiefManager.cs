@@ -30,18 +30,6 @@ public class CS_ThiefManager : MonoBehaviour
     private CO_ThiefCommonStatusData thiefCommonDB;
     public CO_ThiefCommonStatusData GetThiefCommonDB() { return GameObject.Instantiate(thiefCommonDB); }
 
-    [Tooltip("初回生成が完了しているかどうか")]
-    private bool isFirstGenerationComplete = false;
-    public bool read_IsFirstGenerationComplete => isFirstGenerationComplete;
-
-    [Tooltip("生成が完了しているかどうか")]
-    private bool isGenerationComplete = false;
-    public bool read_IsGenerationComplete => isGenerationComplete;
-
-    [Tooltip("ウェーブ進行後のリセットを行うかどうか")]
-    private bool isResetAfterWaveProgress = true;
-    public bool read_IsResetAfterWaveProgress => isResetAfterWaveProgress;
-
     [Tooltip("ゲーム開始から一体目を生成するまでの時間")]
     private float firstSpawnDelay = 5.0f;
     [Tooltip("ウェーブ進行後に一体目を生成するまでの時間")]
@@ -85,6 +73,9 @@ public class CS_ThiefManager : MonoBehaviour
 
     [Tooltip("敵の生成情報のスタック")]
     private List<Stack<ThiefSpawnInfo>> thiefWaveStack = new List<Stack<ThiefSpawnInfo>>();
+
+    [Tooltip("泥棒の生成予定が存在するかどうか")]
+    public bool read_IsThiefWaveStackExist => thiefWaveStack.Count > 0;
 
 
     private void Awake()
