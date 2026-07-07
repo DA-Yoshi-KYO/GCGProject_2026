@@ -16,6 +16,8 @@ using UnityEngine;
 public class RoomGrid : MonoBehaviour
 {
     [SerializeField] private Vector2Int gridDivision;
+    public Vector2Int read_GridDivision => gridDivision;   // グリッドの分割数の取得用プロパティ
+
     public Vector2 gridSize { get; private set; } = new Vector2(1, 1);   // グリッド1マスの大きさ
     List<List<GameObject>> gridGimmicks;
     GameObject[,] gridObjects;
