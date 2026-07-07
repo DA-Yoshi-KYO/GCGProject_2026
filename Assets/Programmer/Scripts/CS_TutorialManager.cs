@@ -43,24 +43,24 @@ public class CS_TutorialManager : MonoBehaviour
         }
 
         // チュートリアル用の泥棒を出現させる処理
-        foreach (var spawnData in thiefSpawnDataList)
-        {
-            // 泥棒のプレハブを生成
-            GameObject thief = Instantiate(
-                spawnData.thiefTypeData.thiefPrefab,
-                spawnData.spawnPoint,
-                Quaternion.identity,
-                thiefParent.transform
-                );
+        //foreach (var spawnData in thiefSpawnDataList)
+        //{
+        //    // 泥棒のプレハブを生成
+        //    GameObject thief = Instantiate(
+        //        spawnData.thiefTypeData.thiefPrefab,
+        //        spawnData.spawnPoint,
+        //        Quaternion.identity,
+        //        thiefParent.transform
+        //        );
 
-            thief.name = "Thief_" + thiefParent.transform.childCount;
+        //    thief.name = "Thief_" + thiefParent.transform.childCount;
 
-            // 基準となるプレイヤーの速度を取得
-            float playerSpeed = GameObject.FindGameObjectWithTag("Player").GetComponent<CS_PlayerMove>().GetBasePlayerSpeed();
+        //    // 基準となるプレイヤーの速度を取得
+        //    float playerSpeed = GameObject.FindGameObjectWithTag("Player").GetComponent<CS_PlayerMove>().GetBasePlayerSpeed();
 
-            // 行動AIの設定
-            CS_ThiefAI thiefAI = thief.GetComponent<CS_ThiefAI>();
-            thiefAI.Setting(Instantiate(spawnData.thiefTypeData), Instantiate(spawnData.thiefCommonData), playerSpeed, null, null);
-        }
+        //    // 行動AIの設定
+        //    CS_ThiefAI thiefAI = thief.GetComponent<CS_ThiefAI>();
+        //    thiefAI.Setting(Instantiate(spawnData.thiefTypeData), Instantiate(spawnData.thiefCommonData), playerSpeed, null, null);
+        //}
     }
 }
