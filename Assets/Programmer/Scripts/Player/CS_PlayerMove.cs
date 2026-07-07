@@ -29,12 +29,11 @@ public class CS_PlayerMove : MonoBehaviour
     private CS_3DPlaySE playSE;
 
     // ロジックと見た目を揃える為の保存変数
-    public Transform visualModel; // 見た目のモデル
-
-    private Vector3 previousPosition;
-    private Vector3 currentPosition;
-    private Quaternion previousRotation;
-    private Quaternion currentRotation;
+    public Transform visualModel;       // 見た目のモデル
+    public Vector3 previousPosition;    // 前回の位置
+    public Vector3 currentPosition;     // 現在の位置
+    public Quaternion previousRotation; // 前回の回転
+    public Quaternion currentRotation;  // 現在の回転
 
     private float rotateSpeed = 10.0f;  // 回転のスピード
     private bool isJumping = false;     // ジャンプ中かどうか

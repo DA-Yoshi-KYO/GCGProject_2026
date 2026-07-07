@@ -10,7 +10,7 @@
  * 2026-05-27 | リファクタリング（吉田）
  * 2026-06-05 | 初期値のカメラの修正
  */
-using System.Collections.Generic;
+using System.Collections;
 using UnityEngine;
 
 public class CS_PlayerCamera : MonoBehaviour
@@ -53,11 +53,8 @@ public class CS_PlayerCamera : MonoBehaviour
     [HideInInspector] public Vector3 cameraForward { private set; get; } = Vector3.zero;    //カメラの正面方向ベクトル
     [HideInInspector] public Vector3 cameraRight { private set; get; } = Vector3.zero;      //カメラの右方向ベクトル
 
-    /* ---レイキャストによるオブジェクトの透過処理のための変数--- */
-    [Header("透過するオブジェクトのレイヤー")][SerializeField] LayerMask obstacleLayer;  // 透過するオブジェクトのレイヤー
-    Dictionary<Renderer, MaterialPropertyBlock> mpbCache = new Dictionary<Renderer, MaterialPropertyBlock>();   // マテリアルのプロパティ
-    List<Renderer> currentHits = new List<Renderer>();  // レイキャストの結果衝突したRenderオブジェクトのリスト
-
+    
+    
     // Start is called before the first frame update
     void Start()
     {
@@ -93,6 +90,23 @@ public class CS_PlayerCamera : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //現在のカメラのベクトルを更新
+        cameraRight = roomCameraObject.transform.right;
+        cameraForward = roomCameraObject.transform.forward;
+
+        //プレイヤーに追従して移動
+        Vector3 moveAmount = roomCenter - transform.position;
+
+        //カメラの移動に制限をかける
+        moveAmount.x = Mathf.Clamp(moveAmount.x, -roomCamera.moveAmountLimit.x, roomCamera.moveAmountLimit.x);
+        moveAmount.y = Mathf.Clamp(moveAmount.y, -roomCamera.moveAmountLimit.y, roomCamera.moveAmountLimit.y);
+        moveAmount.z = Mathf.Clamp(moveAmount.z, -roomCamera.moveAmountLimit.z, roomCamera.moveAmountLimit.z);
+
+        //カメラの移動
+        roomCameraObject.transform.position =
+            Vector3.Lerp(roomCameraObject.transform.position, roomCamera.initPos - moveAmount, trackingTime * Time.deltaTime);
+        Vector3.Lerp(roomCameraObject.transform.position, roomCamera.initPos - moveAmount, trackingTime * Time.deltaTime);
+
         //カメラの遷移演出の処理
         switch (transitionCamera)
         {
@@ -116,31 +130,24 @@ public class CS_PlayerCamera : MonoBehaviour
         }
     }
 
-    private void LateUpdate()
-    {
-        //現在のカメラのベクトルを更新
-        cameraRight = roomCameraObject.transform.right;
-        cameraForward = roomCameraObject.transform.forward;
-
-        //プレイヤーに追従して移動
-        Vector3 moveAmount = roomCenter - transform.position;
-
-        //カメラの移動に制限をかける
-        moveAmount.x = Mathf.Clamp(moveAmount.x, -roomCamera.moveAmountLimit.x, roomCamera.moveAmountLimit.x);
-        moveAmount.y = Mathf.Clamp(moveAmount.y, -roomCamera.moveAmountLimit.y, roomCamera.moveAmountLimit.y);
-        moveAmount.z = Mathf.Clamp(moveAmount.z, -roomCamera.moveAmountLimit.z, roomCamera.moveAmountLimit.z);
-
-        //カメラの移動
-        roomCameraObject.transform.position =
-            Vector3.Lerp(roomCameraObject.transform.position, roomCamera.initPos - moveAmount, trackingTime * Time.deltaTime);
-            Vector3.Lerp(roomCameraObject.transform.position, roomCamera.initPos - moveAmount, trackingTime * Time.deltaTime);
-    }
-
     /// <summary>
     /// 部屋移動した際のカメラ情報更新
     /// </summary>
     public void OnRoomMove()
     {
+        transitionCamera = TransitionCamera.Start;
+    }
+
+    /// <summary>
+    /// 移動後の実座標を取得する為にwaitFrame分遅延させる
+    /// </summary>
+    /// <param name="waitFrame">遅延させるフレーム数</param>
+    IEnumerator WaitMove(int waitFrame)
+    {
+        for (int i = 0 ; i < waitFrame ; i++)
+        {
+            yield return null;
+        }
         transitionCamera = TransitionCamera.Start;
     }
 
