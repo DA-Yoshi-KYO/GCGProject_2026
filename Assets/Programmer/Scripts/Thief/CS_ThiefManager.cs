@@ -180,7 +180,7 @@ public class CS_ThiefManager : MonoBehaviour
 
         // 行動AIの設定
         CS_ThiefAI thiefAI = thief.GetComponent<CS_ThiefAI>();
-        thiefAI.Setting(GameObject.Instantiate(typeData), GetThiefCommonDB(), playerSpeed, entryRoom, entryPoint);
+        thiefAI.Setting(GameObject.Instantiate(typeData), GetThiefCommonDB(), playerSpeed, entryRoom, Info.entryInfo.entryDirection, entryPoint);
     }
 
     /// <summary>
@@ -232,6 +232,29 @@ public class CS_ThiefManager : MonoBehaviour
         {
             thiefWaveStack.Add(stack);
         }
+    }
+
+    /// <summary>
+    /// 指定された泥棒データを元に、生成情報を登録する処理
+    /// </summary>
+    /// <param name="thiefData">泥棒データ</param>
+    /// <param name="roomName">生成する部屋の名前</param>
+    /// <param name="doorDir">生成する出入口の方向</param>
+    public void RegistGenerationInfo(CO_ThiefStatusData thiefData, string roomName, CSE_RoomDoorDirection doorDir)
+    {
+        // 新しいスタックを作成し、生成情報を追加
+        Stack<ThiefSpawnInfo> newStacks = new Stack<ThiefSpawnInfo>();
+        // 生成情報を作成
+        ThiefSpawnInfo spawnInfo = new ThiefSpawnInfo(
+            roomName,                       // 部屋の名前
+            doorDir,                        // 出入口の方向
+            thiefData,                      // 泥棒のタイプデータ
+            spawnInterval          // 生成されるまでの秒数
+        );
+        newStacks.Push(spawnInfo);
+
+        // 新しいスタックをリストに追加
+        thiefWaveStack.Add(newStacks);
     }
 
     /// <summary>
