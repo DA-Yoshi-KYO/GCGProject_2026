@@ -413,8 +413,10 @@ public class CS_ThiefAI : MonoBehaviour
         {
             CS_ThiefManager thiefManager = GameObject.FindObjectOfType<CS_ThiefManager>();
 
-            thiefManager.RegistGenerationInfo(thiefStatusData, memorySystem.read_CurrentRoom.transform.parent.name, memorySystem.read_FirstEntryDirection);
-
+            if (thiefManager != null && memorySystem != null && memorySystem.read_CurrentRoom != null && memorySystem.read_CurrentRoom.transform != null && memorySystem.read_CurrentRoom.transform.parent != null)
+            {
+                thiefManager.RegistGenerationInfo(thiefStatusData, memorySystem.read_CurrentRoom.transform.parent.name, memorySystem.read_FirstEntryDirection);
+            }
         }
         else
         {
