@@ -31,6 +31,7 @@ public class CS_MoveSystem
     {
         Player,         // プレイヤー
         Treasure,       // 宝物
+        SearchObject,    // 捜索対象オブジェクト
     }
 
     [Tooltip("走り状態になる標的オブジェクトのタイプリスト")]
@@ -113,6 +114,20 @@ public class CS_MoveSystem
                     if (currentTarget is CS_VisionTarget vt && vt.targetType == CS_VisionTarget.TargetType.Treasure)
                     {
                         // 現在の標的が宝物の場合は走り速度に切り替える
+                        navMeshAgent.speed = runSpeed;
+                        return;
+                    }
+                    if (currentTarget is CS_TrapTarget tt && tt.gimmickScript.gimmick == Gimmick.EmptyChest)
+                    {
+                        // 現在の標的が宝物ギミックの場合は走り速度に切り替える
+                        navMeshAgent.speed = runSpeed;
+                        return;
+                    }
+                    break;
+                case RunTargetType.SearchObject:
+                    if (currentTarget is CS_VisionTarget vt2 && vt2.targetType == CS_VisionTarget.TargetType.Shelf)
+                    {
+                        // 現在の標的が捜索対象オブジェクトの場合は走り速度に切り替える
                         navMeshAgent.speed = runSpeed;
                         return;
                     }

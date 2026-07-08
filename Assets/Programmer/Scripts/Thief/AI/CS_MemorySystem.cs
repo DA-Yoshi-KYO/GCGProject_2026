@@ -50,7 +50,6 @@ public class CS_MemorySystem
     [Tooltip("プレイヤーを追跡する残り時間")]
     private float remainingIgnorePlayerTime;
     [Tooltip("プレイヤーを追跡する残り時間の初期値")]
-
     private float initialRemainingIgnorePlayerTime;
     [Tooltip("プレイヤーを発見する猶予時間")]
     private float findPlayerGraceTime;
