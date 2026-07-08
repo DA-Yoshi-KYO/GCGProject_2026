@@ -40,7 +40,6 @@ public class TreasureItem : MonoBehaviour
                 isDestroyCheck = true;
                 return;
             }
-            Debug.Log("宝物が破棄されました。");
             rectTransform.localScale = Vector3.Lerp(rectTransform.localScale, scale, Time.deltaTime * 5f);
             BastetIcon.SetActive(false);
             BastetOutLineIcon.SetActive(false);
