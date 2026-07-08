@@ -49,7 +49,7 @@ public class CS_VisionTarget : CS_ThiefTarget
     public bool read_IsStolenMoveing => isStolenMoveing;
 
     [Tooltip("出口までの距離")]
-    private int exitDistance = 0;
+    private int exitDistance = -1;
     public int read_ExitDistance => exitDistance;
 
     [Tooltip("盗んで移動中の敵のAI")]
