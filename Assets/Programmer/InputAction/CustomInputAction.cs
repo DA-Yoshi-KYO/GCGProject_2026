@@ -1386,6 +1386,76 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""TutorialConfirmation"",
+            ""id"": ""01f5fb66-8144-4e2b-ac3d-fcf084f9fce5"",
+            ""actions"": [
+                {
+                    ""name"": ""MoveAxis"",
+                    ""type"": ""Value"",
+                    ""id"": ""c5c23f44-da5c-4ef4-9dfa-ebba572f3aea"",
+                    ""expectedControlType"": ""Axis"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""Decision"",
+                    ""type"": ""Button"",
+                    ""id"": ""f00277e0-4b17-4e27-9ea1-eab0856b73a3"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": ""1D Axis"",
+                    ""id"": ""8f67210b-64c4-4a2e-8f4a-690e69890db7"",
+                    ""path"": ""1DAxis"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveAxis"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""Positive"",
+                    ""id"": ""2b9575fb-c309-4c94-895d-bb02808bbf36"",
+                    ""path"": ""<Keyboard>/d"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveAxis"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""Negative"",
+                    ""id"": ""fb6b32f9-8a27-4025-a41c-1a988fdd7c81"",
+                    ""path"": ""<Keyboard>/a"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveAxis"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""11c5f0ee-df5c-4415-832d-e424a1570e28"",
+                    ""path"": ""<Keyboard>/f"",
+                    ""interactions"": ""Press(pressPoint=0.5)"",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Decision"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": []
@@ -1426,6 +1496,10 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
         // Openning
         m_Openning = asset.FindActionMap("Openning", throwIfNotFound: true);
         m_Openning_SkipButton = m_Openning.FindAction("SkipButton", throwIfNotFound: true);
+        // TutorialConfirmation
+        m_TutorialConfirmation = asset.FindActionMap("TutorialConfirmation", throwIfNotFound: true);
+        m_TutorialConfirmation_MoveAxis = m_TutorialConfirmation.FindAction("MoveAxis", throwIfNotFound: true);
+        m_TutorialConfirmation_Decision = m_TutorialConfirmation.FindAction("Decision", throwIfNotFound: true);
     }
 
     ~@CustomInputAction()
@@ -1437,6 +1511,7 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
         UnityEngine.Debug.Assert(!m_GameOver.enabled, "This will cause a leak and performance issues, CustomInputAction.GameOver.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_Option.enabled, "This will cause a leak and performance issues, CustomInputAction.Option.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_Openning.enabled, "This will cause a leak and performance issues, CustomInputAction.Openning.Disable() has not been called.");
+        UnityEngine.Debug.Assert(!m_TutorialConfirmation.enabled, "This will cause a leak and performance issues, CustomInputAction.TutorialConfirmation.Disable() has not been called.");
     }
 
     /// <summary>
@@ -2345,6 +2420,113 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
     /// Provides a new <see cref="OpenningActions" /> instance referencing this action map.
     /// </summary>
     public OpenningActions @Openning => new OpenningActions(this);
+
+    // TutorialConfirmation
+    private readonly InputActionMap m_TutorialConfirmation;
+    private List<ITutorialConfirmationActions> m_TutorialConfirmationActionsCallbackInterfaces = new List<ITutorialConfirmationActions>();
+    private readonly InputAction m_TutorialConfirmation_MoveAxis;
+    private readonly InputAction m_TutorialConfirmation_Decision;
+    /// <summary>
+    /// Provides access to input actions defined in input action map "TutorialConfirmation".
+    /// </summary>
+    public struct TutorialConfirmationActions
+    {
+        private @CustomInputAction m_Wrapper;
+
+        /// <summary>
+        /// Construct a new instance of the input action map wrapper class.
+        /// </summary>
+        public TutorialConfirmationActions(@CustomInputAction wrapper) { m_Wrapper = wrapper; }
+        /// <summary>
+        /// Provides access to the underlying input action "TutorialConfirmation/MoveAxis".
+        /// </summary>
+        public InputAction @MoveAxis => m_Wrapper.m_TutorialConfirmation_MoveAxis;
+        /// <summary>
+        /// Provides access to the underlying input action "TutorialConfirmation/Decision".
+        /// </summary>
+        public InputAction @Decision => m_Wrapper.m_TutorialConfirmation_Decision;
+        /// <summary>
+        /// Provides access to the underlying input action map instance.
+        /// </summary>
+        public InputActionMap Get() { return m_Wrapper.m_TutorialConfirmation; }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Enable()" />
+        public void Enable() { Get().Enable(); }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Disable()" />
+        public void Disable() { Get().Disable(); }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.enabled" />
+        public bool enabled => Get().enabled;
+        /// <summary>
+        /// Implicitly converts an <see ref="TutorialConfirmationActions" /> to an <see ref="InputActionMap" /> instance.
+        /// </summary>
+        public static implicit operator InputActionMap(TutorialConfirmationActions set) { return set.Get(); }
+        /// <summary>
+        /// Adds <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+        /// </summary>
+        /// <param name="instance">Callback instance.</param>
+        /// <remarks>
+        /// If <paramref name="instance" /> is <c>null</c> or <paramref name="instance"/> have already been added this method does nothing.
+        /// </remarks>
+        /// <seealso cref="TutorialConfirmationActions" />
+        public void AddCallbacks(ITutorialConfirmationActions instance)
+        {
+            if (instance == null || m_Wrapper.m_TutorialConfirmationActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_TutorialConfirmationActionsCallbackInterfaces.Add(instance);
+            @MoveAxis.started += instance.OnMoveAxis;
+            @MoveAxis.performed += instance.OnMoveAxis;
+            @MoveAxis.canceled += instance.OnMoveAxis;
+            @Decision.started += instance.OnDecision;
+            @Decision.performed += instance.OnDecision;
+            @Decision.canceled += instance.OnDecision;
+        }
+
+        /// <summary>
+        /// Removes <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+        /// </summary>
+        /// <remarks>
+        /// Calling this method when <paramref name="instance" /> have not previously been registered has no side-effects.
+        /// </remarks>
+        /// <seealso cref="TutorialConfirmationActions" />
+        private void UnregisterCallbacks(ITutorialConfirmationActions instance)
+        {
+            @MoveAxis.started -= instance.OnMoveAxis;
+            @MoveAxis.performed -= instance.OnMoveAxis;
+            @MoveAxis.canceled -= instance.OnMoveAxis;
+            @Decision.started -= instance.OnDecision;
+            @Decision.performed -= instance.OnDecision;
+            @Decision.canceled -= instance.OnDecision;
+        }
+
+        /// <summary>
+        /// Unregisters <param cref="instance" /> and unregisters all input action callbacks via <see cref="TutorialConfirmationActions.UnregisterCallbacks(ITutorialConfirmationActions)" />.
+        /// </summary>
+        /// <seealso cref="TutorialConfirmationActions.UnregisterCallbacks(ITutorialConfirmationActions)" />
+        public void RemoveCallbacks(ITutorialConfirmationActions instance)
+        {
+            if (m_Wrapper.m_TutorialConfirmationActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        /// <summary>
+        /// Replaces all existing callback instances and previously registered input action callbacks associated with them with callbacks provided via <param cref="instance" />.
+        /// </summary>
+        /// <remarks>
+        /// If <paramref name="instance" /> is <c>null</c>, calling this method will only unregister all existing callbacks but not register any new callbacks.
+        /// </remarks>
+        /// <seealso cref="TutorialConfirmationActions.AddCallbacks(ITutorialConfirmationActions)" />
+        /// <seealso cref="TutorialConfirmationActions.RemoveCallbacks(ITutorialConfirmationActions)" />
+        /// <seealso cref="TutorialConfirmationActions.UnregisterCallbacks(ITutorialConfirmationActions)" />
+        public void SetCallbacks(ITutorialConfirmationActions instance)
+        {
+            foreach (var item in m_Wrapper.m_TutorialConfirmationActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_TutorialConfirmationActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    /// <summary>
+    /// Provides a new <see cref="TutorialConfirmationActions" /> instance referencing this action map.
+    /// </summary>
+    public TutorialConfirmationActions @TutorialConfirmation => new TutorialConfirmationActions(this);
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Player" which allows adding and removing callbacks.
     /// </summary>
@@ -2554,5 +2736,27 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnSkipButton(InputAction.CallbackContext context);
+    }
+    /// <summary>
+    /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "TutorialConfirmation" which allows adding and removing callbacks.
+    /// </summary>
+    /// <seealso cref="TutorialConfirmationActions.AddCallbacks(ITutorialConfirmationActions)" />
+    /// <seealso cref="TutorialConfirmationActions.RemoveCallbacks(ITutorialConfirmationActions)" />
+    public interface ITutorialConfirmationActions
+    {
+        /// <summary>
+        /// Method invoked when associated input action "MoveAxis" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnMoveAxis(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Decision" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnDecision(InputAction.CallbackContext context);
     }
 }
