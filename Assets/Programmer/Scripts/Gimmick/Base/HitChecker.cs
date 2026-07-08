@@ -424,7 +424,7 @@ public class HitChecker : MonoBehaviour
                         case Gimmick.EmptyChest:
                             EmptyChestGimmick emptyChestGimmick =
                                 parentGameObject.GetComponent<EmptyChestGimmick>();
-                            if (emptyChestGimmick != null)
+                            if (emptyChestGimmick != null && thiefAI.read_CurrentState != CS_ThiefAI.ThiefState.Stunned)
                             {
                                 emptyChestGimmick.Durability_Value_Decreased();
                                 thiefAI.read_ThiefReaction.ChangeReaction(CS_ThiefReaction.ThiefReactionType.Searching);

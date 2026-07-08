@@ -70,6 +70,10 @@ public class CS_MemorySystem
     private Transform firstEntryPoint;
     public Transform read_FirstEntryPoint => firstEntryPoint;
 
+    [Tooltip("最初入ってきたドアの方向")]
+    private CSE_RoomDoorDirection firstEntryDirection;
+    public CSE_RoomDoorDirection read_FirstEntryDirection => firstEntryDirection;
+
     [Tooltip("この泥棒が回避する DangerZone の zoneID 一覧")]
     private List<int> avoidZoneIDs = new List<int>();
 
@@ -79,13 +83,14 @@ public class CS_MemorySystem
     /// <param name="thiefAI">ThiefAIのメインスクリプト</param>
     /// <param name="entryRoom">最初の部屋の情報</param>
     /// <param name="entryPoint">最初の部屋の入ってきたドアの位置</param>
-    public CS_MemorySystem(CS_ThiefAI thiefAI, CS_RoomNode entryRoom, Transform entryPoint, CO_ThiefStatusData typedata, CO_ThiefCommonStatusData data)
+    public CS_MemorySystem(CS_ThiefAI thiefAI, CS_RoomNode entryRoom, CSE_RoomDoorDirection doorDir, Transform entryPoint, CO_ThiefStatusData typedata, CO_ThiefCommonStatusData data)
     {
         // ThiefAIのメインスクリプトを取得
         this.thiefAI = thiefAI;
         // 最初の部屋の情報を保存
         firstRoom = entryRoom;
         firstEntryPoint = entryPoint;
+        firstEntryDirection = doorDir;
 
         // プレイヤーを追跡する残り時間の初期値を設定
         initialRemainingIgnorePlayerTime = typedata.pursuitTime;

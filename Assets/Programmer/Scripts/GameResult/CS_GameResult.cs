@@ -61,7 +61,12 @@ public class CS_GameResult : MonoBehaviour
                 }
                 else
                 {
-                    GameObject gameObject = Instantiate(gameClearCutScene, gameClearCutScenePos.position, gameClearCutScenePos.rotation);
+                    if (!startJingle)
+                    {
+                        GameObject gameObject = Instantiate(gameClearCutScene, gameClearCutScenePos.position, gameClearCutScenePos.rotation);
+                        backGroundPlaySE.PlaySE("WinJingle");
+                        startJingle = true;
+                    }
                 }
             }
         }
@@ -79,7 +84,12 @@ public class CS_GameResult : MonoBehaviour
             }
             else
             {
-                GameObject gameObject = Instantiate(gameFailureCutScene, gameFailureCutScenePos.position, gameFailureCutScenePos.rotation);
+                if (!startJingle)
+                {
+                    GameObject gameObject = Instantiate(gameFailureCutScene, gameFailureCutScenePos.position, gameFailureCutScenePos.rotation);
+                    backGroundPlaySE.PlaySE("LoseJingle");
+                    startJingle = true;
+                }
             }
         }
         else
@@ -99,7 +109,12 @@ public class CS_GameResult : MonoBehaviour
                     }
                     else
                     {
-                        GameObject gameObject = Instantiate(gameClearCutScene, gameClearCutScenePos.position, gameClearCutScenePos.rotation);
+                        if (!startJingle)
+                        {
+                            GameObject gameObject = Instantiate(gameClearCutScene, gameClearCutScenePos.position, gameClearCutScenePos.rotation);
+                            backGroundPlaySE.PlaySE("WinJingle");
+                            startJingle = true;
+                        }
                     }
                 }
                 else
@@ -115,7 +130,12 @@ public class CS_GameResult : MonoBehaviour
                     }
                     else
                     {
-                        GameObject gameObject = Instantiate(gameFailureCutScene, gameFailureCutScenePos.position, gameFailureCutScenePos.rotation);
+                        if (!startJingle)
+                        {
+                            GameObject gameObject = Instantiate(gameFailureCutScene, gameFailureCutScenePos.position, gameFailureCutScenePos.rotation);
+                            backGroundPlaySE.PlaySE("LoseJingle");
+                            startJingle = true;
+                        }
                     }
                 }
             }

@@ -302,6 +302,11 @@ public class CS_RoomMovePoint : MonoBehaviour
         }
 
         playerTransform.SetPositionAndRotation(targetTransform.position, spawnRotation);
+        CS_PlayerMove playerMove = playerTransform.GetComponent<CS_PlayerMove>();
+        playerMove.previousPosition = targetTransform.position;
+        playerMove.previousRotation = spawnRotation;
+        playerMove.currentPosition = targetTransform.position;
+        playerMove.currentRotation = spawnRotation;
 
         if (characterController != null)
         {

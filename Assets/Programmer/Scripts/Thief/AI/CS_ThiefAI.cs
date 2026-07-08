@@ -74,6 +74,9 @@ public class CS_ThiefAI : MonoBehaviour
     [Tooltip("泥棒のマテリアルのフェードアウトにかかる時間")]
     private float fadeAfterStunTime;
 
+    [Tooltip("使用したデータベース")]
+    private CO_ThiefStatusData thiefStatusData;
+
     [Tooltip("アウトラインターゲット")]
     private CS_OutlineTarget outlineTarget;
 
@@ -271,8 +274,10 @@ public class CS_ThiefAI : MonoBehaviour
     /// <param name="playerSpeed">プレイヤーの移動速度（泥棒の移動速度をプレイヤーの移動速度に対する倍率で設定するため）</param>
     /// <param name="entryRoom">最初に入ってくる部屋のオブジェクト</param>
     /// <param name="entryPoint">最初に入ってくるドアの位置</param>
-    public void Setting(CO_ThiefStatusData typedata, CO_ThiefCommonStatusData data, float playerSpeed, CS_RoomNode entryRoom, Transform entryPoint)
+    public void Setting(CO_ThiefStatusData typedata, CO_ThiefCommonStatusData data, float playerSpeed, CS_RoomNode entryRoom, CSE_RoomDoorDirection doorDir, Transform entryPoint)
     {
+        thiefStatusData = typedata;
+
         iconSprite = typedata.thiefTypeIcon;
 
         durability = typedata.durability;
@@ -292,7 +297,7 @@ public class CS_ThiefAI : MonoBehaviour
         aStarSystem = new CS_AStarSystem(this);
 
         // 記憶システムの初期化
-        memorySystem = new CS_MemorySystem(this, entryRoom, entryPoint, typedata, data);
+        memorySystem = new CS_MemorySystem(this, entryRoom, doorDir, entryPoint, typedata, data);
         memorySystem.FindNowRoomNode();
 
         // ギミック行動システムの初期化
@@ -403,9 +408,20 @@ public class CS_ThiefAI : MonoBehaviour
 
     private void OnDestroy()
     {
-        // 退場したときにウェーブ数を増加させる
-        CS_StageManager stageManager = GameObject.FindObjectOfType<CS_StageManager>();
-        if(stageManager != null) stageManager.WaveCountUp();
+        // 生きている状態で退場した場合
+        if (durability > 0)
+        {
+            CS_ThiefManager thiefManager = GameObject.FindObjectOfType<CS_ThiefManager>();
+
+            thiefManager.RegistGenerationInfo(thiefStatusData, memorySystem.read_CurrentRoom.transform.parent.name, memorySystem.read_FirstEntryDirection);
+
+        }
+        else
+        {
+            // 退場したときにウェーブ数を増加させる
+            CS_StageManager stageManager = GameObject.FindObjectOfType<CS_StageManager>();
+            if (stageManager != null) stageManager.WaveCountUp();
+        }
     }
 
     // 探索状態の行動
