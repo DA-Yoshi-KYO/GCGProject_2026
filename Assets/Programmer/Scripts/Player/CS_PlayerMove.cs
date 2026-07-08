@@ -142,7 +142,6 @@ public class CS_PlayerMove : MonoBehaviour
     {
         if (catCaughtTime > 0f)
         {
-            Debug.Log(catCaughtTime);
             catCaughtTime -= Time.fixedDeltaTime;
             catCaughtTime = Mathf.Max(0.0f, catCaughtTime);
             return;
@@ -150,7 +149,6 @@ public class CS_PlayerMove : MonoBehaviour
 
         if (ankhStunTimeToCatStun > 0.0f)
         {//猫がスタンしている場合動かせない
-            Debug.Log(ankhStunTimeToCatStun);
             ankhStunTimeToCatStun -= Time.fixedDeltaTime;
             ankhStunTimeToCatStun = Mathf.Max(0.0f,ankhStunTimeToCatStun);
             return;
