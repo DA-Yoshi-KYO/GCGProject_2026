@@ -590,6 +590,7 @@ public class CS_PlayerAction : MonoBehaviour
 
         var roomGrid = currentRoom.GetComponent<RoomGrid>();
         if (roomGrid == null) return Vector3.positiveInfinity;
+        if (gimmickManager.GetGimmickInfoDataList().Count == 0) return Vector3.positiveInfinity;
         GimmickBase gimmick = gimmickManager.GetGimmickInfoDataList()[currentGimmickIndex].gimmickPrefab.GetComponent<GimmickBase>();
 
         settingPos = transform.position;

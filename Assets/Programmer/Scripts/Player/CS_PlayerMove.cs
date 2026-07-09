@@ -99,6 +99,10 @@ public class CS_PlayerMove : MonoBehaviour
             Debug.LogWarning("[PlayerMove] 3DSE が見つかりません。SE再生は無効になります。");
         }
 
+        currentPosition = transform.position;
+        previousPosition = currentPosition;
+        currentRotation = rb.rotation;
+        previousRotation = currentRotation;
     }
 
     void FixedUpdate()
