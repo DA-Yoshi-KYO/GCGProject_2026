@@ -19,6 +19,7 @@ public enum SceneName
     StageSelectScene,
     MainScene,//MainSceneで切り替えて流すBGM
     ThiefEscape,//MainSceneで切り替えて流すBGM
+    TutorialScene
 }
 
 //バックグランド用のBGMのキューの名前
@@ -29,6 +30,7 @@ public enum BackGroundBGMCueName
     SelectBGM,
     ThiefEscapeBGM,
     InGameBGM,
+    TutolialBGM
 };
 
 //ステータス
