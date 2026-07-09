@@ -130,7 +130,6 @@ public class CS_PlayerMove : MonoBehaviour
 
     void Update()
     {
-        Debug.Log(Physics.simulationMode);
         // FixedUpdate間の経過割合を計算
         float t = (Time.time - Time.fixedTime) / Time.fixedDeltaTime;
         t = Mathf.Clamp01(t);
