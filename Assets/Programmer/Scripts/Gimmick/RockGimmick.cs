@@ -313,41 +313,47 @@ public class RockGimmick : GimmickBase
                     break;
             }
             Debug.DrawRay(rayPos, rollDir, Color.yellow);
-            if (Physics.Raycast(
+            foreach (RaycastHit h in Physics.RaycastAll(
                 rayPos,
                 rollDir,
-                out wallHit,
                 raySideLength))
             {
-                if (HitBrokeAngle(wallHit, rollDir, 85f))
+                Transform hitTransform = h.collider.transform;
+
+                // 自分自身と、自分の子Colliderを除外
+                if (hitTransform.root == transform.root)
+                    continue;
+
+                bool isIgnoreObject =
+                    HasNameInHierarchy(
+                        hitTransform,
+                        "Player",
+                        "ThiefParent",
+                        "Floors");
+
+                // 階層内に対象名が存在した場合は無視
+                if (isIgnoreObject)
                 {
-                    bool isHit = false;
-                    //親オブジェクトの当たり判定のみを対象とする
-                    foreach (var h in Physics.RaycastAll(rayPos, rollDir, raySideLength))
-                    {
-                        var root = h.collider.transform.root;
+                    Debug.Log(
+                        $"横Ray除外: Collider={hitTransform.name}, " +
+                        $"Root={hitTransform.root.name}");
 
-                        //自身に当たっていたら
-                        if (root == transform.root)
-                            continue;
-                        //親が存在しなかったら
-
-                        //タグ指定※playerやthiefに当たらないようにする
-                        if (root.CompareTag("Plane") ||
-                            root.CompareTag("Untagged"))
-                        {
-                            Debug.Log(root.name);
-                            wallHit = h;
-                            isHit = true;
-                            break;
-                        }
-                    }
-                    if (isHit)
-                    {
-                        gimmickState = GimmickState.Broken;
-
-                    }
+                    continue;
                 }
+
+                //------------------------------------------------
+                // 壁として破壊可能な角度か確認
+                //------------------------------------------------
+                if (!HitBrokeAngle(h, rollDir, 85.0f))
+                    continue;
+
+                Debug.Log(
+                    $"大岩破壊: Collider={hitTransform.name}, " +
+                    $"Root={hitTransform.root.name}");
+
+                wallHit = h;
+                gimmickState = GimmickState.Broken;
+                break;
             }
             cicleHit++;
         }
@@ -387,6 +393,36 @@ public class RockGimmick : GimmickBase
 
         return angle < breakAngle;
     }
+
+
+    //=========================================================
+    // 子オブジェクトから最上位の親まで対象名を検索
+    //=========================================================
+    private bool HasNameInHierarchy(
+        Transform hitTransform,
+        params string[] targetNames)
+    {
+        Transform current = hitTransform;
+
+        // 当たったオブジェクト自身から最上位まで調べる
+        while (current != null)
+        {
+            foreach (string targetName in targetNames)
+            {
+                // 通常オブジェクトと(Clone)の両方に対応
+                if (current.name == targetName ||
+                    current.name.StartsWith(targetName + "("))
+                {
+                    return true;
+                }
+            }
+
+            current = current.parent;
+        }
+
+        return false;
+    }
+
     // =========================
     // 破壊処理
     // =========================
