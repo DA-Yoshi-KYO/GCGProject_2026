@@ -238,8 +238,30 @@ public class RoomGrid : MonoBehaviour
             QueryTriggerInteraction.Ignore);
         Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
 
+        // レイキャストのヒット情報をリスト化
         List<RaycastHit> hitList = new List<RaycastHit>(hits);
-        hitList.RemoveAll(hit => hit.transform.CompareTag("Player") || hit.transform.CompareTag("Thief") || hit.transform.CompareTag("Treasure"));
+
+        // 宝物の例外処理：宝物の上には召喚しない
+        List<RaycastHit> hitTreasures = hitList.FindAll(hit => hit.transform.CompareTag("Treasure"));
+        foreach (var hit in hitTreasures)
+        {
+            // 運搬中でもそうでなくとも宝物の上には召喚しない為、必ずリストからは除外する
+            hitList.Remove(hit);
+
+            if (hit.collider != null && hit.collider.gameObject != null)
+            {
+                GameObject treasureObj = hit.collider.gameObject;
+                CS_VisionTarget treasureVisionTarget = treasureObj.GetComponent<CS_VisionTarget>();
+                if (treasureVisionTarget != null && treasureVisionTarget.read_IsStolenMoveing)
+                {
+                    // 運搬中の宝物は召喚しない
+                    return false;
+                }
+            }
+        }
+
+        // プレイヤー、泥棒の例外処理：プレイヤーと泥棒の上には召喚しない
+        hitList.RemoveAll(hit => hit.transform.CompareTag("Player") || hit.transform.CompareTag("Thief"));
         spawnPos.y = hitList[0].point.y;
 
         // ギミックが落とし穴ギミックだった場合、床のマテリアルに穴の位置を伝える
