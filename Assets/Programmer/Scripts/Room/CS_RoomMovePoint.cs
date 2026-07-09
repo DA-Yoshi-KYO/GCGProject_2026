@@ -272,6 +272,17 @@ public class CS_RoomMovePoint : MonoBehaviour
     /// <param name="targetTransform">移動先Transform。</param>
     private void MovePlayer(Transform playerTransform, Transform targetTransform)
     {
+        Debug.Log(
+            "[RoomMovePoint] Player移動 / Player:"
+            + playerTransform.name
+            + " / 移動前:"
+            + playerTransform.position
+            + " / 移動先:"
+            + targetTransform.name
+            + " / 移動先座標:"
+            + targetTransform.position
+);
+
         if (playerTransform == null)
         {
             Debug.LogWarning("[RoomMovePoint] PlayerTransformがnullです。");
