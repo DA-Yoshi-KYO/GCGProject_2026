@@ -23,7 +23,7 @@ public class GimmickList : MonoBehaviour
     //=========================================================
     [System.Serializable]
     public class GimmickInfo
-    {
+    {//初期設定用のクラス
         // クールタイムの長さ
         public float coolTime;
         // 設置後の生存時間
@@ -42,12 +42,17 @@ public class GimmickList : MonoBehaviour
             currentNum = maxNum;
         }
     }
-
+    //=========================================================
+    // 現在の所持ギミック情報
+    //=========================================================
     public class CurrentGimmickData
     {
         public Gimmick gimmickTag;
         public int currentNum;
         public int totalNum;
+        public GameObject itemPrefab;
+        public GameObject previewPrefab;
+        public GameObject gimmickPrefab;
     }
 
     //=========================================================
@@ -129,7 +134,17 @@ public class GimmickList : MonoBehaviour
             //リストに追加
             if(data.gimmickInfo.currentNum > 0)
             {
-                currentGimmickData[data.gimmickTag].currentNum = data.gimmickInfo.currentNum;
+                currentGimmickData[data.gimmickTag] = new CurrentGimmickData
+                {
+                    gimmickTag = data.gimmickTag,
+                    currentNum = data.gimmickInfo.currentNum,
+                    totalNum = 0,
+                    itemPrefab = data.itemPrefab,
+                    previewPrefab = data.previewPrefab,
+                    gimmickPrefab = data.gimmickPrefab
+                };
+
+                currentGimmickInfoList = new List<CurrentGimmickData>(currentGimmickData.Values);
             }
         }
     }
@@ -235,6 +250,17 @@ public class GimmickList : MonoBehaviour
         {
             if (item.GetGimmickTag() == data.gimmickTag)
             {
+                currentGimmickData[data.gimmickTag] = new CurrentGimmickData
+                {
+                    gimmickTag = data.gimmickTag,
+                    currentNum = data.gimmickInfo.currentNum,
+                    totalNum = 0,
+                    itemPrefab = data.itemPrefab,
+                    previewPrefab = data.previewPrefab,
+                    gimmickPrefab = data.gimmickPrefab
+                };
+                currentGimmickInfoList = new List<CurrentGimmickData>(currentGimmickData.Values);
+
                 //入手したら所持数を最大値にする
                 SetCurrentGimmick(item.GetGimmickTag(), gimmickInfo[item.GetGimmickTag()].maxNum);
                 Destroy(other.gameObject);
