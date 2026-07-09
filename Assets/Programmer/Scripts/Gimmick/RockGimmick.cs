@@ -334,10 +334,6 @@ public class RockGimmick : GimmickBase
                 // 階層内に対象名が存在した場合は無視
                 if (isIgnoreObject)
                 {
-                    Debug.Log(
-                        $"横Ray除外: Collider={hitTransform.name}, " +
-                        $"Root={hitTransform.root.name}");
-
                     continue;
                 }
 
