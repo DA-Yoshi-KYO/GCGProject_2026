@@ -76,7 +76,7 @@ public class MagicAnkhGimmick : GimmickBase
         Quaternion q_EffectRotation =
             go_AnkhEffectPrefab.transform.rotation;
 
-        CS_EffectPlayUtility.PlaySingleAndDestroy(
+        CS_EffectPlayUtility.PlaySingle(
             go_AnkhEffectPrefab,
             v3_EffectPosition,
             q_EffectRotation,
@@ -89,7 +89,7 @@ public class MagicAnkhGimmick : GimmickBase
     /// </summary>
     private void EndAnkhEffect()
     {
-        CS_EffectPlayUtility.EndAndClear(ref csad_AnkhEffect);
+        CS_EffectPlayUtility.EndEffect(ref csad_AnkhEffect);
     }
 
     /// <summary>
@@ -103,7 +103,7 @@ public class MagicAnkhGimmick : GimmickBase
         Quaternion q_EffectRotation =
             go_AnkhStandEffectPrefab.transform.rotation;
 
-        CS_EffectPlayUtility.PlaySingleAndDestroy(
+        CS_EffectPlayUtility.PlaySingle(
             go_AnkhStandEffectPrefab,
             v3_EffectPosition,
             q_EffectRotation,
@@ -116,6 +116,6 @@ public class MagicAnkhGimmick : GimmickBase
     /// </summary>
     public void EndAnkhStandEffect()
     {
-        CS_EffectPlayUtility.EndAndClear(ref csad_AnkhStandEffect);
+        CS_EffectPlayUtility.EndEffect(ref csad_AnkhStandEffect);
     }
 }
