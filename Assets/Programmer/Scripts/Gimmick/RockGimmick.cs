@@ -66,7 +66,7 @@ public class RockGimmick : GimmickBase
     protected override void IdleUpdate()
     {
         //！！デバッグ用応急処置！！//
-        if(!isStart)
+        if (!isStart)
         {
             isStart = true;
             startPos = transform.position;
@@ -231,54 +231,9 @@ public class RockGimmick : GimmickBase
                 moveOnGround = moveDir;
             }
 
-            // 上方向へ進もうとしていたら反転する
-            if (angle > 1.0f && moveOnGround.y > 0.01f)
-            {
-                ReverseGimmickDirection();
-
-                switch (gimmickDirection)
-                {
-                    case GimmickDirection.Up:
-                        moveDir = Vector3.back;
-                        rotateAxis = Vector3.right;
-                        rotateSign = 1.0f;
-                        break;
-
-                    case GimmickDirection.Down:
-                        moveDir = Vector3.forward;
-                        rotateAxis = Vector3.right;
-                        rotateSign = -1.0f;
-                        break;
-
-                    case GimmickDirection.Left:
-                        moveDir = Vector3.left;
-                        rotateAxis = Vector3.forward;
-                        rotateSign = 1.0f;
-                        break;
-
-                    case GimmickDirection.Right:
-                        moveDir = Vector3.right;
-                        rotateAxis = Vector3.forward;
-                        rotateSign = -1.0f;
-                        break;
-                }
-
-                moveOnGround =
-                    Vector3.ProjectOnPlane(moveDir, hit.normal);
-
-                if (moveOnGround.sqrMagnitude > 0.0001f)
-                {
-                    moveOnGround.Normalize();
-                }
-                else
-                {
-                    moveOnGround = moveDir;
-                }
-            }
-
             // 坂の方向 = Dirの方向
             Vector3 rollDir = moveOnGround;
-            
+
             //------------------------------------------------
             // 速度計算
             //------------------------------------------------
@@ -328,7 +283,7 @@ public class RockGimmick : GimmickBase
                     rayPos = new Vector3(
                         transform.position.x
                             + cicleHit * radius * 0.75f,
-                        transform.position.y,
+                        transform.position.y - radius * 0.75f,
                         transform.position.z
                         );
                     break;
@@ -336,14 +291,14 @@ public class RockGimmick : GimmickBase
                     rayPos = new Vector3(
                         transform.position.x
                             + cicleHit * radius * 0.75f,
-                        transform.position.y,
+                        transform.position.y - radius * 0.75f,
                         transform.position.z
                         );
                     break;
                 case GimmickDirection.Left:
                     rayPos = new Vector3(
                         transform.position.x,
-                        transform.position.y,
+                        transform.position.y - radius * 0.75f,
                         transform.position.z
                             + cicleHit * radius * 0.75f
                         );
@@ -351,7 +306,7 @@ public class RockGimmick : GimmickBase
                 case GimmickDirection.Right:
                     rayPos = new Vector3(
                         transform.position.x,
-                        transform.position.y,
+                        transform.position.y - radius * 0.75f,
                         transform.position.z
                             + cicleHit * radius * 0.75f
                         );
@@ -379,7 +334,7 @@ public class RockGimmick : GimmickBase
 
                         //タグ指定※playerやthiefに当たらないようにする
                         if (root.CompareTag("Plane") ||
-                                 root.CompareTag("Untagged"))
+                            root.CompareTag("Untagged"))
                         {
                             Debug.Log(root.name);
                             wallHit = h;
