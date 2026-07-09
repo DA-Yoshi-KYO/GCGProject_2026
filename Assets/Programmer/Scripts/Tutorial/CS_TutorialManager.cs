@@ -35,6 +35,8 @@ public class CS_TutorialManager : MonoBehaviour
 
     private void Start()
     {
+        Time.timeScale = 1.0f;
+
         GameObject thiefParent = GameObject.Find("ThiefParent");
         if (thiefParent == null)
         {

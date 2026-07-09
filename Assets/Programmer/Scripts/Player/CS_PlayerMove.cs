@@ -99,6 +99,10 @@ public class CS_PlayerMove : MonoBehaviour
             Debug.LogWarning("[PlayerMove] 3DSE が見つかりません。SE再生は無効になります。");
         }
 
+        currentPosition = transform.position;
+        previousPosition = currentPosition;
+        currentRotation = rb.rotation;
+        previousRotation = currentRotation;
     }
 
     void FixedUpdate()
@@ -126,6 +130,7 @@ public class CS_PlayerMove : MonoBehaviour
 
     void Update()
     {
+        Debug.Log(Physics.simulationMode);
         // FixedUpdate間の経過割合を計算
         float t = (Time.time - Time.fixedTime) / Time.fixedDeltaTime;
         t = Mathf.Clamp01(t);
