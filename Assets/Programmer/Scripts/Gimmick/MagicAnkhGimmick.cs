@@ -70,35 +70,18 @@ public class MagicAnkhGimmick : GimmickBase
     /// </summary>
     private void PlayAnkhEffect()
     {
-        if (go_AnkhEffectPrefab == null)
-        {
-            return;
-        }
-
         Vector3 v3_EffectPosition =
             transform.position + v3_EffectOffset;
 
         Quaternion q_EffectRotation =
             go_AnkhEffectPrefab.transform.rotation;
 
-        csad_AnkhEffect = CS_EffectFactory.CreateEffect(
+        CS_EffectPlayUtility.PlaySingle(
             go_AnkhEffectPrefab,
             v3_EffectPosition,
             q_EffectRotation,
-            null);
-
-        if (csad_AnkhEffect == null)
-        {
-            return;
-        }
-
-        CSST_EffectPlayData csst_EffectPlayData = new CSST_EffectPlayData();
-        csst_EffectPlayData.CSST_EffectPlayData_Init();
-
-        csst_EffectPlayData.SetPosition(v3_EffectPosition);
-        csst_EffectPlayData.SetRotation(q_EffectRotation);
-
-        csad_AnkhEffect.PlayEffect(csst_EffectPlayData);
+            null,
+            ref csad_AnkhEffect);
     }
 
     /// <summary>
@@ -106,13 +89,7 @@ public class MagicAnkhGimmick : GimmickBase
     /// </summary>
     private void EndAnkhEffect()
     {
-        if (csad_AnkhEffect == null)
-        {
-            return;
-        }
-
-        csad_AnkhEffect.EndEffect();
-        csad_AnkhEffect = null;
+        CS_EffectPlayUtility.EndEffect(ref csad_AnkhEffect);
     }
 
     /// <summary>
@@ -120,41 +97,18 @@ public class MagicAnkhGimmick : GimmickBase
     /// </summary>
     public void PlayAnkhStandEffect()
     {
-        if (go_AnkhStandEffectPrefab == null)
-        {
-            return;
-        }
-
-        if (csad_AnkhStandEffect != null &&
-            csad_AnkhStandEffect.gameObject.activeInHierarchy)
-        {
-            return;
-        }
-
         Vector3 v3_EffectPosition =
             transform.position + v3_EffectOffset;
 
         Quaternion q_EffectRotation =
             go_AnkhStandEffectPrefab.transform.rotation;
 
-        csad_AnkhStandEffect = CS_EffectFactory.CreateEffect(
+        CS_EffectPlayUtility.PlaySingle(
             go_AnkhStandEffectPrefab,
             v3_EffectPosition,
             q_EffectRotation,
-            null);
-
-        if (csad_AnkhStandEffect == null)
-        {
-            return;
-        }
-
-        CSST_EffectPlayData csst_EffectPlayData = new CSST_EffectPlayData();
-        csst_EffectPlayData.CSST_EffectPlayData_Init();
-
-        csst_EffectPlayData.SetPosition(v3_EffectPosition);
-        csst_EffectPlayData.SetRotation(q_EffectRotation);
-
-        csad_AnkhStandEffect.PlayEffect(csst_EffectPlayData);
+            null,
+            ref csad_AnkhStandEffect);
     }
 
     /// <summary>
@@ -162,12 +116,6 @@ public class MagicAnkhGimmick : GimmickBase
     /// </summary>
     public void EndAnkhStandEffect()
     {
-        if (csad_AnkhStandEffect == null)
-        {
-            return;
-        }
-
-        csad_AnkhStandEffect.EndEffect();
-        csad_AnkhStandEffect = null;
+        CS_EffectPlayUtility.EndEffect(ref csad_AnkhStandEffect);
     }
 }

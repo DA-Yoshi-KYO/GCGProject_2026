@@ -15,7 +15,7 @@ public class CS_PlayerMove : MonoBehaviour
     // 移動用ステータス
     [Header("基礎の移動量")][SerializeField] private float moveAmount = 10.0f; //基礎移動量
     [Header("移動速度(歩き)")][SerializeField]private float velocityWalk = 1.0f;  //移動速度(歩き)
-    [Header("移動速度（走り）")][SerializeField] private float velocitySneak = 0.6f;//移動速度(スニーク)
+    [Header("移動速度（走り）")][SerializeField] private float velocityRun = 1.5f;//移動速度(走り)
     [Header("ジャンプ量")][SerializeField] private float jumpAmount = 2.5f;//ジャンプ量
     [Header("重力")][SerializeField] private float gravity = -9.8f;//重力
     [Header("空気抵抗")][Range(0, 1)][SerializeField] private float airResistance = 0.99f;//空気抵抗
@@ -37,7 +37,7 @@ public class CS_PlayerMove : MonoBehaviour
 
     private float rotateSpeed = 10.0f;  // 回転のスピード
     private bool isJumping = false;     // ジャンプ中かどうか
-    private bool isSneaking = false;    // スニーク中かどうか
+    private bool isRunning = false;    // スニーク中かどうか
 
     private bool isInvincible = false;  // 無敵状態かどうか
     public bool IsInvincible => isInvincible; // 無敵状態かどうかの取得
@@ -99,10 +99,17 @@ public class CS_PlayerMove : MonoBehaviour
             Debug.LogWarning("[PlayerMove] 3DSE が見つかりません。SE再生は無効になります。");
         }
 
+        currentPosition = transform.position;
+        previousPosition = currentPosition;
+        currentRotation = rb.rotation;
+        previousRotation = currentRotation;
     }
 
     void FixedUpdate()
     {
+        // ゲームが一時停止中の場合は移動処理を行わない
+        if (Time.timeScale == 0) return;
+
         createFootPrintTime += Time.deltaTime;
         previousPosition = currentPosition;
         previousRotation = currentRotation;
@@ -150,12 +157,11 @@ public class CS_PlayerMove : MonoBehaviour
         if (ankhStunTimeToCatStun > 0.0f)
         {//猫がスタンしている場合動かせない
             ankhStunTimeToCatStun -= Time.fixedDeltaTime;
-            ankhStunTimeToCatStun = Mathf.Max(0.0f,ankhStunTimeToCatStun);
+            ankhStunTimeToCatStun = Mathf.Max(0.0f, ankhStunTimeToCatStun);
             return;
         }
 
-        // ゲームが一時停止中の場合は移動処理を行わない
-        if (Time.timeScale == 0) return;
+
         // ジャンプ待機中は移動処理を行わない
         if (isJumpMerging && !isJumping) return;
 
@@ -169,23 +175,14 @@ public class CS_PlayerMove : MonoBehaviour
         cameraRight.Normalize();
 
         // 入力された移動量に基づいて速度を計算
-        float speed = (moveAmount) * (isSneaking ? velocitySneak : velocityWalk);
+        float speed = (moveAmount) * (isRunning ? velocityRun : velocityWalk);
 
         // 入力を成分ごとに分解
         Vector3 forwardMove = cameraForward * (inputDirection.y * speed);
         Vector3 rightMove = cameraRight * (inputDirection.x * speed);
 
         Vector3 horizontalMove; // 最終的な水平移動ベクトル
-        if (isSneaking && controller.isGrounded)    // スニーク中で地面にいる場合は、移動可能な成分のみを通す
-        {
-            // スニーク中の移動量の計算
-            horizontalMove = ResolveSneakMove(forwardMove, rightMove);
-        }
-        else
-        {
-            horizontalMove = forwardMove + rightMove;   // それ以外は入力された移動をそのまま使用
-
-        }
+        horizontalMove = forwardMove + rightMove;   // それ以外は入力された移動をそのまま使用
 
         // 移動量を更新
         velocity = new Vector3(horizontalMove.x, velocity.y, horizontalMove.z);
@@ -236,11 +233,42 @@ public class CS_PlayerMove : MonoBehaviour
         controller.Move(velocity * Time.fixedDeltaTime);
 
         Vector2 velocityXZ = new Vector2(velocity.x, velocity.z);
+        bool isMoving = velocityXZ.sqrMagnitude > 0.0001f;
+        if (isMoving && isRunning && controller.isGrounded)
+        {
+            animator.speed = 1.5f;
+        }
+        else
+        {
+            animator.speed = 1.0f;
+        }
         animator.SetBool("IsGround", controller.isGrounded);
-        animator.SetBool("IsMoving", velocityXZ.sqrMagnitude > 0);
+        animator.SetBool("IsMoving", isMoving);
     }
 
 
+
+    /// <summary>
+    /// 部屋移動やワープなど、外部からTransformを直接書き換えた際に
+    /// Rigidbodyと補間用の前回/現在値、見た目のモデルを同期させる関数。
+    /// これを呼ばずにtransformだけ書き換えると、次のFixedUpdateで
+    /// currentRotationがrb.rotationの古い値で上書きされ、回転が一瞬戻る
+    /// がたつきが発生する。
+    /// </summary>
+    /// <param name="position">同期後の位置</param>
+    /// <param name="rotation">同期後の回転</param>
+    public void SyncTransform(Vector3 position, Quaternion rotation)
+    {
+        rb.position = position;
+        rb.rotation = rotation;
+
+        previousPosition = position;
+        currentPosition = position;
+        previousRotation = rotation;
+        currentRotation = rotation;
+
+        visualModel.SetPositionAndRotation(position, rotation);
+    }
 
     /// <summary>
     /// 基準となるプレイヤーの移動速度を取得します。
@@ -352,8 +380,8 @@ public class CS_PlayerMove : MonoBehaviour
     }
     private void OnSneak(InputAction.CallbackContext context)
     {
-        if (context.canceled) isSneaking = false;
-        else isSneaking = true;
+        if (context.canceled) isRunning = false;
+        else isRunning = true;
     }
 
     /// <summary>

@@ -381,8 +381,8 @@ public class CS_MemorySystem
                 }
             }
 
-            // 現在の耐久値が1以下の場合
-            if (thiefAI?.read_Durability <= 1)
+            // 現在の耐久値が1の場合
+            if (thiefAI?.read_Durability == 1)
             {
                 // 探索対象に設定
                 if (CS_ThiefDebugFlags.ChasePlayer)
@@ -392,10 +392,10 @@ public class CS_MemorySystem
             }
             else
             {
-                // プレイヤーを無視するフラグが立っていない場合は、探索対象に設定する
+                // プレイヤーを無視するフラグが立っていない場合
                 if (!ignorePlayer)
                 {
-                    //無敵状態ではないときは、プレイヤーを無視する
+                    // プレイヤーを追跡する残り時間が0以下の場合は、探索対象に設定しない
                     if (thiefAI?.read_RemainingInvincibleTime <= 0) return;
 
                     if (CS_ThiefDebugFlags.ChasePlayer)
@@ -566,11 +566,14 @@ public class CS_MemorySystem
                     {
                         thiefAI.CatchCat();
 
+                        ignorePlayer = true;
+
                         // CS_PlayerMoveに通知
                         ((CS_PlayerTarget)currentTarget).transform.GetComponent<CS_PlayerMove>().CaughtByThief(thiefAI.read_RemainingHoldCatTime);
 
                         // 泥棒のアニメーション状態をHuntingに変更する
                         thiefAI?.read_Animator?.SetBool("IsHunting", true);
+
 
                         return;
                     }

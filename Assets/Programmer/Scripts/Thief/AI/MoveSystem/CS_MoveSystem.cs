@@ -180,15 +180,27 @@ public class CS_MoveSystem
     /// </summary>
     /// <param name="targetPos">指定位置</param>
     /// <param name="entryDoorDir">入ってきたドアの方向</param>
-    public void WarpAction(Vector3 targetPos, CSE_RoomDoorDirection entryDoorDir)
+    public void WarpAction(Transform targetTransform, CSE_RoomDoorDirection entryDoorDir)
     {
         // 現在の経路をリセットして、ワープ後に新しい経路を計算させる
         navMeshAgent.ResetPath();
         // NavMeshAgentのWarpメソッドを使用して、指定した位置にワープする
-        navMeshAgent.Warp(targetPos);
+        navMeshAgent.Warp(targetTransform.position);
 
         // ThiefAI経由でTransformの位置を更新
-        thiefAI.transform.position = targetPos;
+
+        Vector3 lookDir = targetTransform.position - targetTransform.parent.position;
+        lookDir.y = 0.0f;
+
+        Quaternion spawnRotation = targetTransform.rotation;
+
+        if (lookDir.sqrMagnitude > 0.001f)
+        {
+            spawnRotation = Quaternion.LookRotation(lookDir);
+        }
+
+        thiefAI.transform.SetPositionAndRotation(targetTransform.position, spawnRotation);
+
 
         // ワープ後に、ThiefAIのA*システムにワープアクションを通知する
         thiefAI?.read_AStarSystem?.WarpAction();

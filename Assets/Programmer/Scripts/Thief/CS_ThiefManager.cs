@@ -147,12 +147,22 @@ public class CS_ThiefManager : MonoBehaviour
         // 泥棒のタイプに応じたデータを取得
         CO_ThiefStatusData typeData = Info.thiefTypeData;
 
+        Vector3 lookDir = entryPoint.parent.position - entryPoint.position;
+        lookDir.y = 0.0f;
+
+        Quaternion spawnRotation = entryPoint.rotation;
+
+        if (lookDir.sqrMagnitude > 0.001f)
+        {
+            spawnRotation = Quaternion.LookRotation(lookDir);
+        }
+
         // ============================================ 応急処置
         //泥棒の生成
         GameObject thief = GameObject.Instantiate(
             typeData.thiefPrefab,
             entryPoint.position,
-            entryPoint.rotation,
+            spawnRotation,
             thiefParent.transform
         );
 
