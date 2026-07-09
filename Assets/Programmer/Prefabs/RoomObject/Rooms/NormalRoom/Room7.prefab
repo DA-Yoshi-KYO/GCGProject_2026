@@ -3381,6 +3381,7 @@ Transform:
   - {fileID: 1534290750320204798}
   - {fileID: 5386827217708695335}
   - {fileID: 6593720959187062119}
+  - {fileID: 817750034299209971}
   m_Father: {fileID: 7771715636724454795}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7300324100682133746
@@ -4840,8 +4841,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetType: 1
-  explorationValue: 8
-  exploredDistanceThreshold: 2
+  explorationValue: 12
+  exploredDistanceThreshold: 1.5
   showGizmos: 0
   gizmoColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   searchThief: {fileID: 0}
@@ -5185,8 +5186,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetType: 1
-  explorationValue: 8
-  exploredDistanceThreshold: 2
+  explorationValue: 12
+  exploredDistanceThreshold: 1.5
   showGizmos: 0
   gizmoColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   searchThief: {fileID: 0}
@@ -5574,6 +5575,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8660203234602223668}
     m_Modifications:
+    - target: {fileID: -3326193817571467046, guid: 9b88cbb5d2b4afd47858ba91b8952d0f,
+        type: 3}
+      propertyPath: exploredDistanceThreshold
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5879629861925785809, guid: 9b88cbb5d2b4afd47858ba91b8952d0f,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -7420,8 +7426,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetType: 1
-  explorationValue: 8
-  exploredDistanceThreshold: 2
+  explorationValue: 12
+  exploredDistanceThreshold: 1.5
   showGizmos: 0
   gizmoColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   searchThief: {fileID: 0}
@@ -8667,8 +8673,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetType: 1
-  explorationValue: 8
-  exploredDistanceThreshold: 2
+  explorationValue: 12
+  exploredDistanceThreshold: 1.5
   showGizmos: 0
   gizmoColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   searchThief: {fileID: 0}
@@ -9001,8 +9007,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetType: 1
-  explorationValue: 8
-  exploredDistanceThreshold: 2
+  explorationValue: 12
+  exploredDistanceThreshold: 1.5
   showGizmos: 0
   gizmoColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   searchThief: {fileID: 0}
@@ -9335,8 +9341,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetType: 1
-  explorationValue: 8
-  exploredDistanceThreshold: 2
+  explorationValue: 12
+  exploredDistanceThreshold: 1.5
   showGizmos: 0
   gizmoColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   searchThief: {fileID: 0}
@@ -9600,8 +9606,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetType: 1
-  explorationValue: 8
-  exploredDistanceThreshold: 2
+  explorationValue: 12
+  exploredDistanceThreshold: 1.5
   showGizmos: 0
   gizmoColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   searchThief: {fileID: 0}
@@ -11544,8 +11550,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetType: 1
-  explorationValue: 8
-  exploredDistanceThreshold: 2
+  explorationValue: 12
+  exploredDistanceThreshold: 1.5
   showGizmos: 0
   gizmoColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   searchThief: {fileID: 0}
@@ -12373,6 +12379,85 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 6453648668142241977}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &6539683402535819298
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 8660203234602223668}
+    m_Modifications:
+    - target: {fileID: -3326193817571467046, guid: 9b88cbb5d2b4afd47858ba91b8952d0f,
+        type: 3}
+      propertyPath: exploredDistanceThreshold
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5879629861925785809, guid: 9b88cbb5d2b4afd47858ba91b8952d0f,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5879629861925785809, guid: 9b88cbb5d2b4afd47858ba91b8952d0f,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5879629861925785809, guid: 9b88cbb5d2b4afd47858ba91b8952d0f,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.53
+      objectReference: {fileID: 0}
+    - target: {fileID: 5879629861925785809, guid: 9b88cbb5d2b4afd47858ba91b8952d0f,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 5879629861925785809, guid: 9b88cbb5d2b4afd47858ba91b8952d0f,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5879629861925785809, guid: 9b88cbb5d2b4afd47858ba91b8952d0f,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 5879629861925785809, guid: 9b88cbb5d2b4afd47858ba91b8952d0f,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5879629861925785809, guid: 9b88cbb5d2b4afd47858ba91b8952d0f,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5879629861925785809, guid: 9b88cbb5d2b4afd47858ba91b8952d0f,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 5879629861925785809, guid: 9b88cbb5d2b4afd47858ba91b8952d0f,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6042134172678275116, guid: 9b88cbb5d2b4afd47858ba91b8952d0f,
+        type: 3}
+      propertyPath: m_Name
+      value: Treasure (1)
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 9b88cbb5d2b4afd47858ba91b8952d0f, type: 3}
+--- !u!4 &817750034299209971 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5879629861925785809, guid: 9b88cbb5d2b4afd47858ba91b8952d0f,
+    type: 3}
+  m_PrefabInstance: {fileID: 6539683402535819298}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &6547576991422951714
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -12939,8 +13024,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetType: 1
-  explorationValue: 8
-  exploredDistanceThreshold: 2
+  explorationValue: 12
+  exploredDistanceThreshold: 1.5
   showGizmos: 0
   gizmoColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   searchThief: {fileID: 0}
@@ -13852,8 +13937,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetType: 1
-  explorationValue: 8
-  exploredDistanceThreshold: 2
+  explorationValue: 12
+  exploredDistanceThreshold: 1.5
   showGizmos: 0
   gizmoColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   searchThief: {fileID: 0}
@@ -15391,8 +15476,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetType: 1
-  explorationValue: 8
-  exploredDistanceThreshold: 2
+  explorationValue: 12
+  exploredDistanceThreshold: 1.5
   showGizmos: 0
   gizmoColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   searchThief: {fileID: 0}
@@ -15873,8 +15958,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetType: 1
-  explorationValue: 8
-  exploredDistanceThreshold: 2
+  explorationValue: 12
+  exploredDistanceThreshold: 1.5
   showGizmos: 0
   gizmoColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   searchThief: {fileID: 0}
