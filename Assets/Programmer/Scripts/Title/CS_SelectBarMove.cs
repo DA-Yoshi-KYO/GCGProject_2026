@@ -35,7 +35,10 @@ public class CS_SelectBarMove : MonoBehaviour
 
         currentButton = 0;
         UpdateButtonTexture();
-
+        foreach (var action in inputActions)
+        {
+            action.performed += OnAction;
+        }
     }
 
     // Update is called once per frame
@@ -125,5 +128,20 @@ public class CS_SelectBarMove : MonoBehaviour
                 UpdateButtonTexture();
             }
         }
+
+        if (context.control.device is Gamepad)
+            CS_InputType.currentInputType = CS_InputType.InputType.Gamepad;
+        else
+            CS_InputType.currentInputType = CS_InputType.InputType.KeyboardMouse;
+        Debug.Log("InputType: " + CS_InputType.currentInputType);
+    }
+
+    private void OnAction(InputAction.CallbackContext context)
+    {
+        if (context.control.device is Gamepad)
+            CS_InputType.currentInputType = CS_InputType.InputType.Gamepad;
+        else
+            CS_InputType.currentInputType = CS_InputType.InputType.KeyboardMouse;
+        Debug.Log("InputType: " + CS_InputType.currentInputType);
     }
 }
