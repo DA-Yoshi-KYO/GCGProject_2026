@@ -289,6 +289,18 @@ public class CS_MemorySystem
             }
         }
 
+        // 記憶の中に宝物オブジェクトがある場合は、視認オブジェクトリストの中に追加する
+        foreach (var entry in roomMemory.recognizedObjects)
+        {
+            if (entry is CS_VisionTarget visionTarget && visionTarget.targetType == CS_VisionTarget.TargetType.Treasure)
+            {
+                if (!visionTargets.Contains(entry)) 
+                    visionTargets.Add(entry);
+
+                isTreasureObject = true;
+            }
+        }
+
 
         // 探索対象を決める処理
         DecideTarget(visionTargets, isTreasureObject, isPlayerObject);
@@ -302,7 +314,9 @@ public class CS_MemorySystem
         // 現在の部屋の探索度が閾値を超えている場合
         if (roomMemories[currentRoom].explorationLevel >= nextRoomSearchThreshold)
         {
-            if (!thiefAI.read_AStarSystem.HasRoute) NextDoorElection();
+            if (!thiefAI.read_AStarSystem.HasRoute)
+                if (!isTreasureObject && !isPlayerObject)
+                    NextDoorElection();
         }
 
         // 現在の探索対象との距離
@@ -355,8 +369,6 @@ public class CS_MemorySystem
                     }
                 }
             }
-
-
 
             // 宝物を探索対象に設定した後は、A*システムのルートをクリアする
             if (thiefAI.read_AStarSystem.HasRoute) thiefAI?.read_AStarSystem?.ClearRoute();
@@ -569,7 +581,7 @@ public class CS_MemorySystem
                         ignorePlayer = true;
 
                         // CS_PlayerMoveに通知
-                        ((CS_PlayerTarget)currentTarget).transform.GetComponent<CS_PlayerMove>().CaughtByThief(thiefAI.read_RemainingHoldCatTime);
+                        ((CS_PlayerTarget)currentTarget).transform.GetComponent<CS_PlayerMove>().CaughtByThief(thiefAI.read_RemainingHoldCatTime, thiefAI.transform);
 
                         // 泥棒のアニメーション状態をHuntingに変更する
                         thiefAI?.read_Animator?.SetBool("IsHunting", true);
@@ -734,6 +746,7 @@ public class CS_MemorySystem
 
         // 探索対象に向かって移動
         thiefAI?.read_MoveSystem?.MoveTo(currentTarget.transform.position);
+        thiefAI.read_AStarSystem.ResetUpdatedFlag();
     }
 
     /// <summary>

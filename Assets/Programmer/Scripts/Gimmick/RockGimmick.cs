@@ -14,7 +14,6 @@ public class RockGimmick : GimmickBase
 {
     private bool isFirstActive = true;
 
-    private float slopeAngleLimit;   //破壊判定がおこる斜面の角度限度値
     private float initPositionY;     //初期位置Y
 
     private Vector3 velocity = Vector3.zero;
@@ -52,13 +51,10 @@ public class RockGimmick : GimmickBase
     private bool soundPlayed = false;
 
     Vector3 startPos;
+    Vector3 rollDir;
 
     bool isStart = false;
-    private float debugIdleOffset = 0.0f;
-    private float debugUpdateOffset = 0.4f;
-    private HitChecker hitting;
-    private Transform visualRoot;
-
+    bool isFront = true;
     private bool isBrokenFirst = false;
     int cicleHit;
 
@@ -116,8 +112,8 @@ public class RockGimmick : GimmickBase
                 activeTimer = gimmickSound.GetAudioLength("Gimmick_RockRoll");
             }
 
+            initPositionY = transform.position.y;
             velocity = Vector3.zero;
-
             SetHitChecker(transform.position);
         }
 
@@ -159,6 +155,11 @@ public class RockGimmick : GimmickBase
 
         RaycastHit hit;
         Debug.DrawRay(rayOrigin, Vector3.down, Color.yellow);
+        if(isFront)
+        {
+
+        }
+
         bool isGround = false;
         if (Physics.Raycast(rayOrigin, Vector3.down, out hit, rayDownLength))
         {
@@ -172,12 +173,6 @@ public class RockGimmick : GimmickBase
                     isGround = true;
                     isRolling = true;
                     hit = h;
-                    //地面とオブジェクト以外は無視
-                    if (!h.collider.CompareTag("Plane") &&
-                        !h.collider.CompareTag("Untagged"))
-                    {
-                        isRolling = false;
-                    }
                     break;
                 }
             }
@@ -185,13 +180,15 @@ public class RockGimmick : GimmickBase
             {
                 isGround = true;
                 isRolling = true;
-                //地面とオブジェクト以外は無視
-                if (!hit.collider.CompareTag("Plane") &&
-                    !hit.collider.CompareTag("Untagged"))
-                {
-                    isRolling = false;
-                }
             }
+            if (!CheckParentTags(
+                hit.collider.transform,
+                "Plane",
+                "Untagged"))
+            {
+                isRolling = false;
+            }
+
         }
 
         //-----------------------------------------
@@ -232,7 +229,7 @@ public class RockGimmick : GimmickBase
             }
 
             // 坂の方向 = Dirの方向
-            Vector3 rollDir = moveOnGround;
+            rollDir = moveOnGround;
 
             //------------------------------------------------
             // 速度計算
@@ -252,6 +249,7 @@ public class RockGimmick : GimmickBase
             //------------------------------------------------
 
             transform.position += frameMove;
+            initPositionY = transform.position.y;
 
             //------------------------------------------------
             // 回転
@@ -282,7 +280,7 @@ public class RockGimmick : GimmickBase
                 case GimmickDirection.Up:
                     rayPos = new Vector3(
                         transform.position.x
-                            + cicleHit * radius * 0.75f,
+                            + cicleHit * radius * 0.6f,
                         transform.position.y - radius * 0.75f,
                         transform.position.z
                         );
@@ -290,7 +288,7 @@ public class RockGimmick : GimmickBase
                 case GimmickDirection.Down:
                     rayPos = new Vector3(
                         transform.position.x
-                            + cicleHit * radius * 0.75f,
+                            + cicleHit * radius * 0.6f,
                         transform.position.y - radius * 0.75f,
                         transform.position.z
                         );
@@ -300,7 +298,7 @@ public class RockGimmick : GimmickBase
                         transform.position.x,
                         transform.position.y - radius * 0.75f,
                         transform.position.z
-                            + cicleHit * radius * 0.75f
+                            + cicleHit * radius * 0.6f
                         );
                     break;
                 case GimmickDirection.Right:
@@ -308,7 +306,7 @@ public class RockGimmick : GimmickBase
                         transform.position.x,
                         transform.position.y - radius * 0.75f,
                         transform.position.z
-                            + cicleHit * radius * 0.75f
+                            + cicleHit * radius * 0.6f
                         );
                     break;
             }
@@ -325,11 +323,14 @@ public class RockGimmick : GimmickBase
                     continue;
 
                 bool isIgnoreObject =
-                    HasNameInHierarchy(
+                    CheckParentTags(
                         hitTransform,
                         "Player",
-                        "ThiefParent",
-                        "Floors");
+                        "Thief",
+                        "Plane",
+                        "Gimmick",
+                        "HitChecker"
+                        );
 
                 // 階層内に対象名が存在した場合は無視
                 if (isIgnoreObject)
@@ -392,28 +393,27 @@ public class RockGimmick : GimmickBase
 
 
     //=========================================================
-    // 子オブジェクトから最上位の親まで対象名を検索
+    // 子オブジェクトから最上位の親まで対象タグを設定
     //=========================================================
-    private bool HasNameInHierarchy(
-        Transform hitTransform,
-        params string[] targetNames)
+    private bool CheckParentTags(
+    Transform hitTransform,
+    params string[] excludeTags)
     {
-        Transform current = hitTransform;
+        if (hitTransform == null)
+            return false;
 
-        // 当たったオブジェクト自身から最上位まで調べる
-        while (current != null)
+        Transform[] parents =
+            hitTransform.GetComponentsInParent<Transform>(true);
+
+        foreach (Transform parent in parents)
         {
-            foreach (string targetName in targetNames)
+            foreach (string tag in excludeTags)
             {
-                // 通常オブジェクトと(Clone)の両方に対応
-                if (current.name == targetName ||
-                    current.name.StartsWith(targetName + "("))
+                if (parent.CompareTag(tag))
                 {
                     return true;
                 }
             }
-
-            current = current.parent;
         }
 
         return false;
