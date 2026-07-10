@@ -38,6 +38,8 @@ public class MagicAnkhGimmick : GimmickBase
 
             f_CurrentActiveTime = f_ActiveDuration;
 
+            // 待機Effectを終了してから発動Effectを再生
+            EndAnkhStandEffect();
             PlayAnkhEffect();
         }
 
@@ -97,6 +99,17 @@ public class MagicAnkhGimmick : GimmickBase
     /// </summary>
     public void PlayAnkhStandEffect()
     {
+        // 未発動状態のアンクだけ待機Effectを出す
+        if (gimmickState != GimmickState.Idle)
+        {
+            return;
+        }
+
+        if (go_AnkhStandEffectPrefab == null)
+        {
+            return;
+        }
+
         Vector3 v3_EffectPosition =
             transform.position + v3_EffectOffset;
 

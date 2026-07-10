@@ -31,8 +31,8 @@ public static class CS_EffectPlayUtility
     private static Transform tr_PoolRoot;
 
     /// <summary>
-    /// 同じEffectが既にActiveなら新規生成せず、そのEffectを返します。
-    /// ActiveでなければPool設定を見て再生します。
+    /// 同じEffectが再生中なら新規生成せず、そのEffectを返します。
+    /// 終了処理中の場合は、同じEffectを最初から再生し直します。
     /// </summary>
     public static CSAD_EffectCommonProcessBase PlaySingle(
         GameObject effectPrefab,
@@ -50,6 +50,21 @@ public static class CS_EffectPlayUtility
             currentEffect.gameObject != null &&
             currentEffect.gameObject.activeInHierarchy)
         {
+            // 終了演出中なら、終了処理を止めて最初から再生し直します。
+            if (currentEffect.IsEndRequested())
+            {
+                currentEffect.transform.SetPositionAndRotation(
+                    position,
+                    rotation);
+
+                CSST_EffectPlayData csst_EffectPlayData =
+                    new CSST_EffectPlayData();
+
+                csst_EffectPlayData.CSST_EffectPlayData_Init();
+
+                currentEffect.PlayEffect(csst_EffectPlayData);
+            }
+
             return currentEffect;
         }
 
