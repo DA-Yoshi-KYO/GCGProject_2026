@@ -332,5 +332,11 @@ public abstract class CSAD_EffectCommonProcessBase : MonoBehaviour, CSI_EffectPl
         FinishEndEffect();
     }
 
-
+    /// <summary>
+    /// Effectが終了処理中か確認します。
+    /// </summary>
+    public bool IsEndRequested()
+    {
+        return b_IsEndRequested;
+    }
 }
