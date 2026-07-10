@@ -66,7 +66,7 @@ public class RockGimmick : GimmickBase
     protected override void IdleUpdate()
     {
         //！！デバッグ用応急処置！！//
-        if(!isStart)
+        if (!isStart)
         {
             isStart = true;
             startPos = transform.position;
@@ -231,54 +231,9 @@ public class RockGimmick : GimmickBase
                 moveOnGround = moveDir;
             }
 
-            // 上方向へ進もうとしていたら反転する
-            if (angle > 1.0f && moveOnGround.y > 0.01f)
-            {
-                ReverseGimmickDirection();
-
-                switch (gimmickDirection)
-                {
-                    case GimmickDirection.Up:
-                        moveDir = Vector3.back;
-                        rotateAxis = Vector3.right;
-                        rotateSign = 1.0f;
-                        break;
-
-                    case GimmickDirection.Down:
-                        moveDir = Vector3.forward;
-                        rotateAxis = Vector3.right;
-                        rotateSign = -1.0f;
-                        break;
-
-                    case GimmickDirection.Left:
-                        moveDir = Vector3.left;
-                        rotateAxis = Vector3.forward;
-                        rotateSign = 1.0f;
-                        break;
-
-                    case GimmickDirection.Right:
-                        moveDir = Vector3.right;
-                        rotateAxis = Vector3.forward;
-                        rotateSign = -1.0f;
-                        break;
-                }
-
-                moveOnGround =
-                    Vector3.ProjectOnPlane(moveDir, hit.normal);
-
-                if (moveOnGround.sqrMagnitude > 0.0001f)
-                {
-                    moveOnGround.Normalize();
-                }
-                else
-                {
-                    moveOnGround = moveDir;
-                }
-            }
-
             // 坂の方向 = Dirの方向
             Vector3 rollDir = moveOnGround;
-            
+
             //------------------------------------------------
             // 速度計算
             //------------------------------------------------
@@ -328,7 +283,7 @@ public class RockGimmick : GimmickBase
                     rayPos = new Vector3(
                         transform.position.x
                             + cicleHit * radius * 0.75f,
-                        transform.position.y,
+                        transform.position.y - radius * 0.75f,
                         transform.position.z
                         );
                     break;
@@ -336,14 +291,14 @@ public class RockGimmick : GimmickBase
                     rayPos = new Vector3(
                         transform.position.x
                             + cicleHit * radius * 0.75f,
-                        transform.position.y,
+                        transform.position.y - radius * 0.75f,
                         transform.position.z
                         );
                     break;
                 case GimmickDirection.Left:
                     rayPos = new Vector3(
                         transform.position.x,
-                        transform.position.y,
+                        transform.position.y - radius * 0.75f,
                         transform.position.z
                             + cicleHit * radius * 0.75f
                         );
@@ -351,48 +306,50 @@ public class RockGimmick : GimmickBase
                 case GimmickDirection.Right:
                     rayPos = new Vector3(
                         transform.position.x,
-                        transform.position.y,
+                        transform.position.y - radius * 0.75f,
                         transform.position.z
                             + cicleHit * radius * 0.75f
                         );
                     break;
             }
             Debug.DrawRay(rayPos, rollDir, Color.yellow);
-            if (Physics.Raycast(
+            foreach (RaycastHit h in Physics.RaycastAll(
                 rayPos,
                 rollDir,
-                out wallHit,
                 raySideLength))
             {
-                if (HitBrokeAngle(wallHit, rollDir, 85f))
+                Transform hitTransform = h.collider.transform;
+
+                // 自分自身と、自分の子Colliderを除外
+                if (hitTransform.root == transform.root)
+                    continue;
+
+                bool isIgnoreObject =
+                    HasNameInHierarchy(
+                        hitTransform,
+                        "Player",
+                        "ThiefParent",
+                        "Floors");
+
+                // 階層内に対象名が存在した場合は無視
+                if (isIgnoreObject)
                 {
-                    bool isHit = false;
-                    //親オブジェクトの当たり判定のみを対象とする
-                    foreach (var h in Physics.RaycastAll(rayPos, rollDir, raySideLength))
-                    {
-                        var root = h.collider.transform.root;
-
-                        //自身に当たっていたら
-                        if (root == transform.root)
-                            continue;
-                        //親が存在しなかったら
-
-                        //タグ指定※playerやthiefに当たらないようにする
-                        if (root.CompareTag("Plane") ||
-                                 root.CompareTag("Untagged"))
-                        {
-                            Debug.Log(root.name);
-                            wallHit = h;
-                            isHit = true;
-                            break;
-                        }
-                    }
-                    if (isHit)
-                    {
-                        gimmickState = GimmickState.Broken;
-
-                    }
+                    continue;
                 }
+
+                //------------------------------------------------
+                // 壁として破壊可能な角度か確認
+                //------------------------------------------------
+                if (!HitBrokeAngle(h, rollDir, 85.0f))
+                    continue;
+
+                Debug.Log(
+                    $"大岩破壊: Collider={hitTransform.name}, " +
+                    $"Root={hitTransform.root.name}");
+
+                wallHit = h;
+                gimmickState = GimmickState.Broken;
+                break;
             }
             cicleHit++;
         }
@@ -432,6 +389,36 @@ public class RockGimmick : GimmickBase
 
         return angle < breakAngle;
     }
+
+
+    //=========================================================
+    // 子オブジェクトから最上位の親まで対象名を検索
+    //=========================================================
+    private bool HasNameInHierarchy(
+        Transform hitTransform,
+        params string[] targetNames)
+    {
+        Transform current = hitTransform;
+
+        // 当たったオブジェクト自身から最上位まで調べる
+        while (current != null)
+        {
+            foreach (string targetName in targetNames)
+            {
+                // 通常オブジェクトと(Clone)の両方に対応
+                if (current.name == targetName ||
+                    current.name.StartsWith(targetName + "("))
+                {
+                    return true;
+                }
+            }
+
+            current = current.parent;
+        }
+
+        return false;
+    }
+
     // =========================
     // 破壊処理
     // =========================

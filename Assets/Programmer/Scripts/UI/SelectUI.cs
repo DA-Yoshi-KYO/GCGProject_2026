@@ -99,7 +99,7 @@ public class GimmickSelectUI : MonoBehaviour
             int slideDir = 1;
             if (prevIndex >= 0)
             {
-                int count = gimmickManager.GetGimmickInfoDataList().Count;
+                int count = gimmickManager.GetCurrentGimmick().Count;
                 int rawDiff = idx - prevIndex;
                 slideDir = (Mathf.Abs(rawDiff) <= count / 2)
                     ? (int)Mathf.Sign(rawDiff)
@@ -257,13 +257,13 @@ public class GimmickSelectUI : MonoBehaviour
 
     private void RefreshImages(int idx)
     {
-        int count = gimmickManager.GetGimmickInfoDataList().Count;
+        int count = gimmickManager.GetCurrentGimmick().Count;
         if (count == 0) return;
 
         int leftIdx = (idx - 1 + count) % count;
         int rightIdx = (idx + 1) % count;
 
-        Sprite TextImage = gimmickManager.GetGimmickInfoDataList()[idx].gimmickPrefab?.GetComponent<GimmickBase>()?.gimmickTextImage;
+        Sprite TextImage = gimmickManager.GetCurrentGimmick()[idx].gimmickPrefab?.GetComponent<GimmickBase>()?.gimmickTextImage;
 
 
         SetImage(centerImg, GetSprite(idx), 1f);
@@ -276,14 +276,14 @@ public class GimmickSelectUI : MonoBehaviour
 
     private Sprite GetSprite(int idx)
     {
-        var kinds = gimmickManager.GetGimmickInfoDataList();
+        var kinds = gimmickManager.GetCurrentGimmick();
         if (idx < 0 || idx >= kinds.Count) return null;
         return kinds[idx].gimmickPrefab?.GetComponent<GimmickBase>()?.gimmickImage;
     }
 
     private GimmickBase GetGimmickBase(int idx)
     {
-        var kinds = gimmickManager.GetGimmickInfoDataList();
+        var kinds = gimmickManager.GetCurrentGimmick();
         if (idx < 0 || idx >= kinds.Count) return null;
         return kinds[idx].gimmickPrefab?.GetComponent<GimmickBase>();
     }
