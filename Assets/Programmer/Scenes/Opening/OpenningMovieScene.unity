@@ -684,6 +684,7 @@ MonoBehaviour:
   - TutorialScene
   - MainScene
   fadeCanvas: {fileID: 882091212}
+  movieCanvas: {fileID: 2121846530}
 --- !u!1 &1063889641
 GameObject:
   m_ObjectHideFlags: 0
@@ -761,7 +762,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1186176693}
-  - component: {fileID: 1186176694}
   m_Layer: 0
   m_Name: Canvas
   m_TagString: Untagged
@@ -787,21 +787,6 @@ Transform:
   - {fileID: 938690795}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1186176694
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1186176692}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 114638de13900d44f9526ca2881d2b47, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  sceneName: MainScene
-  fadeCanvas: {fileID: 882091212}
-  videoPlayer: {fileID: 463269675}
 --- !u!1 &1186385863
 GameObject:
   m_ObjectHideFlags: 0
@@ -1227,6 +1212,7 @@ GameObject:
   - component: {fileID: 2121846533}
   - component: {fileID: 2121846532}
   - component: {fileID: 2121846531}
+  - component: {fileID: 2121846535}
   m_Layer: 5
   m_Name: MovieCanvas
   m_TagString: Untagged
@@ -1317,6 +1303,21 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &2121846535
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2121846530}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 114638de13900d44f9526ca2881d2b47, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneName: MainScene
+  fadeCanvas: {fileID: 882091212}
+  videoPlayer: {fileID: 463269675}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
