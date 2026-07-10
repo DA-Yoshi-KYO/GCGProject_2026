@@ -934,7 +934,9 @@ public class CS_MemorySystem
                     if (roomMemories.ContainsKey(nextConnectionRoomNode))
                     {
                         // 選択した方向にあるドアの位置を次の移動ポイントに設定
-                        thiefAI?.read_AStarSystem?.ConstructionRoute(nextConnectionRoomNode.GetDirectionWallToDoor((CSE_RoomDoorDirection)i), false);
+                        // ※ 接続先のドア方向は必ずしも自室と同じ(i)とは限らないため、
+                        //   接続情報が持つ TargetOutDirection(接続先側の実際のドア方向)を使用する
+                        thiefAI?.read_AStarSystem?.ConstructionRoute(nextConnectionRoomNode.GetDirectionWallToDoor(nextConnectionRoom.TargetOutDirection), false);
                         return;
                     }
                 }
@@ -969,7 +971,7 @@ public class CS_MemorySystem
             if (nextConnectionRoomNode.CompareTag("TreasureRoom"))
             {
                 // 選択した方向にあるドアの位置を次の移動ポイントに設定
-                thiefAI?.read_AStarSystem?.ConstructionRoute(roomCreatePoint.GetRoomDoorPosition((CSE_RoomDoorDirection)i), false);
+                thiefAI?.read_AStarSystem?.ConstructionRoute(roomCreatePoint.GetRoomDoorPosition(connectDirs[i]), false);
                 return;
             }
         }
@@ -984,22 +986,26 @@ public class CS_MemorySystem
             }
         }
 
-        // 次の部屋候補の中に行ったことのない部屋がある場合
-        if (HasUnvisitedNextRooms())
+        // 次の部屋候補の中に行ったことのない部屋の方向リストを作成
+        // ※ HasUnvisitedNextRooms() は入ってきたドア方向を除外していない全方向で判定するため、
+        //   ここで別途フィルタした connectDirs から判定すると結果が食い違い、
+        //   unvisitedDirs が空なのに選出しようとして OutOfRangeError になることがある。
+        //   そのため、実際に使うリストを先に作ってその件数で判定する。
+        List<CSE_RoomDoorDirection> unvisitedDirs = new List<CSE_RoomDoorDirection>();
+        for (int i = 0 ; i < connectDirs.Count ; i++)
         {
-            // 次の部屋候補の中に行ったことのない部屋の方向リストを作成
-            List<CSE_RoomDoorDirection> unvisitedDirs = new List<CSE_RoomDoorDirection>();
-            for (int i = 0 ; i < connectDirs.Count ; i++)
+            // 接続している部屋のRoomNodeを取得
+            CS_RoomNode nextConnectionRoomNode = roomCreatePoint.GetConnection(connectDirs[i]).TargetCreatePoint.GetComponentInChildren<CS_RoomNode>();
+            // 次の部屋の記憶がない場合は、行ったことのない部屋としてリストに追加
+            if (!roomMemories.ContainsKey(nextConnectionRoomNode))
             {
-                // 接続している部屋のRoomNodeを取得
-                CS_RoomNode nextConnectionRoomNode = roomCreatePoint.GetConnection(connectDirs[i]).TargetCreatePoint.GetComponentInChildren<CS_RoomNode>();
-                // 次の部屋の記憶がない場合は、行ったことのない部屋としてリストに追加
-                if (!roomMemories.ContainsKey(nextConnectionRoomNode))
-                {
-                    unvisitedDirs.Add(connectDirs[i]);
-                }
+                unvisitedDirs.Add(connectDirs[i]);
             }
+        }
 
+        // 次の部屋候補の中に行ったことのない部屋がある場合
+        if (unvisitedDirs.Count > 0)
+        {
             // 次の部屋候補の中に行ったことのない部屋の方向リストからランダムに選出
             int randomIndex = Random.Range(0, unvisitedDirs.Count);
             CSE_RoomDoorDirection selectedDir = unvisitedDirs[randomIndex];
