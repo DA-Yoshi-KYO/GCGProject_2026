@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEditor.ShaderKeywordFilter;
 using UnityEngine;
 using static GimmickList;
 
@@ -10,6 +11,9 @@ public class MiniMap : MonoBehaviour
     [SerializeField] private GameObject thiefIcon;
     [SerializeField] private GameObject treasureIcon;
     [SerializeField] private GameObject gimmickIcon;
+    [SerializeField] private Sprite treasureIconSprite;
+    [SerializeField] private Sprite treasureMoveIconSprite;
+    [SerializeField] private Sprite treasurePinchIconSprite;
 
     [SerializeField] private string playerTag = "Player";
     [SerializeField] private string thiefTag = "Thief";
@@ -28,12 +32,21 @@ public class MiniMap : MonoBehaviour
         public GameObject gimmickIcon;
     }
 
+    enum TreasureMode
+    {
+        None,
+        Move,
+        Pinch
+    }
+
     struct MiniMapInfo
     {
         public bool isPlayerIconActive;
         public bool isThiefIconActive;
         public bool isTreasureIconActive;
         public bool isGimmickIconActive;
+        public TreasureMode mode;
+
     }
     
 
@@ -104,13 +117,14 @@ public class MiniMap : MonoBehaviour
 
         // フラグのリセット
         for (int i = 0; i < miniMapInfo.Count; i++)
-            {
-                MiniMapInfo info = miniMapInfo[i];
-                info.isPlayerIconActive = false;
-                info.isThiefIconActive = false;
-                info.isTreasureIconActive = false;
-                info.isGimmickIconActive = false;
-                miniMapInfo[i] = info;
+        {
+             MiniMapInfo info = miniMapInfo[i];
+            info.isPlayerIconActive = false;
+            info.isThiefIconActive = false;
+            info.isTreasureIconActive = false;
+            info.isGimmickIconActive = false;
+            info.mode = TreasureMode.None;
+            miniMapInfo[i] = info;
         }
 
 
@@ -160,6 +174,18 @@ public class MiniMap : MonoBehaviour
             MiniMapInfo info = miniMapInfo[index];
             info.isTreasureIconActive = true;
             miniMapInfo[index] = info;
+            CS_VisionTarget vt = treasure.GetComponent<CS_VisionTarget>();
+            if (vt == null) continue;
+            info.mode = TreasureMode.None;
+            if (vt.read_IsStolenMoveing)
+            {
+                info.mode = TreasureMode.Move;
+                if (vt.read_ExitDistance <= 10)
+                {
+                    info.mode = TreasureMode.Pinch;
+                }
+            }
+            miniMapInfo[index] = info;
         }
     }
 
@@ -193,7 +219,21 @@ public class MiniMap : MonoBehaviour
             if (miniMapInfo[i].isThiefIconActive)
                 activeIcons.Add(miniMapObjectInfo[i].thiefIcon.GetComponent<RectTransform>());
             if (miniMapInfo[i].isTreasureIconActive)
+            {
+                switch (miniMapInfo[i].mode)
+                {
+                    case TreasureMode.None:
+                        miniMapObjectInfo[i].treasureIcon.GetComponent<UnityEngine.UI.Image>().sprite = treasureIconSprite;
+                        break;
+                    case TreasureMode.Move:
+                        miniMapObjectInfo[i].treasureIcon.GetComponent<UnityEngine.UI.Image>().sprite = treasureMoveIconSprite;
+                        break;
+                    case TreasureMode.Pinch:
+                        miniMapObjectInfo[i].treasureIcon.GetComponent<UnityEngine.UI.Image>().sprite = treasurePinchIconSprite;
+                        break;
+                }
                 activeIcons.Add(miniMapObjectInfo[i].treasureIcon.GetComponent<RectTransform>());
+            }
             if (miniMapInfo[i].isGimmickIconActive)
                 activeIcons.Add(miniMapObjectInfo[i].gimmickIcon.GetComponent<RectTransform>());
 
