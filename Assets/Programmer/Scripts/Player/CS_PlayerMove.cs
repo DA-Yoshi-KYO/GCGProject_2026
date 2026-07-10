@@ -50,6 +50,7 @@ public class CS_PlayerMove : MonoBehaviour
     [Tooltip("盗賊に捕まっているかどうか")]
     private bool isCaughtByThief;
     float catCaughtTime = 0.0f;
+    float invincibleTime = 0.0f;
 
     //スタン状態はどうか
     private bool isCatStunByAnkh;
@@ -110,7 +111,14 @@ public class CS_PlayerMove : MonoBehaviour
         // ゲームが一時停止中の場合は移動処理を行わない
         if (Time.timeScale == 0) return;
 
-        createFootPrintTime += Time.deltaTime;
+        invincibleTime -= Time.fixedDeltaTime;
+        if (invincibleTime <= 0.0f && isInvincible)
+        {
+            isInvincible = false;
+            invincibleTime = 0.0f;
+        }
+
+        createFootPrintTime += Time.fixedDeltaTime;
         previousPosition = currentPosition;
         previousRotation = currentRotation;
 
@@ -355,6 +363,8 @@ public class CS_PlayerMove : MonoBehaviour
         // フラグを立てる
         isCaughtByThief = true;
         catCaughtTime = holdCatTime;
+        invincibleTime = holdCatTime * 2f;
+        isInvincible = true;
         playSE.PlayOneShotSE("Cat_HitThief", gameObject.transform.position, "Cat_HitThief");
     }
 
