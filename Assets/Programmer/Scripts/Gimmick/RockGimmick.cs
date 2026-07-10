@@ -14,7 +14,6 @@ public class RockGimmick : GimmickBase
 {
     private bool isFirstActive = true;
 
-    private float slopeAngleLimit;   //破壊判定がおこる斜面の角度限度値
     private float initPositionY;     //初期位置Y
 
     private Vector3 velocity = Vector3.zero;
@@ -52,13 +51,10 @@ public class RockGimmick : GimmickBase
     private bool soundPlayed = false;
 
     Vector3 startPos;
+    Vector3 rollDir;
 
     bool isStart = false;
-    private float debugIdleOffset = 0.0f;
-    private float debugUpdateOffset = 0.4f;
-    private HitChecker hitting;
-    private Transform visualRoot;
-
+    bool isFront = true;
     private bool isBrokenFirst = false;
     int cicleHit;
 
@@ -116,8 +112,8 @@ public class RockGimmick : GimmickBase
                 activeTimer = gimmickSound.GetAudioLength("Gimmick_RockRoll");
             }
 
+            initPositionY = transform.position.y;
             velocity = Vector3.zero;
-
             SetHitChecker(transform.position);
         }
 
@@ -159,6 +155,11 @@ public class RockGimmick : GimmickBase
 
         RaycastHit hit;
         Debug.DrawRay(rayOrigin, Vector3.down, Color.yellow);
+        if(isFront)
+        {
+
+        }
+
         bool isGround = false;
         if (Physics.Raycast(rayOrigin, Vector3.down, out hit, rayDownLength))
         {
@@ -232,7 +233,9 @@ public class RockGimmick : GimmickBase
             }
 
             // 坂の方向 = Dirの方向
-            Vector3 rollDir = moveOnGround;
+            rollDir = moveOnGround;
+            
+            
 
             //------------------------------------------------
             // 速度計算
@@ -252,6 +255,7 @@ public class RockGimmick : GimmickBase
             //------------------------------------------------
 
             transform.position += frameMove;
+            initPositionY = transform.position.y;
 
             //------------------------------------------------
             // 回転
