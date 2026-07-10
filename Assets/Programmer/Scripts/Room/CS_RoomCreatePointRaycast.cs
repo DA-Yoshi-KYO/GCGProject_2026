@@ -143,7 +143,7 @@ public static class CS_RoomCreatePointRaycast
             }
         }
 
-        return 0;
+        return -1;
     }
 
     /// <summary>
