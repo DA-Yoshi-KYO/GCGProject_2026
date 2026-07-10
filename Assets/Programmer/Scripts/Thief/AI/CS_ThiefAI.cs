@@ -370,6 +370,7 @@ public class CS_ThiefAI : MonoBehaviour
         if (remainingHoldCatTime > 0.0f)
         {
             remainingHoldCatTime -= Time.deltaTime;
+            moveSystem.Stop();
             if (remainingHoldCatTime < 0.0f)
             {
                 remainingHoldCatTime = 0.0f;
