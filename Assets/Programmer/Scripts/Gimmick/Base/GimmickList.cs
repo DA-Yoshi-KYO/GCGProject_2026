@@ -23,7 +23,7 @@ public class GimmickList : MonoBehaviour
     //=========================================================
     [System.Serializable]
     public class GimmickInfo
-    {
+    {//初期設定用のクラス
         // クールタイムの長さ
         public float coolTime;
         // 設置後の生存時間
@@ -32,8 +32,6 @@ public class GimmickList : MonoBehaviour
         public int maxNum;
         // 現在設置可能な数
         public int currentNum;
-        // 今まで設置した数
-        public int totalNum;
         public GimmickInfo(float coolTime, int maxNum)
         {
             this.coolTime = coolTime;
@@ -43,6 +41,18 @@ public class GimmickList : MonoBehaviour
             // 初期状態では最大数まで置ける
             currentNum = maxNum;
         }
+    }
+    //=========================================================
+    // 現在の所持ギミック情報
+    //=========================================================
+    public class CurrentGimmickData
+    {
+        public Gimmick gimmickTag;
+        public int currentNum;
+        public int totalNum;
+        public GameObject itemPrefab;
+        public GameObject previewPrefab;
+        public GameObject gimmickPrefab;
     }
 
     //=========================================================
@@ -84,9 +94,13 @@ public class GimmickList : MonoBehaviour
 
     [SerializeField]
     private List<GimmickInfoData> gimmickInfoList;
+    private List<CurrentGimmickData> currentGimmickInfoList;
     
     private Dictionary<Gimmick, GimmickInfo> gimmickInfo =
         new Dictionary<Gimmick, GimmickInfo>();
+
+    private Dictionary<Gimmick, CurrentGimmickData> currentGimmickData =
+        new Dictionary<Gimmick, CurrentGimmickData>();
 
     private Dictionary<Gimmick, bool> isItemGetNow = 
         new Dictionary<Gimmick, bool>();
@@ -100,6 +114,7 @@ public class GimmickList : MonoBehaviour
         new List<ActiveGimmick>();
 
     GimmickInfo info;
+    CurrentGimmickData currentData;
 
     //=========================================================
     // チュートリアル動画再生に必要な変数
@@ -115,6 +130,22 @@ public class GimmickList : MonoBehaviour
         foreach (var data in gimmickInfoList)
         {
             gimmickInfo[data.gimmickTag] = data.gimmickInfo;
+            //初期設定で物を持っている場合
+            //リストに追加
+            if(data.gimmickInfo.currentNum > 0)
+            {
+                currentGimmickData[data.gimmickTag] = new CurrentGimmickData
+                {
+                    gimmickTag = data.gimmickTag,
+                    currentNum = data.gimmickInfo.currentNum,
+                    totalNum = 0,
+                    itemPrefab = data.itemPrefab,
+                    previewPrefab = data.previewPrefab,
+                    gimmickPrefab = data.gimmickPrefab
+                };
+
+                currentGimmickInfoList = new List<CurrentGimmickData>(currentGimmickData.Values);
+            }
         }
     }
 
@@ -140,14 +171,14 @@ public class GimmickList : MonoBehaviour
             return false;
         }
 
-        info = gimmickInfo[type];
+        currentData = currentGimmickData[type];
 
         // 設置可能数を減らす
-        info.currentNum--;
-        info.totalNum++;
+        currentData.currentNum--;
+        currentData.totalNum++;
         Debug.Log(
             $"[Set Success] {type}" +
-            $" Remaining : {info.currentNum}/{info.maxNum}/{info.totalNum}");
+            $" Remaining : {currentData.currentNum}/{currentData.totalNum}");
 
         // 実体追加
         ActiveGimmick active =
@@ -175,6 +206,7 @@ public class GimmickList : MonoBehaviour
 
             Gimmick type = active.gimmickType;
             info = gimmickInfo[type];
+            currentData = currentGimmickData[type];
 
             // 稼働中 _________________________________________
             if (!active.isCoolTime)
@@ -197,7 +229,7 @@ public class GimmickList : MonoBehaviour
                 if (active.coolTimer <= 0.0f)
                 {
                     // 設置可能数回復
-                    info.currentNum++;
+                    currentData.currentNum++;
                     active.isEnd = true;
                 }
             }
@@ -218,6 +250,17 @@ public class GimmickList : MonoBehaviour
         {
             if (item.GetGimmickTag() == data.gimmickTag)
             {
+                currentGimmickData[data.gimmickTag] = new CurrentGimmickData
+                {
+                    gimmickTag = data.gimmickTag,
+                    currentNum = data.gimmickInfo.currentNum,
+                    totalNum = 0,
+                    itemPrefab = data.itemPrefab,
+                    previewPrefab = data.previewPrefab,
+                    gimmickPrefab = data.gimmickPrefab
+                };
+                currentGimmickInfoList = new List<CurrentGimmickData>(currentGimmickData.Values);
+
                 //入手したら所持数を最大値にする
                 SetCurrentGimmick(item.GetGimmickTag(), gimmickInfo[item.GetGimmickTag()].maxNum);
                 Destroy(other.gameObject);
@@ -275,15 +318,15 @@ public class GimmickList : MonoBehaviour
         }
 
         // 登録されていない
-        if (!gimmickInfo.ContainsKey(gimmickTag))
+        if (!currentGimmickData.ContainsKey(gimmickTag))
         {
             Debug.LogError(
                 $"[IsSetting Error] {gimmickTag} : 未登録ギミック");
             Debug.Log(
                 $"[Type FullName] {gimmickTag.GetType().FullName}");
             Debug.Log(
-                $"[Dictionary Count] {gimmickInfo.Count}");
-            foreach (var pair in gimmickInfo)
+                $"[Dictionary Count] {currentGimmickData.Count}");
+            foreach (var pair in currentGimmickData)
             {
                 Debug.Log(
                     $"[Dictionary Key] {pair.Key}");
@@ -292,7 +335,7 @@ public class GimmickList : MonoBehaviour
             return false;
         }
 
-        GimmickInfo data = gimmickInfo[gimmickTag];
+        CurrentGimmickData data = currentGimmickData[gimmickTag];
 
         // 置ける数がない
         if (data.currentNum <= 0)
@@ -331,6 +374,10 @@ public class GimmickList : MonoBehaviour
     {
         return gimmickInfoList;
     }
+    public List<CurrentGimmickData> GetCurrentGimmick()
+    {
+        return currentGimmickInfoList;
+    }
 
     
     public void SetActiveGimmickCoolTime(int index, float coolTime)
@@ -362,13 +409,13 @@ public class GimmickList : MonoBehaviour
     //=========================================================
     public int GetCurrentNum(Gimmick gimmickTag)
     {
-        if (!gimmickInfo.ContainsKey(gimmickTag))
+        if (!currentGimmickData.ContainsKey(gimmickTag))
         {
             Debug.LogError(
                 $"[GetCurrentNum Error] {gimmickTag} : 未登録");
             return 0;
         }
-        return gimmickInfo[gimmickTag].currentNum;
+        return currentGimmickData[gimmickTag].currentNum;
     }
 
     //=========================================================
@@ -416,7 +463,7 @@ public class GimmickList : MonoBehaviour
     //=========================================================
     public int GetTotalSetGimmick(Gimmick gimmickTag)
     {
-        return gimmickInfo[gimmickTag].totalNum;
+        return currentGimmickData[gimmickTag].totalNum;
     }
 
     //=========================================================
@@ -432,20 +479,20 @@ public class GimmickList : MonoBehaviour
     }
     public void SetCurrentGimmick(Gimmick gimmickTag, int value)
     {//ギミック所持数の設定
-        gimmickInfo[gimmickTag].currentNum = value;
+        currentGimmickData[gimmickTag].currentNum = value;
         //所持数が最大数を超えたら最大数を変更
-        if(gimmickInfo[gimmickTag].maxNum < gimmickInfo[gimmickTag].currentNum)
+        if(gimmickInfo[gimmickTag].maxNum < currentGimmickData[gimmickTag].currentNum)
         {
             gimmickInfo[gimmickTag].maxNum = gimmickInfo[gimmickTag].currentNum;
         }
     }
     public void AddCurrentGimmick(Gimmick gimmickTag)
     {//ギミック所持数の追加
-        gimmickInfo[gimmickTag].currentNum++;
+        currentGimmickData[gimmickTag].currentNum++;
         //所持数が最大数を超えたら最大数を変更
-        if (gimmickInfo[gimmickTag].maxNum < gimmickInfo[gimmickTag].currentNum)
+        if (gimmickInfo[gimmickTag].maxNum < currentGimmickData[gimmickTag].currentNum)
         {
-            gimmickInfo[gimmickTag].maxNum = gimmickInfo[gimmickTag].currentNum;
+            gimmickInfo[gimmickTag].maxNum = currentGimmickData[gimmickTag].currentNum;
         }
     }
 
