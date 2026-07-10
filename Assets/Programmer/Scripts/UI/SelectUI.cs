@@ -51,9 +51,6 @@ public class GimmickSelectUI : MonoBehaviour
 
     private Vector2 centerFrom, leftFrom, rightFrom;
     private Vector2 centerTo, leftTo, rightTo;
-
-    private bool isActive = true;
-
     // ──────────────────────────────
     private void Start()
     {
@@ -160,7 +157,7 @@ public class GimmickSelectUI : MonoBehaviour
         mask.raycastTarget = false;
 
         mat = mask.material;
-        mat.SetFloat("_FillAmount", 0f);
+        mat.SetFloat("_FillAmount", 1f);
         mat.SetTexture("_MainTex", mask.sprite.texture);
         mat.SetColor("_Color", col);
     }
@@ -181,58 +178,27 @@ public class GimmickSelectUI : MonoBehaviour
         }
 
         Gimmick tag = gb.GetGimmickTag();
-        int maxNum = gimmickManager.GetMaxNum(tag);
-        int currentNum = gimmickManager.GetCurrentNum(tag);
-        int consumed = maxNum - currentNum;
-        float coolTime = gimmickManager.GetCoolTime(tag);
-        float totalCool = GetTotalCoolTime(tag);
+        float currentTime = gimmickManager.GetCoolTime(tag);
 
-        float coolRatio = (totalCool > 0f)
-            ? Mathf.Clamp01(coolTime / totalCool)
-            : 0f;
+        var ls = gimmickManager.GetGimmickInfoDataList();
+        foreach (var item in ls)
+        {
+            if(item.gimmickTag == tag)
+            {
+                float maxTime = item.gimmickInfo.coolTime;
+                float ratio = (maxTime > 0f) ? Mathf.Clamp01(currentTime / maxTime) : 0f;
+                CoolTimeRatio = ratio;
+                SetMaskFill(ctMaskMat1, ratio);
+                SetMaskFill(ctMaskMat2, ratio);
+                break;
+            }
 
-        CoolTimeRatio = coolRatio;
+        }
 
-        if (consumed <= 0)
-        {
-            SetMaskFill(ctMaskMat1, 0f);
-            SetMaskFill(ctMaskMat2, 0f);
-        }
-        else if (consumed == 1)
-        {
-            SetMaskFill(ctMaskMat1, coolRatio);
-            SetMaskFill(ctMaskMat2, 0f);
-        }
-        else
-        {
-            SetMaskFill(ctMaskMat1, 1f);
-            SetMaskFill(ctMaskMat2, coolRatio);
-        }
+
+
+
     }
-
-    private System.Collections.Generic.Dictionary<Gimmick, float> ctMaxCache
-        = new System.Collections.Generic.Dictionary<Gimmick, float>();
-
-    private System.Collections.Generic.Dictionary<Gimmick, float> ctPrevTime
-        = new System.Collections.Generic.Dictionary<Gimmick, float>();
-
-    /// <summary>
-    /// CT最大値を返す。残り時間が前フレームより増えた瞬間をCT開始と判断して記録する。
-    /// </summary>
-    private float GetTotalCoolTime(Gimmick tag)
-    {
-        float remaining = gimmickManager.GetCoolTime(tag);
-        float prev = ctPrevTime.ContainsKey(tag) ? ctPrevTime[tag] : 0f;
-
-        if (remaining > prev + 0.01f)
-            ctMaxCache[tag] = remaining;
-
-        ctPrevTime[tag] = remaining;
-
-        return ctMaxCache.ContainsKey(tag) ? ctMaxCache[tag] : 1f;
-    }
-
-    private void RefreshCoolTimeCache(int idx) { }
 
     /// <summary>
     /// 現在選択中ギミックの CT 進捗（0.0=CT終了 / 1.0=CT最大）
@@ -242,7 +208,10 @@ public class GimmickSelectUI : MonoBehaviour
 
     private static void SetMaskFill(Material maskMat, float fill)
     {
-        if (maskMat == null) return;
+        if (maskMat == null)
+        {
+            return;
+        }
         maskMat.SetFloat("_FillAmount", fill);
     }
 
@@ -270,8 +239,6 @@ public class GimmickSelectUI : MonoBehaviour
         SetImage(leftImg, GetSprite(leftIdx), sideAlpha);
         SetImage(rightImg, GetSprite(rightIdx), sideAlpha);
         SetImage(TextImg, TextImage, 1f);
-
-        RefreshCoolTimeCache(idx);
     }
 
     private Sprite GetSprite(int idx)
