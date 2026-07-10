@@ -370,7 +370,7 @@ public class CS_ThiefAI : MonoBehaviour
         if (remainingHoldCatTime > 0.0f)
         {
             remainingHoldCatTime -= Time.deltaTime;
-            moveSystem.Stop();
+              moveSystem.Stop();
             if (remainingHoldCatTime < 0.0f)
             {
                 remainingHoldCatTime = 0.0f;
@@ -386,7 +386,7 @@ public class CS_ThiefAI : MonoBehaviour
         if (durability <= 0)
         {
             durability = 0;
-            currentState = ThiefState.Stunned;
+            ChangeStatus(ThiefState.Stunned);
         }
 
         // 現在の状態に応じた行動を実行
@@ -511,7 +511,10 @@ public class CS_ThiefAI : MonoBehaviour
             // 経過時間が気絶時間を超えた場合は、耐久力を減少させて、状態を探索に戻す
             if (elapsedTimeAfterStun >= damageStunTime)
             {
-                currentState = ThiefState.Explore; // 状態を探索に戻す
+                if (holdTreasure == null)
+                    ChangeStatus(ThiefState.Explore); // 状態を探索に戻す
+                else
+                    ChangeStatus(ThiefState.Escape); // 状態を逃走に戻す
 
                 // アニメーションの状態を解除(歩き状態に戻す)
                 if (animator != null)
