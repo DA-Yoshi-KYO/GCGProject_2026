@@ -358,6 +358,8 @@ public class CS_AStarSystem
             moveRoute.Clear();
             moveRoute = null;
         }
+
+        isRouteUpdated = true;
     }
 
     /// <summary>
@@ -385,6 +387,14 @@ public class CS_AStarSystem
             thiefAI?.read_MoveSystem?.MoveTo(targetPoint.position);
             isRouteUpdated = false;
         }
+    }
+
+    /// <summary>
+    /// ルートの更新フラグをリセットする処理
+    /// </summary>
+    public void ResetUpdatedFlag()
+    {
+        isRouteUpdated = true;
     }
 
     /// <summary>
