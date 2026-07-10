@@ -491,7 +491,7 @@ public class CS_PlayerAction : MonoBehaviour
         // 実際に生成されたインスタンス取得
         // =========================
         Vector3 center = setPos;          // 中心位置
-        Vector3 halfExtents = new Vector3(2f, 5f, 2f); // 半径ではなく「半サイズ」
+        Vector3 halfExtents = new Vector3(roomGrid.gridSize.x * 0.5f, 5f, roomGrid.gridSize.y * 0.5f); // 半径ではなく「半サイズ」
 
         Collider[] hits = Physics.OverlapBox(center, halfExtents);
         GimmickBase instance = null;

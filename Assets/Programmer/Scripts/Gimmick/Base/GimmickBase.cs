@@ -629,7 +629,7 @@ public class GimmickBase : MonoBehaviour
         }
         else
         {
-            gimmickDirection = diff.z >= 0f ? GimmickDirection.Up : GimmickDirection.Down;
+            gimmickDirection = diff.z >= 0f ? GimmickDirection.Down : GimmickDirection.Up;
         }
 
         Debug.Log("Detected enemy: " + nearestEnemy.name + ", Direction: " + gimmickDirection);
