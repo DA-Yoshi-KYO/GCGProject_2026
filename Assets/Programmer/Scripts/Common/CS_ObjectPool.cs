@@ -4,53 +4,207 @@
  *    元浪梨緒
  * ----------------------------------------------------------
  * 2026-05-27 | 初回作成
+ * 2026-07-09 | 継承して使えるようにvirtual処理を追加(ヨシモト)
  */
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// GameObject用のObjectPool基底クラスです。
+/// 継承先で取得時・返却時の処理を変更できます。
+/// </summary>
 public class CS_ObjectPool
 {
-    private GameObject prefab;
-    private int initialSize = 10;
-    private List<GameObject> poolList = new List<GameObject>();
+    /// <summary>
+    /// 複製元Prefabです。
+    /// </summary>
+    protected GameObject prefab;
 
-    private GameObject objectParent;
+    /// <summary>
+    /// 初期生成数です。
+    /// </summary>
+    protected int initialSize = 10;
 
-    // Start is called before the first frame update
+    /// <summary>
+    /// Pool最大数です。
+    /// 0以下の場合は上限なしです。
+    /// </summary>
+    protected int maxPoolSize = 0;
+
+    /// <summary>
+    /// Pool管理中のObject一覧です。
+    /// </summary>
+    protected List<GameObject> poolList = new List<GameObject>();
+
+    /// <summary>
+    /// Pool待機中Objectの親です。
+    /// </summary>
+    protected GameObject objectParent;
+
+    /// <summary>
+    /// ObjectPoolを作成します。
+    /// </summary>
     public CS_ObjectPool(GameObject gameObject, GameObject poolParent)
     {
         prefab = gameObject;
         objectParent = poolParent;
+
         for (int i = 0 ; i < initialSize ; ++i)
         {
-            GameObject obj = GameObject.Instantiate(gameObject);
-            obj.transform.SetParent(objectParent.transform);
-            obj.SetActive(false);
-            poolList.Add(obj);
+            CreatePoolObject();
         }
     }
-    public GameObject GetObject()
+
+    /// <summary>
+    /// ObjectPoolを作成します。
+    /// </summary>
+    public CS_ObjectPool(
+        GameObject gameObject,
+        GameObject poolParent,
+        int poolSize)
     {
-        //非アクティブを探す
-        foreach (var obj in poolList)
+        prefab = gameObject;
+        objectParent = poolParent;
+
+        initialSize = Mathf.Max(0, poolSize);
+        maxPoolSize = Mathf.Max(0, poolSize);
+
+        for (int i = 0 ; i < initialSize ; ++i)
         {
-            if (obj.activeSelf) continue;
+            CreatePoolObject();
+        }
+    }
+
+    /// <summary>
+    /// Pool最大数を設定します。
+    /// </summary>
+    public void SetMaxPoolSize(int poolSize)
+    {
+        maxPoolSize = Mathf.Max(0, poolSize);
+    }
+
+    /// <summary>
+    /// PoolからObjectを取得します。
+    /// </summary>
+    public virtual GameObject GetObject()
+    {
+        for (int i = 0 ; i < poolList.Count ; i++)
+        {
+            GameObject obj = poolList[i];
+
+            if (obj == null)
+            {
+                continue;
+            }
+
+            if (obj.activeSelf)
+            {
+                continue;
+            }
+
             obj.SetActive(true);
+
+            OnGetObject(obj);
+
             return obj;
         }
 
-        //全部アクティブなら新しく作って作成
-        GameObject newObject = GameObject.Instantiate(prefab);
-        newObject.transform.SetParent(objectParent.transform);
-        poolList.Add(newObject);
+        if (maxPoolSize > 0 &&
+            poolList.Count >= maxPoolSize)
+        {
+            return null;
+        }
+
+        GameObject newObject = CreatePoolObject();
+
+        if (newObject == null)
+        {
+            return null;
+        }
+
+        newObject.SetActive(true);
+
+        OnGetObject(newObject);
+
         return newObject;
     }
 
-    //非アクティブにする処理
+    /// <summary>
+    /// ObjectをPoolへ戻します。
+    /// </summary>
+    public virtual void ReturnObject(GameObject gameObject)
+    {
+        if (gameObject == null)
+        {
+            return;
+        }
+
+        OnReturnObject(gameObject);
+
+        if (objectParent != null)
+        {
+            gameObject.transform.SetParent(
+                objectParent.transform,
+                true);
+        }
+
+        gameObject.SetActive(false);
+    }
+
+    /// <summary>
+    /// 指定時間後に非アクティブにします。
+    /// </summary>
     public IEnumerator DisableAfterTime(GameObject gameObject, float time)
     {
         yield return new WaitForSeconds(time);
-        gameObject.SetActive(false);
+
+        ReturnObject(gameObject);
+    }
+
+    /// <summary>
+    /// Pool用Objectを作成します。
+    /// </summary>
+    protected virtual GameObject CreatePoolObject()
+    {
+        if (prefab == null)
+        {
+            return null;
+        }
+
+        GameObject obj = GameObject.Instantiate(prefab);
+
+        obj.name = prefab.name + "(Pool)";
+
+        if (objectParent != null)
+        {
+            obj.transform.SetParent(
+                objectParent.transform,
+                true);
+        }
+
+        obj.SetActive(false);
+
+        poolList.Add(obj);
+
+        return obj;
+    }
+
+    /// <summary>
+    /// Object取得時の追加処理です。
+    /// 継承先で上書きします。
+    /// </summary>
+    protected virtual void OnGetObject(GameObject gameObject)
+    {
+
+    }
+
+    /// <summary>
+    /// Object返却時の追加処理です。
+    /// 継承先で上書きします。
+    /// </summary>
+    protected virtual void OnReturnObject(GameObject gameObject)
+    {
+
     }
 }

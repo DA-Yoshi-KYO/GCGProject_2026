@@ -51,6 +51,36 @@ public enum GimmickOutline
 
 public class GimmickBase : MonoBehaviour
 {
+    // -----------------------------------------------------------------
+    // 定数
+    // -----------------------------------------------------------------
+    private const string AlphaPropertyName = "_Alpha";
+    private const string SearchAxisXName = "X";
+    private const string SearchAxisZName = "Z";
+    private const string HitCheckerEffectName = "Effect";
+    private const string HitCheckerHitName = "Hit";
+    private const string HitCheckerSearchName = "Search";
+    private const string AudioManagerPath = "AudioManager/3DSE";
+    private const string SummonSeName = "Gimmick_Summon";
+    private const string SummonSeCategory = "Summon";
+
+    // GimmickDirection -> 回転 / 方向ベクトル の対応表（switch の重複を排除）
+    private static readonly Dictionary<GimmickDirection, Quaternion> DirectionRotations = new Dictionary<GimmickDirection, Quaternion>
+    {
+        { GimmickDirection.Up,    Quaternion.Euler(0, 0, 0) },
+        { GimmickDirection.Down,  Quaternion.Euler(0, 180, 0) },
+        { GimmickDirection.Left,  Quaternion.Euler(0, 90, 0) },
+        { GimmickDirection.Right, Quaternion.Euler(0, -90, 0) },
+    };
+
+    private static readonly Dictionary<GimmickDirection, Vector2Int> DirectionVectors = new Dictionary<GimmickDirection, Vector2Int>
+    {
+        { GimmickDirection.Up,    new Vector2Int(0, 1) },
+        { GimmickDirection.Down,  new Vector2Int(0, -1) },
+        { GimmickDirection.Left,  new Vector2Int(1, 0) },
+        { GimmickDirection.Right, new Vector2Int(-1, 0) },
+    };
+
     public Sprite gimmickImage;
     public Sprite gimmickTextImage;
 
@@ -105,7 +135,8 @@ public class GimmickBase : MonoBehaviour
 
     [Header("RendererComponent")]
     [SerializeField] private MeshRenderer[] mesh;
-    private Material[] materials;
+    // マテリアル未使用時にも null 参照が起きないよう、常に空配列で初期化しておく
+    private Material[] materials = System.Array.Empty<Material>();
 
     [Header("MeshScaleAdaptation")]
     [SerializeField] private bool isMeshScaleAdaptation;
@@ -135,12 +166,11 @@ public class GimmickBase : MonoBehaviour
     protected CS_OutlineTarget outlineTarget;
     protected float outlineWidth = 6f;
 
+    private readonly HashSet<Collider> searchHitBuffer = new HashSet<Collider>();
+
     protected virtual void Start()
     {
-        GameObject X = search.transform.Find("X").gameObject;
-        GameObject Z = search.transform.Find("Z").gameObject;
-        searchColliderX = X.GetComponent<BoxCollider>();
-        searchColliderZ = Z.GetComponent<BoxCollider>();
+        InitSearchColliders();
 
         targetPoint = transform.position;
         transform.position = new Vector3(
@@ -149,7 +179,47 @@ public class GimmickBase : MonoBehaviour
             transform.position.z
         );
 
-        GameObject soundManager = GameObject.Find("AudioManager/3DSE");
+        InitSound();
+
+        roomIndex = CS_RoomCreatePointRaycast.GetRayRoomCreatePoint(this.gameObject).transform.GetSiblingIndex();
+
+        if (gimmickMaterial == GimmickMaterial.Material)
+            InitMaterials();
+
+        if (gimmickOutline == GimmickOutline.Default)
+        {
+            outlineTarget = GetComponentInChildren<CS_OutlineTarget>();
+            if (outlineTarget != null)
+                outlineTarget.SetOutline(Color.gray, outlineWidth);
+            else
+                Debug.LogWarning("CS_OutlineTargetが見つかりません: " + gameObject.name);
+        }
+    }
+
+    private void InitSearchColliders()
+    {
+        if (search == null)
+        {
+            Debug.LogWarning("searchが設定されていません: " + gameObject.name);
+            return;
+        }
+
+        Transform xTransform = search.transform.Find(SearchAxisXName);
+        Transform zTransform = search.transform.Find(SearchAxisZName);
+
+        if (xTransform == null || zTransform == null)
+        {
+            Debug.LogWarning("searchの子オブジェクト(X/Z)が見つかりません: " + gameObject.name);
+            return;
+        }
+
+        searchColliderX = xTransform.GetComponent<BoxCollider>();
+        searchColliderZ = zTransform.GetComponent<BoxCollider>();
+    }
+
+    private void InitSound()
+    {
+        GameObject soundManager = GameObject.Find(AudioManagerPath);
         if (soundManager != null)
         {
             gimmickSound = soundManager.GetComponent<CS_3DPlaySE>();
@@ -162,18 +232,7 @@ public class GimmickBase : MonoBehaviour
         else
         {
             //召喚SE再生
-            gimmickSound.PlayOneShotSE("Gimmick_Summon", transform.position, "Summon");
-        }
-
-        roomIndex = CS_RoomCreatePointRaycast.GetRayRoomCreatePoint(this.gameObject).transform.GetSiblingIndex();
-
-        if (gimmickMaterial == GimmickMaterial.Material)
-            InitMaterials();
-
-        if(gimmickOutline == GimmickOutline.Default)
-        {
-            outlineTarget = GetComponentInChildren<CS_OutlineTarget>();
-            outlineTarget.SetOutline(Color.gray, outlineWidth);
+            gimmickSound.PlayOneShotSE(SummonSeName, transform.position, SummonSeCategory);
         }
     }
 
@@ -189,12 +248,19 @@ public class GimmickBase : MonoBehaviour
         }
 
         materials = materialList.ToArray();
+        SetMaterialsAlpha(1.0f);
+    }
+
+    private void SetMaterialsAlpha(float alpha)
+    {
+        if (materials == null)
+            return;
 
         foreach (Material mat in materials)
         {
-            if (mat != null && mat.HasProperty("_Alpha"))
+            if (mat != null && mat.HasProperty(AlphaPropertyName))
             {
-                mat.SetFloat("_Alpha", 1.0f);
+                mat.SetFloat(AlphaPropertyName, alpha);
             }
         }
     }
@@ -230,21 +296,27 @@ public class GimmickBase : MonoBehaviour
 
         transform.localScale = new Vector3(scaleX, scaleY, scaleX);
 
+        if (search == null)
+            return;
+
         Vector3 set = search.transform.position;
         set.y = 0.0f;
         search.transform.position = set;
 
-        GameObject X = search.transform.Find("X").gameObject;
-        GameObject Z = search.transform.Find("Z").gameObject;
+        Transform xTransform = search.transform.Find(SearchAxisXName);
+        Transform zTransform = search.transform.Find(SearchAxisZName);
 
-        Vector3 searchX = X.transform.localScale;
-        Vector3 searchZ = Z.transform.localScale;
+        if (xTransform == null || zTransform == null)
+            return;
+
+        Vector3 searchX = xTransform.localScale;
+        Vector3 searchZ = zTransform.localScale;
 
         searchX.x = searchGridRange * roomGrid.gridSize.x;
         searchZ.z = searchGridRange * roomGrid.gridSize.y;
 
-        X.transform.localScale = searchX;
-        Z.transform.localScale = searchZ;
+        xTransform.localScale = searchX;
+        zTransform.localScale = searchZ;
     }
 
     public void ActivateGimmick()
@@ -273,48 +345,6 @@ public class GimmickBase : MonoBehaviour
 
     protected void SetHitChecker(int gridX, int gridY)
     {
-        if (hitChecker == null)
-        {
-            hitChecker = Instantiate(hitCheckerPrefab);
-
-            hit = hitChecker.GetComponent<HitChecker>();
-
-            if (hit != null)
-            {
-                hit.SetHitDamage(attackPower);
-                hit.SetEffectDamage(effectPower);
-                hit.HitLoop(gimmickType == GimmickType.Reusable);
-                hit.SetGimmick(gimmick);
-                hit.SetParentGameObject(gameObject);
-            }
-
-            GameObject effect = hitChecker.transform.Find("Effect").gameObject;
-            GameObject hitObj = hitChecker.transform.Find("Hit").gameObject;
-            GameObject searchObj = hitChecker.transform.Find("Search").gameObject;
-
-            Vector3 effectSize = new Vector3(
-                effectRange.x * roomGrid.gridSize.x,
-                effectRange.y * roomGrid.gridSize.y,
-                effectRange.z * roomGrid.gridSize.y
-            );
-
-            Vector3 hitSize = new Vector3(
-                effectRange.x * roomGrid.gridSize.x,
-                effectRange.y * roomGrid.gridSize.y,
-                hitRange.z * roomGrid.gridSize.y
-            );
-
-            Vector3 searchSize = new Vector3(
-                effectRange.x * roomGrid.gridSize.x,
-                effectRange.y * roomGrid.gridSize.y,
-                searchRange.z * roomGrid.gridSize.y
-            );
-
-            effect.transform.localScale = effectSize;
-            hitObj.transform.localScale = hitSize;
-            searchObj.transform.localScale = searchSize;
-        }
-
         Vector3 hitCheckerPos = roomGrid.GetWorldPosFromGrid(new Vector2Int(gridX, gridY));
 
         if (float.IsInfinity(hitCheckerPos.x) ||
@@ -329,59 +359,84 @@ public class GimmickBase : MonoBehaviour
         }
 
         hitCheckerPos.y += (effectRange.y * roomGrid.gridSize.y) / 2.0f;
+
+        EnsureHitCheckerCreated(useHitRangeForHit: false);
         hitChecker.transform.position = hitCheckerPos;
     }
 
     protected void SetHitChecker(Vector3 worldPos)
     {
-        if (hitChecker == null)
+        EnsureHitCheckerCreated(useHitRangeForHit: true);
+        hitChecker.transform.position = worldPos;
+    }
+
+    private void EnsureHitCheckerCreated(bool useHitRangeForHit)
+    {
+        if (hitChecker != null)
+            return;
+
+        if (hitCheckerPrefab == null)
         {
-            hitChecker = Instantiate(hitCheckerPrefab);
-
-            hit = hitChecker.GetComponent<HitChecker>();
-
-            if (hit != null)
-            {
-                hit.SetHitDamage(attackPower);
-                hit.SetEffectDamage(effectPower);
-                hit.HitLoop(gimmickType == GimmickType.Reusable);
-                hit.SetGimmick(gimmick);
-                hit.SetParentGameObject(gameObject);
-            }
-
-            GameObject effect = hitChecker.transform.Find("Effect").gameObject;
-            GameObject hitObj = hitChecker.transform.Find("Hit").gameObject;
-            GameObject searchObj = hitChecker.transform.Find("Search").gameObject;
-
-            Vector3 effectSize = new Vector3(
-                effectRange.x * roomGrid.gridSize.x,
-                effectRange.y * roomGrid.gridSize.y,
-                effectRange.z * roomGrid.gridSize.y
-            );
-
-            Vector3 hitSize = new Vector3(
-                hitRange.x * roomGrid.gridSize.x,
-                hitRange.y * roomGrid.gridSize.y,
-                hitRange.z * roomGrid.gridSize.y
-            );
-
-            Vector3 searchSize = new Vector3(
-                searchRange.x * roomGrid.gridSize.x,
-                searchRange.y * roomGrid.gridSize.y,
-                searchRange.z * roomGrid.gridSize.y
-            );
-
-            effect.transform.localScale = effectSize;
-            hitObj.transform.localScale = hitSize;
-            searchObj.transform.localScale = searchSize;
+            Debug.LogWarning("hitCheckerPrefabが設定されていません: " + gameObject.name);
+            return;
         }
 
-        hitChecker.transform.position = worldPos;
+        hitChecker = Instantiate(hitCheckerPrefab);
+        hit = hitChecker.GetComponent<HitChecker>();
+
+        if (hit != null)
+        {
+            hit.SetHitDamage(attackPower);
+            hit.SetEffectDamage(effectPower);
+            hit.HitLoop(gimmickType == GimmickType.Reusable);
+            hit.SetGimmick(gimmick);
+            hit.SetParentGameObject(gameObject);
+        }
+
+        Transform effectT = hitChecker.transform.Find(HitCheckerEffectName);
+        Transform hitT = hitChecker.transform.Find(HitCheckerHitName);
+        Transform searchT = hitChecker.transform.Find(HitCheckerSearchName);
+
+        if (effectT == null || hitT == null || searchT == null)
+        {
+            Debug.LogWarning("hitCheckerPrefabにEffect/Hit/Searchの子オブジェクトが見つかりません: " + hitCheckerPrefab.name);
+            return;
+        }
+
+        Vector3 effectSize = new Vector3(
+            effectRange.x * roomGrid.gridSize.x,
+            effectRange.y * roomGrid.gridSize.y,
+            effectRange.z * roomGrid.gridSize.y
+        );
+
+        Vector3 hitSize = useHitRangeForHit
+            ? new Vector3(
+                hitRange.x * roomGrid.gridSize.x,
+                hitRange.y * roomGrid.gridSize.y,
+                hitRange.z * roomGrid.gridSize.y)
+            : new Vector3(
+                effectRange.x * roomGrid.gridSize.x,
+                effectRange.y * roomGrid.gridSize.y,
+                hitRange.z * roomGrid.gridSize.y);
+
+        Vector3 searchSize = useHitRangeForHit
+            ? new Vector3(
+                searchRange.x * roomGrid.gridSize.x,
+                searchRange.y * roomGrid.gridSize.y,
+                searchRange.z * roomGrid.gridSize.y)
+            : new Vector3(
+                effectRange.x * roomGrid.gridSize.x,
+                effectRange.y * roomGrid.gridSize.y,
+                searchRange.z * roomGrid.gridSize.y);
+
+        effectT.localScale = effectSize;
+        hitT.localScale = hitSize;
+        searchT.localScale = searchSize;
     }
 
     public CS_ThiefGimmickAction GetThiefGimmickAction()
     {
-        return hit.GetThiefGA();
+        return hit != null ? hit.GetThiefGA() : null;
     }
 
     protected void DeleteHitChecker()
@@ -389,24 +444,14 @@ public class GimmickBase : MonoBehaviour
         if (hitChecker != null)
         {
             Destroy(hitChecker);
+            hitChecker = null;
+            hit = null;
         }
     }
 
     public Vector2Int GetDirectionVec()
     {
-        switch (gimmickDirection)
-        {
-            case GimmickDirection.Up:
-                return new Vector2Int(0, 1);
-            case GimmickDirection.Down:
-                return new Vector2Int(0, -1);
-            case GimmickDirection.Left:
-                return new Vector2Int(1, 0);
-            case GimmickDirection.Right:
-                return new Vector2Int(-1, 0);
-            default:
-                return Vector2Int.zero;
-        }
+        return DirectionVectors.TryGetValue(gimmickDirection, out Vector2Int vec) ? vec : Vector2Int.zero;
     }
 
     public Vector2Int GetGimmickSize()
@@ -442,7 +487,7 @@ public class GimmickBase : MonoBehaviour
     {
         if (box == null)
         {
-            return new Collider[0];
+            return System.Array.Empty<Collider>();
         }
 
         Vector3 worldCenter = box.transform.TransformPoint(box.center);
@@ -488,29 +533,8 @@ public class GimmickBase : MonoBehaviour
 
     protected virtual void PreviewUpdate()
     {
-        switch(gimmickDirection)
-        {
-            case GimmickDirection.Up:
-                transform.rotation = Quaternion.Euler(0, 0, 0);
-                break;
-            case GimmickDirection.Down:
-                transform.rotation = Quaternion.Euler(0, 180, 0);
-                break;
-            case GimmickDirection.Left:
-                transform.rotation = Quaternion.Euler(0, 90, 0);
-                break;
-            case GimmickDirection.Right:
-                transform.rotation = Quaternion.Euler(0, -90, 0);
-                break;
-        }
-
-        foreach (Material mat in materials)
-        {
-            if (mat != null && mat.HasProperty("_Alpha"))
-            {
-                mat.SetFloat("_Alpha", 0.4f);
-            }
-        }
+        ApplyDirectionRotation();
+        SetMaterialsAlpha(previewAlpha);
     }
 
     protected virtual void SpawnUpdate()
@@ -536,35 +560,21 @@ public class GimmickBase : MonoBehaviour
             }
             spawnVibrationCount++;
             transform.position = currentPoint;
-            switch (gimmickDirection)
-            {
-                case GimmickDirection.Up:
-                    transform.rotation = Quaternion.Euler(0, 0, 0);
-                    break;
-                case GimmickDirection.Down:
-                    transform.rotation = Quaternion.Euler(0, 180, 0);
-                    break;
-                case GimmickDirection.Left:
-                    transform.rotation = Quaternion.Euler(0, 90, 0);
-                    break;
-                case GimmickDirection.Right:
-                    transform.rotation = Quaternion.Euler(0, -90, 0);
-                    break;
-            }
+            ApplyDirectionRotation();
         }
         else
         {
             transform.position = targetPoint;
-            if (materials == null)
-                return;
-            foreach (Material mat in materials)
-            {
-                if (mat != null && mat.HasProperty("_Alpha"))
-                {
-                    mat.SetFloat("_Alpha", 1f);
-                }
-            }
+            SetMaterialsAlpha(1f);
             gimmickState = GimmickState.Idle;
+        }
+    }
+
+    private void ApplyDirectionRotation()
+    {
+        if (DirectionRotations.TryGetValue(gimmickDirection, out Quaternion rot))
+        {
+            transform.rotation = rot;
         }
     }
 
@@ -579,19 +589,13 @@ public class GimmickBase : MonoBehaviour
         Collider[] hitsX = OverlapBoxCollider(searchColliderX);
         Collider[] hitsZ = OverlapBoxCollider(searchColliderZ);
 
-        List<Collider> allHits = new List<Collider>(hitsX);
+        searchHitBuffer.Clear();
+        foreach (Collider col in hitsX) searchHitBuffer.Add(col);
+        foreach (Collider col in hitsZ) searchHitBuffer.Add(col);
 
-        foreach (Collider col in hitsZ)
-        {
-            if (!allHits.Contains(col))
-            {
-                allHits.Add(col);
-            }
-        }
+        Debug.Log("Detected " + searchHitBuffer.Count + " enemies in search area.");
 
-        Debug.Log("Detected " + allHits.Count + " enemies in search area.");
-
-        if (allHits.Count == 0)
+        if (searchHitBuffer.Count == 0)
         {
             return;
         }
@@ -599,7 +603,7 @@ public class GimmickBase : MonoBehaviour
         float minDist = float.MaxValue;
         Transform nearestEnemy = null;
 
-        foreach (Collider col in allHits)
+        foreach (Collider col in searchHitBuffer)
         {
             float dist = Vector3.Distance(transform.position, col.transform.position);
 
@@ -645,32 +649,14 @@ public class GimmickBase : MonoBehaviour
         {
             brokenAlpha = 1.0f;
             brokenFadeStart = true;
-
-            if (materials != null)
-            {
-                foreach (Material mat in materials)
-                {
-                    if (mat != null && mat.HasProperty("_Alpha"))
-                    {
-                        mat.SetFloat("_Alpha", brokenAlpha);
-                    }
-                }
-            }
+            SetMaterialsAlpha(brokenAlpha);
         }
 
         brokenAlpha -= brokenFadeSpeed * Time.deltaTime;
         brokenAlpha = Mathf.Clamp01(brokenAlpha);
 
-        if (materials != null)
-        {
-            foreach (Material mat in materials)
-            {
-                if (mat != null && mat.HasProperty("_Alpha"))
-                {
-                    mat.SetFloat("_Alpha", brokenAlpha);
-                }
-            }
-        }
+        SetMaterialsAlpha(brokenAlpha);
+
         if (outlineTarget != null)
             outlineTarget.SetOutlineAlpha(0.0f);
 
@@ -682,7 +668,8 @@ public class GimmickBase : MonoBehaviour
 
     public void SetOutLineColor(Color col)
     {
-        outlineTarget.SetOutlineColor(col);
+        if (outlineTarget != null)
+            outlineTarget.SetOutlineColor(col);
     }
 
     public CS_3DPlaySE GetGimmickSound()
