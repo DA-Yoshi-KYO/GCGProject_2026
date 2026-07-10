@@ -515,6 +515,7 @@ public class CS_ThiefAI : MonoBehaviour
                     ChangeStatus(ThiefState.Explore); // 状態を探索に戻す
                 else
                     ChangeStatus(ThiefState.Escape); // 状態を逃走に戻す
+                
 
                 // アニメーションの状態を解除(歩き状態に戻す)
                 if (animator != null)
@@ -733,6 +734,7 @@ public class CS_ThiefAI : MonoBehaviour
             case ThiefState.Stunned:
                 // 気絶時間の経過時間をリセット
                 elapsedTimeAfterStun = 0.0f;
+                aStarSystem.ResetUpdatedFlag();
                 break;
         }
     }
