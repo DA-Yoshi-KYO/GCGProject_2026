@@ -569,7 +569,7 @@ public class CS_MemorySystem
                         ignorePlayer = true;
 
                         // CS_PlayerMoveに通知
-                        ((CS_PlayerTarget)currentTarget).transform.GetComponent<CS_PlayerMove>().CaughtByThief(thiefAI.read_RemainingHoldCatTime);
+                        ((CS_PlayerTarget)currentTarget).transform.GetComponent<CS_PlayerMove>().CaughtByThief(thiefAI.read_RemainingHoldCatTime, thiefAI.transform);
 
                         // 泥棒のアニメーション状態をHuntingに変更する
                         thiefAI?.read_Animator?.SetBool("IsHunting", true);
