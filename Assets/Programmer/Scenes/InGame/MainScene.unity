@@ -1018,7 +1018,7 @@ PrefabInstance:
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
       propertyPath: cs_BackConnection.e_DoorUsageType
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
@@ -1027,14 +1027,29 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
+      propertyPath: cs_FrontConnection.e_DoorUsageType
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
       propertyPath: cs_RightConnection.e_DoorUsageType
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
+      propertyPath: cs_BackConnection.cs_TargetCreatePoint
+      value: 
+      objectReference: {fileID: 1759275515}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_BackConnection.e_TargetOutDirection
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
       propertyPath: cs_FrontConnection.cs_TargetCreatePoint
       value: 
-      objectReference: {fileID: 2133503044}
+      objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
       propertyPath: cs_FrontConnection.e_TargetOutDirection
@@ -1044,7 +1059,12 @@ PrefabInstance:
         type: 3}
       propertyPath: cs_BackConnection.cs_RoomEnemyEntryDataSO
       value: 
-      objectReference: {fileID: 11400000, guid: 01d007deca5d55942892b391d5c7b9d1,
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_FrontConnection.cs_RoomEnemyEntryDataSO
+      value: 
+      objectReference: {fileID: 11400000, guid: ff94536379ae1a148b7558542c0c4862,
         type: 2}
     - target: {fileID: 6285496938507336483, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
@@ -1122,6 +1142,18 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 555523389}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &555523392 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+    type: 3}
+  m_PrefabInstance: {fileID: 555523389}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 555523391}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1dd62ab88ad5e7b4b8f0d673a9179748, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &576364148
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2276,7 +2308,7 @@ PrefabInstance:
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
       propertyPath: cs_BackConnection.e_DoorUsageType
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
@@ -2286,7 +2318,7 @@ PrefabInstance:
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
       propertyPath: cs_FrontConnection.e_DoorUsageType
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
@@ -2297,7 +2329,7 @@ PrefabInstance:
         type: 3}
       propertyPath: cs_BackConnection.cs_TargetCreatePoint
       value: 
-      objectReference: {fileID: 1759275515}
+      objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
       propertyPath: cs_BackConnection.e_TargetOutDirection
@@ -2305,10 +2337,25 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
+      propertyPath: cs_FrontConnection.cs_TargetCreatePoint
+      value: 
+      objectReference: {fileID: 2133503044}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_FrontConnection.e_TargetOutDirection
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_BackConnection.cs_RoomEnemyEntryDataSO
+      value: 
+      objectReference: {fileID: 11400000, guid: 01d007deca5d55942892b391d5c7b9d1,
+        type: 2}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
       propertyPath: cs_FrontConnection.cs_RoomEnemyEntryDataSO
       value: 
-      objectReference: {fileID: 11400000, guid: ff94536379ae1a148b7558542c0c4862,
-        type: 2}
+      objectReference: {fileID: 0}
     - target: {fileID: 6285496938507336483, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
       propertyPath: m_Name
@@ -2385,6 +2432,18 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 1363028006}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1363028009 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+    type: 3}
+  m_PrefabInstance: {fileID: 1363028006}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1363028008}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1dd62ab88ad5e7b4b8f0d673a9179748, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &1425979537 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2977523730953705697, guid: 6050fd3af03816d4ebd2d313a81c713d,
@@ -2510,7 +2569,7 @@ PrefabInstance:
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
       propertyPath: cs_FrontConnection.e_DoorUsageType
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
@@ -2521,6 +2580,16 @@ PrefabInstance:
         type: 3}
       propertyPath: cs_LeftConnection.e_TargetOutDirection
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_FrontConnection.cs_TargetCreatePoint
+      value: 
+      objectReference: {fileID: 555523392}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_FrontConnection.e_TargetOutDirection
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
@@ -3355,12 +3424,22 @@ PrefabInstance:
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
       propertyPath: cs_BackConnection.e_DoorUsageType
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
       propertyPath: cs_FrontConnection.e_DoorUsageType
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_BackConnection.cs_TargetCreatePoint
+      value: 
+      objectReference: {fileID: 1363028009}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_BackConnection.e_TargetOutDirection
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
