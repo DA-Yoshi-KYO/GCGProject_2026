@@ -265,7 +265,9 @@ public class CS_ThiefManager : MonoBehaviour
     public void EraseTheMemoryToAllThief(CS_ThiefTarget obj)
     {
         // 全泥棒を取得
-        GameObject[] thieves = GameObject.FindAnyObjectByType<CS_ThiefAI>().gameObject.scene.GetRootGameObjects();
+        CS_ThiefAI anyThiefAI = GameObject.FindAnyObjectByType<CS_ThiefAI>();
+        if (anyThiefAI == null) return;
+        GameObject[] thieves = anyThiefAI.gameObject.scene.GetRootGameObjects();
         foreach (var thief in thieves)
         {
             CS_ThiefAI thiefAI = thief.GetComponentInChildren<CS_ThiefAI>();
@@ -318,6 +320,7 @@ public class CS_ThiefManager : MonoBehaviour
         if (thiefParent == null)
         {
             Debug.LogError("ThiefParentが存在しません。");
+            return;
         }
 
         // 全ての泥棒をチェックして、指定の危険地帯IDを記憶から消す
