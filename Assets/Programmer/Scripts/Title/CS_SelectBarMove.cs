@@ -7,6 +7,7 @@
  * 2026-05-17 | SE再生処理追加
  * 2026-06-15 | 修正
  */
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -16,6 +17,8 @@ public class CS_SelectBarMove : MonoBehaviour
     [Header("選択バー")][SerializeField] private GameObject selectBar;
 
     [Header("FadeCanvasのPrefab格納")][SerializeField] private GameObject fadeCanvas;
+
+    [Header("Manualの画像を格納")][SerializeField] private GameObject[] manualImage;
 
     private CustomInputAction inputActions;
     private int currentButton = 0;
@@ -33,9 +36,15 @@ public class CS_SelectBarMove : MonoBehaviour
 
         backGroundPlaySE = GameObject.Find("SE").GetComponent<CS_BackGroundPlaySE>();
 
+        manualImage[0].SetActive(true);
+        manualImage[1].SetActive(false);
+
         currentButton = 0;
         UpdateButtonTexture();
-
+        foreach (var action in inputActions)
+        {
+            action.performed += OnAction;
+        }
     }
 
     // Update is called once per frame
@@ -124,6 +133,28 @@ public class CS_SelectBarMove : MonoBehaviour
 
                 UpdateButtonTexture();
             }
+        }
+
+        if (context.control.device is Gamepad)
+            CS_InputType.currentInputType = CS_InputType.InputType.Gamepad;
+        else
+            CS_InputType.currentInputType = CS_InputType.InputType.KeyboardMouse;
+        Debug.Log("InputType: " + CS_InputType.currentInputType);
+    }
+
+    private void OnAction(InputAction.CallbackContext context)
+    {
+        if (context.control.device is Gamepad)
+        {
+            CS_InputType.currentInputType = CS_InputType.InputType.Gamepad;
+            manualImage[0].SetActive(true);
+            manualImage[1].SetActive(false);
+        }
+        else
+        {
+           CS_InputType.currentInputType = CS_InputType.InputType.KeyboardMouse;
+            manualImage[0].SetActive(false);
+            manualImage[1].SetActive(true);
         }
     }
 }

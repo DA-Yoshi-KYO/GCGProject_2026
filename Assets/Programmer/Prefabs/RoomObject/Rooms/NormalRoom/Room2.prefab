@@ -716,7 +716,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 7767929183574839151}
   - {fileID: 2606645274188878038}
   - {fileID: 6848341338072248041}
   - {fileID: 7897670972790329421}
@@ -799,6 +798,7 @@ Transform:
   - {fileID: 4952807867822338728}
   - {fileID: 575512154834515297}
   - {fileID: 1547225213803795865}
+  - {fileID: 7767929183574839151}
   m_Father: {fileID: 39875320880196456}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5279734456270285330
@@ -2993,8 +2993,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetType: 1
-  explorationValue: 25
-  exploredDistanceThreshold: 2
+  explorationValue: 35
+  exploredDistanceThreshold: 1.5
   showGizmos: 0
   gizmoColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   searchThief: {fileID: 0}
@@ -4134,6 +4134,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Floor_A (12)
       objectReference: {fileID: 0}
+    - target: {fileID: 5370897123925838254, guid: 467ac4be6114e5b4082a1dec7a223a26,
+        type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5413998705590339364, guid: 467ac4be6114e5b4082a1dec7a223a26,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -4750,8 +4755,13 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 39875320880196456}
+    m_TransformParent: {fileID: 2606645274188878038}
     m_Modifications:
+    - target: {fileID: -3326193817571467046, guid: 9b88cbb5d2b4afd47858ba91b8952d0f,
+        type: 3}
+      propertyPath: exploredDistanceThreshold
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5879629861925785809, guid: 9b88cbb5d2b4afd47858ba91b8952d0f,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -5572,8 +5582,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetType: 1
-  explorationValue: 25
-  exploredDistanceThreshold: 2
+  explorationValue: 35
+  exploredDistanceThreshold: 1.5
   showGizmos: 0
   gizmoColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   searchThief: {fileID: 0}
@@ -5980,8 +5990,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetType: 1
-  explorationValue: 25
-  exploredDistanceThreshold: 2
+  explorationValue: 35
+  exploredDistanceThreshold: 1.5
   showGizmos: 0
   gizmoColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   searchThief: {fileID: 0}
@@ -6630,8 +6640,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetType: 1
-  explorationValue: 25
-  exploredDistanceThreshold: 2
+  explorationValue: 35
+  exploredDistanceThreshold: 1.5
   showGizmos: 0
   gizmoColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   searchThief: {fileID: 0}

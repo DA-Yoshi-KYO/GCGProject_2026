@@ -178,6 +178,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8184754857928878025}
   - component: {fileID: 3128741956147634963}
+  - component: {fileID: 3851869172763850077}
   m_Layer: 29
   m_Name: Vision
   m_TagString: Untagged
@@ -218,6 +219,23 @@ MonoBehaviour:
   obstacleLayer:
     serializedVersion: 2
     m_Bits: 0
+--- !u!114 &3851869172763850077
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4013857449410679947}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf7e5d6298d7567458f226d3c93c12b9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isVisible: 1
+  coneColor: {r: 1, g: 0.9, b: 0.2, a: 0.35}
+  segments: 24
+  floorOffset: 0.03
+  rayHeight: 1
 --- !u!1001 &2968923909658677401
 PrefabInstance:
   m_ObjectHideFlags: 0

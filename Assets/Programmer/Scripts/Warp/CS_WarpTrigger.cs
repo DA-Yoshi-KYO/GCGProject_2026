@@ -86,20 +86,6 @@ public class CS_WarpTrigger : MonoBehaviour
         //プレイヤーの座標更新
         controller.enabled = false;
 
-        Rigidbody rb = other.attachedRigidbody;
-
-        if (rb == null)
-        {
-            rb = other.GetComponentInParent<Rigidbody>();
-        }
-
-        if (rb != null)
-        {
-            rb.isKinematic = true;
-            rb.velocity = Vector3.zero;
-            rb.angularVelocity = Vector3.zero;
-        }
-
         Transform exitPosition = wp.targetPoint.warpExitPosition;
 
         if (exitPosition == null)
@@ -109,10 +95,12 @@ public class CS_WarpTrigger : MonoBehaviour
 
         other.transform.position = exitPosition.position;
 
-        if (rb != null)
+        CS_PlayerMove playerMove = other.GetComponent<CS_PlayerMove>();
+        if (playerMove != null)
         {
-            rb.isKinematic = false;
+            playerMove.SyncTransform(other.transform.position, other.transform.rotation);
         }
+
         controller.enabled = true;
 
         //カメラ更新

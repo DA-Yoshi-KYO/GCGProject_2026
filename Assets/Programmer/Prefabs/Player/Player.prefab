@@ -71,7 +71,7 @@ Rigidbody:
   m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 112
+  m_Constraints: 0
   m_CollisionDetection: 0
 --- !u!114 &5236082132703535882
 MonoBehaviour:
@@ -87,11 +87,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveAmount: 3
   velocityWalk: 1
-  velocitySneak: 0.6
+  velocityRun: 1.5
   jumpAmount: 10
   gravity: -20
   airResistance: 0.97
-  jumpMerginFrame: 2
+  visualModel: {fileID: 6119830326453982005}
+  previousPosition: {x: 0, y: 0, z: 0}
+  currentPosition: {x: 0, y: 0, z: 0}
+  previousRotation: {x: 0, y: 0, z: 0, w: 0}
+  currentRotation: {x: 0, y: 0, z: 0, w: 0}
+  jumpMerginDuration: 0
 --- !u!114 &3152219394414369179
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -129,9 +134,6 @@ MonoBehaviour:
   rotateDuration: 1
   moveDuration: 1
   trackingTime: 5
-  obstacleLayer:
-    serializedVersion: 2
-    m_Bits: 2147483648
 --- !u!114 &3367410344476483694
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -208,8 +210,7 @@ MonoBehaviour:
     gimmickInfo:
       coolTime: 5
       maxNum: 5
-      currentNum: 1
-      totalNum: 0
+      currentNum: 5
     itemPrefab: {fileID: 7905465617219888894, guid: ea9bc9bbcf651ed43b2221a4dcb8d0c4,
       type: 3}
     previewPrefab: {fileID: 7905465617219888894, guid: 3bbc83263c5915945a441225b71b798c,
@@ -220,8 +221,7 @@ MonoBehaviour:
     gimmickInfo:
       coolTime: 10
       maxNum: 2
-      currentNum: 1
-      totalNum: 0
+      currentNum: 2
     itemPrefab: {fileID: 1657490478714675189, guid: 96291b85c9fdb7d49afd3a58f5702762,
       type: 3}
     previewPrefab: {fileID: 5619306240066455382, guid: dd482d498a4aff246acacf665d5711ea,
@@ -232,8 +232,7 @@ MonoBehaviour:
     gimmickInfo:
       coolTime: 10
       maxNum: 2
-      currentNum: 1
-      totalNum: 0
+      currentNum: 0
     itemPrefab: {fileID: 8099441442987179503, guid: 5a19a6247af65e74d8197a1e82c9564c,
       type: 3}
     previewPrefab: {fileID: 8099441442987179503, guid: 5f533338cc2b2bd43af43cc50ce6e253,
@@ -244,10 +243,8 @@ MonoBehaviour:
     gimmickInfo:
       coolTime: 20
       maxNum: 1
-      currentNum: 1
-      totalNum: 0
-    itemPrefab: {fileID: 1489878763450881206, guid: 8473af0b8d1462a459b65f9f712bf41d,
-      type: 3}
+      currentNum: 0
+    itemPrefab: {fileID: 0}
     previewPrefab: {fileID: 0}
     gimmickPrefab: {fileID: 2109292754562999017, guid: 5439714f3877a314ba01e6c958ee03e4,
       type: 3}
@@ -255,8 +252,7 @@ MonoBehaviour:
     gimmickInfo:
       coolTime: 20
       maxNum: 1
-      currentNum: 1
-      totalNum: 0
+      currentNum: 0
     itemPrefab: {fileID: 3784575776439470413, guid: 9988d2f929e240744b330f3925377dfb,
       type: 3}
     previewPrefab: {fileID: 2268929153101709382, guid: 1050028b9b76c6a40bb4cd6201081adc,
@@ -265,10 +261,9 @@ MonoBehaviour:
       type: 3}
   - gimmickTag: 6
     gimmickInfo:
-      coolTime: 20
-      maxNum: 1
-      currentNum: 1
-      totalNum: 0
+      coolTime: 25
+      maxNum: 2
+      currentNum: 0
     itemPrefab: {fileID: 0}
     previewPrefab: {fileID: 1489878763450881206, guid: 5e6df8dac4832cc4b87524ece603b7d0,
       type: 3}
@@ -279,7 +274,6 @@ MonoBehaviour:
       coolTime: 20
       maxNum: 1
       currentNum: 1
-      totalNum: 0
     itemPrefab: {fileID: 0}
     previewPrefab: {fileID: 7506170590698890803, guid: 269c04346fb368b42835df1885b8ea20,
       type: 3}

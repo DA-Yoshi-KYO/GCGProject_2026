@@ -15,7 +15,7 @@ public class CS_PlayerMove : MonoBehaviour
     // 移動用ステータス
     [Header("基礎の移動量")][SerializeField] private float moveAmount = 10.0f; //基礎移動量
     [Header("移動速度(歩き)")][SerializeField]private float velocityWalk = 1.0f;  //移動速度(歩き)
-    [Header("移動速度（走り）")][SerializeField] private float velocitySneak = 0.6f;//移動速度(スニーク)
+    [Header("移動速度（走り）")][SerializeField] private float velocityRun = 1.5f;//移動速度(走り)
     [Header("ジャンプ量")][SerializeField] private float jumpAmount = 2.5f;//ジャンプ量
     [Header("重力")][SerializeField] private float gravity = -9.8f;//重力
     [Header("空気抵抗")][Range(0, 1)][SerializeField] private float airResistance = 0.99f;//空気抵抗
@@ -26,10 +26,18 @@ public class CS_PlayerMove : MonoBehaviour
     private Vector3 velocity = Vector3.zero;        // 現在の移動速度
     private CS_PlayerData playerData;       // プレイヤーのデータ
     private CS_PlayerCamera playerCamera;   // プレイヤーのカメラ
+    private CS_3DPlaySE playSE;
+
+    // ロジックと見た目を揃える為の保存変数
+    public Transform visualModel;       // 見た目のモデル
+    public Vector3 previousPosition;    // 前回の位置
+    public Vector3 currentPosition;     // 現在の位置
+    public Quaternion previousRotation; // 前回の回転
+    public Quaternion currentRotation;  // 現在の回転
 
     private float rotateSpeed = 10.0f;  // 回転のスピード
     private bool isJumping = false;     // ジャンプ中かどうか
-    private bool isSneaking = false;    // スニーク中かどうか
+    private bool isRunning = false;    // スニーク中かどうか
 
     private bool isInvincible = false;  // 無敵状態かどうか
     public bool IsInvincible => isInvincible; // 無敵状態かどうかの取得
@@ -42,14 +50,16 @@ public class CS_PlayerMove : MonoBehaviour
     [Tooltip("盗賊に捕まっているかどうか")]
     private bool isCaughtByThief;
     float catCaughtTime = 0.0f;
+    float invincibleTime = 0.0f;
 
     //スタン状態はどうか
     private bool isCatStunByAnkh;
     float ankhStunTimeToCatStun = 0.0f;
 
-    [Header("ジャンプ開始するまでのマージン(フレーム単位)")][SerializeField] private int jumpMerginFrame = 5;
-    private int jumpMerginFrameCount = 5;
-    bool isJumpMerging = false;
+    [Header("ジャンプ開始するまでのマージン(秒数単位)")]
+    [SerializeField] private float jumpMerginDuration;
+    private float jumpMerginTimer;
+    private bool isJumpMerging = false;
 
     // Start is called before the first frame update
     void Start()
@@ -81,33 +91,63 @@ public class CS_PlayerMove : MonoBehaviour
 
         // アニメーターの取得
         animator = GetComponentInChildren<Animator>();
-        jumpMerginFrameCount = jumpMerginFrame;
+        jumpMerginTimer = jumpMerginDuration;
+
+        playSE = GameObject.Find("3DSE").GetComponent<CS_3DPlaySE>();
+
+        if (playSE == null)
+        {
+            Debug.LogWarning("[PlayerMove] 3DSE が見つかりません。SE再生は無効になります。");
+        }
+
+        currentPosition = transform.position;
+        previousPosition = currentPosition;
+        currentRotation = rb.rotation;
+        previousRotation = currentRotation;
     }
 
     void FixedUpdate()
     {
-        createFootPrintTime += Time.deltaTime;
+        // ゲームが一時停止中の場合は移動処理を行わない
+        if (Time.timeScale == 0) return;
 
-        // 移動処理
-        Move();
-
-        if (catCaughtTime > 0f)
+        invincibleTime -= Time.fixedDeltaTime;
+        if (invincibleTime <= 0.0f && isInvincible)
         {
-            catCaughtTime -= Time.deltaTime;
-            catCaughtTime = Mathf.Max(0.0f, catCaughtTime);
-            return;
+            isInvincible = false;
+            invincibleTime = 0.0f;
         }
+
+        createFootPrintTime += Time.fixedDeltaTime;
+        previousPosition = currentPosition;
+        previousRotation = currentRotation;
+
+        Move();
 
         if (isJumpMerging)
         {
-            if (jumpMerginFrameCount == 0)
+            if (jumpMerginTimer <= 0f)
             {
                 isJumping = true;
                 isJumpMerging = false;
-                jumpMerginFrameCount = jumpMerginFrame;
+                jumpMerginTimer = jumpMerginDuration;
             }
-            else jumpMerginFrameCount--;
+            else jumpMerginTimer -= Time.fixedDeltaTime;
         }
+
+        currentPosition = transform.position; // CharacterController.Move後の実位置
+        currentRotation = rb.rotation;
+    }
+
+    void Update()
+    {
+        // FixedUpdate間の経過割合を計算
+        float t = (Time.time - Time.fixedTime) / Time.fixedDeltaTime;
+        t = Mathf.Clamp01(t);
+
+        // 見た目だけ補間して滑らかに動かす
+        visualModel.position = Vector3.Lerp(previousPosition, currentPosition, t);
+        visualModel.rotation = Quaternion.Slerp(previousRotation, currentRotation, t);
     }
 
     /// <summary>
@@ -117,22 +157,19 @@ public class CS_PlayerMove : MonoBehaviour
     {
         if (catCaughtTime > 0f)
         {
-            Debug.Log(catCaughtTime);
-            catCaughtTime -= Time.deltaTime;
+            catCaughtTime -= Time.fixedDeltaTime;
             catCaughtTime = Mathf.Max(0.0f, catCaughtTime);
             return;
         }
 
         if (ankhStunTimeToCatStun > 0.0f)
         {//猫がスタンしている場合動かせない
-            Debug.Log(ankhStunTimeToCatStun);
-            ankhStunTimeToCatStun -= Time.deltaTime;
-            ankhStunTimeToCatStun = Mathf.Max(0.0f,ankhStunTimeToCatStun);
+            ankhStunTimeToCatStun -= Time.fixedDeltaTime;
+            ankhStunTimeToCatStun = Mathf.Max(0.0f, ankhStunTimeToCatStun);
             return;
         }
 
-        // ゲームが一時停止中の場合は移動処理を行わない
-        if (Time.timeScale == 0) return;
+
         // ジャンプ待機中は移動処理を行わない
         if (isJumpMerging && !isJumping) return;
 
@@ -146,23 +183,14 @@ public class CS_PlayerMove : MonoBehaviour
         cameraRight.Normalize();
 
         // 入力された移動量に基づいて速度を計算
-        float speed = (moveAmount) * (isSneaking ? velocitySneak : velocityWalk);
+        float speed = (moveAmount) * (isRunning ? velocityRun : velocityWalk);
 
         // 入力を成分ごとに分解
         Vector3 forwardMove = cameraForward * (inputDirection.y * speed);
         Vector3 rightMove = cameraRight * (inputDirection.x * speed);
 
         Vector3 horizontalMove; // 最終的な水平移動ベクトル
-        if (isSneaking && controller.isGrounded)    // スニーク中で地面にいる場合は、移動可能な成分のみを通す
-        {
-            // スニーク中の移動量の計算
-            horizontalMove = ResolveSneakMove(forwardMove, rightMove);
-        }
-        else
-        {
-            horizontalMove = forwardMove + rightMove;   // それ以外は入力された移動をそのまま使用
-
-        }
+        horizontalMove = forwardMove + rightMove;   // それ以外は入力された移動をそのまま使用
 
         // 移動量を更新
         velocity = new Vector3(horizontalMove.x, velocity.y, horizontalMove.z);
@@ -174,7 +202,7 @@ public class CS_PlayerMove : MonoBehaviour
             Quaternion playerRotate = Quaternion.LookRotation(horizontalMove);
             // Rigidbodyを使用して滑らかに回転させる
             rb.MoveRotation(Quaternion.Slerp(
-                rb.rotation, playerRotate, Time.deltaTime * rotateSpeed));
+                rb.rotation, playerRotate, Time.fixedDeltaTime * rotateSpeed));
         }
 
         // 接地
@@ -207,17 +235,48 @@ public class CS_PlayerMove : MonoBehaviour
         }
 
         // 重力
-        velocity.y += gravity * Time.deltaTime;
+        velocity.y += gravity * Time.fixedDeltaTime;
 
         // CharacterControllerを使用して移動
-        controller.Move(velocity * Time.deltaTime);
+        controller.Move(velocity * Time.fixedDeltaTime);
 
         Vector2 velocityXZ = new Vector2(velocity.x, velocity.z);
+        bool isMoving = velocityXZ.sqrMagnitude > 0.0001f;
+        if (isMoving && isRunning && controller.isGrounded)
+        {
+            animator.speed = 1.5f;
+        }
+        else
+        {
+            animator.speed = 1.0f;
+        }
         animator.SetBool("IsGround", controller.isGrounded);
-        animator.SetBool("IsMoving", velocityXZ.sqrMagnitude > 0);
+        animator.SetBool("IsMoving", isMoving);
     }
 
 
+
+    /// <summary>
+    /// 部屋移動やワープなど、外部からTransformを直接書き換えた際に
+    /// Rigidbodyと補間用の前回/現在値、見た目のモデルを同期させる関数。
+    /// これを呼ばずにtransformだけ書き換えると、次のFixedUpdateで
+    /// currentRotationがrb.rotationの古い値で上書きされ、回転が一瞬戻る
+    /// がたつきが発生する。
+    /// </summary>
+    /// <param name="position">同期後の位置</param>
+    /// <param name="rotation">同期後の回転</param>
+    public void SyncTransform(Vector3 position, Quaternion rotation)
+    {
+        rb.position = position;
+        rb.rotation = rotation;
+
+        previousPosition = position;
+        currentPosition = position;
+        previousRotation = rotation;
+        currentRotation = rotation;
+
+        visualModel.SetPositionAndRotation(position, rotation);
+    }
 
     /// <summary>
     /// 基準となるプレイヤーの移動速度を取得します。
@@ -296,11 +355,17 @@ public class CS_PlayerMove : MonoBehaviour
     /// <summary>
     /// 盗賊に捕まったときの処理
     /// </summary>
-    public void CaughtByThief(float holdCatTime)
+    public void CaughtByThief(float holdCatTime, Transform thiefTransform)
     {
+        transform.position = new Vector3(thiefTransform.position.x, thiefTransform.position.y - thiefTransform.localScale.y / 2.0f, thiefTransform.position.z);
+        visualModel.position = transform.position;
+
         // フラグを立てる
         isCaughtByThief = true;
         catCaughtTime = holdCatTime;
+        invincibleTime = holdCatTime * 2f;
+        isInvincible = true;
+        playSE.PlayOneShotSE("Cat_HitThief", gameObject.transform.position, "Cat_HitThief");
     }
 
     // 猫のスタン状態用処理※Ankh用
@@ -328,8 +393,8 @@ public class CS_PlayerMove : MonoBehaviour
     }
     private void OnSneak(InputAction.CallbackContext context)
     {
-        if (context.canceled) isSneaking = false;
-        else isSneaking = true;
+        if (context.canceled) isRunning = false;
+        else isRunning = true;
     }
 
     /// <summary>

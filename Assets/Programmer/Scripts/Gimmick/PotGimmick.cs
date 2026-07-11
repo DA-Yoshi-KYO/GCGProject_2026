@@ -11,6 +11,7 @@
 // ・当たり判定の大きさは、HitRangeX, HitRangeY
 
 using UnityEngine;
+using System.Collections;
 
 public class PotGimmick : GimmickBase
 {
@@ -38,8 +39,17 @@ public class PotGimmick : GimmickBase
 
     private bool isFall = false;
     private float initPositionY;
+    private float initOffsetY = 0.2f;
     private bool isFirstUpdate = true;
+    private bool isFirstBroken = true;
     private bool isDangerZoneSpawned;
+    private float downRayLength = 0.5f;
+
+    private Vector3 activePos; // アクティブ状態のときの移動先座標
+    private float activeMoveTime = 0.06f; // アクティブ初期状態までの移動時間
+    private Coroutine moveCoroutine;
+    private bool isMoving;
+
     protected override void IdleUpdate()
     {
     }
@@ -58,6 +68,7 @@ public class PotGimmick : GimmickBase
             Vector2Int directionVec = GetDirectionVec();
             Vector2Int hitCheckerGridPos = new Vector2Int(gimmickGridPos.x + directionVec.x, gimmickGridPos.y + directionVec.y);
             SetHitChecker(hitCheckerGridPos.x, hitCheckerGridPos.y);
+            activePos = transform.position;
 
             //インタラクトされた方向に地面があるか確認
             //原点をギミックの方向にずらして、下方にレイを飛ばす
@@ -79,26 +90,40 @@ public class PotGimmick : GimmickBase
                     interactVecX = -roomGrid.gridSize.x;
                     break;
             }
-            Vector3 originPos = transform.position + new Vector3(interactVecX, transform.position.y, interactVecZ);
-            initPositionY = originPos.y;
+            //ちょっと上にずらす
+            activePos += new Vector3(interactVecX, initOffsetY, interactVecZ);
+            initPositionY = activePos.y;
             isFall = true;
-            //落下地点に移動
-            originPos.y = transform.position.y;
-            transform.position = originPos;
-
+            isMoving = true;
             if (gimmickSound != null)
             {
-                gimmickSound.PlayOneShotSE("Gimmick_PotFall", gameObject.transform.position, "PotSound");
+                gimmickSound.PlayOneShotSE("Gimmick_PotFall", activePos, "PotSound");
             }
+        }
+        if (activePos != transform.position && isMoving)
+        {
+            MoveToPosition(activePos, activeMoveTime);
+            return;
+        }
+        else
+        {
+            isMoving = false;
         }
 
         //落下
         transform.position -= new Vector3(0, gravity, 0);
         SetHitChecker(transform.position);
 
-        Ray ray = new Ray(transform.position, Vector3.down);
-        if (!Physics.Raycast(ray, out RaycastHit hit, initPositionY + 0.1f))
-        {//初期の高さ+aのレイを出しをそれが当たっていなかったら破壊
+        Ray rayDown = new Ray(transform.position, Vector3.down);
+        Debug.DrawRay(rayDown.origin, rayDown.direction * downRayLength, Color.red, 0.1f);
+        if (Physics.Raycast(rayDown, out RaycastHit hit, downRayLength))
+        {
+            gimmickState = GimmickState.Broken;
+        }
+
+        //ゅかより下に行ったら破壊
+        if (transform.position.y < 0.0f)
+        {
             gimmickState = GimmickState.Broken;
         }
 
@@ -114,34 +139,35 @@ public class PotGimmick : GimmickBase
     {
         base.BrokenUpdate();
 
-        //破壊時に1回だけ生成
-        PlayPotVatEffect();
-
-
-        if (!isDangerZoneSpawned)
+        if (isFirstBroken)
         {
-            isDangerZoneSpawned = true;
+            //破壊時に1回だけ生成
+            PlayPotVatEffect();
 
-            if (dangerZone != null)
+            if (!isDangerZoneSpawned)
             {
-                // ThiefCommonDBから残存時間を取得
-                CO_ThiefCommonStatusData common = null;
-                var thiefManager = GameObject.FindObjectOfType<CS_ThiefManager>();
-                if (thiefManager != null) common = thiefManager.GetThiefCommonDB();
-                CS_DangerZoneSpawner.SpawnAndRegisterFromGimmick(dangerZone, transform.position, this, common, thiefLayer);
+                isDangerZoneSpawned = true;
+
+                if (dangerZone != null)
+                {
+                    // ThiefCommonDBから残存時間を取得
+                    CO_ThiefCommonStatusData common = null;
+                    var thiefManager = GameObject.FindObjectOfType<CS_ThiefManager>();
+                    if (thiefManager != null) common = thiefManager.GetThiefCommonDB();
+                    CS_DangerZoneSpawner.SpawnAndRegisterFromGimmick(dangerZone, transform.position, this, common, thiefLayer);
+                }
+                else
+                {
+                    Debug.LogWarning("PotGimmick: dangerZone が未設定です。", this);
+                }
             }
-            else
+            if (gimmickSound != null)
             {
-                Debug.LogWarning("PotGimmick: dangerZone が未設定です。", this);
+                gimmickSound.PlayOneShotSE("Gimmick_PotBreak", gameObject.transform.position, "PotSound");
             }
+            isFirstBroken = false;
+            DeleteHitChecker();
         }
-        if (gimmickSound != null)
-        {
-            gimmickSound.PlayOneShotSE("Gimmick_PotBreak", gameObject.transform.position, "PotSound");
-        }
-        Destroy(gimmickSound);
-        isFirstUpdate = true;
-        DeleteHitChecker();
     }
 
     private void PlayPotVatEffect()
@@ -184,5 +210,38 @@ public class PotGimmick : GimmickBase
         }
 
         cs_PotVatEffect.PlayEffect(csst_EffectPlayData);
+    }
+
+    public void MoveToPosition(Vector3 targetPos, float moveTime)
+    {
+        if (moveCoroutine != null)
+        {
+            StopCoroutine(moveCoroutine);
+        }
+
+        moveCoroutine = StartCoroutine(MoveToPositionCoroutine(targetPos, moveTime));
+    }
+
+    private IEnumerator MoveToPositionCoroutine(Vector3 targetPos, float moveTime)
+    {
+        Vector3 startPos = transform.position;
+        float timer = 0.0f;
+
+        while (timer < moveTime)
+        {
+            timer += Time.deltaTime;
+
+            float t = timer / moveTime;
+            t = Mathf.Clamp01(t);
+
+            transform.position = Vector3.Lerp(startPos, targetPos, t);
+
+            yield return null;
+        }
+
+        // 誤差防止で最後にぴったり合わせる
+        transform.position = targetPos;
+
+        moveCoroutine = null;
     }
 }

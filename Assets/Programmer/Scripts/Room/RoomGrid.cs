@@ -16,6 +16,8 @@ using UnityEngine;
 public class RoomGrid : MonoBehaviour
 {
     [SerializeField] private Vector2Int gridDivision;
+    public Vector2Int read_GridDivision => gridDivision;   // グリッドの分割数の取得用プロパティ
+
     public Vector2 gridSize { get; private set; } = new Vector2(1, 1);   // グリッド1マスの大きさ
     List<List<GameObject>> gridGimmicks;
     GameObject[,] gridObjects;
@@ -236,7 +238,29 @@ public class RoomGrid : MonoBehaviour
             QueryTriggerInteraction.Ignore);
         Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
 
+        // レイキャストのヒット情報をリスト化
         List<RaycastHit> hitList = new List<RaycastHit>(hits);
+
+        // 宝物の例外処理：宝物の上には召喚しない
+        List<RaycastHit> hitTreasures = hitList.FindAll(hit => hit.transform.CompareTag("Treasure"));
+        foreach (var hit in hitTreasures)
+        {
+            // 運搬中でもそうでなくとも宝物の上には召喚しない為、必ずリストからは除外する
+            hitList.Remove(hit);
+
+            if (hit.collider != null && hit.collider.gameObject != null)
+            {
+                GameObject treasureObj = hit.collider.gameObject;
+                CS_VisionTarget treasureVisionTarget = treasureObj.GetComponent<CS_VisionTarget>();
+                if (treasureVisionTarget != null && treasureVisionTarget.read_IsStolenMoveing)
+                {
+                    // 運搬中の宝物は召喚しない
+                    return false;
+                }
+            }
+        }
+
+        // プレイヤー、泥棒の例外処理：プレイヤーと泥棒の上には召喚しない
         hitList.RemoveAll(hit => hit.transform.CompareTag("Player") || hit.transform.CompareTag("Thief"));
         spawnPos.y = hitList[0].point.y;
 

@@ -272,6 +272,17 @@ public class CS_RoomMovePoint : MonoBehaviour
     /// <param name="targetTransform">移動先Transform。</param>
     private void MovePlayer(Transform playerTransform, Transform targetTransform)
     {
+        Debug.Log(
+            "[RoomMovePoint] Player移動 / Player:"
+            + playerTransform.name
+            + " / 移動前:"
+            + playerTransform.position
+            + " / 移動先:"
+            + targetTransform.name
+            + " / 移動先座標:"
+            + targetTransform.position
+);
+
         if (playerTransform == null)
         {
             Debug.LogWarning("[RoomMovePoint] PlayerTransformがnullです。");
@@ -302,6 +313,8 @@ public class CS_RoomMovePoint : MonoBehaviour
         }
 
         playerTransform.SetPositionAndRotation(targetTransform.position, spawnRotation);
+        CS_PlayerMove playerMove = playerTransform.GetComponent<CS_PlayerMove>();
+        playerMove.SyncTransform(playerTransform.position, playerTransform.rotation);
 
         if (characterController != null)
         {
@@ -461,7 +474,7 @@ public class CS_RoomMovePoint : MonoBehaviour
 
         if (thiefAI != null)
         {
-            thiefAI.read_MoveSystem.WarpAction(targetTransform.position, targetTransform.parent.GetComponent<CS_RoomMovePoint>().e_MoveDirection);
+            thiefAI.read_MoveSystem.WarpAction(targetTransform, targetTransform.parent.GetComponent<CS_RoomMovePoint>().e_MoveDirection);
         }
     }
 

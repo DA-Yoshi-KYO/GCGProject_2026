@@ -139,11 +139,11 @@ public static class CS_RoomCreatePointRaycast
             }
             else
             {
-                return treasureParent.parent.parent.parent.GetSiblingIndex();
+                return treasureParent.GetComponentInParent<CS_RoomCreatePoint>().transform.GetSiblingIndex();
             }
         }
 
-        return 0;
+        return -1;
     }
 
     /// <summary>

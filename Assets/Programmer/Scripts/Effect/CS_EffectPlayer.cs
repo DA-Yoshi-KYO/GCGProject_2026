@@ -136,7 +136,13 @@ public class CS_EffectPlayer : MonoBehaviour
                 v3_Position,
                 q_Rotation,
                 transform);
+
+            if (csad_CurrentEffect != null)
+            {
+                csad_CurrentEffect.SetOnEffectEndAction(DestroyEffect);
+            }
         }
+
 
         if (csad_CurrentEffect == null)
         {
@@ -299,5 +305,18 @@ public class CS_EffectPlayer : MonoBehaviour
         }
 
         csad_CurrentEffect.EndEffect();
+    }
+
+    /// <summary>
+    /// Effect終了時に破棄します。
+    /// </summary>
+    private void DestroyEffect(CSAD_EffectCommonProcessBase csad_Effect)
+    {
+        if (csad_Effect == null)
+        {
+            return;
+        }
+
+        Destroy(csad_Effect.gameObject);
     }
 }

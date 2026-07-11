@@ -30,18 +30,6 @@ public class CS_ThiefManager : MonoBehaviour
     private CO_ThiefCommonStatusData thiefCommonDB;
     public CO_ThiefCommonStatusData GetThiefCommonDB() { return GameObject.Instantiate(thiefCommonDB); }
 
-    [Tooltip("初回生成が完了しているかどうか")]
-    private bool isFirstGenerationComplete = false;
-    public bool read_IsFirstGenerationComplete => isFirstGenerationComplete;
-
-    [Tooltip("生成が完了しているかどうか")]
-    private bool isGenerationComplete = false;
-    public bool read_IsGenerationComplete => isGenerationComplete;
-
-    [Tooltip("ウェーブ進行後のリセットを行うかどうか")]
-    private bool isResetAfterWaveProgress = true;
-    public bool read_IsResetAfterWaveProgress => isResetAfterWaveProgress;
-
     [Tooltip("ゲーム開始から一体目を生成するまでの時間")]
     private float firstSpawnDelay = 5.0f;
     [Tooltip("ウェーブ進行後に一体目を生成するまでの時間")]
@@ -85,6 +73,9 @@ public class CS_ThiefManager : MonoBehaviour
 
     [Tooltip("敵の生成情報のスタック")]
     private List<Stack<ThiefSpawnInfo>> thiefWaveStack = new List<Stack<ThiefSpawnInfo>>();
+
+    [Tooltip("泥棒の生成予定が存在するかどうか")]
+    public bool read_IsThiefWaveStackExist => thiefWaveStack.Count > 0;
 
 
     private void Awake()
@@ -156,12 +147,22 @@ public class CS_ThiefManager : MonoBehaviour
         // 泥棒のタイプに応じたデータを取得
         CO_ThiefStatusData typeData = Info.thiefTypeData;
 
+        Vector3 lookDir = entryPoint.parent.position - entryPoint.position;
+        lookDir.y = 0.0f;
+
+        Quaternion spawnRotation = entryPoint.rotation;
+
+        if (lookDir.sqrMagnitude > 0.001f)
+        {
+            spawnRotation = Quaternion.LookRotation(lookDir);
+        }
+
         // ============================================ 応急処置
         //泥棒の生成
         GameObject thief = GameObject.Instantiate(
             typeData.thiefPrefab,
             entryPoint.position,
-            entryPoint.rotation,
+            spawnRotation,
             thiefParent.transform
         );
 
@@ -180,7 +181,7 @@ public class CS_ThiefManager : MonoBehaviour
 
         // 行動AIの設定
         CS_ThiefAI thiefAI = thief.GetComponent<CS_ThiefAI>();
-        thiefAI.Setting(GameObject.Instantiate(typeData), GetThiefCommonDB(), playerSpeed, entryRoom, entryPoint);
+        thiefAI.Setting(GameObject.Instantiate(typeData), GetThiefCommonDB(), playerSpeed, entryRoom, Info.entryInfo.entryDirection, entryPoint);
     }
 
     /// <summary>
@@ -232,6 +233,29 @@ public class CS_ThiefManager : MonoBehaviour
         {
             thiefWaveStack.Add(stack);
         }
+    }
+
+    /// <summary>
+    /// 指定された泥棒データを元に、生成情報を登録する処理
+    /// </summary>
+    /// <param name="thiefData">泥棒データ</param>
+    /// <param name="roomName">生成する部屋の名前</param>
+    /// <param name="doorDir">生成する出入口の方向</param>
+    public void RegistGenerationInfo(CO_ThiefStatusData thiefData, string roomName, CSE_RoomDoorDirection doorDir)
+    {
+        // 新しいスタックを作成し、生成情報を追加
+        Stack<ThiefSpawnInfo> newStacks = new Stack<ThiefSpawnInfo>();
+        // 生成情報を作成
+        ThiefSpawnInfo spawnInfo = new ThiefSpawnInfo(
+            roomName,                       // 部屋の名前
+            doorDir,                        // 出入口の方向
+            thiefData,                      // 泥棒のタイプデータ
+            spawnInterval          // 生成されるまでの秒数
+        );
+        newStacks.Push(spawnInfo);
+
+        // 新しいスタックをリストに追加
+        thiefWaveStack.Add(newStacks);
     }
 
     /// <summary>
