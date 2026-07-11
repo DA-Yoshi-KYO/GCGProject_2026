@@ -405,6 +405,8 @@ public class CS_ThiefAI : MonoBehaviour
                 Stunned();
                 break;
         }
+
+        moveSystem.DebugMove();
     }
 
     private void OnDestroy()
@@ -432,6 +434,10 @@ public class CS_ThiefAI : MonoBehaviour
     {
         thiefReaction.ClearReaction();
 
+        if (thiefGimmickAction == null)
+        {
+            thiefGimmickAction = new CS_ThiefGimmickAction(this);
+        }
         if(thiefGimmickAction.UpdateAction()) return;
 
         // 探索対象を決定
@@ -733,7 +739,6 @@ public class CS_ThiefAI : MonoBehaviour
     /// <param name="newState">変更する状態</param>
     public void ChangeStatus(ThiefState newState)
     {
-        currentState = newState;
         switch(newState)
             {
             case ThiefState.Explore:
@@ -747,10 +752,12 @@ public class CS_ThiefAI : MonoBehaviour
                 break;
             case ThiefState.Stunned:
                 // 気絶時間の経過時間をリセット
-                elapsedTimeAfterStun = 0.0f;
+                if (currentState != ThiefState.Stunned)
+                    elapsedTimeAfterStun = 0.0f;
                 aStarSystem.ResetUpdatedFlag();
                 break;
         }
+        currentState = newState;
     }
 
     /// <summary>

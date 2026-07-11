@@ -487,4 +487,21 @@ public class CS_AStarSystem
 
         return distance;
     }
+
+    /// <summary>
+    /// 現在のターゲット部屋ノードを取得する処理
+    /// </summary>
+    /// <returns>現在のターゲット部屋ノード</returns>
+    public CS_RoomNode GetCurrentTargetRoomNode()
+    {
+        if (moveRoute == null || moveRoute.Count == 0) return null;
+        Transform targetPoint = moveRoute[0];
+        if (targetPoint == null) return null;
+        GameObject targetRoomObj = CS_RoomCreatePointRaycast.GetRayRoomCreatePoint(targetPoint.gameObject);
+        if (targetRoomObj != null)
+        {
+            return targetRoomObj.GetComponentInChildren<CS_RoomNode>();
+        }
+        return null;
+    }
 }
