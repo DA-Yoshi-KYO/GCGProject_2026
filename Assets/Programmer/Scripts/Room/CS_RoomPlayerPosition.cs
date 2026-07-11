@@ -170,7 +170,8 @@ public class CS_RoomPlayerPosition : MonoBehaviour
 
         playerRoomData = normalizedRoomCreatePoint;
         // TODO: 部屋の情報も取得できるように(もっといい方法ある...？)
-        playerFloorData = playerRoomData.transform.GetComponentInChildren<RoomGrid>().gameObject;
+        RoomGrid roomGrid = playerRoomData.transform.GetComponentInChildren<RoomGrid>();
+        playerFloorData = roomGrid != null ? roomGrid.gameObject : null;
 
         DebugCurrentRoomData();
     }

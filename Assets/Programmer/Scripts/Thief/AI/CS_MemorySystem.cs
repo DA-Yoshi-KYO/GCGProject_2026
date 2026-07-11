@@ -10,6 +10,7 @@
 using System.Collections.Generic;
 using Unity.VisualScripting.Dependencies.Sqlite;
 using UnityEngine;
+using static UnityEditor.Recorder.OutputPath;
 
 /// <summary>
 /// 泥棒の記憶に関するシステムを管理するクラス
@@ -188,6 +189,10 @@ public class CS_MemorySystem
             {
                 // 無敵状態のプレイヤーは探索対象にしない
                 if (entry.transform.GetComponent<CS_PlayerMove>().IsInvincible) continue;
+                // プレイヤーを発見してからの猶予時間が0以下の場合は探索対象にしない
+                if (findPlayerGraceTime <= 0.0f) continue;
+                // プレイヤーの無視フラグが立っている場合は探索対象にしない
+                if (ignorePlayer) continue;
 
                 // プレイヤー視認フラグを立てる
                 isPlayerObject = true;
@@ -434,7 +439,19 @@ public class CS_MemorySystem
         }
 
         // 以下は構築しているルート移動を優先させる
-        if (thiefAI.read_AStarSystem.HasRoute) return;
+        if (thiefAI.read_AStarSystem.HasRoute)
+        {
+            // 部屋の探索度が閾値を超えている場合
+            if (roomMemories[currentRoom].explorationLevel >= nextRoomSearchThreshold)
+            {
+                return;
+            }
+            else
+            {
+                // ルートをクリアして以下の処理に移行する
+                thiefAI?.read_AStarSystem?.ClearRoute();
+            }
+        }
 
         //ーーーーーーーーーーーーーーーーーーーーーーーー
         //--- 音に反応している場合
@@ -801,7 +818,12 @@ public class CS_MemorySystem
         // 探索対象の探索にかかる時間を経過させる
         //　((VisionTarget)currentTarget).explorationProgress　: 対象の探索度(MAX : 100.0f)
         // searchTime : 探索対象の探索にかかる時間
-        visionTargetMemories[((CS_VisionTarget)currentTarget)].explorationProgress += (100.0f / searchTime[((int)((CS_VisionTarget)currentTarget).targetType)]) * Time.deltaTime;
+        int targetTypeIndex = (int)((CS_VisionTarget)currentTarget).targetType;
+        if (searchTime == null || targetTypeIndex < 0 || targetTypeIndex >= searchTime.Count || searchTime[targetTypeIndex] <= 0)
+        {
+            return false;
+        }
+        visionTargetMemories[((CS_VisionTarget)currentTarget)].explorationProgress += (100.0f / searchTime[targetTypeIndex]) * Time.deltaTime;
 
         GameObject Thief_Serach = GameObject.Find("Thief_Serach_" + thiefAI.transform.name);
         if (Thief_Serach == null)
@@ -933,6 +955,10 @@ public class CS_MemorySystem
                     // 次の部屋の記憶がある場合
                     if (roomMemories.ContainsKey(nextConnectionRoomNode))
                     {
+                        if (nextConnectionRoomNode.GetDirectionWallToDoor((CSE_RoomDoorDirection)i) == null)
+                            Debug.LogWarning(nextConnectionRoomNode.transform.name + "の" + (CSE_RoomDoorDirection)i + "の位置がnullです");
+                        
+
                         // 選択した方向にあるドアの位置を次の移動ポイントに設定
                         thiefAI?.read_AStarSystem?.ConstructionRoute(nextConnectionRoomNode.GetDirectionWallToDoor((CSE_RoomDoorDirection)i), false);
                         return;
@@ -963,11 +989,31 @@ public class CS_MemorySystem
         for (int i = 0 ; i < connectDirs.Count ; i++)
         {
             // 接続している部屋のRoomNodeを取得
-            CS_RoomNode nextConnectionRoomNode = roomCreatePoint.GetConnection(connectDirs[i]).TargetCreatePoint.GetComponentInChildren<CS_RoomNode>();
+            CS_RoomMoveConnection connection = roomCreatePoint.GetConnection(connectDirs[i]);
+            if (connection == null || connection.TargetCreatePoint == null) continue;
+            CS_RoomNode nextConnectionRoomNode = connection.TargetCreatePoint.GetComponentInChildren<CS_RoomNode>();
+            if (nextConnectionRoomNode == null) continue;
 
             // タグがTreasureRoomの場合は、次の移動ポイントに設定して処理を終了する
             if (nextConnectionRoomNode.CompareTag("TreasureRoom"))
             {
+                Transform treasureRoomObjParent = nextConnectionRoomNode.read_ObjectParent.transform;
+                if (treasureRoomObjParent.childCount == 0) break;
+
+                bool isTreasureObject = false;
+                for (int n = 0 ; n < treasureRoomObjParent.childCount ; n++)
+                {
+                    if (treasureRoomObjParent.GetChild(n).GetComponent<CS_VisionTarget>().targetType == CS_VisionTarget.TargetType.Treasure)
+                    {
+                        isTreasureObject = true;
+                        break;
+                    }
+                }
+                if (!isTreasureObject) break;
+
+                if (roomCreatePoint.GetRoomDoorPosition((CSE_RoomDoorDirection)i) == null)
+                    Debug.LogWarning(roomCreatePoint.transform.name + "の" + (CSE_RoomDoorDirection)i + "の位置がnullです");
+
                 // 選択した方向にあるドアの位置を次の移動ポイントに設定
                 thiefAI?.read_AStarSystem?.ConstructionRoute(roomCreatePoint.GetRoomDoorPosition((CSE_RoomDoorDirection)i), false);
                 return;
@@ -992,20 +1038,47 @@ public class CS_MemorySystem
             for (int i = 0 ; i < connectDirs.Count ; i++)
             {
                 // 接続している部屋のRoomNodeを取得
-                CS_RoomNode nextConnectionRoomNode = roomCreatePoint.GetConnection(connectDirs[i]).TargetCreatePoint.GetComponentInChildren<CS_RoomNode>();
+                CS_RoomMoveConnection connection = roomCreatePoint.GetConnection(connectDirs[i]);
+                if (connection == null || connection.TargetCreatePoint == null) continue;
+                CS_RoomNode nextConnectionRoomNode = connection.TargetCreatePoint.GetComponentInChildren<CS_RoomNode>();
+                if (nextConnectionRoomNode == null) continue;
                 // 次の部屋の記憶がない場合は、行ったことのない部屋としてリストに追加
                 if (!roomMemories.ContainsKey(nextConnectionRoomNode))
                 {
-                    unvisitedDirs.Add(connectDirs[i]);
+                    unvisitedDirs.Add(connectDirs[i]); 
                 }
             }
 
+            if (unvisitedDirs.Count == 0) return;
+
             // 次の部屋候補の中に行ったことのない部屋の方向リストからランダムに選出
-            int randomIndex = Random.Range(0, unvisitedDirs.Count);
-            CSE_RoomDoorDirection selectedDir = unvisitedDirs[randomIndex];
+            CSE_RoomDoorDirection selectedDir;
+            if (unvisitedDirs.Count != 0)
+            {
+                int randomIndex = Random.Range(0, unvisitedDirs.Count);
+                selectedDir = unvisitedDirs[randomIndex];
+            }
+            else
+            {
+                // 入ってきた方向
+                selectedDir = roomMemories[currentRoom].enteredDoorDirection;
+            }
+
+            if (roomCreatePoint.GetRoomDoorPosition(selectedDir) == null)
+                Debug.LogWarning(roomCreatePoint.transform.name + "の" + selectedDir + "の位置がnullです");
 
             // 選択した方向にあるドアの位置を次の移動ポイントに設定
             thiefAI?.read_AStarSystem?.ConstructionRoute(roomCreatePoint.GetRoomDoorPosition(selectedDir), false);
+
+            // 選ばなかったドアを記憶する
+            for (int i = 0 ; i < connectDirs.Count ; i++)
+            {
+                if (connectDirs[i] != selectedDir)
+                {
+                    roomMemories[currentRoom].unchosenDoors.Add(connectDirs[i]);
+                }
+            }
+
             return;
         }
         // 次の部屋候補の中に行ったことのない部屋がない場合
@@ -1016,7 +1089,10 @@ public class CS_MemorySystem
             for (int i = 0 ; i < connectDirs.Count ; i++)
             {
                 // 接続している部屋のRoomNodeを取得
-                CS_RoomNode nextConnectionRoomNode = roomCreatePoint.GetConnection(connectDirs[i]).TargetCreatePoint.GetComponentInChildren<CS_RoomNode>();
+                CS_RoomMoveConnection connection = roomCreatePoint.GetConnection(connectDirs[i]);
+                if (connection == null || connection.TargetCreatePoint == null) continue;
+                CS_RoomNode nextConnectionRoomNode = connection.TargetCreatePoint.GetComponentInChildren<CS_RoomNode>();
+                if (nextConnectionRoomNode == null) continue;
                 // 次の部屋の記憶がある場合は、探索度が閾値を超えていないかどうかを判定
                 if (roomMemories.ContainsKey(nextConnectionRoomNode))
                 {
@@ -1033,6 +1109,10 @@ public class CS_MemorySystem
                 // 隣接している部屋で探索度が閾値を超えていない部屋の方向リストからランダムに選出
                 int randomIndex = Random.Range(0, unSearchedDirs.Count);
                 CSE_RoomDoorDirection selectedDir = unSearchedDirs[randomIndex];
+
+                if (roomCreatePoint.GetRoomDoorPosition(selectedDir) == null)
+                    Debug.LogWarning(roomCreatePoint.transform.name + "の" + selectedDir + "の位置がnullです");
+
                 // 選択した方向にあるドアの位置を次の移動ポイントに設定
                 thiefAI?.read_AStarSystem?.ConstructionRoute(roomCreatePoint.GetRoomDoorPosition(selectedDir), false);
                 return;
@@ -1059,6 +1139,7 @@ public class CS_MemorySystem
 
                     // 選択した部屋のRoomCreatePointを取得
                     CS_RoomCreatePoint selectedRoomCreatePoint = selectedRoom.GetComponentInParent<CS_RoomCreatePoint>();
+                    if (selectedRoomCreatePoint == null) return;
 
                     // 選択した部屋の接続している方向を取得
                     List<CSE_RoomDoorDirection> connectDirsOfSelectedRoom = selectedRoomCreatePoint.GetConnectDirections();
@@ -1067,15 +1148,79 @@ public class CS_MemorySystem
                     for (int i = 0 ; i < connectDirsOfSelectedRoom.Count ; i++)
                     {
                         // 接続している部屋のRoomNodeを取得
-                        CS_RoomNode nextConnectionRoomNode = selectedRoomCreatePoint.GetConnection(connectDirsOfSelectedRoom[i]).TargetCreatePoint.GetComponentInChildren<CS_RoomNode>();
+                        CS_RoomMoveConnection connection = selectedRoomCreatePoint.GetConnection(connectDirsOfSelectedRoom[i]);
+                        if (connection == null || connection.TargetCreatePoint == null) continue;
+                        CS_RoomNode nextConnectionRoomNode = connection.TargetCreatePoint.GetComponentInChildren<CS_RoomNode>();
+                        if (nextConnectionRoomNode == null) continue;
 
                         // 次の部屋の記憶がある場合
                         if (roomMemories.ContainsKey(nextConnectionRoomNode))
                         {
+                            if (selectedRoomCreatePoint.GetRoomDoorPosition(connectDirsOfSelectedRoom[i]) == null)
+                                Debug.LogWarning(selectedRoomCreatePoint.transform.name + "の" + connectDirsOfSelectedRoom[i] + "の位置がnullです");
+
                             // 選択した方向にあるドアの位置を次の移動ポイントに設定
                             thiefAI?.read_AStarSystem?.ConstructionRoute(selectedRoomCreatePoint.GetRoomDoorPosition(connectDirsOfSelectedRoom[i]), false);
                             return;
                         }
+                    }
+                }
+                else
+                {
+                    // 記憶の中のすべての選択しなかったドアを取得
+                    Dictionary<CS_RoomNode, List<CSE_RoomDoorDirection>> unchosenDoors = new Dictionary<CS_RoomNode, List<CSE_RoomDoorDirection>>();
+                    foreach (var room in roomMemories)
+                    {
+                        if (room.Value.unchosenDoors.Count > 0)
+                        {
+                            unchosenDoors[room.Key] = room.Value.unchosenDoors;
+                        }
+                    }
+
+                    if (unchosenDoors.Count > 0)
+                    {
+                        // 記憶の中のすべての選択しなかったドアの中からランダムに選出
+                        int randomRoomIndex = Random.Range(0, unchosenDoors.Count);
+                        CS_RoomNode selectRoomNode = new List<CS_RoomNode>(unchosenDoors.Keys)[randomRoomIndex];
+
+                        CS_RoomCreatePoint selectCreateRoomPoint = selectRoomNode.GetComponentInParent<CS_RoomCreatePoint>();
+
+                        int randomIndex = Random.Range(0, roomMemories[selectRoomNode].unchosenDoors.Count);
+
+                        // 次の部屋の記憶がある場合
+                        if (roomMemories.ContainsKey(selectRoomNode))
+                        {
+                            if (selectCreateRoomPoint.GetRoomDoorPosition(roomMemories[selectRoomNode].unchosenDoors[randomIndex]) == null)
+                                Debug.LogWarning(selectCreateRoomPoint.transform.name + "の" + roomMemories[selectRoomNode].unchosenDoors[randomIndex] + "の位置がnullです");
+
+                            // 選択した方向にあるドアの位置を次の移動ポイントに設定
+                            thiefAI?.read_AStarSystem?.ConstructionRoute(selectCreateRoomPoint.GetRoomDoorPosition(roomMemories[selectRoomNode].unchosenDoors[randomIndex]), false);
+
+                            // 選択した物を記憶から削除する
+                            roomMemories[selectRoomNode].unchosenDoors.RemoveAt(randomIndex);
+
+                            return;
+                        }
+                    }
+                    // 記憶の中のすべての選択しなかったドアがない場合
+                    else
+                    {
+                        if (connectDirs.Count == 0)
+                        {
+                            // 現在いる部屋の接続している方向を再取得
+                            connectDirs = roomCreatePoint.GetConnectDirections();
+                        }
+
+                        // 今いる部屋の接続している方向の中からランダムに選出
+                        int randomIndex = Random.Range(0, connectDirs.Count);
+
+                        if (roomCreatePoint.GetRoomDoorPosition(connectDirs[randomIndex]) == null)
+                            Debug.LogWarning(roomCreatePoint.transform.name + "の" + connectDirs[randomIndex] + "の位置がnullです");
+
+                        // 選択した方向にあるドアの位置を次の移動ポイント
+                        thiefAI?.read_AStarSystem?.ConstructionRoute(roomCreatePoint.GetRoomDoorPosition(connectDirs[randomIndex]), false);
+
+                        return;
                     }
                 }
             }
@@ -1107,7 +1252,10 @@ public class CS_MemorySystem
             foreach (var dir in currentRoomObject.transform.GetComponent<CS_RoomCreatePoint>().GetConnectDirections())
             {
                 // 接続している部屋のRoomNodeを取得
-                CS_RoomNode nextConnectionRoomNode = currentRoomObject.transform.GetComponent<CS_RoomCreatePoint>().GetConnection(dir).TargetCreatePoint.GetComponentInChildren<CS_RoomNode>();
+                CS_RoomMoveConnection connection = currentRoomObject.transform.GetComponent<CS_RoomCreatePoint>().GetConnection(dir);
+                if (connection == null || connection.TargetCreatePoint == null) continue;
+                CS_RoomNode nextConnectionRoomNode = connection.TargetCreatePoint.GetComponentInChildren<CS_RoomNode>();
+                if (nextConnectionRoomNode == null) continue;
                 // 次の部屋の記憶がない場合は、行ったことのない部屋があると判定してtrueを返す
                 if (!roomMemories.ContainsKey(nextConnectionRoomNode))
                 {

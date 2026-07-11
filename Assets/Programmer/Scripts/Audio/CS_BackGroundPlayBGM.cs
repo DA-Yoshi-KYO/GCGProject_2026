@@ -70,7 +70,8 @@ public class CS_BackGroundPlayBGM : MonoBehaviour
         //ThiefManagerがあるかどうか(一回きり)
         if (!once)
         {
-            thiefManager = GameObject.Find("ThiefManager").GetComponent<CS_ThiefManager>();
+            GameObject thiefManagerObject = GameObject.Find("ThiefManager");
+            thiefManager = thiefManagerObject != null ? thiefManagerObject.GetComponent<CS_ThiefManager>() : null;
         }
 
         //ThiefManagerない場合は処理しない
@@ -86,7 +87,11 @@ public class CS_BackGroundPlayBGM : MonoBehaviour
     //BGM設定
     private void SettingBGM(string CurrentScene)
     {
-        BackGroundBGMData data = dataBase.bgmData[CurrentScene];
+        if (!dataBase.bgmData.TryGetValue(CurrentScene, out BackGroundBGMData data))
+        {
+            Debug.LogError($"CS_BackGroundPlayBGM: シーン \"{CurrentScene}\" に対応するBGMデータが見つかりません。");
+            return;
+        }
 
         if (data.cueName.ToString() != "NoneBGM")
         {
@@ -103,7 +108,10 @@ public class CS_BackGroundPlayBGM : MonoBehaviour
 
         currentData = data;
 
-        thiefData = dataBase.bgmData["ThiefEscape"];
+        if (!dataBase.bgmData.TryGetValue("ThiefEscape", out thiefData))
+        {
+            Debug.LogError("CS_BackGroundPlayBGM: \"ThiefEscape\"に対応するBGMデータが見つかりません。");
+        }
     }
 
     //BGMのフェードアウト

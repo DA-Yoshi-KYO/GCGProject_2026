@@ -35,6 +35,11 @@ public class NyakiGimmick : GimmickBase
         //設置＝発動となる
         gimmickState = GimmickState.Active;
         volume = FindFirstObjectByType<Volume>();
+        if (volume == null)
+        {
+            Debug.LogError("NyakiGimmick: シーン内にVolumeが見つかりません。", this);
+            return;
+        }
         volume.profile.TryGet(out catEye);
     }
     protected override void ActiveUpdate()

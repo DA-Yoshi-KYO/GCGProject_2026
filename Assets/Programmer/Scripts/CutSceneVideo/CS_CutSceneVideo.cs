@@ -37,6 +37,10 @@ public class CS_CutSceneVideo : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //まだ再生対象が設定されていない場合は処理しない
+        if (data == null)
+            return;
+
         //再生していた場合処理しない
         if (data.played)
             return;
@@ -84,7 +88,10 @@ public class CS_CutSceneVideo : MonoBehaviour
         videoPlayer.Stop();
 
         if (nextWait)
+        {
+            nextWait = false;
             data = nextData;
             PlayVideo();
+        }
     }
 }

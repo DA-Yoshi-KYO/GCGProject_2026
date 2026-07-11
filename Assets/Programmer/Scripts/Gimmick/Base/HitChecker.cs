@@ -317,6 +317,7 @@ public class HitChecker : MonoBehaviour
             {
                 GameObject enemy = searchEnemies[i].gameObject;
                 CS_ThiefAI thiefAI = enemy.GetComponent<CS_ThiefAI>();
+                if (thiefAI == null) continue;
                 thiefGA = thiefAI.read_ThiefGimmickAction;
                 GimmickBase gimmickBase = parentGameObject.GetComponent<GimmickBase>();
                 switch (gimmick)
@@ -351,11 +352,8 @@ public class HitChecker : MonoBehaviour
                     GameObject enemy =
                         effectEnemies[i].gameObject;
                     CS_ThiefAI thiefAI = enemy.GetComponent<CS_ThiefAI>();
+                    if (thiefAI == null) continue;
                     thiefGA = thiefAI.read_ThiefGimmickAction;
-                    if (thiefAI != null)
-                    {
-                        thiefGA = thiefAI.read_ThiefGimmickAction;
-                    }
                     GimmickBase gimmickBase = parentGameObject.GetComponent<GimmickBase>();
                     switch (gimmick)
                     {
@@ -400,6 +398,7 @@ public class HitChecker : MonoBehaviour
             {
                 GameObject enemy = hitEnemies[i].gameObject;
                 CS_ThiefAI thiefAI = enemy.GetComponent<CS_ThiefAI>();
+                if (thiefAI == null) continue;
                 thiefGA = thiefAI.read_ThiefGimmickAction;
                 GimmickBase gimmickBase = parentGameObject.GetComponent<GimmickBase>();
 

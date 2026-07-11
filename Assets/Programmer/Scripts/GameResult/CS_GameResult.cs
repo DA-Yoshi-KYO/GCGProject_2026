@@ -31,9 +31,11 @@ public class CS_GameResult : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        endManager = GameObject.Find("EndManager").GetComponent<CS_EndManager>();
+        GameObject endManagerObject = GameObject.Find("EndManager");
+        endManager = endManagerObject != null ? endManagerObject.GetComponent<CS_EndManager>() : null;
 
-        backGroundPlaySE = GameObject.Find("SE").GetComponent<CS_BackGroundPlaySE>();
+        GameObject seObject = GameObject.Find("SE");
+        backGroundPlaySE = seObject != null ? seObject.GetComponent<CS_BackGroundPlaySE>() : null;
 
         gameClear.SetActive(false);
 

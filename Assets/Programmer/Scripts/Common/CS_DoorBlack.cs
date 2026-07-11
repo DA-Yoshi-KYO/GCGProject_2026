@@ -16,7 +16,13 @@ public class CS_DoorBlack : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        doorMaterial = GetComponent<Renderer>().material;
+        Renderer renderer = GetComponent<Renderer>();
+        if (renderer == null)
+        {
+            Debug.LogError("CS_DoorBlack: Rendererコンポーネントが見つかりません。", this);
+            return;
+        }
+        doorMaterial = renderer.material;
 
         doorMaterial.SetFloat("_FadeRangeFloat", fadeRange);
     }

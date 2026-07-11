@@ -314,7 +314,10 @@ public class CS_RoomMovePoint : MonoBehaviour
 
         playerTransform.SetPositionAndRotation(targetTransform.position, spawnRotation);
         CS_PlayerMove playerMove = playerTransform.GetComponent<CS_PlayerMove>();
-        playerMove.SyncTransform(playerTransform.position, playerTransform.rotation);
+        if (playerMove != null)
+        {
+            playerMove.SyncTransform(playerTransform.position, playerTransform.rotation);
+        }
 
         if (characterController != null)
         {

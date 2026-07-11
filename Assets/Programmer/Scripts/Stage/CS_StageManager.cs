@@ -48,12 +48,23 @@ public class CS_StageManager : MonoBehaviour
         waveCount = 1;
         stageCount = 1;
 
+        if (enemyDatabase == null)
+        {
+            Debug.LogError("CS_StageManager: enemyDatabaseがInspectorで設定されていません。", this);
+            return;
+        }
+
         maxWaveCount = enemyDatabase.stageThiefDataList[stageCount - 1].waveData.Count; // データベースから現在のステージの最大ウェーブ数を取得して設定する
 
         Time.timeScale = 1.0f; // 時間のスケールをリセットする
 
         // 生成情報を登録
         thiefManager = GameObject.FindAnyObjectByType<CS_ThiefManager>();
+        if (thiefManager == null)
+        {
+            Debug.LogError("CS_StageManager: CS_ThiefManagerが見つかりません。", this);
+            return;
+        }
         thiefManager.RegistGenerationInfo(
             enemyDatabase.stageThiefDataList[stageCount - 1].waveData[waveCount - 1],
             waveCount == 1

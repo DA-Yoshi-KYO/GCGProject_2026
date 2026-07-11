@@ -53,6 +53,7 @@ public class CS_EndManager : MonoBehaviour
 
             // WaveManagerを取得
             CS_StageManager stageManager = GameObject.FindObjectOfType< CS_StageManager>();
+            if (stageManager == null) return;
 
             // 泥棒がいなくなった場合
             if (thiefCount == 0 && stageManager.IsMaxWave())
