@@ -243,6 +243,7 @@ public class MiniMap : MonoBehaviour
             if (count == 0) continue;
 
             RectTransform parentRect = targetObjects[i].GetComponent<RectTransform>();
+            if (parentRect == null) continue;
             Vector2[] positions = GetLayoutPositions(count, parentRect.rect.width, parentRect.rect.height);
 
             for (int j = 0 ; j < count ; j++)
