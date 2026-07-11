@@ -135,11 +135,29 @@ public class CS_ThiefManager : MonoBehaviour
         }
 
         GameObject roomObject = GameObject.Find(Info.entryInfo.roomName);
+        if (roomObject == null)
+        {
+            Debug.LogError($"部屋 {Info.entryInfo.roomName} が見つかりません。");
+            return;
+        }
 
-        CS_RoomEnemyEntryPointCollector collector = GameObject.Find("RoomCreatePoints").GetComponent<CS_RoomEnemyEntryPointCollector>();
+        GameObject roomCreatePoints = GameObject.Find("RoomCreatePoints");
+        CS_RoomEnemyEntryPointCollector collector = roomCreatePoints != null ? roomCreatePoints.GetComponent<CS_RoomEnemyEntryPointCollector>() : null;
+
+        CS_RoomCreatePoint roomCreatePoint = roomObject.transform.GetComponent<CS_RoomCreatePoint>();
+        if (roomCreatePoint == null)
+        {
+            Debug.LogError($"部屋 {Info.entryInfo.roomName} にCS_RoomCreatePointが見つかりません。");
+            return;
+        }
 
         // 生成位置の取得
-        Transform entryPoint = roomObject.transform.GetComponent<CS_RoomCreatePoint>().GetRoomDoorPosition(Info.entryInfo.entryDirection);
+        Transform entryPoint = roomCreatePoint.GetRoomDoorPosition(Info.entryInfo.entryDirection);
+        if (entryPoint == null)
+        {
+            Debug.LogError($"部屋 {Info.entryInfo.roomName} の入口位置が取得できません。");
+            return;
+        }
 
         // 生成される初期部屋の取得
         CS_RoomNode entryRoom = roomObject.transform.GetComponentInChildren<CS_RoomNode>();
@@ -177,10 +195,18 @@ public class CS_ThiefManager : MonoBehaviour
         }
 
         // 基準となるプレイヤーの速度を取得
-        float playerSpeed = GameObject.FindGameObjectWithTag("Player").GetComponent<CS_PlayerMove>().GetBasePlayerSpeed();
+        GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
+        CS_PlayerMove playerMove = playerObject != null ? playerObject.GetComponent<CS_PlayerMove>() : null;
+        if (playerMove == null)
+        {
+            Debug.LogError("Playerが見つかりません。泥棒の速度を設定できません。");
+            return;
+        }
+        float playerSpeed = playerMove.GetBasePlayerSpeed();
 
         // 行動AIの設定
         CS_ThiefAI thiefAI = thief.GetComponent<CS_ThiefAI>();
+        if (thiefAI == null) return;
         thiefAI.Setting(GameObject.Instantiate(typeData), GetThiefCommonDB(), playerSpeed, entryRoom, Info.entryInfo.entryDirection, entryPoint);
     }
 
