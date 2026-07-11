@@ -30,6 +30,8 @@ public class CS_VisionConeRenderer : MonoBehaviour
     private Mesh mesh;
     private int floorRaycastMask;
 
+    CS_ThiefAI thiefAI;
+
     private void Awake()
     {
         visionSensor = GetComponent<CS_VisionSensor>();
@@ -55,6 +57,8 @@ public class CS_VisionConeRenderer : MonoBehaviour
         meshRenderer.sharedMaterial = material;
         meshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
         meshRenderer.receiveShadows = false;
+
+        thiefAI = transform.GetComponentInParent<CS_ThiefAI>();
     }
 
     private void LateUpdate()
@@ -62,7 +66,37 @@ public class CS_VisionConeRenderer : MonoBehaviour
         if (meshRenderer.enabled != isVisible) meshRenderer.enabled = isVisible;
         if (!isVisible) return;
 
+        UpdateColor();
         BuildConeMesh();
+    }
+
+    /// <summary>
+    /// メッシュの色を更新する
+    /// </summary>
+    private void UpdateColor()
+    {
+        if (thiefAI == null)
+        {
+            thiefAI = transform.GetComponentInParent<CS_ThiefAI>();
+            Debug.Log("CS_ThiefAIが見つかりません。視野角の色を更新できません。");
+            return;
+        }
+
+        if(thiefAI.read_MemorySystem.read_CurrentTarget == null)
+        {
+            meshRenderer.sharedMaterial.color = new Color(1f, 0.9f, 0.2f, 0.35f); // 黄色
+        }
+        else
+        {
+            if (thiefAI.read_MemorySystem.read_CurrentTarget is CS_PlayerTarget)
+            {
+                meshRenderer.sharedMaterial.color = new Color(1f, 0.2f, 0.2f, 0.35f); // 赤色
+            }
+            else
+            {
+                meshRenderer.sharedMaterial.color = new Color(1f, 0.9f, 0.2f, 0.35f); // 黄色
+            }
+        }
     }
 
     /// <summary>
