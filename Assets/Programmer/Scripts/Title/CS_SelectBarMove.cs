@@ -34,10 +34,14 @@ public class CS_SelectBarMove : MonoBehaviour
         inputActions.SelectBar.Enable();
         inputActions.SelectBar.MoveAxis.started += TitleSelectInput;
 
-        backGroundPlaySE = GameObject.Find("SE").GetComponent<CS_BackGroundPlaySE>();
+        GameObject seObject = GameObject.Find("SE");
+        backGroundPlaySE = seObject != null ? seObject.GetComponent<CS_BackGroundPlaySE>() : null;
 
-        manualImage[0].SetActive(true);
-        manualImage[1].SetActive(false);
+        if (manualImage != null && manualImage.Length >= 2)
+        {
+            manualImage[0].SetActive(true);
+            manualImage[1].SetActive(false);
+        }
 
         currentButton = 0;
         UpdateButtonTexture();
@@ -50,6 +54,8 @@ public class CS_SelectBarMove : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (Option.Instance == null) return;
+
         if (!Option.Instance.GetIsOptionUIActive())
         {
             inputActions.SelectBar.Enable();
