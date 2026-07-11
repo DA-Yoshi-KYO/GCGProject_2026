@@ -2054,7 +2054,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a522c4a2bffae8b4f9a3a2b1c1674f46, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  e_MoveDirection: 0
+  e_MoveDirection: 2
   tf_PlayerSpawnPoint: {fileID: 3743769990839530399}
   go_OpenDoorObject: {fileID: 0}
   go_ClosedWallObject: {fileID: 0}
@@ -2073,7 +2073,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7921090078645540343}
   m_Layer: 0
-  m_Name: Back
+  m_Name: Right
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2105,7 +2105,6 @@ Transform:
   - {fileID: 5183155182423599954}
   - {fileID: 8985266070463842505}
   - {fileID: 6118686991947895207}
-  - {fileID: 4166035897229278456}
   m_Father: {fileID: 1719473393117230257}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4160971439472419371
@@ -2190,14 +2189,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4168464381259940326}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: 0.7071068, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: -3, y: 4, z: -11}
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
+  m_LocalPosition: {x: 7.817, y: 0.986, z: 5.977}
   m_LocalScale: {x: 1, y: 2, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8573658773057498960}
   m_Father: {fileID: 3131162511979469901}
-  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!65 &2212600046631411460
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -2231,7 +2230,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a522c4a2bffae8b4f9a3a2b1c1674f46, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  e_MoveDirection: 1
+  e_MoveDirection: 3
   tf_PlayerSpawnPoint: {fileID: 8573658773057498960}
   go_OpenDoorObject: {fileID: 0}
   go_ClosedWallObject: {fileID: 0}
@@ -2840,7 +2839,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7126168024130160030}
   m_Layer: 0
-  m_Name: Right
+  m_Name: Front
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3169,7 +3168,7 @@ Transform:
   m_GameObject: {fileID: 5881544220385117702}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2, y: -0.5, z: -0}
+  m_LocalPosition: {x: 2, y: -0.5, z: -0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3394,7 +3393,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2905338006770726645}
   m_Layer: 0
-  m_Name: Front
+  m_Name: Left
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3426,6 +3425,7 @@ Transform:
   - {fileID: 6523041172351987251}
   - {fileID: 1139222450861517283}
   - {fileID: 4843429815335755389}
+  - {fileID: 4166035897229278456}
   m_Father: {fileID: 1719473393117230257}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6586643890836029789
@@ -3811,14 +3811,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7414941889018990679}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 8, y: 1, z: 6}
+  m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: -3.06, y: 4.02, z: -10.96}
   m_LocalScale: {x: 1, y: 2, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3506358064490129275}
-  m_Father: {fileID: 7921090078645540343}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_Father: {fileID: 2905338006770726645}
+  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
 --- !u!65 &3497624081868592764
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -3852,7 +3852,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a522c4a2bffae8b4f9a3a2b1c1674f46, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  e_MoveDirection: 3
+  e_MoveDirection: 1
   tf_PlayerSpawnPoint: {fileID: 3506358064490129275}
   go_OpenDoorObject: {fileID: 0}
   go_ClosedWallObject: {fileID: 0}
@@ -3871,7 +3871,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3131162511979469901}
   m_Layer: 0
-  m_Name: Left
+  m_Name: Back
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4210,8 +4210,8 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7126168024130160030}
-  - {fileID: 3131162511979469901}
   - {fileID: 2905338006770726645}
+  - {fileID: 3131162511979469901}
   - {fileID: 7921090078645540343}
   m_Father: {fileID: 2615002409663817288}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
