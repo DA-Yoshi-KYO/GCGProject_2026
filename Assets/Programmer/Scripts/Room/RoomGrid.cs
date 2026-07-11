@@ -47,6 +47,11 @@ public class RoomGrid : MonoBehaviour
         List<GameObject> floors = new List<GameObject>();
 
         GameObject roomParent = GameObject.Find("RoomCreatePoints");
+        if (roomParent == null)
+        {
+            Debug.LogError("RoomGrid: RoomCreatePointsオブジェクトが見つかりません。");
+            return;
+        }
         List<GameObject> rooms = new List<GameObject>();
         for (int i = 0 ; i < roomParent.transform.childCount ; i++)
         {
@@ -71,7 +76,7 @@ public class RoomGrid : MonoBehaviour
             sum += child.transform.position;
             floorCount++;
         }
-        gridCenter = sum / floorCount;
+        if (floorCount > 0) gridCenter = sum / floorCount;
 
         // グリッドから溢れているかチェックする
         const int gridCellNumX = 3;
@@ -262,6 +267,7 @@ public class RoomGrid : MonoBehaviour
 
         // プレイヤー、泥棒の例外処理：プレイヤーと泥棒の上には召喚しない
         hitList.RemoveAll(hit => hit.transform.CompareTag("Player") || hit.transform.CompareTag("Thief"));
+        if (hitList.Count == 0) return false;
         spawnPos.y = hitList[0].point.y;
 
         // ギミックが落とし穴ギミックだった場合、床のマテリアルに穴の位置を伝える
