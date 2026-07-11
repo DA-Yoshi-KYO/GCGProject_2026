@@ -1,4 +1,10 @@
-
+/* ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+ *    チュートリアル確認画面の処理
+ * ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+ *    元浪梨緒
+ * ----------------------------------------------------------
+ * 2026-07-8 | 初回作成
+ */
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -8,6 +14,7 @@ public class CS_TutorialConfirmation : MonoBehaviour
     [Header("ボタンを押した際にシーン遷移するシーン名前（右から順に格納してください）")][SerializeField] private string[] sceneList;
 
     [Header("FadeCanvasのPrefab格納")][SerializeField] private GameObject fadeCanvas;
+    [Header("MovieCanvasを格納")][SerializeField] private GameObject movieCanvas;
 
     private CustomInputAction inputActions;
     private int currentButton = 0;
@@ -29,11 +36,21 @@ public class CS_TutorialConfirmation : MonoBehaviour
 
         currentButton = 0;
         UpdateButtonTexture();
+        foreach (var action in inputActions)
+        {
+            action.performed += OnAction;
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (enabled)
+        {
+            //アクティブを切り替える（不必要なため）
+           movieCanvas.SetActive(false);
+        }
+
         //決定ボタンでシーン遷移
         if (inputActions.TutorialConfirmation.Decision.triggered)
         {
@@ -97,6 +114,18 @@ public class CS_TutorialConfirmation : MonoBehaviour
 
                 UpdateButtonTexture();
             }
+        }
+    }
+
+    private void OnAction(InputAction.CallbackContext context)
+    {
+        if (context.control.device is Gamepad)
+        {
+            CS_InputType.currentInputType = CS_InputType.InputType.Gamepad;
+        }
+        else
+        {
+            CS_InputType.currentInputType = CS_InputType.InputType.KeyboardMouse;
         }
     }
 }

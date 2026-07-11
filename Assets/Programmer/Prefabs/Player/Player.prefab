@@ -69,7 +69,7 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 0
-  m_IsKinematic: 1
+  m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
@@ -87,7 +87,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveAmount: 3
   velocityWalk: 1
-  velocitySneak: 1.5
+  velocityRun: 1.5
   jumpAmount: 10
   gravity: -20
   airResistance: 0.97
@@ -211,7 +211,6 @@ MonoBehaviour:
       coolTime: 5
       maxNum: 5
       currentNum: 5
-      totalNum: 0
     itemPrefab: {fileID: 7905465617219888894, guid: ea9bc9bbcf651ed43b2221a4dcb8d0c4,
       type: 3}
     previewPrefab: {fileID: 7905465617219888894, guid: 3bbc83263c5915945a441225b71b798c,
@@ -223,7 +222,6 @@ MonoBehaviour:
       coolTime: 10
       maxNum: 2
       currentNum: 2
-      totalNum: 0
     itemPrefab: {fileID: 1657490478714675189, guid: 96291b85c9fdb7d49afd3a58f5702762,
       type: 3}
     previewPrefab: {fileID: 5619306240066455382, guid: dd482d498a4aff246acacf665d5711ea,
@@ -235,7 +233,6 @@ MonoBehaviour:
       coolTime: 10
       maxNum: 2
       currentNum: 0
-      totalNum: 0
     itemPrefab: {fileID: 8099441442987179503, guid: 5a19a6247af65e74d8197a1e82c9564c,
       type: 3}
     previewPrefab: {fileID: 8099441442987179503, guid: 5f533338cc2b2bd43af43cc50ce6e253,
@@ -247,7 +244,6 @@ MonoBehaviour:
       coolTime: 20
       maxNum: 1
       currentNum: 0
-      totalNum: 0
     itemPrefab: {fileID: 0}
     previewPrefab: {fileID: 0}
     gimmickPrefab: {fileID: 2109292754562999017, guid: 5439714f3877a314ba01e6c958ee03e4,
@@ -257,7 +253,6 @@ MonoBehaviour:
       coolTime: 20
       maxNum: 1
       currentNum: 0
-      totalNum: 0
     itemPrefab: {fileID: 3784575776439470413, guid: 9988d2f929e240744b330f3925377dfb,
       type: 3}
     previewPrefab: {fileID: 2268929153101709382, guid: 1050028b9b76c6a40bb4cd6201081adc,
@@ -269,7 +264,6 @@ MonoBehaviour:
       coolTime: 25
       maxNum: 2
       currentNum: 0
-      totalNum: 0
     itemPrefab: {fileID: 0}
     previewPrefab: {fileID: 1489878763450881206, guid: 5e6df8dac4832cc4b87524ece603b7d0,
       type: 3}
@@ -279,8 +273,7 @@ MonoBehaviour:
     gimmickInfo:
       coolTime: 20
       maxNum: 1
-      currentNum: 0
-      totalNum: 0
+      currentNum: 1
     itemPrefab: {fileID: 0}
     previewPrefab: {fileID: 7506170590698890803, guid: 269c04346fb368b42835df1885b8ea20,
       type: 3}
