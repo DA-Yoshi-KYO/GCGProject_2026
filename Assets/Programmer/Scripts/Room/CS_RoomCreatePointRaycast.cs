@@ -89,6 +89,10 @@ public static class CS_RoomCreatePointRaycast
             return roomCreatePoint;
         }
 
+        if (player.name == "RoomMovePoint01")
+        {
+            Debug.LogWarning(player.transform.GetComponentInParent<CS_RoomCreatePoint>().transform.name + "|" + player.transform.GetComponentInParent<CS_RoomCreatePoint>().transform.GetChild(0).name);
+        }
         Debug.LogWarning("[CS_RoomCreatePointRaycast] " + player.name + " の下方向にPlaneタグのColliderが見つかりませんでした。");
         Debug.DrawRay(rayStartPosition, Vector3.down * RAY_DISTANCE, Color.red, 3.0f);
 

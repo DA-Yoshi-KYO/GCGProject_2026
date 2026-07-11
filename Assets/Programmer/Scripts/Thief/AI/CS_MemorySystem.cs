@@ -619,6 +619,7 @@ public class CS_MemorySystem
             {
                 if (Vector3.Distance(thiefAI.transform.position, currentTarget.transform.position) > thiefAI.read_ExploredDistanceThresholdMovePoint)
                 {
+                    thiefAI?.read_MoveSystem?.MoveTo(currentTarget.transform.position);
                     return;
                 }
 
@@ -944,23 +945,22 @@ public class CS_MemorySystem
                 if (!isTreasureObject) break;
                 //---------------------------------------------------------------------------------------------------------------------------
 
-                for (int i = 0 ; i < 4 ; i++)
-                {
-                    CS_RoomMoveConnection nextConnectionRoom = room.Key.GetComponentInParent<CS_RoomCreatePoint>().GetConnection((CSE_RoomDoorDirection)i);
+                List<CSE_RoomDoorDirection> nextConnectDirs = room.Key.GetComponentInParent<CS_RoomCreatePoint>().GetConnectDirections();
 
+                for (int n = 0 ; n < nextConnectDirs.Count ; n++)
+                {
+                    CS_RoomMoveConnection nextConnectionRoom = room.Key.GetComponentInParent<CS_RoomCreatePoint>().GetConnection(nextConnectDirs[n]);
                     if (nextConnectionRoom.TargetCreatePoint == null) continue;
 
                     CS_RoomNode nextConnectionRoomNode = nextConnectionRoom.TargetCreatePoint.GetComponentInChildren<CS_RoomNode>();
-
                     // 次の部屋の記憶がある場合
                     if (roomMemories.ContainsKey(nextConnectionRoomNode))
                     {
-                        if (nextConnectionRoomNode.GetDirectionWallToDoor((CSE_RoomDoorDirection)i) == null)
-                            Debug.LogWarning(nextConnectionRoomNode.transform.name + "の" + (CSE_RoomDoorDirection)i + "の位置がnullです");
-                        
+                        if (room.Key.GetDirectionWallToDoor(nextConnectDirs[n]) == null)
+                            Debug.LogWarning(room.Key.transform.name + "の" + nextConnectDirs[n] + "の位置がnullです");
 
                         // 選択した方向にあるドアの位置を次の移動ポイントに設定
-                        thiefAI?.read_AStarSystem?.ConstructionRoute(nextConnectionRoomNode.GetDirectionWallToDoor((CSE_RoomDoorDirection)i), false);
+                        thiefAI?.read_AStarSystem?.ConstructionRoute(room.Key.GetDirectionWallToDoor(nextConnectDirs[n]), false);
                         return;
                     }
                 }
@@ -1011,11 +1011,11 @@ public class CS_MemorySystem
                 }
                 if (!isTreasureObject) break;
 
-                if (roomCreatePoint.GetRoomDoorPosition((CSE_RoomDoorDirection)i) == null)
-                    Debug.LogWarning(roomCreatePoint.transform.name + "の" + (CSE_RoomDoorDirection)i + "の位置がnullです");
+                if (roomCreatePoint.GetRoomDoorPosition(connectDirs[i]) == null)
+                    Debug.LogWarning(roomCreatePoint.transform.name + "の" + connectDirs[i] + "の位置がnullです");
 
                 // 選択した方向にあるドアの位置を次の移動ポイントに設定
-                thiefAI?.read_AStarSystem?.ConstructionRoute(roomCreatePoint.GetRoomDoorPosition((CSE_RoomDoorDirection)i), false);
+                thiefAI?.read_AStarSystem?.ConstructionRoute(roomCreatePoint.GetRoomDoorPosition(connectDirs[i]), false);
                 return;
             }
         }
@@ -1268,7 +1268,7 @@ public class CS_MemorySystem
     }
 
     /// <summary>
-    ///罠発動などで「この泥棒が回避する DangerZone」を動的に追加する。
+    /// 罠発動などで「この泥棒が回避する DangerZone」を動的に追加する。
     /// </summary>
     /// <param name="zoneID">追加する DangerZone のID</param>
     public void AddAvoidZoneID(int zoneID)
