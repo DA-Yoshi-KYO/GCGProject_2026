@@ -639,7 +639,7 @@ PrefabInstance:
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
       propertyPath: cs_BackConnection.e_TargetOutDirection
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
@@ -762,7 +762,7 @@ PrefabInstance:
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
       propertyPath: cs_BackConnection.e_TargetOutDirection
-      value: 0
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
@@ -1611,7 +1611,7 @@ PrefabInstance:
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
       propertyPath: cs_RightConnection.e_TargetOutDirection
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
@@ -2271,8 +2271,13 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
-      propertyPath: cs_FrontConnection.e_DoorUsageType
+      propertyPath: cs_BackConnection.e_DoorUsageType
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_FrontConnection.e_DoorUsageType
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
@@ -2292,17 +2297,17 @@ PrefabInstance:
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
       propertyPath: cs_LeftConnection.e_TargetOutDirection
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
       propertyPath: cs_FrontConnection.cs_TargetCreatePoint
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1961195761}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
       propertyPath: cs_FrontConnection.e_TargetOutDirection
-      value: 0
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
@@ -2536,8 +2541,13 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
-      propertyPath: cs_FrontConnection.e_DoorUsageType
+      propertyPath: cs_LeftConnection.e_DoorUsageType
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_FrontConnection.e_DoorUsageType
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
@@ -2558,11 +2568,11 @@ PrefabInstance:
         type: 3}
       propertyPath: cs_FrontConnection.cs_TargetCreatePoint
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 257867269}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
       propertyPath: cs_FrontConnection.e_TargetOutDirection
-      value: 3
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
@@ -3542,6 +3552,11 @@ PrefabInstance:
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
       propertyPath: cs_FrontConnection.e_DoorUsageType
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_RightConnection.e_DoorUsageType
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
@@ -3568,11 +3583,11 @@ PrefabInstance:
         type: 3}
       propertyPath: cs_FrontConnection.cs_TargetCreatePoint
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 35335177}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
       propertyPath: cs_FrontConnection.e_TargetOutDirection
-      value: 2
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
@@ -3968,6 +3983,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 991451740903014827, guid: 6050fd3af03816d4ebd2d313a81c713d,
         type: 3}
+      propertyPath: list_RoomCreatePointGenerateData.Array.data[6].list_RandomRoomBlockPrefabs.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 991451740903014827, guid: 6050fd3af03816d4ebd2d313a81c713d,
+        type: 3}
       propertyPath: list_RoomCreatePointGenerateData.Array.data[1].list_RandomRoomBlockPrefabs.Array.data[1]
       value: 
       objectReference: {fileID: 5646823382267403765, guid: 612781328e9a9984dbffbfc27b0531a9,
@@ -3983,6 +4003,24 @@ PrefabInstance:
       propertyPath: list_RoomCreatePointGenerateData.Array.data[2].list_RandomRoomBlockPrefabs.Array.data[1]
       value: 
       objectReference: {fileID: 5646823382267403765, guid: f7823d91226fd6048aed6a1a1504ab70,
+        type: 3}
+    - target: {fileID: 991451740903014827, guid: 6050fd3af03816d4ebd2d313a81c713d,
+        type: 3}
+      propertyPath: list_RoomCreatePointGenerateData.Array.data[5].list_RandomRoomBlockPrefabs.Array.data[1]
+      value: 
+      objectReference: {fileID: 5646823382267403765, guid: 232f85383a3aaa94d92b4626f6e7e465,
+        type: 3}
+    - target: {fileID: 991451740903014827, guid: 6050fd3af03816d4ebd2d313a81c713d,
+        type: 3}
+      propertyPath: list_RoomCreatePointGenerateData.Array.data[6].list_RandomRoomBlockPrefabs.Array.data[0]
+      value: 
+      objectReference: {fileID: 5652029755238022159, guid: b9ffe1e19fb449f4681320ab2ff1eecf,
+        type: 3}
+    - target: {fileID: 991451740903014827, guid: 6050fd3af03816d4ebd2d313a81c713d,
+        type: 3}
+      propertyPath: list_RoomCreatePointGenerateData.Array.data[6].list_RandomRoomBlockPrefabs.Array.data[1]
+      value: 
+      objectReference: {fileID: 432796890172666503, guid: e816e97518b5e474880cd268b3f0fb60,
         type: 3}
     - target: {fileID: 1595244217030525855, guid: 6050fd3af03816d4ebd2d313a81c713d,
         type: 3}
