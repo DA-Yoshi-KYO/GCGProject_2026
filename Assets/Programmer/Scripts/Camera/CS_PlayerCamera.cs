@@ -59,22 +59,39 @@ public class CS_PlayerCamera : MonoBehaviour
     void Start()
     {
         playerData = GetComponent<CS_PlayerData>();
-        if (playerData == null) Debug.LogError("CS_PlayerDataコンポーネントが見つかりませんでした。");
+        if (playerData == null)
+        {
+            Debug.LogError("CS_PlayerDataコンポーネントが見つかりませんでした。");
+            return;
+        }
 
         // 現在の部屋を取得し、カメラの初期化を行う
         currentRoom = playerData.currentRoomData.GetPlayerRoomData();
-        if (currentRoom == null) Debug.LogError("現在の部屋を取得できませんでした。");
+        if (currentRoom == null)
+        {
+            Debug.LogError("現在の部屋を取得できませんでした。");
+            return;
+        }
 
         Transform roomCenterTransform = currentRoom.transform.GetChild(0).Find("Center");
         if (roomCenterTransform == null) roomCenter = currentRoom.transform.position;
         else roomCenter = roomCenterTransform.position;
 
-        roomCameraObject = currentRoom.transform.GetComponentInChildren<Camera>().gameObject;
-        if (roomCameraObject == null) Debug.LogError(currentRoom.name + "の部屋にカメラがありません。");
-        else roomCameraObject.GetComponent<Camera>().enabled = true; // 初期部屋のカメラを有効にする
-        
+        Camera roomCameraComponent = currentRoom.transform.GetComponentInChildren<Camera>();
+        if (roomCameraComponent == null)
+        {
+            Debug.LogError(currentRoom.name + "の部屋にカメラがありません。");
+            return;
+        }
+        roomCameraObject = roomCameraComponent.gameObject;
+        roomCameraComponent.enabled = true; // 初期部屋のカメラを有効にする
+
         roomCamera = roomCameraObject.GetComponent<CS_RoomCamera>();
-        if (roomCamera == null) Debug.LogError(roomCameraObject.name + "にCS_RoomCameraコンポーネントがありません。");
+        if (roomCamera == null)
+        {
+            Debug.LogError(roomCameraObject.name + "にCS_RoomCameraコンポーネントがありません。");
+            return;
+        }
 
         //視点がプレイヤーから始まるように補正
         Vector3 moveAmount = roomCenter - transform.position;

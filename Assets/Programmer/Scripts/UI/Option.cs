@@ -75,12 +75,13 @@ public class Option : MonoBehaviour
             Debug.Log("Canvasesオブジェクトが見つかりません。");
             return;
         }
-        GameUI = canvase.transform.Find("GameUICavas").gameObject;
-        if(GameUI == null)
+        Transform gameUITransform = canvase.transform.Find("GameUICavas");
+        if (gameUITransform == null)
         {
             Debug.Log("GameUICavasオブジェクトが見つかりません。");
             return;
         }
+        GameUI = gameUITransform.gameObject;
     }
 
     /// <summary>
@@ -123,6 +124,11 @@ public class Option : MonoBehaviour
         {
             // Canvasを探してその子オブジェクトとしてOptionUIを生成
             GameObject canvas = GameObject.Find("OptionCanvas");
+            if (canvas == null)
+            {
+                Debug.LogError("OptionCanvasオブジェクトが見つかりません。");
+                return;
+            }
             _prevOption = Instantiate(OptionUI, Vector3.zero, Quaternion.identity, canvas.transform);
             RectTransform rectTransform = _prevOption.GetComponent<RectTransform>();
             rectTransform.anchoredPosition = Vector2.zero;
@@ -136,7 +142,8 @@ public class Option : MonoBehaviour
                 Debug.Log("Canvasesオブジェクトが見つかりません。");
                 return;
             }
-            GameUI = canvase.transform.Find("GameUICavas").gameObject;
+            Transform gameUITransform = canvase.transform.Find("GameUICavas");
+            GameUI = gameUITransform != null ? gameUITransform.gameObject : null;
         }
         if (GameUI != null)
         {
@@ -161,7 +168,8 @@ public class Option : MonoBehaviour
             }
             else
             {
-                GameUI = canvase.transform.Find("GameUICavas").gameObject;
+                Transform gameUITransform = canvase.transform.Find("GameUICavas");
+                GameUI = gameUITransform != null ? gameUITransform.gameObject : null;
             }
         }
         if (GameUI != null)

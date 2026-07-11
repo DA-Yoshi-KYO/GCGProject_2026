@@ -24,7 +24,14 @@ public class CS_StageSelect : MonoBehaviour
         inputActions = new CustomInputAction();
         inputActions.StageSelect.Enable();
 
-        image = GameObject.Find("BackGround").GetComponent<Image>();
+        GameObject backGroundObject = GameObject.Find("BackGround");
+        if (backGroundObject == null)
+        {
+            Debug.LogError("CS_StageSelect: BackGroundオブジェクトが見つかりません。");
+            return;
+        }
+        image = backGroundObject.GetComponent<Image>();
+        if (image == null || imageBackGround == null || stageNumber - 1 < 0 || stageNumber - 1 >= imageBackGround.Length) return;
         image.sprite = imageBackGround[stageNumber - 1];
     }
 

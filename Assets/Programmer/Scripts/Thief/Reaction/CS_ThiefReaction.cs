@@ -96,6 +96,11 @@ public class CS_ThiefReaction : MonoBehaviour
             return;
         }
         // リアクションの種類に応じてスプライトを変更
+        if ((int)reactionType < 0 || (int)reactionType >= reactionSprites.Count)
+        {
+            Debug.LogError("reactionSpritesの要素数がThiefReactionTypeに対して不足しています。");
+            return;
+        }
         reactionSpriteRenderer.sprite = reactionSprites[(int)reactionType];
 
         notChangeTimer = setNotChangeTimer;
@@ -129,6 +134,10 @@ public class CS_ThiefReaction : MonoBehaviour
             return;
         }
         // 現在のスプライトが指定されたリアクションのスプライトと一致する場合にクリア
+        if ((int)reactionType < 0 || (int)reactionType >= reactionSprites.Count)
+        {
+            return;
+        }
         if (reactionSpriteRenderer.sprite == reactionSprites[(int)reactionType])
         {
             reactionSpriteRenderer.sprite = null;

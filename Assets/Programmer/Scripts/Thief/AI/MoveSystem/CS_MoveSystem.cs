@@ -229,4 +229,42 @@ public class CS_MoveSystem
         exitPosition.y = thiefAI.transform.position.y; // 高さは変えない
         thiefAI.transform.position = Vector3.MoveTowards(thiefAI.transform.position, exitPosition, walkSpeed * 0.5f * Time.deltaTime);
     }
+
+    public void DebugMove()
+    {
+        if (thiefAI.read_Animator.GetBool("IsStun")) return; // 気絶状態のときは移動要求を無視する
+        if (Time.timeScale == 0) return; // ゲームが一時停止中の場合は移動要求を無視する
+
+        if (debugPos == thiefAI.transform.position)
+        {
+            samePosFrameCount++;
+            if (samePosFrameCount > 300)
+            {
+                if (thiefAI.read_AStarSystem.HasRoute)
+                {
+                    if (thiefAI.read_MemorySystem.read_CurrentRoom != thiefAI.read_AStarSystem.GetCurrentTargetRoomNode())
+                    {
+                        thiefAI.read_AStarSystem.ClearRoute();
+                    }
+                    else
+                    {
+                        thiefAI.read_AStarSystem.ResetUpdatedFlag();
+                    }
+                }
+                else if (thiefAI.read_MemorySystem.read_CurrentTarget != null)
+                {
+                    MoveTo(thiefAI.read_MemorySystem.read_CurrentTarget.transform.position);
+                }
+                else
+                {
+                    thiefAI.read_MemorySystem.ClearTarget();
+                }
+            }
+        }
+        else
+        {
+            debugPos = thiefAI.transform.position;
+            samePosFrameCount = 0; // カウンターをリセット
+        }
+    }
 }

@@ -27,23 +27,27 @@ public class CS_WarpTrigger : MonoBehaviour
     {
         selfWarpPoint = GetComponent<CS_WarpPoint>();
 
-        roomPlayerPosition = GameObject.Find("RoomManager").GetComponent<CS_RoomPlayerPosition>();
+        GameObject roomManager = GameObject.Find("RoomManager");
+        roomPlayerPosition = roomManager != null ? roomManager.GetComponent<CS_RoomPlayerPosition>() : null;
         if (roomPlayerPosition == null)
         {
             Debug.Log("RoomManagerが見つかりませんでした");
             return;
         }
 
-        mask = GameObject.Find("MaskCanvas").GetComponent<CS_Mask>();
+        GameObject maskCanvas = GameObject.Find("MaskCanvas");
+        mask = maskCanvas != null ? maskCanvas.GetComponent<CS_Mask>() : null;
 
         // SE取得
         g_SEDataObject = GameObject.Find("3DSE");
-        cs_3DPlaySE = g_SEDataObject.GetComponent<CS_3DPlaySE>();
+        cs_3DPlaySE = g_SEDataObject != null ? g_SEDataObject.GetComponent<CS_3DPlaySE>() : null;
     }
 
 
     void Update()
     {
+        if (selfWarpPoint == null) return;
+
         if (selfWarpPoint.warping)
         {
             //ワープのクールタイム

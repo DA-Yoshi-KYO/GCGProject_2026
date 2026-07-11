@@ -275,7 +275,11 @@ public class CS_ThiefReactionUI : MonoBehaviour
 
             Image imageUI = reactionUIObject.AddComponent<Image>();
 
-            imageUI.sprite = reactionSprites[parentThiefReaction.transform.childCount - 1];
+            if (reactionSprites != null && reactionSprites.Count > 0)
+            {
+                int spriteIndex = Mathf.Clamp(parentThiefReaction.transform.childCount - 1, 0, reactionSprites.Count - 1);
+                imageUI.sprite = reactionSprites[spriteIndex];
+            }
             // リアクションオブジェクトの構造体を作成
             // リアクションオブジェクトと表示タイマーするまでの時間
             ReactionObject reactionObject = new ReactionObject(
