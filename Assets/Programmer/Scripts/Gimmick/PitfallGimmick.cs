@@ -47,7 +47,8 @@ public class PitfallGimmick : GimmickBase
         if (!isFirstBroken)
         {
             isFirstBroken = true;
-            GetThiefGimmickAction().PitFallEnd();
+            CS_ThiefGimmickAction thiefGA = GetThiefGimmickAction();
+            if (thiefGA != null) thiefGA.PitFallEnd();
             Debug.Log("落とし穴ギミックが壊れました");
         }
     }
