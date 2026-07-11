@@ -368,7 +368,7 @@ public class CS_AStarSystem
     /// <param name="exploredDistanceThreshold"></param>
     public void UpdateRoute(float exploredDistanceThreshold)
     {
-        if (moveRoute == null) return;
+        if (moveRoute == null || moveRoute.Count == 0) return;
 
         // ルートの先頭の要素を取得
         Transform targetPoint = moveRoute[0];
@@ -379,6 +379,7 @@ public class CS_AStarSystem
             // 先頭の要素をルートから削除
             moveRoute.RemoveAt(0);
             isRouteUpdated = true;
+            return;
         }
 
         // 移動システムを使って移動

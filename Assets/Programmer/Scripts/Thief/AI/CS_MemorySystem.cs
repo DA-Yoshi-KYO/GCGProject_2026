@@ -801,7 +801,12 @@ public class CS_MemorySystem
         // 探索対象の探索にかかる時間を経過させる
         //　((VisionTarget)currentTarget).explorationProgress　: 対象の探索度(MAX : 100.0f)
         // searchTime : 探索対象の探索にかかる時間
-        visionTargetMemories[((CS_VisionTarget)currentTarget)].explorationProgress += (100.0f / searchTime[((int)((CS_VisionTarget)currentTarget).targetType)]) * Time.deltaTime;
+        int targetTypeIndex = (int)((CS_VisionTarget)currentTarget).targetType;
+        if (searchTime == null || targetTypeIndex < 0 || targetTypeIndex >= searchTime.Count || searchTime[targetTypeIndex] <= 0)
+        {
+            return false;
+        }
+        visionTargetMemories[((CS_VisionTarget)currentTarget)].explorationProgress += (100.0f / searchTime[targetTypeIndex]) * Time.deltaTime;
 
         GameObject Thief_Serach = GameObject.Find("Thief_Serach_" + thiefAI.transform.name);
         if (Thief_Serach == null)
@@ -963,7 +968,10 @@ public class CS_MemorySystem
         for (int i = 0 ; i < connectDirs.Count ; i++)
         {
             // 接続している部屋のRoomNodeを取得
-            CS_RoomNode nextConnectionRoomNode = roomCreatePoint.GetConnection(connectDirs[i]).TargetCreatePoint.GetComponentInChildren<CS_RoomNode>();
+            CS_RoomMoveConnection connection = roomCreatePoint.GetConnection(connectDirs[i]);
+            if (connection == null || connection.TargetCreatePoint == null) continue;
+            CS_RoomNode nextConnectionRoomNode = connection.TargetCreatePoint.GetComponentInChildren<CS_RoomNode>();
+            if (nextConnectionRoomNode == null) continue;
 
             // タグがTreasureRoomの場合は、次の移動ポイントに設定して処理を終了する
             if (nextConnectionRoomNode.CompareTag("TreasureRoom"))
@@ -992,13 +1000,18 @@ public class CS_MemorySystem
             for (int i = 0 ; i < connectDirs.Count ; i++)
             {
                 // 接続している部屋のRoomNodeを取得
-                CS_RoomNode nextConnectionRoomNode = roomCreatePoint.GetConnection(connectDirs[i]).TargetCreatePoint.GetComponentInChildren<CS_RoomNode>();
+                CS_RoomMoveConnection connection = roomCreatePoint.GetConnection(connectDirs[i]);
+                if (connection == null || connection.TargetCreatePoint == null) continue;
+                CS_RoomNode nextConnectionRoomNode = connection.TargetCreatePoint.GetComponentInChildren<CS_RoomNode>();
+                if (nextConnectionRoomNode == null) continue;
                 // 次の部屋の記憶がない場合は、行ったことのない部屋としてリストに追加
                 if (!roomMemories.ContainsKey(nextConnectionRoomNode))
                 {
                     unvisitedDirs.Add(connectDirs[i]);
                 }
             }
+
+            if (unvisitedDirs.Count == 0) return;
 
             // 次の部屋候補の中に行ったことのない部屋の方向リストからランダムに選出
             int randomIndex = Random.Range(0, unvisitedDirs.Count);
@@ -1016,7 +1029,10 @@ public class CS_MemorySystem
             for (int i = 0 ; i < connectDirs.Count ; i++)
             {
                 // 接続している部屋のRoomNodeを取得
-                CS_RoomNode nextConnectionRoomNode = roomCreatePoint.GetConnection(connectDirs[i]).TargetCreatePoint.GetComponentInChildren<CS_RoomNode>();
+                CS_RoomMoveConnection connection = roomCreatePoint.GetConnection(connectDirs[i]);
+                if (connection == null || connection.TargetCreatePoint == null) continue;
+                CS_RoomNode nextConnectionRoomNode = connection.TargetCreatePoint.GetComponentInChildren<CS_RoomNode>();
+                if (nextConnectionRoomNode == null) continue;
                 // 次の部屋の記憶がある場合は、探索度が閾値を超えていないかどうかを判定
                 if (roomMemories.ContainsKey(nextConnectionRoomNode))
                 {
@@ -1059,6 +1075,7 @@ public class CS_MemorySystem
 
                     // 選択した部屋のRoomCreatePointを取得
                     CS_RoomCreatePoint selectedRoomCreatePoint = selectedRoom.GetComponentInParent<CS_RoomCreatePoint>();
+                    if (selectedRoomCreatePoint == null) return;
 
                     // 選択した部屋の接続している方向を取得
                     List<CSE_RoomDoorDirection> connectDirsOfSelectedRoom = selectedRoomCreatePoint.GetConnectDirections();
@@ -1067,7 +1084,10 @@ public class CS_MemorySystem
                     for (int i = 0 ; i < connectDirsOfSelectedRoom.Count ; i++)
                     {
                         // 接続している部屋のRoomNodeを取得
-                        CS_RoomNode nextConnectionRoomNode = selectedRoomCreatePoint.GetConnection(connectDirsOfSelectedRoom[i]).TargetCreatePoint.GetComponentInChildren<CS_RoomNode>();
+                        CS_RoomMoveConnection connection = selectedRoomCreatePoint.GetConnection(connectDirsOfSelectedRoom[i]);
+                        if (connection == null || connection.TargetCreatePoint == null) continue;
+                        CS_RoomNode nextConnectionRoomNode = connection.TargetCreatePoint.GetComponentInChildren<CS_RoomNode>();
+                        if (nextConnectionRoomNode == null) continue;
 
                         // 次の部屋の記憶がある場合
                         if (roomMemories.ContainsKey(nextConnectionRoomNode))
@@ -1107,7 +1127,10 @@ public class CS_MemorySystem
             foreach (var dir in currentRoomObject.transform.GetComponent<CS_RoomCreatePoint>().GetConnectDirections())
             {
                 // 接続している部屋のRoomNodeを取得
-                CS_RoomNode nextConnectionRoomNode = currentRoomObject.transform.GetComponent<CS_RoomCreatePoint>().GetConnection(dir).TargetCreatePoint.GetComponentInChildren<CS_RoomNode>();
+                CS_RoomMoveConnection connection = currentRoomObject.transform.GetComponent<CS_RoomCreatePoint>().GetConnection(dir);
+                if (connection == null || connection.TargetCreatePoint == null) continue;
+                CS_RoomNode nextConnectionRoomNode = connection.TargetCreatePoint.GetComponentInChildren<CS_RoomNode>();
+                if (nextConnectionRoomNode == null) continue;
                 // 次の部屋の記憶がない場合は、行ったことのない部屋があると判定してtrueを返す
                 if (!roomMemories.ContainsKey(nextConnectionRoomNode))
                 {

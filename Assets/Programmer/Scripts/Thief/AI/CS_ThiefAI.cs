@@ -447,10 +447,19 @@ public class CS_ThiefAI : MonoBehaviour
     // 発見状態の行動
     private void Found()
     {
+        // 探索対象が存在しない場合は何もしない
+        if (memorySystem.read_CurrentTarget == null)
+        {
+            Debug.LogError("Found()が呼ばれましたが、探索対象が存在しません。");
+            ChangeStatus(ThiefState.Explore);
+            return;
+        }
+
         // 宝物を持つ
         holdTreasure = memorySystem.read_CurrentTarget.gameObject;
         holdTreasure.transform.parent = this.transform; // 泥棒の子オブジェクトにする
-        holdTreasure.GetComponent<Collider>().enabled = false; // 宝物のコライダーを無効にする
+        Collider holdTreasureCollider = holdTreasure.GetComponent<Collider>();
+        if (holdTreasureCollider != null) holdTreasureCollider.enabled = false; // 宝物のコライダーを無効にする
         holdTreasure.transform.localScale *= 0.5f; // 宝物のサイズを半分にする
 
         //-- 体の前に持つ位置を設定
@@ -458,13 +467,18 @@ public class CS_ThiefAI : MonoBehaviour
         Vector3 holdPosition = transform.position + transform.forward * 0.5f + Vector3.up * -0.5f;
         holdTreasure.transform.position = holdPosition;
 
-        holdTreasure.GetComponent<CS_VisionTarget>().PlayStolen(this);
+        CS_VisionTarget visionTarget = holdTreasure.GetComponent<CS_VisionTarget>();
+        if (visionTarget != null) visionTarget.PlayStolen(this);
 
         // 状態を逃走に変更
         ChangeStatus(ThiefState.Escape);
 
         // 取得した宝物を他の泥棒の記憶から消去する
-        GameObject.FindObjectOfType<CS_ThiefManager>().EraseTheMemoryToAllThief(holdTreasure.GetComponent<CS_ThiefTarget>());
+        CS_ThiefManager thiefManager = GameObject.FindObjectOfType<CS_ThiefManager>();
+        if (thiefManager != null)
+        {
+            thiefManager.EraseTheMemoryToAllThief(holdTreasure.GetComponent<CS_ThiefTarget>());
+        }
         // 探索対象をリセット
         memorySystem.ClearTarget();
     }

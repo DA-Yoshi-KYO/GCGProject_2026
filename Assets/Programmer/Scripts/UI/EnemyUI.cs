@@ -91,6 +91,7 @@ public class EnemyUI : MonoBehaviour
     }
     private void RealignIcons()
     {
+        if (actor == null) return;
         RectTransform actorRT = actor.GetComponent<RectTransform>();
         if (actorRT == null) return;
 

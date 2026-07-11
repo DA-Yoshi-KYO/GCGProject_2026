@@ -20,14 +20,30 @@ public class CS_PlayerData : MonoBehaviour
         customInputAction.Player.Enable();
 
         // プレイヤーの現在の部屋データの取得
-        currentRoomData = GameObject.Find("RoomManager").GetComponent<CS_RoomPlayerPosition>();
+        GameObject roomManager = GameObject.Find("RoomManager");
+        if (roomManager != null)
+        {
+            currentRoomData = roomManager.GetComponent<CS_RoomPlayerPosition>();
+        }
+        else
+        {
+            Debug.LogError("RoomManagerが見つかりません。");
+        }
     }
 
     public void ChangePlayerRoomData()
     {
         // プレイヤーの現在の部屋データを更新
-        currentRoomData = GameObject.Find("RoomManager").GetComponent<CS_RoomPlayerPosition>();
+        GameObject roomManager = GameObject.Find("RoomManager");
+        if (roomManager == null)
+        {
+            Debug.LogError("RoomManagerが見つかりません。");
+            return;
+        }
+        currentRoomData = roomManager.GetComponent<CS_RoomPlayerPosition>();
+        if (currentRoomData == null) return;
         GameObject i = currentRoomData.GetPlayerRoomData();
+        if (i == null) return;
         Debug.Log("[RoomMovePoint] PlayerData.currentRoomDataを更新しました。" + i.name);
     }
 

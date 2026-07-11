@@ -181,7 +181,15 @@ public class GimmickBase : MonoBehaviour
 
         InitSound();
 
-        roomIndex = CS_RoomCreatePointRaycast.GetRayRoomCreatePoint(this.gameObject).transform.GetSiblingIndex();
+        GameObject rayRoomCreatePoint = CS_RoomCreatePointRaycast.GetRayRoomCreatePoint(this.gameObject);
+        if (rayRoomCreatePoint == null)
+        {
+            Debug.LogError("GimmickBase: 床下のRoomCreatePointが取得できません: " + gameObject.name);
+        }
+        else
+        {
+            roomIndex = rayRoomCreatePoint.transform.GetSiblingIndex();
+        }
 
         if (gimmickMaterial == GimmickMaterial.Material)
             InitMaterials();

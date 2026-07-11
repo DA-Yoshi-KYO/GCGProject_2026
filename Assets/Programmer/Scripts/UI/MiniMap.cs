@@ -139,6 +139,7 @@ public class MiniMap : MonoBehaviour
     private void UpdatePlayerActive()
     {
         int index = CS_RoomCreatePointRaycast.GetRoomIndex(player);
+        if (index == -1) return;
         MiniMapInfo info = miniMapInfo[index];
         info.isPlayerIconActive = true;
         miniMapInfo[index] = info;
@@ -156,6 +157,7 @@ public class MiniMap : MonoBehaviour
         foreach (GameObject thief in thieves)
         {
             int index = CS_RoomCreatePointRaycast.GetRoomIndex(thief);
+            if (index == -1) continue;
             MiniMapInfo info = miniMapInfo[index];
             info.isThiefIconActive = true;
             miniMapInfo[index] = info;
@@ -241,6 +243,7 @@ public class MiniMap : MonoBehaviour
             if (count == 0) continue;
 
             RectTransform parentRect = targetObjects[i].GetComponent<RectTransform>();
+            if (parentRect == null) continue;
             Vector2[] positions = GetLayoutPositions(count, parentRect.rect.width, parentRect.rect.height);
 
             for (int j = 0 ; j < count ; j++)
