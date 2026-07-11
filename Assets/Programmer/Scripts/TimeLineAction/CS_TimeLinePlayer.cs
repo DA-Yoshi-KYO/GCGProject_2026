@@ -27,11 +27,23 @@ public class CS_TimeLinePlayer : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
 
-        if (rb == null) Debug.LogError("Rigitbodyコンポーネントが見つかりませんでした。");
+        if (rb == null)
+        {
+            Debug.LogError("Rigitbodyコンポーネントが見つかりませんでした。");
+            return;
+        }
         controller = GetComponent<CharacterController>();
-        if (controller == null) Debug.LogError("CharacterControllerコンポーネントが見つかりませんでした。");
+        if (controller == null)
+        {
+            Debug.LogError("CharacterControllerコンポーネントが見つかりませんでした。");
+            return;
+        }
         playerData = GetComponent<CS_PlayerData>();
-        if (playerData == null) Debug.LogError("CS_PlayerDataコンポーネントが見つかりませんでした。");
+        if (playerData == null)
+        {
+            Debug.LogError("CS_PlayerDataコンポーネントが見つかりませんでした。");
+            return;
+        }
 
         // インプットアクションの登録
         // 移動
