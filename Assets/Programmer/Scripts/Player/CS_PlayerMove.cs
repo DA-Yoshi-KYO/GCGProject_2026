@@ -67,11 +67,23 @@ public class CS_PlayerMove : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         footPrint = GetComponent<CS_FootPrint>();
 
-        if (rb == null) Debug.LogError("Rigitbodyコンポーネントが見つかりませんでした。");
+        if (rb == null)
+        {
+            Debug.LogError("Rigitbodyコンポーネントが見つかりませんでした。");
+            return;
+        }
         controller = GetComponent<CharacterController>();
-        if (controller == null) Debug.LogError("CharacterControllerコンポーネントが見つかりませんでした。");
+        if (controller == null)
+        {
+            Debug.LogError("CharacterControllerコンポーネントが見つかりませんでした。");
+            return;
+        }
         playerData = GetComponent<CS_PlayerData>();
-        if (playerData == null) Debug.LogError("CS_PlayerDataコンポーネントが見つかりませんでした。");
+        if (playerData == null)
+        {
+            Debug.LogError("CS_PlayerDataコンポーネントが見つかりませんでした。");
+            return;
+        }
         playerCamera = GetComponent<CS_PlayerCamera>();
         if (playerCamera == null) Debug.LogError("CS_PlayerCameraコンポーネントが見つかりませんでした。");
 
@@ -93,7 +105,8 @@ public class CS_PlayerMove : MonoBehaviour
         animator = GetComponentInChildren<Animator>();
         jumpMerginTimer = jumpMerginDuration;
 
-        playSE = GameObject.Find("3DSE").GetComponent<CS_3DPlaySE>();
+        GameObject se3DObject = GameObject.Find("3DSE");
+        playSE = se3DObject != null ? se3DObject.GetComponent<CS_3DPlaySE>() : null;
 
         if (playSE == null)
         {

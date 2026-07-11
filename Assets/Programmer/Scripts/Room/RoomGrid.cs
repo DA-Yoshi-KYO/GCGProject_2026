@@ -47,6 +47,11 @@ public class RoomGrid : MonoBehaviour
         List<GameObject> floors = new List<GameObject>();
 
         GameObject roomParent = GameObject.Find("RoomCreatePoints");
+        if (roomParent == null)
+        {
+            Debug.LogError("RoomGrid: RoomCreatePointsオブジェクトが見つかりません。");
+            return;
+        }
         List<GameObject> rooms = new List<GameObject>();
         for (int i = 0 ; i < roomParent.transform.childCount ; i++)
         {
@@ -71,7 +76,7 @@ public class RoomGrid : MonoBehaviour
             sum += child.transform.position;
             floorCount++;
         }
-        gridCenter = sum / floorCount;
+        if (floorCount > 0) gridCenter = sum / floorCount;
 
         // グリッドから溢れているかチェックする
         const int gridCellNumX = 3;
@@ -262,11 +267,12 @@ public class RoomGrid : MonoBehaviour
 
         // プレイヤー、泥棒の例外処理：プレイヤーと泥棒の上には召喚しない
         hitList.RemoveAll(hit => hit.transform.CompareTag("Player") || hit.transform.CompareTag("Thief"));
+        if (hitList.Count == 0) return false;
         spawnPos.y = hitList[0].point.y;
 
         // ギミックが落とし穴ギミックだった場合、床のマテリアルに穴の位置を伝える
-        PitfallGimmick pitfallGimmick = gimmick.GetComponent<PitfallGimmick>();
-        if (pitfallGimmick != null)
+        bool isPitfallGimmick = gimmick.GetComponent<PitfallGimmick>() != null;
+        if (isPitfallGimmick)
         {
             foreach (var hitItem in hitList)
             {
@@ -276,12 +282,14 @@ public class RoomGrid : MonoBehaviour
                 material.SetVector("_HoleCenter", new Vector4(spawnPos.x, spawnPos.z, 0, 0));
                 break;
             }
-
-            // ギミック削除時にアルファクリッピングを元に戻すため、ヒットしたオブジェクトをリストに格納する
-            pitfallGimmick.hitHoles = hitList;
         }
         GameObject gimmickObject = Instantiate(gimmick.gameObject, spawnPos, Quaternion.identity);
         GimmickBase spawnGimmick = gimmickObject.GetComponent<GimmickBase>();
+        PitfallGimmick spawnPitfallGimmick = gimmickObject.GetComponent<PitfallGimmick>();
+        if (spawnPitfallGimmick != null)
+        {
+            spawnPitfallGimmick.hitHoles = hitList;
+        }
         spawnGimmick.roomGrid = this;
         gridGimmicks[grid.y][grid.x] = gimmickObject;
         spawnGimmick.SetGimmickPos(grid);

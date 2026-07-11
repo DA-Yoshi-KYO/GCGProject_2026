@@ -15,6 +15,11 @@ public class CS_GimmickSpawn : MonoBehaviour
 
     void Start()
     {
+        if (roomParent == null)
+        {
+            Debug.LogError("CS_GimmickSpawn: roomParentがInspectorで設定されていません。", this);
+            return;
+        }
         CS_RoomCreatePoint[] rooms = roomParent.GetComponentsInChildren<CS_RoomCreatePoint>();
 
         foreach (var item in rooms)
@@ -26,10 +31,11 @@ public class CS_GimmickSpawn : MonoBehaviour
 
     private void Update()
     {
-        // 部屋が生成されるまで待つ
-        if (spawnRooms[0].transform.childCount == 0) return;
-
         if (doOnce) return;
+
+        // 部屋が生成されるまで待つ
+        if (spawnRooms.Count == 0) return;
+        if (spawnRooms[0].transform.childCount == 0) return;
 
         // 条件確認
         // 即時終了するもの

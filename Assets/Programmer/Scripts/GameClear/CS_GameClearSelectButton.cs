@@ -33,24 +33,31 @@ public class CS_GameClearSelectButton : MonoBehaviour
         inputActions.GameClear.Enable();
         inputActions.GameClear.MoveAxis.started += SelectInput;
 
-        backTitleButtonImage = GameObject.Find("GameClearBackTitleButton").GetComponent<Image>();
-        backTitleButtonImage.sprite = backTitleButtonSprite[currentButton];
+        GameObject backTitleButtonObject = GameObject.Find("GameClearBackTitleButton");
+        if (backTitleButtonObject == null)
+        {
+            Debug.LogError("CS_GameClearSelectButton: GameClearBackTitleButtonが見つかりません。");
+            return;
+        }
+        backTitleButtonImage = backTitleButtonObject.GetComponent<Image>();
+        if (backTitleButtonImage != null) backTitleButtonImage.sprite = backTitleButtonSprite[currentButton];
 
         GameObject stageSelectButtonObject = GameObject.Find("StageSelectButton");
         if (stageSelectButtonObject != null)
         {
-            stageSelectButtonImage = GameObject.Find("StageSelectButton").GetComponent<Image>();
-            stageSelectButtonImage.sprite = stageSelectButtonSprite[currentButton];
+            stageSelectButtonImage = stageSelectButtonObject.GetComponent<Image>();
+            if (stageSelectButtonImage != null) stageSelectButtonImage.sprite = stageSelectButtonSprite[currentButton];
         }
 
-        backGroundPlaySE = GameObject.Find("SE").GetComponent<CS_BackGroundPlaySE>();
+        GameObject seObject = GameObject.Find("SE");
+        backGroundPlaySE = seObject != null ? seObject.GetComponent<CS_BackGroundPlaySE>() : null;
     }
 
     // Update is called once per frame
     void Update()
     {
         //現在選択しているボタンの移動処理
-        backTitleButtonImage.sprite = backTitleButtonSprite[currentButton];
+        if (backTitleButtonImage != null) backTitleButtonImage.sprite = backTitleButtonSprite[currentButton];
         if (stageSelectButtonImage != null) stageSelectButtonImage.sprite = stageSelectButtonSprite[currentButton];
 
         //決定ボタンでシーン遷移

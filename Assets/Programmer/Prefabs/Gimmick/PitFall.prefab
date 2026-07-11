@@ -72,8 +72,8 @@ MonoBehaviour:
   gimmickScale: 100
   hitCheckerPrefab: {fileID: 5250139902968933795, guid: 20e32c23a30b34c45916d0dcbd7a0e58,
     type: 3}
-  hitRange: {x: 1, y: 1, z: 1}
-  effectRange: {x: 1, y: 1, z: 1}
+  hitRange: {x: 1, y: 6, z: 1}
+  effectRange: {x: 1, y: 6, z: 1}
   searchRange: {x: 0, y: 0, z: 0}
   attackPower: 1
   effectPower: 1
@@ -82,6 +82,8 @@ MonoBehaviour:
   gimmickType: 1
   gimmick: 5
   gimmickState: 1
+  gimmickMaterial: 0
+  gimmickOutline: 1
   search: {fileID: 933345628519016608, guid: 04669349bd8eae5469e6e486cc2c28e1, type: 3}
   searchGridRange: 1
   enemyLayer:
@@ -93,6 +95,5 @@ MonoBehaviour:
   mesh: []
   isMeshScaleAdaptation: 1
   brokenFadeSpeed: 1
-  isMaterial: 1
   previewAlpha: 0.5
   activeTime: 5

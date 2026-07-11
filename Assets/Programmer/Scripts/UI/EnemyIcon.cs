@@ -17,7 +17,11 @@ public class EnemyIcon : MonoBehaviour
     private CS_RoomPlayerPosition roomPlayerPosition;
     private void Start()
     {
-        roomPlayerPosition = GameObject.Find("RoomManager").GetComponent<CS_RoomPlayerPosition>();
+        GameObject roomManager = GameObject.Find("RoomManager");
+        if (roomManager != null)
+        {
+            roomPlayerPosition = roomManager.GetComponent<CS_RoomPlayerPosition>();
+        }
         numberView.SetTensView(false);
 
     }
@@ -36,7 +40,8 @@ public class EnemyIcon : MonoBehaviour
         int currentHP = thiefAI.read_Durability;
         numberView.SetNumber(currentHP);
         // 同じ部屋にいる場合サイズを大きくする
-        if (thiefAI.read_MemorySystem.read_CurrentRoomPoint == roomPlayerPosition.PlayerRoomData.transform)
+        if (thiefAI.read_MemorySystem != null && roomPlayerPosition.PlayerRoomData != null &&
+            thiefAI.read_MemorySystem.read_CurrentRoomPoint == roomPlayerPosition.PlayerRoomData.transform)
         {
 
 

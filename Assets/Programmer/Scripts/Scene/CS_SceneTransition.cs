@@ -37,7 +37,11 @@ public class CS_SceneTransition : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        backGroundPlayBGM = GameObject.Find("BGM").GetComponent<CS_BackGroundPlayBGM>();
+        GameObject bgmObject = GameObject.Find("BGM");
+        if (bgmObject != null)
+        {
+            backGroundPlayBGM = bgmObject.GetComponent<CS_BackGroundPlayBGM>();
+        }
 
         InitSet();
 
@@ -118,6 +122,12 @@ public class CS_SceneTransition : MonoBehaviour
 
     private void InitSet()
     {
+        if (blackFadeImage == null || catInFadeImage == null || catOutFadeImage == null)
+        {
+            Debug.LogError("CS_SceneTransition: フェード用のImageがInspectorで設定されていません。", this);
+            return;
+        }
+
         blackFadeImage.raycastTarget = false;
         catInFadeImage.raycastTarget = false;
         catOutFadeImage.raycastTarget = false;
@@ -163,13 +173,16 @@ public class CS_SceneTransition : MonoBehaviour
             float alpha = Mathf.Lerp(startAlpha, targetAlpha, time / fadeDuration);
             blackFadeImage.color = new Color(blackFadeImage.color.r, blackFadeImage.color.g, blackFadeImage.color.b, alpha);
 
-            if (fadeOut)
+            if (backGroundPlayBGM != null)
             {
-                backGroundPlayBGM.BGMFadeOut(time, fadeDuration);
-            }
-            else
-            {
-                backGroundPlayBGM.BGMFadeIn(time, fadeDuration);
+                if (fadeOut)
+                {
+                    backGroundPlayBGM.BGMFadeOut(time, fadeDuration);
+                }
+                else
+                {
+                    backGroundPlayBGM.BGMFadeIn(time, fadeDuration);
+                }
             }
 
             yield return null;
@@ -195,13 +208,16 @@ public class CS_SceneTransition : MonoBehaviour
             catInFadeImage.material.SetFloat("_AlphaScaleFloat", alpha);
             catOutFadeImage.material.SetFloat("_AlphaScaleFloat", alpha);
 
-            if (fadeOut)
+            if (backGroundPlayBGM != null)
             {
-                backGroundPlayBGM.BGMFadeOut(time, fadeDuration);
-            }
-            else
-            {
-                backGroundPlayBGM.BGMFadeIn(time, fadeDuration);
+                if (fadeOut)
+                {
+                    backGroundPlayBGM.BGMFadeOut(time, fadeDuration);
+                }
+                else
+                {
+                    backGroundPlayBGM.BGMFadeIn(time, fadeDuration);
+                }
             }
 
             yield return null;

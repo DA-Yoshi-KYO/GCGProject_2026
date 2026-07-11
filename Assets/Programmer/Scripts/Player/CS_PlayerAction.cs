@@ -74,6 +74,11 @@ public class CS_PlayerAction : MonoBehaviour
     {
         //現在のソウルの数
         playerData = GetComponent<CS_PlayerData>();
+        if (playerData == null)
+        {
+            Debug.LogError("CS_PlayerDataコンポーネントが見つかりませんでした。");
+            return;
+        }
 
         gimmickManager = GetComponent<GimmickList>();
 
@@ -86,13 +91,18 @@ public class CS_PlayerAction : MonoBehaviour
 
         playerData.customInputAction.Player.InteractCancel.started += OnCancel;
 
-        interactField.GetComponent<Renderer>().enabled = false;
+        if (interactField != null)
+        {
+            Renderer interactRenderer = interactField.GetComponent<Renderer>();
+            if (interactRenderer != null) interactRenderer.enabled = false;
+        }
 
         // アウトラインコントローラーの初期化
         outlineTarget = GetComponentInChildren<CS_OutlineTarget>();
-        outlineTarget.SetOutlineColor(Color.gray);
+        if (outlineTarget != null) outlineTarget.SetOutlineColor(Color.gray);
 
-        playSE = GameObject.Find("3DSE").GetComponent<CS_3DPlaySE>();
+        GameObject se3DObject = GameObject.Find("3DSE");
+        playSE = se3DObject != null ? se3DObject.GetComponent<CS_3DPlaySE>() : null;
 
         cs_GimmickSetEffectPlayer = GetComponent<CS_GimmickSetEffectPlayer>();
 
@@ -462,7 +472,13 @@ public class CS_PlayerAction : MonoBehaviour
             Debug.Log("ギミックの設置失敗: IsSetting");
             return;
         }
-        GameObject currentRoom = playerData.currentRoomData.GetPlayerRoomData().transform.GetChild(0).gameObject;
+        GameObject playerRoomData = playerData.currentRoomData.GetPlayerRoomData();
+        if (playerRoomData == null)
+        {
+            Debug.Log("現在の部屋データが取得できません");
+            return;
+        }
+        GameObject currentRoom = playerRoomData.transform.GetChild(0).gameObject;
         string roomName = currentRoom.name;
         bool isNotSettingRoom = roomName.Contains("Treasure");
         Debug.Log(roomName);
@@ -473,6 +489,11 @@ public class CS_PlayerAction : MonoBehaviour
         }
 
         GameObject currentFloor = playerData.currentRoomData.GetPlayerFloorData();
+        if (currentFloor == null)
+        {
+            Debug.LogError("現在の部屋の床データが取得できません");
+            return;
+        }
         var roomGrid = currentFloor.GetComponent<RoomGrid>();
 
         // グリッド配置
@@ -491,7 +512,7 @@ public class CS_PlayerAction : MonoBehaviour
         // 実際に生成されたインスタンス取得
         // =========================
         Vector3 center = setPos;          // 中心位置
-        Vector3 halfExtents = new Vector3(2f, 5f, 2f); // 半径ではなく「半サイズ」
+        Vector3 halfExtents = new Vector3(roomGrid.gridSize.x * 0.5f, 5f, roomGrid.gridSize.y * 0.5f); // 半径ではなく「半サイズ」
 
         Collider[] hits = Physics.OverlapBox(center, halfExtents);
         GimmickBase instance = null;

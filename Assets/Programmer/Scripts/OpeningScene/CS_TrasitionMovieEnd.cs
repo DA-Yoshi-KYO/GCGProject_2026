@@ -23,6 +23,11 @@ public class CS_TrasitionMovieEnd : MonoBehaviour
         custoomInputAction = new CustomInputAction();
         custoomInputAction.Openning.Enable();
 
+        if (videoPlayer == null)
+        {
+            Debug.LogError("CS_TrasitionMovieEnd: videoPlayerが設定されていません。", this);
+            return;
+        }
         videoPlayer.loopPointReached += OnMovieFinished;
     }
 
@@ -31,8 +36,8 @@ public class CS_TrasitionMovieEnd : MonoBehaviour
     {
         if (custoomInputAction.Openning.SkipButton.triggered)
         {
-            videoPlayer.Stop();
-            fadeCanvas.GetComponent<CS_SceneTransition>().StartSceneTransition(sceneName);
+            if (videoPlayer != null) videoPlayer.Stop();
+            StartTransition();
         }
     }
 
@@ -42,8 +47,23 @@ public class CS_TrasitionMovieEnd : MonoBehaviour
             return;
 
         videoPlayer.Stop();
-        fadeCanvas.GetComponent<CS_SceneTransition>().StartSceneTransition(sceneName);
+        StartTransition();
+    }
 
+    private void StartTransition()
+    {
+        if (fadeCanvas == null)
+        {
+            Debug.LogError("CS_TrasitionMovieEnd: fadeCanvasが設定されていません。", this);
+            return;
+        }
+        CS_SceneTransition sceneTransition = fadeCanvas.GetComponent<CS_SceneTransition>();
+        if (sceneTransition == null)
+        {
+            Debug.LogError("CS_TrasitionMovieEnd: fadeCanvasにCS_SceneTransitionが見つかりません。", this);
+            return;
+        }
+        sceneTransition.StartSceneTransition(sceneName);
     }
 
     private void OnDestroy()

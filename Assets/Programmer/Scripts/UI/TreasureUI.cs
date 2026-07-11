@@ -59,7 +59,10 @@ public class TreasureUI : MonoBehaviour
             Vector3 pos = Actor.transform.position - ShiftDistance * i;
             GameObject icon = Instantiate(TreasureIconPrefab, pos, Quaternion.identity, this.transform);
             TreasureItem treasureItem = icon.GetComponent<TreasureItem>();
-            treasureItem.SetCS(endManager.read_TreasureList[i]);
+            if (treasureItem != null)
+            {
+                treasureItem.SetCS(endManager.read_TreasureList[i]);
+            }
             treasureIcons.Add(icon);
         }
     }

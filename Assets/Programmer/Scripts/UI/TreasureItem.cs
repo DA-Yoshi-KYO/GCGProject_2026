@@ -24,9 +24,9 @@ public class TreasureItem : MonoBehaviour
 
     private void Awake()
     {
-        BastetOutLineIcon.SetActive(false);
-        DetailTextImage.SetActive(false);
-        numberView = NumberView.GetComponent<NumberView>();
+        if (BastetOutLineIcon != null) BastetOutLineIcon.SetActive(false);
+        if (DetailTextImage != null) DetailTextImage.SetActive(false);
+        if (NumberView != null) numberView = NumberView.GetComponent<NumberView>();
         rectTransform = GetComponent<RectTransform>();
         scale =rectTransform.localScale;
     }
