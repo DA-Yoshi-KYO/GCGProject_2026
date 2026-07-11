@@ -271,8 +271,8 @@ public class RoomGrid : MonoBehaviour
         spawnPos.y = hitList[0].point.y;
 
         // ギミックが落とし穴ギミックだった場合、床のマテリアルに穴の位置を伝える
-        PitfallGimmick pitfallGimmick = gimmick.GetComponent<PitfallGimmick>();
-        if (pitfallGimmick != null)
+        bool isPitfallGimmick = gimmick.GetComponent<PitfallGimmick>() != null;
+        if (isPitfallGimmick)
         {
             foreach (var hitItem in hitList)
             {
@@ -282,12 +282,14 @@ public class RoomGrid : MonoBehaviour
                 material.SetVector("_HoleCenter", new Vector4(spawnPos.x, spawnPos.z, 0, 0));
                 break;
             }
-
-            // ギミック削除時にアルファクリッピングを元に戻すため、ヒットしたオブジェクトをリストに格納する
-            pitfallGimmick.hitHoles = hitList;
         }
         GameObject gimmickObject = Instantiate(gimmick.gameObject, spawnPos, Quaternion.identity);
         GimmickBase spawnGimmick = gimmickObject.GetComponent<GimmickBase>();
+        PitfallGimmick spawnPitfallGimmick = gimmickObject.GetComponent<PitfallGimmick>();
+        if (spawnPitfallGimmick != null)
+        {
+            spawnPitfallGimmick.hitHoles = hitList;
+        }
         spawnGimmick.roomGrid = this;
         gridGimmicks[grid.y][grid.x] = gimmickObject;
         spawnGimmick.SetGimmickPos(grid);
