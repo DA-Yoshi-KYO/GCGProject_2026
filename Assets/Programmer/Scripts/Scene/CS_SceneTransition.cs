@@ -122,6 +122,12 @@ public class CS_SceneTransition : MonoBehaviour
 
     private void InitSet()
     {
+        if (blackFadeImage == null || catInFadeImage == null || catOutFadeImage == null)
+        {
+            Debug.LogError("CS_SceneTransition: フェード用のImageがInspectorで設定されていません。", this);
+            return;
+        }
+
         blackFadeImage.raycastTarget = false;
         catInFadeImage.raycastTarget = false;
         catOutFadeImage.raycastTarget = false;
