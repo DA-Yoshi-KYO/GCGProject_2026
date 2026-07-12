@@ -32,9 +32,19 @@ public class CS_TutorialManager : MonoBehaviour
     [SerializeField, Header("泥棒の出現データリスト")]
     private List<ThiefSpawnData> thiefSpawnDataList;
 
+    [SerializeField, Header("チュートリアル用の部屋ノード")]
+    private CS_RoomNode tutorialRoomNode;
 
-    private void Start()
+    [SerializeField, Header("部屋の出入口")]
+    private Transform tutorialRoomDoorTransform;
+
+
+    private bool isCreatedThief = false;
+
+    private void Update()
     {
+        if (isCreatedThief) return;
+
         Time.timeScale = 1.0f;
 
         GameObject thiefParent = GameObject.Find("ThiefParent");
@@ -44,25 +54,28 @@ public class CS_TutorialManager : MonoBehaviour
             thiefParent = new GameObject("ThiefParent");
         }
 
+        // 基準となるプレイヤーの速度を取得
+        CS_PlayerMove playerMove = GameObject.FindAnyObjectByType<CS_PlayerMove>();
+        if (playerMove == null) return;
+        float playerSpeed = playerMove.GetBasePlayerSpeed();
+
         // チュートリアル用の泥棒を出現させる処理
-        //foreach (var spawnData in thiefSpawnDataList)
-        //{
-        //    // 泥棒のプレハブを生成
-        //    GameObject thief = Instantiate(
-        //        spawnData.thiefTypeData.thiefPrefab,
-        //        spawnData.spawnPoint,
-        //        Quaternion.identity,
-        //        thiefParent.transform
-        //        );
+        foreach (var spawnData in thiefSpawnDataList)
+        {
+            // 泥棒のプレハブを生成
+            GameObject thief = Instantiate(
+                spawnData.thiefTypeData.thiefPrefab,
+                spawnData.spawnPoint,
+                Quaternion.identity,
+                thiefParent.transform
+                );
 
-        //    thief.name = "Thief_" + thiefParent.transform.childCount;
+            thief.name = "Thief_" + thiefParent.transform.childCount;
 
-        //    // 基準となるプレイヤーの速度を取得
-        //    float playerSpeed = GameObject.FindGameObjectWithTag("Player").GetComponent<CS_PlayerMove>().GetBasePlayerSpeed();
-
-        //    // 行動AIの設定
-        //    CS_ThiefAI thiefAI = thief.GetComponent<CS_ThiefAI>();
-        //    thiefAI.Setting(Instantiate(spawnData.thiefTypeData), Instantiate(spawnData.thiefCommonData), playerSpeed, null, null);
-        //}
+            // 行動AIの設定
+            CS_ThiefAI thiefAI = thief.GetComponent<CS_ThiefAI>();
+            thiefAI.Setting(Instantiate(spawnData.thiefTypeData), Instantiate(spawnData.thiefCommonData), playerSpeed, tutorialRoomNode, CSE_RoomDoorDirection.Back, tutorialRoomDoorTransform);
+        }
+        isCreatedThief = true;
     }
 }
