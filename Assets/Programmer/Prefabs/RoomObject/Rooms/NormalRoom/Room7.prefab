@@ -1076,6 +1076,7 @@ GameObject:
   - component: {fileID: 8032740423281638283}
   - component: {fileID: 7360479954462087121}
   - component: {fileID: 6443253689172714130}
+  - component: {fileID: 5281266929352948707}
   m_Layer: 0
   m_Name: Camera
   m_TagString: MainCamera
@@ -1092,7 +1093,7 @@ Transform:
   m_GameObject: {fileID: 2408333208021286107}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0.8660254, z: -0.5, w: 0}
-  m_LocalPosition: {x: -2, y: 7, z: 2.5}
+  m_LocalPosition: {x: -2, y: 10.04, z: 3.1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1206,6 +1207,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveAmountLimit: {x: 5, y: 0, z: 8.5}
+--- !u!114 &5281266929352948707
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2408333208021286107}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b49b3a5d35060647abf993bd7e7c1de, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  timeScale: 1
+  isEnabled: 1
 --- !u!1 &2643214857098558220
 GameObject:
   m_ObjectHideFlags: 0
@@ -2253,7 +2268,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a522c4a2bffae8b4f9a3a2b1c1674f46, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  e_MoveDirection: 1
+  e_MoveDirection: 2
   tf_PlayerSpawnPoint: {fileID: 3449473152099735994}
   go_OpenDoorObject: {fileID: 0}
   go_ClosedWallObject: {fileID: 0}
@@ -3206,7 +3221,7 @@ Transform:
   m_GameObject: {fileID: 6179083086532912844}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 3.5, y: 0, z: 8.5}
+  m_LocalPosition: {x: 3.5, y: 0, z: 6.43}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
