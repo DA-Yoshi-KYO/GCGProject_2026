@@ -93,7 +93,7 @@ public sealed class CS_SmartNavAgent : MonoBehaviour
     /// </summary>
     public void MoveTo(Vector3 target)
     {
-        if (agent == null) return;
+        if (agent == null || !agent.isOnNavMesh) return;
         if (reusablePath == null) reusablePath = new NavMeshPath();
 
         // 回避対象が無いなら通常移動

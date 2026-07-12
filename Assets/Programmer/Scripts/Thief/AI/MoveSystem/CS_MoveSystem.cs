@@ -159,6 +159,9 @@ public class CS_MoveSystem
     /// </summary>
     public void MoveTo(Vector3 destination)
     {
+        // NavMeshAgentが存在しない、またはNavMesh上にない場合は移動要求を無視する
+        if (navMeshAgent == null || !navMeshAgent.isOnNavMesh) return;
+
         // 漁り状態のときは移動要求を無視する
         if (thiefAI.read_Animator.GetBool("IsHunting")) return;
         navMeshAgent.isStopped = false; // SmartNavAgentを使用する場合はNavMeshAgentを停止状態から解除する
