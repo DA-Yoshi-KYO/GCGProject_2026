@@ -94,7 +94,7 @@ public class GimmickList : MonoBehaviour
 
     [SerializeField]
     private List<GimmickInfoData> gimmickInfoList;
-    private List<CurrentGimmickData> currentGimmickInfoList;
+    private List<CurrentGimmickData> currentGimmickInfoList = new List<CurrentGimmickData>();
     
     private Dictionary<Gimmick, GimmickInfo> gimmickInfo =
         new Dictionary<Gimmick, GimmickInfo>();
@@ -144,7 +144,7 @@ public class GimmickList : MonoBehaviour
                     gimmickPrefab = data.gimmickPrefab
                 };
 
-                currentGimmickInfoList = new List<CurrentGimmickData>(currentGimmickData.Values);
+                currentGimmickInfoList.Add(currentGimmickData[data.gimmickTag]);
             }
         }
     }
