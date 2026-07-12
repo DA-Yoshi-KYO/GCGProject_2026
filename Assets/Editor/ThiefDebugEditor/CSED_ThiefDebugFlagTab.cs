@@ -93,31 +93,66 @@ internal sealed class CSED_ThiefDebugFlagTab
     {
         if (!Application.isPlaying) return;
 
+        // CS_ThiefAI 型をキャッシュ
+        var thiefAiType = CSED_ThiefDebug.FindTypeByName("CS_ThiefAI");
+        if (thiefAiType == null)
+        {
+            Debug.LogWarning("[ThiefDebug] CS_ThiefAI 型が見つかりませんでした。");
+            return;
+        }
+
+        // CS_PlayerTarget 型をキャッシュ
+        var playerTargetType = CSED_ThiefDebug.FindTypeByName("CS_PlayerTarget");
+        if (playerTargetType == null)
+        {
+            Debug.LogWarning("[ThiefDebug] CS_PlayerTarget 型が見つかりませんでした。");
+            return;
+        }
+
         // 全ての CS_ThiefAI を取得して、必要ならターゲットをクリアする
-        var allThieves = GameObject.FindObjectsOfType<CS_ThiefAI>();
+        var allThieves = GameObject.FindObjectsOfType(thiefAiType);
         int cleared = 0;
         foreach (var t in allThieves)
         {
-            var mem = t.read_MemorySystem;
+            var thiefComponent = t as Component;
+            if (thiefComponent == null) continue;
+
+            // memorySystem を取得
+            var memorySystemProp = thiefAiType.GetProperty("read_MemorySystem");
+            if (memorySystemProp == null) continue;
+            var mem = memorySystemProp.GetValue(thiefComponent);
             if (mem == null) continue;
+
+            var memType = mem.GetType();
+            var currentTargetProp = memType.GetProperty("read_CurrentTarget");
+            if (currentTargetProp == null) continue;
+            var currentTarget = currentTargetProp.GetValue(mem);
 
             // プレイヤー捕獲をオフにした場合、現在ターゲットがプレイヤーであれば解除する
             if (!isCatchPlayer)
             {
-                if (mem.read_CurrentTarget is CS_PlayerTarget)
+                if (playerTargetType.IsInstanceOfType(currentTarget))
                 {
-                    mem.ClearTarget();
-                    cleared++;
+                    var clearMethod = memType.GetMethod("ClearTarget");
+                    if (clearMethod != null)
+                    {
+                        clearMethod.Invoke(mem, null);
+                        cleared++;
+                    }
                 }
             }
 
             // 追跡をオフにした場合、現在プレイヤーをターゲットにしている泥棒のターゲットを解除
             if (!isChasePlayer)
             {
-                if (mem.read_CurrentTarget is CS_PlayerTarget)
+                if (playerTargetType.IsInstanceOfType(currentTarget))
                 {
-                    mem.ClearTarget();
-                    cleared++;
+                    var clearMethod = memType.GetMethod("ClearTarget");
+                    if (clearMethod != null)
+                    {
+                        clearMethod.Invoke(mem, null);
+                        cleared++;
+                    }
                 }
             }
         }

@@ -154,6 +154,7 @@ public class CS_ThiefReactionUI : MonoBehaviour
             // 最初の0.5秒で下から上にスライドインアニメーション
             if (key.slideInTime > 0.0f)
             {
+                key.reactionUI.SetActive(true);
                 float slideInProgress = 1.0f - (key.slideInTime / reactionUISlideInTime);
                 float slideInY = Mathf.Lerp(key.initialPosition.y, key.targetPosition.y, slideInProgress);
                 key.reactionUI.transform.localPosition = new Vector3(key.targetPosition.x, slideInY, key.targetPosition.z);
@@ -264,6 +265,7 @@ public class CS_ThiefReactionUI : MonoBehaviour
             // リアクションオブジェクトを作成
             GameObject reactionUI = new GameObject("ThiefReaction");
             reactionUI.transform.SetParent(parentThiefReaction.transform);
+            reactionUI.SetActive(false);
 
             // 新しいものを一番上に表示
             reactionUI.transform.SetAsLastSibling();

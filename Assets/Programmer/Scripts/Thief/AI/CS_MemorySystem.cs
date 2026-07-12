@@ -722,6 +722,8 @@ public class CS_MemorySystem
         // 前回の探索対象がThiefTargetの派生クラスかどうか(前回が移動ポイントでない場合)
         if (currentTarget == null || currentTarget is CS_VisionTarget || currentTarget is CS_TrapTarget || currentTarget is CS_PlayerTarget)
         {
+            if (currentRoom.movePoints.Count == 0) return;
+
             // 視認オブジェクトから移動ポイントにする場合は一番近いものを探索対象に設定
             foreach (CS_ThiefTarget target in currentRoom.movePoints)
             {
