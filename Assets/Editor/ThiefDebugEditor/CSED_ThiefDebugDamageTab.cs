@@ -20,15 +20,6 @@ using System.Collections.Generic;
 /// </summary>
 internal sealed class CSED_ThiefDebugDamageTab
 {
-    [Tooltip("対象（泥棒AIコンポーネント）リスト")]
-    private readonly List<MonoBehaviour> targets = new List<MonoBehaviour>();
-
-    [Tooltip("対象リスト内の選択中index（-1は未選択）")]
-    private int selectedTargetIndex = -1;
-
-    [Tooltip("追加用ObjectField")]
-    private MonoBehaviour addTarget;
-
     [Tooltip("与えるダメージ量")]
     private int damageAmount = 1;
 
@@ -38,7 +29,7 @@ internal sealed class CSED_ThiefDebugDamageTab
     /// <summary>
     /// タブ全体描画
     /// </summary>
-    public void Draw()
+    public void Draw(List<MonoBehaviour> targets, int selectedTargetIndex)
     {
         EditorGUILayout.LabelField("ダメージ", EditorStyles.boldLabel);
         EditorGUILayout.HelpBox(
@@ -46,152 +37,20 @@ internal sealed class CSED_ThiefDebugDamageTab
         "実行中に対象を追加/選択できます。",
         MessageType.Info);
 
-        // 対象追加
-        DrawAddTargetArea();
-        EditorGUILayout.Space(8);
-
-        // 対象リスト表示/選択
-        DrawTargetListArea();
-        EditorGUILayout.Space(8);
-
-        // ダメージ設定/実行
-        DrawDamageExecuteArea();
-    }
-
-    /// <summary>
-    /// 対象（泥棒AI）をリストに追加するUI
-    /// </summary>
-    private void DrawAddTargetArea()
-    {
-        EditorGUILayout.LabelField("対象の追加", EditorStyles.boldLabel);
-
-        //1件追加（ObjectField ->追加ボタン）
-        using (new EditorGUILayout.HorizontalScope())
-        {
-            addTarget = (MonoBehaviour)EditorGUILayout.ObjectField("追加する泥棒(AI)", addTarget, typeof(MonoBehaviour), true);
-
-            using (new EditorGUI.DisabledScope(addTarget == null))
-            {
-                if (GUILayout.Button("リストに追加", GUILayout.Width(100)))
-                {
-                    // 重複登録を防ぐ
-                    if (!targets.Contains(addTarget))
-                    {
-                        targets.Add(addTarget);
-                        selectedTargetIndex = targets.Count - 1;
-                    }
-                    else
-                    {
-                        //既にある場合はその要素を選択状態にする
-                        selectedTargetIndex = targets.IndexOf(addTarget);
-                    }
-
-                    // 次の追加のために入力欄をクリア
-                    addTarget = null;
-                }
-            }
-        }
-
-        // 一括操作（シーン収集/クリア）
-        using (new EditorGUILayout.HorizontalScope())
-        {
-            if (GUILayout.Button("シーンから泥棒AIを収集"))
-            {
-                var thiefAiType = FindTypeByName("CS_ThiefAI");
-                if (thiefAiType == null)
-                {
-                    EditorGUILayout.HelpBox("泥棒AI型が見つかりません。", MessageType.Warning);
-                }
-                else
-                {
-                    var found = UnityEngine.Object.FindObjectsOfType(thiefAiType);
-                    foreach (var o in found)
-                    {
-                        var mb = o as MonoBehaviour;
-                        if (mb == null) continue;
-                        if (!targets.Contains(mb)) targets.Add(mb);
-                    }
-
-                    // 選択が無ければ先頭を選択する
-                    if (targets.Count > 0 && selectedTargetIndex < 0)
-                    {
-                        selectedTargetIndex = 0;
-                    }
-                }
-            }
-
-            using (new EditorGUI.DisabledScope(targets.Count == 0))
-            {
-                if (GUILayout.Button("リストをクリア", GUILayout.Width(100)))
-                {
-                    targets.Clear();
-                    selectedTargetIndex = -1;
-                }
-            }
-        }
-    }
-
-    /// <summary>
-    /// 対象リストの表示/選択/削除
-    /// </summary>
-    private void DrawTargetListArea()
-    {
-        EditorGUILayout.LabelField("対象リスト", EditorStyles.boldLabel);
-
-        //参照切れ（Destroy済み）を掃除
-        CleanupNullTargets();
-
         if (targets.Count == 0)
         {
             EditorGUILayout.HelpBox("対象がありません。上の『追加』から登録してください。", MessageType.Warning);
             return;
         }
 
-        // Popup表示用のラベル配列を作る（name表示）
-        string[] options = new string[targets.Count];
-        for (int i = 0 ; i < targets.Count ; i++)
-        {
-            var t = targets[i];
-            options[i] = t != null ? (i + ": " + t.name) : (i + ": (Missing)");
-        }
-
-        // 範囲外参照が起きないように補正
-        selectedTargetIndex = Mathf.Clamp(selectedTargetIndex, 0, targets.Count - 1);
-
-        // 選択中の対象をPopupで切り替え
-        selectedTargetIndex = EditorGUILayout.Popup("選択中", selectedTargetIndex, options);
-
-        // 一覧 + 個別操作
-        for (int i = 0 ; i < targets.Count ; i++)
-        {
-            var t = targets[i];
-            using (new EditorGUILayout.HorizontalScope())
-            {
-                using (new EditorGUI.DisabledScope(true))
-                {
-                    EditorGUILayout.ObjectField(i.ToString(), t, typeof(MonoBehaviour), true);
-                }
-
-                if (GUILayout.Button("選択", GUILayout.Width(60)))
-                {
-                    selectedTargetIndex = i;
-                    if (t != null) Selection.activeObject = t.gameObject;
-                }
-
-                if (GUILayout.Button("削除", GUILayout.Width(60)))
-                {
-                    targets.RemoveAt(i);
-                    if (selectedTargetIndex >= targets.Count) selectedTargetIndex = targets.Count - 1;
-                    break;
-                }
-            }
-        }
+        // ダメージ設定/実行
+        DrawDamageExecuteArea(targets, selectedTargetIndex);
     }
 
     /// <summary>
     /// ダメージ量/種別の設定、および実行ボタン
     /// </summary>
-    private void DrawDamageExecuteArea()
+    private void DrawDamageExecuteArea(List<MonoBehaviour> targets, int selectedTargetIndex)
     {
         EditorGUILayout.LabelField("ダメージ設定", EditorStyles.boldLabel);
 
@@ -217,7 +76,7 @@ internal sealed class CSED_ThiefDebugDamageTab
             using (new EditorGUILayout.HorizontalScope())
             {
                 // 選択中の対象へダメージ
-                using (new EditorGUI.DisabledScope(!HasValidSelectedTarget()))
+                using (new EditorGUI.DisabledScope(!HasValidSelectedTarget(targets, selectedTargetIndex)))
                 {
                     if (GUILayout.Button("選択中にダメージ"))
                     {
@@ -231,7 +90,7 @@ internal sealed class CSED_ThiefDebugDamageTab
                 {
                     if (GUILayout.Button("リスト全員にダメージ"))
                     {
-                        for (int i = 0 ; i < targets.Count ; i++)
+                        for (int i = 0; i < targets.Count; i++)
                         {
                             var t = targets[i];
                             if (t == null) continue;
@@ -249,7 +108,7 @@ internal sealed class CSED_ThiefDebugDamageTab
     private void DrawDamageTypePopup()
     {
         // ThiefReactionUIType enum を取得
-        var reactionEnumType = FindTypeByName("CS_ThiefReactionUI+ThiefReactionUIType");
+        var reactionEnumType = CSED_ThiefDebug.FindTypeByName("CS_ThiefReactionUI+ThiefReactionUIType");
         if (reactionEnumType != null) {
             // enumが見つかった場合は、選択中の種別名 -> enum値へ変換して保存
             damageReactionTypeName = ToGimmickValue(reactionEnumType, damageReactionTypeName)?.ToString() ?? damageReactionTypeName;
@@ -282,7 +141,7 @@ internal sealed class CSED_ThiefDebugDamageTab
         if (thief.GetType().Name != "CS_ThiefAI") return;
 
         // Gimmick enum を取得
-        var gimmickEnumType = FindTypeByName("Gimmick");
+        var gimmickEnumType = CSED_ThiefDebug.FindTypeByName("Gimmick");
         if (gimmickEnumType == null || !gimmickEnumType.IsEnum)
         {
             Debug.LogWarning("Gimmick enum が見つからないため TakeDamage を実行できません。");
@@ -342,64 +201,11 @@ internal sealed class CSED_ThiefDebugDamageTab
     /// <summary>
     /// 現在選択中の対象が有効か判定する
     /// </summary>
-    private bool HasValidSelectedTarget()
+    private bool HasValidSelectedTarget(List<MonoBehaviour> targets, int selectedTargetIndex)
     {
         return selectedTargetIndex >= 0
         && selectedTargetIndex < targets.Count
         && targets[selectedTargetIndex] != null;
-    }
-
-    /// <summary>
-    /// targets 内の null（Destroy済みなど）を削除して、安全に操作できる状態に整える
-    /// </summary>
-    private void CleanupNullTargets()
-    {
-        for (int i = targets.Count - 1 ; i >= 0 ; i--)
-        {
-            if (targets[i] == null) targets.RemoveAt(i);
-        }
-
-        if (targets.Count == 0) selectedTargetIndex = -1;
-        else selectedTargetIndex = Mathf.Clamp(selectedTargetIndex, 0, targets.Count - 1);
-    }
-
-    /// <summary>
-    /// 型名からTypeを検索する（UnityのAssembly構成差異に耐えるためのヘルパ）
-    /// </summary>
-    private static Type FindTypeByName(string typeName)
-    {
-        foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
-        {
-            try
-            {
-                var t = asm.GetType(typeName);
-                if (t != null) return t;
-            }
-            catch
-            {
-            }
-        }
-
-        foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
-        {
-            Type[] types;
-            try
-            {
-                types = asm.GetTypes();
-            }
-            catch
-            {
-                continue;
-            }
-
-            foreach (var t in types)
-            {
-                if (t == null) continue;
-                if (t.Name == typeName) return t;
-            }
-        }
-
-        return null;
     }
 }
 #endif
