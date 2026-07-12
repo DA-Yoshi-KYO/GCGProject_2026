@@ -424,8 +424,8 @@ public class CS_ThiefAI : MonoBehaviour
         else
         {
             // 退場したときにウェーブ数を増加させる
-            //CS_StageManager stageManager = GameObject.FindObjectOfType<CS_StageManager>();
-            //if (stageManager != null) stageManager.WaveCountUp();
+            CS_StageManager stageManager = GameObject.FindObjectOfType<CS_StageManager>();
+            if (stageManager != null) stageManager.WaveCountUp();
         }
     }
 
