@@ -1020,7 +1020,8 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 4988030264269803716, guid: 3a0f8a01545f0bb4ba4a0f61ada82e03, type: 3}
     m_RemovedGameObjects:
     - {fileID: 8616038160603616655, guid: 3a0f8a01545f0bb4ba4a0f61ada82e03, type: 3}
     m_AddedGameObjects: []
@@ -1138,6 +1139,11 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: 10b60465d3fce884a9e4d6aa7e84ba02,
         type: 2}
+    - target: {fileID: 7316762453513333914, guid: 3d3967b1f790c794fa031042794edb32,
+        type: 3}
+      propertyPath: thiefSpawnDataList.Array.data[0].spawnRotation.y
+      value: -90
+      objectReference: {fileID: 0}
     - target: {fileID: 7316762453513333914, guid: 3d3967b1f790c794fa031042794edb32,
         type: 3}
       propertyPath: thiefSpawnDataList.Array.data[0].thiefCommonData

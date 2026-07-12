@@ -27,6 +27,9 @@ public class CS_TutorialManager : MonoBehaviour
 
         [Header("泥棒の出現位置")]
         public Vector3 spawnPoint;
+
+        [Header("泥棒の出現時の向き")]
+        public Vector3 spawnRotation;
     }
 
     [SerializeField, Header("泥棒の出現データリスト")]
@@ -69,6 +72,8 @@ public class CS_TutorialManager : MonoBehaviour
                 Quaternion.identity,
                 thiefParent.transform
                 );
+
+            thief.transform.rotation = Quaternion.Euler(spawnData.spawnRotation);
 
             thief.name = "Thief_" + thiefParent.transform.childCount;
 
