@@ -40,6 +40,8 @@ public class CloneCat : GimmickBase
     CS_PlayerAction.InteractSyllinder defaultMaxSyllinder;
     CS_PlayerAction.InteractSyllinder defaultMinSyllinder;
 
+    CustomInputAction inputAction;
+
     float activeTimer = 0.0f;
     bool bFirstActive = true;
     bool bFirstBroken = true;
@@ -52,7 +54,10 @@ public class CloneCat : GimmickBase
         gimmickState = GimmickState.Active;
 
         player = GameObject.Find("Player(Clone)");
-        roomPlayerPosition = GameObject.Find("RoomManager").GetComponent<CS_RoomPlayerPosition>();
+        GameObject roomManager = GameObject.Find("RoomManager");
+        roomPlayerPosition = roomManager != null ? roomManager.GetComponent<CS_RoomPlayerPosition>() : null;
+        inputAction = new CustomInputAction();
+        inputAction.Enable();
 
         if (player == null) return;
 
@@ -71,12 +76,17 @@ public class CloneCat : GimmickBase
             ChangePosProcess();
         }
 
-        ViewGimmickUI(false);
+        ViewGimmickUI(true);
         SetPlayerAlpha(activeAlpha);
     }
 
     protected override void ActiveUpdate()
     {
+        if (inputAction.Player.InteractCancel.IsPressed())
+        {
+            gimmickState = GimmickState.Broken;
+        }
+
         activeTimer += Time.deltaTime;
         if (activeTimer >= activeTime)
         {

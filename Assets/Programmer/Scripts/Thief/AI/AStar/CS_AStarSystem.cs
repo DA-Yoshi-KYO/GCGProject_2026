@@ -358,6 +358,8 @@ public class CS_AStarSystem
             moveRoute.Clear();
             moveRoute = null;
         }
+
+        isRouteUpdated = true;
     }
 
     /// <summary>
@@ -366,7 +368,7 @@ public class CS_AStarSystem
     /// <param name="exploredDistanceThreshold"></param>
     public void UpdateRoute(float exploredDistanceThreshold)
     {
-        if (moveRoute == null) return;
+        if (moveRoute == null || moveRoute.Count == 0) return;
 
         // ルートの先頭の要素を取得
         Transform targetPoint = moveRoute[0];
@@ -377,6 +379,7 @@ public class CS_AStarSystem
             // 先頭の要素をルートから削除
             moveRoute.RemoveAt(0);
             isRouteUpdated = true;
+            return;
         }
 
         // 移動システムを使って移動
@@ -385,6 +388,14 @@ public class CS_AStarSystem
             thiefAI?.read_MoveSystem?.MoveTo(targetPoint.position);
             isRouteUpdated = false;
         }
+    }
+
+    /// <summary>
+    /// ルートの更新フラグをリセットする処理
+    /// </summary>
+    public void ResetUpdatedFlag()
+    {
+        isRouteUpdated = true;
     }
 
     /// <summary>
@@ -475,5 +486,22 @@ public class CS_AStarSystem
         }
 
         return distance;
+    }
+
+    /// <summary>
+    /// 現在のターゲット部屋ノードを取得する処理
+    /// </summary>
+    /// <returns>現在のターゲット部屋ノード</returns>
+    public CS_RoomNode GetCurrentTargetRoomNode()
+    {
+        if (moveRoute == null || moveRoute.Count == 0) return null;
+        Transform targetPoint = moveRoute[0];
+        if (targetPoint == null) return null;
+        GameObject targetRoomObj = CS_RoomCreatePointRaycast.GetRayRoomCreatePoint(targetPoint.gameObject);
+        if (targetRoomObj != null)
+        {
+            return targetRoomObj.GetComponentInChildren<CS_RoomNode>();
+        }
+        return null;
     }
 }

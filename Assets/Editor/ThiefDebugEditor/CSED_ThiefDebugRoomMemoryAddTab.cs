@@ -23,15 +23,6 @@ using System.Reflection;
 /// </summary>
 public sealed class CSED_ThiefDebugRoomMemoryAddTab
 {
-    // デバッグ対象の泥棒(MonoBehaviour)リスト
-    private readonly List<MonoBehaviour> targets = new List<MonoBehaviour>();
-
-    // targets 内で選択中のインデックス
-    private int selectedTargetIndex = -1;
-
-    // 対象追加用の ObjectFieldで一時的に保持する参照
-    private MonoBehaviour addTarget;
-
     // Sceneから収集した RoomNode コンポーネントのリスト
     private List<Component> roomNodeList = new List<Component>();
 
@@ -44,134 +35,24 @@ public sealed class CSED_ThiefDebugRoomMemoryAddTab
     /// <summary>
     /// タブ全体の描画エントリ
     /// </summary>
-    public void Draw()
+    public void Draw(List<MonoBehaviour> targets, int selectedTargetIndex)
     {
         EditorGUILayout.LabelField("部屋記憶の追加", EditorStyles.boldLabel);
         EditorGUILayout.HelpBox("指定した泥棒に対して、特定の部屋の記憶(CS_RoomMemory)を追加します。部屋はScene内のRoomCreatePointの子にあるRoomNodeから選択してください。", MessageType.Info);
 
-        DrawAddTargetArea();
-        EditorGUILayout.Space(8);
-        DrawTargetListArea();
-        EditorGUILayout.Space(8);
-        DrawAddMemoryArea();
-    }
-
-    /// <summary>
-    /// 対象泥棒を追加するエリアの描画
-    /// </summary>
-    private void DrawAddTargetArea()
-    {
-        EditorGUILayout.LabelField("対象の追加", EditorStyles.boldLabel);
-        using (new EditorGUILayout.HorizontalScope())
-        {
-            // ObjectFieldで泥棒(GameObjectに付いたコンポーネント)を指定
-            addTarget = (MonoBehaviour)EditorGUILayout.ObjectField("追加する泥棒(AI)", addTarget, typeof(MonoBehaviour), true);
-
-            //追加ボタン（選択されていない場合は無効化）
-            using (new EditorGUI.DisabledScope(addTarget == null))
-            {
-                if (GUILayout.Button("リストに追加", GUILayout.Width(100)))
-                {
-                    // 重複防止してリストへ追加、選択インデックスを更新
-                    if (!targets.Contains(addTarget))
-                    {
-                        targets.Add(addTarget);
-                        selectedTargetIndex = targets.Count -1;
-                    }
-                    else
-                    {
-                        selectedTargetIndex = targets.IndexOf(addTarget);
-                    }
-                    addTarget = null; // 入力欄をクリア
-                }
-            }
-        }
-
-        // シーンから自動収集 / リストクリア
-        using (new EditorGUILayout.HorizontalScope())
-        {
-            if (GUILayout.Button("シーンから泥棒AIを収集"))
-            {
-                var thiefAiType = FindTypeByName("CS_ThiefAI");
-                if (thiefAiType != null)
-                {
-                    var found = UnityEngine.Object.FindObjectsOfType(thiefAiType);
-                    foreach (var o in found)
-                    {
-                        var mb = o as MonoBehaviour;
-                        if (mb == null) continue;
-                        if (!targets.Contains(mb)) targets.Add(mb);
-                    }
-                    if (targets.Count >0 && selectedTargetIndex <0) selectedTargetIndex =0;
-                }
-            }
-
-            using (new EditorGUI.DisabledScope(targets.Count ==0))
-            {
-                if (GUILayout.Button("リストをクリア", GUILayout.Width(100)))
-                {
-                    targets.Clear();
-                    selectedTargetIndex = -1;
-                }
-            }
-        }
-    }
-
-    /// <summary>
-    /// 対象リスト表示エリアの描画
-    /// </summary>
-    private void DrawTargetListArea()
-    {
-        EditorGUILayout.LabelField("対象リスト", EditorStyles.boldLabel);
-        CleanupNullTargets();
         if (targets.Count ==0)
         {
-            EditorGUILayout.HelpBox("対象がありません。上の『追加』から登録してください。", MessageType.Warning);
+            EditorGUILayout.HelpBox("対象の泥棒が登録されていません。上の『対象の追加』から登録してください。", MessageType.Warning);
             return;
         }
 
-        // Popup用のラベル配列
-        string[] options = new string[targets.Count];
-        for (int i =0; i < targets.Count; i++)
-        {
-            var t = targets[i];
-            options[i] = t != null ? (i + ": " + t.name) : (i + ": (Missing)");
-        }
-
-        selectedTargetIndex = Mathf.Clamp(selectedTargetIndex,0, targets.Count -1);
-        selectedTargetIndex = EditorGUILayout.Popup("選択中", selectedTargetIndex, options);
-
-        // 個別の操作ボタン（選択/削除）
-        for (int i =0; i < targets.Count; i++)
-        {
-            var t = targets[i];
-            using (new EditorGUILayout.HorizontalScope())
-            {
-                using (new EditorGUI.DisabledScope(true))
-                {
-                    EditorGUILayout.ObjectField(i.ToString(), t, typeof(MonoBehaviour), true);
-                }
-
-                if (GUILayout.Button("選択", GUILayout.Width(60)))
-                {
-                    selectedTargetIndex = i;
-                    if (t != null) Selection.activeObject = t.gameObject;
-                }
-
-                if (GUILayout.Button("削除", GUILayout.Width(60)))
-                {
-                    targets.RemoveAt(i);
-                    if (selectedTargetIndex >= targets.Count) selectedTargetIndex = targets.Count -1;
-                    break;
-                }
-            }
-        }
+        DrawAddMemoryArea(targets, selectedTargetIndex);
     }
 
     /// <summary>
     /// 選択中対象が有効か判定
     /// </summary>
-    private bool HasValidSelectedTarget()
+    private bool HasValidSelectedTarget(List<MonoBehaviour> targets, int selectedTargetIndex)
     {
         return selectedTargetIndex >=0
         && selectedTargetIndex < targets.Count
@@ -179,27 +60,13 @@ public sealed class CSED_ThiefDebugRoomMemoryAddTab
     }
 
     /// <summary>
-    /// null（破棄済み）のターゲットを除去してインデックスを調整
-    /// </summary>
-    private void CleanupNullTargets()
-    {
-        for (int i = targets.Count -1; i >=0; i--)
-        {
-            if (targets[i] == null) targets.RemoveAt(i);
-        }
-
-        if (targets.Count ==0) selectedTargetIndex = -1;
-        else selectedTargetIndex = Mathf.Clamp(selectedTargetIndex,0, targets.Count -1);
-    }
-
-    /// <summary>
     /// 記憶追加エリアの描画
     /// </summary>
-    private void DrawAddMemoryArea()
+    private void DrawAddMemoryArea(List<MonoBehaviour> targets, int selectedTargetIndex)
     {
         EditorGUILayout.LabelField("記憶追加", EditorStyles.boldLabel);
 
-        if (!HasValidSelectedTarget())
+        if (!HasValidSelectedTarget(targets, selectedTargetIndex))
         {
             EditorGUILayout.HelpBox("対象が選択されていません。", MessageType.Warning);
             return;
@@ -282,7 +149,7 @@ public sealed class CSED_ThiefDebugRoomMemoryAddTab
                         var go = currentRoomObj as GameObject;
                         if (go != null)
                         {
-                            Type roomNodeType = FindTypeByName("CS_RoomNode");
+                            Type roomNodeType = CSED_ThiefDebug.FindTypeByName("CS_RoomNode");
                             Component nodeComp = null;
                             if (roomNodeType != null) nodeComp = go.GetComponentInChildren(roomNodeType) as Component;
                             if (nodeComp != null)
@@ -357,8 +224,8 @@ public sealed class CSED_ThiefDebugRoomMemoryAddTab
         roomNodeList.Clear();
         selectedRoomNodeIndex = -1;
 
-        var createPointType = FindTypeByName("CS_RoomCreatePoint");
-        var roomNodeType = FindTypeByName("CS_RoomNode");
+        var createPointType = CSED_ThiefDebug.FindTypeByName("CS_RoomCreatePoint");
+        var roomNodeType = CSED_ThiefDebug.FindTypeByName("CS_RoomNode");
         if (createPointType == null || roomNodeType == null) return;
 
         var createPoints = UnityEngine.Object.FindObjectsOfType(createPointType);
@@ -431,7 +298,7 @@ public sealed class CSED_ThiefDebugRoomMemoryAddTab
         }
 
         // CS_RoomMemory 型を生成して初期化
-        var roomMemoryType = FindTypeByName("CS_RoomMemory");
+        var roomMemoryType = CSED_ThiefDebug.FindTypeByName("CS_RoomMemory");
         if (roomMemoryType == null)
         {
             if (!silent) EditorUtility.DisplayDialog("エラー", "CS_RoomMemory 型が見つかりません。", "OK");
@@ -450,7 +317,7 @@ public sealed class CSED_ThiefDebugRoomMemoryAddTab
         var recognizedField = roomMemoryType.GetField("recognizedObjects", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
         if (recognizedField != null)
         {
-            var thiefTargetType = FindTypeByName("CS_ThiefTarget");
+            var thiefTargetType = CSED_ThiefDebug.FindTypeByName("CS_ThiefTarget");
             Type listType;
             if (thiefTargetType != null) listType = typeof(List<>).MakeGenericType(thiefTargetType);
             else listType = typeof(List<UnityEngine.Object>);
@@ -460,7 +327,7 @@ public sealed class CSED_ThiefDebugRoomMemoryAddTab
         var unchosenField = roomMemoryType.GetField("unchosenDoors", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
         if (unchosenField != null)
         {
-            var doorDirType = FindTypeByName("CSE_RoomDoorDirection");
+            var doorDirType = CSED_ThiefDebug.FindTypeByName("CSE_RoomDoorDirection");
             Type listType;
             if (doorDirType != null) listType = typeof(List<>).MakeGenericType(doorDirType);
             else listType = typeof(List<UnityEngine.Object>);
@@ -517,7 +384,7 @@ public sealed class CSED_ThiefDebugRoomMemoryAddTab
             var go = currentRoomObj as GameObject;
             if (go != null)
             {
-                Type roomNodeType = FindTypeByName("CS_RoomNode");
+                Type roomNodeType = CSED_ThiefDebug.FindTypeByName("CS_RoomNode");
                 if (roomNodeType != null) nodeComp = go.GetComponentInChildren(roomNodeType) as Component;
             }
         }
@@ -564,7 +431,7 @@ public sealed class CSED_ThiefDebugRoomMemoryAddTab
         else
         {
             // 存在しない場合は新規に作成して追加
-            var roomMemoryType = FindTypeByName("CS_RoomMemory");
+            var roomMemoryType = CSED_ThiefDebug.FindTypeByName("CS_RoomMemory");
             if (roomMemoryType == null)
             {
                 if (!silent) EditorUtility.DisplayDialog("エラー", "CS_RoomMemory 型が見つかりません。", "OK");
@@ -578,7 +445,7 @@ public sealed class CSED_ThiefDebugRoomMemoryAddTab
             var recognizedField = roomMemoryType.GetField("recognizedObjects", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             if (recognizedField != null)
             {
-                var thiefTargetType = FindTypeByName("CS_ThiefTarget");
+                var thiefTargetType = CSED_ThiefDebug.FindTypeByName("CS_ThiefTarget");
                 Type listType;
                 if (thiefTargetType != null) listType = typeof(List<>).MakeGenericType(thiefTargetType);
                 else listType = typeof(List<UnityEngine.Object>);
@@ -589,7 +456,7 @@ public sealed class CSED_ThiefDebugRoomMemoryAddTab
             var unchosenField = roomMemoryType.GetField("unchosenDoors", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             if (unchosenField != null)
             {
-                var doorDirType = FindTypeByName("CSE_RoomDoorDirection");
+                var doorDirType = CSED_ThiefDebug.FindTypeByName("CSE_RoomDoorDirection");
                 Type listType;
                 if (doorDirType != null) listType = typeof(List<>).MakeGenericType(doorDirType);
                 else listType = typeof(List<UnityEngine.Object>);
@@ -631,32 +498,6 @@ public sealed class CSED_ThiefDebugRoomMemoryAddTab
         if (f != null) return f.GetValue(obj);
         var p = t.GetProperty(name, flags);
         if (p != null) return p.GetValue(obj, null);
-        return null;
-    }
-
-    private static Type FindTypeByName(string typeName)
-    {
-        foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
-        {
-            try
-            {
-                var t = asm.GetType(typeName);
-                if (t != null) return t;
-            }
-            catch { }
-        }
-
-        foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
-        {
-            Type[] types;
-            try { types = asm.GetTypes(); } catch { continue; }
-            foreach (var t in types)
-            {
-                if (t == null) continue;
-                if (t.Name == typeName) return t;
-            }
-        }
-
         return null;
     }
 }

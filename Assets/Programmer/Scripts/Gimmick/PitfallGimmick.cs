@@ -18,14 +18,15 @@ public class PitfallGimmick : GimmickBase
 
     private bool isFirstActive = false;
     private bool isFirstBroken = false;
-    public List<RaycastHit> hitHoles;   // 落とし穴としてアルファクリッピングする為にレイキャストでヒットしたオブジェクトを格納するリスト
+    private CS_ThiefGimmickAction trappedThiefGimmickAction;
+    public List<RaycastHit> hitHoles = new List<RaycastHit>();   // 落とし穴としてアルファクリッピングする為にレイキャストでヒットしたオブジェクトを格納するリスト
 
-    void Start()
+    protected override void Start()
     {
+        base.Start();
         //Idle状態で当たり判定を設定して
         //当たったらActive状態にする
         //※消えるまでの時間計算用(Active)
-        hitHoles = new List<RaycastHit>();
         SetHitChecker(transform.position);
     }
     protected override void ActiveUpdate()
@@ -33,6 +34,7 @@ public class PitfallGimmick : GimmickBase
         if (!isFirstActive)
         {//Active状態になった瞬間に当たり判定を消す
             isFirstActive = true;
+            trappedThiefGimmickAction = GetThiefGimmickAction();
             DeleteHitChecker();
         }
         activeTime -= Time.deltaTime;
@@ -47,13 +49,25 @@ public class PitfallGimmick : GimmickBase
         if (!isFirstBroken)
         {
             isFirstBroken = true;
-            GetThiefGimmickAction().PitFallEnd();
+            if (trappedThiefGimmickAction != null)
+            {
+                trappedThiefGimmickAction.PitFallEnd();
+            }
+            else
+            {
+                Debug.LogWarning("PitfallGimmick: ThiefGimmickAction is null.");
+            }
             Debug.Log("落とし穴ギミックが壊れました");
         }
     }
 
     void OnDestroy()
     {
+        if (hitHoles == null)
+        {
+            return;
+        }
+
         foreach (var hit in hitHoles)
         {
             if (hit.collider != null)

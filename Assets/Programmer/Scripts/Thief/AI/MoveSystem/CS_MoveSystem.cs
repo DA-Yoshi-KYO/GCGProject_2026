@@ -31,6 +31,7 @@ public class CS_MoveSystem
     {
         Player,         // プレイヤー
         Treasure,       // 宝物
+        SearchObject,    // 捜索対象オブジェクト
     }
 
     [Tooltip("走り状態になる標的オブジェクトのタイプリスト")]
@@ -116,6 +117,20 @@ public class CS_MoveSystem
                         navMeshAgent.speed = runSpeed;
                         return;
                     }
+                    if (currentTarget is CS_TrapTarget tt && tt.gimmickScript.gimmick == Gimmick.EmptyChest)
+                    {
+                        // 現在の標的が宝物ギミックの場合は走り速度に切り替える
+                        navMeshAgent.speed = runSpeed;
+                        return;
+                    }
+                    break;
+                case RunTargetType.SearchObject:
+                    if (currentTarget is CS_VisionTarget vt2 && vt2.targetType == CS_VisionTarget.TargetType.Shelf)
+                    {
+                        // 現在の標的が捜索対象オブジェクトの場合は走り速度に切り替える
+                        navMeshAgent.speed = runSpeed;
+                        return;
+                    }
                     break;
             }
         }
@@ -144,6 +159,9 @@ public class CS_MoveSystem
     /// </summary>
     public void MoveTo(Vector3 destination)
     {
+        // NavMeshAgentが存在しない、またはNavMesh上にない場合は移動要求を無視する
+        if (navMeshAgent == null || !navMeshAgent.isOnNavMesh) return;
+
         // 漁り状態のときは移動要求を無視する
         if (thiefAI.read_Animator.GetBool("IsHunting")) return;
         navMeshAgent.isStopped = false; // SmartNavAgentを使用する場合はNavMeshAgentを停止状態から解除する
@@ -165,15 +183,27 @@ public class CS_MoveSystem
     /// </summary>
     /// <param name="targetPos">指定位置</param>
     /// <param name="entryDoorDir">入ってきたドアの方向</param>
-    public void WarpAction(Vector3 targetPos, CSE_RoomDoorDirection entryDoorDir)
+    public void WarpAction(Transform targetTransform, CSE_RoomDoorDirection entryDoorDir)
     {
         // 現在の経路をリセットして、ワープ後に新しい経路を計算させる
         navMeshAgent.ResetPath();
         // NavMeshAgentのWarpメソッドを使用して、指定した位置にワープする
-        navMeshAgent.Warp(targetPos);
+        navMeshAgent.Warp(targetTransform.position);
 
         // ThiefAI経由でTransformの位置を更新
-        thiefAI.transform.position = targetPos;
+
+        Vector3 lookDir = targetTransform.position - targetTransform.parent.position;
+        lookDir.y = 0.0f;
+
+        Quaternion spawnRotation = targetTransform.rotation;
+
+        if (lookDir.sqrMagnitude > 0.001f)
+        {
+            spawnRotation = Quaternion.LookRotation(lookDir);
+        }
+
+        thiefAI.transform.SetPositionAndRotation(targetTransform.position, spawnRotation);
+
 
         // ワープ後に、ThiefAIのA*システムにワープアクションを通知する
         thiefAI?.read_AStarSystem?.WarpAction();
@@ -201,5 +231,43 @@ public class CS_MoveSystem
         Vector3 exitPosition = thiefAI.transform.position + exitDirectionAfterStun.normalized; // 退場する距離を適宜調整
         exitPosition.y = thiefAI.transform.position.y; // 高さは変えない
         thiefAI.transform.position = Vector3.MoveTowards(thiefAI.transform.position, exitPosition, walkSpeed * 0.5f * Time.deltaTime);
+    }
+
+    public void DebugMove()
+    {
+        if (thiefAI.read_Animator.GetBool("IsStun")) return; // 気絶状態のときは移動要求を無視する
+        if (Time.timeScale == 0) return; // ゲームが一時停止中の場合は移動要求を無視する
+
+        if (debugPos == thiefAI.transform.position)
+        {
+            samePosFrameCount++;
+            if (samePosFrameCount > 300)
+            {
+                if (thiefAI.read_AStarSystem.HasRoute)
+                {
+                    if (thiefAI.read_MemorySystem.read_CurrentRoom != thiefAI.read_AStarSystem.GetCurrentTargetRoomNode())
+                    {
+                        thiefAI.read_AStarSystem.ClearRoute();
+                    }
+                    else
+                    {
+                        thiefAI.read_AStarSystem.ResetUpdatedFlag();
+                    }
+                }
+                else if (thiefAI.read_MemorySystem.read_CurrentTarget != null)
+                {
+                    MoveTo(thiefAI.read_MemorySystem.read_CurrentTarget.transform.position);
+                }
+                else
+                {
+                    thiefAI.read_MemorySystem.ClearTarget();
+                }
+            }
+        }
+        else
+        {
+            debugPos = thiefAI.transform.position;
+            samePosFrameCount = 0; // カウンターをリセット
+        }
     }
 }

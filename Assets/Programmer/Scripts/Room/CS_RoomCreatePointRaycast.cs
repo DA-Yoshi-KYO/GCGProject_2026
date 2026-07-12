@@ -107,6 +107,7 @@ public static class CS_RoomCreatePointRaycast
         CS_ThiefAI thifAI = obj.GetComponent<CS_ThiefAI>();
         if (thifAI != null)
         {
+            if (thifAI.read_MemorySystem == null || thifAI.read_MemorySystem.read_CurrentRoomPoint == null) return -1;
             roomCreatePoint = thifAI.read_MemorySystem.read_CurrentRoomPoint;
 
             return roomCreatePoint.GetSiblingIndex();
@@ -115,7 +116,10 @@ public static class CS_RoomCreatePointRaycast
         CS_PlayerData playerData = obj.GetComponent<CS_PlayerData>();
         if (playerData != null)
         {
-            roomCreatePoint = playerData.currentRoomData.transform.GetComponent<CS_RoomPlayerPosition>().PlayerRoomData.transform;
+            if (playerData.currentRoomData == null) return -1;
+            CS_RoomPlayerPosition roomPlayerPosition = playerData.currentRoomData.transform.GetComponent<CS_RoomPlayerPosition>();
+            if (roomPlayerPosition == null || roomPlayerPosition.PlayerRoomData == null) return -1;
+            roomCreatePoint = roomPlayerPosition.PlayerRoomData.transform;
 
             return roomCreatePoint.GetSiblingIndex();
         }
@@ -130,20 +134,24 @@ public static class CS_RoomCreatePointRaycast
         if (visionTarget != null && visionTarget.targetType == CS_VisionTarget.TargetType.Treasure)
         {
             Transform treasureParent = obj.transform.parent;
+            if (treasureParent == null) return -1;
             thifAI = treasureParent.GetComponent<CS_ThiefAI>();
             if (thifAI != null)
             {
+                if (thifAI.read_MemorySystem == null || thifAI.read_MemorySystem.read_CurrentRoomPoint == null) return -1;
                 roomCreatePoint = thifAI.read_MemorySystem.read_CurrentRoomPoint;
 
                 return roomCreatePoint.GetSiblingIndex();
             }
             else
             {
-                return treasureParent.parent.parent.parent.GetSiblingIndex();
+                CS_RoomCreatePoint parentRoomCreatePoint = treasureParent.GetComponentInParent<CS_RoomCreatePoint>();
+                if (parentRoomCreatePoint == null) return -1;
+                return parentRoomCreatePoint.transform.GetSiblingIndex();
             }
         }
 
-        return 0;
+        return -1;
     }
 
     /// <summary>

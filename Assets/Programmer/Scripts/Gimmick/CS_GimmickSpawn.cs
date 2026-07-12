@@ -15,6 +15,11 @@ public class CS_GimmickSpawn : MonoBehaviour
 
     void Start()
     {
+        if (roomParent == null)
+        {
+            Debug.LogError("CS_GimmickSpawn: roomParentがInspectorで設定されていません。", this);
+            return;
+        }
         CS_RoomCreatePoint[] rooms = roomParent.GetComponentsInChildren<CS_RoomCreatePoint>();
 
         foreach (var item in rooms)
@@ -26,10 +31,11 @@ public class CS_GimmickSpawn : MonoBehaviour
 
     private void Update()
     {
-        // 部屋が生成されるまで待つ
-        if (spawnRooms[0].transform.childCount == 0) return;
-
         if (doOnce) return;
+
+        // 部屋が生成されるまで待つ
+        if (spawnRooms.Count == 0) return;
+        if (spawnRooms[0].transform.childCount == 0) return;
 
         // 条件確認
         // 即時終了するもの
@@ -63,7 +69,7 @@ public class CS_GimmickSpawn : MonoBehaviour
             if (roomList.Count <= 0 || gimmickList.Count <= 0) break;   // 一部実行時にnullエラーを吐かないようにする為の例外処理
 
             // スポーンポイントを取得
-            GameObject roomObject = roomList[Random.Range(0, roomList.Count - 1)];
+            GameObject roomObject = roomList[Random.Range(0, roomList.Count)];
             CS_GimmickSpawnPoint spawnPoint = roomObject.GetComponentInChildren<CS_GimmickSpawnPoint>();
             if (spawnPoint == null)
             {
@@ -72,7 +78,7 @@ public class CS_GimmickSpawn : MonoBehaviour
             }
 
             // ギミック用アイテムをスポーンさせる
-            GameObject gimmickObject = gimmickList[Random.Range(0, gimmickList.Count - 1)];
+            GameObject gimmickObject = gimmickList[Random.Range(0, gimmickList.Count)];
             spawnPoint.GimmickSpawn(gimmickObject);
 
             // 一度使ったギミックアイテムや部屋は2度使わない

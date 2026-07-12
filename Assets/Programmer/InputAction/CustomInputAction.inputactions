@@ -1300,6 +1300,76 @@
                     "isPartOfComposite": false
                 }
             ]
+        },
+        {
+            "name": "TutorialConfirmation",
+            "id": "01f5fb66-8144-4e2b-ac3d-fcf084f9fce5",
+            "actions": [
+                {
+                    "name": "MoveAxis",
+                    "type": "Value",
+                    "id": "c5c23f44-da5c-4ef4-9dfa-ebba572f3aea",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Decision",
+                    "type": "Button",
+                    "id": "f00277e0-4b17-4e27-9ea1-eab0856b73a3",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "1D Axis",
+                    "id": "8f67210b-64c4-4a2e-8f4a-690e69890db7",
+                    "path": "1DAxis",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MoveAxis",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "Positive",
+                    "id": "2b9575fb-c309-4c94-895d-bb02808bbf36",
+                    "path": "<Keyboard>/d",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MoveAxis",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "Negative",
+                    "id": "fb6b32f9-8a27-4025-a41c-1a988fdd7c81",
+                    "path": "<Keyboard>/a",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MoveAxis",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "11c5f0ee-df5c-4415-832d-e424a1570e28",
+                    "path": "<Keyboard>/f",
+                    "interactions": "Press(pressPoint=0.5)",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Decision",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": []

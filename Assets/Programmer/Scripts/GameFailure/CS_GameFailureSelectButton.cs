@@ -34,20 +34,24 @@ public class CS_GameFailureSelectButton : MonoBehaviour
         inputActions.GameOver.Enable();
         inputActions.GameClear.MoveAxis.started += SelectInput;
 
-        retryButtonImage = GameObject.Find("RetryButton").GetComponent<Image>();
-        retryButtonImage.sprite = retryButtonSprite[currentButton];
+        GameObject retryButtonObject = GameObject.Find("RetryButton");
+        retryButtonImage = retryButtonObject != null ? retryButtonObject.GetComponent<Image>() : null;
+        if (retryButtonImage != null) retryButtonImage.sprite = retryButtonSprite[currentButton];
 
-        backTitleButtonImage = GameObject.Find("GameFailureBackTitleButton").GetComponent<Image>();
-        backTitleButtonImage.sprite = backTitleButtonSprite[currentButton];
-        backGroundPlaySE = GameObject.Find("SE").GetComponent<CS_BackGroundPlaySE>();
+        GameObject backTitleButtonObject = GameObject.Find("GameFailureBackTitleButton");
+        backTitleButtonImage = backTitleButtonObject != null ? backTitleButtonObject.GetComponent<Image>() : null;
+        if (backTitleButtonImage != null) backTitleButtonImage.sprite = backTitleButtonSprite[currentButton];
+
+        GameObject seObject = GameObject.Find("SE");
+        backGroundPlaySE = seObject != null ? seObject.GetComponent<CS_BackGroundPlaySE>() : null;
 
     }
 
     // Update is called once per frame
     void Update()
     {
-        retryButtonImage.sprite = retryButtonSprite[currentButton];
-        backTitleButtonImage.sprite = backTitleButtonSprite[currentButton];
+        if (retryButtonImage != null) retryButtonImage.sprite = retryButtonSprite[currentButton];
+        if (backTitleButtonImage != null) backTitleButtonImage.sprite = backTitleButtonSprite[currentButton];
 
         //決定ボタンでシーン遷移
         if (inputActions.GameOver.Decision.triggered)

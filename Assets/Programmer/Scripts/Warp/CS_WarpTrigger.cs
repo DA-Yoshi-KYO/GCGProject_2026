@@ -27,23 +27,27 @@ public class CS_WarpTrigger : MonoBehaviour
     {
         selfWarpPoint = GetComponent<CS_WarpPoint>();
 
-        roomPlayerPosition = GameObject.Find("RoomManager").GetComponent<CS_RoomPlayerPosition>();
+        GameObject roomManager = GameObject.Find("RoomManager");
+        roomPlayerPosition = roomManager != null ? roomManager.GetComponent<CS_RoomPlayerPosition>() : null;
         if (roomPlayerPosition == null)
         {
             Debug.Log("RoomManagerが見つかりませんでした");
             return;
         }
 
-        mask = GameObject.Find("MaskCanvas").GetComponent<CS_Mask>();
+        GameObject maskCanvas = GameObject.Find("MaskCanvas");
+        mask = maskCanvas != null ? maskCanvas.GetComponent<CS_Mask>() : null;
 
         // SE取得
         g_SEDataObject = GameObject.Find("3DSE");
-        cs_3DPlaySE = g_SEDataObject.GetComponent<CS_3DPlaySE>();
+        cs_3DPlaySE = g_SEDataObject != null ? g_SEDataObject.GetComponent<CS_3DPlaySE>() : null;
     }
 
 
     void Update()
     {
+        if (selfWarpPoint == null) return;
+
         if (selfWarpPoint.warping)
         {
             //ワープのクールタイム
@@ -86,20 +90,6 @@ public class CS_WarpTrigger : MonoBehaviour
         //プレイヤーの座標更新
         controller.enabled = false;
 
-        Rigidbody rb = other.attachedRigidbody;
-
-        if (rb == null)
-        {
-            rb = other.GetComponentInParent<Rigidbody>();
-        }
-
-        if (rb != null)
-        {
-            rb.isKinematic = true;
-            rb.velocity = Vector3.zero;
-            rb.angularVelocity = Vector3.zero;
-        }
-
         Transform exitPosition = wp.targetPoint.warpExitPosition;
 
         if (exitPosition == null)
@@ -109,10 +99,12 @@ public class CS_WarpTrigger : MonoBehaviour
 
         other.transform.position = exitPosition.position;
 
-        if (rb != null)
+        CS_PlayerMove playerMove = other.GetComponent<CS_PlayerMove>();
+        if (playerMove != null)
         {
-            rb.isKinematic = false;
+            playerMove.SyncTransform(other.transform.position, other.transform.rotation);
         }
+
         controller.enabled = true;
 
         //カメラ更新

@@ -10,6 +10,7 @@
  * 
  */
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// 視界検出ターゲットクラス
@@ -49,7 +50,7 @@ public class CS_VisionTarget : CS_ThiefTarget
     public bool read_IsStolenMoveing => isStolenMoveing;
 
     [Tooltip("出口までの距離")]
-    private int exitDistance = 0;
+    private int exitDistance = -1;
     public int read_ExitDistance => exitDistance;
 
     [Tooltip("盗んで移動中の敵のAI")]
@@ -58,6 +59,9 @@ public class CS_VisionTarget : CS_ThiefTarget
 
     private void Start()
     {
+        // チュートリアルシーンでは処理を行わない(EndManagerが存在しないため)
+        if (SceneManager.GetActiveScene().name == "TutorialScene") return;
+
         // ターゲットの種類が宝物の場合
         if (targetType == TargetType.Treasure)
         {
@@ -71,7 +75,6 @@ public class CS_VisionTarget : CS_ThiefTarget
 
                 endManager = GameObject.Instantiate(endManager);
             }
-
             // EndManagerに宝物を追加
             endManager.AddTreasure(this);
         }

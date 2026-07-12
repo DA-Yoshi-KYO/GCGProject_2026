@@ -962,6 +962,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2313615261327703842}
+  - component: {fileID: 4913764094395685022}
+  - component: {fileID: 8265462215535830746}
   m_Layer: 0
   m_Name: TutorialRoom
   m_TagString: Untagged
@@ -990,6 +992,56 @@ Transform:
   - {fileID: 5788822679441702860}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4913764094395685022
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1601135619335894845}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b4b50624b32a4654b93f5324958fcc46, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  movePoints: []
+  isListDown: 1
+  wallParent: {fileID: 653973063325110208}
+  initialExplorationLevel: 0
+  objectParent: {fileID: 4023289540699656208}
+  showGizmos: 0
+  gizmoColor: {r: 0, g: 1, b: 0, a: 1}
+--- !u!114 &8265462215535830746
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1601135619335894845}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a5ac11cc976e418e8d13136b07e1f52, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_AgentTypeID: -1372625422
+  m_CollectObjects: 0
+  m_Size: {x: 10, y: 10, z: 10}
+  m_Center: {x: 0, y: 2, z: 0}
+  m_LayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_UseGeometry: 0
+  m_DefaultArea: 0
+  m_GenerateLinks: 0
+  m_IgnoreNavMeshAgent: 1
+  m_IgnoreNavMeshObstacle: 1
+  m_OverrideTileSize: 0
+  m_TileSize: 256
+  m_OverrideVoxelSize: 0
+  m_VoxelSize: 0.1
+  m_MinRegionArea: 2
+  m_NavMeshData: {fileID: 23800000, guid: e688082d793dbc940a817d08bd633652, type: 2}
+  m_BuildHeightMesh: 0
 --- !u!1 &1864160101152410077
 GameObject:
   m_ObjectHideFlags: 0
@@ -2994,8 +3046,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe4d5e07842250146aabdd6b91d5d8bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridDivision: {x: 18, y: 24}
-  gridOrigin: 0
+  gridDivision: {x: 63, y: 8}
+  gridOrigin: 1
   floorMaterials:
   - {fileID: 2100000, guid: d855334199bca864fa48d2b712994899, type: 2}
   - {fileID: 2100000, guid: 6062e2b38c1ec194b984d6931ba75261, type: 2}
@@ -11429,7 +11481,7 @@ PrefabInstance:
     - target: {fileID: 8575212899292025998, guid: 07a836126badaa94e973127975c5ec83,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 24
+      value: 24.57
       objectReference: {fileID: 0}
     - target: {fileID: 8575212899292025998, guid: 07a836126badaa94e973127975c5ec83,
         type: 3}
@@ -14852,49 +14904,8 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 2780520976142203525, guid: 467ac4be6114e5b4082a1dec7a223a26,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 4988030264269803716}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 467ac4be6114e5b4082a1dec7a223a26, type: 3}
---- !u!1 &1233985453451145137 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2780520976142203525, guid: 467ac4be6114e5b4082a1dec7a223a26,
-    type: 3}
-  m_PrefabInstance: {fileID: 4001899223096104244}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &4988030264269803716
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1233985453451145137}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a5ac11cc976e418e8d13136b07e1f52, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_AgentTypeID: 0
-  m_CollectObjects: 0
-  m_Size: {x: 10, y: 10, z: 10}
-  m_Center: {x: 0, y: 2, z: 0}
-  m_LayerMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_UseGeometry: 0
-  m_DefaultArea: 0
-  m_GenerateLinks: 0
-  m_IgnoreNavMeshAgent: 1
-  m_IgnoreNavMeshObstacle: 1
-  m_OverrideTileSize: 0
-  m_TileSize: 256
-  m_OverrideVoxelSize: 0
-  m_VoxelSize: 0.1
-  m_MinRegionArea: 2
-  m_NavMeshData: {fileID: 23800000, guid: e76367d9406ca6d45a8734ab537cdd4b, type: 2}
-  m_BuildHeightMesh: 0
 --- !u!4 &8983547663046480400 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5413998705590339364, guid: 467ac4be6114e5b4082a1dec7a223a26,

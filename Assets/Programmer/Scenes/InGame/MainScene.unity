@@ -1187,6 +1187,37 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: cb3268eda9f973b49b6312c18c1c4e5c, type: 3}
+--- !u!1 &644026040
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 644026041}
+  m_Layer: 0
+  m_Name: ObjectPoolList_Effect
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &644026041
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 644026040}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &654711339
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1487,6 +1518,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2201237471093900046, guid: 1f59a1f70c099bc4aaf5a8280b6122f4,
+        type: 3}
+      propertyPath: initialExplorationLevel
+      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 5271250154422898253, guid: 1f59a1f70c099bc4aaf5a8280b6122f4,
         type: 3}
@@ -2869,7 +2905,7 @@ PrefabInstance:
     - target: {fileID: 3946631964307117946, guid: 6004c8a9769f10b4d9285bea71c176b6,
         type: 3}
       propertyPath: spawnGimmicks.Array.size
-      value: 3
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 3946631964307117946, guid: 6004c8a9769f10b4d9285bea71c176b6,
         type: 3}
@@ -2888,6 +2924,18 @@ PrefabInstance:
       propertyPath: spawnGimmicks.Array.data[2]
       value: 
       objectReference: {fileID: 3784575776439470413, guid: 9988d2f929e240744b330f3925377dfb,
+        type: 3}
+    - target: {fileID: 3946631964307117946, guid: 6004c8a9769f10b4d9285bea71c176b6,
+        type: 3}
+      propertyPath: spawnGimmicks.Array.data[3]
+      value: 
+      objectReference: {fileID: 1657490478714675189, guid: bc09e151b4a03794f870c98799ff1d19,
+        type: 3}
+    - target: {fileID: 3946631964307117946, guid: 6004c8a9769f10b4d9285bea71c176b6,
+        type: 3}
+      propertyPath: spawnGimmicks.Array.data[4]
+      value: 
+      objectReference: {fileID: 1657490478714675189, guid: 1cf2192a818d01843af987bea4967c85,
         type: 3}
     - target: {fileID: 4844897646312434375, guid: 6004c8a9769f10b4d9285bea71c176b6,
         type: 3}
@@ -2972,6 +3020,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: FadeCanvas
+      objectReference: {fileID: 0}
+    - target: {fileID: 3050108183426739676, guid: 922687218cf79094894a13ed3bb0c227,
+        type: 3}
+      propertyPath: fadeKind
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3537443052586793396, guid: 922687218cf79094894a13ed3bb0c227,
         type: 3}
@@ -3903,6 +3956,11 @@ PrefabInstance:
       propertyPath: list_RoomCreatePointGenerateData.Array.data[8].go_RoomCreatePointObject
       value: 
       objectReference: {fileID: 1961195759}
+    - target: {fileID: 991451740903014827, guid: 6050fd3af03816d4ebd2d313a81c713d,
+        type: 3}
+      propertyPath: list_RoomCreatePointGenerateData.Array.data[2].list_RandomRoomBlockPrefabs.Array.size
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1595244217030525855, guid: 6050fd3af03816d4ebd2d313a81c713d,
         type: 3}
       propertyPath: cs_WarpSpawn
@@ -3966,7 +4024,7 @@ PrefabInstance:
     - target: {fileID: 7843047914209569928, guid: 6050fd3af03816d4ebd2d313a81c713d,
         type: 3}
       propertyPath: i_ActiveTreasureCount
-      value: 2
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 7843047914209569928, guid: 6050fd3af03816d4ebd2d313a81c713d,
         type: 3}
@@ -4110,3 +4168,4 @@ SceneRoots:
   - {fileID: 2990935490476093454}
   - {fileID: 2067910355}
   - {fileID: 2020262215}
+  - {fileID: 644026041}

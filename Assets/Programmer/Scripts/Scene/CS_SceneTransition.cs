@@ -24,6 +24,10 @@ public class CS_SceneTransition : MonoBehaviour
     [Header("猫フェードの画像")][SerializeField]private Image catInFadeImage;//フェードの画像
     [Header("猫フェードの画像")][SerializeField]private Image catOutFadeImage;//フェードの画像
     [Header("フェードにかける時間")][SerializeField] private float fadeDuration = 1.0f;//フェードにかける時間
+
+    [Header("チュートリアル確認キャンバス")] [SerializeField] private GameObject tutorialConfirmationCanvas;
+    private bool isTutorialConfirmation = false;//チュートリアル確認キャンバスが表示されたかどうか
+
     private bool transition = false;//遷移したかどうか
 
     private bool fadeOut = false;//フェードアウトしたかどうか
@@ -33,38 +37,18 @@ public class CS_SceneTransition : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        backGroundPlayBGM = GameObject.Find("BGM").GetComponent<CS_BackGroundPlayBGM>();
-
-        blackFadeImage.raycastTarget = false;
-        catInFadeImage.raycastTarget = false;
-        catOutFadeImage.raycastTarget = false;
-
-        switch (fadeKind)
+        GameObject bgmObject = GameObject.Find("BGM");
+        if (bgmObject != null)
         {
-            case FadeKind.BlackFade:
-                blackFadeImage.color = new Color(blackFadeImage.color.r, blackFadeImage.color.g, blackFadeImage.color.b, 1.0f);
-                catInFadeImage.material.SetFloat("_AlphaScaleFloat", 1.0f);
-                catInFadeImage.material.SetFloat("_CurrentScaleFloat", 0.0f);
+            backGroundPlayBGM = bgmObject.GetComponent<CS_BackGroundPlayBGM>();
+        }
 
-                catOutFadeImage.material.SetFloat("_AlphaScaleFloat", 1.0f);
-                catOutFadeImage.material.SetFloat("_CurrentScaleFloat", 0.0f);
+        InitSet();
 
-                //フェードイン
-                fadeOut = false;
-                StartCoroutine(BlackFadeProcessing(0.0f));
-                break;
-            case FadeKind.CatFade:
-                blackFadeImage.color = new Color(blackFadeImage.color.r, blackFadeImage.color.g, blackFadeImage.color.b, 0.0f);
-                catInFadeImage.material.SetFloat("_CurrentScaleFloat", 18.0f);
-                catInFadeImage.material.SetFloat("_AlphaScaleFloat", 0.0f);
-
-                catOutFadeImage.material.SetFloat("_CurrentScaleFloat", 18.0f);
-                catOutFadeImage.material.SetFloat("_AlphaScaleFloat", 0.0f);
-
-                //フェードイン
-                fadeOut = false;
-                StartCoroutine(CatFadeProcessing(0.0f, 18.0f, 1.0f, 0.0f));
-                break;
+        if (tutorialConfirmationCanvas != null)
+        {
+            //チュートリアル確認キャンバスを非表示
+            tutorialConfirmationCanvas.SetActive(false);
         }
     }
 
@@ -99,7 +83,7 @@ public class CS_SceneTransition : MonoBehaviour
         //フェードアウト
         fadeOut = true;
 
-        switch(fadeKind)
+        switch (fadeKind)
         {
             case FadeKind.BlackFade:
                 yield return StartCoroutine(BlackFadeProcessing(1.0f));
@@ -109,11 +93,72 @@ public class CS_SceneTransition : MonoBehaviour
                 break;
         }
 
-        //シーンの切り替え
-        SceneManager.LoadScene(sceneName);
+        //チュートリアル確認キャンバス表示されている
+        if (isTutorialConfirmation)
+        {
+            //シーンの切り替え
+            SceneManager.LoadScene(sceneName);
+            //シーンが切り替わるまで待つ
+            yield return null;
+        }
 
-        //シーンが切り替わるまで待つ
-        yield return null;
+        //チュートリアル確認キャンバスがない場合通常
+        if (tutorialConfirmationCanvas == null)
+        {
+            //シーンの切り替え
+            SceneManager.LoadScene(sceneName);
+
+            //シーンが切り替わるまで待つ
+            yield return null;
+        }
+        else
+        {
+            //チュートリアル確認キャンバスを表示
+            tutorialConfirmationCanvas.SetActive(true);
+            transition = false;
+            isTutorialConfirmation = true;
+        }
+    }
+
+    private void InitSet()
+    {
+        if (blackFadeImage == null || catInFadeImage == null || catOutFadeImage == null)
+        {
+            Debug.LogError("CS_SceneTransition: フェード用のImageがInspectorで設定されていません。", this);
+            return;
+        }
+
+        blackFadeImage.raycastTarget = false;
+        catInFadeImage.raycastTarget = false;
+        catOutFadeImage.raycastTarget = false;
+
+        switch (fadeKind)
+        {
+            case FadeKind.BlackFade:
+                blackFadeImage.color = new Color(blackFadeImage.color.r, blackFadeImage.color.g, blackFadeImage.color.b, 1.0f);
+                catInFadeImage.material.SetFloat("_AlphaScaleFloat", 1.0f);
+                catInFadeImage.material.SetFloat("_CurrentScaleFloat", 0.0f);
+
+                catOutFadeImage.material.SetFloat("_AlphaScaleFloat", 1.0f);
+                catOutFadeImage.material.SetFloat("_CurrentScaleFloat", 0.0f);
+
+                //フェードイン
+                fadeOut = false;
+                StartCoroutine(BlackFadeProcessing(0.0f));
+                break;
+            case FadeKind.CatFade:
+                blackFadeImage.color = new Color(blackFadeImage.color.r, blackFadeImage.color.g, blackFadeImage.color.b, 0.0f);
+                catInFadeImage.material.SetFloat("_CurrentScaleFloat", 18.0f);
+                catInFadeImage.material.SetFloat("_AlphaScaleFloat", 0.0f);
+
+                catOutFadeImage.material.SetFloat("_CurrentScaleFloat", 18.0f);
+                catOutFadeImage.material.SetFloat("_AlphaScaleFloat", 0.0f);
+
+                //フェードイン
+                fadeOut = false;
+                StartCoroutine(CatFadeProcessing(0.0f, 18.0f, 1.0f, 0.0f));
+                break;
+        }
     }
 
     //フェードの処理
@@ -128,13 +173,16 @@ public class CS_SceneTransition : MonoBehaviour
             float alpha = Mathf.Lerp(startAlpha, targetAlpha, time / fadeDuration);
             blackFadeImage.color = new Color(blackFadeImage.color.r, blackFadeImage.color.g, blackFadeImage.color.b, alpha);
 
-            if (fadeOut)
+            if (backGroundPlayBGM != null)
             {
-                backGroundPlayBGM.BGMFadeOut(time, fadeDuration);
-            }
-            else
-            {
-                backGroundPlayBGM.BGMFadeIn(time, fadeDuration);
+                if (fadeOut)
+                {
+                    backGroundPlayBGM.BGMFadeOut(time, fadeDuration);
+                }
+                else
+                {
+                    backGroundPlayBGM.BGMFadeIn(time, fadeDuration);
+                }
             }
 
             yield return null;
@@ -160,13 +208,16 @@ public class CS_SceneTransition : MonoBehaviour
             catInFadeImage.material.SetFloat("_AlphaScaleFloat", alpha);
             catOutFadeImage.material.SetFloat("_AlphaScaleFloat", alpha);
 
-            if (fadeOut)
+            if (backGroundPlayBGM != null)
             {
-                backGroundPlayBGM.BGMFadeOut(time, fadeDuration);
-            }
-            else
-            {
-                backGroundPlayBGM.BGMFadeIn(time, fadeDuration);
+                if (fadeOut)
+                {
+                    backGroundPlayBGM.BGMFadeOut(time, fadeDuration);
+                }
+                else
+                {
+                    backGroundPlayBGM.BGMFadeIn(time, fadeDuration);
+                }
             }
 
             yield return null;

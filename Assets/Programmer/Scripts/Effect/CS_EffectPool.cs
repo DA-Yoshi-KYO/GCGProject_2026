@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 /*
@@ -7,11 +6,13 @@ using UnityEngine;
  概要     : Effectを再利用するObjectPoolクラス
  作者     : ヨシモト リョウ
  履歴     : 2026/06/10 新規作成
+            2026/07/09 CS_EffectObjectPoolを使う形へ変更
 =====================================+
 */
 
 /// <summary>
 /// Effectを再利用するObjectPoolクラスです。
+/// 内部ではCS_ObjectPoolを継承したCS_EffectObjectPoolを使用します。
 /// </summary>
 public class CS_EffectPool
 {
@@ -21,85 +22,104 @@ public class CS_EffectPool
     private GameObject go_EffectPrefab;
 
     /// <summary>
-    /// Pool用の親Transformです。
+    /// Effect専用ObjectPoolです。
     /// </summary>
-    private Transform tr_PoolParent;
+    private CS_EffectObjectPool cs_EffectObjectPool;
 
     /// <summary>
-    /// Poolに保持する最大数です。
+    /// 再生中の基本Parentです。
+    /// </summary>
+    private Transform tr_DefaultActiveParent;
+
+    /// <summary>
+    /// Pool最大数です。
     /// </summary>
     private int n_MaxPoolCount;
 
     /// <summary>
-    /// Pool内のEffectQueueです。
-    /// </summary>
-    private Queue<CSAD_EffectCommonProcessBase> queue_EffectPool =
-        new Queue<CSAD_EffectCommonProcessBase>();
-
-
-    public void SetMaxPoolCount(int n_maxPoolCount)
-    {
-        n_MaxPoolCount = n_maxPoolCount;
-    }
-
-    /// <summary>
     /// EffectPoolを作成します。
     /// </summary>
-    /// <param name="go_effectPrefab">再利用するEffectPrefab。</param>
-    /// <param name="tr_poolParent">Pool用親Transform。</param>
-    /// <param name="n_maxPoolCount">Poolに保持する最大数。</param>
     public CS_EffectPool(
         GameObject go_effectPrefab,
         Transform tr_poolParent,
         int n_maxPoolCount)
     {
         go_EffectPrefab = go_effectPrefab;
-        tr_PoolParent = tr_poolParent;
-        n_MaxPoolCount = n_maxPoolCount;
+        tr_DefaultActiveParent = tr_poolParent;
+        n_MaxPoolCount = Mathf.Max(0, n_maxPoolCount);
+
+        cs_EffectObjectPool = new CS_EffectObjectPool(
+            go_EffectPrefab,
+            n_MaxPoolCount);
+    }
+
+    /// <summary>
+    /// Pool最大数を設定します。
+    /// </summary>
+    public void SetMaxPoolCount(int n_maxPoolCount)
+    {
+        n_MaxPoolCount = Mathf.Max(0, n_maxPoolCount);
+
+        if (cs_EffectObjectPool != null)
+        {
+            cs_EffectObjectPool.SetMaxPoolSize(n_MaxPoolCount);
+        }
     }
 
     /// <summary>
     /// Effectを取得します。
     /// </summary>
-    /// <param name="v3_Position">生成位置。</param>
-    /// <param name="q_Rotation">生成回転。</param>
-    /// <returns>取得したEffect。</returns>
     public CSAD_EffectCommonProcessBase GetEffect(
         Vector3 v3_Position,
         Quaternion q_Rotation)
     {
-        CSAD_EffectCommonProcessBase csad_EffectProcess = null;
+        return GetEffect(
+            v3_Position,
+            q_Rotation,
+            tr_DefaultActiveParent);
+    }
 
-        while (queue_EffectPool.Count > 0 && csad_EffectProcess == null)
-        {
-            csad_EffectProcess = queue_EffectPool.Dequeue();
-        }
-
-        if (csad_EffectProcess == null)
-        {
-            csad_EffectProcess = CS_EffectFactory.CreateEffect(
-                go_EffectPrefab,
-                v3_Position,
-                q_Rotation,
-                tr_PoolParent);
-        }
-
-        if (csad_EffectProcess == null)
+    /// <summary>
+    /// Effectを取得します。
+    /// </summary>
+    public CSAD_EffectCommonProcessBase GetEffect(
+        Vector3 v3_Position,
+        Quaternion q_Rotation,
+        Transform tr_ActiveParent)
+    {
+        if (go_EffectPrefab == null)
         {
             return null;
         }
 
-        CS_EffectTransformController cs_EffectTransformController =
-            csad_EffectProcess.GetComponent<CS_EffectTransformController>();
-
-        if (cs_EffectTransformController != null)
+        if (cs_EffectObjectPool == null)
         {
-            cs_EffectTransformController.StopTransformControl();
+            cs_EffectObjectPool = new CS_EffectObjectPool(
+                go_EffectPrefab,
+                n_MaxPoolCount);
         }
 
-        csad_EffectProcess.transform.SetPositionAndRotation(
-            v3_Position,
-            q_Rotation);
+        GameObject go_EffectObject =
+            cs_EffectObjectPool.GetEffectObject(
+                tr_ActiveParent,
+                v3_Position,
+                q_Rotation);
+
+        if (go_EffectObject == null)
+        {
+            return null;
+        }
+
+        CSAD_EffectCommonProcessBase csad_EffectProcess =
+            go_EffectObject.GetComponent<CSAD_EffectCommonProcessBase>();
+
+        if (csad_EffectProcess == null)
+        {
+            Debug.LogWarning("[CS_EffectPool] EffectPrefabにCSAD_EffectCommonProcessBase継承クラスがありません : " + go_EffectObject.name);
+
+            cs_EffectObjectPool.ReturnObject(go_EffectObject);
+            return null;
+        }
 
         if (go_EffectPrefab != null)
         {
@@ -107,18 +127,15 @@ public class CS_EffectPool
                 go_EffectPrefab.transform.localScale;
         }
 
-        csad_EffectProcess.gameObject.SetActive(true);
-
+        // Effect終了時にPoolへ戻します。
         csad_EffectProcess.SetOnEffectEndAction(ReturnEffect);
 
         return csad_EffectProcess;
     }
 
     /// <summary>
-    /// EffectをPoolに戻します。
-    /// 最大保持数を超える場合は破棄します。
+    /// EffectをPoolへ戻します。
     /// </summary>
-    /// <param name="csad_EffectProcess">戻すEffect。</param>
     private void ReturnEffect(CSAD_EffectCommonProcessBase csad_EffectProcess)
     {
         if (csad_EffectProcess == null)
@@ -126,20 +143,13 @@ public class CS_EffectPool
             return;
         }
 
-        if (n_MaxPoolCount <= 0)
+        if (cs_EffectObjectPool == null)
         {
             Object.Destroy(csad_EffectProcess.gameObject);
             return;
         }
 
-        if (queue_EffectPool.Count >= n_MaxPoolCount)
-        {
-            Object.Destroy(csad_EffectProcess.gameObject);
-            return;
-        }
-
-        csad_EffectProcess.gameObject.SetActive(false);
-
-        queue_EffectPool.Enqueue(csad_EffectProcess);
+        cs_EffectObjectPool.ReturnObject(
+            csad_EffectProcess.gameObject);
     }
 }

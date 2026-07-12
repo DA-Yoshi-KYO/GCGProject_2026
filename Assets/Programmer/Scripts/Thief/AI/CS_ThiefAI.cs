@@ -370,6 +370,7 @@ public class CS_ThiefAI : MonoBehaviour
         if (remainingHoldCatTime > 0.0f)
         {
             remainingHoldCatTime -= Time.deltaTime;
+              moveSystem.Stop();
             if (remainingHoldCatTime < 0.0f)
             {
                 remainingHoldCatTime = 0.0f;
@@ -385,7 +386,7 @@ public class CS_ThiefAI : MonoBehaviour
         if (durability <= 0)
         {
             durability = 0;
-            currentState = ThiefState.Stunned;
+            ChangeStatus(ThiefState.Stunned);
         }
 
         // 現在の状態に応じた行動を実行
@@ -404,6 +405,8 @@ public class CS_ThiefAI : MonoBehaviour
                 Stunned();
                 break;
         }
+
+        moveSystem.DebugMove();
     }
 
     private void OnDestroy()
@@ -413,8 +416,10 @@ public class CS_ThiefAI : MonoBehaviour
         {
             CS_ThiefManager thiefManager = GameObject.FindObjectOfType<CS_ThiefManager>();
 
-            thiefManager.RegistGenerationInfo(thiefStatusData, memorySystem.read_CurrentRoom.transform.parent.name, memorySystem.read_FirstEntryDirection);
-
+            if (thiefManager != null && memorySystem != null && memorySystem.read_CurrentRoom != null && memorySystem.read_CurrentRoom.transform != null && memorySystem.read_CurrentRoom.transform.parent != null)
+            {
+                thiefManager.RegistGenerationInfo(thiefStatusData, memorySystem.read_CurrentRoom.transform.parent.name, memorySystem.read_FirstEntryDirection);
+            }
         }
         else
         {
@@ -429,6 +434,10 @@ public class CS_ThiefAI : MonoBehaviour
     {
         thiefReaction.ClearReaction();
 
+        if (thiefGimmickAction == null)
+        {
+            thiefGimmickAction = new CS_ThiefGimmickAction(this);
+        }
         if(thiefGimmickAction.UpdateAction()) return;
 
         // 探索対象を決定
@@ -444,10 +453,19 @@ public class CS_ThiefAI : MonoBehaviour
     // 発見状態の行動
     private void Found()
     {
+        // 探索対象が存在しない場合は何もしない
+        if (memorySystem.read_CurrentTarget == null)
+        {
+            Debug.LogError("Found()が呼ばれましたが、探索対象が存在しません。");
+            ChangeStatus(ThiefState.Explore);
+            return;
+        }
+
         // 宝物を持つ
         holdTreasure = memorySystem.read_CurrentTarget.gameObject;
         holdTreasure.transform.parent = this.transform; // 泥棒の子オブジェクトにする
-        holdTreasure.GetComponent<Collider>().enabled = false; // 宝物のコライダーを無効にする
+        Collider holdTreasureCollider = holdTreasure.GetComponent<Collider>();
+        if (holdTreasureCollider != null) holdTreasureCollider.enabled = false; // 宝物のコライダーを無効にする
         holdTreasure.transform.localScale *= 0.5f; // 宝物のサイズを半分にする
 
         //-- 体の前に持つ位置を設定
@@ -455,13 +473,18 @@ public class CS_ThiefAI : MonoBehaviour
         Vector3 holdPosition = transform.position + transform.forward * 0.5f + Vector3.up * -0.5f;
         holdTreasure.transform.position = holdPosition;
 
-        holdTreasure.GetComponent<CS_VisionTarget>().PlayStolen(this);
+        CS_VisionTarget visionTarget = holdTreasure.GetComponent<CS_VisionTarget>();
+        if (visionTarget != null) visionTarget.PlayStolen(this);
 
         // 状態を逃走に変更
         ChangeStatus(ThiefState.Escape);
 
         // 取得した宝物を他の泥棒の記憶から消去する
-        GameObject.FindObjectOfType<CS_ThiefManager>().EraseTheMemoryToAllThief(holdTreasure.GetComponent<CS_ThiefTarget>());
+        CS_ThiefManager thiefManager = GameObject.FindObjectOfType<CS_ThiefManager>();
+        if (thiefManager != null)
+        {
+            thiefManager.EraseTheMemoryToAllThief(holdTreasure.GetComponent<CS_ThiefTarget>());
+        }
         // 探索対象をリセット
         memorySystem.ClearTarget();
     }
@@ -508,7 +531,11 @@ public class CS_ThiefAI : MonoBehaviour
             // 経過時間が気絶時間を超えた場合は、耐久力を減少させて、状態を探索に戻す
             if (elapsedTimeAfterStun >= damageStunTime)
             {
-                currentState = ThiefState.Explore; // 状態を探索に戻す
+                if (holdTreasure == null)
+                    ChangeStatus(ThiefState.Explore); // 状態を探索に戻す
+                else
+                    ChangeStatus(ThiefState.Escape); // 状態を逃走に戻す
+                
 
                 // アニメーションの状態を解除(歩き状態に戻す)
                 if (animator != null)
@@ -712,7 +739,6 @@ public class CS_ThiefAI : MonoBehaviour
     /// <param name="newState">変更する状態</param>
     public void ChangeStatus(ThiefState newState)
     {
-        currentState = newState;
         switch(newState)
             {
             case ThiefState.Explore:
@@ -726,9 +752,12 @@ public class CS_ThiefAI : MonoBehaviour
                 break;
             case ThiefState.Stunned:
                 // 気絶時間の経過時間をリセット
-                elapsedTimeAfterStun = 0.0f;
+                if (currentState != ThiefState.Stunned)
+                    elapsedTimeAfterStun = 0.0f;
+                aStarSystem.ResetUpdatedFlag();
                 break;
         }
+        currentState = newState;
     }
 
     /// <summary>

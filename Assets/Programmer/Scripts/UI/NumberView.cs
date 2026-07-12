@@ -16,6 +16,11 @@ public class NumberView : MonoBehaviour
         currentNumber = number;
         int ones = number % 10;
         int tens = number / 10;
+        if (numberSprites == null || numberSprites.Length < 10)
+        {
+            Debug.LogError("NumberView: numberSpritesには0～9の10個のSpriteを設定してください。", this);
+            return;
+        }
         onesPalce.sprite = numberSprites[ones];
         tensPalce.sprite = numberSprites[tens];
     }

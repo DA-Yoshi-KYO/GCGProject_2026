@@ -34,7 +34,10 @@ public class RandomShake : CS_TimeLineActionBase
         transform.localPosition = defaultPos;
 
         Rigidbody rb = GetComponent<Rigidbody>();
-        rb.AddForce(new Vector3(0, 0, 5), ForceMode.Impulse);
-        rb.useGravity = true;
+        if (rb != null)
+        {
+            rb.AddForce(new Vector3(0, 0, 5), ForceMode.Impulse);
+            rb.useGravity = true;
+        }
     }
 }
