@@ -440,6 +440,12 @@ public class CS_ThiefAI : MonoBehaviour
         }
         if(thiefGimmickAction.UpdateAction()) return;
 
+        // メモリがnullだった場合
+        if (memorySystem == null)
+        {
+            Debug.Log(this.transform.name);
+        }
+
         // 探索対象を決定
         memorySystem.RecognizeObjects();
 
