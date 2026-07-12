@@ -19,10 +19,14 @@ public class EnemyUI : MonoBehaviour
     [Header("別の部屋にいる敵をまとめて表示するUIのプレハブ")]
     [SerializeField] private GameObject otherRoomsEnemyPrefab;
 
+    [Header("並び順が変わった際のスライド移動の速さ")]
+    [SerializeField] private float repositionSpeed = 8f;
+
     // ──────────────────────────────
     private GameObject enemyManager;
     private CS_RoomPlayerPosition roomPlayerPosition;
     private GameObject otherRoomsEnemyInstance;
+    private HashSet<GameObject> placedIcons = new HashSet<GameObject>();
 
 
     private Dictionary<Transform, GameObject> iconMap = new Dictionary<Transform, GameObject>();
@@ -74,6 +78,7 @@ public class EnemyUI : MonoBehaviour
             if (!currentChildren.Contains(kv.Key) || !IsSameRoomAsPlayer(kv.Key))
             {
                 Destroy(kv.Value);
+                placedIcons.Remove(kv.Value);
                 removed.Add(kv.Key);
             }
         }
@@ -138,23 +143,35 @@ public class EnemyUI : MonoBehaviour
 
         foreach (var kv in iconMap)
         {
-            RectTransform rt = kv.Value.GetComponent<RectTransform>();
-            if (rt != null)
-            {
-                rt.anchoredPosition = actorRT.anchoredPosition + new Vector2(0, -index * iconSpacing);
-            }
+            PlaceIcon(kv.Value, actorRT.anchoredPosition + new Vector2(0, -index * iconSpacing));
             index++;
         }
 
         // OtherRoomsEnemyは同じ並びの一番下に表示する
         if (otherRoomsEnemyInstance != null)
         {
-            RectTransform otherRoomsRT = otherRoomsEnemyInstance.GetComponent<RectTransform>();
-            if (otherRoomsRT != null)
-            {
-                otherRoomsRT.anchoredPosition = actorRT.anchoredPosition + new Vector2(0, -index * iconSpacing);
-            }
+            PlaceIcon(otherRoomsEnemyInstance, actorRT.anchoredPosition + new Vector2(0, -index * iconSpacing));
             index++;
         }
+    }
+
+    /// <summary>
+    /// アイコンを指定位置へ配置する処理。
+    /// 追加されたばかりのアイコンは登場演出（回転＋拡大）に専念させるため即座に配置し、
+    /// 既に表示されているアイコンは、並び順が変わった際に一つずつずれながらスライド移動する。
+    /// </summary>
+    private void PlaceIcon(GameObject icon, Vector2 targetPosition)
+    {
+        RectTransform rt = icon.GetComponent<RectTransform>();
+        if (rt == null) return;
+
+        if (!placedIcons.Contains(icon))
+        {
+            rt.anchoredPosition = targetPosition;
+            placedIcons.Add(icon);
+            return;
+        }
+
+        rt.anchoredPosition = Vector2.Lerp(rt.anchoredPosition, targetPosition, Time.unscaledDeltaTime * repositionSpeed);
     }
 }
