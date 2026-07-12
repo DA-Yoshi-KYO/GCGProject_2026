@@ -68,7 +68,7 @@ public class TreasureItem : MonoBehaviour
         }
 
         Distance = visionTarget.read_ExitDistance;
-
+        Debug.Log($"Distance: {Distance}");
         // 距離表示
 
         if (numberView != null)
