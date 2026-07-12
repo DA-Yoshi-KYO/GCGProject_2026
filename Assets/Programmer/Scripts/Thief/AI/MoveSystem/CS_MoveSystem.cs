@@ -47,6 +47,9 @@ public class CS_MoveSystem
     [Tooltip("バグ対策用位置保存")]
     private Vector3 debugPos;
 
+    [Tooltip("過去に指定した目的地")]
+    private Vector3 lastDestination;
+
     [Tooltip("バグ対策用位置の同じ位置にいるフレーム数カウンター")]
     private int samePosFrameCount = 0;
 
@@ -168,13 +171,17 @@ public class CS_MoveSystem
 
         UpdateMoveSpeed(thiefAI.read_MemorySystem.read_CurrentTarget); // 現在の標的に応じて移動速度を更新する
 
+        if (lastDestination == destination) return; // 目的地が前回と同じ場合は移動要求を無視する
+
         if (smartNavAgent != null)
         {
             smartNavAgent.MoveTo(destination);
+            lastDestination = destination;
         }
         else if (navMeshAgent != null)
         {
             navMeshAgent.SetDestination(destination);
+            lastDestination = destination;
         }
     }
 

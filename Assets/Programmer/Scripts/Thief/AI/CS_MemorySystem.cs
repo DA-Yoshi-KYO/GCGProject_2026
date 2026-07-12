@@ -297,6 +297,7 @@ public class CS_MemorySystem
         // 記憶の中に宝物オブジェクトがある場合は、視認オブジェクトリストの中に追加する
         foreach (var entry in roomMemory.recognizedObjects)
         {
+            if (entry == null) continue;
             if (entry is CS_VisionTarget visionTarget && visionTarget.targetType == CS_VisionTarget.TargetType.Treasure)
             {
                 if (!visionTargets.Contains(entry)) 
@@ -349,6 +350,9 @@ public class CS_MemorySystem
             // 視認したオブジェクトを走査
             foreach (var entry in visionTargets)
             {
+                // entryが破棄されている場合はスキップ
+                if (entry == null) continue;
+
                 // 現在の探索対象の場合はスキップする
                 if (entry == currentTarget) continue;
 
@@ -390,6 +394,9 @@ public class CS_MemorySystem
             // 視認したオブジェクトを走査
             foreach (var entry in visionTargets)
             {
+                // entryが破棄されている場合はスキップ
+                if (entry == null) continue;
+
                 // プレイヤーオブジェクトの場合
                 if (entry is CS_PlayerTarget)
                 {
@@ -563,6 +570,10 @@ public class CS_MemorySystem
                     ResetCurrentTargetExplorationProgress();
                     // 探索対象の方へ移動する
                     thiefAI?.read_MoveSystem?.MoveTo(currentTarget.transform.position);
+
+                    thiefAI?.read_Animator?.SetBool("IsHunting", false);
+
+                    thiefAI?.read_ThiefReaction?.ClearReactionByType(CS_ThiefReaction.ThiefReactionType.Searching);
                 }
             }
             // プレイヤーの場合

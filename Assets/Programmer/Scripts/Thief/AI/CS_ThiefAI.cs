@@ -424,8 +424,8 @@ public class CS_ThiefAI : MonoBehaviour
         else
         {
             // 退場したときにウェーブ数を増加させる
-            CS_StageManager stageManager = GameObject.FindObjectOfType<CS_StageManager>();
-            if (stageManager != null) stageManager.WaveCountUp();
+            //CS_StageManager stageManager = GameObject.FindObjectOfType<CS_StageManager>();
+            //if (stageManager != null) stageManager.WaveCountUp();
         }
     }
 
@@ -443,7 +443,7 @@ public class CS_ThiefAI : MonoBehaviour
         // メモリがnullだった場合
         if (memorySystem == null)
         {
-            Debug.Log(this.transform.name);
+            Debug.LogWarning(this.transform.name);
         }
 
         // 探索対象を決定

@@ -160,6 +160,21 @@ public sealed class CSED_ThiefDebug : EditorWindow
                 }
             }
 
+            using (new EditorGUI.DisabledScope(!HasValidSelectedTarget()))
+            {
+                if (GUILayout.Button("選択中を削除", GUILayout.Width(100)))
+                {
+                    targets.RemoveAt(selectedTargetIndex);
+                    // インデックスをクランプして範囲内に収める
+                    selectedTargetIndex = Mathf.Clamp(selectedTargetIndex, 0, targets.Count - 1);
+                    // リストが空になった場合は未選択にする
+                    if (targets.Count == 0)
+                    {
+                        selectedTargetIndex = -1;
+                    }
+                }
+            }
+
             using (new EditorGUI.DisabledScope(targets.Count == 0))
             {
                 if (GUILayout.Button("リストをクリア", GUILayout.Width(100)))
