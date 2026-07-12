@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: warp_mat_down02
+  m_Name: warp_mat_down12
   m_Shader: {fileID: 4800000, guid: 153b36af907fa774cacb6f0cfcc4b550, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -48,7 +48,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: dab833354a0e1f24b9d88e30e681d68a, type: 3}
+        m_Texture: {fileID: 2800000, guid: 66c1cbb45ec06af42b476ec0d3271a68, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
@@ -56,7 +56,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _NoiseTex:
-        m_Texture: {fileID: 2800000, guid: 807c3093c62d9204ebac7ecf5b4d3818, type: 3}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
@@ -88,7 +88,7 @@ Material:
     - _Alpha: 1
     - _AlphaClip: 0
     - _AlphaToMask: 0
-    - _BasePower: 10
+    - _BasePower: 0
     - _BlackCut: 0
     - _Blend: 0
     - _BlendModePreserveSpecular: 1
@@ -104,7 +104,7 @@ Material:
     - _ElectricCut: 0.55
     - _ElectricPower: 3
     - _EnvironmentReflections: 1
-    - _FlickerPower: 0.5
+    - _FlickerPower: 3
     - _FlickerSpeed: 15
     - _GlossMapScale: 0
     - _Glossiness: 0
@@ -115,9 +115,9 @@ Material:
     - _GradientRotateSpeed: 1
     - _MainRotateSpeed: 0
     - _Metallic: 0
-    - _NoisePower: 0.5
+    - _NoisePower: 1
     - _NoiseRotateSpeed: -8.16
-    - _NoiseScale: 5
+    - _NoiseScale: 30
     - _NoiseSpeed: 2
     - _NoiseSpeedX: 1
     - _NoiseSpeedY: 0.5
@@ -125,7 +125,7 @@ Material:
     - _Parallax: 0.005
     - _QueueOffset: 0
     - _ReceiveShadows: 1
-    - _RotateSpeed: 0.5
+    - _RotateSpeed: 5
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
@@ -133,8 +133,8 @@ Material:
     - _SrcBlendAlpha: 1
     - _Surface: 0
     - _SweepPower: 20
-    - _SweepSoftness: 0.08
-    - _SweepWidth: 0.08
+    - _SweepSoftness: 0.3
+    - _SweepWidth: 0.01
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:
@@ -145,7 +145,7 @@ Material:
     - _InnerColor: {r: 0.93678015, g: 1, b: 0.21226418, a: 1}
     - _OuterColor: {r: 1, g: 0, b: 0.692471, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
-    - _SweepColor: {r: 0, g: 0.6560173, b: 1, a: 1}
+    - _SweepColor: {r: 0, g: 0.2094922, b: 1, a: 1}
   m_BuildTextureStacks: []
 --- !u!114 &8732606940815203376
 MonoBehaviour:
