@@ -22,7 +22,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.Video;
 
 public class CS_PlayerAction : MonoBehaviour
 {
@@ -378,20 +377,20 @@ public class CS_PlayerAction : MonoBehaviour
 
         return gimmickManager.GetCurrentGimmick()[currentGimmickIndex].gimmickTag;
     }
-    public CurrentGimmickData GetCurrentGimmick(Gimmick gimmickTag)
+    public GimmickList.CurrentGimmickData GetCurrentGimmick(Gimmick gimmickTag)
     {
         if(gimmickTag == Gimmick.None)
             return null;
 
-        CurrentGimmickData currentGimmick = gimmickManager.GetCurrentGimmick().Find(g => g.gimmickTag == gimmickTag);
+        GimmickList.CurrentGimmickData currentGimmick = gimmickManager.GetCurrentGimmick().Find(g => g.gimmickTag == gimmickTag);
 
         return currentGimmick;
     }
-    public GimmickInfoData GetGimmickInfoData(Gimmick gimmickTag)
+    public GimmickList.GimmickInfoData GetGimmickInfoData(Gimmick gimmickTag)
     {
         if (gimmickTag == Gimmick.None)
             return null;
-        GimmickInfoData gimmickInfo = gimmickManager.GetGimmickInfoDataList().Find(g => g.gimmickTag == gimmickTag);
+        GimmickList.GimmickInfoData gimmickInfo = gimmickManager.GetGimmickInfoDataList().Find(g => g.gimmickTag == gimmickTag);
         return gimmickInfo;
     }
 
