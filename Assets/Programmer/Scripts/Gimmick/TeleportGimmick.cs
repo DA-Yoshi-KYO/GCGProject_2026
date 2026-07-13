@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class TeleportGimmick : GimmickBase
@@ -26,10 +27,12 @@ public class TeleportGimmick : GimmickBase
     private CS_RoomPlayerPosition roomPlayerPosition;
     private SkinnedMeshRenderer[] smesh;
 
+    private GimmickSelectUI gimmickSelectUI;
     private static float sharedCooldown;
 
     protected override void SpawnUpdate()
     {
+        gameObject.transform.position = new Vector3(gameObject.transform.position.x, 0.0f, gameObject.transform.position.z);
         gimmickState = GimmickState.Idle;
     }
 
@@ -59,6 +62,25 @@ public class TeleportGimmick : GimmickBase
             UpdateTeleportAnimation();
         }
 
+        if (gimmickSelectUI == null)
+        {
+            // シーンからGimmickSelectUIを取得
+            gimmickSelectUI = FindObjectOfType<GimmickSelectUI>();
+            if (gimmickSelectUI != null)
+            {
+                if(destination != null)
+                {
+                    gimmickSelectUI.ResetUIActive = true;
+                }
+                else
+                {
+                    gimmickSelectUI.ResetUIActive = false;
+                }
+            }
+        }
+
+
+
         if (isCooldown)
         {
             sharedCooldown -= Time.deltaTime;
@@ -78,9 +100,6 @@ public class TeleportGimmick : GimmickBase
         base.BrokenUpdate();
     }
 
-    /// <summary>
-    /// テレポート演出（TimeScaleを止めてフェードアウト → 実際のテレポート → フェードイン）を開始する処理
-    /// </summary>
     private void BeginTeleport()
     {
         teleportPhase = TeleportPhase.FadingOut;
