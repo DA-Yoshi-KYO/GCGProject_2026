@@ -47,6 +47,7 @@ public class CS_ThiefAnimation
                 animator.speed = 1.5f * (thiefAI.read_MoveSystem.read_RunSpeed / thiefAI.read_MoveSystem.read_WalkSpeed);
                 break;
             case ThiefAnimationState.Damage:
+                animator.SetBool("IsHunting", false);
                 animator.SetBool("IsDamage", true);
                 animator.speed = 1.0f;
                 break;
@@ -55,6 +56,7 @@ public class CS_ThiefAnimation
                 animator.speed = 1.0f;
                 break;
             case ThiefAnimationState.Stunned:
+                animator.SetBool("IsHunting", false);
                 animator.SetBool("IsStun", true);
                 animator.speed = 1.0f;
                 break;

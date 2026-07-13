@@ -827,7 +827,7 @@ public class CS_MemorySystem
 
         currentTarget = null;
         // 探索対象をリセット
-        thiefAI?.read_AnimatorSystem?.ResetAnimationState();
+        thiefAI?.read_AnimatorSystem?.read_Animator.SetBool("IsHunting", false);
     }
 
     /// <summary>
