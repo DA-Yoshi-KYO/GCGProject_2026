@@ -69,6 +69,8 @@ public class CS_PlayerAction : MonoBehaviour
 
     private bool b_IsPlayingAnkhStandEffect = false;
 
+    private const float PlacementBoundsInsetRate = 0.01f;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -221,10 +223,8 @@ public class CS_PlayerAction : MonoBehaviour
             // 残ったプレビューオブジェクトの削除
             if (previewBase != null)
             {
-                Destroy(previewBase.gameObject);
-                previewBase = null;
+                ClearGimmickPreview();
             }
-            isShowGimmickPreview = false;
         }
 
     }
@@ -454,7 +454,7 @@ public class CS_PlayerAction : MonoBehaviour
 
     private void SettingAction()
     {
-        if (settingPos.magnitude == float.PositiveInfinity) return;
+        if (IsInfinityPosition(settingPos)) return;
 
         if (gimmickManager.GetCurrentGimmick()[currentGimmickIndex] == null)
         {
@@ -501,6 +501,7 @@ public class CS_PlayerAction : MonoBehaviour
             Debug.LogError("この部屋の床にRoomGridがついていません");
 
         Vector3 setPos = CalculateGimmickSetPosition();
+        if (IsInfinityPosition(setPos)) return;
 
         gimmick.gimmickState = GimmickState.Spawn;
 
@@ -672,7 +673,7 @@ public class CS_PlayerAction : MonoBehaviour
 
         //グリッド座標からワールドへ逆変換
         Vector3 spawnPos = roomGrid.GetWorldPosFromGrid(grid);
-        if (spawnPos.magnitude == float.PositiveInfinity) return Vector3.positiveInfinity;
+        if (IsInfinityPosition(spawnPos)) return Vector3.positiveInfinity;
 
         ////グリッド補正
         ////グリッドを４分割して考えより細かく
@@ -696,8 +697,95 @@ public class CS_PlayerAction : MonoBehaviour
             }
         }
 
+        Vector2Int fixedGrid = roomGrid.GetGridFromPos(spawnPos);
+        if (fixedGrid.x == -1 || fixedGrid.y == -1) return Vector3.positiveInfinity;
+
+        Vector3 correctedSpawnPos =
+            roomGrid.GimmickEvenNumberCorrection(spawnPos, fixedGrid, gimmick);
+
+        if (!IsGimmickInsideRoom(roomGrid, correctedSpawnPos, size))
+            return Vector3.positiveInfinity;
+
         settingPos = spawnPos;
         return spawnPos;
+    }
+
+    private static bool IsInfinityPosition(Vector3 position)
+    {
+        return float.IsInfinity(position.x) ||
+               float.IsInfinity(position.y) ||
+               float.IsInfinity(position.z);
+    }
+
+    private bool IsGimmickInsideRoom(
+        RoomGrid roomGrid,
+        Vector3 centerPos,
+        Vector2Int size)
+    {
+        if (roomGrid == null) return false;
+        if (IsInfinityPosition(centerPos)) return false;
+
+        Vector2 gridSize = roomGrid.gridSize;
+        float inset = Mathf.Min(gridSize.x, gridSize.y) * PlacementBoundsInsetRate;
+        float halfX = Mathf.Max(size.x * gridSize.x * 0.5f - inset, 0f);
+        float halfZ = Mathf.Max(size.y * gridSize.y * 0.5f - inset, 0f);
+
+        Vector3[] checkOffsets =
+        {
+            Vector3.zero,
+            new Vector3(halfX, 0f, halfZ),
+            new Vector3(halfX, 0f, -halfZ),
+            new Vector3(-halfX, 0f, halfZ),
+            new Vector3(-halfX, 0f, -halfZ),
+        };
+
+        foreach (Vector3 offset in checkOffsets)
+        {
+            Vector3 checkPos =
+                centerPos + roomGrid.transform.TransformVector(offset);
+            Vector2Int grid = roomGrid.GetGridFromPos(checkPos);
+
+            if (grid.x == -1 || grid.y == -1)
+                return false;
+        }
+
+        return true;
+    }
+
+    private Vector2Int GetPreviewCheckSize(GimmickBase gimmick)
+    {
+        Vector2Int size = gimmick.GetGimmickSize();
+
+        if (gimmickManager == null ||
+            gimmickManager.GetCurrentGimmick() == null ||
+            currentGimmickIndex < 0 ||
+            currentGimmickIndex >= gimmickManager.GetCurrentGimmick().Count)
+        {
+            return size;
+        }
+
+        GameObject previewPrefab =
+            gimmickManager.GetCurrentGimmick()[currentGimmickIndex].previewPrefab;
+        if (previewPrefab == null) return size;
+
+        PreviewBase preview = previewPrefab.GetComponent<PreviewBase>();
+        if (preview == null) return size;
+
+        Vector3Int previewSize = preview.GetPreviewSize();
+        size.x = Mathf.Max(size.x, previewSize.x);
+        size.y = Mathf.Max(size.y, previewSize.z);
+        return size;
+    }
+
+    private void ClearGimmickPreview()
+    {
+        if (previewBase != null)
+        {
+            Destroy(previewBase.gameObject);
+            previewBase = null;
+        }
+
+        isShowGimmickPreview = false;
     }
 
     // ギミックのプレビュー表示
@@ -733,10 +821,33 @@ public class CS_PlayerAction : MonoBehaviour
             return;
 
         // 設置位置の計算_______________________________________
-        Vector2Int grid = roomGrid.GetGridFromPos(settingPos);
-        settingPos = roomGrid.GetWorldPosFromGrid(grid);
         settingPos = CalculateGimmickSetPosition();
+        if (IsInfinityPosition(settingPos))
+        {
+            ClearGimmickPreview();
+            return;
+        }
+
+        Vector2Int grid = roomGrid.GetGridFromPos(settingPos);
+        if (grid.x == -1 || grid.y == -1)
+        {
+            ClearGimmickPreview();
+            return;
+        }
+
+        settingPos = roomGrid.GetWorldPosFromGrid(grid);
+        if (IsInfinityPosition(settingPos))
+        {
+            ClearGimmickPreview();
+            return;
+        }
+
         settingPos = roomGrid.GimmickEvenNumberCorrection(settingPos, grid, gimmick);
+        if (!IsGimmickInsideRoom(roomGrid, settingPos, GetPreviewCheckSize(gimmick)))
+        {
+            ClearGimmickPreview();
+            return;
+        }
 
         // レイでギミックの設置位置を計算_______________________
         Ray ray = new Ray();
@@ -762,7 +873,7 @@ public class CS_PlayerAction : MonoBehaviour
             gimmick.AdjustScaleToGrid();
 
         // infinity例外
-        if (settingPos.magnitude == float.PositiveInfinity) return;
+        if (IsInfinityPosition(settingPos)) return;
 
         //----------------------------------
         // 初回のみ生成
@@ -782,8 +893,7 @@ public class CS_PlayerAction : MonoBehaviour
             // 設置前破壊
             if(previewBase != null)
             {
-                Destroy(previewBase.gameObject);
-                previewBase = null;
+                ClearGimmickPreview();
             }
             if(gimmickManager.GetCurrentGimmick()[currentGimmickIndex].previewPrefab == null)
             {
