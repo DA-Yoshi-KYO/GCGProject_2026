@@ -117,7 +117,7 @@ public class CS_PlayerMove : MonoBehaviour
         currentRotation = rb.rotation;
         previousRotation = currentRotation;
 
-        materials = GetComponentInChildren<Renderer>().materials;
+        materials = GetComponentInChildren<SkinnedMeshRenderer>().materials;
     }
 
     void FixedUpdate()
@@ -130,6 +130,11 @@ public class CS_PlayerMove : MonoBehaviour
         {
             isInvincible = false;
             invincibleTime = 0.0f;
+
+            foreach (var material in materials)
+            {
+                material.SetFloat("_Alpha", 1f);
+            }
         }
 
         createFootPrintTime += Time.fixedDeltaTime;
@@ -185,10 +190,10 @@ public class CS_PlayerMove : MonoBehaviour
 
         if (isInvincible)
         {
-            float sineValue = Mathf.Abs(Mathf.Sin(invincibleTime * 10f * Mathf.Deg2Rad));
+            float sineValue = Mathf.Abs(Mathf.Sin(invincibleTime * 180f * Mathf.Deg2Rad));
             foreach (var material in materials)
             {
-                material.SetFloat("_IsInvincible", sineValue);
+                material.SetFloat("_Alpha", sineValue);
             }
         }
 
@@ -315,6 +320,7 @@ public class CS_PlayerMove : MonoBehaviour
     public void CaughtByThief(float holdCatTime, Transform thiefTransform)
     {
         transform.position = new Vector3(thiefTransform.position.x, thiefTransform.position.y - thiefTransform.localScale.y / 2.0f, thiefTransform.position.z);
+        transform.position += thiefTransform.forward;
         visualModel.position = transform.position;
 
         // フラグを立てる
