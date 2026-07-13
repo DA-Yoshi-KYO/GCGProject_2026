@@ -148,18 +148,19 @@ public class CS_ThiefAI : MonoBehaviour
     public float read_RemainingHoldCatTime => remainingHoldCatTime;
 
     [Tooltip("アニメーション用")]
-    private Animator animator;
-    public Animator read_Animator
+    private CS_ThiefAnimation animatorSystem;
+    public CS_ThiefAnimation read_AnimatorSystem
     {
         get
         {
-            if (animator == null)
+            if (animatorSystem == null)
             {
-                animator = GetComponentInChildren<Animator>();
+                Animator getAnimator = GetComponentInChildren<Animator>();
+                animatorSystem = new CS_ThiefAnimation(this, getAnimator);
             }
-            if (animator == null) Debug.LogWarning("【泥棒】Animatorコンポーネントが見つかりません。アニメーションが再生されません。");
+            if (animatorSystem == null) Debug.LogWarning("【泥棒】AnimatorSystemが見つかりません。アニメーションが再生されません。");
 
-            return animator;
+            return animatorSystem;
         }
     }
 
@@ -335,7 +336,9 @@ public class CS_ThiefAI : MonoBehaviour
         outlineTarget = GetComponentInChildren<CS_OutlineTarget>();
 
         // アニメーション用のコンポーネントを取得
-        animator = GetComponentInChildren<Animator>();
+        Animator getAnimator = GetComponentInChildren<Animator>();
+        animatorSystem = new CS_ThiefAnimation(this, getAnimator);
+        animatorSystem.SetAnimationState(CS_ThiefAnimation.ThiefAnimationState.Walk);
 
         // サウンドマネージャーから泥棒のサウンドを管理するコンポーネントを取得
         GameObject soundManager = GameObject.Find("AudioManager");
@@ -541,14 +544,11 @@ public class CS_ThiefAI : MonoBehaviour
                     ChangeStatus(ThiefState.Explore); // 状態を探索に戻す
                 else
                     ChangeStatus(ThiefState.Escape); // 状態を逃走に戻す
-                
 
-                // アニメーションの状態を解除(歩き状態に戻す)
-                if (animator != null)
-                {
-                    animator.SetBool("IsStun", false);
-                    animator.SetBool("IsDamage", false);
-                }
+
+                // アニメーションを歩き状態に設定
+                read_AnimatorSystem?.ResetAnimationState();
+                read_AnimatorSystem?.SetAnimationState(CS_ThiefAnimation.ThiefAnimationState.Walk);
             }
         }
         // 耐久力が0以下の場合は、時間経過後に退場する
@@ -570,6 +570,9 @@ public class CS_ThiefAI : MonoBehaviour
                 if (Thief_DeadFade == null)
                     if (thiefSound != null)
                         thiefSound.PlayOneShotSE("Thief_DeadFade", gameObject.transform.position, "Thief_DeadFade_" + transform.name);
+
+                read_AnimatorSystem?.ResetAnimationState();
+                read_AnimatorSystem?.SetAnimationState(CS_ThiefAnimation.ThiefAnimationState.RunAway);
 
                 // 退場移動
                 moveSystem.StunMove();
@@ -657,12 +660,9 @@ public class CS_ThiefAI : MonoBehaviour
             {
                 thiefReaction.ClearReaction();
 
-                if (animator != null)
-                {
-                    animator.SetBool("IsStun", false);
-                    animator.SetBool("IsDamage", false);
-                    animator.SetTrigger("DeathTrigger");
-                }
+                // アニメーションをダメージ状態に設定
+                read_AnimatorSystem?.ResetAnimationState();
+                read_AnimatorSystem?.SetAnimationState(CS_ThiefAnimation.ThiefAnimationState.Stunned);
             }
         }
     }
@@ -684,6 +684,9 @@ public class CS_ThiefAI : MonoBehaviour
         int soundIndex = Random.Range(1, 4);
         if (thiefSound != null)
             thiefSound.PlayOneShotSE("Thief_Hit" + soundIndex, gameObject.transform.position, "Thief_Hit" + soundIndex);
+
+        read_AnimatorSystem?.ResetAnimationState();
+        read_AnimatorSystem?.SetAnimationState(CS_ThiefAnimation.ThiefAnimationState.Damage);
 
         // ギミックの方を向く
         Vector3 directionToGimmick = gimmickPoint - transform.position;
@@ -833,19 +836,6 @@ public class CS_ThiefAI : MonoBehaviour
         }
 
         csad_PettingEffect.EndEffect();
-    }
-
-    /// <summary>
-    /// 泥棒のアニメーションを変更する処理(Triigerのみ)
-    /// </summary>
-    /// <param name="parameter">変更するアニメーションのパラメーター</param>
-    /// memo: 
-    /// NotFoundTrigger | 空の宝箱を探索後のアニメーション
-    /// FoundTrigger | 宝物を探索後のアニメーション
-    /// DamageTrigger | ダメージを受けたときのアニメーション
-    public void SetAnimation(string parameter)
-    {
-        if (animator != null) animator.SetTrigger(parameter);
     }
 
     /// <summary>

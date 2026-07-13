@@ -11,8 +11,14 @@ public class TreasureUI : MonoBehaviour
     [Header("お宝アイコンプレハブ")]
     [SerializeField] private GameObject TreasureIconPrefab;
 
-    [Header("シフト距離")]
+    [Header("シフト距離（横方向、次の列へのシフト距離）")]
     [SerializeField] private Vector3 ShiftDistance = new Vector3(50f, 0, 0);
+
+    [Header("行の間隔（縦方向、行を折り返す際のシフト距離）")]
+    [SerializeField] private Vector3 RowShiftDistance = new Vector3(0, 130f, 0);
+
+    [Header("行数（横2列なら2）")]
+    [SerializeField] private int RowCount = 2;
 
     [Header("最大お宝アイコン数")]
     [SerializeField] private int MaxTreasureCount = 5;
@@ -56,7 +62,9 @@ public class TreasureUI : MonoBehaviour
 
         for (int i = 0 ; i < count ; i++)
         {
-            Vector3 pos = Actor.transform.position - ShiftDistance * i;
+            int row = i % RowCount;
+            int column = i / RowCount;
+            Vector3 pos = Actor.transform.position - ShiftDistance * column - RowShiftDistance * row;
             GameObject icon = Instantiate(TreasureIconPrefab, pos, Quaternion.identity, this.transform);
             TreasureItem treasureItem = icon.GetComponent<TreasureItem>();
             if (treasureItem != null)
