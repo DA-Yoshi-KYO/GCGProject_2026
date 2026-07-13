@@ -7,6 +7,7 @@
  * 2026-05-22 | ファイル名を変更（ThiefDebugDamageTab.cs → CSED_ThiefDebugDamageTab.cs）
  *            | クラス名を変更（ThiefDebugDamageTab → CSED_ThiefDebugDamageTab）
  * 2026-05-28 | ThiefReactionUIType enum からダメージ種別を選択する機能を追加
+ * 2026-07-13 | Gimmick enum を直接参照するように修正
  *　
  */
 #if UNITY_EDITOR
@@ -24,7 +25,7 @@ internal sealed class CSED_ThiefDebugDamageTab
     private int damageAmount = 1;
 
     [Tooltip("ダメージを与えるギミック種類")]
-    private string damageReactionTypeName = "Pot";
+    private Gimmick damageGimmickType = Gimmick.Pot;
 
     /// <summary>
     /// タブ全体描画
@@ -60,7 +61,7 @@ internal sealed class CSED_ThiefDebugDamageTab
         // マイナスダメージなどの入力を防ぐ
         if (damageAmount < 0) damageAmount = 0;
 
-        // ダメージ種別選択（enum取得できない場合は文字入力欄にフォールバック）
+        // ダメージ種別選択
         DrawDamageTypePopup();
 
         EditorGUILayout.Space(4);
@@ -107,29 +108,7 @@ internal sealed class CSED_ThiefDebugDamageTab
     /// </summary>
     private void DrawDamageTypePopup()
     {
-        // ThiefReactionUIType enum を取得
-        var reactionEnumType = CSED_ThiefDebug.FindTypeByName("CS_ThiefReactionUI+ThiefReactionUIType");
-        if (reactionEnumType != null) {
-            // enumが見つかった場合は、選択中の種別名 -> enum値へ変換して保存
-            damageReactionTypeName = ToGimmickValue(reactionEnumType, damageReactionTypeName)?.ToString() ?? damageReactionTypeName;
-        }
-        else {
-        }
-
-        // enumが取れない場合は入力欄にフォールバック
-        if (reactionEnumType == null || !reactionEnumType.IsEnum)
-        {
-            EditorGUILayout.HelpBox("ダメージ種別(enum)を取得できません。", MessageType.Warning);
-            damageReactionTypeName = EditorGUILayout.TextField("ギミック(名前)", damageReactionTypeName);
-            return;
-        }
-
-        // enum名一覧からPopup
-        var names = Enum.GetNames(reactionEnumType);
-        int index = Array.IndexOf(names, damageReactionTypeName);
-        if (index < 0) index = 0;
-        index = EditorGUILayout.Popup("ギミック", index, names);
-        damageReactionTypeName = names[index];
+        damageGimmickType = (Gimmick)EditorGUILayout.EnumPopup("ギミック", damageGimmickType);
     }
 
     /// <summary>
@@ -138,64 +117,17 @@ internal sealed class CSED_ThiefDebugDamageTab
     private void TryInvokeTakeDamage(MonoBehaviour thief)
     {
         if (thief == null) return;
-        if (thief.GetType().Name != "CS_ThiefAI") return;
-
-        // Gimmick enum を取得
-        var gimmickEnumType = CSED_ThiefDebug.FindTypeByName("Gimmick");
-        if (gimmickEnumType == null || !gimmickEnumType.IsEnum)
+        var thiefAI = thief as CS_ThiefAI;
+        if (thiefAI == null)
         {
-            Debug.LogWarning("Gimmick enum が見つからないため TakeDamage を実行できません。");
-            return;
-        }
-
-        // 選択中の種別名 -> Gimmick enum値へ変換
-        object gimmickValue = ToGimmickValue(gimmickEnumType, damageReactionTypeName);
-        if (gimmickValue == null)
-        {
-            Debug.LogWarning("ギミック変換に失敗しました: " + damageReactionTypeName);
-            return;
-        }
-
-        // メソッド取得）
-        var method = thief.GetType().GetMethod("TakeDamage");
-        if (method == null)
-        {
-            Debug.LogWarning("TakeDamage(int, Gimmick) が見つかりません。");
+            Debug.LogWarning("対象が CS_ThiefAI ではありません。");
             return;
         }
 
         Vector3 gimmickPoint = new Vector3(0, 0, 0); // ギミックポイントは仮に(0,0,0)を渡す。
 
-        method.Invoke(thief, new[] { (object)damageAmount, gimmickValue, gimmickPoint, true });
-    }
-
-    /// <summary>
-    /// 表示用の種別名を、Gimmick enum値へ変換する
-    /// </summary>
-    private static object ToGimmickValue(Type gimmickEnumType, string reactionTypeName)
-    {
-        // 種別名 -> ギミック名（命名が同一という前提。例：Pot/IronBall）
-        var gimmickName = reactionTypeName;
-
-        if (Enum.IsDefined(gimmickEnumType, gimmickName))
-        {
-            return Enum.Parse(gimmickEnumType, gimmickName);
-        }
-
-        // 無ければ None を試し、それも無ければ0
-        if (Enum.IsDefined(gimmickEnumType, "None"))
-        {
-            return Enum.Parse(gimmickEnumType, "None");
-        }
-
-        try
-        {
-            return Enum.ToObject(gimmickEnumType, 0);
-        }
-        catch
-        {
-            return null;
-        }
+        // CS_ThiefAIのTakeDamageメソッドを直接呼び出す
+        thiefAI.TakeDamage(damageAmount, damageGimmickType, gimmickPoint, true);
     }
 
     /// <summary>
