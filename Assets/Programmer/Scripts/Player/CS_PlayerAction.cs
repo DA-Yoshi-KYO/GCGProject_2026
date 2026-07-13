@@ -114,16 +114,22 @@ public class CS_PlayerAction : MonoBehaviour
 
         cs_PlayerInteractRangeEffectPlayer = GetComponent<CS_PlayerInteractRangeEffectPlayer>();
 
-        if (CS_InputType.currentInputType == CS_InputType.InputType.Gamepad)
+        if (warpUIGameObject == null)
         {
-            warpUIGameObject.GetComponent<SpriteRenderer>().sprite = warpUISprite[0];
+            Debug.LogWarning("warpUIGameObjectが設定されていません。");
         }
-        else
+        else 
         {
-            warpUIGameObject.GetComponent<SpriteRenderer>().sprite = warpUISprite[1];
+            if (CS_CustomInputActionManager.instance.currentInputType == CS_CustomInputActionManager.InputType.Gamepad)
+            {
+                warpUIGameObject.GetComponent<SpriteRenderer>().sprite = warpUISprite[0];
+            }
+            else
+            {
+                warpUIGameObject.GetComponent<SpriteRenderer>().sprite = warpUISprite[1];
+            }
+            warpUIGameObject.SetActive(false);
         }
-
-        warpUIGameObject.SetActive(false);
     }
 
     // Update is called once per frame
@@ -1019,6 +1025,8 @@ public class CS_PlayerAction : MonoBehaviour
     //ワープUIの非表示処理
     private void WarpUIView()
     {
+        if (!warpUIView) return;
+
         if(warpUIView)
         {
             warpUIGameObject.SetActive(true);

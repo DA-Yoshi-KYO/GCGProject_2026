@@ -1564,6 +1564,56 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
                     ""action"": ""Decision"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a2d50b07-8124-45f5-93d9-1ab414bd866d"",
+                    ""path"": ""<Gamepad>/buttonSouth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Decision"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
+        },
+        {
+            ""name"": ""Anything"",
+            ""id"": ""ff77913e-8908-4d53-9aec-4c2340dcac7a"",
+            ""actions"": [
+                {
+                    ""name"": ""New action"",
+                    ""type"": ""Button"",
+                    ""id"": ""12f511e8-58ea-443e-b7aa-6ca0bf2534d1"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""9c9d7e3f-c444-4616-8211-62947986af94"",
+                    ""path"": ""<Keyboard>/anyKey"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""New action"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""81f7e8f6-04fd-4e39-9e3d-64f3c24b2c1f"",
+                    ""path"": """",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""New action"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -1610,6 +1660,9 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
         m_TutorialConfirmation = asset.FindActionMap("TutorialConfirmation", throwIfNotFound: true);
         m_TutorialConfirmation_MoveAxis = m_TutorialConfirmation.FindAction("MoveAxis", throwIfNotFound: true);
         m_TutorialConfirmation_Decision = m_TutorialConfirmation.FindAction("Decision", throwIfNotFound: true);
+        // Anything
+        m_Anything = asset.FindActionMap("Anything", throwIfNotFound: true);
+        m_Anything_Newaction = m_Anything.FindAction("New action", throwIfNotFound: true);
     }
 
     ~@CustomInputAction()
@@ -1622,6 +1675,7 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
         UnityEngine.Debug.Assert(!m_Option.enabled, "This will cause a leak and performance issues, CustomInputAction.Option.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_Openning.enabled, "This will cause a leak and performance issues, CustomInputAction.Openning.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_TutorialConfirmation.enabled, "This will cause a leak and performance issues, CustomInputAction.TutorialConfirmation.Disable() has not been called.");
+        UnityEngine.Debug.Assert(!m_Anything.enabled, "This will cause a leak and performance issues, CustomInputAction.Anything.Disable() has not been called.");
     }
 
     /// <summary>
@@ -2637,6 +2691,102 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
     /// Provides a new <see cref="TutorialConfirmationActions" /> instance referencing this action map.
     /// </summary>
     public TutorialConfirmationActions @TutorialConfirmation => new TutorialConfirmationActions(this);
+
+    // Anything
+    private readonly InputActionMap m_Anything;
+    private List<IAnythingActions> m_AnythingActionsCallbackInterfaces = new List<IAnythingActions>();
+    private readonly InputAction m_Anything_Newaction;
+    /// <summary>
+    /// Provides access to input actions defined in input action map "Anything".
+    /// </summary>
+    public struct AnythingActions
+    {
+        private @CustomInputAction m_Wrapper;
+
+        /// <summary>
+        /// Construct a new instance of the input action map wrapper class.
+        /// </summary>
+        public AnythingActions(@CustomInputAction wrapper) { m_Wrapper = wrapper; }
+        /// <summary>
+        /// Provides access to the underlying input action "Anything/Newaction".
+        /// </summary>
+        public InputAction @Newaction => m_Wrapper.m_Anything_Newaction;
+        /// <summary>
+        /// Provides access to the underlying input action map instance.
+        /// </summary>
+        public InputActionMap Get() { return m_Wrapper.m_Anything; }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Enable()" />
+        public void Enable() { Get().Enable(); }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Disable()" />
+        public void Disable() { Get().Disable(); }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.enabled" />
+        public bool enabled => Get().enabled;
+        /// <summary>
+        /// Implicitly converts an <see ref="AnythingActions" /> to an <see ref="InputActionMap" /> instance.
+        /// </summary>
+        public static implicit operator InputActionMap(AnythingActions set) { return set.Get(); }
+        /// <summary>
+        /// Adds <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+        /// </summary>
+        /// <param name="instance">Callback instance.</param>
+        /// <remarks>
+        /// If <paramref name="instance" /> is <c>null</c> or <paramref name="instance"/> have already been added this method does nothing.
+        /// </remarks>
+        /// <seealso cref="AnythingActions" />
+        public void AddCallbacks(IAnythingActions instance)
+        {
+            if (instance == null || m_Wrapper.m_AnythingActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_AnythingActionsCallbackInterfaces.Add(instance);
+            @Newaction.started += instance.OnNewaction;
+            @Newaction.performed += instance.OnNewaction;
+            @Newaction.canceled += instance.OnNewaction;
+        }
+
+        /// <summary>
+        /// Removes <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+        /// </summary>
+        /// <remarks>
+        /// Calling this method when <paramref name="instance" /> have not previously been registered has no side-effects.
+        /// </remarks>
+        /// <seealso cref="AnythingActions" />
+        private void UnregisterCallbacks(IAnythingActions instance)
+        {
+            @Newaction.started -= instance.OnNewaction;
+            @Newaction.performed -= instance.OnNewaction;
+            @Newaction.canceled -= instance.OnNewaction;
+        }
+
+        /// <summary>
+        /// Unregisters <param cref="instance" /> and unregisters all input action callbacks via <see cref="AnythingActions.UnregisterCallbacks(IAnythingActions)" />.
+        /// </summary>
+        /// <seealso cref="AnythingActions.UnregisterCallbacks(IAnythingActions)" />
+        public void RemoveCallbacks(IAnythingActions instance)
+        {
+            if (m_Wrapper.m_AnythingActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        /// <summary>
+        /// Replaces all existing callback instances and previously registered input action callbacks associated with them with callbacks provided via <param cref="instance" />.
+        /// </summary>
+        /// <remarks>
+        /// If <paramref name="instance" /> is <c>null</c>, calling this method will only unregister all existing callbacks but not register any new callbacks.
+        /// </remarks>
+        /// <seealso cref="AnythingActions.AddCallbacks(IAnythingActions)" />
+        /// <seealso cref="AnythingActions.RemoveCallbacks(IAnythingActions)" />
+        /// <seealso cref="AnythingActions.UnregisterCallbacks(IAnythingActions)" />
+        public void SetCallbacks(IAnythingActions instance)
+        {
+            foreach (var item in m_Wrapper.m_AnythingActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_AnythingActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    /// <summary>
+    /// Provides a new <see cref="AnythingActions" /> instance referencing this action map.
+    /// </summary>
+    public AnythingActions @Anything => new AnythingActions(this);
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Player" which allows adding and removing callbacks.
     /// </summary>
@@ -2868,5 +3018,20 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnDecision(InputAction.CallbackContext context);
+    }
+    /// <summary>
+    /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Anything" which allows adding and removing callbacks.
+    /// </summary>
+    /// <seealso cref="AnythingActions.AddCallbacks(IAnythingActions)" />
+    /// <seealso cref="AnythingActions.RemoveCallbacks(IAnythingActions)" />
+    public interface IAnythingActions
+    {
+        /// <summary>
+        /// Method invoked when associated input action "New action" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnNewaction(InputAction.CallbackContext context);
     }
 }

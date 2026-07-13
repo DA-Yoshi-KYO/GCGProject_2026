@@ -16,8 +16,7 @@ public class CS_PlayerData : MonoBehaviour
     void Awake()
     {
         // プレイヤーの入力アクションの初期化と有効化
-        customInputAction = new CustomInputAction();
-        customInputAction.Player.Enable();
+        customInputAction = CS_CustomInputActionManager.instance.customInputAction;
 
         // プレイヤーの現在の部屋データの取得
         GameObject roomManager = GameObject.Find("RoomManager");
@@ -46,13 +45,4 @@ public class CS_PlayerData : MonoBehaviour
         if (i == null) return;
         Debug.Log("[RoomMovePoint] PlayerData.currentRoomDataを更新しました。" + i.name);
     }
-
-    private void OnDestroy()
-    {
-        // プレイヤーの入力アクションの無効化
-        if (customInputAction != null)
-            customInputAction.Player.Disable();
-    }
-
-
 }
