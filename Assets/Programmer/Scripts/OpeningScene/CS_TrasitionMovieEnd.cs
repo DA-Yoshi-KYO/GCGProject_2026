@@ -5,7 +5,6 @@
  * ----------------------------------------------------------
  * 2026-06-22 | 初回作成
  */
-using UnityEditor.Timeline.Actions;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Video;
@@ -16,6 +15,8 @@ public class CS_TrasitionMovieEnd : MonoBehaviour
     [Header("FadeCanvasのPrefab格納")][SerializeField] private GameObject fadeCanvas;
     [Header("VideoPlayerのコンポーネントが入ったゲームオブジェクト")][SerializeField] private VideoPlayer videoPlayer;
     [Header("長押しする時間")][SerializeField] private float holdTime;
+
+    [Header("映像を格納")][SerializeField] private VideoClip[] videoclip;
 
     private CustomInputAction custoomInputAction;
     private bool Holding = false;
@@ -30,12 +31,24 @@ public class CS_TrasitionMovieEnd : MonoBehaviour
         custoomInputAction.Openning.SkipButton.started += OnHoldStart;
         custoomInputAction.Openning.SkipButton.canceled += OnHoldEnd;
 
+        if (CS_InputType.currentInputType == CS_InputType.InputType.Gamepad)
+        {
+            videoPlayer.clip = videoclip[0];
+        }
+        else
+        {
+            videoPlayer.clip = videoclip[1];
+        }
+
         if (videoPlayer == null)
         {
             Debug.LogError("CS_TrasitionMovieEnd: videoPlayerが設定されていません。", this);
             return;
         }
         videoPlayer.loopPointReached += OnMovieFinished;
+
+        videoPlayer.Stop();
+        videoPlayer.Play();
     }
 
     // Update is called once per frame
