@@ -18,7 +18,7 @@ public class CS_TrasitionMovieEnd : MonoBehaviour
 
     [Header("映像を格納")][SerializeField] private VideoClip[] videoclip;
 
-    private CustomInputAction custoomInputAction;
+    private CustomInputAction customInputAction;
     private bool Holding = false;
     private float time;
 
@@ -26,12 +26,11 @@ public class CS_TrasitionMovieEnd : MonoBehaviour
     void Start()
     {
         // プレイヤーの入力アクションの初期化と有効化
-        custoomInputAction = new CustomInputAction();
-        custoomInputAction.Openning.Enable();
-        custoomInputAction.Openning.SkipButton.started += OnHoldStart;
-        custoomInputAction.Openning.SkipButton.canceled += OnHoldEnd;
+        customInputAction = CS_CustomInputActionManager.instance.customInputAction;
+        customInputAction.Openning.SkipButton.started += OnHoldStart;
+        customInputAction.Openning.SkipButton.canceled += OnHoldEnd;
 
-        if (CS_InputType.currentInputType == CS_InputType.InputType.Gamepad)
+        if (CS_CustomInputActionManager.instance.currentInputType == CS_CustomInputActionManager.InputType.Gamepad)
         {
             videoPlayer.clip = videoclip[0];
         }
@@ -92,17 +91,6 @@ public class CS_TrasitionMovieEnd : MonoBehaviour
             return;
         }
         sceneTransition.StartSceneTransition(sceneName);
-    }
-
-    private void OnDestroy()
-    {
-        // プレイヤーの入力アクションの無効化
-        if (custoomInputAction != null)
-        {
-            custoomInputAction.Openning.SkipButton.started -= OnHoldStart;
-            custoomInputAction.Openning.SkipButton.canceled -= OnHoldEnd;
-            custoomInputAction.Openning.Disable();
-        }
     }
 
     private void OnHoldStart(InputAction.CallbackContext ctx)

@@ -29,8 +29,7 @@ public class CS_GameClearSelectButton : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        inputActions = new CustomInputAction();
-        inputActions.GameClear.Enable();
+        inputActions = CS_CustomInputActionManager.instance.customInputAction;
         inputActions.GameClear.MoveAxis.started += SelectInput;
 
         GameObject backTitleButtonObject = GameObject.Find("GameClearBackTitleButton");
@@ -66,11 +65,6 @@ public class CS_GameClearSelectButton : MonoBehaviour
             string sceneName = sceneTransitionName[currentButton];
             sceneTransition.StartSceneTransition(sceneName);
         }
-    }
-
-    private void OnDestroy()
-    {
-        inputActions.GameClear.Disable();
     }
 
     void SelectInput(InputAction.CallbackContext context)
