@@ -135,7 +135,7 @@ public class CS_PlayerAction : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        settingPos = CalculateGimmickSetPosition();
+        CalculateGimmickSetPosition();
 
         if (playerData.currentMode == CS_PlayerData.PlayerMode.Normal)
         {
@@ -551,19 +551,18 @@ public class CS_PlayerAction : MonoBehaviour
         if (roomGrid == null)
             Debug.LogError("この部屋の床にRoomGridがついていません");
 
-        Vector3 setPos = CalculateGimmickSetPosition();
-        if (IsInfinityPosition(setPos)) return;
+        if (IsInfinityPosition(settingPos)) return;
 
         gimmick.gimmickState = GimmickState.Spawn;
 
         // 設置処理 //
-        if (!roomGrid.SetGimmickInGrid(setPos, gimmick))
+        if (!roomGrid.SetGimmickInGrid(settingPos, gimmick))
             return;
 
         // =========================
         // 実際に生成されたインスタンス取得
         // =========================
-        Vector3 center = setPos;          // 中心位置
+        Vector3 center = settingPos;          // 中心位置
         Vector3 halfExtents = new Vector3(roomGrid.gridSize.x * 0.5f, 5f, roomGrid.gridSize.y * 0.5f); // 半径ではなく「半サイズ」
 
         Collider[] hits = Physics.OverlapBox(center, halfExtents);
@@ -617,8 +616,7 @@ public class CS_PlayerAction : MonoBehaviour
     public void SettingGimmickDirection(GimmickBase gimmick)
     {
         // インタラクト方向を設定※ギミックとの位置関係で判定（対角線で四分割：三角形×4）
-        Vector3 gimmickPos = CalculateGimmickSetPosition();
-        Vector3 toPlayer = transform.position - gimmickPos;
+        Vector3 toPlayer = transform.position - settingPos;
         float dx = toPlayer.x;
         float dz = toPlayer.z;
 
@@ -657,108 +655,97 @@ public class CS_PlayerAction : MonoBehaviour
     }
 
     //ギミックの設置位置を補正する計算：大瀧
-    private Vector3 CalculateGimmickSetPosition()
+    private void CalculateGimmickSetPosition()
     {
         GameObject currentRoom = playerData.currentRoomData.GetPlayerFloorData();
 
         var roomGrid = currentRoom.GetComponent<RoomGrid>();
-        if (roomGrid == null) return Vector3.positiveInfinity;
-        if (gimmickManager.GetCurrentGimmick().Count == 0) return Vector3.positiveInfinity;
+        if (roomGrid == null)
+        {
+            settingPos = Vector3.positiveInfinity;
+            return;
+        }
+        if (gimmickManager.GetCurrentGimmick().Count == 0)
+        {
+            settingPos = Vector3.positiveInfinity;
+            return;
+        }
         GimmickBase gimmick = gimmickManager.GetCurrentGimmick()[currentGimmickIndex].gimmickPrefab.GetComponent<GimmickBase>();
+        if (gimmick == null)
+        {
+            settingPos = Vector3.positiveInfinity;
+            return;
+        }
 
+        // 設置予定位置をプレイヤーの位置に初期化
         settingPos = transform.position;
 
-        //ギミックのサイズ
-        Vector2Int size = gimmick.GetGimmickSize();
-        // グリッドサイズ
-        Vector3 gridSize = roomGrid.gridSize;
+        //ギミックのサイズからオフセット量を計算
+        Vector2Int gimmickSize = gimmick.GetGimmickSize();
+        float offsetX = gimmickSize.x;
+        float offsetZ = gimmickSize.y;
 
-        // 各方向のオフセット量を計算
-        float offsetX = size.x;
-        float offsetZ = size.y;
-
-        // ワールド座標に変換
+        // グリッドサイズを使用しワールド座標に変換
+        Vector2 gridSize = roomGrid.gridSize;
         offsetX *= gridSize.x;
         offsetZ *= gridSize.y;
 
-        // 向きで分岐
+        // プレイヤーの前方を召喚位置とする
         Vector3 forward = transform.forward;
-        bool forwardZ = false;
+        settingPos += forward;
+        // 2マスのギミックを設置する場合、ギミックの中心をプレイヤーの前方に持ってくるように補正する
+        //if (gimmickSize.x % 2 == 0)
+        //    settingPos.x -= offsetX * 0.5f;
+        //if (gimmickSize.y % 2 == 0)
+        //    settingPos.z -= offsetZ * 0.5f;
 
-        // プレイヤの前面にギミックを置くために行う補正
-        // X成分とZ成分の絶対値を比較して、どちらを優先するか決める
-        if (Mathf.Abs(forward.x) > Mathf.Abs(forward.z))
-        {
-            forwardZ = false;
-            // X軸
-            if (forward.x >= 0f)
-                settingPos += new Vector3(offsetX, 0f, 0f);
-            else
-            {
-                //設置位置の補正※偶数時
-                if (size.x % 2 == 0)
-                    settingPos -= new Vector3(offsetX * 0.5f, 0f, 0f);  //設置予定位置の中核部分なため半マスのみ動かす。
-                else
-                    settingPos -= new Vector3(offsetX, 0f, 0f);
-            }
-        }
-        else
-        {
-            forwardZ = true;
-            // Z軸（同値なら Z を優先）
-            if (forward.z >= 0f)
-                settingPos += new Vector3(0f, 0f, offsetZ);
-            else
-            {
-                //設置位置の補正※偶数時
-                if (size.x % 2 == 0)
-                    settingPos -= new Vector3(0f, 0f, offsetZ * 0.5f);  //設置予定位置の中核部分なため半マスのみ動かす。
-                else
-                    settingPos -= new Vector3(0f, 0f, offsetZ);
-            }
-        }
-        // ===============================
-        // グリッド変換
+
+        // グリッド位置に変換
         Vector2Int grid = roomGrid.GetGridFromPos(settingPos);
-        if (grid.x == -1 || grid.y == -1) return Vector3.positiveInfinity;
-
-        //グリッド座標からワールドへ逆変換
+        if (grid.x == -1 || grid.y == -1)
+        {
+            settingPos = Vector3.positiveInfinity;
+            return;
+        }
+        // グリッド座標からワールド座標へ逆変換
         Vector3 spawnPos = roomGrid.GetWorldPosFromGrid(grid);
-        if (IsInfinityPosition(spawnPos)) return Vector3.positiveInfinity;
+        if (IsInfinityPosition(spawnPos))
+        {
+            settingPos = Vector3.positiveInfinity;
+            return;
+        }
 
         ////グリッド補正
         ////グリッドを４分割して考えより細かく
         ////設置位置の調整をできるようにする。
-        if (gimmick.GetGimmickSize().x % 2 == 0 && forwardZ)
-        {//サイズが偶数の時 && Z軸を向いているとき
-            if (spawnPos.x < transform.position.x &&
-                spawnPos.x + (size.x / 2f) > transform.position.x)
-            {//グリッド設置予定位置より右よりにいたら
-             //グリッド設置予定位置+ギミックサイズより左にいたら
-                spawnPos.x += gridSize.x;
-            }
-        }
-        else if (gimmick.GetGimmickSize().y % 2 == 0 && !forwardZ)
-        {
-            if (spawnPos.z < transform.position.z &&
-                spawnPos.z + (size.y / 2f) > transform.position.z)
-            {//グリッド設置予定位置より右よりにいたら
-             //グリッド設置予定位置+ギミックサイズより左にいたら
-                spawnPos.z += gridSize.y;
-            }
-        }
+        //if (gimmick.GetGimmickSize().x % 2 == 0 && forwardZ)
+        //{//サイズが偶数の時 && Z軸を向いているとき
+        //    if (spawnPos.x < transform.position.x &&
+        //        spawnPos.x + (size.x / 2f) > transform.position.x)
+        //    {//グリッド設置予定位置より右よりにいたら
+        //     //グリッド設置予定位置+ギミックサイズより左にいたら
+        //        spawnPos.x += gridSize.x;
+        //    }
+        //}
+        //else if (gimmick.GetGimmickSize().y % 2 == 0 && !forwardZ)
+        //{
+        //    if (spawnPos.z < transform.position.z &&
+        //        spawnPos.z + (size.y / 2f) > transform.position.z)
+        //    {//グリッド設置予定位置より右よりにいたら
+        //     //グリッド設置予定位置+ギミックサイズより左にいたら
+        //        spawnPos.z += gridSize.y;
+        //    }
+        //}
 
-        Vector2Int fixedGrid = roomGrid.GetGridFromPos(spawnPos);
-        if (fixedGrid.x == -1 || fixedGrid.y == -1) return Vector3.positiveInfinity;
+        //Vector2Int fixedGrid = roomGrid.GetGridFromPos(spawnPos);
+        //if (fixedGrid.x == -1 || fixedGrid.y == -1) return Vector3.positiveInfinity;
 
-        Vector3 correctedSpawnPos =
-            roomGrid.GimmickEvenNumberCorrection(spawnPos, fixedGrid, gimmick);
+        Vector3 correctedSpawnPos = roomGrid.GimmickEvenNumberCorrection(spawnPos, gimmick);
 
-        if (!IsGimmickInsideRoom(roomGrid, correctedSpawnPos, size))
-            return Vector3.positiveInfinity;
+        //if (!IsGimmickInsideRoom(roomGrid, correctedSpawnPos, size))
+        //    return Vector3.positiveInfinity;
 
         settingPos = spawnPos;
-        return spawnPos;
     }
 
     private static bool IsInfinityPosition(Vector3 position)
@@ -872,7 +859,6 @@ public class CS_PlayerAction : MonoBehaviour
             return;
 
         // 設置位置の計算_______________________________________
-        settingPos = CalculateGimmickSetPosition();
         if (IsInfinityPosition(settingPos))
         {
             ClearGimmickPreview();
@@ -893,7 +879,7 @@ public class CS_PlayerAction : MonoBehaviour
             return;
         }
 
-        settingPos = roomGrid.GimmickEvenNumberCorrection(settingPos, grid, gimmick);
+        settingPos = roomGrid.GimmickEvenNumberCorrection(settingPos, gimmick);
         if (!IsGimmickInsideRoom(roomGrid, settingPos, GetPreviewCheckSize(gimmick)))
         {
             ClearGimmickPreview();
@@ -1025,12 +1011,10 @@ public class CS_PlayerAction : MonoBehaviour
     //ワープUIの非表示処理
     private void WarpUIView()
     {
-        if (!warpUIView) return;
-
         if(warpUIView)
         {
             warpUIGameObject.SetActive(true);
-            Vector3 camPos = Camera.main.transform.position;
+            Vector3 camPos = GetComponent<CS_PlayerCamera>().roomCamera.transform.position;
             // UI の高さを固定（上下に傾かない）
             camPos.y = warpUIGameObject.transform.position.y;
             // カメラ方向を向く
