@@ -46,14 +46,13 @@ public class CS_PlayerMove : MonoBehaviour
     private float createFootPrintTime = 100.0f;
 
     private Animator animator; // プレイヤーのアニメーター
+    Material[] materials; // プレイヤーのマテリアル配列
 
     [Tooltip("盗賊に捕まっているかどうか")]
-    private bool isCaughtByThief;
     float catCaughtTime = 0.0f;
     float invincibleTime = 0.0f;
 
     //スタン状態はどうか
-    private bool isCatStunByAnkh;
     float ankhStunTimeToCatStun = 0.0f;
 
     [Header("ジャンプ開始するまでのマージン(秒数単位)")]
@@ -117,6 +116,8 @@ public class CS_PlayerMove : MonoBehaviour
         previousPosition = currentPosition;
         currentRotation = rb.rotation;
         previousRotation = currentRotation;
+
+        materials = GetComponentInChildren<Renderer>().materials;
     }
 
     void FixedUpdate()
@@ -182,6 +183,14 @@ public class CS_PlayerMove : MonoBehaviour
             return;
         }
 
+        if (isInvincible)
+        {
+            float sineValue = Mathf.Abs(Mathf.Sin(invincibleTime * 10f * Mathf.Deg2Rad));
+            foreach (var material in materials)
+            {
+                material.SetFloat("_IsInvincible", sineValue);
+            }
+        }
 
         // ジャンプ待機中は移動処理を行わない
         if (isJumpMerging && !isJumping) return;
@@ -309,7 +318,6 @@ public class CS_PlayerMove : MonoBehaviour
         visualModel.position = transform.position;
 
         // フラグを立てる
-        isCaughtByThief = true;
         catCaughtTime = holdCatTime;
         invincibleTime = holdCatTime * 2f;
         isInvincible = true;
@@ -319,8 +327,6 @@ public class CS_PlayerMove : MonoBehaviour
     // 猫のスタン状態用処理※Ankh用
     public void SetAnkhCatStunTime(float stunTime)
     {
-        Debug.Log("アンクスタン");
-        isCatStunByAnkh = true;
         ankhStunTimeToCatStun = stunTime;
     }
 
