@@ -232,7 +232,7 @@ public class RoomGrid : MonoBehaviour
         if (spawnPos.magnitude == float.PositiveInfinity) return false; 
 
         //偶数補正
-        spawnPos = GimmickEvenNumberCorrection(spawnPos, grid, gimmick);
+        spawnPos = GimmickEvenNumberCorrection(spawnPos,gimmick);
 
         Ray ray = new Ray();
         ray.direction = Vector3.down;
@@ -301,13 +301,13 @@ public class RoomGrid : MonoBehaviour
     // 概要：奇数はチェス型、偶数は囲碁型に配置します。
     // 引数：Vector3 / オブジェクトの設置する位置※偶数補正前の値
     // 戻値：Vector3 / 補正した値を返します。
-    public Vector3 GimmickEvenNumberCorrection(Vector3 setPos, Vector2Int setGrid, GimmickBase gimmick)
+    public Vector3 GimmickEvenNumberCorrection(Vector3 setPos, GimmickBase gimmick)
     {
-        Vector2Int grid = setGrid;
         Vector3 spawnPos = setPos;
 
-        float sizeX = gimmick.GetGimmickSize().x;
-        float sizeY = gimmick.GetGimmickSize().y;
+        Vector2Int gimmickSize = gimmick.GetGimmickSize();
+        float sizeX = gimmickSize.x;
+        float sizeY = gimmickSize.y;
 
         // グリッドサイズ
         float gridSizeX = gridSize.x;

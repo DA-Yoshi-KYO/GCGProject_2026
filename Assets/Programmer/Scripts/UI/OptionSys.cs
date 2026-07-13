@@ -68,8 +68,7 @@ public class OptionSys : MonoBehaviour
             TempSelectObject.Object_False = optionUI[i].transform.Find("Select_false").gameObject;
             selectGameObjects.Add(TempSelectObject);
         }
-        inputAction = new CustomInputAction();
-        inputAction.Enable();
+        inputAction = CS_CustomInputActionManager.instance.customInputAction;
         inputAction.Option.Up.started += Up;
         inputAction.Option.Down.started += Down;
         inputAction.Option.Decision.started += Enter;
@@ -327,18 +326,6 @@ public class OptionSys : MonoBehaviour
             seSoundValue += 0.1f;
             if (seSoundValue > 100) seSoundValue = 100;
             option.SetSEVolume(seSoundValue);
-        }
-    }
-
-    private void OnDestroy()
-    {
-        if (inputAction != null)
-        {
-            inputAction.Option.Up.started -= Up;
-            inputAction.Option.Down.started -= Down;
-            inputAction.Option.Decision.started -= Enter;
-            inputAction.Disable();
-            inputAction.Dispose();
         }
     }
 }

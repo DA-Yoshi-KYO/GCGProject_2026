@@ -300,8 +300,8 @@ public class CS_ThiefGimmickAction
             targetGimmick.Remove(emptyChest);
         }
 
-        // 泥棒のアニメーション状態をHuntingに変更する
-        if (thiefAI.read_Animator != null) thiefAI.read_Animator.SetBool("IsHunting", false);
+        // アニメーション状態をリセットする
+        thiefAI?.read_AnimatorSystem?.ResetAnimationState();
 
         // 泥棒の反応状態をChasingCatに変更する
         thiefAI?.read_ThiefReaction?.ChangeReaction(CS_ThiefReaction.ThiefReactionType.Alert, 2.0f);

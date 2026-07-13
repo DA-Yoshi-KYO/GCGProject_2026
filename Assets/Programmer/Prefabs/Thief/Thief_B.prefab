@@ -102,8 +102,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2a484cb4fa1e2342996f7d303f99b96, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentState: 0
-  durability: 0
+  thiefMaterialsList:
+  - materialA: {fileID: 2100000, guid: a49e2af2ff8fd7445b008d0913d4f3c4, type: 2}
+    materialB: {fileID: 2100000, guid: a45a0128a237df841969c5a34dbd0850, type: 2}
+    materialC: {fileID: 2100000, guid: 80fe9a0b4e955294da6105d3efde26fa, type: 2}
+  - materialA: {fileID: 2100000, guid: a49e2af2ff8fd7445b008d0913d4f3c4, type: 2}
+    materialB: {fileID: 2100000, guid: e54bd301ab311ad408cbc3b0717f68e6, type: 2}
+    materialC: {fileID: 2100000, guid: 80f4ce1053cc96a4da7aa0c88d0598f2, type: 2}
+  - materialA: {fileID: 2100000, guid: a49e2af2ff8fd7445b008d0913d4f3c4, type: 2}
+    materialB: {fileID: 2100000, guid: 842bfa5fcaabf284ba87f595514f82e7, type: 2}
+    materialC: {fileID: 2100000, guid: 6c36599ccea347b49a1ee36cc870a7f5, type: 2}
   targetLayer:
   - serializedVersion: 2
     m_Bits: 1073741824
@@ -336,7 +344,7 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: eb0700089a07b8e4e90035b22aef1c91,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: -1
+      value: -0.5
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: eb0700089a07b8e4e90035b22aef1c91,
         type: 3}

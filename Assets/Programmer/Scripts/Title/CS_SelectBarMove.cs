@@ -7,7 +7,6 @@
  * 2026-05-17 | SE再生処理追加
  * 2026-06-15 | 修正
  */
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -30,8 +29,7 @@ public class CS_SelectBarMove : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        inputActions = new CustomInputAction();
-        inputActions.SelectBar.Enable();
+        inputActions = CS_CustomInputActionManager.instance.customInputAction;
         inputActions.SelectBar.MoveAxis.started += TitleSelectInput;
 
         GameObject seObject = GameObject.Find("SE");
@@ -45,16 +43,24 @@ public class CS_SelectBarMove : MonoBehaviour
 
         currentButton = 0;
         UpdateButtonTexture();
-        foreach (var action in inputActions)
-        {
-            action.performed += OnAction;
-        }
     }
 
     // Update is called once per frame
     void Update()
     {
         if (Option.Instance == null) return;
+
+        switch (CS_CustomInputActionManager.instance.currentInputType)
+        {
+            case CS_CustomInputActionManager.InputType.Gamepad:
+                manualImage[0].SetActive(true);
+                manualImage[1].SetActive(false);
+                break;
+            case CS_CustomInputActionManager.InputType.KeyboardMouse:
+                manualImage[0].SetActive(false);
+                manualImage[1].SetActive(true);
+                break;
+        }
 
         if (!Option.Instance.GetIsOptionUIActive())
         {
@@ -97,11 +103,6 @@ public class CS_SelectBarMove : MonoBehaviour
         }
     }
 
-    private void OnDestroy()
-    {
-        inputActions.SelectBar.Disable();
-    }
-
     private void UpdateButtonTexture()
     {
         for (int i = 0 ; i < buttonList.Length ; i++)
@@ -139,28 +140,6 @@ public class CS_SelectBarMove : MonoBehaviour
 
                 UpdateButtonTexture();
             }
-        }
-
-        if (context.control.device is Gamepad)
-            CS_InputType.currentInputType = CS_InputType.InputType.Gamepad;
-        else
-            CS_InputType.currentInputType = CS_InputType.InputType.KeyboardMouse;
-        Debug.Log("InputType: " + CS_InputType.currentInputType);
-    }
-
-    private void OnAction(InputAction.CallbackContext context)
-    {
-        if (context.control.device is Gamepad)
-        {
-            CS_InputType.currentInputType = CS_InputType.InputType.Gamepad;
-            manualImage[0].SetActive(true);
-            manualImage[1].SetActive(false);
-        }
-        else
-        {
-           CS_InputType.currentInputType = CS_InputType.InputType.KeyboardMouse;
-            manualImage[0].SetActive(false);
-            manualImage[1].SetActive(true);
         }
     }
 }

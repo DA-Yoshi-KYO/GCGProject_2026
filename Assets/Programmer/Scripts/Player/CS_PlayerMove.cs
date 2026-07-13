@@ -34,8 +34,8 @@ public class CS_PlayerMove : MonoBehaviour
     public Vector3 currentPosition;     // 現在の位置
     public Quaternion previousRotation; // 前回の回転
     public Quaternion currentRotation;  // 現在の回転
-
-    private float rotateSpeed = 10.0f;  // 回転のスピード
+    
+    private float rotateSpeed = 20.0f;  // 回転のスピード
     private bool isJumping = false;     // ジャンプ中かどうか
     private bool isRunning = false;    // スニーク中かどうか
 
@@ -46,14 +46,13 @@ public class CS_PlayerMove : MonoBehaviour
     private float createFootPrintTime = 100.0f;
 
     private Animator animator; // プレイヤーのアニメーター
+    Material[] materials; // プレイヤーのマテリアル配列
 
     [Tooltip("盗賊に捕まっているかどうか")]
-    private bool isCaughtByThief;
     float catCaughtTime = 0.0f;
     float invincibleTime = 0.0f;
 
     //スタン状態はどうか
-    private bool isCatStunByAnkh;
     float ankhStunTimeToCatStun = 0.0f;
 
     [Header("ジャンプ開始するまでのマージン(秒数単位)")]
@@ -117,6 +116,8 @@ public class CS_PlayerMove : MonoBehaviour
         previousPosition = currentPosition;
         currentRotation = rb.rotation;
         previousRotation = currentRotation;
+
+        materials = GetComponentInChildren<SkinnedMeshRenderer>().materials;
     }
 
     void FixedUpdate()
@@ -129,6 +130,11 @@ public class CS_PlayerMove : MonoBehaviour
         {
             isInvincible = false;
             invincibleTime = 0.0f;
+
+            foreach (var material in materials)
+            {
+                material.SetFloat("_Alpha", 1f);
+            }
         }
 
         createFootPrintTime += Time.fixedDeltaTime;
@@ -182,6 +188,14 @@ public class CS_PlayerMove : MonoBehaviour
             return;
         }
 
+        if (isInvincible)
+        {
+            float sineValue = Mathf.Abs(Mathf.Sin(invincibleTime * 180f * Mathf.Deg2Rad));
+            foreach (var material in materials)
+            {
+                material.SetFloat("_Alpha", sineValue);
+            }
+        }
 
         // ジャンプ待機中は移動処理を行わない
         if (isJumpMerging && !isJumping) return;
@@ -301,80 +315,15 @@ public class CS_PlayerMove : MonoBehaviour
     }
 
     /// <summary>
-    /// スニーク中は斜め入力の際に地面がない方向への移動を制限するため
-    /// 成分ごとに移動可能かを判定して通すかどうかを決定する関数。
-    /// </summary>
-    /// <param name="forwardMove">正面方向への移動量</param>
-    /// <param name="rightMove">右方向への移動量</param>
-    /// <returns></returns>
-    private Vector3 ResolveSneakMove(Vector3 forwardMove, Vector3 rightMove)
-    {
-        Vector3 accepted = Vector3.zero;    // 最終的に通す移動量
-
-        // 斜め入力時は成分ごとに通す
-        if (forwardMove.sqrMagnitude >= rightMove.sqrMagnitude)
-        {
-            TryAddSneakComponent(ref accepted, forwardMove);
-            TryAddSneakComponent(ref accepted, rightMove);
-        }
-        else
-        {
-            TryAddSneakComponent(ref accepted, rightMove);
-            TryAddSneakComponent(ref accepted, forwardMove);
-        }
-
-        return accepted;
-    }
-
-    // ある方向への移動を足した先に地面があるかを判定し、あれば移動を通す関数。
-    private void TryAddSneakComponent(ref Vector3 currentMove, Vector3 addMove)
-    {
-        if (addMove.sqrMagnitude <= 0.0001f) return;    // 移動量がほぼゼロなら判定しない
-
-        // 現在の移動にこの成分を足した先に地面があるかを判定
-        if (HasGroundForMove(currentMove, addMove, 0.3f))
-        {
-            currentMove += addMove; // 地面があればこの成分を通す
-        }
-    }
-
-    private bool HasGroundForMove(Vector3 currentMove, Vector3 addMove, float checkLength)
-    {
-        // 追加する移動の方向を取得
-        Vector3 dir = addMove.normalized;
-
-        // CharacterController の足元基準
-        Vector3 feet = controller.center + transform.position;
-        feet.y -= controller.height / 2;
-
-        // 既に通っている移動を足した先で判定
-        Vector3 checkPos = feet + currentMove * Time.deltaTime + dir * checkLength;
-        checkPos.y += 0.1f;
-
-        // 地面があるかをレイで判定
-        RaycastHit hit;
-        bool hasGround = Physics.Raycast(
-            checkPos,
-            Vector3.down,
-            out hit,
-            0.1f + 0.6f,
-            ~0,
-            QueryTriggerInteraction.Ignore);
-
-        return hasGround;
-    }
-
-
-    /// <summary>
     /// 盗賊に捕まったときの処理
     /// </summary>
     public void CaughtByThief(float holdCatTime, Transform thiefTransform)
     {
         transform.position = new Vector3(thiefTransform.position.x, thiefTransform.position.y - thiefTransform.localScale.y / 2.0f, thiefTransform.position.z);
+        transform.position += thiefTransform.forward;
         visualModel.position = transform.position;
 
         // フラグを立てる
-        isCaughtByThief = true;
         catCaughtTime = holdCatTime;
         invincibleTime = holdCatTime * 2f;
         isInvincible = true;
@@ -384,8 +333,6 @@ public class CS_PlayerMove : MonoBehaviour
     // 猫のスタン状態用処理※Ankh用
     public void SetAnkhCatStunTime(float stunTime)
     {
-        Debug.Log("アンクスタン");
-        isCatStunByAnkh = true;
         ankhStunTimeToCatStun = stunTime;
     }
 
