@@ -1,10 +1,9 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 public class TeleportGimmick : GimmickBase
 {
     private const float TeleportCooldown = 2.0f;
-    private const float TeleportHeightOffset = 2.0f;
+    private const float TeleportHeightOffset = 0.0f;
     private const float FadeOutDuration = 0.5f;
     private const float FadeInDuration = 0.5f;
 
@@ -15,6 +14,20 @@ public class TeleportGimmick : GimmickBase
         FadingIn,
     }
 
+    private enum CirclePhase
+    {
+        Idle,
+        Rising,
+        Falling,
+    }
+
+    [SerializeField] private CS_EffectWarpShaderOnly warpEffect;
+    [SerializeField] private Color noActive;
+    [SerializeField] private Color active;
+
+    [SerializeField] GameObject magicCircle;
+    [SerializeField] private float magicCircleRiseHeight = 2f;
+
     // Teleport先のオブジェクト
     private GameObject destination;
     private GameObject player;
@@ -23,6 +36,11 @@ public class TeleportGimmick : GimmickBase
 
     private TeleportPhase teleportPhase = TeleportPhase.None;
     private float phaseTimer = 0f;
+
+    private CirclePhase circlePhase = CirclePhase.Idle;
+    private float circleTimer = 0f;
+    private Vector3 magicCircleBasePosition;
+    private bool magicCircleBaseCaptured = false;
 
     private CS_RoomPlayerPosition roomPlayerPosition;
     private SkinnedMeshRenderer[] smesh;
@@ -62,6 +80,8 @@ public class TeleportGimmick : GimmickBase
             UpdateTeleportAnimation();
         }
 
+        UpdateMagicCircle();
+
         if (gimmickSelectUI == null)
         {
             // シーンからGimmickSelectUIを取得
@@ -79,6 +99,19 @@ public class TeleportGimmick : GimmickBase
             }
         }
 
+        // 移動先が無い（1個のみ召喚）場合、またはクールタイム中は非アクティブ色にする
+        bool isTeleportUsable = destination != null && sharedCooldown <= 0f;
+
+        if (isTeleportUsable)
+        {
+            Debug.Log("TeleportGimmick:アクティブ");
+            warpEffect.SetEffectColor(active);
+        }
+        else
+        {
+            Debug.Log("TeleportGimmick:非アクティブ");
+            warpEffect.SetEffectColor(noActive);
+        }
 
 
         if (isCooldown)
@@ -105,6 +138,11 @@ public class TeleportGimmick : GimmickBase
         teleportPhase = TeleportPhase.FadingOut;
         phaseTimer = 0f;
         SetPlayerAlpha(1f);
+
+        // 魔法陣に乗って上に運ばれていく演出を開始する
+        CaptureMagicCircleBase();
+        circlePhase = CirclePhase.Rising;
+        circleTimer = 0f;
     }
 
     private void UpdateTeleportAnimation()
@@ -141,6 +179,56 @@ public class TeleportGimmick : GimmickBase
         }
     }
 
+
+    private void UpdateMagicCircle()
+    {
+        if (circlePhase == CirclePhase.Idle || magicCircle == null) return;
+
+        circleTimer += Time.unscaledDeltaTime;
+        float duration = (circlePhase == CirclePhase.Rising) ? FadeOutDuration : FadeInDuration;
+        float t = Mathf.Clamp01(circleTimer / duration);
+
+        Vector3 topPosition = magicCircleBasePosition + Vector3.up * magicCircleRiseHeight;
+
+        if (circlePhase == CirclePhase.Rising)
+        {
+            magicCircle.transform.localPosition = Vector3.Lerp(magicCircleBasePosition, topPosition, t);
+            if (t >= 1f)
+            {
+                circlePhase = CirclePhase.Falling;
+                circleTimer = 0f;
+            }
+        }
+        else
+        {
+            magicCircle.transform.localPosition = Vector3.Lerp(topPosition, magicCircleBasePosition, t);
+            if (t >= 1f) circlePhase = CirclePhase.Idle;
+        }
+    }
+
+    /// <summary>
+    /// 到着側の魔法陣を、上から降りてくる状態にする処理（テレポート実行元から呼び出される）
+    /// </summary>
+    public void BeginArrivalCircle()
+    {
+        CaptureMagicCircleBase();
+
+        if (magicCircle != null)
+        {
+            magicCircle.transform.localPosition = magicCircleBasePosition + Vector3.up * magicCircleRiseHeight;
+        }
+
+        circlePhase = CirclePhase.Falling;
+        circleTimer = 0f;
+    }
+
+    private void CaptureMagicCircleBase()
+    {
+        if (magicCircleBaseCaptured || magicCircle == null) return;
+        magicCircleBasePosition = magicCircle.transform.localPosition;
+        magicCircleBaseCaptured = true;
+    }
+
     private void OnTeleport()
     {
         if (!CanTeleport(out CS_PlayerData playerData, out CS_PlayerCamera playerCamera)) return;
@@ -155,6 +243,13 @@ public class TeleportGimmick : GimmickBase
         playerData.ChangePlayerRoomData();
         roomPlayerPosition.RefreshPlayerRoomData();
         playerCamera.ChangeCamera();
+
+        // 到着先の魔法陣を、上から降りてくる演出に連動させる
+        TeleportGimmick destinationGimmick = destination.GetComponent<TeleportGimmick>();
+        if (destinationGimmick != null)
+        {
+            destinationGimmick.BeginArrivalCircle();
+        }
     }
 
     void SetPlayerAlpha(float alpha)
@@ -248,7 +343,7 @@ public class TeleportGimmick : GimmickBase
         // 既にテレポート演出中の場合は二重に開始しない
         if (teleportPhase != TeleportPhase.None) return;
 
-        // テレポートできない状態であれば、演出（TimeScale停止・フェード）自体を始めない
+        // テレポートできない状態であれば、演出（フェード）自体を始めない
         if (!CanTeleport(out _, out _)) return;
 
         BeginTeleport();
