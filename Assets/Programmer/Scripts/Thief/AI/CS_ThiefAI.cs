@@ -345,7 +345,7 @@ public class CS_ThiefAI : MonoBehaviour
         Material[] newColorMaterials = new Material[] { thiefMaterialsList[colorIndex].materialA, thiefMaterialsList[colorIndex].materialB, thiefMaterialsList[colorIndex].materialC };
         // カラーバリエーションを適応
         skinnedMeshRenderer.materials = newColorMaterials;
-        thiefMaterial = skinnedMeshRenderer.sharedMaterials;
+        thiefMaterial = skinnedMeshRenderer.materials;
 
         iconSprite = typedata.thiefTypeIcon[colorIndex];
 
