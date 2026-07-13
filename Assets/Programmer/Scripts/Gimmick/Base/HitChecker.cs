@@ -427,7 +427,10 @@ public class HitChecker : MonoBehaviour
                             {
                                 emptyChestGimmick.Durability_Value_Decreased();
                                 thiefAI.read_ThiefReaction.ChangeReaction(CS_ThiefReaction.ThiefReactionType.Searching);
-                                thiefAI.read_Animator.SetBool("IsHunting", true);
+
+                                thiefAI?.read_AnimatorSystem?.ResetAnimationState();
+                                thiefAI?.read_AnimatorSystem?.SetAnimationState(CS_ThiefAnimation.ThiefAnimationState.Hunting);
+
                                 thiefAI.read_MoveSystem.Stop();
 
                                 Debug.Log("Durability decreased");

@@ -552,7 +552,8 @@ public class CS_MemorySystem
                     thiefAI?.transform.LookAt(new Vector3(currentTarget.transform.position.x, thiefAI.transform.position.y, currentTarget.transform.position.z));
 
                     // 泥棒のアニメーション状態をHuntingに変更する
-                    thiefAI?.read_Animator?.SetBool("IsHunting", true);
+                    thiefAI?.read_AnimatorSystem?.ResetAnimationState();
+                    thiefAI?.read_AnimatorSystem?.SetAnimationState(CS_ThiefAnimation.ThiefAnimationState.Hunting);
 
                     // 泥棒のリアクションを探索に変更する
                     thiefAI?.read_ThiefReaction?.ChangeReaction(CS_ThiefReaction.ThiefReactionType.Searching);
@@ -571,7 +572,7 @@ public class CS_MemorySystem
                     // 探索対象の方へ移動する
                     thiefAI?.read_MoveSystem?.MoveTo(currentTarget.transform.position);
 
-                    thiefAI?.read_Animator?.SetBool("IsHunting", false);
+                    thiefAI?.read_AnimatorSystem?.ResetAnimationState();
 
                     thiefAI?.read_ThiefReaction?.ClearReactionByType(CS_ThiefReaction.ThiefReactionType.Searching);
                 }
@@ -612,7 +613,8 @@ public class CS_MemorySystem
                         ((CS_PlayerTarget)currentTarget).transform.GetComponent<CS_PlayerMove>().CaughtByThief(thiefAI.read_RemainingHoldCatTime, thiefAI.transform);
 
                         // 泥棒のアニメーション状態をHuntingに変更する
-                        thiefAI?.read_Animator?.SetBool("IsHunting", true);
+                        thiefAI?.read_AnimatorSystem?.ResetAnimationState();
+                        thiefAI?.read_AnimatorSystem?.SetAnimationState(CS_ThiefAnimation.ThiefAnimationState.Hunting);
 
 
                         return;
@@ -803,8 +805,8 @@ public class CS_MemorySystem
         }
 
         currentTarget = null;
-        // 泥棒のアニメーション状態をHuntingに変更する
-        thiefAI?.read_Animator?.SetBool("IsHunting", false);
+        // 探索対象をリセット
+        thiefAI?.read_AnimatorSystem?.ResetAnimationState();
     }
 
     /// <summary>
@@ -851,10 +853,8 @@ public class CS_MemorySystem
             // 探索対象が宝物の場合は、そのままtrueを返す
             if (((CS_VisionTarget)currentTarget).targetType == CS_VisionTarget.TargetType.Treasure)
             {
-                // 泥棒のアニメーション状態をHuntingに変更する
-                thiefAI?.read_Animator?.SetBool("IsHunting", false);
-                // 泥棒のアニメーション状態をHuntingに変更する
-                thiefAI?.read_Animator?.SetTrigger("FoundTrigger");
+                // 泥棒のアニメーションをリセット
+                thiefAI?.read_AnimatorSystem?.ResetAnimationState();
                 // 泥棒の状態をFoundに変更する
                 thiefAI?.ChangeStatus(CS_ThiefAI.ThiefState.Found);
 
