@@ -43,6 +43,7 @@
  * 2026-06-12   | 退場時のフェードアウト処理を追加
  * 
  */
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
@@ -65,7 +66,7 @@ public class CS_ThiefAI : MonoBehaviour
         [Tooltip("気絶状態")]
         Stunned
     }
-    [SerializeField, Tooltip("現在の行動状態")]
+    [Tooltip("現在の行動状態")]
     private ThiefState currentState;
     public ThiefState read_CurrentState => currentState;
 
@@ -74,13 +75,23 @@ public class CS_ThiefAI : MonoBehaviour
     [Tooltip("泥棒のマテリアルのフェードアウトにかかる時間")]
     private float fadeAfterStunTime;
 
+    [Serializable]
+    public struct ThiefMaterials
+    {
+        public Material materialA;
+        public Material materialB;
+        public Material materialC;
+    }
+    [SerializeField, Tooltip("泥棒のカラーバリエーションリスト")]
+    private List<ThiefMaterials> thiefMaterialsList = new List<ThiefMaterials>();
+
     [Tooltip("使用したデータベース")]
     private CO_ThiefStatusData thiefStatusData;
 
     [Tooltip("アウトラインターゲット")]
     private CS_OutlineTarget outlineTarget;
 
-    [SerializeField, Tooltip("泥棒の耐久力")]
+    [Tooltip("泥棒の耐久力")]
     private int durability;
     public int read_Durability => durability;
 
@@ -279,8 +290,6 @@ public class CS_ThiefAI : MonoBehaviour
     {
         thiefStatusData = typedata;
 
-        iconSprite = typedata.thiefTypeIcon;
-
         durability = typedata.durability;
         maxDurability = typedata.durability;
 
@@ -330,7 +339,15 @@ public class CS_ThiefAI : MonoBehaviour
         fadeAfterStunTime = data.fadeAfterStunTime;
 
         // マテリアルの取得
-        thiefMaterial = transform.GetComponentInChildren<SkinnedMeshRenderer>().materials;
+        SkinnedMeshRenderer skinnedMeshRenderer = transform.GetComponentInChildren<SkinnedMeshRenderer>();
+
+        int colorIndex = UnityEngine.Random.Range(0, thiefMaterialsList.Count);
+        Material[] newColorMaterials = new Material[] { thiefMaterialsList[colorIndex].materialA, thiefMaterialsList[colorIndex].materialB, thiefMaterialsList[colorIndex].materialC };
+        // カラーバリエーションを適応
+        skinnedMeshRenderer.materials = newColorMaterials;
+        thiefMaterial = skinnedMeshRenderer.sharedMaterials;
+
+        iconSprite = typedata.thiefTypeIcon[colorIndex];
 
         // アウトラインターゲットの取得
         outlineTarget = GetComponentInChildren<CS_OutlineTarget>();
@@ -621,7 +638,7 @@ public class CS_ThiefAI : MonoBehaviour
                             }
 
                             // ランダムにグリッドセルのオフセットを選択
-                            int randomIndex = Random.Range(0, targetGridOffset.Count);
+                            int randomIndex = UnityEngine.Random.Range(0, targetGridOffset.Count);
 
                             // 選択したグリッドセルの位置をワールド座標で
                             gridPos = roomGrid.GetWorldPosFromGrid(gridIndex + targetGridOffset[randomIndex]);
@@ -677,7 +694,7 @@ public class CS_ThiefAI : MonoBehaviour
         durability -= damage;
 
         // ※intのRangeはmin以上max未満の範囲でランダムな整数を返すため、1～3の範囲でランダムな整数を取得する場合は、Random.Range(1, 4)とする必要がある
-        int soundIndex = Random.Range(1, 4);
+        int soundIndex = UnityEngine.Random.Range(1, 4);
         if (thiefSound != null)
             thiefSound.PlayOneShotSE("Thief_Hit" + soundIndex, gameObject.transform.position, "Thief_Hit" + soundIndex);
 
