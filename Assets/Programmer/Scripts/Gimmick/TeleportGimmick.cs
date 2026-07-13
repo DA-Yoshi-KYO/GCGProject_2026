@@ -4,13 +4,27 @@ public class TeleportGimmick : GimmickBase
 {
     private const float TeleportCooldown = 2.0f;
     private const float TeleportHeightOffset = 2.0f;
+    private const float FadeOutDuration = 0.5f;
+    private const float FadeInDuration = 0.5f;
+
+    private enum TeleportPhase
+    {
+        None,
+        FadingOut,
+        FadingIn,
+    }
 
     // Teleport先のオブジェクト
     private GameObject destination;
     private GameObject player;
+
     private bool isCooldown = false;
-    private bool isTeleporting = false;
+
+    private TeleportPhase teleportPhase = TeleportPhase.None;
+    private float phaseTimer = 0f;
+
     private CS_RoomPlayerPosition roomPlayerPosition;
+    private SkinnedMeshRenderer[] smesh;
 
     private static float sharedCooldown;
 
@@ -40,7 +54,10 @@ public class TeleportGimmick : GimmickBase
             player = GameObject.FindGameObjectWithTag("Player");
         }
 
-        if (isTeleporting) OnTeleport();
+        if (teleportPhase != TeleportPhase.None)
+        {
+            UpdateTeleportAnimation();
+        }
 
         if (isCooldown)
         {
@@ -57,28 +74,56 @@ public class TeleportGimmick : GimmickBase
 
     protected override void BrokenUpdate()
     {
-        base.BrokenUpdate();
         sharedCooldown = 0.0f;
+        base.BrokenUpdate();
     }
 
-    private void SearchOfDestination()
+    /// <summary>
+    /// テレポート演出（TimeScaleを止めてフェードアウト → 実際のテレポート → フェードイン）を開始する処理
+    /// </summary>
+    private void BeginTeleport()
     {
-        TeleportGimmick[] teleportGimmicks = FindObjectsOfType<TeleportGimmick>();
-        foreach (TeleportGimmick gimmick in teleportGimmicks)
+        teleportPhase = TeleportPhase.FadingOut;
+        phaseTimer = 0f;
+        SetPlayerAlpha(1f);
+    }
+
+    private void UpdateTeleportAnimation()
+    {
+        // TimeScaleを0にしている間も進行させるため、unscaledDeltaTimeを使用する
+        phaseTimer += Time.unscaledDeltaTime;
+
+        switch (teleportPhase)
         {
-            if (gimmick != this)
-            {
-                destination = gimmick.gameObject;
-                return;
-            }
+            case TeleportPhase.FadingOut:
+                {
+                    float t = Mathf.Clamp01(phaseTimer / FadeOutDuration);
+                    SetPlayerAlpha(1f - t);
+
+                    if (t >= 1f)
+                    {
+                        OnTeleport();
+                        teleportPhase = TeleportPhase.FadingIn;
+                        phaseTimer = 0f;
+                    }
+                    break;
+                }
+            case TeleportPhase.FadingIn:
+                {
+                    float t = Mathf.Clamp01(phaseTimer / FadeInDuration);
+                    SetPlayerAlpha(t);
+
+                    if (t >= 1f)
+                    {
+                        teleportPhase = TeleportPhase.None;
+                    }
+                    break;
+                }
         }
-        destination = null;
     }
 
     private void OnTeleport()
     {
-        isTeleporting = false;
-
         if (!CanTeleport(out CS_PlayerData playerData, out CS_PlayerCamera playerCamera)) return;
 
         Vector3 pos = destination.transform.position;
@@ -93,9 +138,26 @@ public class TeleportGimmick : GimmickBase
         playerCamera.ChangeCamera();
     }
 
-    /// <summary>
-    /// テレポート可能な状態かどうかを判定する処理
-    /// </summary>
+    void SetPlayerAlpha(float alpha)
+    {
+        if (player == null) return;
+
+        if (smesh == null || smesh.Length == 0)
+        {
+            smesh = player.GetComponentsInChildren<SkinnedMeshRenderer>();
+        }
+
+        foreach (var renderer in smesh)
+        {
+            if (renderer == null) continue;
+            foreach (var mat in renderer.materials)
+            {
+                if (mat == null || !mat.HasProperty("_Alpha")) continue;
+                mat.SetFloat("_Alpha", alpha);
+            }
+        }
+    }
+
     private bool CanTeleport(out CS_PlayerData playerData, out CS_PlayerCamera playerCamera)
     {
         playerData = null;
@@ -141,7 +203,20 @@ public class TeleportGimmick : GimmickBase
         return true;
     }
 
-    // Teleportに触れた場合の処理
+    private void SearchOfDestination()
+    {
+        TeleportGimmick[] teleportGimmicks = FindObjectsOfType<TeleportGimmick>();
+        foreach (TeleportGimmick gimmick in teleportGimmicks)
+        {
+            if (gimmick != this)
+            {
+                destination = gimmick.gameObject;
+                return;
+            }
+        }
+        destination = null;
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         // Player以外のオブジェクトは処理を行わない
@@ -150,6 +225,13 @@ public class TeleportGimmick : GimmickBase
             Debug.Log("TeleportGimmick: Player以外のオブジェクトが触れました。");
             return;
         }
-        isTeleporting = true;
+
+        // 既にテレポート演出中の場合は二重に開始しない
+        if (teleportPhase != TeleportPhase.None) return;
+
+        // テレポートできない状態であれば、演出（TimeScale停止・フェード）自体を始めない
+        if (!CanTeleport(out _, out _)) return;
+
+        BeginTeleport();
     }
 }
