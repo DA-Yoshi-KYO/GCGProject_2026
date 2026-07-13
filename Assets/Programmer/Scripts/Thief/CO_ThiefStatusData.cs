@@ -27,9 +27,9 @@ public class CO_ThiefStatusData : ScriptableObject
     [Tooltip("使用する泥棒のプレハブ"), SerializeField]
     public GameObject thiefPrefab;
 
-    [Header("使用する泥棒のミニマップアイコン")]
-    [Tooltip("使用する泥棒のミニマップアイコン"), SerializeField]
-    public Sprite thiefTypeIcon;
+    [Header("使用する泥棒のアイコン")]
+    [Tooltip("使用する泥棒のアイコン"), SerializeField]
+    public List<Sprite> thiefTypeIcon;
 
     [Header("耐久値")]
     [Tooltip("泥棒の耐久値"), Min(1)]
