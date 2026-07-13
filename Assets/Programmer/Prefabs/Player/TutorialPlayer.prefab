@@ -87,7 +87,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveAmount: 3
   velocityWalk: 1
-  velocitySneak: 0.6
+  velocityRun: 1.5
   jumpAmount: 10
   gravity: -20
   airResistance: 0.97
@@ -208,22 +208,20 @@ MonoBehaviour:
   gimmickInfoList:
   - gimmickTag: 1
     gimmickInfo:
-      coolTime: 0
-      maxNum: 0
+      coolTime: 5
+      maxNum: 5
       currentNum: 0
-      totalNum: 0
     itemPrefab: {fileID: 7905465617219888894, guid: ea9bc9bbcf651ed43b2221a4dcb8d0c4,
       type: 3}
     previewPrefab: {fileID: 7905465617219888894, guid: 3bbc83263c5915945a441225b71b798c,
       type: 3}
-    gimmickPrefab: {fileID: 7905465617219888894, guid: c467ea3baedb9d14088530cb401de8e3,
+    gimmickPrefab: {fileID: 4877168968123032387, guid: d7e1022ca6ddac643ad7e4a772826d60,
       type: 3}
   - gimmickTag: 2
     gimmickInfo:
-      coolTime: 0
-      maxNum: 0
+      coolTime: 10
+      maxNum: 2
       currentNum: 0
-      totalNum: 0
     itemPrefab: {fileID: 1657490478714675189, guid: 96291b85c9fdb7d49afd3a58f5702762,
       type: 3}
     previewPrefab: {fileID: 5619306240066455382, guid: dd482d498a4aff246acacf665d5711ea,
