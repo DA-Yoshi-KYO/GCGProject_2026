@@ -293,6 +293,9 @@ public class GimmickList : MonoBehaviour
                     case Gimmick.None:
                         situation = "None";
                         break;
+                    default:
+                        situation = "None";
+                        break;
                 }
 
                 if (situation != "None")

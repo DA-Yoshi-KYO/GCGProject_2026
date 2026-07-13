@@ -53,7 +53,11 @@ public class TeleportGimmick : GimmickBase
 
     protected override void SpawnUpdate()
     {
-        gameObject.transform.position = new Vector3(gameObject.transform.position.x, 0.0f, gameObject.transform.position.z);
+        gameObject.transform.position = 
+            new Vector3(
+            gameObject.transform.position.x,
+            gameObject.transform.position.y + 0.5f,
+            gameObject.transform.position.z);
         customInputAction = new CustomInputAction();
         customInputAction.Enable();
         gimmickState = GimmickState.Idle;
