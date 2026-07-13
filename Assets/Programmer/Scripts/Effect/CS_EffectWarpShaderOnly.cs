@@ -163,6 +163,12 @@ public class CS_EffectWarpShaderOnly : CS_EffectShaderOnly
     {
         c_EffectColor = c_Color;
 
+        // PlayEffect（InitEffect）が一度も呼ばれていない状態でも
+        // 色変更だけは反映できるように、ここでもキャッシュを保証する
+        CacheChildRenderers();
+
+        EnsureMaterialPropertyBlock();
+
         ApplyEffectColorToChildren();
     }
 

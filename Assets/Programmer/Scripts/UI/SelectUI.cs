@@ -35,6 +35,12 @@ public class GimmickSelectUI : MonoBehaviour
     [SerializeField] private Color ctColor1 = new Color(0.25f, 0.25f, 0.25f, 0.85f);
     [SerializeField] private Color ctColor2 = new Color(0.10f, 0.10f, 0.10f, 0.85f);
 
+    [Header("テレポート")]
+    [SerializeField] private Image resetUI;
+    private float teleportImageAlpha = 1.0f;
+    private bool addition = false;
+    public bool ResetUIActive { get; set; } = false;
+
     // ==============================================================
     //  内部型
     // ==============================================================
@@ -179,6 +185,31 @@ public class GimmickSelectUI : MonoBehaviour
 
         AnimateSlots();
         UpdateCTMask(idx);
+
+
+        resetUI.gameObject.SetActive(ResetUIActive);
+        if (addition)
+        {
+            teleportImageAlpha += Time.deltaTime;
+            if(teleportImageAlpha > 1.0f)
+            {
+                teleportImageAlpha = 1.0f;
+                addition = false;
+            }
+            resetUI.color = new Color(1.0f, 1.0f, 1.0f, teleportImageAlpha);
+        }
+        else
+        {
+            teleportImageAlpha -= Time.deltaTime;
+            if (teleportImageAlpha < 0.0f)
+            {
+                teleportImageAlpha = 0.0f;
+                addition = true;
+            }
+            resetUI.color = new Color(1.0f, 1.0f, 1.0f, teleportImageAlpha);
+        }
+
+
     }
 
     /// <summary>
