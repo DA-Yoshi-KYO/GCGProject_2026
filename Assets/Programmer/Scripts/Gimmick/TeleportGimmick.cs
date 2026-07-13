@@ -31,6 +31,7 @@ public class TeleportGimmick : GimmickBase
     // Teleport先のオブジェクト
     private GameObject destination;
     private GameObject player;
+    private CS_PlayerAction playerAction;
 
     private bool isCooldown = false;
 
@@ -48,9 +49,13 @@ public class TeleportGimmick : GimmickBase
     private GimmickSelectUI gimmickSelectUI;
     private static float sharedCooldown;
 
+    private CustomInputAction customInputAction;
+
     protected override void SpawnUpdate()
     {
         gameObject.transform.position = new Vector3(gameObject.transform.position.x, 0.0f, gameObject.transform.position.z);
+        customInputAction = new CustomInputAction();
+        customInputAction.Enable();
         gimmickState = GimmickState.Idle;
     }
 
@@ -59,6 +64,7 @@ public class TeleportGimmick : GimmickBase
         base.IdleUpdate();
 
         // 自分以外のTeleportGimmickを探す
+        HandleDiscardInput();
         SearchOfDestination();
 
         if (roomPlayerPosition == null)
@@ -75,44 +81,19 @@ public class TeleportGimmick : GimmickBase
             player = GameObject.FindGameObjectWithTag("Player");
         }
 
+        if (playerAction == null && player != null)
+        {
+            playerAction = player.GetComponent<CS_PlayerAction>();
+        }
+
         if (teleportPhase != TeleportPhase.None)
         {
             UpdateTeleportAnimation();
         }
 
         UpdateMagicCircle();
-
-        if (gimmickSelectUI == null)
-        {
-            // シーンからGimmickSelectUIを取得
-            gimmickSelectUI = FindObjectOfType<GimmickSelectUI>();
-            if (gimmickSelectUI != null)
-            {
-                if(destination != null)
-                {
-                    gimmickSelectUI.ResetUIActive = true;
-                }
-                else
-                {
-                    gimmickSelectUI.ResetUIActive = false;
-                }
-            }
-        }
-
-        // 移動先が無い（1個のみ召喚）場合、またはクールタイム中は非アクティブ色にする
-        bool isTeleportUsable = destination != null && sharedCooldown <= 0f;
-
-        if (isTeleportUsable)
-        {
-            Debug.Log("TeleportGimmick:アクティブ");
-            warpEffect.SetEffectColor(active);
-        }
-        else
-        {
-            Debug.Log("TeleportGimmick:非アクティブ");
-            warpEffect.SetEffectColor(noActive);
-        }
-
+        UpdateGimmickSelectUI();
+        UpdateWarpEffectColor();;
 
         if (isCooldown)
         {
@@ -122,15 +103,52 @@ public class TeleportGimmick : GimmickBase
 
     protected override void ActiveUpdate()
     {
-        base.ActiveUpdate();
-        // インタラクトされた際に破棄
-        gimmickState = GimmickState.Broken;
+        gimmickState = GimmickState.Idle;
     }
 
     protected override void BrokenUpdate()
     {
         sharedCooldown = 0.0f;
+        gimmickSelectUI.ResetUIActive = false;
         base.BrokenUpdate();
+    }
+
+    /// <summary>
+    /// GimmickSelectUIの参照解決と、リセットUIの表示状態（移動先の有無）を毎フレーム同期する処理
+    /// </summary>
+    private void UpdateGimmickSelectUI()
+    {
+        if (gimmickSelectUI == null)
+        {
+            gimmickSelectUI = FindObjectOfType<GimmickSelectUI>();
+        }
+
+        if (gimmickSelectUI != null)
+        {
+            gimmickSelectUI.ResetUIActive = destination != null;
+        }
+    }
+
+    /// <summary>
+    /// 移動先が無い（1個のみ召喚）場合、またはクールタイム中は非アクティブ色にする
+    /// </summary>
+    private void UpdateWarpEffectColor()
+    {
+        bool isTeleportUsable = destination != null && sharedCooldown <= 0f;
+        warpEffect.SetEffectColor(isTeleportUsable ? active : noActive);
+    }
+
+    /// <summary>
+    /// このギミックを選択中に破棄入力が行われた場合、テレポートギミックを手放す処理
+    /// </summary>
+    private void HandleDiscardInput()
+    {
+        if (destination == null || playerAction == null || gimmickSelectUI == null) return;
+        if (GetGimmickTag() != playerAction.GetSelectCurrentGimmickTag()) return;
+        if (!customInputAction.Player.Interact.triggered) return;
+
+        gimmickSelectUI.ResetUIActive = false;
+        gimmickState = GimmickState.Broken;
     }
 
     private void BeginTeleport()
