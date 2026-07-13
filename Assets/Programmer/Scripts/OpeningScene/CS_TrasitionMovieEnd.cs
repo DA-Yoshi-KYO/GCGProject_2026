@@ -8,6 +8,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Video;
+using static HoudiniEngineUnity.HEU_InputNode;
 
 public class CS_TrasitionMovieEnd : MonoBehaviour
 {
@@ -30,6 +31,11 @@ public class CS_TrasitionMovieEnd : MonoBehaviour
         custoomInputAction.Openning.Enable();
         custoomInputAction.Openning.SkipButton.started += OnHoldStart;
         custoomInputAction.Openning.SkipButton.canceled += OnHoldEnd;
+
+        foreach (var action in custoomInputAction)
+        {
+            action.performed += OnAction;
+        }
 
         if (CS_InputType.currentInputType == CS_InputType.InputType.Gamepad)
         {
@@ -115,5 +121,17 @@ public class CS_TrasitionMovieEnd : MonoBehaviour
     {
         Holding = false;
         time = 0.0f;
+    }
+
+    private void OnAction(InputAction.CallbackContext context)
+    {
+        if (context.control.device is Gamepad)
+        {
+            CS_InputType.currentInputType = CS_InputType.InputType.Gamepad;
+        }
+        else
+        {
+            CS_InputType.currentInputType = CS_InputType.InputType.KeyboardMouse;
+        }
     }
 }
