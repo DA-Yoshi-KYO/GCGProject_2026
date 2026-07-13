@@ -249,15 +249,6 @@ public class CS_PlayerAction : MonoBehaviour
 
         WarpUIView();
     }
-    private IEnumerator ExecuteSettingSequence()
-    {
-        playerData.currentMode = CS_PlayerData.PlayerMode.Normal;
-        //一フレーム遅らせる処理
-        yield return null;
-        SettingAction();
-        int interactSEIndex = UnityEngine.Random.Range(1, 4);
-        playSE.PlayOneShotSE("Cat_Interact" + interactSEIndex.ToString(), gameObject.transform.position, "InteractSE");
-    }
 
     private void OnSelect(InputAction.CallbackContext context)
     {
@@ -313,7 +304,12 @@ public class CS_PlayerAction : MonoBehaviour
                             playerData.currentMode = CS_PlayerData.PlayerMode.Setting;
                             break;
                         case CS_PlayerData.PlayerMode.Setting:
-                            StartCoroutine(ExecuteSettingSequence());
+                            if (SettingAction())
+                            {
+                                int interactSEIndex = UnityEngine.Random.Range(1, 4);
+                                playSE.PlayOneShotSE("Cat_Interact" + interactSEIndex.ToString(), gameObject.transform.position, "InteractSE");
+                                playerData.currentMode = CS_PlayerData.PlayerMode.Normal;
+                            }
                             break;
                         default:
                             break;
@@ -503,31 +499,31 @@ public class CS_PlayerAction : MonoBehaviour
         playerData.currentMode = CS_PlayerData.PlayerMode.Normal;
     }
 
-    private void SettingAction()
+    private bool SettingAction()
     {
-        if (IsInfinityPosition(settingPos)) return;
+        if (IsInfinityPosition(settingPos)) return false;
 
         if (gimmickManager.GetCurrentGimmick()[currentGimmickIndex] == null)
         {
             Debug.LogError("選択されたギミックが見つかりません");
-            return;
+            return false;
         }
         GimmickBase gimmick = 
             gimmickManager.GetCurrentGimmick()[currentGimmickIndex].gimmickPrefab.GetComponent<GimmickBase>();
         if (gimmick == null)
         {
-            Debug.LogError("選択されたギミックにGimmickBaseコンポーネントが付いていません"); return;
+            Debug.LogError("選択されたギミックにGimmickBaseコンポーネントが付いていません"); return false;
         }
         if (!gimmickManager.IsSetting(gimmick.gimmick))
         {
             Debug.Log("ギミックの設置失敗: IsSetting");
-            return;
+            return false;
         }
         GameObject playerRoomData = playerData.currentRoomData.GetPlayerRoomData();
         if (playerRoomData == null)
         {
             Debug.Log("現在の部屋データが取得できません");
-            return;
+            return false;
         }
         GameObject currentRoom = playerRoomData.transform.GetChild(0).gameObject;
         string roomName = currentRoom.name;
@@ -536,14 +532,14 @@ public class CS_PlayerAction : MonoBehaviour
         if (currentRoom == null || isNotSettingRoom)
         {
             Debug.Log("この部屋にトラップは配置できません");
-            return;    // 設置可能な部屋のみ設置する
+            return false;    // 設置可能な部屋のみ設置する
         }
 
         GameObject currentFloor = playerData.currentRoomData.GetPlayerFloorData();
         if (currentFloor == null)
         {
             Debug.LogError("現在の部屋の床データが取得できません");
-            return;
+            return false;
         }
         var roomGrid = currentFloor.GetComponent<RoomGrid>();
 
@@ -551,13 +547,13 @@ public class CS_PlayerAction : MonoBehaviour
         if (roomGrid == null)
             Debug.LogError("この部屋の床にRoomGridがついていません");
 
-        if (IsInfinityPosition(settingPos)) return;
+        if (IsInfinityPosition(settingPos)) return false;
 
         gimmick.gimmickState = GimmickState.Spawn;
 
         // 設置処理 //
         if (!roomGrid.SetGimmickInGrid(settingPos, gimmick))
-            return;
+            return false;
 
         // =========================
         // 実際に生成されたインスタンス取得
@@ -586,7 +582,7 @@ public class CS_PlayerAction : MonoBehaviour
         if (instance == null)
         {
             Debug.LogError("配置後のGimmick取得失敗");
-            return;
+            return false;
         }
 
         bool isEffect = true;
@@ -611,12 +607,14 @@ public class CS_PlayerAction : MonoBehaviour
 
         // Managerへ実体を登録
         gimmickManager.SettingStart(instance);
+
+        return true;
     }
 
     public void SettingGimmickDirection(GimmickBase gimmick)
     {
         // インタラクト方向を設定※ギミックとの位置関係で判定（対角線で四分割：三角形×4）
-        Vector3 toPlayer = transform.position - settingPos;
+        Vector3 toPlayer = transform.position - gimmick.transform.position;
         float dx = toPlayer.x;
         float dz = toPlayer.z;
 
@@ -693,12 +691,6 @@ public class CS_PlayerAction : MonoBehaviour
         // プレイヤーの前方を召喚位置とする
         Vector3 forward = transform.forward;
         settingPos += forward;
-        // 2マスのギミックを設置する場合、ギミックの中心をプレイヤーの前方に持ってくるように補正する
-        //if (gimmickSize.x % 2 == 0)
-        //    settingPos.x -= offsetX * 0.5f;
-        //if (gimmickSize.y % 2 == 0)
-        //    settingPos.z -= offsetZ * 0.5f;
-
 
         // グリッド位置に変換
         Vector2Int grid = roomGrid.GetGridFromPos(settingPos);
@@ -715,35 +707,7 @@ public class CS_PlayerAction : MonoBehaviour
             return;
         }
 
-        ////グリッド補正
-        ////グリッドを４分割して考えより細かく
-        ////設置位置の調整をできるようにする。
-        //if (gimmick.GetGimmickSize().x % 2 == 0 && forwardZ)
-        //{//サイズが偶数の時 && Z軸を向いているとき
-        //    if (spawnPos.x < transform.position.x &&
-        //        spawnPos.x + (size.x / 2f) > transform.position.x)
-        //    {//グリッド設置予定位置より右よりにいたら
-        //     //グリッド設置予定位置+ギミックサイズより左にいたら
-        //        spawnPos.x += gridSize.x;
-        //    }
-        //}
-        //else if (gimmick.GetGimmickSize().y % 2 == 0 && !forwardZ)
-        //{
-        //    if (spawnPos.z < transform.position.z &&
-        //        spawnPos.z + (size.y / 2f) > transform.position.z)
-        //    {//グリッド設置予定位置より右よりにいたら
-        //     //グリッド設置予定位置+ギミックサイズより左にいたら
-        //        spawnPos.z += gridSize.y;
-        //    }
-        //}
-
-        //Vector2Int fixedGrid = roomGrid.GetGridFromPos(spawnPos);
-        //if (fixedGrid.x == -1 || fixedGrid.y == -1) return Vector3.positiveInfinity;
-
         Vector3 correctedSpawnPos = roomGrid.GimmickEvenNumberCorrection(spawnPos, gimmick);
-
-        //if (!IsGimmickInsideRoom(roomGrid, correctedSpawnPos, size))
-        //    return Vector3.positiveInfinity;
 
         settingPos = spawnPos;
     }
@@ -1006,7 +970,6 @@ public class CS_PlayerAction : MonoBehaviour
     {
         isSelectGimmickActive = isActive;
     }
-
 
     //ワープUIの非表示処理
     private void WarpUIView()
