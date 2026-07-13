@@ -31,6 +31,16 @@ public class CS_EffectMagicCircleShaderOnly : CS_EffectShaderOnly
     private MaterialPropertyBlock mpb_ChildPropertyBlock;
 
     /// <summary>
+    /// Shaderへ渡す再生時間です。
+    /// </summary>
+    private static readonly int int_EffectTimePropertyId =
+        Shader.PropertyToID("_EffectTime");
+
+    [Header("Shaderアニメーション1ループの時間")]
+    [SerializeField]
+    private float f_ShaderLoopTime = 1.0f;
+
+    /// <summary>
     /// 初期化処理です。
     /// </summary>
     public override void InitEffect()
