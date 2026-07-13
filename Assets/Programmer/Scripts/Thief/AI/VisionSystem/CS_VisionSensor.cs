@@ -139,16 +139,4 @@ public class CS_VisionSensor : MonoBehaviour
 
         return true;
     }
-
-    private void OnDrawGizmos()
-    {
-        // 視界の半径を表すワイヤースフィアを描画
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, viewDistance);
-        // 視界の角度を表す線を描画
-        Vector3 leftBoundary = Quaternion.Euler(0, -viewAngle / 2, 0) * transform.forward * viewDistance;
-        Vector3 rightBoundary = Quaternion.Euler(0, viewAngle / 2, 0) * transform.forward * viewDistance;
-        Gizmos.DrawLine(transform.position, transform.position + leftBoundary);
-        Gizmos.DrawLine(transform.position, transform.position + rightBoundary);
-    }
 }
