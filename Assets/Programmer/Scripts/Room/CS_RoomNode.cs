@@ -19,9 +19,6 @@ public class CS_RoomNode : MonoBehaviour
     [Tooltip("部屋の移動ポイントリスト")]
     public List<CS_ThiefTarget> movePoints;
 
-    [Tooltip("移動ポイントの回り方")]
-    public bool isListDown = true;// trueなら右回り、falseなら左回り
-
     [SerializeField, Header("壁の親オブジェクト")]
     private GameObject wallParent;
 

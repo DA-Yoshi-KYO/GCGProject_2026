@@ -78,6 +78,12 @@ public class CS_MemorySystem
     [Tooltip("この泥棒が回避する DangerZone の zoneID 一覧")]
     private List<int> avoidZoneIDs = new List<int>();
 
+    [Tooltip("移動ポイントの回り方")]
+    public bool isMovePointListDown = true;
+
+    [Tooltip("移動ポイントを移動した回数")]
+    public int movePointCount = 0;
+
     /// <summary>
     /// 記憶システムの初期設定を行う処理
     /// </summary>
@@ -322,7 +328,8 @@ public class CS_MemorySystem
         {
             if (!thiefAI.read_AStarSystem.HasRoute)
                 if (!isTreasureObject && !isPlayerObject)
-                    NextDoorElection();
+                    if (movePointCount >= currentRoom.movePoints.Count)
+                        NextDoorElection();
         }
 
         // 現在の探索対象との距離
@@ -630,48 +637,8 @@ public class CS_MemorySystem
             // 部屋の移動ポイントの場合
             else if (currentTarget is CS_ThiefTarget)
             {
-                if (Vector3.Distance(thiefAI.transform.position, currentTarget.transform.position) > thiefAI.read_ExploredDistanceThresholdMovePoint)
-                {
-                    thiefAI?.read_MoveSystem?.MoveTo(currentTarget.transform.position);
-                    return;
-                }
 
-                // 現在の移動ポイントがリストのどこにあるかを判定
-                for (int i = 0 ; i < currentRoom.movePoints.Count ; i++)
-                {
-                    // 現在の移動ポイントがリストのどこにあるかを判定
-                    if (currentRoom.movePoints[i] == currentTarget)
-                    {
-                        int nextIndex = 0;
-
-                        // 右回りの場合
-                        if (currentRoom.isListDown)
-                        {
-                            // 次のインデックスを計算
-                            nextIndex = i + 1;
-
-                            // インデックスがリストの範囲を超える場合は、リストの先頭に戻す
-                            if (nextIndex >= currentRoom.movePoints.Count) nextIndex = 0;
-
-                            // リストを加算して次の移動ポイントを探索対象に設定
-                            currentTarget = currentRoom.movePoints[nextIndex];
-                        }
-                        // 左回りの場合
-                        else
-                        {
-                            // 次のインデックスを計算
-                            nextIndex = i - 1;
-
-                            // インデックスがリストの範囲を超える場合は、リストの末尾に戻す
-                            if (nextIndex < 0) nextIndex = currentRoom.movePoints.Count - 1;
-
-                            // リストを減算して次の移動ポイントを探索対象に設定
-                            currentTarget = currentRoom.movePoints[nextIndex];
-                        }
-                        thiefAI?.read_MoveSystem?.MoveTo(currentTarget.transform.position);
-                        break;
-                    }
-                }
+                DecideTargetMovePoint();
             }
         }
         // 現在の探索対象がない場合
@@ -726,8 +693,11 @@ public class CS_MemorySystem
         // 部屋の探索度が閾値を超えている場合
         if (IsCurrentRoomExplored())
         {
-            NextDoorElection();
-            return;
+            if (movePointCount >= currentRoom.movePoints.Count)
+            {
+                NextDoorElection();
+                return;
+            }
         }
 
         // 探索対象との距離
@@ -753,6 +723,57 @@ public class CS_MemorySystem
                 else continue;
             }
             thiefAI?.read_MoveSystem?.MoveTo(currentTarget.transform.position);
+            movePointCount = 1;
+        }
+        // 前回の探索対象が移動ポイントの場合は、次の移動ポイントを探索対象に設定する
+        else
+        {
+            if (Vector3.Distance(thiefAI.transform.position, currentTarget.transform.position) > thiefAI.read_ExploredDistanceThresholdMovePoint)
+            {
+                thiefAI?.read_MoveSystem?.MoveTo(currentTarget.transform.position);
+                return;
+            }
+
+            // 現在の移動ポイントがリストのどこにあるかを判定
+            for (int i = 0; i < currentRoom.movePoints.Count; i++)
+            {
+                // 現在の移動ポイントがリストのどこにあるかを判定
+                if (currentRoom.movePoints[i] == currentTarget)
+                {
+                    int nextIndex = 0;
+                    // 右回りの場合
+                    if (isMovePointListDown)
+                    {
+                        // 次のインデックスを計算
+                        nextIndex = i + 1;
+                        // インデックスがリストの範囲を超える場合は、リストの先頭に戻す
+                        if (nextIndex >= currentRoom.movePoints.Count)
+                        {
+                            isMovePointListDown = false;
+                            nextIndex = i - 1;
+                        }
+                        // リストを加算して次の移動ポイントを探索対象に設定
+                        currentTarget = currentRoom.movePoints[nextIndex];
+                    }
+                    // 左回りの場合
+                    else
+                    {
+                        // 次のインデックスを計算
+                        nextIndex = i - 1;
+                        // インデックスがリストの範囲を超える場合は、リストの末尾に戻す
+                        if (nextIndex < 0)
+                        {
+                            isMovePointListDown = true;
+                            nextIndex = i + 1;
+                        }
+                        // リストを減算して次の移動ポイントを探索対象に設定
+                        currentTarget = currentRoom.movePoints[nextIndex];
+                    }
+                    thiefAI?.read_MoveSystem?.MoveTo(currentTarget.transform.position);
+                    movePointCount++;
+                    break;
+                }
+            }
         }
     }
 
@@ -1312,7 +1333,7 @@ public class CS_MemorySystem
     {
         FindNowRoomNode(); // ワープした後の現在の部屋を取得して設定する処理
         roomMemories[currentRoom].enteredDoorDirection = entryDoorDir; // ワープしてきたドアの方向を記憶する処理
-
+        movePointCount = 0; // 移動ポイントのカウントをリセットする処理
         ClearTarget();
     }
 
