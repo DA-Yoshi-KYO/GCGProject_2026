@@ -163,7 +163,7 @@ GameObject:
   m_Component:
   - component: {fileID: 304769261038283115}
   m_Layer: 0
-  m_Name: Left
+  m_Name: Back
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -198,6 +198,8 @@ Transform:
   - {fileID: 6312497189829192456}
   - {fileID: 7943891831278709929}
   - {fileID: 3282490846670526776}
+  - {fileID: 7416307652376204946}
+  - {fileID: 5231326562767303368}
   m_Father: {fileID: 7728630240312575745}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &734087086400941880
@@ -1517,7 +1519,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6718849790737462453}
-  m_Father: {fileID: 5000826956223291406}
+  m_Father: {fileID: 304769261038283115}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &7129463444268857515
 BoxCollider:
@@ -2144,7 +2146,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1588948880661241113}
   m_Layer: 0
-  m_Name: Right
+  m_Name: Front
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2179,6 +2181,7 @@ Transform:
   - {fileID: 8088848525213213327}
   - {fileID: 4473572273432629944}
   - {fileID: 830210368004756867}
+  - {fileID: 4768786909710718403}
   m_Father: {fileID: 7728630240312575745}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4999438975822185539
@@ -2427,7 +2430,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5000826956223291406}
   m_Layer: 0
-  m_Name: Back
+  m_Name: Right
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2458,8 +2461,6 @@ Transform:
   - {fileID: 8324285067811565709}
   - {fileID: 2554759369621375064}
   - {fileID: 4022784642128317743}
-  - {fileID: 7416307652376204946}
-  - {fileID: 5231326562767303368}
   m_Father: {fileID: 7728630240312575745}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5384117035838613738
@@ -2849,7 +2850,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2547915590185207462}
-  m_Father: {fileID: 1772201554354190550}
+  m_Father: {fileID: 1588948880661241113}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &2129813496017380924
 BoxCollider:
@@ -3060,7 +3061,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1772201554354190550}
   m_Layer: 0
-  m_Name: Front
+  m_Name: Left
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3091,7 +3092,6 @@ Transform:
   - {fileID: 4907547408736276843}
   - {fileID: 5895958211354560022}
   - {fileID: 6277757599780766564}
-  - {fileID: 4768786909710718403}
   m_Father: {fileID: 7728630240312575745}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6676531886523974335
@@ -9796,7 +9796,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 5000826956223291406}
+    m_TransformParent: {fileID: 304769261038283115}
     m_Modifications:
     - target: {fileID: 5226452918498288379, guid: 2763a0e61476fbd438db74ca20a30a1b,
         type: 3}

@@ -34,8 +34,10 @@ public class CS_RoomNode : MonoBehaviour
 
     [SerializeField, Header("ギズモを表示")]
     private bool showGizmos = false;
-    [SerializeField, Header("ギズモの色")]
+    [SerializeField, Header("ギズモの開始側の色")]
     private Color gizmoColor = Color.green;
+    [SerializeField, Header("ギズモの終了側の色")]
+    private Color gizmoColor2 = Color.blue;
 
 
     /// <summary>
@@ -43,26 +45,24 @@ public class CS_RoomNode : MonoBehaviour
     /// </summary>
     void OnDrawGizmos()
     {
-            if (!showGizmos) return;
+        if (!showGizmos) return;
 
         if (movePoints.Count == 0)
             return;
-        Gizmos.color = gizmoColor;
-        for (int i = 0; i < movePoints.Count; i++)
+
+        // 開始位置から終了位置までの線を引く
+        for (int i = 0 ; i < movePoints.Count ; i++)
         {
             if (movePoints[i] == null)
                 continue;
 
+            Color currentColor = Color.Lerp(gizmoColor, gizmoColor2, (float)i / (movePoints.Count - 1));
+
             Vector3 currentPoint = movePoints[i].transform.position;
             Vector3 nextPoint = movePoints[(i + 1) % movePoints.Count].transform.position;
             // 線を引く
+            Gizmos.color = currentColor;
             Gizmos.DrawLine(currentPoint, nextPoint);
-            // 矢印を描く
-            Vector3 direction = (nextPoint - currentPoint).normalized;
-            Vector3 arrowHead = currentPoint + direction * 0.5f; // 矢印の長さ
-            Gizmos.DrawLine(currentPoint, arrowHead);
-            Gizmos.DrawLine(arrowHead, arrowHead + Quaternion.Euler(0, 0, isListDown ? -30 : 30) * direction * 0.2f);
-            Gizmos.DrawLine(arrowHead, arrowHead + Quaternion.Euler(0, 0, isListDown ? 30 : -30) * direction * 0.2f);
         }
     }
 

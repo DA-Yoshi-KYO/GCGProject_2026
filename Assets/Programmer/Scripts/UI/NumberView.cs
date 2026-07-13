@@ -12,7 +12,12 @@ public class NumberView : MonoBehaviour
 
     public void SetNumber(int number)
     {
-        if (number < 0 || number > 99) return;
+        if (number < 0 || number > 99)
+        {
+            onesPalce.sprite = numberSprites[10];
+            tensPalce.sprite = numberSprites[10];
+            return;
+        }
         currentNumber = number;
         int ones = number % 10;
         int tens = number / 10;
