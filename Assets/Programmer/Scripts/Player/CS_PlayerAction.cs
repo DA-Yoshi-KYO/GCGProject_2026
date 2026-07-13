@@ -304,9 +304,12 @@ public class CS_PlayerAction : MonoBehaviour
                             playerData.currentMode = CS_PlayerData.PlayerMode.Setting;
                             break;
                         case CS_PlayerData.PlayerMode.Setting:
-                            SettingAction();
-                            int interactSEIndex = UnityEngine.Random.Range(1, 4);
-                            playSE.PlayOneShotSE("Cat_Interact" + interactSEIndex.ToString(), gameObject.transform.position, "InteractSE");
+                            if (SettingAction())
+                            {
+                                int interactSEIndex = UnityEngine.Random.Range(1, 4);
+                                playSE.PlayOneShotSE("Cat_Interact" + interactSEIndex.ToString(), gameObject.transform.position, "InteractSE");
+                                playerData.currentMode = CS_PlayerData.PlayerMode.Normal;
+                            }
                             break;
                         default:
                             break;
