@@ -11,6 +11,7 @@ public enum Gimmick
     Pitfall,
     MagicAnkh,
     CloneCat,
+    Teleport,
 }
 
 public enum GimmickState
