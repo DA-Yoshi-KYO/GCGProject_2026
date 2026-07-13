@@ -70,6 +70,7 @@ public class CS_ThiefAnimation
         animator.SetBool("IsStun", false);
         animator.SetBool("IsDamage", false);
         animator.SetBool("IsHunting", false);
+        animator.speed = 1.0f;
 
         SetAnimationState(ThiefAnimationState.Walk);
     }
