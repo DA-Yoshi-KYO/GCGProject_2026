@@ -111,9 +111,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7464062737429334774}
-  - component: {fileID: 4374251384866418497}
   - component: {fileID: 7990791195206730652}
   - component: {fileID: 384022288543438575}
+  - component: {fileID: 4795599461695008677}
   m_Layer: 0
   m_Name: Warp
   m_TagString: Untagged
@@ -141,30 +141,6 @@ Transform:
   - {fileID: 433849902191674704}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4374251384866418497
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6919014136174155209}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a2e984b002514154c9ea16025a2780eb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  csst_DefaultEffectPlayData:
-    b_UsePlayTime: 1
-    f_InspectorPlayTime: 0.5
-    b_UseEndTime: 1
-    f_InspectorEndTime: 0.5
-    b_UseLoopFlag: 1
-    b_InspectorLoopFlag: 1
-    b_UseHideOnEnd: 0
-    b_InspectorHideOnEnd: 0
-    b_UsePlayEndTime: 0
-    f_InspectorPlayEndTime: 0
-  f_ShaderLoopTime: 1
 --- !u!114 &7990791195206730652
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -191,6 +167,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8dd14b5a9b49c5c49996b0afcb27531d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &4795599461695008677
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6919014136174155209}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 047866b2dd0edff45b8e989ac6b6190f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  csst_DefaultEffectPlayData:
+    b_UsePlayTime: 0
+    f_InspectorPlayTime: 0
+    b_UseEndTime: 0
+    f_InspectorEndTime: 0
+    b_UseLoopFlag: 0
+    b_InspectorLoopFlag: 0
+    b_UseHideOnEnd: 0
+    b_InspectorHideOnEnd: 0
+    b_UsePlayEndTime: 0
+    f_InspectorPlayEndTime: 0
+  c_EffectColor: {r: 0, g: 0.5501585, b: 1, a: 1}
 --- !u!1 &9098576505403202548
 GameObject:
   m_ObjectHideFlags: 0
