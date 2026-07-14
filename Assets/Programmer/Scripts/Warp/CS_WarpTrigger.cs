@@ -82,12 +82,19 @@ public class CS_WarpTrigger : MonoBehaviour
         if (!playerAction.doWarp)
             return;
 
-
         CS_PlayerMove playerMove = other.GetComponent<CS_PlayerMove>();
-        if (playerMove != null) playerMove.animator.SetTrigger("WarpInTrigger");
-        else Debug.LogError("ワープさせるプレイヤーのコンポーネントにCS_PlayerMoveがありませんでした");
+        if (playerMove == null)
+        {
+            Debug.LogError("ワープさせるプレイヤーのコンポーネントにCS_PlayerMoveがありませんでした");
+            return;
+        }
 
-        StartCoroutine(WarpCoroutine(other));
+        // プレイヤーをワープの正面に配置し、ワープの方向へ向かせる
+        PlacePlayerInFrontOfWarp(other, playerMove);
+
+        playerMove.animator.SetTrigger("WarpInTrigger");
+
+        StartCoroutine(WarpCoroutine(other, playerMove.animator));
 
         playerAction.warpUIView = false;
         playerAction.doWarp = false;
@@ -121,24 +128,63 @@ public class CS_WarpTrigger : MonoBehaviour
             return;
 
         CS_PlayerMove playerMove = other.GetComponent<CS_PlayerMove>();
-        if (playerMove != null) playerMove.animator.SetTrigger("WarpInTrigger");
-        else Debug.LogError("ワープさせるプレイヤーのコンポーネントにCS_PlayerMoveがありませんでした");
+        if (playerMove == null)
+        {
+            Debug.LogError("ワープさせるプレイヤーのコンポーネントにCS_PlayerMoveがありませんでした");
+            return;
+        }
 
-        // プレイヤーの回転をワープ方向に向ける
-        Quaternion playerRotate = Quaternion.LookRotation(Vector3.Normalize(transform.position - other.transform.position));
-        // Rigidbodyを使用して滑らかに回転させる
-        playerMove.rb.MoveRotation(Quaternion.Slerp(
-            playerMove.rb.rotation, playerRotate, Time.fixedDeltaTime * 20.0f));
+        // プレイヤーをワープの正面に配置し、ワープの方向へ向かせる
+        PlacePlayerInFrontOfWarp(other, playerMove);
 
-        StartCoroutine(WarpCoroutine(other));
+        playerMove.animator.SetTrigger("WarpInTrigger");
+
+        StartCoroutine(WarpCoroutine(other, playerMove.animator));
 
         playerAction.warpUIView = false;
         playerAction.doWarp = false;
     }
 
-    IEnumerator WarpCoroutine(Collider other)
+    /// <summary>
+    /// プレイヤーをワープの正面に配置し、ワープの方向へ向かせる
+    /// </summary>
+    private void PlacePlayerInFrontOfWarp(Collider other, CS_PlayerMove playerMove)
     {
-        yield return new WaitForSeconds(1f);
+        Vector2 dirWarpToPlayer = new Vector2(playerMove.transform.position.x - transform.position.x, playerMove.transform.position.z - transform.position.z).normalized;
+
+        Vector3 playerStartPoint = other.transform.position;
+        playerStartPoint.x += dirWarpToPlayer.x;
+        playerStartPoint.z += dirWarpToPlayer.y;
+
+        Quaternion playerRotate = Quaternion.LookRotation(Vector3.Normalize(transform.position - playerStartPoint));
+
+        // CharacterControllerが有効なまま座標を書き換えると位置がずれるため、一旦無効化してから書き換える
+        CharacterController controller = other.GetComponent<CharacterController>();
+        if (controller != null) controller.enabled = false;
+
+        other.transform.SetPositionAndRotation(playerStartPoint, playerRotate);
+
+        if (controller != null) controller.enabled = true;
+
+        // rb.rotation等を同期しないとFixedUpdateで回転が古い値に戻され、がたつきが発生する
+        playerMove.SyncTransform(playerStartPoint, playerRotate);
+    }
+
+    IEnumerator WarpCoroutine(Collider other, Animator animator)
+    {
+        // WarpInアニメーションの再生開始を待つ
+        yield return null;
+        while (!animator.GetCurrentAnimatorStateInfo(0).IsName("WarpIn"))
+        {
+            yield return null;
+        }
+
+        // WarpInアニメーションの再生完了を待つ
+        while (animator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1.0f)
+        {
+            yield return null;
+        }
+
         WarpDo(other);
     }
 
@@ -170,7 +216,14 @@ public class CS_WarpTrigger : MonoBehaviour
             exitPosition = wp.targetPoint.transform;
         }
 
-        other.transform.position = exitPosition.position;
+        // ワープ先を向かないよう、ワープ先とは逆方向（外向き）に回転させる
+        Vector3 dirAwayFromWarp = exitPosition.position - wp.targetPoint.transform.position;
+        dirAwayFromWarp.y = 0f;
+        Quaternion exitRotation = dirAwayFromWarp.sqrMagnitude > 0.0001f
+            ? Quaternion.LookRotation(dirAwayFromWarp.normalized)
+            : exitPosition.rotation;
+
+        other.transform.SetPositionAndRotation(exitPosition.position, exitRotation);
 
         CS_PlayerMove playerMove = other.GetComponent<CS_PlayerMove>();
         if (playerMove != null)
