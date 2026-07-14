@@ -4,9 +4,11 @@
  *    元浪梨緒
  * ----------------------------------------------------------
  * 2026-06-22 | 初回作成
+ * 2026-07-14 | UIの追加
  */
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 using UnityEngine.Video;
 
 public class CS_TrasitionMovieEnd : MonoBehaviour
@@ -16,7 +18,7 @@ public class CS_TrasitionMovieEnd : MonoBehaviour
     [Header("VideoPlayerのコンポーネントが入ったゲームオブジェクト")][SerializeField] private VideoPlayer videoPlayer;
     [Header("長押しする時間")][SerializeField] private float holdTime;
 
-    [Header("映像を格納")][SerializeField] private VideoClip[] videoclip;
+    [Header("Manualの画像を格納")][SerializeField] private GameObject[] manualImage;
 
     private CustomInputAction customInputAction;
     private bool Holding = false;
@@ -30,13 +32,13 @@ public class CS_TrasitionMovieEnd : MonoBehaviour
         customInputAction.Openning.SkipButton.started += OnHoldStart;
         customInputAction.Openning.SkipButton.canceled += OnHoldEnd;
 
-        if (CS_CustomInputActionManager.instance.currentInputType == CS_CustomInputActionManager.InputType.Gamepad)
+        if (manualImage != null && manualImage.Length >= 2)
         {
-            videoPlayer.clip = videoclip[0];
-        }
-        else
-        {
-            videoPlayer.clip = videoclip[1];
+            manualImage[0].SetActive(true);
+            manualImage[1].SetActive(false);
+
+            manualImage[0].GetComponent<Image>().material.SetFloat("_MaxTimeFloat", holdTime);
+            manualImage[1].GetComponent<Image>().material.SetFloat("_MaxTimeFloat", holdTime);
         }
 
         if (videoPlayer == null)
@@ -53,18 +55,37 @@ public class CS_TrasitionMovieEnd : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!Holding)
-            return;
-
-        time += Time.deltaTime;
-
-        if (time >= holdTime)
+        if (Holding)
         {
-            Holding = false;
-            if (videoPlayer != null)
-                videoPlayer.Stop();
+            time += Time.deltaTime;
 
-            StartTransition();
+            if (time >= holdTime)
+            {
+                Holding = false;
+                if (videoPlayer != null)
+                    videoPlayer.Stop();
+
+                StartTransition();
+            }
+        }
+        else
+        {
+            time = 0.0f;
+        }
+
+        if (CS_CustomInputActionManager.instance.currentInputType == CS_CustomInputActionManager.InputType.Gamepad)
+        {
+            manualImage[0].SetActive(true);
+            manualImage[1].SetActive(false);
+
+            manualImage[0].GetComponent<Image>().material.SetFloat("_TimeFloat", time);
+        }
+        else
+        {
+            manualImage[0].SetActive(false);
+            manualImage[1].SetActive(true);
+
+            manualImage[1].GetComponent<Image>().material.SetFloat("_TimeFloat", time);
         }
     }
 
