@@ -18,7 +18,6 @@
  * 2026-06-22 | ギミック設置時のプレビュー表示を追加：大瀧
  */
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;

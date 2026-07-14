@@ -5,6 +5,7 @@
  * ----------------------------------------------------------
  * 2026-06-08 | 初回作成
  */
+using System.Collections;
 using UnityEngine;
 
 public class CS_WarpTrigger : MonoBehaviour
@@ -69,13 +70,24 @@ public class CS_WarpTrigger : MonoBehaviour
 
         //UI表示
         CS_PlayerAction playerAction = other.GetComponent<CS_PlayerAction>();
+        if (playerAction == null)
+        {
+            Debug.LogError("ワープさせるプレイヤーのコンポーネントにCS_PlayerActionがありませんでした");
+            return;
+        }
+
         playerAction.warpUIView = true;
 
         //ワープする
         if (!playerAction.doWarp)
             return;
 
-        WarpDo(other);
+
+        CS_PlayerMove playerMove = other.GetComponent<CS_PlayerMove>();
+        if (playerMove != null) playerMove.animator.SetTrigger("WarpInTrigger");
+        else Debug.LogError("ワープさせるプレイヤーのコンポーネントにCS_PlayerMoveがありませんでした");
+
+        StartCoroutine(WarpCoroutine(other));
 
         playerAction.warpUIView = false;
         playerAction.doWarp = false;
@@ -108,10 +120,26 @@ public class CS_WarpTrigger : MonoBehaviour
         if (!playerAction.doWarp)
             return;
 
-        WarpDo(other);
+        CS_PlayerMove playerMove = other.GetComponent<CS_PlayerMove>();
+        if (playerMove != null) playerMove.animator.SetTrigger("WarpInTrigger");
+        else Debug.LogError("ワープさせるプレイヤーのコンポーネントにCS_PlayerMoveがありませんでした");
+
+        // プレイヤーの回転をワープ方向に向ける
+        Quaternion playerRotate = Quaternion.LookRotation(Vector3.Normalize(transform.position - other.transform.position));
+        // Rigidbodyを使用して滑らかに回転させる
+        playerMove.rb.MoveRotation(Quaternion.Slerp(
+            playerMove.rb.rotation, playerRotate, Time.fixedDeltaTime * 20.0f));
+
+        StartCoroutine(WarpCoroutine(other));
 
         playerAction.warpUIView = false;
         playerAction.doWarp = false;
+    }
+
+    IEnumerator WarpCoroutine(Collider other)
+    {
+        yield return new WaitForSeconds(1f);
+        WarpDo(other);
     }
 
     private void WarpDo(Collider other)
