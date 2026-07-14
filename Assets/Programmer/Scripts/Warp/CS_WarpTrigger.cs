@@ -27,23 +27,27 @@ public class CS_WarpTrigger : MonoBehaviour
     {
         selfWarpPoint = GetComponent<CS_WarpPoint>();
 
-        roomPlayerPosition = GameObject.Find("RoomManager").GetComponent<CS_RoomPlayerPosition>();
+        GameObject roomManager = GameObject.Find("RoomManager");
+        roomPlayerPosition = roomManager != null ? roomManager.GetComponent<CS_RoomPlayerPosition>() : null;
         if (roomPlayerPosition == null)
         {
             Debug.Log("RoomManagerが見つかりませんでした");
             return;
         }
 
-        mask = GameObject.Find("MaskCanvas").GetComponent<CS_Mask>();
+        GameObject maskCanvas = GameObject.Find("MaskCanvas");
+        mask = maskCanvas != null ? maskCanvas.GetComponent<CS_Mask>() : null;
 
         // SE取得
         g_SEDataObject = GameObject.Find("3DSE");
-        cs_3DPlaySE = g_SEDataObject.GetComponent<CS_3DPlaySE>();
+        cs_3DPlaySE = g_SEDataObject != null ? g_SEDataObject.GetComponent<CS_3DPlaySE>() : null;
     }
 
 
     void Update()
     {
+        if (selfWarpPoint == null) return;
+
         if (selfWarpPoint.warping)
         {
             //ワープのクールタイム
@@ -63,6 +67,55 @@ public class CS_WarpTrigger : MonoBehaviour
         if (selfWarpPoint.warping)
             return;
 
+        //UI表示
+        CS_PlayerAction playerAction = other.GetComponent<CS_PlayerAction>();
+        playerAction.warpUIView = true;
+
+        //ワープする
+        if (!playerAction.doWarp)
+            return;
+
+        WarpDo(other);
+
+        playerAction.warpUIView = false;
+        playerAction.doWarp = false;
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (!other.CompareTag("Player"))
+            return;
+
+        if (selfWarpPoint.warping)
+            return;
+
+        CS_PlayerAction playerAction = other.GetComponent<CS_PlayerAction>();
+        playerAction.warpUIView = false;
+        playerAction.doWarp = false;
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+        if (!other.CompareTag("Player"))
+            return;
+
+        if (selfWarpPoint.warping)
+            return;
+
+        CS_PlayerAction playerAction = other.GetComponent<CS_PlayerAction>();
+
+        //ワープする
+        if (!playerAction.doWarp)
+            return;
+
+        WarpDo(other);
+
+        playerAction.warpUIView = false;
+        playerAction.doWarp = false;
+    }
+
+    private void WarpDo(Collider other)
+    {
         CS_WarpPoint wp = GetComponent<CS_WarpPoint>();
         CharacterController controller = other.GetComponent<CharacterController>();
 
@@ -71,15 +124,11 @@ public class CS_WarpTrigger : MonoBehaviour
 
         CS_PlayerCamera playerCamera = other.GetComponent<CS_PlayerCamera>();
 
-
-
         // SEを鳴らす
         if (cs_3DPlaySE != null)
         {
             cs_3DPlaySE.PlayOneShotSE(s_seName, other.transform.position, s_seObjectName, CS_3DPlaySE.SEMode.Normal);
         }
-
-
 
         mask.StartInMask(playerCamera.ChangeCamera);
 
@@ -105,7 +154,7 @@ public class CS_WarpTrigger : MonoBehaviour
 
         //カメラ更新
         roomPlayerPosition.RefreshPlayerRoomData();
-       if (playerCamera == null)
+        if (playerCamera == null)
         {
             Debug.Log("CS＿PlayerCameraが見つかりませんでした");
             return;

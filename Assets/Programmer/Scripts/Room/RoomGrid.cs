@@ -47,6 +47,11 @@ public class RoomGrid : MonoBehaviour
         List<GameObject> floors = new List<GameObject>();
 
         GameObject roomParent = GameObject.Find("RoomCreatePoints");
+        if (roomParent == null)
+        {
+            Debug.LogError("RoomGrid: RoomCreatePointsオブジェクトが見つかりません。");
+            return;
+        }
         List<GameObject> rooms = new List<GameObject>();
         for (int i = 0 ; i < roomParent.transform.childCount ; i++)
         {
@@ -71,7 +76,7 @@ public class RoomGrid : MonoBehaviour
             sum += child.transform.position;
             floorCount++;
         }
-        gridCenter = sum / floorCount;
+        if (floorCount > 0) gridCenter = sum / floorCount;
 
         // グリッドから溢れているかチェックする
         const int gridCellNumX = 3;
@@ -227,7 +232,7 @@ public class RoomGrid : MonoBehaviour
         if (spawnPos.magnitude == float.PositiveInfinity) return false; 
 
         //偶数補正
-        spawnPos = GimmickEvenNumberCorrection(spawnPos, grid, gimmick);
+        spawnPos = GimmickEvenNumberCorrection(spawnPos,gimmick);
 
         Ray ray = new Ray();
         ray.direction = Vector3.down;
@@ -262,11 +267,12 @@ public class RoomGrid : MonoBehaviour
 
         // プレイヤー、泥棒の例外処理：プレイヤーと泥棒の上には召喚しない
         hitList.RemoveAll(hit => hit.transform.CompareTag("Player") || hit.transform.CompareTag("Thief"));
+        if (hitList.Count == 0) return false;
         spawnPos.y = hitList[0].point.y;
 
         // ギミックが落とし穴ギミックだった場合、床のマテリアルに穴の位置を伝える
-        PitfallGimmick pitfallGimmick = gimmick.GetComponent<PitfallGimmick>();
-        if (pitfallGimmick != null)
+        bool isPitfallGimmick = gimmick.GetComponent<PitfallGimmick>() != null;
+        if (isPitfallGimmick)
         {
             foreach (var hitItem in hitList)
             {
@@ -276,12 +282,14 @@ public class RoomGrid : MonoBehaviour
                 material.SetVector("_HoleCenter", new Vector4(spawnPos.x, spawnPos.z, 0, 0));
                 break;
             }
-
-            // ギミック削除時にアルファクリッピングを元に戻すため、ヒットしたオブジェクトをリストに格納する
-            pitfallGimmick.hitHoles = hitList;
         }
         GameObject gimmickObject = Instantiate(gimmick.gameObject, spawnPos, Quaternion.identity);
         GimmickBase spawnGimmick = gimmickObject.GetComponent<GimmickBase>();
+        PitfallGimmick spawnPitfallGimmick = gimmickObject.GetComponent<PitfallGimmick>();
+        if (spawnPitfallGimmick != null)
+        {
+            spawnPitfallGimmick.hitHoles = hitList;
+        }
         spawnGimmick.roomGrid = this;
         gridGimmicks[grid.y][grid.x] = gimmickObject;
         spawnGimmick.SetGimmickPos(grid);
@@ -293,13 +301,13 @@ public class RoomGrid : MonoBehaviour
     // 概要：奇数はチェス型、偶数は囲碁型に配置します。
     // 引数：Vector3 / オブジェクトの設置する位置※偶数補正前の値
     // 戻値：Vector3 / 補正した値を返します。
-    public Vector3 GimmickEvenNumberCorrection(Vector3 setPos, Vector2Int setGrid, GimmickBase gimmick)
+    public Vector3 GimmickEvenNumberCorrection(Vector3 setPos, GimmickBase gimmick)
     {
-        Vector2Int grid = setGrid;
         Vector3 spawnPos = setPos;
 
-        float sizeX = gimmick.GetGimmickSize().x;
-        float sizeY = gimmick.GetGimmickSize().y;
+        Vector2Int gimmickSize = gimmick.GetGimmickSize();
+        float sizeX = gimmickSize.x;
+        float sizeY = gimmickSize.y;
 
         // グリッドサイズ
         float gridSizeX = gridSize.x;

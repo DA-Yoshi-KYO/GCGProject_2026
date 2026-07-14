@@ -14,7 +14,9 @@ public class billboard : MonoBehaviour
         else
         {
             playerCamera = Player.GetComponent<CS_PlayerCamera>();
+            if (playerCamera == null) return;
             roomCamera = playerCamera.roomCamera;
+            if (roomCamera == null) return;
             transform.rotation = Quaternion.LookRotation(transform.position - roomCamera.transform.position);
         }
     }

@@ -34,6 +34,12 @@ public class CS_Mask : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        if (maskImageIn == null || maskImageOut == null)
+        {
+            Debug.LogError("CS_Mask: maskImageIn/maskImageOutがInspectorで設定されていません。", this);
+            return;
+        }
+
         maskImageIn.material.SetFloat("_CurrentScaleFloat", 0.0f);
         maskImageIn.material.SetFloat("_AlphaScaleFloat", 1.0f);
 

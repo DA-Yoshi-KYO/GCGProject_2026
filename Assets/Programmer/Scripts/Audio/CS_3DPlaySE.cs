@@ -5,7 +5,6 @@
  * ----------------------------------------------------------
  * 2026-05-18 | 初回作成
  */
-using CriWare;
 using UnityEngine;
 
 public class CS_3DPlaySE : MonoBehaviour
@@ -47,9 +46,7 @@ public class CS_3DPlaySE : MonoBehaviour
 
     public GameObject PlayOneShotSE(string currentSituation, Vector3 pos, string gameObjectName, SEMode seMode = SEMode.Normal)
     {
-        SE3DData data = dataBase.seData[currentSituation];
-
-        if (data == null)
+        if (!dataBase.seData.TryGetValue(currentSituation, out SE3DData data) || data == null)
             return null;
 
         //Snapshot切り替え
@@ -74,7 +71,8 @@ public class CS_3DPlaySE : MonoBehaviour
 
     private void ChangeSnapshot(string currentSituation, string snapshotName, float time = 1.0f)
     {
-        foreach (var item in  dataBase.seData[currentSituation].audioMixerSnapshot)
+        if (!dataBase.seData.TryGetValue(currentSituation, out SE3DData data) || data == null) return;
+        foreach (var item in data.audioMixerSnapshot)
         {
             if (item.name == snapshotName)
             {
@@ -86,7 +84,8 @@ public class CS_3DPlaySE : MonoBehaviour
 
     private void ChangeAudioMixerGroup(string currentSituation, AudioSource audioSource, string groupName)
     {
-        foreach (var item in dataBase.seData[currentSituation].audioMixerGroup)
+        if (!dataBase.seData.TryGetValue(currentSituation, out SE3DData data) || data == null) return;
+        foreach (var item in data.audioMixerGroup)
         {
             if (item.name == groupName)
             {
@@ -98,7 +97,8 @@ public class CS_3DPlaySE : MonoBehaviour
 
     public float GetAudioLength(string currentSituation)
     {
-        return dataBase.seData[currentSituation].audioClip.length;
+        if (!dataBase.seData.TryGetValue(currentSituation, out SE3DData data) || data == null || data.audioClip == null) return 0.0f;
+        return data.audioClip.length;
     }
 
 

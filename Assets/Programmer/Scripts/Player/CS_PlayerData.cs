@@ -16,27 +16,33 @@ public class CS_PlayerData : MonoBehaviour
     void Awake()
     {
         // プレイヤーの入力アクションの初期化と有効化
-        customInputAction = new CustomInputAction();
-        customInputAction.Player.Enable();
+        customInputAction = CS_CustomInputActionManager.instance.customInputAction;
 
         // プレイヤーの現在の部屋データの取得
-        currentRoomData = GameObject.Find("RoomManager").GetComponent<CS_RoomPlayerPosition>();
+        GameObject roomManager = GameObject.Find("RoomManager");
+        if (roomManager != null)
+        {
+            currentRoomData = roomManager.GetComponent<CS_RoomPlayerPosition>();
+        }
+        else
+        {
+            Debug.LogError("RoomManagerが見つかりません。");
+        }
     }
 
     public void ChangePlayerRoomData()
     {
         // プレイヤーの現在の部屋データを更新
-        currentRoomData = GameObject.Find("RoomManager").GetComponent<CS_RoomPlayerPosition>();
+        GameObject roomManager = GameObject.Find("RoomManager");
+        if (roomManager == null)
+        {
+            Debug.LogError("RoomManagerが見つかりません。");
+            return;
+        }
+        currentRoomData = roomManager.GetComponent<CS_RoomPlayerPosition>();
+        if (currentRoomData == null) return;
         GameObject i = currentRoomData.GetPlayerRoomData();
+        if (i == null) return;
         Debug.Log("[RoomMovePoint] PlayerData.currentRoomDataを更新しました。" + i.name);
     }
-
-    private void OnDestroy()
-    {
-        // プレイヤーの入力アクションの無効化
-        if (customInputAction != null)
-            customInputAction.Player.Disable();
-    }
-
-
 }

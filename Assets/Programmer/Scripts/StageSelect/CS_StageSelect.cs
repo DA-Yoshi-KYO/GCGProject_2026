@@ -21,10 +21,16 @@ public class CS_StageSelect : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        inputActions = new CustomInputAction();
-        inputActions.StageSelect.Enable();
-
-        image = GameObject.Find("BackGround").GetComponent<Image>();
+        inputActions = CS_CustomInputActionManager.instance.customInputAction;
+        
+        GameObject backGroundObject = GameObject.Find("BackGround");
+        if (backGroundObject == null)
+        {
+            Debug.LogError("CS_StageSelect: BackGroundオブジェクトが見つかりません。");
+            return;
+        }
+        image = backGroundObject.GetComponent<Image>();
+        if (image == null || imageBackGround == null || stageNumber - 1 < 0 || stageNumber - 1 >= imageBackGround.Length) return;
         image.sprite = imageBackGround[stageNumber - 1];
     }
 
@@ -58,10 +64,5 @@ public class CS_StageSelect : MonoBehaviour
             string sceneName = sceneTransitionName[stageNumber - 1];
             GetComponent<CS_SceneTransition>().StartSceneTransition(sceneName);
         }
-    }
-
-    private void OnDestroy()
-    {
-        inputActions.StageSelect.Disable();
     }
 }

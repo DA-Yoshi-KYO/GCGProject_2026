@@ -11,8 +11,9 @@ public class CS_ActiveGrayScale : MonoBehaviour
         if (isOnce) return;
 
         Volume volume = FindFirstObjectByType<Volume>();
+        if (volume == null) return;
         CSV_GrayScaleVolume gray;
-        volume.profile.TryGet(out gray);
+        if (!volume.profile.TryGet(out gray) || gray == null) return;
         gray.isEnabled.value = true;
         isOnce = true;
     }

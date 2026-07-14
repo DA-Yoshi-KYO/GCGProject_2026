@@ -29,28 +29,34 @@ public class CS_GameClearSelectButton : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        inputActions = new CustomInputAction();
-        inputActions.GameClear.Enable();
+        inputActions = CS_CustomInputActionManager.instance.customInputAction;
         inputActions.GameClear.MoveAxis.started += SelectInput;
 
-        backTitleButtonImage = GameObject.Find("GameClearBackTitleButton").GetComponent<Image>();
-        backTitleButtonImage.sprite = backTitleButtonSprite[currentButton];
+        GameObject backTitleButtonObject = GameObject.Find("GameClearBackTitleButton");
+        if (backTitleButtonObject == null)
+        {
+            Debug.LogError("CS_GameClearSelectButton: GameClearBackTitleButtonが見つかりません。");
+            return;
+        }
+        backTitleButtonImage = backTitleButtonObject.GetComponent<Image>();
+        if (backTitleButtonImage != null) backTitleButtonImage.sprite = backTitleButtonSprite[currentButton];
 
         GameObject stageSelectButtonObject = GameObject.Find("StageSelectButton");
         if (stageSelectButtonObject != null)
         {
-            stageSelectButtonImage = GameObject.Find("StageSelectButton").GetComponent<Image>();
-            stageSelectButtonImage.sprite = stageSelectButtonSprite[currentButton];
+            stageSelectButtonImage = stageSelectButtonObject.GetComponent<Image>();
+            if (stageSelectButtonImage != null) stageSelectButtonImage.sprite = stageSelectButtonSprite[currentButton];
         }
 
-        backGroundPlaySE = GameObject.Find("SE").GetComponent<CS_BackGroundPlaySE>();
+        GameObject seObject = GameObject.Find("SE");
+        backGroundPlaySE = seObject != null ? seObject.GetComponent<CS_BackGroundPlaySE>() : null;
     }
 
     // Update is called once per frame
     void Update()
     {
         //現在選択しているボタンの移動処理
-        backTitleButtonImage.sprite = backTitleButtonSprite[currentButton];
+        if (backTitleButtonImage != null) backTitleButtonImage.sprite = backTitleButtonSprite[currentButton];
         if (stageSelectButtonImage != null) stageSelectButtonImage.sprite = stageSelectButtonSprite[currentButton];
 
         //決定ボタンでシーン遷移
@@ -59,11 +65,6 @@ public class CS_GameClearSelectButton : MonoBehaviour
             string sceneName = sceneTransitionName[currentButton];
             sceneTransition.StartSceneTransition(sceneName);
         }
-    }
-
-    private void OnDestroy()
-    {
-        inputActions.GameClear.Disable();
     }
 
     void SelectInput(InputAction.CallbackContext context)

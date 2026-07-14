@@ -102,8 +102,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2a484cb4fa1e2342996f7d303f99b96, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentState: 0
-  durability: 0
+  thiefMaterialsList:
+  - materialA: {fileID: 2100000, guid: a49e2af2ff8fd7445b008d0913d4f3c4, type: 2}
+    materialB: {fileID: 2100000, guid: a45a0128a237df841969c5a34dbd0850, type: 2}
+    materialC: {fileID: 2100000, guid: 16e2d5266c7a8ab49b47cf7ab4140acb, type: 2}
+  - materialA: {fileID: 2100000, guid: a49e2af2ff8fd7445b008d0913d4f3c4, type: 2}
+    materialB: {fileID: 2100000, guid: e54bd301ab311ad408cbc3b0717f68e6, type: 2}
+    materialC: {fileID: 2100000, guid: e55b7365998622f44b03ed9bb56bc431, type: 2}
+  - materialA: {fileID: 2100000, guid: a49e2af2ff8fd7445b008d0913d4f3c4, type: 2}
+    materialB: {fileID: 2100000, guid: 842bfa5fcaabf284ba87f595514f82e7, type: 2}
+    materialC: {fileID: 2100000, guid: 18d4c04661f59094392b52e48c94c340, type: 2}
   targetLayer:
   - serializedVersion: 2
     m_Bits: 1073741824
@@ -178,6 +186,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8184754857928878025}
   - component: {fileID: 3128741956147634963}
+  - component: {fileID: 6605203635113527011}
   m_Layer: 29
   m_Name: Vision
   m_TagString: Untagged
@@ -218,6 +227,23 @@ MonoBehaviour:
   obstacleLayer:
     serializedVersion: 2
     m_Bits: 0
+--- !u!114 &6605203635113527011
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4013857449410679947}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf7e5d6298d7567458f226d3c93c12b9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isVisible: 1
+  coneColor: {r: 1, g: 0.9, b: 0.2, a: 0.35}
+  segments: 24
+  floorOffset: 0.03
+  rayHeight: 1
 --- !u!1001 &2968923909658677401
 PrefabInstance:
   m_ObjectHideFlags: 0

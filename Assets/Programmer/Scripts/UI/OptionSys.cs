@@ -43,13 +43,13 @@ public class OptionSys : MonoBehaviour
             isInGame = true;
         }
 
-        if (!isInGame)
+        if (!isInGame && optionUI.Length >= 4)
         {
             optionUI[2].SetActive(false);
-            GameObject text = optionUI[3].transform.Find("Text").gameObject;
-            if(text != null)
+            Transform textTransform = optionUI[3].transform.Find("Text");
+            if (textTransform != null)
             {
-                Image textImge = text.GetComponent<Image>();
+                Image textImge = textTransform.GetComponent<Image>();
                 if (textImge != null)
                 {
                     textImge.sprite = closeImg;
@@ -68,8 +68,7 @@ public class OptionSys : MonoBehaviour
             TempSelectObject.Object_False = optionUI[i].transform.Find("Select_false").gameObject;
             selectGameObjects.Add(TempSelectObject);
         }
-        inputAction = new CustomInputAction();
-        inputAction.Enable();
+        inputAction = CS_CustomInputActionManager.instance.customInputAction;
         inputAction.Option.Up.started += Up;
         inputAction.Option.Down.started += Down;
         inputAction.Option.Decision.started += Enter;
@@ -137,7 +136,10 @@ public class OptionSys : MonoBehaviour
         seSoundBar.fillAmount = seSoundValue / 100f;
 
         Image image = detail.GetComponent<Image>();
-        image.sprite = detailSprite[selected];
+        if (selected >= 0 && selected < detailSprite.Length)
+        {
+            image.sprite = detailSprite[selected];
+        }
 
         // Cursor計算
         Vector3 bgmSoundBarPos = bgmSoundBar.transform.position;
@@ -324,18 +326,6 @@ public class OptionSys : MonoBehaviour
             seSoundValue += 0.1f;
             if (seSoundValue > 100) seSoundValue = 100;
             option.SetSEVolume(seSoundValue);
-        }
-    }
-
-    private void OnDestroy()
-    {
-        if (inputAction != null)
-        {
-            inputAction.Option.Up.started -= Up;
-            inputAction.Option.Down.started -= Down;
-            inputAction.Option.Decision.started -= Enter;
-            inputAction.Disable();
-            inputAction.Dispose();
         }
     }
 }

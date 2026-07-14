@@ -54,9 +54,9 @@ public class CloneCat : GimmickBase
         gimmickState = GimmickState.Active;
 
         player = GameObject.Find("Player(Clone)");
-        roomPlayerPosition = GameObject.Find("RoomManager").GetComponent<CS_RoomPlayerPosition>();
-        inputAction = new CustomInputAction();
-        inputAction.Enable();
+        GameObject roomManager = GameObject.Find("RoomManager");
+        roomPlayerPosition = roomManager != null ? roomManager.GetComponent<CS_RoomPlayerPosition>() : null;
+        inputAction = CS_CustomInputActionManager.instance.customInputAction;
 
         if (player == null) return;
 

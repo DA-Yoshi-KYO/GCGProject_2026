@@ -61,13 +61,10 @@ public class Option : MonoBehaviour
         }
 
         // Input生成
-        _input = new CustomInputAction();
+        _input = CS_CustomInputActionManager.instance.customInputAction;
 
         // Option入力のトリガー登録
         _input.Player.Option.performed += OnOption;
-
-        // Input有効化
-        _input.Enable();
 
         GameObject canvase = GameObject.Find("Canvases");
         if(canvase == null)
@@ -75,12 +72,13 @@ public class Option : MonoBehaviour
             Debug.Log("Canvasesオブジェクトが見つかりません。");
             return;
         }
-        GameUI = canvase.transform.Find("GameUICavas").gameObject;
-        if(GameUI == null)
+        Transform gameUITransform = canvase.transform.Find("GameUICavas");
+        if (gameUITransform == null)
         {
             Debug.Log("GameUICavasオブジェクトが見つかりません。");
             return;
         }
+        GameUI = gameUITransform.gameObject;
     }
 
     /// <summary>
@@ -123,6 +121,11 @@ public class Option : MonoBehaviour
         {
             // Canvasを探してその子オブジェクトとしてOptionUIを生成
             GameObject canvas = GameObject.Find("OptionCanvas");
+            if (canvas == null)
+            {
+                Debug.LogError("OptionCanvasオブジェクトが見つかりません。");
+                return;
+            }
             _prevOption = Instantiate(OptionUI, Vector3.zero, Quaternion.identity, canvas.transform);
             RectTransform rectTransform = _prevOption.GetComponent<RectTransform>();
             rectTransform.anchoredPosition = Vector2.zero;
@@ -136,7 +139,8 @@ public class Option : MonoBehaviour
                 Debug.Log("Canvasesオブジェクトが見つかりません。");
                 return;
             }
-            GameUI = canvase.transform.Find("GameUICavas").gameObject;
+            Transform gameUITransform = canvase.transform.Find("GameUICavas");
+            GameUI = gameUITransform != null ? gameUITransform.gameObject : null;
         }
         if (GameUI != null)
         {
@@ -161,7 +165,8 @@ public class Option : MonoBehaviour
             }
             else
             {
-                GameUI = canvase.transform.Find("GameUICavas").gameObject;
+                Transform gameUITransform = canvase.transform.Find("GameUICavas");
+                GameUI = gameUITransform != null ? gameUITransform.gameObject : null;
             }
         }
         if (GameUI != null)
@@ -239,15 +244,5 @@ public class Option : MonoBehaviour
     public bool GetIsOptionUIActive()
     {
         return _isOptionUIActive;
-    }
-
-    private void OnDestroy()
-    {
-        if (_input != null)
-        {
-            _input.Player.Option.performed -= OnOption;
-
-            _input.Disable();
-        }
     }
 }

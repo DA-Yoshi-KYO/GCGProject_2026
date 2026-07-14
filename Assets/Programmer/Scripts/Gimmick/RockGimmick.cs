@@ -46,9 +46,7 @@ public class RockGimmick : GimmickBase
 
     private bool isDangerZoneSpawned;
 
-    //サウンドにストップができたら使う
-    private float activeTimer = 0f;
-    private bool soundPlayed = false;
+    GameObject seObject;
 
     Vector3 startPos;
     Vector3 rollDir;
@@ -57,6 +55,8 @@ public class RockGimmick : GimmickBase
     bool isFront = true;
     private bool isBrokenFirst = false;
     int cicleHit;
+
+    float slopeAngle;
 
     private float rotateSpeedOffset = 0.5f; //転がる速度(見た目)の調整用
     protected override void IdleUpdate()
@@ -74,22 +74,15 @@ public class RockGimmick : GimmickBase
     {
         //！！！ここら辺のサウンド周りは、ストップ関数ができたら使います！！！//
 
-        //if (soundPlayed)
-        //{
-        //    activeTimer -= Time.deltaTime;
-        //    if (activeTimer <= 0f)
-        //    {
-        //        soundPlayed = false;
-        //    }
-        //}
-        //サウンドループ用
-        //if(!soundPlayed)
-        //{
-        //    if (gimmickSound != null) gimmickSound.PlayOneShotSE("RockRolling", gameObject.transform.position, "RockSound");
-        //    activeTimer = gimmickSound.GetAudioLength("RockRolling");
-        //    soundPlayed = true;
-        //}
-
+        // サウンドループ用
+        if (gimmickSound != null)
+        {
+            if (seObject == null)
+            {
+                seObject = gimmickSound.PlayOneShotSE("Gimmick_RockRoll", gameObject.transform.position, "RockSound");
+            }
+        }
+        if (seObject != null) seObject.transform.position = transform.position;
 
         //-----------------------------------------
         // 進行方向決定
@@ -105,13 +98,6 @@ public class RockGimmick : GimmickBase
         if (isFirstActive)
         {
             isFirstActive = false;
-
-            if (gimmickSound != null)
-            {
-                gimmickSound.PlayOneShotSE("Gimmick_RockRoll", transform.position, "RockRolling");
-                activeTimer = gimmickSound.GetAudioLength("Gimmick_RockRoll");
-            }
-
             initPositionY = transform.position.y;
             velocity = Vector3.zero;
             SetHitChecker(transform.position);
@@ -153,14 +139,21 @@ public class RockGimmick : GimmickBase
         Vector3 rayOrigin =
             transform.position;
 
-        RaycastHit hit;
-        Debug.DrawRay(rayOrigin, Vector3.down, Color.yellow);
-        if(isFront)
+        if(isFront && slopeAngle < 0.01f)
         {
-
+            rayOrigin = transform.position - rollDir * radius * 0.5f;
+            isFront = false;
+        }
+        else
+        {
+            rayOrigin = transform.position;
+            isFront = true;
         }
 
+        RaycastHit hit;
+        Debug.DrawRay(rayOrigin, Vector3.down, Color.yellow);
         bool isGround = false;
+
         if (Physics.Raycast(rayOrigin, Vector3.down, out hit, rayDownLength))
         {
             if (hit.collider.gameObject == gameObject ||
@@ -196,11 +189,19 @@ public class RockGimmick : GimmickBase
         //-----------------------------------------
         if (isGround)
         {
-            //------------------------------------------------
-            // 接地位置へ吸着 ※異例物質無効処理
-            //------------------------------------------------
             if (isRolling)
             {
+                //------------------------------------------------
+                // 大岩破壊処理
+                //------------------------------------------------
+                if(initPositionY - radius > transform.position.y)
+                {
+                    gimmickState = GimmickState.Broken;
+                    return;
+                }
+                //------------------------------------------------
+                // 接地位置へ吸着 ※異例物質無効処理
+                //------------------------------------------------
                 Vector3 pos = transform.position;
 
                 float normalY = Mathf.Max(hit.normal.y, 0.2f);
@@ -212,7 +213,7 @@ public class RockGimmick : GimmickBase
             // 坂情報
             //------------------------------------------------
 
-            float angle =
+            slopeAngle =
                 Vector3.Angle(hit.normal, Vector3.up);
 
             // 指定方向を坂面に沿わせた方向
@@ -230,13 +231,12 @@ public class RockGimmick : GimmickBase
 
             // 坂の方向 = Dirの方向
             rollDir = moveOnGround;
-
             //------------------------------------------------
             // 速度計算
             //------------------------------------------------
 
             float slopePower =
-                Mathf.Sin(angle * Mathf.Deg2Rad);
+                Mathf.Sin(slopeAngle * Mathf.Deg2Rad);
 
             float speed =
                 rollSpeed + slopePower * slideSpeed;
@@ -461,6 +461,12 @@ public class RockGimmick : GimmickBase
                 Destroy(checker);
         }
     }
+
+    private void OnDestroy()
+    {
+        Destroy(seObject);
+    }
+
     private void ReverseGimmickDirection()
     {
         switch (gimmickDirection)

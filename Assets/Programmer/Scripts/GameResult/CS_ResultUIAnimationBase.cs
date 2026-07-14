@@ -90,14 +90,17 @@ public class CS_ResultUIAnimationBase : MonoBehaviour
             return;
 
         float duration = phase[progressIndex].animationDuration;
-        timer += Time.deltaTime;
+        timer += Time.unscaledDeltaTime;
         timer = Mathf.Clamp(timer, 0f, duration);
 
         foreach (int index in phase[progressIndex].sameTimeAnimationIndex)
         {
+            if (index < 0 || index >= inputDatas.Length) continue;
             TransitionData data = inputDatas[index];
             GameObject imageObject = data.imageObject;
+            if (imageObject == null) continue;
             RectTransform rectTransform = imageObject.GetComponent<RectTransform>();
+            if (rectTransform == null) continue;
             if (!data.useInitPos)
             {
                 rectTransform.anchoredPosition = data.transitionPos.init +

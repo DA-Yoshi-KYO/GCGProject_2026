@@ -47,6 +47,9 @@ public class CS_MoveSystem
     [Tooltip("バグ対策用位置保存")]
     private Vector3 debugPos;
 
+    [Tooltip("過去に指定した目的地")]
+    private Vector3 lastDestination;
+
     [Tooltip("バグ対策用位置の同じ位置にいるフレーム数カウンター")]
     private int samePosFrameCount = 0;
 
@@ -94,6 +97,8 @@ public class CS_MoveSystem
         {
             // 標的がいない場合は歩き速度に切り替える
             navMeshAgent.speed = walkSpeed;
+            thiefAI?.read_AnimatorSystem?.SetAnimationState(CS_ThiefAnimation.ThiefAnimationState.Walk);
+
             return;
         }
 
@@ -107,6 +112,7 @@ public class CS_MoveSystem
                     {
                         // 現在の標的がプレイヤーの場合は走り速度に切り替える
                         navMeshAgent.speed = runSpeed;
+                        thiefAI?.read_AnimatorSystem?.SetAnimationState(CS_ThiefAnimation.ThiefAnimationState.Run);
                         return;
                     }
                     break;
@@ -115,12 +121,14 @@ public class CS_MoveSystem
                     {
                         // 現在の標的が宝物の場合は走り速度に切り替える
                         navMeshAgent.speed = runSpeed;
+                        thiefAI?.read_AnimatorSystem?.SetAnimationState(CS_ThiefAnimation.ThiefAnimationState.Run);
                         return;
                     }
                     if (currentTarget is CS_TrapTarget tt && tt.gimmickScript.gimmick == Gimmick.EmptyChest)
                     {
                         // 現在の標的が宝物ギミックの場合は走り速度に切り替える
                         navMeshAgent.speed = runSpeed;
+                        thiefAI?.read_AnimatorSystem?.SetAnimationState(CS_ThiefAnimation.ThiefAnimationState.Run);
                         return;
                     }
                     break;
@@ -129,12 +137,14 @@ public class CS_MoveSystem
                     {
                         // 現在の標的が捜索対象オブジェクトの場合は走り速度に切り替える
                         navMeshAgent.speed = runSpeed;
+                        thiefAI?.read_AnimatorSystem?.SetAnimationState(CS_ThiefAnimation.ThiefAnimationState.Run);
                         return;
                     }
                     break;
             }
         }
 
+        thiefAI?.read_AnimatorSystem?.SetAnimationState(CS_ThiefAnimation.ThiefAnimationState.Walk);
         //標的の場合は歩き速度に切り替える
         navMeshAgent.speed = walkSpeed;
     }
@@ -159,19 +169,26 @@ public class CS_MoveSystem
     /// </summary>
     public void MoveTo(Vector3 destination)
     {
+        // NavMeshAgentが存在しない、またはNavMesh上にない場合は移動要求を無視する
+        if (navMeshAgent == null || !navMeshAgent.isOnNavMesh) return;
+
         // 漁り状態のときは移動要求を無視する
-        if (thiefAI.read_Animator.GetBool("IsHunting")) return;
+        if (thiefAI.read_AnimatorSystem.read_Animator.GetBool("IsHunting")) return;
         navMeshAgent.isStopped = false; // SmartNavAgentを使用する場合はNavMeshAgentを停止状態から解除する
 
         UpdateMoveSpeed(thiefAI.read_MemorySystem.read_CurrentTarget); // 現在の標的に応じて移動速度を更新する
 
+        if (lastDestination == destination) return; // 目的地が前回と同じ場合は移動要求を無視する
+
         if (smartNavAgent != null)
         {
             smartNavAgent.MoveTo(destination);
+            lastDestination = destination;
         }
         else if (navMeshAgent != null)
         {
             navMeshAgent.SetDestination(destination);
+            lastDestination = destination;
         }
     }
 
@@ -228,5 +245,43 @@ public class CS_MoveSystem
         Vector3 exitPosition = thiefAI.transform.position + exitDirectionAfterStun.normalized; // 退場する距離を適宜調整
         exitPosition.y = thiefAI.transform.position.y; // 高さは変えない
         thiefAI.transform.position = Vector3.MoveTowards(thiefAI.transform.position, exitPosition, walkSpeed * 0.5f * Time.deltaTime);
+    }
+
+    public void DebugMove()
+    {
+        if (thiefAI.read_AnimatorSystem.read_Animator.GetBool("IsStun")) return; // 気絶状態のときは移動要求を無視する
+        if (Time.timeScale == 0) return; // ゲームが一時停止中の場合は移動要求を無視する
+
+        if (debugPos == thiefAI.transform.position)
+        {
+            samePosFrameCount++;
+            if (samePosFrameCount > 300)
+            {
+                if (thiefAI.read_AStarSystem.HasRoute)
+                {
+                    if (thiefAI.read_MemorySystem.read_CurrentRoom != thiefAI.read_AStarSystem.GetCurrentTargetRoomNode())
+                    {
+                        thiefAI.read_AStarSystem.ClearRoute();
+                    }
+                    else
+                    {
+                        thiefAI.read_AStarSystem.ResetUpdatedFlag();
+                    }
+                }
+                else if (thiefAI.read_MemorySystem.read_CurrentTarget != null)
+                {
+                    MoveTo(thiefAI.read_MemorySystem.read_CurrentTarget.transform.position);
+                }
+                else
+                {
+                    thiefAI.read_MemorySystem.ClearTarget();
+                }
+            }
+        }
+        else
+        {
+            debugPos = thiefAI.transform.position;
+            samePosFrameCount = 0; // カウンターをリセット
+        }
     }
 }
