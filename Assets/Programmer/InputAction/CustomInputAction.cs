@@ -1377,7 +1377,18 @@ public partial class @CustomInputAction: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""a5ecf7df-373f-4915-8c81-f39403b4b4f4"",
-                    ""path"": ""<Keyboard>/space"",
+                    ""path"": ""<Keyboard>/f"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SkipButton"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""1dd51ac6-5221-449f-a49f-42359d44fae0"",
+                    ""path"": ""<Gamepad>/buttonSouth"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",

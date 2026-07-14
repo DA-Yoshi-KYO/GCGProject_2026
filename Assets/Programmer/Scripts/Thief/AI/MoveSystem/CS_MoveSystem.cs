@@ -97,6 +97,8 @@ public class CS_MoveSystem
         {
             // 標的がいない場合は歩き速度に切り替える
             navMeshAgent.speed = walkSpeed;
+            thiefAI?.read_AnimatorSystem?.SetAnimationState(CS_ThiefAnimation.ThiefAnimationState.Walk);
+
             return;
         }
 
@@ -110,6 +112,7 @@ public class CS_MoveSystem
                     {
                         // 現在の標的がプレイヤーの場合は走り速度に切り替える
                         navMeshAgent.speed = runSpeed;
+                        thiefAI?.read_AnimatorSystem?.SetAnimationState(CS_ThiefAnimation.ThiefAnimationState.Run);
                         return;
                     }
                     break;
@@ -118,12 +121,14 @@ public class CS_MoveSystem
                     {
                         // 現在の標的が宝物の場合は走り速度に切り替える
                         navMeshAgent.speed = runSpeed;
+                        thiefAI?.read_AnimatorSystem?.SetAnimationState(CS_ThiefAnimation.ThiefAnimationState.Run);
                         return;
                     }
                     if (currentTarget is CS_TrapTarget tt && tt.gimmickScript.gimmick == Gimmick.EmptyChest)
                     {
                         // 現在の標的が宝物ギミックの場合は走り速度に切り替える
                         navMeshAgent.speed = runSpeed;
+                        thiefAI?.read_AnimatorSystem?.SetAnimationState(CS_ThiefAnimation.ThiefAnimationState.Run);
                         return;
                     }
                     break;
@@ -132,12 +137,14 @@ public class CS_MoveSystem
                     {
                         // 現在の標的が捜索対象オブジェクトの場合は走り速度に切り替える
                         navMeshAgent.speed = runSpeed;
+                        thiefAI?.read_AnimatorSystem?.SetAnimationState(CS_ThiefAnimation.ThiefAnimationState.Run);
                         return;
                     }
                     break;
             }
         }
 
+        thiefAI?.read_AnimatorSystem?.SetAnimationState(CS_ThiefAnimation.ThiefAnimationState.Walk);
         //標的の場合は歩き速度に切り替える
         navMeshAgent.speed = walkSpeed;
     }
@@ -166,7 +173,7 @@ public class CS_MoveSystem
         if (navMeshAgent == null || !navMeshAgent.isOnNavMesh) return;
 
         // 漁り状態のときは移動要求を無視する
-        if (thiefAI.read_Animator.GetBool("IsHunting")) return;
+        if (thiefAI.read_AnimatorSystem.read_Animator.GetBool("IsHunting")) return;
         navMeshAgent.isStopped = false; // SmartNavAgentを使用する場合はNavMeshAgentを停止状態から解除する
 
         UpdateMoveSpeed(thiefAI.read_MemorySystem.read_CurrentTarget); // 現在の標的に応じて移動速度を更新する
@@ -242,7 +249,7 @@ public class CS_MoveSystem
 
     public void DebugMove()
     {
-        if (thiefAI.read_Animator.GetBool("IsStun")) return; // 気絶状態のときは移動要求を無視する
+        if (thiefAI.read_AnimatorSystem.read_Animator.GetBool("IsStun")) return; // 気絶状態のときは移動要求を無視する
         if (Time.timeScale == 0) return; // ゲームが一時停止中の場合は移動要求を無視する
 
         if (debugPos == thiefAI.transform.position)
