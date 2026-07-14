@@ -21,7 +21,7 @@ public class CS_PlayerMove : MonoBehaviour
     [Header("空気抵抗")][Range(0, 1)][SerializeField] private float airResistance = 0.99f;//空気抵抗
     
     private CharacterController controller; // CharacterController(移動用)
-    private Rigidbody rb;                   // Rigidbody(回転用)
+    public Rigidbody rb { private set; get; }                   // Rigidbody(回転用)
     private Vector2 inputDirection = Vector2.zero;  // 入力された移動方向
     private Vector3 velocity = Vector3.zero;        // 現在の移動速度
     private CS_PlayerData playerData;       // プレイヤーのデータ
@@ -45,7 +45,7 @@ public class CS_PlayerMove : MonoBehaviour
     private CS_FootPrint footPrint;
     private float createFootPrintTime = 100.0f;
 
-    private Animator animator; // プレイヤーのアニメーター
+    public Animator animator { private set; get; } // プレイヤーのアニメーター
     Material[] materials; // プレイヤーのマテリアル配列
 
     [Tooltip("盗賊に捕まっているかどうか")]
