@@ -18,7 +18,6 @@
  * 2026-06-22 | ギミック設置時のプレビュー表示を追加：大瀧
  */
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -74,6 +73,7 @@ public class CS_PlayerAction : MonoBehaviour
     [Header("ワープのUI")][SerializeField] private Sprite[] warpUISprite;
     [HideInInspector]public bool warpUIView;
     [HideInInspector]public bool doWarp;
+    private bool isWarpInteract = false; // ワープ確定の押下中に設置/インタラクト判定へ流れないようにするフラグ
 
     // Start is called before the first frame update
     void Start()
@@ -268,8 +268,14 @@ public class CS_PlayerAction : MonoBehaviour
         if (warpUIView)
         {
             doWarp = true;
+            isWarpInteract = true;
         }
-        else 
+        else if (isWarpInteract)
+        {
+            // ワープ確定に使われたボタン操作なので、離した際にギミック設置の判定に流れないようにする
+            if (context.canceled) isWarpInteract = false;
+        }
+        else
         {
             if (context.started)
             {
