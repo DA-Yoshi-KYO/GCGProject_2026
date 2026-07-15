@@ -23,9 +23,7 @@ public class CS_BackGroundPlaySE : MonoBehaviour
     {
         ////初期化
         playerInfo = new CriAtomExPlayer();
-        criAtomExAcbsList = new CriAtomExAcb[1];
-        string acbPath = System.IO.Path.Combine(Application.streamingAssetsPath, "BackGround_SE.acb");
-        criAtomExAcbsList[0] = CriAtomExAcb.LoadAcbFile(null, acbPath, null);
+        criAtomExAcbsList = new CriAtomExAcb[dataBase.seDatas.Length];
 
         if (Option.Instance != null)
         {
