@@ -675,6 +675,11 @@ PrefabInstance:
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
       propertyPath: cs_LeftConnection.e_DoorUsageType
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_FrontConnection.e_DoorUsageType
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
@@ -694,9 +699,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
-      propertyPath: cs_FrontConnection.cs_TargetCreatePoint
+      propertyPath: cs_LeftConnection.cs_TargetCreatePoint
       value: 
       objectReference: {fileID: 1759275515}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_LeftConnection.e_TargetOutDirection
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_FrontConnection.cs_TargetCreatePoint
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
       propertyPath: cs_FrontConnection.e_TargetOutDirection
@@ -1504,19 +1519,34 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
+      propertyPath: cs_BackConnection.e_DoorUsageType
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
       propertyPath: cs_LeftConnection.e_DoorUsageType
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
       propertyPath: cs_RightConnection.e_DoorUsageType
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
       propertyPath: cs_BackConnection.cs_TargetCreatePoint
       value: 
-      objectReference: {fileID: 2133503044}
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_BackConnection.e_TargetOutDirection
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_LeftConnection.cs_TargetCreatePoint
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
       propertyPath: cs_FrontConnection.cs_TargetCreatePoint
@@ -1526,6 +1556,16 @@ PrefabInstance:
         type: 3}
       propertyPath: cs_FrontConnection.e_TargetOutDirection
       value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_RightConnection.cs_TargetCreatePoint
+      value: 
+      objectReference: {fileID: 2133503044}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_RightConnection.e_TargetOutDirection
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6285496938507336483, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
@@ -2572,7 +2612,7 @@ PrefabInstance:
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
       propertyPath: cs_RightConnection.e_TargetOutDirection
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6285496938507336483, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
@@ -3416,7 +3456,7 @@ PrefabInstance:
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
       propertyPath: cs_LeftConnection.e_TargetOutDirection
-      value: 3
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
@@ -3828,6 +3868,16 @@ PrefabInstance:
         type: 3}
       propertyPath: list_RoomCreatePointGenerateData.Array.data[2].list_RandomRoomBlockPrefabs.Array.size
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 991451740903014827, guid: 6050fd3af03816d4ebd2d313a81c713d,
+        type: 3}
+      propertyPath: list_RoomCreatePointGenerateData.Array.data[3].list_RandomRoomBlockPrefabs.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 991451740903014827, guid: 6050fd3af03816d4ebd2d313a81c713d,
+        type: 3}
+      propertyPath: list_RoomCreatePointGenerateData.Array.data[4].list_RandomRoomBlockPrefabs.Array.size
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 991451740903014827, guid: 6050fd3af03816d4ebd2d313a81c713d,
         type: 3}
