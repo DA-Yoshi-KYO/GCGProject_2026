@@ -7,11 +7,11 @@
  * 2026-05-22 | ファイル名を変更（CS_ThiefReaction.cs → CS_ThiefReaction.cs）
  *            | クラス名を変更（CS_ThiefReaction → CS_ThiefReaction）
  *            | クラス名を変更（CS_ThiefReaction → CS_ThiefReactionUI）
+ * 2026-07-03 | 動作変更
  * 
  */
 using System.Collections.Generic;
 using System.Linq;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 

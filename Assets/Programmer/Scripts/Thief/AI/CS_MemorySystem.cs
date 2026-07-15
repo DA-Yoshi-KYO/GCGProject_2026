@@ -6,11 +6,23 @@
  * 2026-05-27 | 初回作成
  * 2026-06-04 | 視認したオブジェクトを記憶する処理を作り変え
  *            | プレイヤーを無視するフラグと、プレイヤーを追跡する残り時間の処理を追加
+ * 2026-06-05 | プレイヤーを発見する猶予時間の処理を追加
+ * 2026-06-08 | 泥棒の現在いる部屋部屋のCreateRoomPointを取得する変数の追加
+ * 2026-06-10 | 泥棒を生成した瞬間固まってしまっている問題の修正
+ *            | 探索しないバグの修正
+ * 2026-06-11 | 宝物発見判定に記憶しているものも利用するようにする
+ *            | 行ったことのある部屋しかない状態でも移動するように修正
+ * 2026-07-03 | 探索が終了しないバグの修正
+ * 2026-07-08 | 泥棒の次の部屋決めロジックの再構築
+ * 2026-07-10 | 泥棒が宝物を無視するバグの修正
+ *            | 宝部屋に宝物が残っているかの判定を追加
+ * 2026-07-12 | スタックする問題の修正
+ *            | 泥棒がムーンウォークする問題の修正
+ *            | 移動ポイントのシステム改変
+ * 
  */
 using System.Collections.Generic;
-using Unity.VisualScripting.Dependencies.Sqlite;
 using UnityEngine;
-using static UnityEditor.Recorder.OutputPath;
 
 /// <summary>
 /// 泥棒の記憶に関するシステムを管理するクラス
@@ -728,6 +740,7 @@ public class CS_MemorySystem
         // 前回の探索対象が移動ポイントの場合は、次の移動ポイントを探索対象に設定する
         else
         {
+            // 現在の移動ポイントとの距離が、探索済みとする距離の閾値よりも大きい場合は、探索対象をリセットする
             if (Vector3.Distance(thiefAI.transform.position, currentTarget.transform.position) > thiefAI.read_ExploredDistanceThresholdMovePoint)
             {
                 thiefAI?.read_MoveSystem?.MoveTo(currentTarget.transform.position);
