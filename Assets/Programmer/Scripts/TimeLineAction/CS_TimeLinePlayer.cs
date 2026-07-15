@@ -60,6 +60,21 @@ public class CS_TimeLinePlayer : MonoBehaviour
         playerData.customInputAction.Player.Sneak.canceled += OnSneak;
     }
 
+    private void OnDestroy()
+    {
+        if (playerData == null) return;
+
+        playerData.customInputAction.Player.Move.started -= OnMove;
+        playerData.customInputAction.Player.Move.performed -= OnMove;
+        playerData.customInputAction.Player.Move.canceled -= OnMove;
+
+        playerData.customInputAction.Player.Jump.started -= OnJump;
+
+        playerData.customInputAction.Player.Sneak.started -= OnSneak;
+        playerData.customInputAction.Player.Sneak.performed -= OnSneak;
+        playerData.customInputAction.Player.Sneak.canceled -= OnSneak;
+    }
+
     void Update()
     {
         

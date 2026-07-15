@@ -112,6 +112,13 @@ public class OptionSys : MonoBehaviour
         seCursor.transform.position = cursor2;
     }
 
+    private void OnDestroy()
+    {
+        inputAction.Option.Up.started -= Up;
+        inputAction.Option.Down.started -= Down;
+        inputAction.Option.Decision.started -= Enter;
+    }
+
     private void Update()
     {
         if (inputAction.Option.Left.IsPressed())
