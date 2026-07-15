@@ -789,19 +789,25 @@ public class CS_ThiefAI : MonoBehaviour
     /// <param name="newState">変更する状態</param>
     public void ChangeStatus(ThiefState newState)
     {
-        switch(newState)
+        CS_VisionConeRenderer visionConeRenderer = GetComponentInChildren<CS_VisionConeRenderer>();
+        switch (newState)
             {
             case ThiefState.Explore:
                 // 探索状態になったときの処理を追加する
+                visionConeRenderer.SetVisible(true);
                 break;
             case ThiefState.Found:
                 // 発見状態になったときの処理を追加する
+                visionConeRenderer.SetVisible(false);
                 break;
             case ThiefState.Escape:
                 // 逃走状態になったときの処理を追加する
+                visionConeRenderer.SetVisible(false);
                 break;
             case ThiefState.Stunned:
                 // 気絶時間の経過時間をリセット
+                visionConeRenderer.SetVisible(false);
+
                 if (currentState != ThiefState.Stunned)
                     elapsedTimeAfterStun = 0.0f;
                 aStarSystem.ResetUpdatedFlag();
