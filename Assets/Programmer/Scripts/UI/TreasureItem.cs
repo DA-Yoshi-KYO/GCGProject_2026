@@ -14,6 +14,9 @@ public class TreasureItem : MonoBehaviour
     [SerializeField] private Sprite Moveing;
     [SerializeField] private Sprite Pinch;
 
+    [SerializeField] private Sprite MoveText;
+    [SerializeField] private Sprite PinchText;
+
     CS_VisionTarget visionTarget;
     RectTransform rectTransform;
     NumberView numberView;
@@ -87,10 +90,13 @@ public class TreasureItem : MonoBehaviour
         {
             DetailTextImage.GetComponent<UnityEngine.UI.Image>().sprite = Pinch;
             rectTransform.localScale = Vector3.Lerp(rectTransform.localScale, scale * 1.25f, Time.deltaTime * 5f);
+            DistanceImage.GetComponent<UnityEngine.UI.Image>().sprite = PinchText;
+
         }
         else
         {
             DetailTextImage.GetComponent<UnityEngine.UI.Image>().sprite = Moveing;
+            DistanceImage.GetComponent<UnityEngine.UI.Image>().sprite = MoveText;
         }
     }
     
