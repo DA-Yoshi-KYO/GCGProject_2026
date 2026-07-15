@@ -1,9 +1,10 @@
 /*
 +=====================================
  ファイル名 : CSE_EffectType.cs
- 概要     : Effectの再生方式を定義するEnum
- 作者     : ヨシモト リョウ
- 履歴     : 2026/06/10 新規作成
+ 概要       : Effectの再生方式を定義するEnum
+ 作者       : ヨシモト リョウ
+ 履歴       : 2026/06/10 新規作成
+              2026/07/14 VolumeTexture追加
 =====================================+
 */
 
@@ -28,6 +29,11 @@ public enum CSE_EffectType
     /// Vertex Animation Textureを使用するEffectです。
     /// </summary>
     VAT,
+
+    /// <summary>
+    /// 連番Volume Textureをレイマーチ表示するEffectです。
+    /// </summary>
+    VolumeTexture,
 
     /// <summary>
     /// スプライトシートを使用するEffectです。
