@@ -41,6 +41,14 @@
  * 2026-06-11   | 落とし穴用の処理をCS_ThiefGimmickActionに移動
  *              | 気絶状態の更新処理を実行するかどうかを設定する処理を追加
  * 2026-06-12   | 退場時のフェードアウト処理を追加
+ * 2026-06-19   | 泥棒が宝物を落としたときに近くのグリッドに配置される処理の実装
+ * 2026-07-06   | 泥棒が宝物を落としたときグリッド上に正しく落ちない不具合の修正
+ *              | read_の変数すべてにNullチェックを追加
+ *              | 宝物を落としたときに宙に浮くバグの修正
+ *              | update処理に体力が0の時の状態設定を追加
+ * 2026-07-07   | 泥棒が宝物を持ち帰った後再び帰ってくる処理の実装
+ *              | 泥棒の終了時のエラー修正
+ * 2026-07-10   | 宝物をもってスタンをあけたとき再び探索をするバグの修正
  * 
  */
 using System;
@@ -179,7 +187,6 @@ public class CS_ThiefAI : MonoBehaviour
     private Sprite iconSprite;
     public Sprite read_IconSprite => iconSprite;
 
-    // 分解したクラス一覧
     [Tooltip("移動システム")]
     private CS_MoveSystem moveSystem;
     public CS_MoveSystem read_MoveSystem
@@ -489,10 +496,14 @@ public class CS_ThiefAI : MonoBehaviour
 
         // 宝物を持つ
         holdTreasure = memorySystem.read_CurrentTarget.gameObject;
-        holdTreasure.transform.parent = this.transform; // 泥棒の子オブジェクトにする
+        // 泥棒の子オブジェクトにする
+        holdTreasure.transform.parent = this.transform;
+        // 宝物のコライダーを無効にする
         Collider holdTreasureCollider = holdTreasure.GetComponent<Collider>();
-        if (holdTreasureCollider != null) holdTreasureCollider.enabled = false; // 宝物のコライダーを無効にする
-        holdTreasure.transform.localScale *= 0.5f; // 宝物のサイズを半分にする
+        if (holdTreasureCollider != null) holdTreasureCollider.enabled = false;
+
+        // 宝物のサイズを半分にする
+        holdTreasure.transform.localScale *= 0.5f; 
 
         //-- 体の前に持つ位置を設定
         // 泥棒の正面方向を基準に、少し前方に持つ位置を設定
@@ -599,8 +610,11 @@ public class CS_ThiefAI : MonoBehaviour
                     // 宝物を現在の部屋のオブジェクトに親子付けする
                     if (holdTreasure != null)
                     {
+                        // 宝物のコライダーを有効にする
                         holdTreasure.GetComponent<Collider>().enabled = true;
+                        // 宝物のサイズを元に戻す
                         holdTreasure.transform.localScale = Vector3.one;
+                        // 宝物を現在の部屋のオブジェクトに親子付けする
                         holdTreasure.transform.SetParent(memorySystem.read_CurrentRoom.read_ObjectParent.transform);
                         holdTreasure.GetComponent<CS_VisionTarget>().StopStolen();
 

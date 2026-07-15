@@ -8,6 +8,7 @@
  * 2026-05-22 | ファイル名を変更（VisionSensor.cs → CS_VisionSensor.cs）
  *            | クラス名を変更（VisionSensor → CS_VisionSensor）
  * 2026-05-27 | MonoBehaviourから通常クラスに変更
+ * 2026-06-14 | 泥棒の視認オブジェクト検出を複数レイヤーに対応
  * 
  */
 using System.Collections.Generic;

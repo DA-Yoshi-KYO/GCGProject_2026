@@ -5,6 +5,7 @@
  * ----------------------------------------------------------
  * 2026-05-27 | 初回作成
  * 2026-07-09 | 継承して使えるようにvirtual処理を追加(ヨシモト)
+ * 2026-07-15 | フェーズ用のObjectをPoolで戻す処理追加
  */
 using System.Collections;
 using System.Collections.Generic;
@@ -161,6 +162,33 @@ public class CS_ObjectPool
 
         ReturnObject(gameObject);
     }
+
+    /// <summary>
+    /// ObjectをPoolへ戻します。（フェード用）
+    /// </summary>
+    public IEnumerator FadeReturnObject(GameObject gameObject, float fadetime)
+    {
+        var material = gameObject.GetComponent<MeshRenderer>().material;
+        if (material == null)
+            yield break;
+
+        float startAlpha = material.GetFloat("_AlphaFloat");
+        float time = 0.0f;
+
+        while(time < fadetime)
+        {
+            time += Time.deltaTime;
+            material.SetFloat("_AlphaFloat", Mathf.Lerp(startAlpha, 0.0f, time / fadetime));
+
+            yield return null;
+        }
+
+        //完全に透明になったらプールに戻す
+        ReturnObject(gameObject);
+
+        material.SetFloat("_AlphaFloat", 1.0f);
+    }
+
 
     /// <summary>
     /// Pool用Objectを作成します。

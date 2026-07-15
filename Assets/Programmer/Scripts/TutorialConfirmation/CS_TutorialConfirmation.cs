@@ -37,6 +37,11 @@ public class CS_TutorialConfirmation : MonoBehaviour
         UpdateButtonTexture();
     }
 
+    private void OnDestroy()
+    {
+        inputActions.TutorialConfirmation.MoveAxis.started -= TutorialConfirmationButtonSelectInput;
+    }
+
     // Update is called once per frame
     void Update()
     {

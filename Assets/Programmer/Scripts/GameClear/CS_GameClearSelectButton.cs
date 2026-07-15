@@ -52,6 +52,11 @@ public class CS_GameClearSelectButton : MonoBehaviour
         backGroundPlaySE = seObject != null ? seObject.GetComponent<CS_BackGroundPlaySE>() : null;
     }
 
+    private void OnDestroy()
+    {
+        inputActions.GameClear.MoveAxis.started -= SelectInput;
+    }
+
     // Update is called once per frame
     void Update()
     {
