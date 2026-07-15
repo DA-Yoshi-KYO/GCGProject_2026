@@ -63,6 +63,11 @@ public class TeleportGimmick : GimmickBase
         gimmickState = GimmickState.Idle;
     }
 
+    private void OnDestroy()
+    {
+        customInputAction?.Dispose();
+    }
+
     protected override void IdleUpdate()
     {
         base.IdleUpdate();

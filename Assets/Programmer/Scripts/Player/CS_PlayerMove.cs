@@ -124,6 +124,21 @@ public class CS_PlayerMove : MonoBehaviour
         materials = GetComponentInChildren<SkinnedMeshRenderer>().materials;
     }
 
+    private void OnDestroy()
+    {
+        if (playerData == null) return;
+
+        playerData.customInputAction.Player.Move.started -= OnMove;
+        playerData.customInputAction.Player.Move.performed -= OnMove;
+        playerData.customInputAction.Player.Move.canceled -= OnMove;
+
+        playerData.customInputAction.Player.Jump.started -= OnJump;
+
+        playerData.customInputAction.Player.Sneak.started -= OnSneak;
+        playerData.customInputAction.Player.Sneak.performed -= OnSneak;
+        playerData.customInputAction.Player.Sneak.canceled -= OnSneak;
+    }
+
     void FixedUpdate()
     {
         // ゲームが一時停止中の場合は移動処理を行わない
