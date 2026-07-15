@@ -5,6 +5,7 @@
  * ----------------------------------------------------------
  * 2026-06-08 | 初回作成
  */
+using System.Collections;
 using UnityEngine;
 
 public class CS_WarpTrigger : MonoBehaviour
@@ -69,13 +70,31 @@ public class CS_WarpTrigger : MonoBehaviour
 
         //UI表示
         CS_PlayerAction playerAction = other.GetComponent<CS_PlayerAction>();
+        if (playerAction == null)
+        {
+            Debug.LogError("ワープさせるプレイヤーのコンポーネントにCS_PlayerActionがありませんでした");
+            return;
+        }
+
         playerAction.warpUIView = true;
 
         //ワープする
         if (!playerAction.doWarp)
             return;
 
-        WarpDo(other);
+        CS_PlayerMove playerMove = other.GetComponent<CS_PlayerMove>();
+        if (playerMove == null)
+        {
+            Debug.LogError("ワープさせるプレイヤーのコンポーネントにCS_PlayerMoveがありませんでした");
+            return;
+        }
+
+        // プレイヤーをワープの正面に配置し、ワープの方向へ向かせる
+        PlacePlayerInFrontOfWarp(other, playerMove);
+
+        playerMove.animator.SetTrigger("WarpInTrigger");
+
+        StartCoroutine(WarpCoroutine(other, playerMove.animator));
 
         playerAction.warpUIView = false;
         playerAction.doWarp = false;
@@ -108,10 +127,65 @@ public class CS_WarpTrigger : MonoBehaviour
         if (!playerAction.doWarp)
             return;
 
-        WarpDo(other);
+        CS_PlayerMove playerMove = other.GetComponent<CS_PlayerMove>();
+        if (playerMove == null)
+        {
+            Debug.LogError("ワープさせるプレイヤーのコンポーネントにCS_PlayerMoveがありませんでした");
+            return;
+        }
+
+        // プレイヤーをワープの正面に配置し、ワープの方向へ向かせる
+        PlacePlayerInFrontOfWarp(other, playerMove);
+
+        playerMove.animator.SetTrigger("WarpInTrigger");
+
+        StartCoroutine(WarpCoroutine(other, playerMove.animator));
 
         playerAction.warpUIView = false;
         playerAction.doWarp = false;
+    }
+
+    /// <summary>
+    /// プレイヤーをワープの正面に配置し、ワープの方向へ向かせる
+    /// </summary>
+    private void PlacePlayerInFrontOfWarp(Collider other, CS_PlayerMove playerMove)
+    {
+        Vector2 dirWarpToPlayer = new Vector2(playerMove.transform.position.x - transform.position.x, playerMove.transform.position.z - transform.position.z).normalized;
+
+        Vector3 playerStartPoint = other.transform.position;
+        playerStartPoint.x += dirWarpToPlayer.x;
+        playerStartPoint.z += dirWarpToPlayer.y;
+
+        Quaternion playerRotate = Quaternion.LookRotation(Vector3.Normalize(transform.position - playerStartPoint));
+
+        // CharacterControllerが有効なまま座標を書き換えると位置がずれるため、一旦無効化してから書き換える
+        CharacterController controller = other.GetComponent<CharacterController>();
+        if (controller != null) controller.enabled = false;
+
+        other.transform.SetPositionAndRotation(playerStartPoint, playerRotate);
+
+        if (controller != null) controller.enabled = true;
+
+        // rb.rotation等を同期しないとFixedUpdateで回転が古い値に戻され、がたつきが発生する
+        playerMove.SyncTransform(playerStartPoint, playerRotate);
+    }
+
+    IEnumerator WarpCoroutine(Collider other, Animator animator)
+    {
+        // WarpInアニメーションの再生開始を待つ
+        yield return null;
+        while (!animator.GetCurrentAnimatorStateInfo(0).IsName("WarpIn"))
+        {
+            yield return null;
+        }
+
+        // WarpInアニメーションの再生完了を待つ
+        while (animator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1.0f)
+        {
+            yield return null;
+        }
+
+        WarpDo(other);
     }
 
     private void WarpDo(Collider other)
@@ -142,7 +216,14 @@ public class CS_WarpTrigger : MonoBehaviour
             exitPosition = wp.targetPoint.transform;
         }
 
-        other.transform.position = exitPosition.position;
+        // ワープ先を向かないよう、ワープ先とは逆方向（外向き）に回転させる
+        Vector3 dirAwayFromWarp = exitPosition.position - wp.targetPoint.transform.position;
+        dirAwayFromWarp.y = 0f;
+        Quaternion exitRotation = dirAwayFromWarp.sqrMagnitude > 0.0001f
+            ? Quaternion.LookRotation(dirAwayFromWarp.normalized)
+            : exitPosition.rotation;
+
+        other.transform.SetPositionAndRotation(exitPosition.position, exitRotation);
 
         CS_PlayerMove playerMove = other.GetComponent<CS_PlayerMove>();
         if (playerMove != null)
