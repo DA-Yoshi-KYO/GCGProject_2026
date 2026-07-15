@@ -60,6 +60,10 @@ public class CS_PlayerMove : MonoBehaviour
     private float jumpMerginTimer;
     private bool isJumpMerging = false;
 
+    [Header("Effect再生処理")]
+    [SerializeField]
+    private CS_EffectPlayer cs_EffectPlayer;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -349,6 +353,8 @@ public class CS_PlayerMove : MonoBehaviour
             animator.SetTrigger("JumpTrigger");
             velocity.y = jumpAmount;
             isJumpMerging = true;
+            PlaySmokeEffect();
+            return;
         }
     }
     private void OnSneak(InputAction.CallbackContext context)
@@ -364,5 +370,48 @@ public class CS_PlayerMove : MonoBehaviour
     public void SetInvincibleFlag(bool isFlag)
     {
         isInvincible = isFlag;
+    }
+
+    // スモークエフェクトを再生する
+    private void PlaySmokeEffect()
+    {
+        if (cs_EffectPlayer == null)
+        {
+            Debug.LogWarning(
+                "[CS_SmokeEffectTest] CS_EffectPlayerがありません。"
+            );
+
+            return;
+        }
+
+        CSST_EffectPlayData csst_EffectPlayData =
+            new CSST_EffectPlayData();
+
+        csst_EffectPlayData.CSST_EffectPlayData_Init();
+
+        csst_EffectPlayData.SetPosition(
+            transform.position - transform.forward * 0.85f
+        );
+
+        csst_EffectPlayData.SetRotation(
+            transform.rotation
+        );
+
+        csst_EffectPlayData.SetScale(
+            new Vector3(0.65f, 0.5f, 1.0f)
+        );
+
+        csst_EffectPlayData.SetLoopFlag(false);
+        csst_EffectPlayData.SetHideOnEnd(true);
+
+        CSAD_EffectCommonProcessBase smokeEffect =
+            cs_EffectPlayer.PlayEffect(
+                csst_EffectPlayData
+            );
+
+        if (smokeEffect != null)
+        {
+            smokeEffect.transform.SetParent(null, true);
+        }
     }
 }
