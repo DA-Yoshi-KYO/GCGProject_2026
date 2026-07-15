@@ -132,6 +132,19 @@ public class CS_PlayerAction : MonoBehaviour
         }
     }
 
+    private void OnDestroy()
+    {
+        if (playerData == null) return;
+
+        playerData.customInputAction.Player.GimmickChange.started -= OnSelect;
+
+        playerData.customInputAction.Player.Interact.started -= OnInteract;
+        playerData.customInputAction.Player.Interact.performed -= OnInteract;
+        playerData.customInputAction.Player.Interact.canceled -= OnInteract;
+
+        playerData.customInputAction.Player.InteractCancel.started -= OnCancel;
+    }
+
     // Update is called once per frame
     void Update()
     {
@@ -980,6 +993,9 @@ public class CS_PlayerAction : MonoBehaviour
     //ワープUIの非表示処理
     private void WarpUIView()
     {
+        if (warpUIGameObject == null)
+            return;
+
         if(warpUIView)
         {
             warpUIGameObject.SetActive(true);

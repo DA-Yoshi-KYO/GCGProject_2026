@@ -40,8 +40,6 @@ public class CS_StunThiefTarget : CS_ThiefTarget
 
     private void OnDestroy()
     {
-
-
         // 危険地帯を削除
         if (dangerZone != null)
         {

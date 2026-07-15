@@ -52,6 +52,17 @@ public class CS_TrasitionMovieEnd : MonoBehaviour
         videoPlayer.Play();
     }
 
+    private void OnDestroy()
+    {
+        customInputAction.Openning.SkipButton.started -= OnHoldStart;
+        customInputAction.Openning.SkipButton.canceled -= OnHoldEnd;
+
+        if (videoPlayer != null)
+        {
+            videoPlayer.loopPointReached -= OnMovieFinished;
+        }
+    }
+
     // Update is called once per frame
     void Update()
     {

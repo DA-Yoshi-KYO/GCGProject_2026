@@ -5,46 +5,57 @@
  * ----------------------------------------------------------
  * 2026-06-08 | 初回作成
  * 2026-06-11 | 隣同士の部屋にワープを作成しないように修正
+ * 2026-07-15 | ワープ生成位置とワープ後位置を分離
  */
+
 using System.Collections.Generic;
 using UnityEngine;
 
 public class CS_WarpSpawn : MonoBehaviour
 {
-    private Transform[] spawnPoints;//候補地点
-    private List<Transform> spawnPointsList;//候補地点リスト
+    private Transform[] spawnPoints;
+    private List<Transform> spawnPointsList;
 
     [Header("ワープの入り口用のPrefab")]
-    [SerializeField] public GameObject warpEntrancePrefab;
+    [SerializeField]
+    public GameObject warpEntrancePrefab;
 
     [Header("ワープの出口用のPrefab")]
-    [SerializeField] public GameObject warpExitPrefab;
+    [SerializeField]
+    public GameObject warpExitPrefab;
 
     [Header("ワープの数")]
-    [SerializeField] private int warpCount = 1;
+    [SerializeField]
+    private int warpCount = 1;
 
     [Header("RoomCreatePointの元データ")]
-    [SerializeField] private GameObject go_RoomCreatePointsFormer;
+    [SerializeField]
+    private GameObject go_RoomCreatePointsFormer;
 
     private GameObject currentEntrance;
     private GameObject currentExit;
 
-    private List<GameObject> lgo_warpWallObjects = new List<GameObject>();
-    private List<GameObject[]> warpWallPairList = new List<GameObject[]>();
+    private List<GameObject> lgo_warpWallObjects =
+        new List<GameObject>();
 
-    private List<GameObject> lgo_currentWarpObjects = new List<GameObject>();
+    private List<GameObject[]> warpWallPairList =
+        new List<GameObject[]>();
 
-    // Start is called before the first frame update
+    private List<GameObject> lgo_currentWarpObjects =
+        new List<GameObject>();
+
+    /// <summary>
+    /// ワープ生成処理を開始します。
+    /// </summary>
     public void WarpPointStart()
     {
         CollectWarpWalls();
         CreateRandomWarpWallPairs();
     }
 
-    private void Update()
-    {
-    }
-
+    /// <summary>
+    /// ワープを再生成します。
+    /// </summary>
     public void SpawnWarp()
     {
         CollectWarpWalls();
@@ -79,32 +90,45 @@ public class CS_WarpSpawn : MonoBehaviour
         }
     }
 
-    //生成位置候補の処理
+    /// <summary>
+    /// ワープ生成位置の候補を取得します。
+    /// </summary>
     public void ProcessGenerationCandidatePositions()
     {
         GameObject roomParent = GameObject.Find("RoomCreatePoints");
 
         if (roomParent == null)
         {
-            Debug.LogError("[CS_WarpSpawn] RoomCreatePoints が見つかりません。", this);
+            Debug.LogError(
+                "[CS_WarpSpawn] RoomCreatePoints が見つかりません。",
+                this
+            );
+
             spawnPoints = new Transform[0];
             return;
         }
 
-        List<Transform> foundSpawnPoints = new List<Transform>();
+        List<Transform> foundSpawnPoints =
+            new List<Transform>();
 
         // 初期部屋と宝部屋は探索しない
-        for (int i = 1 ; i < roomParent.transform.childCount - 1 ; ++i)
+        for (int i = 1 ;
+             i < roomParent.transform.childCount - 1 ;
+             ++i)
         {
-            Transform roomChild = roomParent.transform.GetChild(i);
+            Transform roomChild =
+                roomParent.transform.GetChild(i);
 
-            Transform warpObj = FindChildObject(roomChild, "WarpCreatePos");
+            Transform warpObj =
+                FindChildObject(roomChild, "WarpCreatePos");
 
             if (warpObj == null)
             {
                 Debug.LogWarning(
-                    "[CS_WarpSpawn] WarpCreatePos が見つかりません。Room : " + roomChild.name,
-                    roomChild);
+                    "[CS_WarpSpawn] WarpCreatePos が見つかりません。Room : "
+                    + roomChild.name,
+                    roomChild
+                );
 
                 continue;
             }
@@ -115,10 +139,13 @@ public class CS_WarpSpawn : MonoBehaviour
         spawnPoints = foundSpawnPoints.ToArray();
     }
 
-    //再帰処理で探す
-
-    //子オブジェクトを探索する場合
-    public Transform FindChildObject(Transform parent, string name)
+    /// <summary>
+    /// 指定された親の子階層から、
+    /// 指定名のTransformを再帰的に探します。
+    /// </summary>
+    public Transform FindChildObject(
+        Transform parent,
+        string name)
     {
         Queue<Transform> queue = new Queue<Transform>();
         queue.Enqueue(parent);
@@ -141,12 +168,16 @@ public class CS_WarpSpawn : MonoBehaviour
         return null;
     }
 
-    //親オブジェクトを探索する場合
-    public Transform FindParentObject(Transform child, string name)
+    /// <summary>
+    /// 親階層から指定名のTransformを探します。
+    /// </summary>
+    public Transform FindParentObject(
+        Transform child,
+        string name)
     {
         Transform current = child.parent;
 
-        while (current.parent != null)
+        while (current != null)
         {
             if (current.name == name)
             {
@@ -160,7 +191,8 @@ public class CS_WarpSpawn : MonoBehaviour
     }
 
     /// <summary>
-    /// go_RoomCreatePointsFormer の子階層から、TagがWarpWallのObjectを集めます。
+    /// go_RoomCreatePointsFormerの子階層から、
+    /// WarpWallタグのオブジェクトを集めます。
     /// </summary>
     private void CollectWarpWalls()
     {
@@ -168,26 +200,40 @@ public class CS_WarpSpawn : MonoBehaviour
 
         if (go_RoomCreatePointsFormer == null)
         {
-            Debug.LogError("[CS_WarpSpawn] go_RoomCreatePointsFormer が設定されていません。", this);
+            Debug.LogError(
+                "[CS_WarpSpawn] go_RoomCreatePointsFormer が設定されていません。",
+                this
+            );
+
             return;
         }
 
-        Transform[] childTransforms = go_RoomCreatePointsFormer.GetComponentsInChildren<Transform>(true);
+        Transform[] childTransforms =
+            go_RoomCreatePointsFormer.GetComponentsInChildren<Transform>(
+                true
+            );
 
         foreach (Transform childTransform in childTransforms)
         {
-            if (childTransform == go_RoomCreatePointsFormer.transform)
+            if (childTransform ==
+                go_RoomCreatePointsFormer.transform)
             {
                 continue;
             }
 
             if (childTransform.CompareTag("WarpWall"))
             {
-                lgo_warpWallObjects.Add(childTransform.gameObject);
+                lgo_warpWallObjects.Add(
+                    childTransform.gameObject
+                );
             }
         }
 
-        Debug.Log("[CS_WarpSpawn] WarpWall の数 : " + lgo_warpWallObjects.Count, this);
+        Debug.Log(
+            "[CS_WarpSpawn] WarpWall の数 : "
+            + lgo_warpWallObjects.Count,
+            this
+        );
     }
 
     /// <summary>
@@ -195,15 +241,15 @@ public class CS_WarpSpawn : MonoBehaviour
     /// </summary>
     private readonly CSE_RoomDoorDirection[] e_RoomDoorDirections =
     {
-    CSE_RoomDoorDirection.Right,
-    CSE_RoomDoorDirection.Left,
-    CSE_RoomDoorDirection.Front,
-    CSE_RoomDoorDirection.Back
-};
+        CSE_RoomDoorDirection.Right,
+        CSE_RoomDoorDirection.Left,
+        CSE_RoomDoorDirection.Front,
+        CSE_RoomDoorDirection.Back
+    };
 
     /// <summary>
     /// WarpWall同士をランダムにペアにします。
-    /// 扉移動で繋がっているRoom同士はワープペアにしません。
+    /// 扉移動で繋がっているRoom同士はペアにしません。
     /// ペアに使われなかったWarpWallは無効化します。
     /// </summary>
     private void CreateRandomWarpWallPairs()
@@ -214,29 +260,44 @@ public class CS_WarpSpawn : MonoBehaviour
 
         if (warpEntrancePrefab == null)
         {
-            Debug.LogError("[CS_WarpSpawn] warpEntrancePrefab が設定されていません。", this);
+            Debug.LogError(
+                "[CS_WarpSpawn] warpEntrancePrefab が設定されていません。",
+                this
+            );
+
             return;
         }
 
         if (warpExitPrefab == null)
         {
-            Debug.LogError("[CS_WarpSpawn] warpExitPrefab が設定されていません。", this);
+            Debug.LogError(
+                "[CS_WarpSpawn] warpExitPrefab が設定されていません。",
+                this
+            );
+
             return;
         }
 
-        List<GameObject> candidateList = new List<GameObject>(lgo_warpWallObjects);
+        List<GameObject> candidateList =
+            new List<GameObject>(lgo_warpWallObjects);
+
         candidateList.RemoveAll(obj => obj == null);
 
         ShuffleWarpWallList(candidateList);
 
         int createdPairCount = 0;
 
-        while (createdPairCount < warpCount && candidateList.Count >= 2)
+        while (createdPairCount < warpCount &&
+               candidateList.Count >= 2)
         {
             GameObject warpWallA = candidateList[0];
             candidateList.RemoveAt(0);
 
-            int pairTargetIndex = FindValidWarpWallPairIndex(warpWallA, candidateList);
+            int pairTargetIndex =
+                FindValidWarpWallPairIndex(
+                    warpWallA,
+                    candidateList
+                );
 
             if (pairTargetIndex < 0)
             {
@@ -245,20 +306,32 @@ public class CS_WarpSpawn : MonoBehaviour
                 Debug.Log(
                     "[CS_WarpSpawn] 有効なワープ相手がないため無効化 : "
                     + warpWallA.name,
-                    this);
+                    this
+                );
 
                 continue;
             }
 
-            GameObject warpWallB = candidateList[pairTargetIndex];
+            GameObject warpWallB =
+                candidateList[pairTargetIndex];
+
             candidateList.RemoveAt(pairTargetIndex);
 
-            warpWallPairList.Add(new GameObject[] { warpWallA, warpWallB });
+            warpWallPairList.Add(
+                new GameObject[]
+                {
+                    warpWallA,
+                    warpWallB
+                }
+            );
 
             SetWarpWallFlag(warpWallA, true);
             SetWarpWallFlag(warpWallB, true);
 
-            CreateWarpPointPair(warpWallA, warpWallB);
+            CreateWarpPointPair(
+                warpWallA,
+                warpWallB
+            );
 
             createdPairCount++;
 
@@ -267,7 +340,8 @@ public class CS_WarpSpawn : MonoBehaviour
                 + warpWallA.name
                 + " <-> "
                 + warpWallB.name,
-                this);
+                this
+            );
         }
 
         foreach (GameObject warpWall in candidateList)
@@ -277,16 +351,20 @@ public class CS_WarpSpawn : MonoBehaviour
             Debug.Log(
                 "[CS_WarpSpawn] 未使用WarpWallを無効化 : "
                 + warpWall.name,
-                this);
+                this
+            );
         }
     }
 
     /// <summary>
     /// WarpWall候補リストをシャッフルします。
     /// </summary>
-    private void ShuffleWarpWallList(List<GameObject> candidateList)
+    private void ShuffleWarpWallList(
+        List<GameObject> candidateList)
     {
-        for (int i = candidateList.Count - 1 ; i > 0 ; i--)
+        for (int i = candidateList.Count - 1 ;
+             i > 0 ;
+             i--)
         {
             int randomIndex = Random.Range(0, i + 1);
 
@@ -297,14 +375,15 @@ public class CS_WarpSpawn : MonoBehaviour
     }
 
     /// <summary>
-    /// warpWallA とペアにできるWarpWallの番号を探します。
-    /// 扉移動で繋がっているRoom同士は対象外にします。
+    /// warpWallAとペアにできるWarpWallを探します。
     /// </summary>
     private int FindValidWarpWallPairIndex(
         GameObject warpWallA,
         List<GameObject> candidateList)
     {
-        for (int i = 0 ; i < candidateList.Count ; i++)
+        for (int i = 0 ;
+             i < candidateList.Count ;
+             i++)
         {
             GameObject warpWallB = candidateList[i];
 
@@ -313,7 +392,9 @@ public class CS_WarpSpawn : MonoBehaviour
                 continue;
             }
 
-            if (IsInvalidWarpWallPair(warpWallA, warpWallB))
+            if (IsInvalidWarpWallPair(
+                    warpWallA,
+                    warpWallB))
             {
                 continue;
             }
@@ -327,20 +408,26 @@ public class CS_WarpSpawn : MonoBehaviour
     /// <summary>
     /// ワープペアにしてはいけない組み合わせか判定します。
     /// </summary>
-    private bool IsInvalidWarpWallPair(GameObject warpWallA, GameObject warpWallB)
+    private bool IsInvalidWarpWallPair(
+        GameObject warpWallA,
+        GameObject warpWallB)
     {
-        CS_RoomCreatePoint roomCreatePointA = FindOwnerRoomCreatePoint(warpWallA);
-        CS_RoomCreatePoint roomCreatePointB = FindOwnerRoomCreatePoint(warpWallB);
+        CS_RoomCreatePoint roomCreatePointA =
+            FindOwnerRoomCreatePoint(warpWallA);
 
-        if (roomCreatePointA == null || roomCreatePointB == null)
+        CS_RoomCreatePoint roomCreatePointB =
+            FindOwnerRoomCreatePoint(warpWallB);
+
+        if (roomCreatePointA == null ||
+            roomCreatePointB == null)
         {
             Debug.LogWarning(
                 "[CS_WarpSpawn] WarpWallの親RoomCreatePointを取得できません。"
                 + " / A : " + warpWallA.name
                 + " / B : " + warpWallB.name,
-                this);
+                this
+            );
 
-            // RoomCreatePointが取れない場合は安全側でペア禁止にする
             return true;
         }
 
@@ -351,13 +438,17 @@ public class CS_WarpSpawn : MonoBehaviour
         }
 
         // AからBへ扉移動できるならペア禁止
-        if (IsRoomConnectedToTarget(roomCreatePointA, roomCreatePointB))
+        if (IsRoomConnectedToTarget(
+                roomCreatePointA,
+                roomCreatePointB))
         {
             return true;
         }
 
         // BからAへ扉移動できるならペア禁止
-        if (IsRoomConnectedToTarget(roomCreatePointB, roomCreatePointA))
+        if (IsRoomConnectedToTarget(
+                roomCreatePointB,
+                roomCreatePointA))
         {
             return true;
         }
@@ -366,9 +457,11 @@ public class CS_WarpSpawn : MonoBehaviour
     }
 
     /// <summary>
-    /// WarpWallが所属しているRoomCreatePointを親階層から探します。
+    /// WarpWallが所属しているRoomCreatePointを
+    /// 親階層から探します。
     /// </summary>
-    private CS_RoomCreatePoint FindOwnerRoomCreatePoint(GameObject warpWallObject)
+    private CS_RoomCreatePoint FindOwnerRoomCreatePoint(
+        GameObject warpWallObject)
     {
         if (warpWallObject == null)
         {
@@ -394,20 +487,25 @@ public class CS_WarpSpawn : MonoBehaviour
     }
 
     /// <summary>
-    /// fromRoom から targetRoom に扉移動できるか確認します。
+    /// fromRoomからtargetRoomに
+    /// 扉移動できるか確認します。
     /// </summary>
     private bool IsRoomConnectedToTarget(
         CS_RoomCreatePoint fromRoom,
         CS_RoomCreatePoint targetRoom)
     {
-        if (fromRoom == null || targetRoom == null)
+        if (fromRoom == null ||
+            targetRoom == null)
         {
             return false;
         }
 
-        for (int i = 0 ; i < e_RoomDoorDirections.Length ; i++)
+        for (int i = 0 ;
+             i < e_RoomDoorDirections.Length ;
+             i++)
         {
-            CSE_RoomDoorDirection direction = e_RoomDoorDirections[i];
+            CSE_RoomDoorDirection direction =
+                e_RoomDoorDirections[i];
 
             if (!fromRoom.TryGetConnection(
                     direction,
@@ -431,12 +529,18 @@ public class CS_WarpSpawn : MonoBehaviour
     }
 
     /// <summary>
-    /// WarpWallの位置情報を使って、入口と出口のワープオブジェクトを生成します。
+    /// WarpWallの位置情報を使用して、
+    /// 入口と出口のワープオブジェクトを生成します。
     /// </summary>
-    private void CreateWarpPointPair(GameObject warpWallA, GameObject warpWallB)
+    private void CreateWarpPointPair(
+        GameObject warpWallA,
+        GameObject warpWallB)
     {
-        CS_WarpWallSwitch warpWallSwitchA = warpWallA.GetComponent<CS_WarpWallSwitch>();
-        CS_WarpWallSwitch warpWallSwitchB = warpWallB.GetComponent<CS_WarpWallSwitch>();
+        CS_WarpWallSwitch warpWallSwitchA =
+            warpWallA.GetComponent<CS_WarpWallSwitch>();
+
+        CS_WarpWallSwitch warpWallSwitchB =
+            warpWallB.GetComponent<CS_WarpWallSwitch>();
 
         if (warpWallSwitchA == null)
         {
@@ -460,34 +564,21 @@ public class CS_WarpSpawn : MonoBehaviour
             return;
         }
 
-        Transform warpPointA = warpWallSwitchA.GetWarpPointTransform();
-        Transform warpPointB = warpWallSwitchB.GetWarpPointTransform();
+        // ワープPrefabを生成する位置
+        Transform warpPointA =
+            warpWallSwitchA.GetWarpPointTransform();
 
-        Transform warpExitPositionA = FindChildObject(warpWallA.transform, "WarpExitPosition");
-        Transform warpExitPositionB = FindChildObject(warpWallB.transform, "WarpExitPosition");
+        Transform warpPointB =
+            warpWallSwitchB.GetWarpPointTransform();
 
-        if (warpExitPositionA == null)
-        {
-            Debug.LogWarning(
-                "[CS_WarpSpawn] WarpExitPosition が見つかりません : "
-                + warpWallA.name,
-                warpWallA
-            );
+        // ワープ後にプレイヤーが出現する位置
+        Transform warpAfterPositionA =
+            warpWallSwitchA.GetWarpAfterPositionTransform();
 
-            warpExitPositionA = warpPointA;
-        }
+        Transform warpAfterPositionB =
+            warpWallSwitchB.GetWarpAfterPositionTransform();
 
-        if (warpExitPositionB == null)
-        {
-            Debug.LogWarning(
-                "[CS_WarpSpawn] WarpExitPosition が見つかりません : "
-                + warpWallB.name,
-                warpWallB
-            );
-
-            warpExitPositionB = warpPointB;
-        }
-
+        // ワープPrefabを生成
         GameObject entranceObj = Instantiate(
             warpEntrancePrefab,
             warpPointA.position,
@@ -506,9 +597,11 @@ public class CS_WarpSpawn : MonoBehaviour
         currentEntrance = entranceObj;
         currentExit = exitObj;
 
-        //WarpPoint のリンク設定（双方向）
-        CS_WarpPoint entranceWP = entranceObj.GetComponent<CS_WarpPoint>();
-        CS_WarpPoint exitWP = exitObj.GetComponent<CS_WarpPoint>();
+        CS_WarpPoint entranceWP =
+            entranceObj.GetComponent<CS_WarpPoint>();
+
+        CS_WarpPoint exitWP =
+            exitObj.GetComponent<CS_WarpPoint>();
 
         if (entranceWP == null)
         {
@@ -532,24 +625,30 @@ public class CS_WarpSpawn : MonoBehaviour
             return;
         }
 
+        // ワープ先を双方向に設定
         entranceWP.targetPoint = exitWP;
         exitWP.targetPoint = entranceWP;
 
-        entranceWP.warpExitPosition = warpExitPositionA;
-        exitWP.warpExitPosition = warpExitPositionB;
+        // 各ワープ地点が所属する壁側の
+        // ワープ後出現位置を設定
+        entranceWP.warpExitPosition = warpAfterPositionA;
+        exitWP.warpExitPosition = warpAfterPositionB;
     }
 
     /// <summary>
-    /// WarpWallの有効/無効フラグを切り替えます。
+    /// WarpWallの有効・無効を切り替えます。
     /// </summary>
-    private void SetWarpWallFlag(GameObject warpWallObject, bool flag)
+    private void SetWarpWallFlag(
+        GameObject warpWallObject,
+        bool flag)
     {
         if (warpWallObject == null)
         {
             return;
         }
 
-        CS_WarpWallSwitch warpWallSwitch = warpWallObject.GetComponent<CS_WarpWallSwitch>();
+        CS_WarpWallSwitch warpWallSwitch =
+            warpWallObject.GetComponent<CS_WarpWallSwitch>();
 
         if (warpWallSwitch == null)
         {

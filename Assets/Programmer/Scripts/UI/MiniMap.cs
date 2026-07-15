@@ -14,6 +14,7 @@ public class MiniMap : MonoBehaviour
     [SerializeField] private Sprite treasureIconSprite;
     [SerializeField] private Sprite treasureMoveIconSprite;
     [SerializeField] private Sprite treasurePinchIconSprite;
+    [SerializeField] private Danger dangerUI;
 
     [SerializeField] private string playerTag = "Player";
     [SerializeField] private string thiefTag = "Thief";
@@ -206,6 +207,7 @@ public class MiniMap : MonoBehaviour
 
     private void RenderSetting()
     {
+        bool isTreasureMove = false;
         for (int i = 0 ; i < targetObjects.Length ; i++)
         {
             miniMapObjectInfo[i].playerIcon.SetActive(miniMapInfo[i].isPlayerIconActive);
@@ -228,9 +230,11 @@ public class MiniMap : MonoBehaviour
                         miniMapObjectInfo[i].treasureIcon.GetComponent<UnityEngine.UI.Image>().sprite = treasureIconSprite;
                         break;
                     case TreasureMode.Move:
+                        isTreasureMove = true;
                         miniMapObjectInfo[i].treasureIcon.GetComponent<UnityEngine.UI.Image>().sprite = treasureMoveIconSprite;
                         break;
                     case TreasureMode.Pinch:
+                        isTreasureMove = true;
                         miniMapObjectInfo[i].treasureIcon.GetComponent<UnityEngine.UI.Image>().sprite = treasurePinchIconSprite;
                         break;
                 }
@@ -251,6 +255,8 @@ public class MiniMap : MonoBehaviour
                 activeIcons[j].anchoredPosition = positions[j];
             }
         }
+
+        dangerUI.SetFrame(isTreasureMove);
     }
 
     private Vector2[] GetLayoutPositions(int count, float width, float height)

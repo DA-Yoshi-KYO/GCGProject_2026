@@ -16,7 +16,6 @@ public class CS_BackGroundPlayBGM : MonoBehaviour
     [SerializeField] private SO_BackGroundBGMDataBase dataBase;//データベース
 
     private CriAtomExPlayer playerInfo;//Player生成
-    private CriAtomExAcb[] criAtomExAcbsList;//CueSheet
 
     private string currentScene;//現在のシーン
 
@@ -37,7 +36,6 @@ public class CS_BackGroundPlayBGM : MonoBehaviour
 
         ////初期化
         playerInfo = new CriAtomExPlayer();
-        criAtomExAcbsList = new CriAtomExAcb[dataBase.bgmDatas.Length];
 
         //BGMの設定と再生
         SettingBGM(currentScene);
@@ -95,7 +93,7 @@ public class CS_BackGroundPlayBGM : MonoBehaviour
 
         if (data.cueName.ToString() != "NoneBGM")
         {
-            playerInfo.SetCue(criAtomExAcbsList[0], data.cueName.ToString());
+            playerInfo.SetCue(CriAtom.GetCueSheet("BackGround_BGM").acb, data.cueName.ToString());
             playerInfo.Loop(true);
             playerInfo.SetVoicePriority(255);
             playerInfo.Prepare();
@@ -143,7 +141,7 @@ public class CS_BackGroundPlayBGM : MonoBehaviour
         {
             playerInfo.Stop();
             playerInfo.SetStartTime(0);
-            playerInfo.SetCue(criAtomExAcbsList[0], thiefData.cueName.ToString());
+            playerInfo.SetCue(CriAtom.GetCueSheet("BackGround_BGM").acb, thiefData.cueName.ToString());
             playerInfo.Start();
             thiefGetTreature = true;
         }
@@ -152,7 +150,7 @@ public class CS_BackGroundPlayBGM : MonoBehaviour
         {
             playerInfo.Stop();
             playerInfo.SetStartTime(0);
-            playerInfo.SetCue(criAtomExAcbsList[0], currentData.cueName.ToString());
+            playerInfo.SetCue(CriAtom.GetCueSheet("BackGround_BGM").acb, currentData.cueName.ToString());
             playerInfo.Start();
             thiefGetTreature = false;
         }

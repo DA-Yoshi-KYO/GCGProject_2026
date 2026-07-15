@@ -10,6 +10,7 @@
  * 2026-05-22 | ファイル名を変更（CSS_ThiefCommonStatusData.cs → SO_ThiefCommonStatusData.cs）(ウルノ)
  *            | クラス名を変更（SO_ThiefCommonStatusData → CO_ThiefCommonStatusData）(ウルノ)
  *            | ファイル名を変更（ThiefCommonStatusData → DB_ThiefCommonStatusData）(ウルノ)
+ * 2026-07-02 | タイプによって使用するモデルとアイコンをDB化(ウルノ)
  * 
  */
 using System.Collections.Generic;

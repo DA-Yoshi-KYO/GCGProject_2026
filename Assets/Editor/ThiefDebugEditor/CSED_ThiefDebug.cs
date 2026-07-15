@@ -6,6 +6,8 @@
  *　2026-05-19 | 初回作成
  *　2026-05-22 | ファイル名を変更（ThiefDebug.cs → CSED_ThiefDebug.cs）
  *　           | クラス名を変更（ThiefDebug → CSED_ThiefDebug）
+ *　2026-07-12 | 泥棒デバックエディタのエラーログ解消のための大改修
+ *　           | 対象の泥棒リストを親エディタウィンドウで管理するように変更
  *　
  */
 #if UNITY_EDITOR
