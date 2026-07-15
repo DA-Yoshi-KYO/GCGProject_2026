@@ -503,11 +503,12 @@ public class CS_ThiefAI : MonoBehaviour
         if (holdTreasureCollider != null) holdTreasureCollider.enabled = false;
 
         // 宝物のサイズを半分にする
-        holdTreasure.transform.localScale *= 0.5f; 
+        holdTreasure.transform.localScale *= 0.5f;
 
         //-- 体の前に持つ位置を設定
         // 泥棒の正面方向を基準に、少し前方に持つ位置を設定
-        Vector3 holdPosition = transform.position + transform.forward * 0.5f + Vector3.up * -0.5f;
+        Vector3 forward = transform.forward.normalized; // ベクトルを正規化
+        Vector3 holdPosition = transform.position + forward * 0.5f + Vector3.up * -0.5f;
         holdTreasure.transform.position = holdPosition;
 
         CS_VisionTarget visionTarget = holdTreasure.GetComponent<CS_VisionTarget>();
@@ -582,6 +583,85 @@ public class CS_ThiefAI : MonoBehaviour
         // 耐久力が0以下の場合は、時間経過後に退場する
         else
         {
+            // 宝物を現在の部屋のオブジェクトに親子付けする
+            if (holdTreasure != null)
+            {
+                // 宝物のコライダーを有効にする
+                holdTreasure.GetComponent<Collider>().enabled = true;
+                // 宝物のサイズを元に戻す
+                holdTreasure.transform.localScale = Vector3.one;
+                // 宝物を現在の部屋のオブジェクトに親子付けする
+                holdTreasure.transform.SetParent(memorySystem.read_CurrentRoom.read_ObjectParent.transform);
+                holdTreasure.GetComponent<CS_VisionTarget>().StopStolen();
+
+                // 宝物を設置するグリッドを探す
+                // 真下のグリッドセルインデックスを取得
+                RoomGrid roomGrid = memorySystem.read_CurrentRoomPoint.GetComponentInChildren<RoomGrid>();
+                Vector2Int gridIndex = roomGrid.GetGridFromPos(transform.position);
+
+                List<Vector2Int> targetGridOffset = new List<Vector2Int>();
+                // 周囲3x3のグリッドセルを探索
+                for (int x = -1 ; x <= 1 ; x++)
+                {
+                    for (int y = -1 ; y <= 1 ; y++)
+                    {
+                        targetGridOffset.Add(new Vector2Int(x, y));
+
+                        if (roomGrid.read_GridDivision.x <= gridIndex.x + x || gridIndex.x + x < 0 ||
+                            roomGrid.read_GridDivision.y <= gridIndex.y + y || gridIndex.y + y < 0)
+                        {
+                            // グリッドの範囲外の場合は、対象から除外する
+                            targetGridOffset.RemoveAt(targetGridOffset.Count - 1);
+                        }
+                    }
+                }
+
+                Vector3 gridPos = Vector3.zero;
+                while (true)
+                {
+                    // リストが空の場合はループを抜ける
+                    if (targetGridOffset.Count == 0)
+                    {
+                        Debug.LogWarning("有効なグリッドセルが見つからなかったため、宝物をデフォルト位置にドロップします。");
+                        gridPos = transform.position; // デフォルトの位置として現在の位置を使用
+                        break;
+                    }
+
+                    // ランダムにグリッドセルのオフセットを選択
+                    int randomIndex = UnityEngine.Random.Range(0, targetGridOffset.Count);
+
+                    // 選択したグリッドセルの位置をワールド座標で
+                    gridPos = roomGrid.GetWorldPosFromGrid(gridIndex + targetGridOffset[randomIndex]);
+
+                    GameObject rayCastObject = new GameObject();
+                    rayCastObject.transform.position = gridPos;
+
+                    RaycastHit[] hits = Physics.RaycastAll(gridPos, Vector3.up, 20, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
+
+                    bool isStandFound = false;
+                    foreach (RaycastHit hit in hits)
+                    {
+                        // Standタグのオブジェクトに当たっている場合はフラグをtureにする
+                        if (hit.transform.name.Contains("Stand")) isStandFound = true;
+                    }
+
+                    // Standに当たっていない場合は、設置する位置を決定する
+                    if (!isStandFound) break;
+
+                    // チェックしたグリッドはリストから削除する
+                    targetGridOffset.RemoveAt(randomIndex);
+                }
+
+                GameObject Thief_DropTreatureHit = GameObject.Find("Thief_DropTreatureHit" + transform.name);
+                if (Thief_DropTreatureHit == null)
+                    if (thiefSound != null)
+                        thiefSound.PlayOneShotSE("Thief_DropTreatureHit", gameObject.transform.position, "Thief_DropTreatureHit");
+
+                // 宝物を設置する位置を設定
+                holdTreasure.transform.position = gridPos;
+                holdTreasure = null;
+            }
+
             // 経過時間が退場するまでの時間を超えた場合は、退場する処理を追加する
             if (elapsedTimeAfterStun >= exitAfterStunTime)
             {
@@ -607,83 +687,6 @@ public class CS_ThiefAI : MonoBehaviour
 
                 if (fadeAmount <= 0.0f)
                 {
-                    // 宝物を現在の部屋のオブジェクトに親子付けする
-                    if (holdTreasure != null)
-                    {
-                        // 宝物のコライダーを有効にする
-                        holdTreasure.GetComponent<Collider>().enabled = true;
-                        // 宝物のサイズを元に戻す
-                        holdTreasure.transform.localScale = Vector3.one;
-                        // 宝物を現在の部屋のオブジェクトに親子付けする
-                        holdTreasure.transform.SetParent(memorySystem.read_CurrentRoom.read_ObjectParent.transform);
-                        holdTreasure.GetComponent<CS_VisionTarget>().StopStolen();
-
-                        // 宝物を設置するグリッドを探す
-                        // 真下のグリッドセルインデックスを取得
-                        RoomGrid roomGrid = memorySystem.read_CurrentRoomPoint.GetComponentInChildren<RoomGrid>();
-                        Vector2Int gridIndex = roomGrid.GetGridFromPos(transform.position);
-
-                        List<Vector2Int> targetGridOffset = new List<Vector2Int>();
-                        // 周囲3x3のグリッドセルを探索
-                        for (int x = -1 ; x <= 1 ; x++)
-                        {
-                            for (int y = -1 ; y <= 1 ; y++)
-                            {
-                                targetGridOffset.Add(new Vector2Int(x, y));
-
-                                if (roomGrid.read_GridDivision.x <= gridIndex.x + x || gridIndex.x + x < 0 ||
-                                    roomGrid.read_GridDivision.y <= gridIndex.y + y || gridIndex.y + y < 0)
-                                {
-                                    // グリッドの範囲外の場合は、対象から除外する
-                                    targetGridOffset.RemoveAt(targetGridOffset.Count - 1);
-                                }
-                            }
-                        }
-
-                        Vector3 gridPos = Vector3.zero;
-                        while (true)
-                        {
-                            // リストが空の場合はループを抜ける
-                            if (targetGridOffset.Count == 0)
-                            {
-                                Debug.LogWarning("有効なグリッドセルが見つからなかったため、宝物をデフォルト位置にドロップします。");
-                                gridPos = transform.position; // デフォルトの位置として現在の位置を使用
-                                break;
-                            }
-
-                            // ランダムにグリッドセルのオフセットを選択
-                            int randomIndex = UnityEngine.Random.Range(0, targetGridOffset.Count);
-
-                            // 選択したグリッドセルの位置をワールド座標で
-                            gridPos = roomGrid.GetWorldPosFromGrid(gridIndex + targetGridOffset[randomIndex]);
-
-                            GameObject rayCastObject = new GameObject();
-                            rayCastObject.transform.position = gridPos;
-
-                            RaycastHit[] hits = Physics.RaycastAll(gridPos, Vector3.up, 20, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
-
-                            bool isStandFound = false;
-                            foreach (RaycastHit hit in hits)
-                            {
-                                // Standタグのオブジェクトに当たっている場合はフラグをtureにする
-                                if (hit.transform.name.Contains("Stand")) isStandFound = true;
-                            }
-
-                            // Standに当たっていない場合は、設置する位置を決定する
-                            if (!isStandFound) break;
-
-                            // チェックしたグリッドはリストから削除する
-                            targetGridOffset.RemoveAt(randomIndex);
-                        }
-
-                        GameObject Thief_DropTreatureHit = GameObject.Find("Thief_DropTreatureHit" + transform.name);
-                        if (Thief_DropTreatureHit == null)
-                            if (thiefSound != null)
-                                thiefSound.PlayOneShotSE("Thief_DropTreatureHit", gameObject.transform.position, "Thief_DropTreatureHit");
-
-                        // 宝物を設置する位置を設定
-                        holdTreasure.transform.position = gridPos;
-                    }
                     Destroy(this.gameObject);
                 }
             }
