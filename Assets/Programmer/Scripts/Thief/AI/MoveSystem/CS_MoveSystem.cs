@@ -254,8 +254,8 @@ public class CS_MoveSystem
     /// </summary>
     public void DebugMove()
     {
-        if (thiefAI.read_AnimatorSystem.read_Animator.GetBool("IsStun")) return; // 気絶状態のときは移動要求を無視する
-        if (Time.timeScale == 0) return; // ゲームが一時停止中の場合は移動要求を無視する
+        if (thiefAI.read_CurrentState == CS_ThiefAI.ThiefState.Stunned) return; // 気絶状態のときは移動要求を無視する
+        if (Time.timeScale == 0.0f || Time.deltaTime == 0.0f) return; // ゲームが一時停止中の場合は移動要求を無視する
 
         // 同じ位置にいるフレーム数をカウントする
         if (debugPos == thiefAI.transform.position)
@@ -290,6 +290,8 @@ public class CS_MoveSystem
                 {
                     // ターゲットをクリアする
                     thiefAI.read_MemorySystem.ClearTarget();
+                    // 現在いる部屋の移動ポイントに向かって移動する
+                    thiefAI.read_MemorySystem.DecideTargetMovePoint();
                 }
             }
         }
