@@ -103,6 +103,11 @@ public class CS_BackGroundPlayBGM : MonoBehaviour
         }
         else
         {
+            playerInfo.SetCue(criAtomExAcbsList[0], "SelectBGM");
+            playerInfo.Loop(true);
+            playerInfo.SetVoicePriority(255);
+            playerInfo.Prepare();
+            playerInfo.SetVolume(0.0f);
             playerInfo.Stop();
         }
 
