@@ -980,6 +980,9 @@ public class CS_PlayerAction : MonoBehaviour
     //ワープUIの非表示処理
     private void WarpUIView()
     {
+        if (warpUIGameObject == null)
+            return;
+
         if(warpUIView)
         {
             warpUIGameObject.SetActive(true);
