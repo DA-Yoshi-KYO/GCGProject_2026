@@ -269,9 +269,11 @@ public class CS_PlayerMove : MonoBehaviour
 
         Vector2 velocityXZ = new Vector2(velocity.x, velocity.z);
         bool isMoving = velocityXZ.sqrMagnitude > 0.0001f;
-        if (isMoving && isRunning && controller.isGrounded)
+
+        if (animator.GetCurrentAnimatorStateInfo(0).IsName("Walk"))
         {
-            animator.speed = 1.5f;
+            if (isRunning) animator.speed = 1.8f;
+            else animator.speed = 1.5f;
         }
         else
         {
