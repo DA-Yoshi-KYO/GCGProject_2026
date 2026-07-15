@@ -287,10 +287,16 @@ public class GimmickList : MonoBehaviour
                     case Gimmick.MagicAnkh:
                         situation = "MagicAnkh";
                         break;
-                        case Gimmick.CloneCat:
+                    case Gimmick.CloneCat:
                         situation = "CloneCat";
                         break;
+                    case Gimmick.Teleport:
+                        situation = "Teleport";
+                        break;
                     case Gimmick.None:
+                        situation = "None";
+                        break;
+                    default:
                         situation = "None";
                         break;
                 }

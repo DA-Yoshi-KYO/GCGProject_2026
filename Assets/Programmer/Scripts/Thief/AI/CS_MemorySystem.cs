@@ -6,11 +6,23 @@
  * 2026-05-27 | 初回作成
  * 2026-06-04 | 視認したオブジェクトを記憶する処理を作り変え
  *            | プレイヤーを無視するフラグと、プレイヤーを追跡する残り時間の処理を追加
+ * 2026-06-05 | プレイヤーを発見する猶予時間の処理を追加
+ * 2026-06-08 | 泥棒の現在いる部屋部屋のCreateRoomPointを取得する変数の追加
+ * 2026-06-10 | 泥棒を生成した瞬間固まってしまっている問題の修正
+ *            | 探索しないバグの修正
+ * 2026-06-11 | 宝物発見判定に記憶しているものも利用するようにする
+ *            | 行ったことのある部屋しかない状態でも移動するように修正
+ * 2026-07-03 | 探索が終了しないバグの修正
+ * 2026-07-08 | 泥棒の次の部屋決めロジックの再構築
+ * 2026-07-10 | 泥棒が宝物を無視するバグの修正
+ *            | 宝部屋に宝物が残っているかの判定を追加
+ * 2026-07-12 | スタックする問題の修正
+ *            | 泥棒がムーンウォークする問題の修正
+ *            | 移動ポイントのシステム改変
+ * 
  */
 using System.Collections.Generic;
-using Unity.VisualScripting.Dependencies.Sqlite;
 using UnityEngine;
-using static UnityEditor.Recorder.OutputPath;
 
 /// <summary>
 /// 泥棒の記憶に関するシステムを管理するクラス
@@ -77,6 +89,12 @@ public class CS_MemorySystem
 
     [Tooltip("この泥棒が回避する DangerZone の zoneID 一覧")]
     private List<int> avoidZoneIDs = new List<int>();
+
+    [Tooltip("移動ポイントの回り方")]
+    public bool isMovePointListDown = true;
+
+    [Tooltip("移動ポイントを移動した回数")]
+    public int movePointCount = 0;
 
     /// <summary>
     /// 記憶システムの初期設定を行う処理
@@ -322,7 +340,8 @@ public class CS_MemorySystem
         {
             if (!thiefAI.read_AStarSystem.HasRoute)
                 if (!isTreasureObject && !isPlayerObject)
-                    NextDoorElection();
+                    if (movePointCount >= currentRoom.movePoints.Count)
+                        NextDoorElection();
         }
 
         // 現在の探索対象との距離
@@ -552,7 +571,8 @@ public class CS_MemorySystem
                     thiefAI?.transform.LookAt(new Vector3(currentTarget.transform.position.x, thiefAI.transform.position.y, currentTarget.transform.position.z));
 
                     // 泥棒のアニメーション状態をHuntingに変更する
-                    thiefAI?.read_Animator?.SetBool("IsHunting", true);
+                    thiefAI?.read_AnimatorSystem?.ResetAnimationState();
+                    thiefAI?.read_AnimatorSystem?.SetAnimationState(CS_ThiefAnimation.ThiefAnimationState.Hunting);
 
                     // 泥棒のリアクションを探索に変更する
                     thiefAI?.read_ThiefReaction?.ChangeReaction(CS_ThiefReaction.ThiefReactionType.Searching);
@@ -571,7 +591,7 @@ public class CS_MemorySystem
                     // 探索対象の方へ移動する
                     thiefAI?.read_MoveSystem?.MoveTo(currentTarget.transform.position);
 
-                    thiefAI?.read_Animator?.SetBool("IsHunting", false);
+                    thiefAI?.read_AnimatorSystem?.ResetAnimationState();
 
                     thiefAI?.read_ThiefReaction?.ClearReactionByType(CS_ThiefReaction.ThiefReactionType.Searching);
                 }
@@ -612,7 +632,8 @@ public class CS_MemorySystem
                         ((CS_PlayerTarget)currentTarget).transform.GetComponent<CS_PlayerMove>().CaughtByThief(thiefAI.read_RemainingHoldCatTime, thiefAI.transform);
 
                         // 泥棒のアニメーション状態をHuntingに変更する
-                        thiefAI?.read_Animator?.SetBool("IsHunting", true);
+                        thiefAI?.read_AnimatorSystem?.ResetAnimationState();
+                        thiefAI?.read_AnimatorSystem?.SetAnimationState(CS_ThiefAnimation.ThiefAnimationState.Hunting);
 
 
                         return;
@@ -628,48 +649,8 @@ public class CS_MemorySystem
             // 部屋の移動ポイントの場合
             else if (currentTarget is CS_ThiefTarget)
             {
-                if (Vector3.Distance(thiefAI.transform.position, currentTarget.transform.position) > thiefAI.read_ExploredDistanceThresholdMovePoint)
-                {
-                    thiefAI?.read_MoveSystem?.MoveTo(currentTarget.transform.position);
-                    return;
-                }
 
-                // 現在の移動ポイントがリストのどこにあるかを判定
-                for (int i = 0 ; i < currentRoom.movePoints.Count ; i++)
-                {
-                    // 現在の移動ポイントがリストのどこにあるかを判定
-                    if (currentRoom.movePoints[i] == currentTarget)
-                    {
-                        int nextIndex = 0;
-
-                        // 右回りの場合
-                        if (currentRoom.isListDown)
-                        {
-                            // 次のインデックスを計算
-                            nextIndex = i + 1;
-
-                            // インデックスがリストの範囲を超える場合は、リストの先頭に戻す
-                            if (nextIndex >= currentRoom.movePoints.Count) nextIndex = 0;
-
-                            // リストを加算して次の移動ポイントを探索対象に設定
-                            currentTarget = currentRoom.movePoints[nextIndex];
-                        }
-                        // 左回りの場合
-                        else
-                        {
-                            // 次のインデックスを計算
-                            nextIndex = i - 1;
-
-                            // インデックスがリストの範囲を超える場合は、リストの末尾に戻す
-                            if (nextIndex < 0) nextIndex = currentRoom.movePoints.Count - 1;
-
-                            // リストを減算して次の移動ポイントを探索対象に設定
-                            currentTarget = currentRoom.movePoints[nextIndex];
-                        }
-                        thiefAI?.read_MoveSystem?.MoveTo(currentTarget.transform.position);
-                        break;
-                    }
-                }
+                DecideTargetMovePoint();
             }
         }
         // 現在の探索対象がない場合
@@ -724,8 +705,11 @@ public class CS_MemorySystem
         // 部屋の探索度が閾値を超えている場合
         if (IsCurrentRoomExplored())
         {
-            NextDoorElection();
-            return;
+            if (movePointCount >= currentRoom.movePoints.Count)
+            {
+                NextDoorElection();
+                return;
+            }
         }
 
         // 探索対象との距離
@@ -751,6 +735,58 @@ public class CS_MemorySystem
                 else continue;
             }
             thiefAI?.read_MoveSystem?.MoveTo(currentTarget.transform.position);
+            movePointCount = 1;
+        }
+        // 前回の探索対象が移動ポイントの場合は、次の移動ポイントを探索対象に設定する
+        else
+        {
+            // 現在の移動ポイントとの距離が、探索済みとする距離の閾値よりも大きい場合は、探索対象をリセットする
+            if (Vector3.Distance(thiefAI.transform.position, currentTarget.transform.position) > thiefAI.read_ExploredDistanceThresholdMovePoint)
+            {
+                thiefAI?.read_MoveSystem?.MoveTo(currentTarget.transform.position);
+                return;
+            }
+
+            // 現在の移動ポイントがリストのどこにあるかを判定
+            for (int i = 0; i < currentRoom.movePoints.Count; i++)
+            {
+                // 現在の移動ポイントがリストのどこにあるかを判定
+                if (currentRoom.movePoints[i] == currentTarget)
+                {
+                    int nextIndex = 0;
+                    // 右回りの場合
+                    if (isMovePointListDown)
+                    {
+                        // 次のインデックスを計算
+                        nextIndex = i + 1;
+                        // インデックスがリストの範囲を超える場合は、リストの先頭に戻す
+                        if (nextIndex >= currentRoom.movePoints.Count)
+                        {
+                            isMovePointListDown = false;
+                            nextIndex = i - 1;
+                        }
+                        // リストを加算して次の移動ポイントを探索対象に設定
+                        currentTarget = currentRoom.movePoints[nextIndex];
+                    }
+                    // 左回りの場合
+                    else
+                    {
+                        // 次のインデックスを計算
+                        nextIndex = i - 1;
+                        // インデックスがリストの範囲を超える場合は、リストの末尾に戻す
+                        if (nextIndex < 0)
+                        {
+                            isMovePointListDown = true;
+                            nextIndex = i + 1;
+                        }
+                        // リストを減算して次の移動ポイントを探索対象に設定
+                        currentTarget = currentRoom.movePoints[nextIndex];
+                    }
+                    thiefAI?.read_MoveSystem?.MoveTo(currentTarget.transform.position);
+                    movePointCount++;
+                    break;
+                }
+            }
         }
     }
 
@@ -803,8 +839,8 @@ public class CS_MemorySystem
         }
 
         currentTarget = null;
-        // 泥棒のアニメーション状態をHuntingに変更する
-        thiefAI?.read_Animator?.SetBool("IsHunting", false);
+        // 探索対象をリセット
+        thiefAI?.read_AnimatorSystem?.read_Animator.SetBool("IsHunting", false);
     }
 
     /// <summary>
@@ -851,10 +887,8 @@ public class CS_MemorySystem
             // 探索対象が宝物の場合は、そのままtrueを返す
             if (((CS_VisionTarget)currentTarget).targetType == CS_VisionTarget.TargetType.Treasure)
             {
-                // 泥棒のアニメーション状態をHuntingに変更する
-                thiefAI?.read_Animator?.SetBool("IsHunting", false);
-                // 泥棒のアニメーション状態をHuntingに変更する
-                thiefAI?.read_Animator?.SetTrigger("FoundTrigger");
+                // 泥棒のアニメーションをリセット
+                thiefAI?.read_AnimatorSystem?.ResetAnimationState();
                 // 泥棒の状態をFoundに変更する
                 thiefAI?.ChangeStatus(CS_ThiefAI.ThiefState.Found);
 
@@ -1312,7 +1346,7 @@ public class CS_MemorySystem
     {
         FindNowRoomNode(); // ワープした後の現在の部屋を取得して設定する処理
         roomMemories[currentRoom].enteredDoorDirection = entryDoorDir; // ワープしてきたドアの方向を記憶する処理
-
+        movePointCount = 0; // 移動ポイントのカウントをリセットする処理
         ClearTarget();
     }
 

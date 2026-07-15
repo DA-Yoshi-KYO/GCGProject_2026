@@ -35,6 +35,12 @@ public class GimmickSelectUI : MonoBehaviour
     [SerializeField] private Color ctColor1 = new Color(0.25f, 0.25f, 0.25f, 0.85f);
     [SerializeField] private Color ctColor2 = new Color(0.10f, 0.10f, 0.10f, 0.85f);
 
+    [Header("テレポート")]
+    [SerializeField] private Image resetUI;
+    private float teleportImageAlpha = 1.0f;
+    private bool addition = false;
+    public bool ResetUIActive { get; set; } = false;
+
     // ==============================================================
     //  内部型
     // ==============================================================
@@ -124,6 +130,7 @@ public class GimmickSelectUI : MonoBehaviour
     private Dictionary<Gimmick, float> maxCoolTimeByTag;
 
     private int prevIndex = -1;
+    private int prevGimmickCount = -1;
     private bool isAnimating = false;
     private float animT = 0f;
 
@@ -161,13 +168,48 @@ public class GimmickSelectUI : MonoBehaviour
 
         UpdateCountText(idx);
 
+        int gimmickCount = gimmickManager != null ? gimmickManager.GetCurrentGimmick().Count : 0;
+
         if (idx != prevIndex)
         {
             OnIndexChanged(idx);
         }
+        else if (gimmickCount != prevGimmickCount)
+        {
+            // 選択中インデックスは変わらなくても、所持ギミックの種類数が増減すると
+            // 左右に表示される候補が変わるため、アニメーション無しで即座に反映する
+            RefreshImages(idx);
+        }
+
+        prevGimmickCount = gimmickCount;
 
         AnimateSlots();
         UpdateCTMask(idx);
+
+
+        resetUI.gameObject.SetActive(ResetUIActive);
+        if (addition)
+        {
+            teleportImageAlpha += Time.deltaTime;
+            if(teleportImageAlpha > 1.0f)
+            {
+                teleportImageAlpha = 1.0f;
+                addition = false;
+            }
+            resetUI.color = new Color(1.0f, 1.0f, 1.0f, teleportImageAlpha);
+        }
+        else
+        {
+            teleportImageAlpha -= Time.deltaTime;
+            if (teleportImageAlpha < 0.0f)
+            {
+                teleportImageAlpha = 0.0f;
+                addition = true;
+            }
+            resetUI.color = new Color(1.0f, 1.0f, 1.0f, teleportImageAlpha);
+        }
+
+
     }
 
     /// <summary>
@@ -278,7 +320,16 @@ public class GimmickSelectUI : MonoBehaviour
     {
         var kinds = gimmickManager.GetCurrentGimmick();
         int count = kinds.Count;
-        if (count == 0) return;
+
+        if (count == 0)
+        {
+            // ギミックを何も所持していない場合は全スロットを非表示にする
+            centerSlot.SetSprite(null);
+            leftSlot.SetSprite(null);
+            rightSlot.SetSprite(null);
+            SetTextImage(null);
+            return;
+        }
 
         int leftIdx = (idx - 1 + count) % count;
         int rightIdx = (idx + 1) % count;
@@ -287,14 +338,16 @@ public class GimmickSelectUI : MonoBehaviour
         leftSlot.SetSprite(GetSprite(leftIdx));
         rightSlot.SetSprite(GetSprite(rightIdx));
 
-        Sprite gimmickTextSprite = GetGimmickBase(idx)?.gimmickTextImage;
-        if (textImg != null)
-        {
-            textImg.sprite = gimmickTextSprite;
-            Color c = textImg.color;
-            c.a = (gimmickTextSprite != null) ? 1f : 0f;
-            textImg.color = c;
-        }
+        SetTextImage(GetGimmickBase(idx)?.gimmickTextImage);
+    }
+
+    private void SetTextImage(Sprite sprite)
+    {
+        if (textImg == null) return;
+        textImg.sprite = sprite;
+        Color c = textImg.color;
+        c.a = (sprite != null) ? 1f : 0f;
+        textImg.color = c;
     }
 
     private void UpdateCountText(int idx)

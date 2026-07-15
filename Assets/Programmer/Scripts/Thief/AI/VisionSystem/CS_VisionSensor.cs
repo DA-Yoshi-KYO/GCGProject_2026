@@ -8,6 +8,7 @@
  * 2026-05-22 | ファイル名を変更（VisionSensor.cs → CS_VisionSensor.cs）
  *            | クラス名を変更（VisionSensor → CS_VisionSensor）
  * 2026-05-27 | MonoBehaviourから通常クラスに変更
+ * 2026-06-14 | 泥棒の視認オブジェクト検出を複数レイヤーに対応
  * 
  */
 using System.Collections.Generic;
@@ -138,17 +139,5 @@ public class CS_VisionSensor : MonoBehaviour
             return false;
 
         return true;
-    }
-
-    private void OnDrawGizmos()
-    {
-        // 視界の半径を表すワイヤースフィアを描画
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, viewDistance);
-        // 視界の角度を表す線を描画
-        Vector3 leftBoundary = Quaternion.Euler(0, -viewAngle / 2, 0) * transform.forward * viewDistance;
-        Vector3 rightBoundary = Quaternion.Euler(0, viewAngle / 2, 0) * transform.forward * viewDistance;
-        Gizmos.DrawLine(transform.position, transform.position + leftBoundary);
-        Gizmos.DrawLine(transform.position, transform.position + rightBoundary);
     }
 }

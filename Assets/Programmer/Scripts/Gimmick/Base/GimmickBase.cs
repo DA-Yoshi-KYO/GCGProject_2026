@@ -11,6 +11,7 @@ public enum Gimmick
     Pitfall,
     MagicAnkh,
     CloneCat,
+    Teleport,
 }
 
 public enum GimmickState
@@ -464,7 +465,7 @@ public class GimmickBase : MonoBehaviour
 
     public Vector2Int GetGimmickSize()
     {
-        return new Vector2Int(gimmickSize.x, gimmickSize.y);
+        return gimmickSize;
     }
 
     public Gimmick GetGimmickTag()

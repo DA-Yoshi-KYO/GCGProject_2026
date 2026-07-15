@@ -6,6 +6,7 @@
  * 2026-04-19 | 初回作成
  * 2026-05-22 | ファイル名を変更（RoomNode.cs → CS_RoomNode.cs）
  *            | クラス名を変更（RoomNode → CS_RoomNode）
+ * 2026-07-12 | ギズモの色が開始位置から終了位置までグラデーションになるように変更
  * 
  */
 using System.Collections.Generic;
@@ -18,9 +19,6 @@ public class CS_RoomNode : MonoBehaviour
 {
     [Tooltip("部屋の移動ポイントリスト")]
     public List<CS_ThiefTarget> movePoints;
-
-    [Tooltip("移動ポイントの回り方")]
-    public bool isListDown = true;// trueなら右回り、falseなら左回り
 
     [SerializeField, Header("壁の親オブジェクト")]
     private GameObject wallParent;

@@ -61,13 +61,10 @@ public class Option : MonoBehaviour
         }
 
         // Input生成
-        _input = new CustomInputAction();
+        _input = CS_CustomInputActionManager.instance.customInputAction;
 
         // Option入力のトリガー登録
         _input.Player.Option.performed += OnOption;
-
-        // Input有効化
-        _input.Enable();
 
         GameObject canvase = GameObject.Find("Canvases");
         if(canvase == null)
@@ -247,15 +244,5 @@ public class Option : MonoBehaviour
     public bool GetIsOptionUIActive()
     {
         return _isOptionUIActive;
-    }
-
-    private void OnDestroy()
-    {
-        if (_input != null)
-        {
-            _input.Player.Option.performed -= OnOption;
-
-            _input.Disable();
-        }
     }
 }

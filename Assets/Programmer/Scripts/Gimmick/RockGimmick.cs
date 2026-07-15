@@ -46,9 +46,7 @@ public class RockGimmick : GimmickBase
 
     private bool isDangerZoneSpawned;
 
-    //サウンドにストップができたら使う
-    private float activeTimer = 0f;
-    private bool soundPlayed = false;
+    GameObject seObject;
 
     Vector3 startPos;
     Vector3 rollDir;
@@ -76,22 +74,15 @@ public class RockGimmick : GimmickBase
     {
         //！！！ここら辺のサウンド周りは、ストップ関数ができたら使います！！！//
 
-        //if (soundPlayed)
-        //{
-        //    activeTimer -= Time.deltaTime;
-        //    if (activeTimer <= 0f)
-        //    {
-        //        soundPlayed = false;
-        //    }
-        //}
-        //サウンドループ用
-        //if(!soundPlayed)
-        //{
-        //    if (gimmickSound != null) gimmickSound.PlayOneShotSE("RockRolling", gameObject.transform.position, "RockSound");
-        //    activeTimer = gimmickSound.GetAudioLength("RockRolling");
-        //    soundPlayed = true;
-        //}
-
+        // サウンドループ用
+        if (gimmickSound != null)
+        {
+            if (seObject == null)
+            {
+                seObject = gimmickSound.PlayOneShotSE("Gimmick_RockRoll", gameObject.transform.position, "RockSound");
+            }
+        }
+        if (seObject != null) seObject.transform.position = transform.position;
 
         //-----------------------------------------
         // 進行方向決定
@@ -107,13 +98,6 @@ public class RockGimmick : GimmickBase
         if (isFirstActive)
         {
             isFirstActive = false;
-
-            if (gimmickSound != null)
-            {
-                gimmickSound.PlayOneShotSE("Gimmick_RockRoll", transform.position, "RockRolling");
-                activeTimer = gimmickSound.GetAudioLength("Gimmick_RockRoll");
-            }
-
             initPositionY = transform.position.y;
             velocity = Vector3.zero;
             SetHitChecker(transform.position);
@@ -477,6 +461,12 @@ public class RockGimmick : GimmickBase
                 Destroy(checker);
         }
     }
+
+    private void OnDestroy()
+    {
+        Destroy(seObject);
+    }
+
     private void ReverseGimmickDirection()
     {
         switch (gimmickDirection)

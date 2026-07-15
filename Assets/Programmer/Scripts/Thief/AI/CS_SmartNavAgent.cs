@@ -203,6 +203,7 @@ public sealed class CS_SmartNavAgent : MonoBehaviour
                 continue;
             }
 
+            // 経路上に危険がなければ採用
             if (!PathContainsDanger(reusablePath))
             {
                 best = hit.position;

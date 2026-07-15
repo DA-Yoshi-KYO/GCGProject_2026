@@ -4,6 +4,8 @@
  *    宇留野 陸斗
  * ----------------------------------------------------------
  * 2026-05-27 | 初回作成
+ * 2026-07-06 | スタック解消用のデバック移動を削除
+ * 2026-07-12 | スタック解消用のデバック移動を再構築
  * 
  */
 using System.Collections.Generic;
@@ -97,6 +99,8 @@ public class CS_MoveSystem
         {
             // 標的がいない場合は歩き速度に切り替える
             navMeshAgent.speed = walkSpeed;
+            thiefAI?.read_AnimatorSystem?.SetAnimationState(CS_ThiefAnimation.ThiefAnimationState.Walk);
+
             return;
         }
 
@@ -110,6 +114,7 @@ public class CS_MoveSystem
                     {
                         // 現在の標的がプレイヤーの場合は走り速度に切り替える
                         navMeshAgent.speed = runSpeed;
+                        thiefAI?.read_AnimatorSystem?.SetAnimationState(CS_ThiefAnimation.ThiefAnimationState.Run);
                         return;
                     }
                     break;
@@ -118,12 +123,14 @@ public class CS_MoveSystem
                     {
                         // 現在の標的が宝物の場合は走り速度に切り替える
                         navMeshAgent.speed = runSpeed;
+                        thiefAI?.read_AnimatorSystem?.SetAnimationState(CS_ThiefAnimation.ThiefAnimationState.Run);
                         return;
                     }
                     if (currentTarget is CS_TrapTarget tt && tt.gimmickScript.gimmick == Gimmick.EmptyChest)
                     {
                         // 現在の標的が宝物ギミックの場合は走り速度に切り替える
                         navMeshAgent.speed = runSpeed;
+                        thiefAI?.read_AnimatorSystem?.SetAnimationState(CS_ThiefAnimation.ThiefAnimationState.Run);
                         return;
                     }
                     break;
@@ -132,12 +139,14 @@ public class CS_MoveSystem
                     {
                         // 現在の標的が捜索対象オブジェクトの場合は走り速度に切り替える
                         navMeshAgent.speed = runSpeed;
+                        thiefAI?.read_AnimatorSystem?.SetAnimationState(CS_ThiefAnimation.ThiefAnimationState.Run);
                         return;
                     }
                     break;
             }
         }
 
+        thiefAI?.read_AnimatorSystem?.SetAnimationState(CS_ThiefAnimation.ThiefAnimationState.Walk);
         //標的の場合は歩き速度に切り替える
         navMeshAgent.speed = walkSpeed;
     }
@@ -166,7 +175,7 @@ public class CS_MoveSystem
         if (navMeshAgent == null || !navMeshAgent.isOnNavMesh) return;
 
         // 漁り状態のときは移動要求を無視する
-        if (thiefAI.read_Animator.GetBool("IsHunting")) return;
+        if (thiefAI.read_AnimatorSystem.read_Animator.GetBool("IsHunting")) return;
         navMeshAgent.isStopped = false; // SmartNavAgentを使用する場合はNavMeshAgentを停止状態から解除する
 
         UpdateMoveSpeed(thiefAI.read_MemorySystem.read_CurrentTarget); // 現在の標的に応じて移動速度を更新する
@@ -240,37 +249,51 @@ public class CS_MoveSystem
         thiefAI.transform.position = Vector3.MoveTowards(thiefAI.transform.position, exitPosition, walkSpeed * 0.5f * Time.deltaTime);
     }
 
+    /// <summary>
+    /// デバッグ用の移動処理
+    /// </summary>
     public void DebugMove()
     {
-        if (thiefAI.read_Animator.GetBool("IsStun")) return; // 気絶状態のときは移動要求を無視する
+        if (thiefAI.read_AnimatorSystem.read_Animator.GetBool("IsStun")) return; // 気絶状態のときは移動要求を無視する
         if (Time.timeScale == 0) return; // ゲームが一時停止中の場合は移動要求を無視する
 
+        // 同じ位置にいるフレーム数をカウントする
         if (debugPos == thiefAI.transform.position)
         {
+            // 同じ位置にいるフレーム数が300フレームを超えた場合の処理
             samePosFrameCount++;
             if (samePosFrameCount > 300)
             {
+                // A*システムの経路が存在する場合
                 if (thiefAI.read_AStarSystem.HasRoute)
                 {
+                    // 現在の部屋とA*システムのターゲット部屋が異なる場合は経路をクリアする
                     if (thiefAI.read_MemorySystem.read_CurrentRoom != thiefAI.read_AStarSystem.GetCurrentTargetRoomNode())
                     {
+                        // 経路をクリアして、再度経路計算を行う
                         thiefAI.read_AStarSystem.ClearRoute();
                     }
                     else
                     {
+                        // 経路が存在するが、同じ位置に長時間いる場合はA*システムの更新フラグをリセットして再計算を促す
                         thiefAI.read_AStarSystem.ResetUpdatedFlag();
                     }
                 }
+                // 現在のターゲットが存在する場合
                 else if (thiefAI.read_MemorySystem.read_CurrentTarget != null)
                 {
+                    // そのターゲットに向かって移動する
                     MoveTo(thiefAI.read_MemorySystem.read_CurrentTarget.transform.position);
                 }
+                // 現在のターゲットが存在しない場合は
                 else
                 {
+                    // ターゲットをクリアする
                     thiefAI.read_MemorySystem.ClearTarget();
                 }
             }
         }
+        // 現在の位置が前回の位置と異なる場合はカウンターをリセットする
         else
         {
             debugPos = thiefAI.transform.position;

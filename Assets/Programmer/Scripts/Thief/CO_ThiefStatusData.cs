@@ -10,6 +10,7 @@
  * 2026-05-22 | ファイル名を変更（CSS_ThiefCommonStatusData.cs → SO_ThiefCommonStatusData.cs）(ウルノ)
  *            | クラス名を変更（SO_ThiefCommonStatusData → CO_ThiefCommonStatusData）(ウルノ)
  *            | ファイル名を変更（ThiefCommonStatusData → DB_ThiefCommonStatusData）(ウルノ)
+ * 2026-07-02 | タイプによって使用するモデルとアイコンをDB化(ウルノ)
  * 
  */
 using System.Collections.Generic;
@@ -27,9 +28,9 @@ public class CO_ThiefStatusData : ScriptableObject
     [Tooltip("使用する泥棒のプレハブ"), SerializeField]
     public GameObject thiefPrefab;
 
-    [Header("使用する泥棒のミニマップアイコン")]
-    [Tooltip("使用する泥棒のミニマップアイコン"), SerializeField]
-    public Sprite thiefTypeIcon;
+    [Header("使用する泥棒のアイコン")]
+    [Tooltip("使用する泥棒のアイコン"), SerializeField]
+    public List<Sprite> thiefTypeIcon;
 
     [Header("耐久値")]
     [Tooltip("泥棒の耐久値"), Min(1)]

@@ -30,8 +30,7 @@ public class CS_GameFailureSelectButton : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        inputActions = new CustomInputAction();
-        inputActions.GameOver.Enable();
+        inputActions = CS_CustomInputActionManager.instance.customInputAction;
         inputActions.GameClear.MoveAxis.started += SelectInput;
 
         GameObject retryButtonObject = GameObject.Find("RetryButton");
@@ -59,11 +58,6 @@ public class CS_GameFailureSelectButton : MonoBehaviour
             string sceneName = sceneTransitionName[currentButton];
             sceneTransition.StartSceneTransition(sceneName);
         }
-    }
-
-    private void OnDestroy()
-    {
-        inputActions.GameOver.Disable();
     }
 
     void SelectInput(InputAction.CallbackContext context)

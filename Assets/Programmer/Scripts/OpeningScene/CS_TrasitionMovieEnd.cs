@@ -4,8 +4,11 @@
  *    元浪梨緒
  * ----------------------------------------------------------
  * 2026-06-22 | 初回作成
+ * 2026-07-14 | UIの追加
  */
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.UI;
 using UnityEngine.Video;
 
 public class CS_TrasitionMovieEnd : MonoBehaviour
@@ -13,15 +16,30 @@ public class CS_TrasitionMovieEnd : MonoBehaviour
     [Header("遷移するシーンの名前")][SerializeField] private string sceneName;
     [Header("FadeCanvasのPrefab格納")][SerializeField] private GameObject fadeCanvas;
     [Header("VideoPlayerのコンポーネントが入ったゲームオブジェクト")][SerializeField] private VideoPlayer videoPlayer;
+    [Header("長押しする時間")][SerializeField] private float holdTime;
 
-    private CustomInputAction custoomInputAction;
+    [Header("Manualの画像を格納")][SerializeField] private GameObject[] manualImage;
+
+    private CustomInputAction customInputAction;
+    private bool Holding = false;
+    private float time;
 
     // Start is called before the first frame update
     void Start()
     {
         // プレイヤーの入力アクションの初期化と有効化
-        custoomInputAction = new CustomInputAction();
-        custoomInputAction.Openning.Enable();
+        customInputAction = CS_CustomInputActionManager.instance.customInputAction;
+        customInputAction.Openning.SkipButton.started += OnHoldStart;
+        customInputAction.Openning.SkipButton.canceled += OnHoldEnd;
+
+        if (manualImage != null && manualImage.Length >= 2)
+        {
+            manualImage[0].SetActive(true);
+            manualImage[1].SetActive(false);
+
+            manualImage[0].GetComponent<Image>().material.SetFloat("_MaxTimeFloat", holdTime);
+            manualImage[1].GetComponent<Image>().material.SetFloat("_MaxTimeFloat", holdTime);
+        }
 
         if (videoPlayer == null)
         {
@@ -29,15 +47,45 @@ public class CS_TrasitionMovieEnd : MonoBehaviour
             return;
         }
         videoPlayer.loopPointReached += OnMovieFinished;
+
+        videoPlayer.Stop();
+        videoPlayer.Play();
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (custoomInputAction.Openning.SkipButton.triggered)
+        if (Holding)
         {
-            if (videoPlayer != null) videoPlayer.Stop();
-            StartTransition();
+            time += Time.deltaTime;
+
+            if (time >= holdTime)
+            {
+                Holding = false;
+                if (videoPlayer != null)
+                    videoPlayer.Stop();
+
+                StartTransition();
+            }
+        }
+        else
+        {
+            time = 0.0f;
+        }
+
+        if (CS_CustomInputActionManager.instance.currentInputType == CS_CustomInputActionManager.InputType.Gamepad)
+        {
+            manualImage[0].SetActive(true);
+            manualImage[1].SetActive(false);
+
+            manualImage[0].GetComponent<Image>().material.SetFloat("_TimeFloat", time);
+        }
+        else
+        {
+            manualImage[0].SetActive(false);
+            manualImage[1].SetActive(true);
+
+            manualImage[1].GetComponent<Image>().material.SetFloat("_TimeFloat", time);
         }
     }
 
@@ -66,10 +114,15 @@ public class CS_TrasitionMovieEnd : MonoBehaviour
         sceneTransition.StartSceneTransition(sceneName);
     }
 
-    private void OnDestroy()
+    private void OnHoldStart(InputAction.CallbackContext ctx)
     {
-        // プレイヤーの入力アクションの無効化
-        if (custoomInputAction != null)
-            custoomInputAction.Openning.Disable();
+        Holding = true;
+        time = 0.0f;
+    }
+
+    private void OnHoldEnd(InputAction.CallbackContext ctx)
+    {
+        Holding = false;
+        time = 0.0f;
     }
 }

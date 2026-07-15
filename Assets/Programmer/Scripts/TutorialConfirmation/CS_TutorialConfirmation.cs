@@ -26,8 +26,7 @@ public class CS_TutorialConfirmation : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        inputActions = new CustomInputAction();
-        inputActions.TutorialConfirmation.Enable();
+        inputActions = CS_CustomInputActionManager.instance.customInputAction;
         inputActions.TutorialConfirmation.MoveAxis.started += TutorialConfirmationButtonSelectInput;
 
         backGroundPlaySE = GameObject.Find("SE").GetComponent<CS_BackGroundPlaySE>();
@@ -36,10 +35,6 @@ public class CS_TutorialConfirmation : MonoBehaviour
 
         currentButton = 0;
         UpdateButtonTexture();
-        foreach (var action in inputActions)
-        {
-            action.performed += OnAction;
-        }
     }
 
     // Update is called once per frame
@@ -70,11 +65,6 @@ public class CS_TutorialConfirmation : MonoBehaviour
                     break;
             }
         }
-    }
-
-    private void OnDestroy()
-    {
-        inputActions.TutorialConfirmation.Disable();
     }
 
     private void UpdateButtonTexture()
@@ -114,18 +104,6 @@ public class CS_TutorialConfirmation : MonoBehaviour
 
                 UpdateButtonTexture();
             }
-        }
-    }
-
-    private void OnAction(InputAction.CallbackContext context)
-    {
-        if (context.control.device is Gamepad)
-        {
-            CS_InputType.currentInputType = CS_InputType.InputType.Gamepad;
-        }
-        else
-        {
-            CS_InputType.currentInputType = CS_InputType.InputType.KeyboardMouse;
         }
     }
 }

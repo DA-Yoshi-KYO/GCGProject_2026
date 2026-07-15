@@ -5,7 +5,6 @@
  * ----------------------------------------------------------
  * 2026-05-18 | 初回作成
  */
-using CriWare;
 using UnityEngine;
 
 public class CS_3DPlaySE : MonoBehaviour

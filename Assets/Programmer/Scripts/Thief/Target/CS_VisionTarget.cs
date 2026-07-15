@@ -7,7 +7,7 @@
  * 2026-05-07 | 探索度を記憶システムに移動
  * 2026-05-22 | ファイル名を変更（VisionTarget.cs → CS_VisionTarget.cs）
  *            | クラス名を変更（VisionTarget → CS_VisionTarget）
- * 
+ * 2026-07-06 | 宝物の出口までの距離と移動しているかの作成
  */
 using UnityEngine;
 using UnityEngine.SceneManagement;

@@ -41,8 +41,17 @@
  * 2026-06-11   | 落とし穴用の処理をCS_ThiefGimmickActionに移動
  *              | 気絶状態の更新処理を実行するかどうかを設定する処理を追加
  * 2026-06-12   | 退場時のフェードアウト処理を追加
+ * 2026-06-19   | 泥棒が宝物を落としたときに近くのグリッドに配置される処理の実装
+ * 2026-07-06   | 泥棒が宝物を落としたときグリッド上に正しく落ちない不具合の修正
+ *              | read_の変数すべてにNullチェックを追加
+ *              | 宝物を落としたときに宙に浮くバグの修正
+ *              | update処理に体力が0の時の状態設定を追加
+ * 2026-07-07   | 泥棒が宝物を持ち帰った後再び帰ってくる処理の実装
+ *              | 泥棒の終了時のエラー修正
+ * 2026-07-10   | 宝物をもってスタンをあけたとき再び探索をするバグの修正
  * 
  */
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
@@ -65,7 +74,7 @@ public class CS_ThiefAI : MonoBehaviour
         [Tooltip("気絶状態")]
         Stunned
     }
-    [SerializeField, Tooltip("現在の行動状態")]
+    [Tooltip("現在の行動状態")]
     private ThiefState currentState;
     public ThiefState read_CurrentState => currentState;
 
@@ -74,13 +83,23 @@ public class CS_ThiefAI : MonoBehaviour
     [Tooltip("泥棒のマテリアルのフェードアウトにかかる時間")]
     private float fadeAfterStunTime;
 
+    [Serializable]
+    public struct ThiefMaterials
+    {
+        public Material materialA;
+        public Material materialB;
+        public Material materialC;
+    }
+    [SerializeField, Tooltip("泥棒のカラーバリエーションリスト")]
+    private List<ThiefMaterials> thiefMaterialsList = new List<ThiefMaterials>();
+
     [Tooltip("使用したデータベース")]
     private CO_ThiefStatusData thiefStatusData;
 
     [Tooltip("アウトラインターゲット")]
     private CS_OutlineTarget outlineTarget;
 
-    [SerializeField, Tooltip("泥棒の耐久力")]
+    [Tooltip("泥棒の耐久力")]
     private int durability;
     public int read_Durability => durability;
 
@@ -148,18 +167,19 @@ public class CS_ThiefAI : MonoBehaviour
     public float read_RemainingHoldCatTime => remainingHoldCatTime;
 
     [Tooltip("アニメーション用")]
-    private Animator animator;
-    public Animator read_Animator
+    private CS_ThiefAnimation animatorSystem;
+    public CS_ThiefAnimation read_AnimatorSystem
     {
         get
         {
-            if (animator == null)
+            if (animatorSystem == null)
             {
-                animator = GetComponentInChildren<Animator>();
+                Animator getAnimator = GetComponentInChildren<Animator>();
+                animatorSystem = new CS_ThiefAnimation(this, getAnimator);
             }
-            if (animator == null) Debug.LogWarning("【泥棒】Animatorコンポーネントが見つかりません。アニメーションが再生されません。");
+            if (animatorSystem == null) Debug.LogWarning("【泥棒】AnimatorSystemが見つかりません。アニメーションが再生されません。");
 
-            return animator;
+            return animatorSystem;
         }
     }
 
@@ -167,7 +187,6 @@ public class CS_ThiefAI : MonoBehaviour
     private Sprite iconSprite;
     public Sprite read_IconSprite => iconSprite;
 
-    // 分解したクラス一覧
     [Tooltip("移動システム")]
     private CS_MoveSystem moveSystem;
     public CS_MoveSystem read_MoveSystem
@@ -278,8 +297,6 @@ public class CS_ThiefAI : MonoBehaviour
     {
         thiefStatusData = typedata;
 
-        iconSprite = typedata.thiefTypeIcon;
-
         durability = typedata.durability;
         maxDurability = typedata.durability;
 
@@ -329,13 +346,23 @@ public class CS_ThiefAI : MonoBehaviour
         fadeAfterStunTime = data.fadeAfterStunTime;
 
         // マテリアルの取得
-        thiefMaterial = transform.GetComponentInChildren<SkinnedMeshRenderer>().materials;
+        SkinnedMeshRenderer skinnedMeshRenderer = transform.GetComponentInChildren<SkinnedMeshRenderer>();
+
+        int colorIndex = UnityEngine.Random.Range(0, thiefMaterialsList.Count);
+        Material[] newColorMaterials = new Material[] { thiefMaterialsList[colorIndex].materialA, thiefMaterialsList[colorIndex].materialB, thiefMaterialsList[colorIndex].materialC };
+        // カラーバリエーションを適応
+        skinnedMeshRenderer.materials = newColorMaterials;
+        thiefMaterial = skinnedMeshRenderer.materials;
+
+        iconSprite = typedata.thiefTypeIcon[colorIndex];
 
         // アウトラインターゲットの取得
         outlineTarget = GetComponentInChildren<CS_OutlineTarget>();
 
         // アニメーション用のコンポーネントを取得
-        animator = GetComponentInChildren<Animator>();
+        Animator getAnimator = GetComponentInChildren<Animator>();
+        animatorSystem = new CS_ThiefAnimation(this, getAnimator);
+        animatorSystem.SetAnimationState(CS_ThiefAnimation.ThiefAnimationState.Walk);
 
         // サウンドマネージャーから泥棒のサウンドを管理するコンポーネントを取得
         GameObject soundManager = GameObject.Find("AudioManager");
@@ -469,10 +496,14 @@ public class CS_ThiefAI : MonoBehaviour
 
         // 宝物を持つ
         holdTreasure = memorySystem.read_CurrentTarget.gameObject;
-        holdTreasure.transform.parent = this.transform; // 泥棒の子オブジェクトにする
+        // 泥棒の子オブジェクトにする
+        holdTreasure.transform.parent = this.transform;
+        // 宝物のコライダーを無効にする
         Collider holdTreasureCollider = holdTreasure.GetComponent<Collider>();
-        if (holdTreasureCollider != null) holdTreasureCollider.enabled = false; // 宝物のコライダーを無効にする
-        holdTreasure.transform.localScale *= 0.5f; // 宝物のサイズを半分にする
+        if (holdTreasureCollider != null) holdTreasureCollider.enabled = false;
+
+        // 宝物のサイズを半分にする
+        holdTreasure.transform.localScale *= 0.5f; 
 
         //-- 体の前に持つ位置を設定
         // 泥棒の正面方向を基準に、少し前方に持つ位置を設定
@@ -534,21 +565,18 @@ public class CS_ThiefAI : MonoBehaviour
         // 耐久値が残っている場合は、気絶時間が経過したら無敵時間を付与して、状態を探索に戻す
         if (durability > 0)
         {
-            // 経過時間が気絶時間を超えた場合は、耐久力を減少させて、状態を探索に戻す
+            // 経過時間が気絶時間を超えた場合は、状態を戻す
             if (elapsedTimeAfterStun >= damageStunTime)
             {
                 if (holdTreasure == null)
                     ChangeStatus(ThiefState.Explore); // 状態を探索に戻す
                 else
                     ChangeStatus(ThiefState.Escape); // 状態を逃走に戻す
-                
 
-                // アニメーションの状態を解除(歩き状態に戻す)
-                if (animator != null)
-                {
-                    animator.SetBool("IsStun", false);
-                    animator.SetBool("IsDamage", false);
-                }
+
+                // アニメーションを歩き状態に設定
+                read_AnimatorSystem?.ResetAnimationState();
+                read_AnimatorSystem?.SetAnimationState(CS_ThiefAnimation.ThiefAnimationState.Walk);
             }
         }
         // 耐久力が0以下の場合は、時間経過後に退場する
@@ -571,6 +599,9 @@ public class CS_ThiefAI : MonoBehaviour
                     if (thiefSound != null)
                         thiefSound.PlayOneShotSE("Thief_DeadFade", gameObject.transform.position, "Thief_DeadFade_" + transform.name);
 
+                read_AnimatorSystem?.ResetAnimationState();
+                read_AnimatorSystem?.SetAnimationState(CS_ThiefAnimation.ThiefAnimationState.RunAway);
+
                 // 退場移動
                 moveSystem.StunMove();
 
@@ -579,8 +610,11 @@ public class CS_ThiefAI : MonoBehaviour
                     // 宝物を現在の部屋のオブジェクトに親子付けする
                     if (holdTreasure != null)
                     {
+                        // 宝物のコライダーを有効にする
                         holdTreasure.GetComponent<Collider>().enabled = true;
+                        // 宝物のサイズを元に戻す
                         holdTreasure.transform.localScale = Vector3.one;
+                        // 宝物を現在の部屋のオブジェクトに親子付けする
                         holdTreasure.transform.SetParent(memorySystem.read_CurrentRoom.read_ObjectParent.transform);
                         holdTreasure.GetComponent<CS_VisionTarget>().StopStolen();
 
@@ -618,7 +652,7 @@ public class CS_ThiefAI : MonoBehaviour
                             }
 
                             // ランダムにグリッドセルのオフセットを選択
-                            int randomIndex = Random.Range(0, targetGridOffset.Count);
+                            int randomIndex = UnityEngine.Random.Range(0, targetGridOffset.Count);
 
                             // 選択したグリッドセルの位置をワールド座標で
                             gridPos = roomGrid.GetWorldPosFromGrid(gridIndex + targetGridOffset[randomIndex]);
@@ -656,13 +690,6 @@ public class CS_ThiefAI : MonoBehaviour
             else
             {
                 thiefReaction.ClearReaction();
-
-                if (animator != null)
-                {
-                    animator.SetBool("IsStun", false);
-                    animator.SetBool("IsDamage", false);
-                    animator.SetTrigger("DeathTrigger");
-                }
             }
         }
     }
@@ -681,9 +708,23 @@ public class CS_ThiefAI : MonoBehaviour
         durability -= damage;
 
         // ※intのRangeはmin以上max未満の範囲でランダムな整数を返すため、1～3の範囲でランダムな整数を取得する場合は、Random.Range(1, 4)とする必要がある
-        int soundIndex = Random.Range(1, 4);
+        int soundIndex = UnityEngine.Random.Range(1, 4);
         if (thiefSound != null)
             thiefSound.PlayOneShotSE("Thief_Hit" + soundIndex, gameObject.transform.position, "Thief_Hit" + soundIndex);
+
+        read_AnimatorSystem?.ResetAnimationState();
+        switch (type)
+        {
+            case Gimmick.IronBall:
+            case Gimmick.MagicAnkh:
+            read_AnimatorSystem?.SetAnimationState(CS_ThiefAnimation.ThiefAnimationState.Damage);
+                break;
+            case Gimmick.Pot:
+            case Gimmick.Pitfall:
+            case Gimmick.Nyaki:
+            read_AnimatorSystem?.SetAnimationState(CS_ThiefAnimation.ThiefAnimationState.Stunned);
+                break;
+        }
 
         // ギミックの方を向く
         Vector3 directionToGimmick = gimmickPoint - transform.position;
@@ -833,19 +874,6 @@ public class CS_ThiefAI : MonoBehaviour
         }
 
         csad_PettingEffect.EndEffect();
-    }
-
-    /// <summary>
-    /// 泥棒のアニメーションを変更する処理(Triigerのみ)
-    /// </summary>
-    /// <param name="parameter">変更するアニメーションのパラメーター</param>
-    /// memo: 
-    /// NotFoundTrigger | 空の宝箱を探索後のアニメーション
-    /// FoundTrigger | 宝物を探索後のアニメーション
-    /// DamageTrigger | ダメージを受けたときのアニメーション
-    public void SetAnimation(string parameter)
-    {
-        if (animator != null) animator.SetTrigger(parameter);
     }
 
     /// <summary>
