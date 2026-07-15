@@ -5,7 +5,9 @@
  * ----------------------------------------------------------
  * 2026-05-27 | 初回作成
  * 2026-06-05 | バグの修正(斜めの地面を歩くときに地面に沿って出るように)
+ * 2026-07-15 | フェード追加
  */
+using System.Collections;
 using UnityEngine;
 
 public class CS_FootPrint : MonoBehaviour
@@ -22,7 +24,7 @@ public class CS_FootPrint : MonoBehaviour
 
     private void Start()
     {
-        pool = new CS_ObjectPool(footPrintPrefab, new GameObject("FootParent"));        
+        pool = new CS_ObjectPool(footPrintPrefab, new GameObject("FootParent"));  
     }
 
     //足跡の生成関数
@@ -91,11 +93,20 @@ public class CS_FootPrint : MonoBehaviour
             footPrintGameObject.transform.rotation = rotation;
 
             //削除
-            StartCoroutine(pool.DisableAfterTime(footPrintGameObject, destroyTime));
+            //StartCoroutine(pool.DisableAfterTime(footPrintGameObject, destroyTime));
+            StartCoroutine(FadeDisableAfterTime(footPrintGameObject, destroyTime));
         }
         else
         {
             //Debug.LogWarning("No ground" + "SpawnPos: " + spawnPos);
         }
+    }
+
+    //非アクティブ
+    public IEnumerator FadeDisableAfterTime(GameObject gameObject, float time)
+    {
+        yield return new WaitForSeconds(time);
+
+        yield return StartCoroutine(pool.FadeReturnObject(gameObject, time));
     }
 }
