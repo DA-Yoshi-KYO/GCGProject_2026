@@ -6,6 +6,7 @@
  * 2026-05-15 | 初回作成
  * 2026-05-17 | SE再生処理追加
  * 2026-06-15 | 修正
+ * 2026-07-15 | ボタンの拡縮処理
  */
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -26,6 +27,12 @@ public class CS_SelectBarMove : MonoBehaviour
 
     [Header("GameStartButton押した際にシーン遷移する名前")][SerializeField] public string pressGameStartToSceneName;
 
+    private float uiTimer = 0.0f;
+    [Header("UIアニメーションの時間間隔")][SerializeField] private float uiDuration;
+    [Header("UIアニメーションの最小の大きさ")][SerializeField] private Vector3 minScale;
+    [Header("UIアニメーションの最大の大きさ")][SerializeField] private Vector3 maxScale;
+    private bool reversibleScale = false;//拡大・縮小を判定
+
     // Start is called before the first frame update
     void Start()
     {
@@ -43,6 +50,7 @@ public class CS_SelectBarMove : MonoBehaviour
 
         currentButton = 0;
         UpdateButtonTexture();
+        UpdateButtonScale();
     }
 
     // Update is called once per frame
@@ -78,6 +86,8 @@ public class CS_SelectBarMove : MonoBehaviour
 
         selectBar.GetComponent<RectTransform>().anchoredPosition = selectBarPos;
 
+        UpdateButtonScale();
+
         //決定ボタンでシーン遷移
         if (inputActions.SelectBar.Decision.triggered)
         {
@@ -108,6 +118,41 @@ public class CS_SelectBarMove : MonoBehaviour
         for (int i = 0 ; i < buttonList.Length ; i++)
         {
             buttonList[i].ChangeTexture(i == currentButton);
+        }
+    }
+
+    //選択しているボタンの拡縮処理
+    private void UpdateButtonScale()
+    {
+        for (int i = 0 ; i < buttonList.Length ; i++)
+        {
+            if (i == currentButton)
+            {
+                uiTimer += Time.deltaTime;
+                float t = Easing.EaseInOutSine(uiTimer, uiDuration);
+
+                if (!reversibleScale)
+                {
+                    buttonList[i].GetComponent<RectTransform>().localScale = Vector3.Lerp(minScale, maxScale, t);
+                }
+                else
+                {
+                    buttonList[i].GetComponent<RectTransform>().localScale = Vector3.Lerp(maxScale, minScale, t);
+                }
+
+                if (uiTimer > uiDuration)
+                {
+                    uiTimer = 0.0f;
+                    if (!reversibleScale)
+                        reversibleScale = true;
+                    else
+                        reversibleScale = false;
+                }
+            }
+            else
+            {
+                buttonList[i].GetComponent<RectTransform>().localScale = new Vector3(1.0f, 1.0f, 1.0f);
+            }
         }
     }
 
