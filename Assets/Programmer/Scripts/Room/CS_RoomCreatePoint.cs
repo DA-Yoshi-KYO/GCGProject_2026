@@ -67,19 +67,19 @@ public class CS_RoomCreatePoint : MonoBehaviour
     private Transform BackDoorPoints;
 
     /// <summary>
-    /// ヒエログリフをまとめているオブジェクトの部屋下のパス(このスクリプタブルオブジェクトのついてるオブジェクトから下の階層からこのパスにある。)
+    /// ヒエログリフをまとめているオブジェクトのRoom内パス
     /// </summary>
     private string s_hieroglyph_path = "GameObject/Hieroglyphs";
 
     /// <summary>
-    /// ヒエログリフのオブジェクト 
+    /// このRoomCreatePoint内にあるヒエログリフのオブジェクト
     /// </summary>
     private List<GameObject> gl_hieroglyph_obj = new List<GameObject>();
 
     /// <summary>
-    /// ヒエログリフのラベル名
+    /// ヒエログリフのタグ名
     /// </summary>
-    private String s_target_hieroglyph_laber = "Hieroglyphs";
+    private String s_target_hieroglyph_tag = "Hieroglyph";
 
     /// <summary>
     /// 指定方向のワープ接続情報を取得します。
@@ -100,6 +100,248 @@ public class CS_RoomCreatePoint : MonoBehaviour
         }
 
         return cs_Connection.HasTarget;
+    }
+
+    /// <summary>
+    /// 生成されたRoom内からHieroglyphタグの付いたオブジェクトを取得します。
+    /// </summary>
+    public void SetHieroglyphObjects()
+    {
+        gl_hieroglyph_obj.Clear();
+
+        Transform tr_HieroglyphRoot = FindHieroglyphRoot();
+
+        if (tr_HieroglyphRoot == null)
+        {
+            Debug.LogWarning(
+                "[Hieroglyph取得失敗]"
+                + "\nRoomCreatePoint : " + GetHierarchyPath(transform)
+                + "\n検索パス : " + s_hieroglyph_path,
+                this);
+
+            return;
+        }
+
+        // 非アクティブのヒエログリフも含めて取得します。
+        Transform[] tr_ChildTransforms =
+            tr_HieroglyphRoot.GetComponentsInChildren<Transform>(true);
+
+        for (int i = 0 ; i < tr_ChildTransforms.Length ; i++)
+        {
+            Transform tr_Target = tr_ChildTransforms[i];
+
+            // Hieroglyphsをまとめている親自身は除外します。
+            if (tr_Target == tr_HieroglyphRoot)
+            {
+                continue;
+            }
+
+            if (!tr_Target.CompareTag(s_target_hieroglyph_tag))
+            {
+                continue;
+            }
+
+            gl_hieroglyph_obj.Add(tr_Target.gameObject);
+        }
+
+        // 取得したヒエログリフへ、
+        // 各扉方向に設定されたマテリアルを反映します。
+        SetHieroglyphMaterials();
+
+        //ShowHieroglyphDebugLog();
+    }
+
+    /// <summary>
+    /// 各扉設定に応じて、同じ方向のヒエログリフへマテリアルを設定します。
+    /// DoorUsageTypeがNoneの扉は処理しません。
+    /// </summary>
+    private void SetHieroglyphMaterials()
+    {
+        SetHieroglyphMaterialByConnection(cs_RightConnection);
+        SetHieroglyphMaterialByConnection(cs_LeftConnection);
+        SetHieroglyphMaterialByConnection(cs_FrontConnection);
+        SetHieroglyphMaterialByConnection(cs_BackConnection);
+    }
+
+    /// <summary>
+    /// 接続情報の方向と一致するヒエログリフへマテリアルを設定します。
+    /// </summary>
+    /// <param name="cs_Connection">確認する扉の接続情報。</param>
+    private void SetHieroglyphMaterialByConnection(
+        CS_RoomMoveConnection cs_Connection)
+    {
+        if (cs_Connection == null)
+        {
+            return;
+        }
+
+        // 使用しない扉にはヒエログリフ用マテリアルを設定しません。
+        if (cs_Connection.GetDoorUsageType == CSE_RoomDoorUsageType.None)
+        {
+            return;
+        }
+
+        Material m_HieroglyphMaterial =
+            cs_Connection.HierographMaterial;
+
+        if (m_HieroglyphMaterial == null)
+        {
+            Debug.LogWarning(
+                "[HieroglyphMaterial設定失敗]"
+                + "\nRoomCreatePoint : " + name
+                + "\n扉方向 : " + cs_Connection.DoorDirection
+                + "\n差し替え用Materialが設定されていません。",
+                this);
+
+            return;
+        }
+
+        for (int i = 0 ; i < gl_hieroglyph_obj.Count ; i++)
+        {
+            GameObject go_Hieroglyph = gl_hieroglyph_obj[i];
+
+            if (go_Hieroglyph == null)
+            {
+                continue;
+            }
+
+            CS_HieroglyphDirectionType cs_DirectionType =
+                go_Hieroglyph.GetComponent<CS_HieroglyphDirectionType>();
+
+            if (cs_DirectionType == null)
+            {
+                continue;
+            }
+
+            // 扉に設定された方向と
+            // ヒエログリフ側の方向が一致するものだけ変更します。
+            if (cs_DirectionType.GetDirection() !=
+                cs_Connection.DoorDirection)
+            {
+                continue;
+            }
+
+            ReplaceAllRendererMaterials(
+                go_Hieroglyph,
+                m_HieroglyphMaterial);
+        }
+    }
+
+    /// <summary>
+    /// 対象オブジェクトとその子にある全RendererのMaterialを、
+    /// 指定されたMaterial1つだけに置き換えます。
+    /// </summary>
+    /// <param name="go_Target">マテリアルを変更するヒエログリフ。</param>
+    /// <param name="m_NewMaterial">新しく設定するマテリアル。</param>
+    private void ReplaceAllRendererMaterials(
+        GameObject go_Target,
+        Material m_NewMaterial)
+    {
+        if (go_Target == null || m_NewMaterial == null)
+        {
+            return;
+        }
+
+        // ヒエログリフ本体だけでなく、
+        // 子オブジェクトにRendererがある場合も全て取得します。
+        Renderer[] rendererArray =
+            go_Target.GetComponentsInChildren<Renderer>(true);
+
+        for (int i = 0 ; i < rendererArray.Length ; i++)
+        {
+            Renderer targetRenderer = rendererArray[i];
+
+            if (targetRenderer == null)
+            {
+                continue;
+            }
+
+            // 既存のMaterialスロットを全て外し、
+            // 指定Material1つだけに置き換えます。
+            targetRenderer.sharedMaterials =
+                new Material[]
+                {
+                m_NewMaterial
+                };
+        }
+    }
+
+    /// <summary>
+    /// s_hieroglyph_pathで指定されたヒエログリフの親を探します。
+    /// </summary>
+    /// <returns>見つかったヒエログリフの親Transform。</returns>
+    private Transform FindHieroglyphRoot()
+    {
+        // RoomCreatePoint直下から検索します。
+        Transform tr_HieroglyphRoot = transform.Find(s_hieroglyph_path);
+
+        if (tr_HieroglyphRoot != null)
+        {
+            return tr_HieroglyphRoot;
+        }
+
+        // RoomCreatePoint直下に生成されたRoomがある場合は、
+        // そのRoomを起点として指定パスを検索します。
+        for (int i = 0 ; i < transform.childCount ; i++)
+        {
+            Transform tr_RoomChild = transform.GetChild(i);
+
+            tr_HieroglyphRoot =
+                tr_RoomChild.Find(s_hieroglyph_path);
+
+            if (tr_HieroglyphRoot != null)
+            {
+                return tr_HieroglyphRoot;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// 取得したヒエログリフをConsoleへ表示します。
+    /// </summary>
+    //private void ShowHieroglyphDebugLog()
+    //{
+    //    string s_Log =
+    //        "===== ヒエログリフ取得結果 ====="
+    //        + "\nRoomCreatePoint : " + GetHierarchyPath(transform)
+    //        + "\n取得数 : " + gl_hieroglyph_obj.Count;
+    //
+    //    for (int i = 0 ; i < gl_hieroglyph_obj.Count ; i++)
+    //    {
+    //        GameObject go_Hieroglyph = gl_hieroglyph_obj[i];
+    //
+    //        s_Log +=
+    //            "\n[" + i + "] "
+    //            + GetHierarchyPath(go_Hieroglyph.transform);
+    //    }
+    //
+    //    Debug.Log(s_Log, this);
+    //}
+
+    /// <summary>
+    /// 対象オブジェクトのHierarchy上のパスを取得します。
+    /// </summary>
+    /// <param name="tr_Target">パスを取得するTransform。</param>
+    /// <returns>Hierarchy上のパス。</returns>
+    private string GetHierarchyPath(Transform tr_Target)
+    {
+        if (tr_Target == null)
+        {
+            return "null";
+        }
+
+        string s_Path = tr_Target.name;
+        Transform tr_Current = tr_Target.parent;
+
+        while (tr_Current != null)
+        {
+            s_Path = tr_Current.name + "/" + s_Path;
+            tr_Current = tr_Current.parent;
+        }
+
+        return s_Path;
     }
 
     /// <summary>

@@ -465,6 +465,21 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
+      propertyPath: cs_BackConnection.e_DoorDirection
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_FrontConnection.e_DoorDirection
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_RightConnection.e_DoorDirection
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
       propertyPath: cs_RightConnection.e_DoorUsageType
       value: 0
       objectReference: {fileID: 0}
@@ -490,6 +505,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
+      propertyPath: cs_BackConnection.m_hierograph_material
+      value: 
+      objectReference: {fileID: 2100000, guid: e31d5cf89d4f83344802832b045614f8, type: 2}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
       propertyPath: cs_FrontConnection.cs_TargetCreatePoint
       value: 
       objectReference: {fileID: 449139604}
@@ -498,6 +518,16 @@ PrefabInstance:
       propertyPath: cs_FrontConnection.e_TargetOutDirection
       value: 3
       objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_LeftConnection.m_hierograph_material
+      value: 
+      objectReference: {fileID: 2100000, guid: f252a3de67d2f6848836f55c95b12153, type: 2}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_FrontConnection.m_hierograph_material
+      value: 
+      objectReference: {fileID: 2100000, guid: 0c96253427008134d8ceb34069b4d887, type: 2}
     - target: {fileID: 6285496938507336483, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
       propertyPath: m_Name
@@ -675,12 +705,27 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
+      propertyPath: cs_BackConnection.e_DoorDirection
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
       propertyPath: cs_LeftConnection.e_DoorUsageType
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
+      propertyPath: cs_FrontConnection.e_DoorDirection
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
       propertyPath: cs_FrontConnection.e_DoorUsageType
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_RightConnection.e_DoorDirection
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
@@ -710,6 +755,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
+      propertyPath: cs_BackConnection.m_hierograph_material
+      value: 
+      objectReference: {fileID: 2100000, guid: 8992e9c428abe2645963eaada613658e, type: 2}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
       propertyPath: cs_FrontConnection.cs_TargetCreatePoint
       value: 
       objectReference: {fileID: 0}
@@ -718,6 +768,11 @@ PrefabInstance:
       propertyPath: cs_FrontConnection.e_TargetOutDirection
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_LeftConnection.m_hierograph_material
+      value: 
+      objectReference: {fileID: 2100000, guid: ab9a7fbc73c19c542b8480f4291ef2be, type: 2}
     - target: {fileID: 6285496938507336483, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
       propertyPath: m_Name
@@ -1023,6 +1078,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
+      propertyPath: cs_BackConnection.e_DoorDirection
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
       propertyPath: cs_BackConnection.e_DoorUsageType
       value: 1
       objectReference: {fileID: 0}
@@ -1033,8 +1093,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
+      propertyPath: cs_FrontConnection.e_DoorDirection
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
       propertyPath: cs_FrontConnection.e_DoorUsageType
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_RightConnection.e_DoorDirection
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
@@ -1051,6 +1121,11 @@ PrefabInstance:
       propertyPath: cs_BackConnection.e_TargetOutDirection
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_BackConnection.m_hierograph_material
+      value: 
+      objectReference: {fileID: 2100000, guid: ab9a7fbc73c19c542b8480f4291ef2be, type: 2}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
       propertyPath: cs_FrontConnection.cs_TargetCreatePoint
@@ -1520,12 +1595,27 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
+      propertyPath: cs_BackConnection.e_DoorDirection
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
       propertyPath: cs_BackConnection.e_DoorUsageType
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
       propertyPath: cs_LeftConnection.e_DoorUsageType
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_FrontConnection.e_DoorDirection
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_RightConnection.e_DoorDirection
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
@@ -1568,6 +1658,16 @@ PrefabInstance:
       propertyPath: cs_RightConnection.e_TargetOutDirection
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_FrontConnection.m_hierograph_material
+      value: 
+      objectReference: {fileID: 2100000, guid: 281889e4c8ac6734d97d8d1d42f25dfa, type: 2}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_RightConnection.m_hierograph_material
+      value: 
+      objectReference: {fileID: 2100000, guid: e31d5cf89d4f83344802832b045614f8, type: 2}
     - target: {fileID: 6285496938507336483, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
       propertyPath: m_Name
@@ -1741,12 +1841,27 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
+      propertyPath: cs_BackConnection.e_DoorDirection
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
       propertyPath: cs_BackConnection.e_DoorUsageType
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
+      propertyPath: cs_FrontConnection.e_DoorDirection
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
       propertyPath: cs_FrontConnection.e_DoorUsageType
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_RightConnection.e_DoorDirection
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
@@ -1761,9 +1876,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
+      propertyPath: cs_LeftConnection.m_hierograph_material
+      value: 
+      objectReference: {fileID: 2100000, guid: 281889e4c8ac6734d97d8d1d42f25dfa, type: 2}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
       propertyPath: cs_RightConnection.cs_TargetCreatePoint
       value: 
       objectReference: {fileID: 299725459}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_RightConnection.m_hierograph_material
+      value: 
+      objectReference: {fileID: 2100000, guid: 8992e9c428abe2645963eaada613658e, type: 2}
     - target: {fileID: 6285496938507336483, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
       propertyPath: m_Name
@@ -2036,7 +2161,22 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
+      propertyPath: cs_BackConnection.e_DoorDirection
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
       propertyPath: cs_LeftConnection.e_DoorUsageType
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_FrontConnection.e_DoorDirection
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_RightConnection.e_DoorDirection
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
@@ -2051,6 +2191,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
+      propertyPath: cs_BackConnection.m_hierograph_material
+      value: 
+      objectReference: {fileID: 2100000, guid: 7ed9833a388973245b7a9e953cb33e2f, type: 2}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
       propertyPath: cs_FrontConnection.cs_TargetCreatePoint
       value: 
       objectReference: {fileID: 1759275515}
@@ -2059,6 +2204,16 @@ PrefabInstance:
       propertyPath: cs_RightConnection.cs_TargetCreatePoint
       value: 
       objectReference: {fileID: 994018392}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_FrontConnection.m_hierograph_material
+      value: 
+      objectReference: {fileID: 2100000, guid: ab9a7fbc73c19c542b8480f4291ef2be, type: 2}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_RightConnection.m_hierograph_material
+      value: 
+      objectReference: {fileID: 2100000, guid: f252a3de67d2f6848836f55c95b12153, type: 2}
     - target: {fileID: 6285496938507336483, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
       propertyPath: m_Name
@@ -2257,6 +2412,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
+      propertyPath: cs_BackConnection.e_DoorDirection
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
       propertyPath: cs_BackConnection.e_DoorUsageType
       value: 2
       objectReference: {fileID: 0}
@@ -2267,8 +2427,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
+      propertyPath: cs_FrontConnection.e_DoorDirection
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
       propertyPath: cs_FrontConnection.e_DoorUsageType
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_RightConnection.e_DoorDirection
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
@@ -2289,7 +2459,7 @@ PrefabInstance:
         type: 3}
       propertyPath: cs_FrontConnection.cs_TargetCreatePoint
       value: 
-      objectReference: {fileID: 2133503044}
+      objectReference: {fileID: 1347509654}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
       propertyPath: cs_FrontConnection.e_TargetOutDirection
@@ -2513,13 +2683,28 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
+      propertyPath: cs_BackConnection.e_DoorDirection
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
       propertyPath: cs_BackConnection.e_DoorUsageType
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
+      propertyPath: cs_FrontConnection.e_DoorDirection
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
       propertyPath: cs_FrontConnection.e_DoorUsageType
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_RightConnection.e_DoorDirection
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
@@ -2543,6 +2728,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
+      propertyPath: cs_LeftConnection.m_hierograph_material
+      value: 
+      objectReference: {fileID: 2100000, guid: 281889e4c8ac6734d97d8d1d42f25dfa, type: 2}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
       propertyPath: cs_RightConnection.cs_TargetCreatePoint
       value: 
       objectReference: {fileID: 449139604}
@@ -2551,6 +2741,16 @@ PrefabInstance:
       propertyPath: cs_RightConnection.e_TargetOutDirection
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_FrontConnection.m_hierograph_material
+      value: 
+      objectReference: {fileID: 2100000, guid: 0156b438b9aa44845a45a5a22139af9b, type: 2}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_RightConnection.m_hierograph_material
+      value: 
+      objectReference: {fileID: 2100000, guid: 0c96253427008134d8ceb34069b4d887, type: 2}
     - target: {fileID: 6285496938507336483, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
       propertyPath: m_Name
@@ -3367,12 +3567,27 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
+      propertyPath: cs_BackConnection.e_DoorDirection
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
       propertyPath: cs_BackConnection.e_DoorUsageType
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
+      propertyPath: cs_FrontConnection.e_DoorDirection
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
       propertyPath: cs_FrontConnection.e_DoorUsageType
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_RightConnection.e_DoorDirection
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
@@ -3397,6 +3612,16 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
+      propertyPath: cs_BackConnection.m_hierograph_material
+      value: 
+      objectReference: {fileID: 2100000, guid: 7c50e795b8fd80f439a1fe53f3ef66a2, type: 2}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_LeftConnection.m_hierograph_material
+      value: 
+      objectReference: {fileID: 2100000, guid: 7ed9833a388973245b7a9e953cb33e2f, type: 2}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
       propertyPath: cs_RightConnection.cs_TargetCreatePoint
       value: 
       objectReference: {fileID: 299725459}
@@ -3405,6 +3630,11 @@ PrefabInstance:
       propertyPath: cs_RightConnection.e_TargetOutDirection
       value: 3
       objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_RightConnection.m_hierograph_material
+      value: 
+      objectReference: {fileID: 2100000, guid: 8992e9c428abe2645963eaada613658e, type: 2}
     - target: {fileID: 6285496938507336483, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
       propertyPath: m_Name

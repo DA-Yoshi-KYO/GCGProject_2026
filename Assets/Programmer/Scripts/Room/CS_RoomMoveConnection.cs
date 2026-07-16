@@ -33,7 +33,11 @@ public class CS_RoomMoveConnection
 
     [Header("ヒエログラフの差し替えmaterial")]
     [SerializeField]
-    private Material tx_hierograph_material;
+    private Material m_hierograph_material;
+
+    [Header("扉の方向")]
+    [SerializeField]
+    private CSE_RoomDoorDirection e_DoorDirection = CSE_RoomDoorDirection.Left;
 
     /// <summary>
     /// 出入口の用途を取得します。
@@ -78,7 +82,12 @@ public class CS_RoomMoveConnection
     /// <summary>
     /// ヒエログラフの差し替え用マテリアルを取得します。
     /// </summary>
-    public Material HierographMaterial => tx_hierograph_material;
+    public Material HierographMaterial => m_hierograph_material;
+
+    /// <summary>
+    /// この接続情報が担当する扉の方向を取得します。
+    /// </summary>
+    public CSE_RoomDoorDirection DoorDirection => e_DoorDirection;
 
     /// <summary>
     /// この敵出入口から出現できる敵の最大数を取得します。

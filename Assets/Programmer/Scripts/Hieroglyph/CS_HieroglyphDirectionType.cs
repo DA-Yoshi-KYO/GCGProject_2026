@@ -14,7 +14,7 @@ public class CS_HieroglyphDirectionType : MonoBehaviour
 {
     [Header("ヒエログラフの扉の方向")]
     [SerializeField]
-    private CSE_RoomDoorDirection direction = CSE_RoomDoorDirection.Front;
+    private CSE_RoomDoorDirection e_direction = CSE_RoomDoorDirection.Front;
 
     /// <summary>
     /// 部屋のヒエログラフの方向を取得する
@@ -22,6 +22,6 @@ public class CS_HieroglyphDirectionType : MonoBehaviour
     /// <returns>CSE_RoomDoorDirection</returns>
     public CSE_RoomDoorDirection GetDirection()
     {
-        return direction;
+        return e_direction;
     }
 }
