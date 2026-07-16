@@ -31,7 +31,7 @@ public class CS_GameFailureSelectButton : MonoBehaviour
     void Start()
     {
         inputActions = CS_CustomInputActionManager.instance.customInputAction;
-        inputActions.GameClear.MoveAxis.started += SelectInput;
+        inputActions.GameOver.MoveAxis.started += SelectInput;
 
         GameObject retryButtonObject = GameObject.Find("RetryButton");
         retryButtonImage = retryButtonObject != null ? retryButtonObject.GetComponent<Image>() : null;
@@ -44,6 +44,11 @@ public class CS_GameFailureSelectButton : MonoBehaviour
         GameObject seObject = GameObject.Find("SE");
         backGroundPlaySE = seObject != null ? seObject.GetComponent<CS_BackGroundPlaySE>() : null;
 
+    }
+
+    private void OnDestroy()
+    {
+        inputActions.GameOver.MoveAxis.started -= SelectInput;
     }
 
     // Update is called once per frame

@@ -53,6 +53,11 @@ public class CS_SelectBarMove : MonoBehaviour
         UpdateButtonScale();
     }
 
+    private void OnDestroy()
+    {
+        inputActions.SelectBar.MoveAxis.started -= TitleSelectInput;
+    }
+
     // Update is called once per frame
     void Update()
     {

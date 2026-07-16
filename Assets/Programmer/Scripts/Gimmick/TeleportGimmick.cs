@@ -63,11 +63,15 @@ public class TeleportGimmick : GimmickBase
         gimmickState = GimmickState.Idle;
     }
 
+    private void OnDestroy()
+    {
+        customInputAction?.Dispose();
+    }
+
     protected override void IdleUpdate()
     {
         base.IdleUpdate();
 
-        // 自分以外のTeleportGimmickを探す
         HandleDiscardInput();
         SearchOfDestination();
 
@@ -117,9 +121,6 @@ public class TeleportGimmick : GimmickBase
         base.BrokenUpdate();
     }
 
-    /// <summary>
-    /// GimmickSelectUIの参照解決と、リセットUIの表示状態（移動先の有無）を毎フレーム同期する処理
-    /// </summary>
     private void UpdateGimmickSelectUI()
     {
         if (gimmickSelectUI == null)
@@ -129,22 +130,22 @@ public class TeleportGimmick : GimmickBase
 
         if (gimmickSelectUI != null)
         {
+            if(playerAction.GetSelectCurrentGimmickTag() != GetGimmickTag())
+            {
+                gimmickSelectUI.ResetUIActive = false;
+                return;
+            }
+
             gimmickSelectUI.ResetUIActive = destination != null;
         }
     }
 
-    /// <summary>
-    /// 移動先が無い（1個のみ召喚）場合、またはクールタイム中は非アクティブ色にする
-    /// </summary>
     private void UpdateWarpEffectColor()
     {
         bool isTeleportUsable = destination != null && sharedCooldown <= 0f;
         warpEffect.SetEffectColor(isTeleportUsable ? active : noActive);
     }
 
-    /// <summary>
-    /// このギミックを選択中に破棄入力が行われた場合、テレポートギミックを手放す処理
-    /// </summary>
     private void HandleDiscardInput()
     {
         if (destination == null || playerAction == null || gimmickSelectUI == null) return;
@@ -161,7 +162,6 @@ public class TeleportGimmick : GimmickBase
         phaseTimer = 0f;
         SetPlayerAlpha(1f);
 
-        // 魔法陣に乗って上に運ばれていく演出を開始する
         CaptureMagicCircleBase();
         circlePhase = CirclePhase.Rising;
         circleTimer = 0f;
@@ -169,7 +169,6 @@ public class TeleportGimmick : GimmickBase
 
     private void UpdateTeleportAnimation()
     {
-        // TimeScaleを0にしている間も進行させるため、unscaledDeltaTimeを使用する
         phaseTimer += Time.unscaledDeltaTime;
 
         switch (teleportPhase)
@@ -228,9 +227,6 @@ public class TeleportGimmick : GimmickBase
         }
     }
 
-    /// <summary>
-    /// 到着側の魔法陣を、上から降りてくる状態にする処理（テレポート実行元から呼び出される）
-    /// </summary>
     public void BeginArrivalCircle()
     {
         CaptureMagicCircleBase();

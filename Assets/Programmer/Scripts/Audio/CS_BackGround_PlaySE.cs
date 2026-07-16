@@ -14,7 +14,6 @@ public class CS_BackGroundPlaySE : MonoBehaviour
     [SerializeField]private SO_BackGroundSEDataBase dataBase;//データベース
 
     private CriAtomExPlayer playerInfo;//Player生成
-    private CriAtomExAcb[] criAtomExAcbsList;//CueSheet
 
     private float currentVolume = 1.0f;//現在の音量
 
@@ -23,7 +22,6 @@ public class CS_BackGroundPlaySE : MonoBehaviour
     {
         ////初期化
         playerInfo = new CriAtomExPlayer();
-        criAtomExAcbsList = new CriAtomExAcb[dataBase.seDatas.Length];
 
         if (Option.Instance != null)
         {
@@ -49,7 +47,7 @@ public class CS_BackGroundPlaySE : MonoBehaviour
     {
         BackGroundSEData data = dataBase.seData[currentSituation];
 
-        playerInfo.SetCue(criAtomExAcbsList[0], data.cueName.ToString());
+        playerInfo.SetCue(CriAtom.GetCueSheet("BackGround_SE").acb, data.cueName.ToString());
         playerInfo.Loop(false);
         playerInfo.SetVoicePriority(50);
         playerInfo.Prepare();

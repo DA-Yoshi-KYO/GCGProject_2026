@@ -15,6 +15,8 @@ using UnityEngine;
 
 public class RoomGrid : MonoBehaviour
 {
+    private const float PlacementBoundsInsetRate = 0.01f;
+
     [SerializeField] private Vector2Int gridDivision;
     public Vector2Int read_GridDivision => gridDivision;   // グリッドの分割数の取得用プロパティ
 
@@ -222,6 +224,13 @@ public class RoomGrid : MonoBehaviour
     /// <returns>true:召喚成功 false:召喚失敗</returns>
     public bool SetGimmickInGrid(Vector3 pos, GimmickBase gimmick)
     {
+        return SetGimmickInGrid(pos, gimmick, out _);
+    }
+
+    public bool SetGimmickInGrid(Vector3 pos, GimmickBase gimmick, out GimmickBase spawnGimmick)
+    {
+        spawnGimmick = null;
+
         if (gimmick == null) return false;
 
         Vector2Int grid = GetGridFromPos(pos);
@@ -229,10 +238,12 @@ public class RoomGrid : MonoBehaviour
         if (IsGridOnGimmick(grid)) return false;
 
         Vector3 spawnPos = GetWorldPosFromGrid(grid);
-        if (spawnPos.magnitude == float.PositiveInfinity) return false; 
+        if (IsInfinityPosition(spawnPos)) return false; 
 
         //偶数補正
         spawnPos = GimmickEvenNumberCorrection(spawnPos,gimmick);
+        if (IsInfinityPosition(spawnPos)) return false;
+        if (!IsAreaInsideGrid(spawnPos, gimmick.GetGimmickSize())) return false;
 
         Ray ray = new Ray();
         ray.direction = Vector3.down;
@@ -284,7 +295,12 @@ public class RoomGrid : MonoBehaviour
             }
         }
         GameObject gimmickObject = Instantiate(gimmick.gameObject, spawnPos, Quaternion.identity);
-        GimmickBase spawnGimmick = gimmickObject.GetComponent<GimmickBase>();
+        spawnGimmick = gimmickObject.GetComponent<GimmickBase>();
+        if (spawnGimmick == null)
+        {
+            Destroy(gimmickObject);
+            return false;
+        }
         PitfallGimmick spawnPitfallGimmick = gimmickObject.GetComponent<PitfallGimmick>();
         if (spawnPitfallGimmick != null)
         {
@@ -294,6 +310,53 @@ public class RoomGrid : MonoBehaviour
         gridGimmicks[grid.y][grid.x] = gimmickObject;
         spawnGimmick.SetGimmickPos(grid);
         spawnGimmick.AdjustScaleToGrid();
+        if (IsInfinityPosition(spawnPos) ||
+            IsInfinityPosition(gimmickObject.transform.position) ||
+            IsInfinityPosition(spawnGimmick.transform.position))
+        {
+            Debug.LogWarning("インフィニティ地点生成");
+            Destroy(gimmickObject.gameObject);
+            Destroy(spawnGimmick.gameObject);
+            return false;
+        }
+
+        return true;
+    }
+    private static bool IsInfinityPosition(Vector3 position)
+    {
+        return float.IsInfinity(position.x) ||
+               float.IsInfinity(position.y) ||
+               float.IsInfinity(position.z);
+    }
+
+    public bool IsAreaInsideGrid(Vector3 centerPos, Vector2Int size)
+    {
+        if (IsInfinityPosition(centerPos)) return false;
+
+        float inset = Mathf.Min(gridSize.x, gridSize.y) * PlacementBoundsInsetRate;
+        float halfX = Mathf.Max(size.x * gridSize.x * 0.5f - inset, 0.0f);
+        float halfZ = Mathf.Max(size.y * gridSize.y * 0.5f - inset, 0.0f);
+
+        Vector3[] checkOffsets =
+        {
+            Vector3.zero,
+            new Vector3(halfX, 0.0f, halfZ),
+            new Vector3(halfX, 0.0f, -halfZ),
+            new Vector3(-halfX, 0.0f, halfZ),
+            new Vector3(-halfX, 0.0f, -halfZ),
+        };
+
+        foreach (Vector3 offset in checkOffsets)
+        {
+            Vector3 checkPos = centerPos + transform.TransformVector(offset);
+            Vector2Int checkGrid = GetGridFromPos(checkPos);
+
+            if (checkGrid.x == -1 || checkGrid.y == -1)
+            {
+                return false;
+            }
+        }
+
         return true;
     }
 
