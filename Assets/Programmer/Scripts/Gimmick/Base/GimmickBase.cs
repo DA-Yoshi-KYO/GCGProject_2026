@@ -55,7 +55,7 @@ public static class GimmickPlacementSurfaceRules
     private const string FloorsGroupName = "Floors";
     private const string SecondFloorsGroupName = "SecondFloors";
     private const string PolesGroupName = "Poles";
-    private const string PartitionsGroupName = "Partitions";
+    private const string PartitionGroupNamePart = "Partition";
 
     public static bool IsAllowed(
         Gimmick gimmick,
@@ -66,8 +66,10 @@ public static class GimmickPlacementSurfaceRules
             case Gimmick.Pot:
                 return IsInGroup(
                     surfaceTransform,
-                    PolesGroupName,
-                    PartitionsGroupName);
+                    PolesGroupName) ||
+                       IsInGroupContaining(
+                           surfaceTransform,
+                           PartitionGroupNamePart);
 
             case Gimmick.IronBall:
             case Gimmick.EmptyChest:
@@ -97,6 +99,25 @@ public static class GimmickPlacementSurfaceRules
                 if (current.name == groupName)
                     return true;
             }
+
+            current = current.parent;
+        }
+
+        return false;
+    }
+
+    private static bool IsInGroupContaining(
+        Transform surfaceTransform,
+        string groupNamePart)
+    {
+        if (surfaceTransform == null)
+            return false;
+
+        Transform current = surfaceTransform;
+        while (current != null)
+        {
+            if (current.name.Contains(groupNamePart))
+                return true;
 
             current = current.parent;
         }
