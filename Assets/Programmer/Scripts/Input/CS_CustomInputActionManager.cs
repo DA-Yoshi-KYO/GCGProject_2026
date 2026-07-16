@@ -1,3 +1,4 @@
+using System;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
 using UnityEngine.InputSystem.LowLevel;
@@ -14,6 +15,11 @@ public class CS_CustomInputActionManager
         Gamepad
     }
     public InputType currentInputType { get; private set; }
+
+    /// <summary>
+    /// プレイヤーのinputがコントローラーorキーマウに切り替わった時に発生するイベント
+    /// </summary>
+    public event Action<InputType> OnInputTypeChanged;
 
     public static CS_CustomInputActionManager instance
     {
@@ -81,13 +87,20 @@ public class CS_CustomInputActionManager
 
         if (!hasSignificantInput) return;
 
+        InputType newInputType = currentInputType;
+
         if (device is Keyboard || device is Mouse)
         {
-            currentInputType = InputType.KeyboardMouse;
+            newInputType = InputType.KeyboardMouse;
         }
         else if (device is Gamepad)
         {
-            currentInputType = InputType.Gamepad;
+            newInputType = InputType.Gamepad;
         }
+
+        if (newInputType == currentInputType) return;
+
+        currentInputType = newInputType;
+        OnInputTypeChanged?.Invoke(currentInputType);
     }
 }
