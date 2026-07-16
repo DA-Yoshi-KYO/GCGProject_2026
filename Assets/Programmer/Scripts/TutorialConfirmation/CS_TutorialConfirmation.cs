@@ -23,6 +23,8 @@ public class CS_TutorialConfirmation : MonoBehaviour
 
     private Canvas tutorialConfirmationCanvas;
 
+    private bool endSound = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -54,12 +56,14 @@ public class CS_TutorialConfirmation : MonoBehaviour
         //決定ボタンでシーン遷移
         if (inputActions.TutorialConfirmation.Decision.triggered)
         {
-            backGroundPlaySE.PlaySE("Decision");
+            if (!endSound)
+                backGroundPlaySE.PlaySE("Decision");
             string sceneName = "";
             switch (currentButton)
             {
                 case 0:
                     sceneName = sceneList[0];
+                    endSound = true;
                     fadeCanvas.GetComponent<CS_SceneTransition>().StartSceneTransition(sceneName);
                     tutorialConfirmationCanvas.sortingOrder = 4;
                     break;
@@ -89,7 +93,8 @@ public class CS_TutorialConfirmation : MonoBehaviour
             //現在選択しているボタンの移動処理
             if (inputFloat > 0.0f)
             {
-                backGroundPlaySE.PlaySE("Cusor");
+                if (!endSound)
+                    backGroundPlaySE.PlaySE("Cusor");
                 currentButton--;
                 if (currentButton < 0)
                 {
@@ -100,7 +105,8 @@ public class CS_TutorialConfirmation : MonoBehaviour
             }
             else if (inputFloat < 0.0f)
             {
-                backGroundPlaySE.PlaySE("Cusor");
+                if (!endSound)
+                    backGroundPlaySE.PlaySE("Cusor");
                 currentButton++;
                 if (currentButton >= buttonList.Length)
                 {

@@ -25,6 +25,9 @@ public class CS_BackGroundPlayBGM : MonoBehaviour
     private BackGroundBGMData currentData;
     private BackGroundBGMData thiefData;
 
+    private BackGroundBGMData WinData;
+    private BackGroundBGMData LoseData;
+
     private CS_ThiefManager thiefManager;
     private bool once = false;
     private bool thiefGetTreature = false;
@@ -62,7 +65,7 @@ public class CS_BackGroundPlayBGM : MonoBehaviour
         }
 
         //InGameシーン以外は処理しない
-        if (currentData.status != BGMStatus.InGame)
+        if (currentData.status == BGMStatus.NONE)
             return;
 
         //ThiefManagerがあるかどうか(一回きり)
@@ -110,6 +113,16 @@ public class CS_BackGroundPlayBGM : MonoBehaviour
         {
             Debug.LogError("CS_BackGroundPlayBGM: \"ThiefEscape\"に対応するBGMデータが見つかりません。");
         }
+
+        if (!dataBase.bgmData.TryGetValue("WinJingle", out WinData))
+        {
+            Debug.LogError("CS_BackGroundPlayBGM: \"WinJingle\"に対応するBGMデータが見つかりません。");
+        }
+
+        if (!dataBase.bgmData.TryGetValue("LoseJingle", out LoseData))
+        {
+            Debug.LogError("CS_BackGroundPlayBGM: \"LoseJingle\"に対応するBGMデータが見つかりません。");
+        }
     }
 
     //BGMのフェードアウト
@@ -154,5 +167,19 @@ public class CS_BackGroundPlayBGM : MonoBehaviour
             playerInfo.Start();
             thiefGetTreature = false;
         }
+    }
+
+    //リザルト演出の音源処理
+    public void InGameCutScene(bool win)
+    {
+        playerInfo.Stop();
+        playerInfo.SetStartTime(0);
+        playerInfo.Loop(false);
+        if(win)
+            playerInfo.SetCue(CriAtom.GetCueSheet("BackGround_BGM").acb, WinData.cueName.ToString());
+        else
+            playerInfo.SetCue(CriAtom.GetCueSheet("BackGround_BGM").acb, LoseData.cueName.ToString());
+
+        playerInfo.Start();
     }
 }
