@@ -107,6 +107,12 @@ public class CS_PlayerMove : MonoBehaviour
         playerData.customInputAction.Player.Sneak.performed += OnDash;
         playerData.customInputAction.Player.Sneak.canceled += OnDash;
 
+        // 入力デバイス切り替え時にダッシュを一旦無効化する
+        if (CS_CustomInputActionManager.instance != null)
+        {
+            CS_CustomInputActionManager.instance.OnInputTypeChanged += OnInputTypeChanged;
+        }
+
         // アニメーターの取得
         animator = GetComponentInChildren<Animator>();
         jumpMerginTimer = jumpMerginDuration;
@@ -140,6 +146,11 @@ public class CS_PlayerMove : MonoBehaviour
         playerData.customInputAction.Player.Sneak.started -= OnDash;
         playerData.customInputAction.Player.Sneak.performed -= OnDash;
         playerData.customInputAction.Player.Sneak.canceled -= OnDash;
+
+        if (CS_CustomInputActionManager.instance != null)
+        {
+            CS_CustomInputActionManager.instance.OnInputTypeChanged -= OnInputTypeChanged;
+        }
     }
 
     void FixedUpdate()
@@ -388,8 +399,22 @@ public class CS_PlayerMove : MonoBehaviour
         // ワープ中はダッシュ入力を無効化する
         if (isWarping) return;
 
-        if (context.canceled) isRunning = false;
-        else isRunning = true;
+        switch (CS_CustomInputActionManager.instance?.currentInputType)
+        {
+            case CS_CustomInputActionManager.InputType.Gamepad:
+                if (context.performed) isRunning ^= true;
+                break;
+            case CS_CustomInputActionManager.InputType.KeyboardMouse:
+                if (context.canceled) isRunning = false;
+                else isRunning = true;
+                break;
+        }
+    }
+
+    // 入力デバイスが切り替わった時のコールバック(ダッシュを一旦無効化する)
+    private void OnInputTypeChanged(CS_CustomInputActionManager.InputType newInputType)
+    {
+        isRunning = false;
     }
 
     /// <summary>
