@@ -138,7 +138,7 @@ public class CS_SelectBarMove : MonoBehaviour
         {
             if (i == currentButton)
             {
-                uiTimer += Time.deltaTime;
+                uiTimer += Time.deltaTime * 2.0f;
                 float t = Easing.EaseInOutSine(uiTimer, uiDuration);
 
                 if (!reversibleScale)
