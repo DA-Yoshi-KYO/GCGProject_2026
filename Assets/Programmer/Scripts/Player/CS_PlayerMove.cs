@@ -223,7 +223,8 @@ public class CS_PlayerMove : MonoBehaviour
 
         if (isInvincible)
         {
-            float sineValue = Mathf.Abs(Mathf.Sin(invincibleTime * 180f * Mathf.Deg2Rad));
+            float sineValue = Mathf.Abs(Mathf.Sin(invincibleTime * 720f * Mathf.Deg2Rad));
+            float mappedValue = Mathf.Lerp(0.5f, 1f, sineValue);
             foreach (var material in materials)
             {
                 material.SetFloat("_Alpha", sineValue);
