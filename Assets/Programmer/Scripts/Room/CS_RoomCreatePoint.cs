@@ -67,6 +67,21 @@ public class CS_RoomCreatePoint : MonoBehaviour
     private Transform BackDoorPoints;
 
     /// <summary>
+    /// ヒエログリフをまとめているオブジェクトの部屋下のパス(このスクリプタブルオブジェクトのついてるオブジェクトから下の階層からこのパスにある。)
+    /// </summary>
+    private string s_hieroglyph_path = "GameObject/Hieroglyphs";
+
+    /// <summary>
+    /// ヒエログリフのオブジェクト 
+    /// </summary>
+    private List<GameObject> gl_hieroglyph_obj = new List<GameObject>();
+
+    /// <summary>
+    /// ヒエログリフのラベル名
+    /// </summary>
+    private String s_target_hieroglyph_laber = "Hieroglyphs";
+
+    /// <summary>
     /// 指定方向のワープ接続情報を取得します。
     /// 敵出入口や未設定の場合はfalseを返します。
     /// </summary>
