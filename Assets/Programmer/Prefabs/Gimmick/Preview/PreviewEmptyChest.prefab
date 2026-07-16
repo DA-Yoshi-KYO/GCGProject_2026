@@ -67,6 +67,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f726e1f352b37f444aae59244067df3c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  PlacementPlaneYOffset: 0.02
+  PlacementPlaneScale: {x: 0.1, y: 1, z: 0.05}
   gimmick: 3
   prevSize: {x: 1, y: 1, z: 1}
   isGimmick: 1
@@ -182,6 +184,7 @@ MonoBehaviour:
   outlineColor: {r: 1, g: 1, b: 0, a: 1}
   outlineWidth: 6
   emissionIntensity: 6
+  xRayOutline: 0
 --- !u!23 &1672862199349053313 stripped
 MeshRenderer:
   m_CorrespondingSourceObject: {fileID: -7511558181221131132, guid: 33aa7af8a14f9114fb72b7e6cff99226,

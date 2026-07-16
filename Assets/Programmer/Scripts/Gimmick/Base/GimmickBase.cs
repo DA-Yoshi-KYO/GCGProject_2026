@@ -50,6 +50,61 @@ public enum GimmickOutline
     NoOutline,
 }
 
+public static class GimmickPlacementSurfaceRules
+{
+    private const string FloorsGroupName = "Floors";
+    private const string SecondFloorsGroupName = "SecondFloors";
+    private const string PolesGroupName = "Poles";
+    private const string PartitionsGroupName = "Partitions";
+
+    public static bool IsAllowed(
+        Gimmick gimmick,
+        Transform surfaceTransform)
+    {
+        switch (gimmick)
+        {
+            case Gimmick.Pot:
+                return IsInGroup(
+                    surfaceTransform,
+                    PolesGroupName,
+                    PartitionsGroupName);
+
+            case Gimmick.IronBall:
+            case Gimmick.EmptyChest:
+            case Gimmick.Pitfall:
+                return IsInGroup(
+                    surfaceTransform,
+                    FloorsGroupName,
+                    SecondFloorsGroupName);
+
+            default:
+                return true;
+        }
+    }
+
+    private static bool IsInGroup(
+        Transform surfaceTransform,
+        params string[] groupNames)
+    {
+        if (surfaceTransform == null)
+            return false;
+
+        Transform current = surfaceTransform;
+        while (current != null)
+        {
+            foreach (string groupName in groupNames)
+            {
+                if (current.name == groupName)
+                    return true;
+            }
+
+            current = current.parent;
+        }
+
+        return false;
+    }
+}
+
 public class GimmickBase : MonoBehaviour
 {
     // -----------------------------------------------------------------
@@ -516,6 +571,51 @@ public class GimmickBase : MonoBehaviour
         {
             smokeEffect.transform.SetParent(null, true);
         }
+    }
+
+    protected virtual bool GetGimmickSettingsArea()
+    {
+        return true;
+    }
+
+    protected bool TryGetPlacementSurface(out RaycastHit surfaceHit)
+    {
+        const float rayOffset = 0.1f;
+        const float rayLength = 0.2f;
+        Vector3 rayOrigin =
+            placementCheckPosition + Vector3.up * rayOffset;
+
+        return Physics.Raycast(
+            rayOrigin,
+            Vector3.down,
+            out surfaceHit,
+            rayLength,
+            ~0,
+            QueryTriggerInteraction.Ignore);
+    }
+
+    protected bool IsPlacementSurfaceAllowed(
+        Transform surfaceTransform)
+    {
+        return GimmickPlacementSurfaceRules.IsAllowed(
+            gimmick,
+            surfaceTransform);
+    }
+
+    //設置可能位置であるかを判定
+    public bool GetIsSettingArea()
+    {
+        placementCheckPosition = transform.position;
+        return GetGimmickSettingsArea();
+    }
+
+    // プレビューなど、まだギミック本体が生成されていない位置の設置判定用
+    protected Vector3 placementCheckPosition;
+
+    public bool GetIsSettingArea(Vector3 worldPosition)
+    {
+        placementCheckPosition = worldPosition;
+        return GetGimmickSettingsArea();
     }
 
     private Quaternion GetEffectDirectionRotation()

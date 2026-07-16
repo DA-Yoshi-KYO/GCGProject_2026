@@ -500,4 +500,56 @@ public class RockGimmick : GimmickBase
                 break;
         }
     }
+
+    protected override bool GetGimmickSettingsArea()
+    {
+        //基本的に地面に置くものとする
+        //もしくは、地面より上に設置する場合
+        //大岩の大きさとなる4マス分が完全に乗らない限り
+        //おけないものとする
+
+        if (roomGrid == null)
+            return false;
+
+        float halfX = roomGrid.gridSize.x * gimmickSize.x * 0.45f;
+        float halfZ = roomGrid.gridSize.y * gimmickSize.y * 0.45f;
+        float rayLength = roomGrid.gridSize.y * 2.0f;
+        Vector3 origin = placementCheckPosition + Vector3.up * 0.1f;
+        Vector3[] offsets =
+        {
+            new Vector3(halfX, 0.0f, halfZ),
+            new Vector3(halfX, 0.0f, -halfZ),
+            new Vector3(-halfX, 0.0f, halfZ),
+            new Vector3(-halfX, 0.0f, -halfZ),
+        };
+
+        float firstHeight = 0.0f;
+        bool hasFirstHeight = false;
+        foreach (Vector3 offset in offsets)
+        {
+            if (!Physics.Raycast(origin + offset, Vector3.down, out RaycastHit hit,
+                    rayLength, ~0, QueryTriggerInteraction.Ignore))
+                return false;
+
+            if (Vector3.Angle(hit.normal, Vector3.up) > 5.0f)
+                return false;
+
+            if (!IsPlacementSurfaceAllowed(hit.transform))
+            {
+                return false;
+            }
+
+            if (!hasFirstHeight)
+            {
+                firstHeight = hit.point.y;
+                hasFirstHeight = true;
+            }
+            else if (Mathf.Abs(hit.point.y - firstHeight) > 0.05f)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }

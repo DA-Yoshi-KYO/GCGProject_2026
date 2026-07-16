@@ -589,6 +589,13 @@ public class CS_PlayerAction : MonoBehaviour
 
         if (IsInfinityPosition(settingPos)) return false;
 
+        Vector3 placementValidationPosition = previewBase != null
+            ? previewBase.transform.position
+            : settingPos;
+
+        if (!gimmick.GetIsSettingArea(placementValidationPosition))
+            return false;
+
         gimmick.gimmickState = GimmickState.Spawn;
 
         // 設置処理 //
@@ -908,6 +915,19 @@ public class CS_PlayerAction : MonoBehaviour
 
             previewBase = Instantiate(gimmickManager.GetCurrentGimmick()[currentGimmickIndex].previewPrefab);
             isShowGimmickPreview = true;
+            previewBase.transform.position = previewPos;
+
+            PreviewBase placementPreview = previewBase.GetComponent<PreviewBase>();
+            if (placementPreview != null &&
+                (gimmick is PotGimmick ||
+                 gimmick is RockGimmick ||
+                 gimmick is EmptyChestGimmick ||
+                 gimmick is PitfallGimmick ||
+                 gimmick is MagicAnkhGimmick ||
+                 gimmick is TeleportGimmick))
+            {
+                placementPreview.SetupPlacementPreview(gimmick, roomGrid);
+            }
 
             // =========================
             // 実際に生成されたインスタンス取得

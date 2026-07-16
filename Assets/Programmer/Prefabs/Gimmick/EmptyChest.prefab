@@ -85,6 +85,8 @@ MonoBehaviour:
   gimmickType: 1
   gimmick: 3
   gimmickState: 1
+  gimmickMaterial: 0
+  gimmickOutline: 0
   search: {fileID: 7801160974139462074}
   searchGridRange: 0
   enemyLayer:
@@ -96,8 +98,13 @@ MonoBehaviour:
   mesh: []
   isMeshScaleAdaptation: 1
   brokenFadeSpeed: 1
-  isMaterial: 1
   previewAlpha: 0.5
+  cs_EffectPlayer: {fileID: 0}
+  effectOffsetPosition: {x: 0, y: 0, z: 0}
+  effectOffsetDirection: 0
+  effectOffsetRotation: {x: 0, y: 0, z: 0, w: 1}
+  effectRotationUseDirection: 1
+  effectOffsetScale: {x: 1, y: 1, z: 1}
   durability: 10
 --- !u!114 &2817741669643907525
 MonoBehaviour:

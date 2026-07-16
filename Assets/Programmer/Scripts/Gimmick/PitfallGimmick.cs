@@ -61,6 +61,14 @@ public class PitfallGimmick : GimmickBase
         }
     }
 
+    protected override bool GetGimmickSettingsArea()
+    {
+        if (!TryGetPlacementSurface(out RaycastHit surfaceHit))
+            return false;
+
+        return IsPlacementSurfaceAllowed(surfaceHit.transform);
+    }
+
     void OnDestroy()
     {
         if (hitHoles == null)
