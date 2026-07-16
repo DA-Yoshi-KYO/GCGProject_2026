@@ -1311,6 +1311,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 555523390}
     m_Modifications:
+    - target: {fileID: 2681752544693535460, guid: 8e1a2530a5fdd8e4ab76018ba7e1e22f,
+        type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4706649935196176157, guid: 8e1a2530a5fdd8e4ab76018ba7e1e22f,
         type: 3}
       propertyPath: m_Name
@@ -1455,6 +1460,11 @@ PrefabInstance:
       propertyPath: cs_BackConnection.e_TargetOutDirection
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_BackConnection.m_hierograph_material
+      value: 
+      objectReference: {fileID: 2100000, guid: ab9a7fbc73c19c542b8480f4291ef2be, type: 2}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
       propertyPath: cs_FrontConnection.cs_TargetCreatePoint
@@ -3000,6 +3010,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
+      propertyPath: cs_FrontConnection.m_hierograph_material
+      value: 
+      objectReference: {fileID: 2100000, guid: e31d5cf89d4f83344802832b045614f8, type: 2}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
       propertyPath: cs_BackConnection.cs_RoomEnemyEntryDataSO
       value: 
       objectReference: {fileID: 11400000, guid: 01d007deca5d55942892b391d5c7b9d1,
@@ -3508,6 +3523,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_IsTrigger
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6234662809032304465, guid: 8e1a2530a5fdd8e4ab76018ba7e1e22f,
+        type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6323166876964350749, guid: 8e1a2530a5fdd8e4ab76018ba7e1e22f,
         type: 3}
@@ -4770,12 +4790,12 @@ PrefabInstance:
     - target: {fileID: 991451740903014827, guid: 6050fd3af03816d4ebd2d313a81c713d,
         type: 3}
       propertyPath: list_RoomCreatePointGenerateData.Array.data[3].list_RandomRoomBlockPrefabs.Array.size
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 991451740903014827, guid: 6050fd3af03816d4ebd2d313a81c713d,
         type: 3}
       propertyPath: list_RoomCreatePointGenerateData.Array.data[4].list_RandomRoomBlockPrefabs.Array.size
-      value: 1
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 991451740903014827, guid: 6050fd3af03816d4ebd2d313a81c713d,
         type: 3}
@@ -4805,6 +4825,24 @@ PrefabInstance:
       propertyPath: list_RoomCreatePointGenerateData.Array.data[3].list_RandomRoomBlockPrefabs.Array.data[0]
       value: 
       objectReference: {fileID: 2349549601360469598, guid: 8e3481ce3429d434396922c0ddbe2bf4,
+        type: 3}
+    - target: {fileID: 991451740903014827, guid: 6050fd3af03816d4ebd2d313a81c713d,
+        type: 3}
+      propertyPath: list_RoomCreatePointGenerateData.Array.data[3].list_RandomRoomBlockPrefabs.Array.data[1]
+      value: 
+      objectReference: {fileID: 6190820968897657137, guid: c137b263ac5756a43aecd2abb7f96fd9,
+        type: 3}
+    - target: {fileID: 991451740903014827, guid: 6050fd3af03816d4ebd2d313a81c713d,
+        type: 3}
+      propertyPath: list_RoomCreatePointGenerateData.Array.data[4].list_RandomRoomBlockPrefabs.Array.data[1]
+      value: 
+      objectReference: {fileID: 2474023301386482053, guid: 8e43a7d250eb8114dbf94858574140f5,
+        type: 3}
+    - target: {fileID: 991451740903014827, guid: 6050fd3af03816d4ebd2d313a81c713d,
+        type: 3}
+      propertyPath: list_RoomCreatePointGenerateData.Array.data[4].list_RandomRoomBlockPrefabs.Array.data[2]
+      value: 
+      objectReference: {fileID: 3999996320122052757, guid: ed75475646200a043bcb291b005fec20,
         type: 3}
     - target: {fileID: 991451740903014827, guid: 6050fd3af03816d4ebd2d313a81c713d,
         type: 3}
