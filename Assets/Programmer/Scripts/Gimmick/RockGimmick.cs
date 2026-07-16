@@ -310,10 +310,20 @@ public class RockGimmick : GimmickBase
                         );
                     break;
             }
-            Debug.DrawRay(rayPos, rollDir, Color.yellow);
+            Vector3 wallRayDir =
+                Vector3.ProjectOnPlane(rollDir, Vector3.up);
+            if (wallRayDir.sqrMagnitude > 0.0001f)
+            {
+                wallRayDir.Normalize();
+            }
+            else
+            {
+                wallRayDir = moveDir;
+            }
+            Debug.DrawRay(rayPos, wallRayDir, Color.yellow);
             foreach (RaycastHit h in Physics.RaycastAll(
                 rayPos,
-                rollDir,
+                wallRayDir,
                 raySideLength))
             {
                 Transform hitTransform = h.collider.transform;
@@ -341,7 +351,7 @@ public class RockGimmick : GimmickBase
                 //------------------------------------------------
                 // 壁として破壊可能な角度か確認
                 //------------------------------------------------
-                if (!HitBrokeAngle(h, rollDir, 85.0f))
+                if (!HitBrokeAngle(h, wallRayDir, 85.0f))
                     continue;
 
                 Debug.Log(
@@ -429,11 +439,13 @@ public class RockGimmick : GimmickBase
         if (!isBrokenFirst)
         {
             isBrokenFirst = true;
-            DeleteHitChecker();
-            if (GetThiefGimmickAction() != null)
+            CS_ThiefGimmickAction thiefGimmickAction =
+                GetThiefGimmickAction();
+            if (thiefGimmickAction != null)
             {
-                GetThiefGimmickAction().IronBallEnd(this);
+                thiefGimmickAction.IronBallEnd(this);
             }
+            DeleteHitChecker();
             //破壊時に1回だけ生成
             if (!isDangerZoneSpawned)
             {
