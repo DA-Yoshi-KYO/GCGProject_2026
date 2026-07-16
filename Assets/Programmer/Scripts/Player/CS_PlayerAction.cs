@@ -278,6 +278,9 @@ public class CS_PlayerAction : MonoBehaviour
 
     private void OnInteract(InputAction.CallbackContext context)
     {
+        // ワープ中は全てのインタラクトを無効化する
+        if (GetComponent<CS_PlayerMove>().IsWarping) return;
+
         GameObject playerRoomData = playerData.currentRoomData.GetPlayerRoomData();
         if (playerRoomData == null)
         {
@@ -294,117 +297,119 @@ public class CS_PlayerAction : MonoBehaviour
             return;    // 設置可能な部屋のみ設置する
         }
 
-        if (warpUIView)
+        if (context.started)
         {
-            doWarp = true;
-            isWarpInteract = true;
+            interactTime = 0.0f;
+
+            interactField.GetComponent<Renderer>().enabled = true;
+
+            interactField.transform.localScale = Vector3.zero;
+            isInteracting = true;
+            if (cs_PlayerInteractRangeEffectPlayer != null)
+            {
+                cs_PlayerInteractRangeEffectPlayer.PlayInteractRangeEffect(
+                    interactField.transform);
+            }
+            if (warpUIView)
+            {
+                doWarp = true;
+                isWarpInteract = true;
+                isInteracting = false;
+                playerData.currentMode = CS_PlayerData.PlayerMode.Normal;
+                return;
+            }
         }
-        else if (isWarpInteract)
+        else if (context.canceled)
         {
             // ワープ確定に使われたボタン操作なので、離した際にギミック設置の判定に流れないようにする
-            if (context.canceled) isWarpInteract = false;
-        }
-        else
-        {
-            if (context.started)
+            if (isWarpInteract)
             {
-                interactTime = 0.0f;
-                interactField.GetComponent<Renderer>().enabled = true;
+                isWarpInteract = false;
+                return;
+            }
+            isInteracting = false;
 
-                interactField.transform.localScale = Vector3.zero;
-                isInteracting = true;
-                if (cs_PlayerInteractRangeEffectPlayer != null)
+            EndAllAnkhStandEffect();
+
+            // Effectの停止
+            if (cs_PlayerInteractRangeEffectPlayer != null)
+            {
+                cs_PlayerInteractRangeEffectPlayer.EndInteractRangeEffect();
+            }
+            if (interactTime < switchInteract)
+            {
+                // 短押しは設置の処理を行う
+                switch (playerData.currentMode)
                 {
-                    cs_PlayerInteractRangeEffectPlayer.PlayInteractRangeEffect(
-                        interactField.transform);
+                    case CS_PlayerData.PlayerMode.Normal:
+                        playerData.currentMode = CS_PlayerData.PlayerMode.Setting;
+                        break;
+                    case CS_PlayerData.PlayerMode.Setting:
+                        if (SettingAction())
+                        {
+                            int interactSEIndex = UnityEngine.Random.Range(1, 4);
+                            playSE.PlayOneShotSE("Cat_Interact" + interactSEIndex.ToString(), gameObject.transform.position, "InteractSE");
+                            playerData.currentMode = CS_PlayerData.PlayerMode.Normal;
+                        }
+                        break;
+                    default:
+                        break;
                 }
             }
-            else if (context.canceled)
+            else
             {
-                isInteracting = false;
+                // 長押しはギミックの起動を行う
+                int interactSEIndex = UnityEngine.Random.Range(1, 4);
+                interactField.GetComponent<Renderer>().enabled = false;
+                playSE.PlayOneShotSE("Cat_Interact" + interactSEIndex.ToString(), gameObject.transform.position, "InteractSE");
 
-                EndAllAnkhStandEffect();
-
-                // Effectの停止
-                if (cs_PlayerInteractRangeEffectPlayer != null)
-                {
-                    cs_PlayerInteractRangeEffectPlayer.EndInteractRangeEffect();
-                }
-                if (interactTime < switchInteract)
-                {
-                    // 短押しは設置の処理を行う
-                    switch (playerData.currentMode)
+                //アンク用動作
+                if (gimmickManager.GetCurrentGimmick()[currentGimmickIndex].gimmickTag ==
+                    Gimmick.MagicAnkh)
+                {//カーソルがアンクの時インタラクト発動
+                    foreach (var GM in gimmickManager.GetGimmickList())
                     {
-                        case CS_PlayerData.PlayerMode.Normal:
-                            playerData.currentMode = CS_PlayerData.PlayerMode.Setting;
-                            break;
-                        case CS_PlayerData.PlayerMode.Setting:
-                            if (SettingAction())
-                            {
-                                int interactSEIndex = UnityEngine.Random.Range(1, 4);
-                                playSE.PlayOneShotSE("Cat_Interact" + interactSEIndex.ToString(), gameObject.transform.position, "InteractSE");
-                                playerData.currentMode = CS_PlayerData.PlayerMode.Normal;
-                            }
-                            break;
-                        default:
-                            break;
+                        //タグでアンク判定→アクティブへ
+                        if (GM.gimmick.GetGimmickTag() == Gimmick.MagicAnkh)
+                        {
+                            GM.gimmick.gimmickState = GimmickState.Active;
+                        }
                     }
                 }
-                else
+
+                foreach (Collider hit in hitList)
                 {
-                    // 長押しはギミックの起動を行う
-                    int interactSEIndex = UnityEngine.Random.Range(1, 4);
-                    interactField.GetComponent<Renderer>().enabled = false;
-                    playSE.PlayOneShotSE("Cat_Interact" + interactSEIndex.ToString(), gameObject.transform.position, "InteractSE");
+                    if (hit == null) continue;
 
-                    //アンク用動作
-                    if (gimmickManager.GetCurrentGimmick()[currentGimmickIndex].gimmickTag ==
-                        Gimmick.MagicAnkh)
-                    {//カーソルがアンクの時インタラクト発動
-                        foreach (var GM in gimmickManager.GetGimmickList())
-                        {
-                            //タグでアンク判定→アクティブへ
-                            if (GM.gimmick.GetGimmickTag() == Gimmick.MagicAnkh)
-                            {
-                                GM.gimmick.gimmickState = GimmickState.Active;
-                            }
-                        }
-                    }
-
-                    foreach (Collider hit in hitList)
+                    var renderers = hit.GetComponentsInChildren<Renderer>();
+                    foreach (var renderer in renderers)
                     {
-                        if (hit == null) continue;
-
-                        var renderers = hit.GetComponentsInChildren<Renderer>();
-                        foreach (var renderer in renderers)
-                        {
-                            if (renderer.materials.Length < 2) continue;
-                            Material material = renderer.materials[1];
-                            if (material != null) material.SetVector("_OutlineColor", Color.gray);
-                        }
-
-                        GimmickBase gimmick = hit.GetComponent<GimmickBase>();
-                        if (gimmick != null)
-                        {
-                            if (gimmick.gimmickState != GimmickState.Idle) continue;
-
-                            SettingGimmickDirection(gimmick);
-
-                            //ギミックをアクティブにする
-                            Debug.Log($"ギミック：" + hit.name + "がアクティブになりました" + gimmick.GetDirectionVec());
-                            gimmick.ActivateGimmick();
-                            continue;
-                        }
-
-                        CS_ThiefAI thief = hit.GetComponent<CS_ThiefAI>();
-                        if (thief != null)
-                        {
-                            thief.read_HearingSystem.InvestigateSound(gameObject.transform.position, CS_HearingSystem.AttractSoundType.CatVoice);
-                        }
+                        if (renderer.materials.Length < 2) continue;
+                        Material material = renderer.materials[1];
+                        if (material != null) material.SetVector("_OutlineColor", Color.gray);
                     }
 
-                    hitList.Clear();
+                    GimmickBase gimmick = hit.GetComponent<GimmickBase>();
+                    if (gimmick != null)
+                    {
+                        if (gimmick.gimmickState != GimmickState.Idle) continue;
+
+                        SettingGimmickDirection(gimmick);
+
+                        //ギミックをアクティブにする
+                        Debug.Log($"ギミック：" + hit.name + "がアクティブになりました" + gimmick.GetDirectionVec());
+                        gimmick.ActivateGimmick();
+                        continue;
+                    }
+
+                    CS_ThiefAI thief = hit.GetComponent<CS_ThiefAI>();
+                    if (thief != null)
+                    {
+                        thief.read_HearingSystem.InvestigateSound(gameObject.transform.position, CS_HearingSystem.AttractSoundType.CatVoice);
+                    }
                 }
+
+                hitList.Clear();
             }
         }
     }
