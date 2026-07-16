@@ -151,6 +151,15 @@ public class GimmickBase : MonoBehaviour
     [Header("Preview")]
     [SerializeField] private float previewAlpha = 0.5f;
 
+    [Header("Effect再生処理")]
+    [SerializeField]
+    private CS_EffectPlayer cs_EffectPlayer;
+    [SerializeField] private Vector3 effectOffsetPosition = Vector3.zero;
+    [SerializeField] private float effectOffsetDirection = 0.0f;
+    [SerializeField] private Quaternion effectOffsetRotation = Quaternion.identity;
+    [SerializeField] private bool effectRotationUseDirection = true;
+    [SerializeField] private Vector3 effectOffsetScale = Vector3.one;
+
     protected Vector2Int gimmickGridPos;
     protected Vector3 targetPoint;
     protected Vector3 currentPoint;
@@ -441,6 +450,95 @@ public class GimmickBase : MonoBehaviour
         effectT.localScale = effectSize;
         hitT.localScale = hitSize;
         searchT.localScale = searchSize;
+    }
+
+    //エフェクト
+    protected void PlayEffectPlayer()
+    {
+        PlayEffectPlayer(transform.position);
+    }
+
+    protected void PlayEffectPlayer(Vector3 basePosition)
+    {
+        if (cs_EffectPlayer == null)
+        {
+            cs_EffectPlayer = GetComponent<CS_EffectPlayer>();
+        }
+
+        if (cs_EffectPlayer == null)
+        {
+            Debug.LogWarning(
+                "[CS_EffectTest] CS_EffectPlayerがありません。"
+            );
+            return;
+        }
+
+        Quaternion directionRotation = GetEffectDirectionRotation();
+        Quaternion baseRotation =
+            effectRotationUseDirection ? directionRotation : transform.rotation;
+        Quaternion effectRotation =
+            baseRotation * GetSafeEffectOffsetRotation();
+
+        Vector3 effectPosition =
+            basePosition +
+            directionRotation * effectOffsetPosition +
+            directionRotation * Vector3.forward * effectOffsetDirection;
+
+        CSST_EffectPlayData csst_EffectPlayData =
+            new CSST_EffectPlayData();
+
+        csst_EffectPlayData.CSST_EffectPlayData_Init();
+
+        csst_EffectPlayData.SetPosition(
+            effectPosition
+        );
+
+        csst_EffectPlayData.SetRotation(
+            effectRotation
+        );
+
+        if (effectOffsetScale != Vector3.zero)
+        {
+            csst_EffectPlayData.SetScale(
+                effectOffsetScale
+            );
+        }
+
+        csst_EffectPlayData.SetLoopFlag(false);
+        csst_EffectPlayData.SetHideOnEnd(true);
+
+        CSAD_EffectCommonProcessBase smokeEffect =
+            cs_EffectPlayer.PlayEffect(
+                csst_EffectPlayData
+            );
+
+        if (smokeEffect != null)
+        {
+            smokeEffect.transform.SetParent(null, true);
+        }
+    }
+
+    private Quaternion GetEffectDirectionRotation()
+    {
+        if (DirectionRotations.TryGetValue(gimmickDirection, out Quaternion directionRotation))
+        {
+            return directionRotation;
+        }
+
+        return transform.rotation;
+    }
+
+    private Quaternion GetSafeEffectOffsetRotation()
+    {
+        if (Mathf.Approximately(effectOffsetRotation.x, 0.0f) &&
+            Mathf.Approximately(effectOffsetRotation.y, 0.0f) &&
+            Mathf.Approximately(effectOffsetRotation.z, 0.0f) &&
+            Mathf.Approximately(effectOffsetRotation.w, 0.0f))
+        {
+            return Quaternion.identity;
+        }
+
+        return effectOffsetRotation;
     }
 
     public CS_ThiefGimmickAction GetThiefGimmickAction()

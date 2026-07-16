@@ -197,6 +197,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3279101354686393898}
   - component: {fileID: 5284634821981415291}
+  - component: {fileID: 8127359024461027741}
   - component: {fileID: 6548285118755774186}
   m_Layer: 27
   m_Name: Pot
@@ -264,6 +265,12 @@ MonoBehaviour:
   isMeshScaleAdaptation: 1
   brokenFadeSpeed: 1
   previewAlpha: 0.5
+  cs_EffectPlayer: {fileID: 8127359024461027741}
+  effectOffsetPosition: {x: 0, y: 0, z: 0}
+  effectOffsetDirection: 0
+  effectOffsetRotation: {x: 0, y: 0, z: 0, w: 1}
+  effectRotationUseDirection: 1
+  effectOffsetScale: {x: 1, y: 1, z: 1}
   activeTime: 10
   gravity: 1
   dangerZone: {fileID: 1027198714623358771, guid: 1dc331ca8706d994f9348bb340bfb17e,
@@ -272,6 +279,20 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 536870912
   cs_PotVatEffect: {fileID: 0}
+--- !u!114 &8127359024461027741
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7905465617219888894}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 392ec5ac6ab66b645a01a679dbd2d422, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  go_EffectPrefab: {fileID: 2120354387666871772, guid: 9ea4668d403aab34f938ca6bd383a298,
+    type: 3}
 --- !u!136 &6548285118755774186
 CapsuleCollider:
   m_ObjectHideFlags: 0

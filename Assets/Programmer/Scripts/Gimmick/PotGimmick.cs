@@ -69,6 +69,8 @@ public class PotGimmick : GimmickBase
             Vector2Int hitCheckerGridPos = new Vector2Int(gimmickGridPos.x + directionVec.x, gimmickGridPos.y + directionVec.y);
             SetHitChecker(hitCheckerGridPos.x, hitCheckerGridPos.y);
             activePos = transform.position;
+            Vector3 smokePosition = activePos;
+            smokePosition.y += initOffsetY;
 
             //インタラクトされた方向に地面があるか確認
             //原点をギミックの方向にずらして、下方にレイを飛ばす
@@ -95,6 +97,7 @@ public class PotGimmick : GimmickBase
             initPositionY = activePos.y;
             isFall = true;
             isMoving = true;
+            PlayEffectPlayer(smokePosition);
             if (gimmickSound != null)
             {
                 gimmickSound.PlayOneShotSE("Gimmick_PotFall", activePos, "PotSound");
