@@ -11,6 +11,8 @@ public struct CSST_GimmickDirectionIndicatorSettings
     public float FadeInSpeed;
     public float FadeOutSpeed;
     public float MaxAlpha;
+    public float SearchTargetMoveSpeedMultiplier;
+    public float SearchTargetSpawnIntervalMultiplier;
 
     public CSST_GimmickDirectionIndicatorSettings(
         Vector2 size,
@@ -19,7 +21,9 @@ public struct CSST_GimmickDirectionIndicatorSettings
         float spawnInterval,
         float fadeInSpeed,
         float fadeOutSpeed,
-        float maxAlpha)
+        float maxAlpha,
+        float searchTargetMoveSpeedMultiplier,
+        float searchTargetSpawnIntervalMultiplier)
     {
         Size = size;
         MoveSpeed = moveSpeed;
@@ -28,6 +32,10 @@ public struct CSST_GimmickDirectionIndicatorSettings
         FadeInSpeed = fadeInSpeed;
         FadeOutSpeed = fadeOutSpeed;
         MaxAlpha = maxAlpha;
+        SearchTargetMoveSpeedMultiplier =
+            searchTargetMoveSpeedMultiplier;
+        SearchTargetSpawnIntervalMultiplier =
+            searchTargetSpawnIntervalMultiplier;
     }
 }
 
@@ -50,16 +58,19 @@ public sealed class CS_GimmickDirectionIndicatorRenderer
 
         public GimmickDirection Direction;
         public Vector3 PositionOffset;
+        public bool HasSearchTarget;
         public float SpawnTimer;
 
         public DirectionEmitter(
             GimmickBase gimmick,
             GimmickDirection direction,
-            Vector3 positionOffset)
+            Vector3 positionOffset,
+            bool hasSearchTarget)
         {
             Gimmick = gimmick;
             Direction = direction;
             PositionOffset = positionOffset;
+            HasSearchTarget = hasSearchTarget;
             SpawnTimer = 0.0f;
             SourceRenderers =
                 gimmick.GetComponentsInChildren<MeshRenderer>(true);
@@ -103,6 +114,7 @@ public sealed class CS_GimmickDirectionIndicatorRenderer
     public void UpdateIndicators(
         IReadOnlyDictionary<GimmickBase, GimmickDirection> directions,
         IReadOnlyDictionary<GimmickBase, Vector3> positionOffsets,
+        IReadOnlyDictionary<GimmickBase, bool> searchTargetStates,
         CSST_GimmickDirectionIndicatorSettings settings,
         float deltaTime)
     {
@@ -127,6 +139,11 @@ public sealed class CS_GimmickDirectionIndicatorRenderer
                     out Vector3 configuredOffset)
                     ? configuredOffset
                     : Vector3.zero;
+            bool hasSearchTarget =
+                searchTargetStates.TryGetValue(
+                    gimmick,
+                    out bool configuredSearchTargetState) &&
+                configuredSearchTargetState;
 
             if (!emitters.TryGetValue(
                     gimmick,
@@ -136,7 +153,8 @@ public sealed class CS_GimmickDirectionIndicatorRenderer
                     new DirectionEmitter(
                         gimmick,
                         pair.Value,
-                        positionOffset);
+                        positionOffset,
+                        hasSearchTarget);
                 emitters.Add(gimmick, emitter);
             }
             else if (emitter.Direction != pair.Value ||
@@ -146,15 +164,36 @@ public sealed class CS_GimmickDirectionIndicatorRenderer
                 ReleaseEmitterTriangles(emitter);
                 emitter.Direction = pair.Value;
                 emitter.PositionOffset = positionOffset;
+                emitter.HasSearchTarget = hasSearchTarget;
+                emitter.SpawnTimer = 0.0f;
+            }
+            else if (emitter.HasSearchTarget != hasSearchTarget)
+            {
+                emitter.HasSearchTarget = hasSearchTarget;
                 emitter.SpawnTimer = 0.0f;
             }
         }
 
         foreach (DirectionEmitter emitter in emitters.Values)
         {
+            CSST_GimmickDirectionIndicatorSettings
+                effectiveSettings = settings;
+            if (emitter.HasSearchTarget)
+            {
+                effectiveSettings.MoveSpeed *=
+                    Mathf.Max(
+                        settings.SearchTargetMoveSpeedMultiplier,
+                        1.0f);
+                effectiveSettings.SpawnInterval *=
+                    Mathf.Clamp(
+                        settings.SearchTargetSpawnIntervalMultiplier,
+                        MinimumValue,
+                        1.0f);
+            }
+
             UpdateEmitter(
                 emitter,
-                settings,
+                effectiveSettings,
                 Mathf.Max(deltaTime, 0.0f));
         }
     }

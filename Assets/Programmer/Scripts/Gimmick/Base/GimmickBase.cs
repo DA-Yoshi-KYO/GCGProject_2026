@@ -793,6 +793,55 @@ public class GimmickBase : MonoBehaviour
     {
         gimmickState = GimmickState.Active;
 
+        bool hasSearchTarget =
+            TryGetSearchDirection(
+                out GimmickDirection searchDirection,
+                out Transform nearestEnemy,
+                out int detectedEnemyCount,
+                out float nearestDistance);
+
+        Debug.Log(
+            "Detected " +
+            detectedEnemyCount +
+            " enemies in search area.");
+
+        if (!hasSearchTarget)
+            return;
+
+        gimmickDirection = searchDirection;
+
+        Debug.Log(
+            "Nearest enemy: " +
+            nearestEnemy.name +
+            ", Distance: " +
+            nearestDistance);
+        Debug.Log(
+            "Detected enemy: " +
+            nearestEnemy.name +
+            ", Direction: " +
+            gimmickDirection);
+    }
+
+    public bool TryGetSearchDirection(
+        out GimmickDirection direction)
+    {
+        return TryGetSearchDirection(
+            out direction,
+            out _,
+            out _,
+            out _);
+    }
+
+    private bool TryGetSearchDirection(
+        out GimmickDirection direction,
+        out Transform nearestEnemy,
+        out int detectedEnemyCount,
+        out float nearestDistance)
+    {
+        direction = gimmickDirection;
+        nearestEnemy = null;
+        nearestDistance = float.MaxValue;
+
         Collider[] hitsX = OverlapBoxCollider(searchColliderX);
         Collider[] hitsZ = OverlapBoxCollider(searchColliderZ);
 
@@ -800,46 +849,48 @@ public class GimmickBase : MonoBehaviour
         foreach (Collider col in hitsX) searchHitBuffer.Add(col);
         foreach (Collider col in hitsZ) searchHitBuffer.Add(col);
 
-        Debug.Log("Detected " + searchHitBuffer.Count + " enemies in search area.");
+        detectedEnemyCount = searchHitBuffer.Count;
 
         if (searchHitBuffer.Count == 0)
         {
-            return;
+            return false;
         }
-
-        float minDist = float.MaxValue;
-        Transform nearestEnemy = null;
 
         foreach (Collider col in searchHitBuffer)
         {
+            if (col == null)
+                continue;
+
             float dist = Vector3.Distance(transform.position, col.transform.position);
 
-            if (dist < minDist)
+            if (dist < nearestDistance)
             {
-                minDist = dist;
+                nearestDistance = dist;
                 nearestEnemy = col.transform;
             }
         }
 
-        Debug.Log("Nearest enemy: " + (nearestEnemy != null ? nearestEnemy.name : "None") + ", Distance: " + minDist);
-
         if (nearestEnemy == null)
         {
-            return;
+            return false;
         }
 
         Vector3 diff = nearestEnemy.position - transform.position;
 
         if (Mathf.Abs(diff.x) >= Mathf.Abs(diff.z))
         {
-            gimmickDirection = diff.x >= 0f ? GimmickDirection.Left : GimmickDirection.Right;
+            direction = diff.x >= 0f
+                ? GimmickDirection.Left
+                : GimmickDirection.Right;
         }
         else
         {
-            gimmickDirection = diff.z >= 0f ? GimmickDirection.Down : GimmickDirection.Up;
+            direction = diff.z >= 0f
+                ? GimmickDirection.Down
+                : GimmickDirection.Up;
         }
 
-        Debug.Log("Detected enemy: " + nearestEnemy.name + ", Direction: " + gimmickDirection);
+        return true;
     }
 
     protected virtual void ActiveUpdate()

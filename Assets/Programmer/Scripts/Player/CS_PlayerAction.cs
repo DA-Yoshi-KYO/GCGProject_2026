@@ -24,6 +24,11 @@ using UnityEngine.InputSystem;
 
 public class CS_PlayerAction : MonoBehaviour
 {
+    private const float SearchTargetTriangleMoveSpeedMultiplier =
+        1.5f;
+    private const float SearchTargetTriangleSpawnIntervalMultiplier =
+        0.5f;
+
     [Header("ギミックの軌道に切り替わる為に必要な長押しの時間")][SerializeField] private float switchInteract = 1f;         // ギミックの起動へ切り替わる為に必要な長押しの時間
     [Header("インタラクト範囲用のオブジェクト")][SerializeField] private GameObject interactField = null;   // インタラクトの範囲を示すフィールド
     [Header("ギミックの大きさが最大になるために必要な秒数")][SerializeField] private float interactSpeed = 1f;          // インタラクトの速度(interactSpeed秒で範囲が1になる)
@@ -71,6 +76,9 @@ public class CS_PlayerAction : MonoBehaviour
     private readonly Dictionary<GimmickBase, GimmickDirection>
         preparedGimmickDirections =
             new Dictionary<GimmickBase, GimmickDirection>();
+    private readonly Dictionary<GimmickBase, bool>
+        preparedGimmickSearchTargetStates =
+            new Dictionary<GimmickBase, bool>();
     private readonly Dictionary<GimmickBase, Vector3>
         preparedGimmickDirectionOffsets =
             new Dictionary<GimmickBase, Vector3>();
@@ -244,6 +252,7 @@ public class CS_PlayerAction : MonoBehaviour
                 }
                 hitList.Clear();
                 preparedGimmickDirections.Clear();
+                preparedGimmickSearchTargetStates.Clear();
                 
                 // インタラクト中はねこのアウトラインを緑にする
                 outlineTarget.SetOutlineColor(Color.green);
@@ -312,10 +321,13 @@ public class CS_PlayerAction : MonoBehaviour
                             IsDirectionIndicatorTarget(gimmick) &&
                             TryCalculatePreparedGimmickDirection(
                                 gimmick,
-                                out GimmickDirection direction))
+                                out GimmickDirection direction,
+                                out bool hasSearchTarget))
                         {
                             preparedGimmickDirections[gimmick] =
                                 direction;
+                            preparedGimmickSearchTargetStates[gimmick] =
+                                hasSearchTarget;
                         }
                     }
 
@@ -718,7 +730,8 @@ public class CS_PlayerAction : MonoBehaviour
     {
         if (!TryCalculatePreparedGimmickDirection(
                 gimmick,
-                out GimmickDirection direction))
+                out GimmickDirection direction,
+                out _))
         {
             return;
         }
@@ -728,16 +741,25 @@ public class CS_PlayerAction : MonoBehaviour
 
     private bool TryCalculatePreparedGimmickDirection(
         GimmickBase gimmick,
-        out GimmickDirection direction)
+        out GimmickDirection direction,
+        out bool hasSearchTarget)
     {
         if (gimmick == null)
         {
             direction = GimmickDirection.Up;
+            hasSearchTarget = false;
             return false;
         }
 
-        GimmickDirection preferredDirection =
-            CalculatePreferredGimmickDirection(gimmick);
+        GimmickDirection preferredDirection;
+        hasSearchTarget =
+            gimmick.TryGetSearchDirection(
+                out preferredDirection);
+        if (!hasSearchTarget)
+        {
+            preferredDirection =
+                CalculatePreferredGimmickDirection(gimmick);
+        }
 
         if (gimmick is PotGimmick potGimmick)
         {
@@ -830,7 +852,9 @@ public class CS_PlayerAction : MonoBehaviour
                 directionTriangleSpawnInterval,
                 directionTriangleFadeInSpeed,
                 directionTriangleFadeOutSpeed,
-                directionTriangleMaxAlpha);
+                directionTriangleMaxAlpha,
+                SearchTargetTriangleMoveSpeedMultiplier,
+                SearchTargetTriangleSpawnIntervalMultiplier);
 
         preparedGimmickDirectionOffsets.Clear();
         foreach (KeyValuePair<GimmickBase, GimmickDirection> pair
@@ -860,6 +884,7 @@ public class CS_PlayerAction : MonoBehaviour
         gimmickDirectionIndicatorRenderer.UpdateIndicators(
             preparedGimmickDirections,
             preparedGimmickDirectionOffsets,
+            preparedGimmickSearchTargetStates,
             settings,
             Time.deltaTime);
     }
@@ -868,6 +893,7 @@ public class CS_PlayerAction : MonoBehaviour
     {
         preparedGimmickDirections.Clear();
         preparedGimmickDirectionOffsets.Clear();
+        preparedGimmickSearchTargetStates.Clear();
         gimmickDirectionIndicatorRenderer?.ClearIndicators();
     }
 
