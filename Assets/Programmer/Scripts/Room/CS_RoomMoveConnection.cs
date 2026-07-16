@@ -31,6 +31,14 @@ public class CS_RoomMoveConnection
     [SerializeField]
     private CSS_RoomEnemyEntryData cs_RoomEnemyEntryDataSO;
 
+    [Header("ヒエログラフの設定テクスチャー")]
+    [SerializeField]
+    private Texture2D tx_HierographTexture = null;
+
+    [Header("ヒエログラフの設定オブジェクト")]
+    [SerializeField]
+    private GameObject go_HierographObject = null;
+
     /// <summary>
     /// 出入口の用途を取得します。
     /// </summary>
@@ -70,6 +78,16 @@ public class CS_RoomMoveConnection
     /// 敵出入口用データを取得します。
     /// </summary>
     public CSS_RoomEnemyEntryData RoomEnemyEntryDataSO => cs_RoomEnemyEntryDataSO;
+
+    /// <summary>
+    /// ヒエログリフのテクスチャーを取得します。
+    /// </summary>
+    public Texture2D HierographTexture => tx_HierographTexture;
+
+    /// <summary>
+    /// ヒエログリフのオブジェクトを取得します。 
+    /// </summary>
+    public GameObject HierographObject => go_HierographObject;
 
     /// <summary>
     /// この敵出入口から出現できる敵の最大数を取得します。
