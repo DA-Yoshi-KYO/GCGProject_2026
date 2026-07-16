@@ -164,12 +164,13 @@ public class CS_PlayerAction : MonoBehaviour
             // インタラクト範囲の拡大
             if (interactTime >= switchInteract)
             {
+                // アンクエフェクトの再生
                 if (IsCurrentGimmickMagicAnkh())
                 {
                     PlayAllAnkhStandEffect();
                 }
 
-
+                // 前フレームのリセット(アウトラインを一度灰色に戻す)
                 if (hitList != null)
                 {
                     foreach (var item in hitList)
@@ -182,7 +183,9 @@ public class CS_PlayerAction : MonoBehaviour
                         }
                     }
                 }
-
+                hitList.Clear();
+                
+                // インタラクト中はねこのアウトラインを緑にする
                 outlineTarget.SetOutlineColor(Color.green);
 
                 // インタラクト範囲を拡大
@@ -194,7 +197,6 @@ public class CS_PlayerAction : MonoBehaviour
                 interactScale.z = Mathf.Min(interactScale.z, interactMax.radius);
                 interactField.transform.localScale = interactScale;
                 Vector3 interactPos = transform.position;
-                interactPos.y += interactScale.y * 0.5f; // フィールドが地面に接するように位置を調整
                 interactField.transform.position = interactPos;
 
                 // Effectのサイズを変更
@@ -211,6 +213,11 @@ public class CS_PlayerAction : MonoBehaviour
                     interactScale.x * 0.5f,
                     LayerMask.GetMask("Gimmick", "Thief")
                     );
+                // 宝箱、落とし穴、にゃ気、テレポートはインタラクトを行わないので除外する
+                hitList.RemoveAll(hitList => hitList.GetComponent<GimmickBase>().gimmick == Gimmick.EmptyChest);
+                hitList.RemoveAll(hitList => hitList.GetComponent<GimmickBase>().gimmick == Gimmick.Pitfall);
+                hitList.RemoveAll(hitList => hitList.GetComponent<GimmickBase>().gimmick == Gimmick.Nyaki);
+                hitList.RemoveAll(hitList => hitList.GetComponent<GimmickBase>().gimmick == Gimmick.Teleport);
 
                 float minHeight = -interactScale.y * 0.5f;
                 float maxHeight = interactScale.y * 0.5f;
@@ -277,6 +284,9 @@ public class CS_PlayerAction : MonoBehaviour
 
     private void OnInteract(InputAction.CallbackContext context)
     {
+        // ワープ中は全てのインタラクトを無効化する
+        if (GetComponent<CS_PlayerMove>().IsWarping) return;
+
         GameObject playerRoomData = playerData.currentRoomData.GetPlayerRoomData();
         if (playerRoomData == null)
         {
@@ -293,115 +303,111 @@ public class CS_PlayerAction : MonoBehaviour
             return;    // 設置可能な部屋のみ設置する
         }
 
-        if (warpUIView)
+        if (context.started)
         {
-            doWarp = true;
-            isWarpInteract = true;
+            interactTime = 0.0f;
+
+            interactField.GetComponent<Renderer>().enabled = true;
+
+            interactField.transform.localScale = Vector3.zero;
+            isInteracting = true;
+            if (cs_PlayerInteractRangeEffectPlayer != null)
+            {
+                cs_PlayerInteractRangeEffectPlayer.PlayInteractRangeEffect(
+                    interactField.transform);
+            }
+            if (warpUIView)
+            {
+                doWarp = true;
+                isWarpInteract = true;
+                ResetInteract();
+                return;
+            }
         }
-        else if (isWarpInteract)
+        else if (context.canceled)
         {
             // ワープ確定に使われたボタン操作なので、離した際にギミック設置の判定に流れないようにする
-            if (context.canceled) isWarpInteract = false;
-        }
-        else
-        {
-            if (context.started)
+            if (isWarpInteract)
             {
-                interactTime = 0.0f;
-                interactField.GetComponent<Renderer>().enabled = true;
+                isWarpInteract = false;
+                return;
+            }
+            isInteracting = false;
 
-                interactField.transform.localScale = Vector3.zero;
-                isInteracting = true;
-                if (cs_PlayerInteractRangeEffectPlayer != null)
+            EndAllAnkhStandEffect();
+
+            // Effectの停止
+            if (cs_PlayerInteractRangeEffectPlayer != null)
+            {
+                cs_PlayerInteractRangeEffectPlayer.EndInteractRangeEffect();
+            }
+            if (interactTime < switchInteract)
+            {
+                // 短押しは設置の処理を行う
+                switch (playerData.currentMode)
                 {
-                    cs_PlayerInteractRangeEffectPlayer.PlayInteractRangeEffect(
-                        interactField.transform);
+                    case CS_PlayerData.PlayerMode.Normal:
+                        playerData.currentMode = CS_PlayerData.PlayerMode.Setting;
+                        break;
+                    case CS_PlayerData.PlayerMode.Setting:
+                        if (SettingAction())
+                        {
+                            int interactSEIndex = UnityEngine.Random.Range(1, 4);
+                            playSE.PlayOneShotSE("Cat_Interact" + interactSEIndex.ToString(), gameObject.transform.position, "InteractSE");
+                            playerData.currentMode = CS_PlayerData.PlayerMode.Normal;
+                        }
+                        break;
+                    default:
+                        break;
                 }
             }
-            else if (context.canceled)
+            else
             {
-                isInteracting = false;
+                // 長押しはギミックの起動を行う
+                int interactSEIndex = UnityEngine.Random.Range(1, 4);
+                interactField.GetComponent<Renderer>().enabled = false;
+                playSE.PlayOneShotSE("Cat_Interact" + interactSEIndex.ToString(), gameObject.transform.position, "InteractSE");
 
-                EndAllAnkhStandEffect();
-
-                // Effectの停止
-                if (cs_PlayerInteractRangeEffectPlayer != null)
-                {
-                    cs_PlayerInteractRangeEffectPlayer.EndInteractRangeEffect();
-                }
-                if (interactTime < switchInteract)
-                {
-                    // 短押しは設置の処理を行う
-                    switch (playerData.currentMode)
+                //アンク用動作
+                if (gimmickManager.GetCurrentGimmick()[currentGimmickIndex].gimmickTag ==
+                    Gimmick.MagicAnkh)
+                {//カーソルがアンクの時インタラクト発動
+                    foreach (var GM in gimmickManager.GetGimmickList())
                     {
-                        case CS_PlayerData.PlayerMode.Normal:
-                            playerData.currentMode = CS_PlayerData.PlayerMode.Setting;
-                            break;
-                        case CS_PlayerData.PlayerMode.Setting:
-                            if (SettingAction())
-                            {
-                                int interactSEIndex = UnityEngine.Random.Range(1, 4);
-                                playSE.PlayOneShotSE("Cat_Interact" + interactSEIndex.ToString(), gameObject.transform.position, "InteractSE");
-                                playerData.currentMode = CS_PlayerData.PlayerMode.Normal;
-                            }
-                            break;
-                        default:
-                            break;
+                        //タグでアンク判定→アクティブへ
+                        if (GM.gimmick.GetGimmickTag() == Gimmick.MagicAnkh)
+                        {
+                            GM.gimmick.gimmickState = GimmickState.Active;
+                        }
                     }
                 }
-                else
+
+                foreach (Collider hit in hitList)
                 {
-                    // 長押しはギミックの起動を行う
-                    int interactSEIndex = UnityEngine.Random.Range(1, 4);
-                    interactField.GetComponent<Renderer>().enabled = false;
-                    playSE.PlayOneShotSE("Cat_Interact" + interactSEIndex.ToString(), gameObject.transform.position, "InteractSE");
+                    if (hit == null) continue;
 
-                    //アンク用動作
-                    if (gimmickManager.GetCurrentGimmick()[currentGimmickIndex].gimmickTag ==
-                        Gimmick.MagicAnkh)
-                    {//カーソルがアンクの時インタラクト発動
-                        foreach (var GM in gimmickManager.GetGimmickList())
-                        {
-                            //タグでアンク判定→アクティブへ
-                            if (GM.gimmick.GetGimmickTag() == Gimmick.MagicAnkh)
-                            {
-                                GM.gimmick.gimmickState = GimmickState.Active;
-                            }
-                        }
-                    }
-
-                    foreach (Collider hit in hitList)
+                    GimmickBase gimmick = hit.GetComponent<GimmickBase>();
+                    if (gimmick != null)
                     {
-                        var renderers = hit.GetComponentsInChildren<Renderer>();
-                        foreach (var renderer in renderers)
-                        {
-                            if (renderer.materials.Length < 2) continue;
-                            Material material = renderer.materials[1];
-                            if (material != null) material.SetVector("_OutlineColor", Color.gray);
-                        }
+                        if (gimmick.gimmickState != GimmickState.Idle) continue;
 
-                        GimmickBase gimmick = hit.GetComponent<GimmickBase>();
-                        if (gimmick != null)
-                        {
-                            if (gimmick.gimmickState != GimmickState.Idle) continue;
+                        SettingGimmickDirection(gimmick);
 
-                            SettingGimmickDirection(gimmick);
+                        //ギミックをアクティブにする
+                        Debug.Log($"ギミック：" + hit.name + "がアクティブになりました" + gimmick.GetDirectionVec());
+                        gimmick.ActivateGimmick();
 
-                            //ギミックをアクティブにする
-                            Debug.Log($"ギミック：" + hit.name + "がアクティブになりました" + gimmick.GetDirectionVec());
-                            gimmick.ActivateGimmick();
-                            continue;
-                        }
-
-                        CS_ThiefAI thief = hit.GetComponent<CS_ThiefAI>();
-                        if (thief != null)
-                        {
-                            thief.read_HearingSystem.InvestigateSound(gameObject.transform.position, CS_HearingSystem.AttractSoundType.CatVoice);
-                        }
+                        continue;
                     }
 
-                    hitList.Clear();
+                    CS_ThiefAI thief = hit.GetComponent<CS_ThiefAI>();
+                    if (thief != null)
+                    {
+                        thief.read_HearingSystem.InvestigateSound(gameObject.transform.position, CS_HearingSystem.AttractSoundType.CatVoice);
+                    }
                 }
+
+                hitList.Clear();
             }
         }
     }
@@ -985,5 +991,22 @@ public class CS_PlayerAction : MonoBehaviour
         {
             warpUIGameObject.SetActive(false);
         }
+    }
+
+    // 部屋移動やワープの祭にインタラクト状態をリセットする
+    public void ResetInteract()
+    {
+        interactTime = 0.0f;
+        isInteracting = false;
+        playerData.currentMode = CS_PlayerData.PlayerMode.Normal;
+        // Effectの停止
+        cs_PlayerInteractRangeEffectPlayer?.EndInteractRangeEffect();
+
+        foreach(var hit in hitList)
+        {
+            GimmickBase gimmick = hit.GetComponent<GimmickBase>();
+            gimmick?.SetOutLineColor(Color.gray);
+        }
+        hitList.Clear();
     }
 }
