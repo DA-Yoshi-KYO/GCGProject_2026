@@ -183,6 +183,7 @@ public class CS_PlayerAction : MonoBehaviour
                     }
                 }
 
+                hitList.Clear();
                 outlineTarget.SetOutlineColor(Color.green);
 
                 // インタラクト範囲を拡大
@@ -372,6 +373,8 @@ public class CS_PlayerAction : MonoBehaviour
 
                     foreach (Collider hit in hitList)
                     {
+                        if (hit == null) continue;
+
                         var renderers = hit.GetComponentsInChildren<Renderer>();
                         foreach (var renderer in renderers)
                         {
