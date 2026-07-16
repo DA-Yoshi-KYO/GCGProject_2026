@@ -384,12 +384,13 @@ public class CS_ThiefAI : MonoBehaviour
         // 気絶状態のときは無敵時間の経過を管理しない（気絶状態のときは攻撃を受けない想定のため）
         if (remainingInvincibleTime > 0)
         {
-            float sineValue = Mathf.Abs(Mathf.Sin(remainingInvincibleTime * 180f * Mathf.Deg2Rad));
+            float sineValue = Mathf.Abs(Mathf.Sin(remainingInvincibleTime * 720f * Mathf.Deg2Rad));
+            float mappedValue = Mathf.Lerp(0.5f, 1f, sineValue);
             if (currentState != ThiefState.Stunned)
             {
                 foreach (var material in thiefMaterial)
                 {
-                    material.SetFloat("_Alpha", sineValue);
+                    material.SetFloat("_Alpha", mappedValue);
                 }
 
                 remainingInvincibleTime -= Time.deltaTime;
@@ -577,10 +578,11 @@ public class CS_ThiefAI : MonoBehaviour
         {
             // 無敵表現
             // チカチカ処理
-            float sineValue = Mathf.Abs(Mathf.Sin(elapsedTimeAfterStun * 180f * Mathf.Deg2Rad));
+            float sineValue = Mathf.Abs(Mathf.Sin(elapsedTimeAfterStun * 720f * Mathf.Deg2Rad));
+            float mappedValue = Mathf.Lerp(0.5f, 1f, sineValue);
             foreach (var material in thiefMaterial)
             {
-                material.SetFloat("_Alpha", sineValue);
+                material.SetFloat("_Alpha", mappedValue);
             }
 
             // 経過時間が気絶時間を超えた場合は、状態を戻す
