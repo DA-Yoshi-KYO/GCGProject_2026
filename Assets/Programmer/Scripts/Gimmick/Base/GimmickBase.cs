@@ -882,6 +882,9 @@ public class GimmickBase : MonoBehaviour
             if (col == null)
                 continue;
 
+            if (!CanPrioritizeSearchTarget(col))
+                continue;
+
             float dist = Vector3.Distance(transform.position, col.transform.position);
 
             if (dist < nearestDistance)
@@ -912,6 +915,53 @@ public class GimmickBase : MonoBehaviour
         }
 
         return true;
+    }
+
+    private bool CanPrioritizeSearchTarget(
+        Collider targetCollider)
+    {
+        if (targetCollider == null)
+            return false;
+
+        // ギミックごとのサーチ対象優先条件はここへ追加する
+        switch (gimmick)
+        {
+            case Gimmick.IronBall:
+                int rockSearchObstacleLayerMask =
+                    LayerMask.GetMask("VisionObstacle");
+
+                return HasClearHorizontalSearchPath(
+                    targetCollider,
+                    rockSearchObstacleLayerMask);
+
+            default:
+                return true;
+        }
+    }
+
+    private bool HasClearHorizontalSearchPath(
+        Collider targetCollider,
+        int obstacleLayerMask)
+    {
+        Collider gimmickCollider = GetComponent<Collider>();
+        Vector3 origin =
+            gimmickCollider != null
+                ? gimmickCollider.bounds.center
+                : transform.position;
+        Vector3 target = targetCollider.bounds.center;
+        target.y = origin.y;
+        Vector3 toTarget = target - origin;
+        float distance = toTarget.magnitude;
+
+        if (distance <= Mathf.Epsilon)
+            return true;
+
+        return !Physics.Raycast(
+            origin,
+            toTarget / distance,
+            distance,
+            obstacleLayerMask,
+            QueryTriggerInteraction.Ignore);
     }
 
     protected virtual void ActiveUpdate()
