@@ -38,6 +38,9 @@ public class CS_ThiefManager : MonoBehaviour
     [Tooltip("泥棒を生成する間隔の時間")]
     private float spawnInterval = 5.0f;
 
+    [Tooltip("生成した泥棒のカウント")]
+    private int totalSpawnCount = 0;
+
 
     [Tooltip("生成する泥棒スタック情報")]
     public class ThiefSpawnInfo
@@ -185,7 +188,9 @@ public class CS_ThiefManager : MonoBehaviour
             thiefParent.transform
         );
 
-        thief.name = "Thief_" + thiefParent.transform.childCount;
+        totalSpawnCount++;
+
+        thief.name = "Thief_" + totalSpawnCount;
 
         // 近くのNavMesh上の位置を検索して、泥棒をそこにワープさせる
         UnityEngine.AI.NavMeshAgent agent = thief.GetComponent<UnityEngine.AI.NavMeshAgent>();

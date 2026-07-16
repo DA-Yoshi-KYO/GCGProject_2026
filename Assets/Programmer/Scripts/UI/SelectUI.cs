@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 [RequireComponent(typeof(RectTransform))]
 public class GimmickSelectUI : MonoBehaviour
@@ -186,8 +185,9 @@ public class GimmickSelectUI : MonoBehaviour
         AnimateSlots();
         UpdateCTMask(idx);
 
-
+        
         resetUI.gameObject.SetActive(ResetUIActive);
+
         if (addition)
         {
             teleportImageAlpha += Time.deltaTime;
@@ -208,8 +208,6 @@ public class GimmickSelectUI : MonoBehaviour
             }
             resetUI.color = new Color(1.0f, 1.0f, 1.0f, teleportImageAlpha);
         }
-
-
     }
 
     /// <summary>

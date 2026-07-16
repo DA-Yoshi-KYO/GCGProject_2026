@@ -105,9 +105,6 @@ public class CS_WarpTrigger : MonoBehaviour
         if (!other.CompareTag("Player"))
             return;
 
-        if (selfWarpPoint.warping)
-            return;
-
         CS_PlayerAction playerAction = other.GetComponent<CS_PlayerAction>();
         playerAction.warpUIView = false;
         playerAction.doWarp = false;

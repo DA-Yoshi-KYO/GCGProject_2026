@@ -66,6 +66,7 @@ GameObject:
   - component: {fileID: 2062024832296711870}
   - component: {fileID: 5365317646100919884}
   - component: {fileID: 3117468721445263130}
+  - component: {fileID: 8127359024461027741}
   m_Layer: 27
   m_Name: PotVat
   m_TagString: Gimmick
@@ -140,7 +141,7 @@ MonoBehaviour:
   gimmickDirection: 0
   gimmickType: 0
   gimmick: 1
-  gimmickState: 0
+  gimmickState: 1
   gimmickMaterial: 0
   gimmickOutline: 0
   search: {fileID: 6784125428343326371}
@@ -155,6 +156,12 @@ MonoBehaviour:
   isMeshScaleAdaptation: 1
   brokenFadeSpeed: 1
   previewAlpha: 0.5
+  cs_EffectPlayer: {fileID: 8127359024461027741}
+  effectOffsetPosition: {x: 0, y: 0, z: 0}
+  effectOffsetDirection: 0
+  effectOffsetRotation: {x: 0, y: 0, z: 0, w: 1}
+  effectRotationUseDirection: 1
+  effectOffsetScale: {x: 5, y: 3, z: 15}
   activeTime: 10
   gravity: 0.1
   dangerZone: {fileID: 1027198714623358771, guid: 1dc331ca8706d994f9348bb340bfb17e,
@@ -163,6 +170,20 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 536870912
   cs_PotVatEffect: {fileID: 7644482365534155845}
+--- !u!114 &8127359024461027741
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4877168968123032387}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 392ec5ac6ab66b645a01a679dbd2d422, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  go_EffectPrefab: {fileID: 2120354387666871772, guid: 9ea4668d403aab34f938ca6bd383a298,
+    type: 3}
 --- !u!1001 &2455111515809349899
 PrefabInstance:
   m_ObjectHideFlags: 0
