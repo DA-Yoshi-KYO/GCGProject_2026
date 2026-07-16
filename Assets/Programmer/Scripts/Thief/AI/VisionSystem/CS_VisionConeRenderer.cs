@@ -64,7 +64,7 @@ public class CS_VisionConeRenderer : MonoBehaviour
     private void LateUpdate()
     {
         if (meshRenderer.enabled != isVisible) meshRenderer.enabled = isVisible;
-        if (!isVisible) return;
+        if (!isVisible) return; 
 
         UpdateColor();
         BuildConeMesh();

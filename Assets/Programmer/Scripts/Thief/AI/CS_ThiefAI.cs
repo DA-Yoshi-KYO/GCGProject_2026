@@ -503,12 +503,11 @@ public class CS_ThiefAI : MonoBehaviour
         if (holdTreasureCollider != null) holdTreasureCollider.enabled = false;
 
         // 宝物のサイズを半分にする
-        holdTreasure.transform.localScale *= 0.5f; 
+        holdTreasure.transform.localScale *= 0.5f;
 
-        //-- 体の前に持つ位置を設定
-        // 泥棒の正面方向を基準に、少し前方に持つ位置を設定
-        Vector3 holdPosition = transform.position + transform.forward * 0.5f + Vector3.up * -0.5f;
-        holdTreasure.transform.position = holdPosition;
+        //-- 体の前に持つ位置をローカル座標で設定
+        // 泥棒の正面0.5m、下0.5mの位置に宝物を配置します。
+        holdTreasure.transform.localPosition = new Vector3(0f, -0.5f, 0.5f);
 
         CS_VisionTarget visionTarget = holdTreasure.GetComponent<CS_VisionTarget>();
         if (visionTarget != null) visionTarget.PlayStolen(this);
@@ -582,6 +581,80 @@ public class CS_ThiefAI : MonoBehaviour
         // 耐久力が0以下の場合は、時間経過後に退場する
         else
         {
+            // 宝物を現在の部屋のオブジェクトに親子付けする
+            if (holdTreasure != null)
+            {
+                // 宝物のコライダーを有効にする
+                holdTreasure.GetComponent<Collider>().enabled = true;
+                // 宝物のサイズを元に戻す
+                holdTreasure.transform.localScale = Vector3.one;
+                // 宝物を現在の部屋のオブジェクトに親子付けする
+                holdTreasure.transform.SetParent(memorySystem.read_CurrentRoom.read_ObjectParent.transform);
+                holdTreasure.GetComponent<CS_VisionTarget>().StopStolen();
+
+                // 宝物を設置するグリッドを探す
+                RoomGrid roomGrid = memorySystem.read_CurrentRoomPoint.GetComponentInChildren<RoomGrid>();
+                Vector2Int startGridIndex = roomGrid.GetGridFromPos(transform.position);
+
+                Vector3 gridPos = Vector3.zero;
+                bool foundValidGrid = false;
+
+                // 検索範囲を広げながら渦巻き状に探索
+                for (int layer = 0; layer < Mathf.Max(roomGrid.read_GridDivision.x, roomGrid.read_GridDivision.y); layer++)
+                {
+                    // layer 0 は中心点のみ
+                    if (layer == 0)
+                    {
+                        if (IsGridAvailable(startGridIndex, roomGrid, out gridPos))
+                        {
+                            foundValidGrid = true;
+                            break;
+                        }
+                        continue;
+                    }
+
+                    // 現在のレイヤーのグリッドをチェック
+                    for (int i = -layer; i <= layer; i++)
+                    {
+                        Vector2Int[] offsets = {
+                            new Vector2Int(i, layer), // 上辺
+                            new Vector2Int(i, -layer),// 下辺
+                            new Vector2Int(layer, i), // 右辺
+                            new Vector2Int(-layer, i) // 左辺
+                        };
+
+                        foreach (var offset in offsets)
+                        {
+                            Vector2Int checkIndex = startGridIndex + offset;
+                            if (IsGridAvailable(checkIndex, roomGrid, out gridPos))
+                            {
+                                foundValidGrid = true;
+                                break;
+                            }
+                        }
+                        if (foundValidGrid) break;
+                    }
+                    if (foundValidGrid) break;
+                }
+
+
+                if (!foundValidGrid)
+                {
+                    Debug.LogWarning("有効なグリッドセルが見つからなかったため、宝物をデフォルト位置にドロップします。");
+                    gridPos = transform.position; // デフォルトの位置として現在の位置を使用
+                }
+
+
+                GameObject Thief_DropTreatureHit = GameObject.Find("Thief_DropTreatureHit" + transform.name);
+                if (Thief_DropTreatureHit == null)
+                    if (thiefSound != null)
+                        thiefSound.PlayOneShotSE("Thief_DropTreatureHit", gameObject.transform.position, "Thief_DropTreatureHit");
+
+                // 宝物を設置する位置を設定
+                Debug.LogWarning("宝物を設置する位置: " + gridPos);
+                holdTreasure.transform.position = gridPos;
+                holdTreasure = null;
+            }
             // 経過時間が退場するまでの時間を超えた場合は、退場する処理を追加する
             if (elapsedTimeAfterStun >= exitAfterStunTime)
             {
@@ -607,83 +680,6 @@ public class CS_ThiefAI : MonoBehaviour
 
                 if (fadeAmount <= 0.0f)
                 {
-                    // 宝物を現在の部屋のオブジェクトに親子付けする
-                    if (holdTreasure != null)
-                    {
-                        // 宝物のコライダーを有効にする
-                        holdTreasure.GetComponent<Collider>().enabled = true;
-                        // 宝物のサイズを元に戻す
-                        holdTreasure.transform.localScale = Vector3.one;
-                        // 宝物を現在の部屋のオブジェクトに親子付けする
-                        holdTreasure.transform.SetParent(memorySystem.read_CurrentRoom.read_ObjectParent.transform);
-                        holdTreasure.GetComponent<CS_VisionTarget>().StopStolen();
-
-                        // 宝物を設置するグリッドを探す
-                        // 真下のグリッドセルインデックスを取得
-                        RoomGrid roomGrid = memorySystem.read_CurrentRoomPoint.GetComponentInChildren<RoomGrid>();
-                        Vector2Int gridIndex = roomGrid.GetGridFromPos(transform.position);
-
-                        List<Vector2Int> targetGridOffset = new List<Vector2Int>();
-                        // 周囲3x3のグリッドセルを探索
-                        for (int x = -1 ; x <= 1 ; x++)
-                        {
-                            for (int y = -1 ; y <= 1 ; y++)
-                            {
-                                targetGridOffset.Add(new Vector2Int(x, y));
-
-                                if (roomGrid.read_GridDivision.x <= gridIndex.x + x || gridIndex.x + x < 0 ||
-                                    roomGrid.read_GridDivision.y <= gridIndex.y + y || gridIndex.y + y < 0)
-                                {
-                                    // グリッドの範囲外の場合は、対象から除外する
-                                    targetGridOffset.RemoveAt(targetGridOffset.Count - 1);
-                                }
-                            }
-                        }
-
-                        Vector3 gridPos = Vector3.zero;
-                        while (true)
-                        {
-                            // リストが空の場合はループを抜ける
-                            if (targetGridOffset.Count == 0)
-                            {
-                                Debug.LogWarning("有効なグリッドセルが見つからなかったため、宝物をデフォルト位置にドロップします。");
-                                gridPos = transform.position; // デフォルトの位置として現在の位置を使用
-                                break;
-                            }
-
-                            // ランダムにグリッドセルのオフセットを選択
-                            int randomIndex = UnityEngine.Random.Range(0, targetGridOffset.Count);
-
-                            // 選択したグリッドセルの位置をワールド座標で
-                            gridPos = roomGrid.GetWorldPosFromGrid(gridIndex + targetGridOffset[randomIndex]);
-
-                            GameObject rayCastObject = new GameObject();
-                            rayCastObject.transform.position = gridPos;
-
-                            RaycastHit[] hits = Physics.RaycastAll(gridPos, Vector3.up, 20, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
-
-                            bool isStandFound = false;
-                            foreach (RaycastHit hit in hits)
-                            {
-                                // Standタグのオブジェクトに当たっている場合はフラグをtureにする
-                                if (hit.transform.name.Contains("Stand")) isStandFound = true;
-                            }
-
-                            // Standに当たっていない場合は、設置する位置を決定する
-                            if (!isStandFound) break;
-
-                            // チェックしたグリッドはリストから削除する
-                            targetGridOffset.RemoveAt(randomIndex);
-                        }
-
-                        GameObject Thief_DropTreatureHit = GameObject.Find("Thief_DropTreatureHit" + transform.name);
-                        if (Thief_DropTreatureHit == null)
-                            if (thiefSound != null)
-                                thiefSound.PlayOneShotSE("Thief_DropTreatureHit", gameObject.transform.position, "Thief_DropTreatureHit");
-
-                        // 宝物を設置する位置を設定
-                        holdTreasure.transform.position = gridPos;
-                    }
                     Destroy(this.gameObject);
                 }
             }
@@ -786,19 +782,25 @@ public class CS_ThiefAI : MonoBehaviour
     /// <param name="newState">変更する状態</param>
     public void ChangeStatus(ThiefState newState)
     {
-        switch(newState)
+        CS_VisionConeRenderer visionConeRenderer = GetComponentInChildren<CS_VisionConeRenderer>();
+        switch (newState)
             {
             case ThiefState.Explore:
                 // 探索状態になったときの処理を追加する
+                visionConeRenderer.SetVisible(true);
                 break;
             case ThiefState.Found:
                 // 発見状態になったときの処理を追加する
+                visionConeRenderer.SetVisible(false);
                 break;
             case ThiefState.Escape:
                 // 逃走状態になったときの処理を追加する
+                visionConeRenderer.SetVisible(false);
                 break;
             case ThiefState.Stunned:
                 // 気絶時間の経過時間をリセット
+                visionConeRenderer.SetVisible(false);
+
                 if (currentState != ThiefState.Stunned)
                     elapsedTimeAfterStun = 0.0f;
                 aStarSystem.ResetUpdatedFlag();
@@ -883,5 +885,80 @@ public class CS_ThiefAI : MonoBehaviour
     public void SetStunnedUpdateFlag(bool isUpdating)
     {
         isUpdatingStunState = isUpdating;
+    }
+
+    /// <summary>
+    /// 指定されたグリッドが宝物を設置可能かどうかをチェックします。
+    /// </summary>
+    /// <param name="gridIndex">チェックするグリッドのインデックス</param>
+    /// <param name="roomGrid">部屋のグリッド</param>
+    /// <param name="worldPos">設置可能な場合のワールド座標</param>
+    /// <returns>設置可能な場合はtrue</returns>
+    private bool IsGridAvailable(Vector2Int gridIndex, RoomGrid roomGrid, out Vector3 worldPos)
+    {
+        worldPos = Vector3.zero;
+
+        // グリッドが範囲外かどうかをチェック
+        if (gridIndex.x < 0 || gridIndex.x >= roomGrid.read_GridDivision.x ||
+            gridIndex.y < 0 || gridIndex.y >= roomGrid.read_GridDivision.y)
+        {
+            return false;
+        }
+
+        // グリッドのワールド座標を取得
+        Vector3 gridCenter = roomGrid.GetWorldPosFromGrid(gridIndex);
+
+        // 高い位置から下にレイを飛ばして地面を検知
+        const float rayOriginY = 255f;
+        Ray ray = new Ray(new Vector3(gridCenter.x, rayOriginY, gridCenter.z), Vector3.down);
+        
+        RaycastHit[] hits = Physics.RaycastAll(ray, 300f, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
+        System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+
+        if (hits.Length == 0)
+        {
+            // レイが何にも当たらなかった場合（奈落など）は設置不可
+            return false;
+        }
+
+        // 最も上にある表面の情報を取得
+        RaycastHit topSurfaceHit = hits[0];
+
+        // 表面が "Stand" オブジェクトの場合は設置不可
+        if (topSurfaceHit.transform.name.Contains("Stand"))
+        {
+            return false;
+        }
+
+        // 最終的な設置位置を、レイキャストが当たった物理的な地面の座標に設定
+        worldPos = topSurfaceHit.point;
+
+        // 宝物のコライダー情報を取得
+        Collider treasureCollider = holdTreasure.GetComponent<Collider>();
+        float treasureHeight = 0.5f; // デフォルトの高さ
+        if (treasureCollider != null)
+        {
+            treasureHeight = treasureCollider.bounds.size.y;
+        }
+
+        // 表面の少し上から、宝物の高さ分だけ上に障害物がないかチェック
+        Vector3 checkOrigin = topSurfaceHit.point + Vector3.up * 0.01f;
+        if (Physics.Raycast(checkOrigin, Vector3.up, treasureHeight, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+        {
+            // 宝物を置くスペースがない場合は設置不可
+            return false;
+        }
+
+        // 設置候補地点がNavMesh上にあるかを確認（あくまで歩行可能かのチェック）
+        UnityEngine.AI.NavMeshHit navHit;
+        // 検索範囲を広げてNavMeshを検出しやすくする
+        if (UnityEngine.AI.NavMesh.SamplePosition(topSurfaceHit.point, out navHit, 1.0f, UnityEngine.AI.NavMesh.AllAreas))
+        {
+            // NavMeshが見つかったので、この場所は有効
+            return true;
+        }
+
+        // NavMeshが見つからなければ設置不可
+        return false;
     }
 }
