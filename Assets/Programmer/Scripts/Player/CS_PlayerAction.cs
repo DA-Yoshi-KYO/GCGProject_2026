@@ -277,6 +277,22 @@ public class CS_PlayerAction : MonoBehaviour
 
     private void OnInteract(InputAction.CallbackContext context)
     {
+        GameObject playerRoomData = playerData.currentRoomData.GetPlayerRoomData();
+        if (playerRoomData == null)
+        {
+            Debug.Log("現在の部屋データが取得できません");
+            return;
+        }
+        GameObject currentRoom = playerRoomData.transform.GetChild(0).gameObject;
+        string roomName = currentRoom.name;
+        bool isNotSettingRoom = roomName.Contains("Treasure");
+        Debug.Log(roomName);
+        if (currentRoom == null || isNotSettingRoom)
+        {
+            Debug.Log("この部屋にトラップは配置できません");
+            return;    // 設置可能な部屋のみ設置する
+        }
+
         if (warpUIView)
         {
             doWarp = true;
