@@ -68,7 +68,6 @@ public class CS_PlayerAction : MonoBehaviour
 
     private bool b_IsPlayingAnkhStandEffect = false;
 
-    private const float PlacementBoundsInsetRate = 0.01f;
     [Header("ワープUI表示のオブジェクト格納")] [SerializeField] private GameObject warpUIGameObject;
     [Header("ワープのUI")][SerializeField] private Sprite[] warpUISprite;
     [HideInInspector]public bool warpUIView;
@@ -571,36 +570,19 @@ public class CS_PlayerAction : MonoBehaviour
         gimmick.gimmickState = GimmickState.Spawn;
 
         // 設置処理 //
-        if (!roomGrid.SetGimmickInGrid(settingPos, gimmick))
-            return false;
-
-        // =========================
-        // 実際に生成されたインスタンス取得
-        // =========================
-        Vector3 center = settingPos;          // 中心位置
-        Vector3 halfExtents = new Vector3(roomGrid.gridSize.x * 0.5f, 5f, roomGrid.gridSize.y * 0.5f); // 半径ではなく「半サイズ」
-
-        Collider[] hits = Physics.OverlapBox(center, halfExtents);
         GimmickBase instance = null;
-
-        foreach (var hit in hits)
-        {
-            GimmickBase gimmickBase = hit.GetComponent<GimmickBase>();
-
-            if (gimmickBase == null)
-                continue;
-
-            // 同じ種類のみ
-            if (gimmickBase.GetGimmickTag() != gimmick.GetGimmickTag())
-                continue;
-
-            instance = gimmickBase;
-            break;
-        }
+        if (!roomGrid.SetGimmickInGrid(settingPos, gimmick, out instance))
+            return false;
 
         if (instance == null)
         {
-            Debug.LogError("配置後のGimmick取得失敗");
+            return false;
+        }
+
+        if (IsInfinityPosition(instance.transform.position))
+        {
+            Debug.LogWarning("インフィニティ配置");
+            Destroy(instance.gameObject);
             return false;
         }
 
@@ -744,33 +726,7 @@ public class CS_PlayerAction : MonoBehaviour
         Vector2Int size)
     {
         if (roomGrid == null) return false;
-        if (IsInfinityPosition(centerPos)) return false;
-
-        Vector2 gridSize = roomGrid.gridSize;
-        float inset = Mathf.Min(gridSize.x, gridSize.y) * PlacementBoundsInsetRate;
-        float halfX = Mathf.Max(size.x * gridSize.x * 0.5f - inset, 0f);
-        float halfZ = Mathf.Max(size.y * gridSize.y * 0.5f - inset, 0f);
-
-        Vector3[] checkOffsets =
-        {
-            Vector3.zero,
-            new Vector3(halfX, 0f, halfZ),
-            new Vector3(halfX, 0f, -halfZ),
-            new Vector3(-halfX, 0f, halfZ),
-            new Vector3(-halfX, 0f, -halfZ),
-        };
-
-        foreach (Vector3 offset in checkOffsets)
-        {
-            Vector3 checkPos =
-                centerPos + roomGrid.transform.TransformVector(offset);
-            Vector2Int grid = roomGrid.GetGridFromPos(checkPos);
-
-            if (grid.x == -1 || grid.y == -1)
-                return false;
-        }
-
-        return true;
+        return roomGrid.IsAreaInsideGrid(centerPos, size);
     }
 
     private Vector2Int GetPreviewCheckSize(GimmickBase gimmick)
@@ -841,29 +797,31 @@ public class CS_PlayerAction : MonoBehaviour
         if (gimmick == null)
             return;
 
+        Vector3 previewPos = settingPos;
+
         // 設置位置の計算_______________________________________
-        if (IsInfinityPosition(settingPos))
+        if (IsInfinityPosition(previewPos))
         {
             ClearGimmickPreview();
             return;
         }
 
-        Vector2Int grid = roomGrid.GetGridFromPos(settingPos);
+        Vector2Int grid = roomGrid.GetGridFromPos(previewPos);
         if (grid.x == -1 || grid.y == -1)
         {
             ClearGimmickPreview();
             return;
         }
 
-        settingPos = roomGrid.GetWorldPosFromGrid(grid);
-        if (IsInfinityPosition(settingPos))
+        previewPos = roomGrid.GetWorldPosFromGrid(grid);
+        if (IsInfinityPosition(previewPos))
         {
             ClearGimmickPreview();
             return;
         }
 
-        settingPos = roomGrid.GimmickEvenNumberCorrection(settingPos, gimmick);
-        if (!IsGimmickInsideRoom(roomGrid, settingPos, GetPreviewCheckSize(gimmick)))
+        previewPos = roomGrid.GimmickEvenNumberCorrection(previewPos, gimmick);
+        if (!IsGimmickInsideRoom(roomGrid, previewPos, GetPreviewCheckSize(gimmick)))
         {
             ClearGimmickPreview();
             return;
@@ -873,7 +831,7 @@ public class CS_PlayerAction : MonoBehaviour
         Ray ray = new Ray();
         ray.direction = Vector3.down;
         const float rayOriginY = 255f;
-        ray.origin = new Vector3(settingPos.x, rayOriginY, settingPos.z);
+        ray.origin = new Vector3(previewPos.x, rayOriginY, previewPos.z);
         // 床を確実に取れるようマージンを大きめに取りレイを飛ばす
         RaycastHit[] rayHits = Physics.RaycastAll(ray, Mathf.Abs(rayOriginY - (gameObject.transform.position.y - 10.0f)), ~0,
             QueryTriggerInteraction.Ignore);
@@ -883,17 +841,17 @@ public class CS_PlayerAction : MonoBehaviour
             if (hitItem.transform.CompareTag("Player")) continue;
             if (hitItem.transform.CompareTag("Thief")) continue;
 
-            settingPos.y = hitItem.point.y;
+            previewPos.y = hitItem.point.y;
             break;
         }
         // 設置位置補正_______________________________________
-        gimmick.SetGimmickPos(settingPos);
+        gimmick.SetGimmickPos(previewPos);
         MeshFilter meshFilter = gimmick.GetComponentInChildren<MeshFilter>();
         if (meshFilter != null && meshFilter.sharedMesh != null)
             gimmick.AdjustScaleToGrid();
 
         // infinity例外
-        if (IsInfinityPosition(settingPos)) return;
+        if (IsInfinityPosition(previewPos)) return;
 
         //----------------------------------
         // 初回のみ生成
@@ -932,7 +890,7 @@ public class CS_PlayerAction : MonoBehaviour
             // =========================
             // 実際に生成されたインスタンス取得
             // =========================
-            Vector3 center = new Vector3(settingPos.x, settingPos.y, settingPos.z);// 中心位置
+            Vector3 center = new Vector3(previewPos.x, previewPos.y, previewPos.z);// 中心位置
             Vector3 halfExtents = new Vector3(2f, 10f, 2f); // 半径ではなく「半サイズ」
 
             Collider[] hits = Physics.OverlapBox(center, halfExtents);
@@ -970,11 +928,11 @@ public class CS_PlayerAction : MonoBehaviour
                 prevObj = previewBase.gameObject;
                 if (prevObj.GetComponent<PreviewBase>().GetPreviewSize().y % 2 == 0)
                 {
-                    settingPos.y += prevObj.GetComponent<PreviewBase>().GetPreviewSize().y * 0.5f;
+                    previewPos.y += prevObj.GetComponent<PreviewBase>().GetPreviewSize().y * 0.5f;
                 }
 
                 previewBase.transform.position =
-                    settingPos;
+                    previewPos;
                 //プレイヤーとギミックとの位置でギミックの向きを設定
                 //SettingGimmickDirection(previewInstance);
             }
