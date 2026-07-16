@@ -18,6 +18,8 @@ public class PreviewBase : MonoBehaviour
     private const float PlacementPlaneAlpha = 0.25f;
     [SerializeField]
     private float PlacementPlaneYOffset;
+    [SerializeField]
+    private Vector3 PlacementPlaneScale;
 
     [Header("PreviewGimmickTag")]
     [SerializeField]
@@ -122,9 +124,9 @@ public class PreviewBase : MonoBehaviour
         plane.transform.SetParent(transform, false);
         plane.transform.localPosition = new Vector3(0.0f, PlacementPlaneYOffset, 0.0f);
         plane.transform.localScale = new Vector3(
-            sourceGimmick.GetGimmickSize().x * grid.gridSize.x / 5,
-            1.0f,
-            sourceGimmick.GetGimmickSize().y * grid.gridSize.y / 5);
+            sourceGimmick.GetGimmickSize().x * grid.gridSize.x * PlacementPlaneScale.x,
+            1.0f * PlacementPlaneScale.y,
+            sourceGimmick.GetGimmickSize().y * grid.gridSize.y * PlacementPlaneScale.z);
 
         Shader shader = Shader.Find("Universal Render Pipeline/Unlit");
         if (shader == null)

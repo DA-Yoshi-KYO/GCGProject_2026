@@ -522,6 +522,11 @@ public class RockGimmick : GimmickBase
             if (Vector3.Angle(hit.normal, Vector3.up) > 5.0f)
                 return false;
 
+            if (!IsPlacementSurfaceAllowed(hit.transform))
+            {
+                return false;
+            }
+
             if (!hasFirstHeight)
             {
                 firstHeight = hit.point.y;
