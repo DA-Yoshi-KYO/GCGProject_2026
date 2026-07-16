@@ -75,6 +75,11 @@ public class CS_ThiefGimmickAction
         thiefAI.read_MoveSystem.read_NavMeshAgent.enabled = true;
         // SmartNavAgentも再度有効にする
         thiefAI.read_MoveSystem.read_SmartNavAgent.enabled = true;
+
+        // 移動に関する情報をリセットする
+        thiefAI?.read_MoveSystem?.read_NavMeshAgent?.ResetPath();
+        thiefAI?.read_MemorySystem?.ClearTarget();
+        thiefAI?.read_AStarSystem?.ClearRoute();
     }
 
     /// <summary>
