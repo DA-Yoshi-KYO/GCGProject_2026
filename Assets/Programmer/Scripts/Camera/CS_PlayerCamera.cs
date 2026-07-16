@@ -333,6 +333,8 @@ public class CS_PlayerCamera : MonoBehaviour
         roomCameraObject = currentRoom.transform.GetComponentInChildren<Camera>().gameObject;
         roomCamera = roomCameraObject.GetComponent<CS_RoomCamera>();
         roomCameraObject.GetComponent<Camera>().enabled = true;
+
+        GetComponent<CS_PlayerAction>().ResetInteract();
     }
 
     //========================

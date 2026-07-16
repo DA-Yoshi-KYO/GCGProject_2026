@@ -55,6 +55,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UIElements;
 
 /// <summary>
 /// 泥棒の行動を管理するクラスです。
@@ -383,12 +384,22 @@ public class CS_ThiefAI : MonoBehaviour
         // 気絶状態のときは無敵時間の経過を管理しない（気絶状態のときは攻撃を受けない想定のため）
         if (remainingInvincibleTime > 0)
         {
+            float sineValue = Mathf.Abs(Mathf.Sin(remainingInvincibleTime * 180f * Mathf.Deg2Rad));
             if (currentState != ThiefState.Stunned)
             {
+                foreach (var material in thiefMaterial)
+                {
+                    material.SetFloat("_Alpha", sineValue);
+                }
+
                 remainingInvincibleTime -= Time.deltaTime;
                 if (remainingInvincibleTime < 0)
                 {
                     remainingInvincibleTime = 0;
+                    foreach (var material in thiefMaterial)
+                    {
+                        material.SetFloat("_Alpha", 1.0f);
+                    }
                 }
             }
         }
@@ -564,6 +575,14 @@ public class CS_ThiefAI : MonoBehaviour
         // 耐久値が残っている場合は、気絶時間が経過したら無敵時間を付与して、状態を探索に戻す
         if (durability > 0)
         {
+            // 無敵表現
+            // チカチカ処理
+            float sineValue = Mathf.Abs(Mathf.Sin(elapsedTimeAfterStun * 180f * Mathf.Deg2Rad));
+            foreach (var material in thiefMaterial)
+            {
+                material.SetFloat("_Alpha", sineValue);
+            }
+
             // 経過時間が気絶時間を超えた場合は、状態を戻す
             if (elapsedTimeAfterStun >= damageStunTime)
             {

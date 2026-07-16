@@ -169,6 +169,10 @@ public class CS_RoomBlockRandomGenerator : MonoBehaviour
 
         yield return null;
 
+        // ランダムRoom生成後に、
+        // 各RoomCreatePoint内のヒエログリフを取得します。
+        cs_RoomBlockPrefabGenerator.SetAllRoomHieroglyphObjects();
+
         // Room生成後にTreasureの表示数を決めます。
         ActivateRandomTreasures();
 

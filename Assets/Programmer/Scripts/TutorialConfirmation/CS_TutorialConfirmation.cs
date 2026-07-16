@@ -54,7 +54,7 @@ public class CS_TutorialConfirmation : MonoBehaviour
         //決定ボタンでシーン遷移
         if (inputActions.TutorialConfirmation.Decision.triggered)
         {
-            //backGroundPlaySE.PlaySE("Decision");
+            backGroundPlaySE.PlaySE("Decision");
             string sceneName = "";
             switch (currentButton)
             {
@@ -89,7 +89,7 @@ public class CS_TutorialConfirmation : MonoBehaviour
             //現在選択しているボタンの移動処理
             if (inputFloat > 0.0f)
             {
-                //backGroundPlaySE.PlaySE("Cusor");
+                backGroundPlaySE.PlaySE("Cusor");
                 currentButton--;
                 if (currentButton < 0)
                 {
@@ -100,7 +100,7 @@ public class CS_TutorialConfirmation : MonoBehaviour
             }
             else if (inputFloat < 0.0f)
             {
-                //backGroundPlaySE.PlaySE("Cusor");
+                backGroundPlaySE.PlaySE("Cusor");
                 currentButton++;
                 if (currentButton >= buttonList.Length)
                 {

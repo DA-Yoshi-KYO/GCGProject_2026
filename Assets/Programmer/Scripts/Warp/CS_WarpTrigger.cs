@@ -93,6 +93,7 @@ public class CS_WarpTrigger : MonoBehaviour
         PlacePlayerInFrontOfWarp(other, playerMove);
 
         playerMove.animator.SetTrigger("WarpInTrigger");
+        playerMove.SetWarpFlag(true);
 
         StartCoroutine(WarpCoroutine(other, playerMove.animator));
 
@@ -135,6 +136,7 @@ public class CS_WarpTrigger : MonoBehaviour
         PlacePlayerInFrontOfWarp(other, playerMove);
 
         playerMove.animator.SetTrigger("WarpInTrigger");
+        playerMove.SetWarpFlag(true);
 
         StartCoroutine(WarpCoroutine(other, playerMove.animator));
 
@@ -191,7 +193,10 @@ public class CS_WarpTrigger : MonoBehaviour
         CharacterController controller = other.GetComponent<CharacterController>();
 
         if (wp == null || wp.targetPoint == null)
+        {
+            other.GetComponent<CS_PlayerMove>()?.SetWarpFlag(false);
             return;
+        }
 
         CS_PlayerCamera playerCamera = other.GetComponent<CS_PlayerCamera>();
 
@@ -226,6 +231,7 @@ public class CS_WarpTrigger : MonoBehaviour
         if (playerMove != null)
         {
             playerMove.SyncTransform(other.transform.position, other.transform.rotation);
+            playerMove.SetWarpFlag(false);
         }
 
         controller.enabled = true;
