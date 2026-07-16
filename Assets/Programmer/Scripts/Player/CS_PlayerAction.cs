@@ -164,12 +164,13 @@ public class CS_PlayerAction : MonoBehaviour
             // インタラクト範囲の拡大
             if (interactTime >= switchInteract)
             {
+                // アンクエフェクトの再生
                 if (IsCurrentGimmickMagicAnkh())
                 {
                     PlayAllAnkhStandEffect();
                 }
 
-
+                // 前フレームのリセット(アウトラインを一度灰色に戻す)
                 if (hitList != null)
                 {
                     foreach (var item in hitList)
@@ -182,8 +183,9 @@ public class CS_PlayerAction : MonoBehaviour
                         }
                     }
                 }
-
                 hitList.Clear();
+                
+                // インタラクト中はねこのアウトラインを緑にする
                 outlineTarget.SetOutlineColor(Color.green);
 
                 // インタラクト範囲を拡大
@@ -195,7 +197,6 @@ public class CS_PlayerAction : MonoBehaviour
                 interactScale.z = Mathf.Min(interactScale.z, interactMax.radius);
                 interactField.transform.localScale = interactScale;
                 Vector3 interactPos = transform.position;
-                interactPos.y += interactScale.y * 0.5f; // フィールドが地面に接するように位置を調整
                 interactField.transform.position = interactPos;
 
                 // Effectのサイズを変更
@@ -212,6 +213,11 @@ public class CS_PlayerAction : MonoBehaviour
                     interactScale.x * 0.5f,
                     LayerMask.GetMask("Gimmick", "Thief")
                     );
+                // 宝箱、落とし穴、にゃ気、テレポートはインタラクトを行わないので除外する
+                hitList.RemoveAll(hitList => hitList.GetComponent<GimmickBase>().gimmick == Gimmick.EmptyChest);
+                hitList.RemoveAll(hitList => hitList.GetComponent<GimmickBase>().gimmick == Gimmick.Pitfall);
+                hitList.RemoveAll(hitList => hitList.GetComponent<GimmickBase>().gimmick == Gimmick.Nyaki);
+                hitList.RemoveAll(hitList => hitList.GetComponent<GimmickBase>().gimmick == Gimmick.Teleport);
 
                 float minHeight = -interactScale.y * 0.5f;
                 float maxHeight = interactScale.y * 0.5f;
@@ -314,8 +320,7 @@ public class CS_PlayerAction : MonoBehaviour
             {
                 doWarp = true;
                 isWarpInteract = true;
-                isInteracting = false;
-                playerData.currentMode = CS_PlayerData.PlayerMode.Normal;
+                ResetInteract();
                 return;
             }
         }
@@ -381,14 +386,6 @@ public class CS_PlayerAction : MonoBehaviour
                 {
                     if (hit == null) continue;
 
-                    var renderers = hit.GetComponentsInChildren<Renderer>();
-                    foreach (var renderer in renderers)
-                    {
-                        if (renderer.materials.Length < 2) continue;
-                        Material material = renderer.materials[1];
-                        if (material != null) material.SetVector("_OutlineColor", Color.gray);
-                    }
-
                     GimmickBase gimmick = hit.GetComponent<GimmickBase>();
                     if (gimmick != null)
                     {
@@ -399,6 +396,7 @@ public class CS_PlayerAction : MonoBehaviour
                         //ギミックをアクティブにする
                         Debug.Log($"ギミック：" + hit.name + "がアクティブになりました" + gimmick.GetDirectionVec());
                         gimmick.ActivateGimmick();
+
                         continue;
                     }
 
@@ -993,5 +991,22 @@ public class CS_PlayerAction : MonoBehaviour
         {
             warpUIGameObject.SetActive(false);
         }
+    }
+
+    // 部屋移動やワープの祭にインタラクト状態をリセットする
+    public void ResetInteract()
+    {
+        interactTime = 0.0f;
+        isInteracting = false;
+        playerData.currentMode = CS_PlayerData.PlayerMode.Normal;
+        // Effectの停止
+        cs_PlayerInteractRangeEffectPlayer?.EndInteractRangeEffect();
+
+        foreach(var hit in hitList)
+        {
+            GimmickBase gimmick = hit.GetComponent<GimmickBase>();
+            gimmick?.SetOutLineColor(Color.gray);
+        }
+        hitList.Clear();
     }
 }
