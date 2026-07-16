@@ -19,7 +19,8 @@ public class CS_TrasitionMovieEnd : MonoBehaviour
     [Header("長押しする時間")][SerializeField] private float holdTime;
 
     [Header("Manualの画像を格納")][SerializeField] private GameObject[] manualImage;
-    [Header("Manualの画像の背景")][SerializeField] private GameObject backmanualImage;
+    [Header("Manualの画像の背景(黒)")][SerializeField] private GameObject[] backBlackManualImage;
+    [Header("Manualの画像の背景(緑)")][SerializeField] private GameObject[] backGreenManualImage;
 
     private CustomInputAction customInputAction;
     private bool Holding = false;
@@ -38,11 +39,10 @@ public class CS_TrasitionMovieEnd : MonoBehaviour
             manualImage[0].SetActive(true);
             manualImage[1].SetActive(false);
 
-            //manualImage[0].GetComponent<Image>().material.SetFloat("_MaxTimeFloat", holdTime);
-            //manualImage[1].GetComponent<Image>().material.SetFloat("_MaxTimeFloat", holdTime);
+            backGreenManualImage[0].GetComponent<Image>().material.SetFloat("_MaxTimeFloat", holdTime);
+            backGreenManualImage[1].GetComponent<Image>().material.SetFloat("_MaxTimeFloat", holdTime);
         }
 
-        backmanualImage.GetComponent<Image>().material.SetFloat("_MaxTimeFloat", time);
 
         if (videoPlayer == null)
         {
@@ -87,22 +87,32 @@ public class CS_TrasitionMovieEnd : MonoBehaviour
             time = 0.0f;
         }
 
-        //if (CS_CustomInputActionManager.instance.currentInputType == CS_CustomInputActionManager.InputType.Gamepad)
-        //{
-        //    manualImage[0].SetActive(true);
-        //    manualImage[1].SetActive(false);
+        if (CS_CustomInputActionManager.instance.currentInputType == CS_CustomInputActionManager.InputType.Gamepad)
+        {
+            manualImage[0].SetActive(true);
+            manualImage[1].SetActive(false);
 
-        //    manualImage[0].GetComponent<Image>().material.SetFloat("_TimeFloat", time);
-        //}
-        //else
-        //{
-        //    manualImage[0].SetActive(false);
-        //    manualImage[1].SetActive(true);
+            backBlackManualImage[0].SetActive(true);
+            backBlackManualImage[1].SetActive(false);
 
-        //    manualImage[1].GetComponent<Image>().material.SetFloat("_TimeFloat", time);
-        //}
+            backGreenManualImage[0].SetActive(true);
+            backGreenManualImage[1].SetActive(false);
 
-        backmanualImage.GetComponent<Image>().material.SetFloat("_TimeFloat", time);
+            backGreenManualImage[0].GetComponent<Image>().material.SetFloat("_TimeFloat", time);
+        }
+        else
+        {
+            manualImage[0].SetActive(false);
+            manualImage[1].SetActive(true);
+
+            backBlackManualImage[0].SetActive(false);
+            backBlackManualImage[1].SetActive(true);
+
+            backGreenManualImage[0].SetActive(false);
+            backGreenManualImage[1].SetActive(true);
+
+            backGreenManualImage[1].GetComponent<Image>().material.SetFloat("_TimeFloat", time);
+        }
     }
 
     private void OnMovieFinished(VideoPlayer vp)

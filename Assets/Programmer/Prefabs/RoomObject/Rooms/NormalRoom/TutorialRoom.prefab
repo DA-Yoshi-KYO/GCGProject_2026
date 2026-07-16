@@ -366,6 +366,7 @@ GameObject:
   - component: {fileID: 915134400559307112}
   - component: {fileID: 822046473581268488}
   - component: {fileID: 1992189809063427222}
+  - component: {fileID: 8571576041944683724}
   m_Layer: 0
   m_Name: STEP1
   m_TagString: Untagged
@@ -460,6 +461,21 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &8571576041944683724
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 591235005590350415}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 06e3adfdd5b01174a9e7abcd7a929c98, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  manualImage:
+  - {fileID: 2800000, guid: 36e612ecbd3b3e140b91f56a50955aca, type: 3}
+  - {fileID: 2800000, guid: 0c5cb8abf4fd0134b8865c4eb005af5e, type: 3}
 --- !u!1 &653973063325110208
 GameObject:
   m_ObjectHideFlags: 0
@@ -706,6 +722,7 @@ GameObject:
   - component: {fileID: 671616420412260523}
   - component: {fileID: 6269695351453192637}
   - component: {fileID: 2917961544950483052}
+  - component: {fileID: 6580708121155515829}
   m_Layer: 0
   m_Name: STEP4
   m_TagString: Untagged
@@ -800,6 +817,21 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &6580708121155515829
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1401552485739698266}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 06e3adfdd5b01174a9e7abcd7a929c98, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  manualImage:
+  - {fileID: 2800000, guid: ef593100f7efa2145adea35e1ab03d33, type: 3}
+  - {fileID: 2800000, guid: 187f4636d1735fa4096412ffe86118eb, type: 3}
 --- !u!1 &1526044983873494166
 GameObject:
   m_ObjectHideFlags: 0
@@ -1005,12 +1037,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   movePoints: []
-  isListDown: 1
   wallParent: {fileID: 653973063325110208}
   initialExplorationLevel: 0
   objectParent: {fileID: 4023289540699656208}
   showGizmos: 0
   gizmoColor: {r: 0, g: 1, b: 0, a: 1}
+  gizmoColor2: {r: 0, g: 0, b: 1, a: 1}
 --- !u!114 &8265462215535830746
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1038,7 +1070,7 @@ MonoBehaviour:
   m_OverrideTileSize: 0
   m_TileSize: 256
   m_OverrideVoxelSize: 0
-  m_VoxelSize: 0.1
+  m_VoxelSize: 0.033333335
   m_MinRegionArea: 2
   m_NavMeshData: {fileID: 23800000, guid: e688082d793dbc940a817d08bd633652, type: 2}
   m_BuildHeightMesh: 0
@@ -3416,6 +3448,7 @@ GameObject:
   - component: {fileID: 8039847286042360296}
   - component: {fileID: 1987714988289968597}
   - component: {fileID: 7704739728249430394}
+  - component: {fileID: 6483641996005731294}
   m_Layer: 0
   m_Name: STEP3
   m_TagString: Untagged
@@ -3510,6 +3543,21 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &6483641996005731294
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6229124919623392219}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 06e3adfdd5b01174a9e7abcd7a929c98, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  manualImage:
+  - {fileID: 2800000, guid: 6e5aaaf5f00af6d4fa4450f09021028d, type: 3}
+  - {fileID: 2800000, guid: 2ebfaada0d8acf446b1db273b6b9ee20, type: 3}
 --- !u!1 &6483697428053152940
 GameObject:
   m_ObjectHideFlags: 0
