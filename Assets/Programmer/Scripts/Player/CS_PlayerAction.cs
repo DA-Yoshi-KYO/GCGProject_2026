@@ -35,6 +35,23 @@ public class CS_PlayerAction : MonoBehaviour
     }
     [SerializeField] public InteractSyllinder interactMin = new InteractSyllinder { radius = 3f, height = 3f };//インタラクトの範囲の最小値
     [SerializeField] public InteractSyllinder interactMax = new InteractSyllinder { radius = 5f, height = 5f };//インタラクトの範囲の最大値
+
+    [Header("インタラクト準備中のギミック方向表示（三角形は緑固定）")]
+    [SerializeField, Tooltip("三角形の横幅(X)と進行方向の長さ(Y)")]
+    private Vector2 directionTriangleSize;
+    [SerializeField, Tooltip("三角形が方向へ移動する速度"), Min(0.0f)]
+    private float directionTriangleMoveSpeed;
+    [SerializeField, Tooltip("三角形が生成されてから消えるまでの時間"), Min(0.01f)]
+    private float directionTriangleLifetime;
+    [SerializeField, Tooltip("次の三角形を描画するまでの間隔"), Min(0.01f)]
+    private float directionTriangleSpawnInterval;
+    [SerializeField, Tooltip("三角形のフェードイン速度"), Min(0.01f)]
+    private float directionTriangleFadeInSpeed;
+    [SerializeField, Tooltip("三角形のフェードアウト速度"), Min(0.01f)]
+    private float directionTriangleFadeOutSpeed;
+    [SerializeField, Tooltip("三角形の最大アルファ値"), Range(0.0f, 1.0f)]
+    private float directionTriangleMaxAlpha;
+
     [HideInInspector] public int currentGimmickIndex { private set; get; } = 0;//現在選択しているギミック
 
     private GameObject previewBase;
@@ -51,6 +68,14 @@ public class CS_PlayerAction : MonoBehaviour
     private GimmickList gimmickManager;
     private CS_3DPlaySE playSE;
     List<Collider> hitList = new List<Collider>();
+    private readonly Dictionary<GimmickBase, GimmickDirection>
+        preparedGimmickDirections =
+            new Dictionary<GimmickBase, GimmickDirection>();
+    private readonly Dictionary<GimmickBase, Vector3>
+        preparedGimmickDirectionOffsets =
+            new Dictionary<GimmickBase, Vector3>();
+    private CS_GimmickDirectionIndicatorRenderer
+        gimmickDirectionIndicatorRenderer;
 
     // ギミック設置時のEffect再生クラスへの参照
     private CS_GimmickSetEffectPlayer cs_GimmickSetEffectPlayer;
@@ -73,6 +98,26 @@ public class CS_PlayerAction : MonoBehaviour
     [HideInInspector]public bool warpUIView;
     [HideInInspector]public bool doWarp;
     private bool isWarpInteract = false; // ワープ確定の押下中に設置/インタラクト判定へ流れないようにするフラグ
+
+    private void OnValidate()
+    {
+        directionTriangleSize.x =
+            Mathf.Max(directionTriangleSize.x, 0.01f);
+        directionTriangleSize.y =
+            Mathf.Max(directionTriangleSize.y, 0.01f);
+        directionTriangleMoveSpeed =
+            Mathf.Max(directionTriangleMoveSpeed, 0.0f);
+        directionTriangleLifetime =
+            Mathf.Max(directionTriangleLifetime, 0.01f);
+        directionTriangleSpawnInterval =
+            Mathf.Max(directionTriangleSpawnInterval, 0.01f);
+        directionTriangleFadeInSpeed =
+            Mathf.Max(directionTriangleFadeInSpeed, 0.01f);
+        directionTriangleFadeOutSpeed =
+            Mathf.Max(directionTriangleFadeOutSpeed, 0.01f);
+        directionTriangleMaxAlpha =
+            Mathf.Clamp01(directionTriangleMaxAlpha);
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -133,6 +178,9 @@ public class CS_PlayerAction : MonoBehaviour
 
     private void OnDestroy()
     {
+        gimmickDirectionIndicatorRenderer?.Dispose();
+        gimmickDirectionIndicatorRenderer = null;
+
         if (playerData == null) return;
 
         playerData.customInputAction.Player.GimmickChange.started -= OnSelect;
@@ -144,10 +192,21 @@ public class CS_PlayerAction : MonoBehaviour
         playerData.customInputAction.Player.InteractCancel.started -= OnCancel;
     }
 
+    private void OnDisable()
+    {
+        ClearGimmickDirectionIndicators();
+    }
+
     // Update is called once per frame
     void Update()
     {
         CalculateGimmickSetPosition();
+
+        if (!isInteracting ||
+            interactTime < switchInteract)
+        {
+            ClearGimmickDirectionIndicators();
+        }
 
         if (playerData.currentMode == CS_PlayerData.PlayerMode.Normal)
         {
@@ -184,6 +243,7 @@ public class CS_PlayerAction : MonoBehaviour
                     }
                 }
                 hitList.Clear();
+                preparedGimmickDirections.Clear();
                 
                 // インタラクト中はねこのアウトラインを緑にする
                 outlineTarget.SetOutlineColor(Color.green);
@@ -247,10 +307,22 @@ public class CS_PlayerAction : MonoBehaviour
                     {
                         if (gimmick.gimmickState != GimmickState.Idle) continue;
                         gimmick.SetOutLineColor(Color.green);
+
+                        if (!preparedGimmickDirections.ContainsKey(gimmick) &&
+                            IsDirectionIndicatorTarget(gimmick) &&
+                            TryCalculatePreparedGimmickDirection(
+                                gimmick,
+                                out GimmickDirection direction))
+                        {
+                            preparedGimmickDirections[gimmick] =
+                                direction;
+                        }
                     }
 
                     hitList.Add(hits[i]);
                 }
+
+                UpdateGimmickDirectionIndicators();
             }
         }
         if (playerData.currentMode == CS_PlayerData.PlayerMode.Setting && isViewPreview)
@@ -333,6 +405,7 @@ public class CS_PlayerAction : MonoBehaviour
                 return;
             }
             isInteracting = false;
+            ClearGimmickDirectionIndicators();
 
             EndAllAnkhStandEffect();
 
@@ -643,7 +716,44 @@ public class CS_PlayerAction : MonoBehaviour
 
     public void SettingGimmickDirection(GimmickBase gimmick)
     {
-        // インタラクト方向を設定※ギミックとの位置関係で判定（対角線で四分割：三角形×4）
+        if (!TryCalculatePreparedGimmickDirection(
+                gimmick,
+                out GimmickDirection direction))
+        {
+            return;
+        }
+
+        gimmick.SetGimmickDirection(direction);
+    }
+
+    private bool TryCalculatePreparedGimmickDirection(
+        GimmickBase gimmick,
+        out GimmickDirection direction)
+    {
+        if (gimmick == null)
+        {
+            direction = GimmickDirection.Up;
+            return false;
+        }
+
+        GimmickDirection preferredDirection =
+            CalculatePreferredGimmickDirection(gimmick);
+
+        if (gimmick is PotGimmick potGimmick)
+        {
+            return potGimmick.TryGetCorrectedDropDirection(
+                preferredDirection,
+                out direction);
+        }
+
+        direction = preferredDirection;
+        return true;
+    }
+
+    private GimmickDirection CalculatePreferredGimmickDirection(
+        GimmickBase gimmick)
+    {
+        // インタラクト方向を計算※ギミックとの位置関係で判定（対角線で四分割：三角形×4）
         Vector3 toPlayer = transform.position - gimmick.transform.position;
         float dx = toPlayer.x;
         float dz = toPlayer.z;
@@ -656,30 +766,109 @@ public class CS_PlayerAction : MonoBehaviour
         if (dz > adx + eps)
         {
             // プレイヤーがギミックの「前（+Z）側の三角形」：Up
-            gimmick.SetGimmickDirection(GimmickDirection.Up);
+            return GimmickDirection.Up;
         }
-        else if (-dz > adx + eps)
+
+        if (-dz > adx + eps)
         {
             // プレイヤーがギミックの「後（-Z）側の三角形」：Down
-            gimmick.SetGimmickDirection(GimmickDirection.Down);
+            return GimmickDirection.Down;
         }
-        else if (dx > adz + eps)
+
+        if (dx > adz + eps)
         {
             // プレイヤーがギミックの「右（+X）側の三角形」：Right
-            gimmick.SetGimmickDirection(GimmickDirection.Right);
+            return GimmickDirection.Right;
         }
-        else if (-dx > adz + eps)
+
+        if (-dx > adz + eps)
         {
             // プレイヤーがギミックの「左（-X）側の三角形」：Left
-            gimmick.SetGimmickDirection(GimmickDirection.Left);
+            return GimmickDirection.Left;
         }
-        else
+
+        // 厳密な境界上（対角線上）に居る場合のフォールバック：
+        // X/Z の絶対値で優勢側を使う（斜め真正面は Z 優先）
+        if (adz >= adx)
         {
-            // 厳密な境界上（対角線上）に居る場合のフォールバック：
-            // X/Z の絶対値で優勢側を使う（斜め真正面は Z 優先）
-            if (adz >= adx) gimmick.SetGimmickDirection(dz >= 0f ? GimmickDirection.Up : GimmickDirection.Down);
-            else gimmick.SetGimmickDirection(dx >= 0f ? GimmickDirection.Right : GimmickDirection.Left);
+            return dz >= 0f
+                ? GimmickDirection.Up
+                : GimmickDirection.Down;
         }
+
+        return dx >= 0f
+            ? GimmickDirection.Right
+            : GimmickDirection.Left;
+    }
+
+    private static bool IsDirectionIndicatorTarget(
+        GimmickBase gimmick)
+    {
+        return gimmick is PotGimmick ||
+               gimmick is RockGimmick;
+    }
+
+    private void UpdateGimmickDirectionIndicators()
+    {
+        if (preparedGimmickDirections.Count == 0)
+        {
+            gimmickDirectionIndicatorRenderer?.ClearIndicators();
+            return;
+        }
+
+        if (gimmickDirectionIndicatorRenderer == null)
+        {
+            gimmickDirectionIndicatorRenderer =
+                new CS_GimmickDirectionIndicatorRenderer();
+        }
+
+        CSST_GimmickDirectionIndicatorSettings settings =
+            new CSST_GimmickDirectionIndicatorSettings(
+                directionTriangleSize,
+                directionTriangleMoveSpeed,
+                directionTriangleLifetime,
+                directionTriangleSpawnInterval,
+                directionTriangleFadeInSpeed,
+                directionTriangleFadeOutSpeed,
+                directionTriangleMaxAlpha);
+
+        preparedGimmickDirectionOffsets.Clear();
+        foreach (KeyValuePair<GimmickBase, GimmickDirection> pair
+                 in preparedGimmickDirections)
+        {
+            Vector3 offset;
+            switch (pair.Key.GetGimmickTag())
+            {
+                case Gimmick.Pot:
+                    // 壺用オフセット（ギミックのローカル座標基準）
+                    offset = new Vector3(0.0f, 0.0f, 0.0f);
+                    break;
+
+                case Gimmick.IronBall:
+                    // Rock用オフセット（ギミックのローカル座標基準）
+                    offset = new Vector3(0.0f, 4f, 0.0f);
+                    break;
+
+                default:
+                    offset = Vector3.zero;
+                    break;
+            }
+
+            preparedGimmickDirectionOffsets[pair.Key] = offset;
+        }
+
+        gimmickDirectionIndicatorRenderer.UpdateIndicators(
+            preparedGimmickDirections,
+            preparedGimmickDirectionOffsets,
+            settings,
+            Time.deltaTime);
+    }
+
+    private void ClearGimmickDirectionIndicators()
+    {
+        preparedGimmickDirections.Clear();
+        preparedGimmickDirectionOffsets.Clear();
+        gimmickDirectionIndicatorRenderer?.ClearIndicators();
     }
 
     //ギミックの設置位置を補正する計算：大瀧
@@ -1021,6 +1210,7 @@ public class CS_PlayerAction : MonoBehaviour
         playerData.currentMode = CS_PlayerData.PlayerMode.Normal;
         // Effectの停止
         cs_PlayerInteractRangeEffectPlayer?.EndInteractRangeEffect();
+        ClearGimmickDirectionIndicators();
 
         foreach(var hit in hitList)
         {

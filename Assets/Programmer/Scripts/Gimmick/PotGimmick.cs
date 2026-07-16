@@ -411,22 +411,9 @@ public class PotGimmick : GimmickBase
     private bool TryCorrectDropDirection()
     {
         GimmickDirection preferredDirection = gimmickDirection;
-        bool canDropUp =
-            CanDropInDirection(GimmickDirection.Up);
-        bool canDropDown =
-            CanDropInDirection(GimmickDirection.Down);
-        bool canDropLeft =
-            CanDropInDirection(GimmickDirection.Left);
-        bool canDropRight =
-            CanDropInDirection(GimmickDirection.Right);
-
         bool hasDropDirection =
-            PotDropRules.TryGetCorrectedDirection(
+            TryGetCorrectedDropDirection(
                 preferredDirection,
-                canDropUp,
-                canDropDown,
-                canDropLeft,
-                canDropRight,
                 out GimmickDirection correctedDirection);
 
         if (!hasDropDirection)
@@ -443,6 +430,28 @@ public class PotGimmick : GimmickBase
         }
 
         return true;
+    }
+
+    public bool TryGetCorrectedDropDirection(
+        GimmickDirection preferredDirection,
+        out GimmickDirection correctedDirection)
+    {
+        bool canDropUp =
+            CanDropInDirection(GimmickDirection.Up);
+        bool canDropDown =
+            CanDropInDirection(GimmickDirection.Down);
+        bool canDropLeft =
+            CanDropInDirection(GimmickDirection.Left);
+        bool canDropRight =
+            CanDropInDirection(GimmickDirection.Right);
+
+        return PotDropRules.TryGetCorrectedDirection(
+            preferredDirection,
+            canDropUp,
+            canDropDown,
+            canDropLeft,
+            canDropRight,
+            out correctedDirection);
     }
 
     private bool CanDropInDirection(GimmickDirection direction)
