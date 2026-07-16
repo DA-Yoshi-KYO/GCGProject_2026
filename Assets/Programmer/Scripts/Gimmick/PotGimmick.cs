@@ -247,4 +247,107 @@ public class PotGimmick : GimmickBase
 
         moveCoroutine = null;
     }
+
+    protected override bool GetGimmickSettingsArea()
+    {
+        //設置該当位置地点が１マス以上上でないと設置は不可能とする
+        //また、斜面に設置される場合も不可能とする
+        //１マス以上上でないといけないが
+        //レイキャストを壺から左右四方向から下に飛ばして
+        //どちらかの方向に落ちられる※設置位置から下にいける
+        //部分がない場合も設置不可能とする
+        if (roomGrid == null)
+            return false;
+
+        Vector2Int placementGrid = roomGrid.GetGridFromPos(placementCheckPosition);
+        if (placementGrid.x < 0 || placementGrid.y < 0)
+            return false;
+
+        Vector3 roomFloorPosition = roomGrid.GetWorldPosFromGrid(placementGrid);
+        if (float.IsInfinity(roomFloorPosition.x))
+            return false;
+
+        float oneGridHeight = roomGrid.gridSize.y;
+        const float surfaceRayOffset = 0.1f;
+        const float surfaceHeightTolerance = 0.05f;
+        const float maxSlopeAngle = 5.0f;
+
+        // 部屋の地面より高ければ設置可能とし、地面と同じ高さは設置不可とする
+        bool isAboveRoomFloor =
+            placementCheckPosition.y - roomFloorPosition.y > surfaceHeightTolerance;
+
+        Vector3 surfaceRayOrigin =
+            placementCheckPosition + Vector3.up * surfaceRayOffset;
+
+        // 壺の直下にある設置面は、四方向の落下判定とは分けて確認する
+        float surfaceRayLength = surfaceRayOffset + surfaceHeightTolerance;
+        bool hasSurface = Physics.Raycast(
+            surfaceRayOrigin,
+            Vector3.down,
+            out RaycastHit surfaceHit,
+            surfaceRayLength,
+            ~0,
+            QueryTriggerInteraction.Ignore);
+
+        bool isFlatSurface =
+            hasSurface && Vector3.Angle(surfaceHit.normal, Vector3.up) <= maxSlopeAngle;
+        Debug.DrawRay(
+            surfaceRayOrigin,
+            Vector3.down * surfaceRayLength,
+            isAboveRoomFloor && isFlatSurface ? Color.green : Color.red,
+            0.0f,
+            false);
+
+        if (!isAboveRoomFloor || !hasSurface)
+        {
+            return false;
+        }
+
+        if (!isFlatSurface)
+            return false;
+
+        // 支えている設置面を落下可能方向と誤判定しないよう、
+        // 壺の接地範囲より少し外側からレイを飛ばす
+        float outsideOffset = Mathf.Min(roomGrid.gridSize.x, roomGrid.gridSize.y) * 0.05f;
+        float halfX = roomGrid.gridSize.x * gimmickSize.x + outsideOffset;
+        float halfZ = roomGrid.gridSize.y * gimmickSize.y + outsideOffset;
+        float dropRayLength = oneGridHeight + surfaceRayOffset + surfaceHeightTolerance;
+        Vector3[] offsets =
+        {
+            new Vector3(halfX, 0.0f, 0.0f),
+            new Vector3(-halfX, 0.0f, 0.0f),
+            new Vector3(0.0f, 0.0f, halfZ),
+            new Vector3(0.0f, 0.0f, -halfZ),
+        };
+
+        foreach (Vector3 offset in offsets)
+        {
+            Vector3 dropRayOrigin = surfaceRayOrigin + offset;
+            bool hasDropHit = Physics.Raycast(
+                dropRayOrigin,
+                Vector3.down,
+                out RaycastHit dropHit,
+                dropRayLength,
+                ~0,
+                QueryTriggerInteraction.Ignore);
+            bool canDrop =
+                !hasDropHit ||
+                placementCheckPosition.y - dropHit.point.y >=
+                oneGridHeight - surfaceHeightTolerance;
+
+            Debug.DrawRay(
+                dropRayOrigin,
+                Vector3.down * dropRayLength,
+                canDrop ? Color.green : Color.red,
+                0.0f,
+                false);
+
+            if (canDrop)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

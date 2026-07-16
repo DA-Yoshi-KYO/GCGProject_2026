@@ -518,6 +518,27 @@ public class GimmickBase : MonoBehaviour
         }
     }
 
+    protected virtual bool GetGimmickSettingsArea()
+    {
+        return false;
+    }
+
+    //設置可能位置であるかを判定
+    public bool GetIsSettingArea()
+    {
+        placementCheckPosition = transform.position;
+        return GetGimmickSettingsArea();
+    }
+
+    // プレビューなど、まだギミック本体が生成されていない位置の設置判定用
+    protected Vector3 placementCheckPosition;
+
+    public bool GetIsSettingArea(Vector3 worldPosition)
+    {
+        placementCheckPosition = worldPosition;
+        return GetGimmickSettingsArea();
+    }
+
     private Quaternion GetEffectDirectionRotation()
     {
         if (DirectionRotations.TryGetValue(gimmickDirection, out Quaternion directionRotation))
