@@ -31,13 +31,13 @@ public class CS_RoomMoveConnection
     [SerializeField]
     private CSS_RoomEnemyEntryData cs_RoomEnemyEntryDataSO;
 
-    [Header("ヒエログラフの設定テクスチャー")]
+    [Header("ヒエログラフの差し替えmaterial")]
     [SerializeField]
-    private Texture2D tx_HierographTexture = null;
+    private Material m_hierograph_material;
 
-    [Header("ヒエログラフの設定オブジェクト")]
+    [Header("扉の方向")]
     [SerializeField]
-    private GameObject go_HierographObject = null;
+    private CSE_RoomDoorDirection e_DoorDirection = CSE_RoomDoorDirection.Left;
 
     /// <summary>
     /// 出入口の用途を取得します。
@@ -80,14 +80,14 @@ public class CS_RoomMoveConnection
     public CSS_RoomEnemyEntryData RoomEnemyEntryDataSO => cs_RoomEnemyEntryDataSO;
 
     /// <summary>
-    /// ヒエログリフのテクスチャーを取得します。
+    /// ヒエログラフの差し替え用マテリアルを取得します。
     /// </summary>
-    public Texture2D HierographTexture => tx_HierographTexture;
+    public Material HierographMaterial => m_hierograph_material;
 
     /// <summary>
-    /// ヒエログリフのオブジェクトを取得します。 
+    /// この接続情報が担当する扉の方向を取得します。
     /// </summary>
-    public GameObject HierographObject => go_HierographObject;
+    public CSE_RoomDoorDirection DoorDirection => e_DoorDirection;
 
     /// <summary>
     /// この敵出入口から出現できる敵の最大数を取得します。
