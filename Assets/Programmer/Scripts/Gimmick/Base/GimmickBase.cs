@@ -707,6 +707,10 @@ public class GimmickBase : MonoBehaviour
     {
         roomIndex = index;
     }
+    public GimmickState GetGimmickState()
+    {
+        return gimmickState;
+    }
 
     private Collider[] OverlapBoxCollider(BoxCollider box)
     {

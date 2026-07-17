@@ -20,6 +20,11 @@ public class CS_ThiefAnimation
     private Animator animator;
     public Animator read_Animator => animator;
 
+    [Tooltip("アニメーション停止時のフレーム時間")]
+    private float animationStopTime = 0.0f;
+    private float stopPrevSpeed = 0.0f;
+    private bool isAnimationStopped = false;
+
     public enum ThiefAnimationState
     {
         Walk,
@@ -34,6 +39,22 @@ public class CS_ThiefAnimation
     {
         this.thiefAI = thiefAI;
         this.animator = animator;
+    }
+
+    public void AnimationUpdate()
+    {
+        if (!isAnimationStopped) return;
+
+        if (animationStopTime > 0.0f)
+        {
+            animationStopTime -= Time.deltaTime;
+            animator.speed = 0.0f;
+        }
+        else
+        {
+            isAnimationStopped = false;
+            animator.speed = stopPrevSpeed;
+        }
     }
 
     public void SetAnimationState(ThiefAnimationState state)
@@ -75,5 +96,13 @@ public class CS_ThiefAnimation
         animator.speed = 1.0f;
 
         SetAnimationState(ThiefAnimationState.Walk);
+    }
+
+    public void StopAnimation(float duration)
+    {
+        animationStopTime = duration;
+        stopPrevSpeed = animator.speed;
+        animator.speed = 0.0f;
+        isAnimationStopped = true;
     }
 }
