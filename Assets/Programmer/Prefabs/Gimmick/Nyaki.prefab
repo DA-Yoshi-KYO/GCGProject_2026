@@ -75,8 +75,8 @@ MonoBehaviour:
   hitRange: {x: 20, y: 10, z: 20}
   effectRange: {x: 20, y: 10, z: 20}
   searchRange: {x: 0, y: 0, z: 0}
-  attackPower: 1
-  effectPower: 1
+  attackPower: 0
+  effectPower: 0
   roomGrid: {fileID: 0}
   gimmickDirection: 0
   gimmickType: 0
@@ -96,4 +96,10 @@ MonoBehaviour:
   isMeshScaleAdaptation: 1
   brokenFadeSpeed: 1
   previewAlpha: 0.5
+  cs_EffectPlayer: {fileID: 0}
+  effectOffsetPosition: {x: 0, y: 0, z: 0}
+  effectOffsetDirection: 0
+  effectOffsetRotation: {x: 0, y: 0, z: 0, w: 1}
+  effectRotationUseDirection: 1
+  effectOffsetScale: {x: 1, y: 1, z: 1}
   time: 3
