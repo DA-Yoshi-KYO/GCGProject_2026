@@ -6,13 +6,16 @@ using UnityEngine;
  概要     : 壺の通常Modelと破壊VAT Modelを切り替えるクラス
  作者     : ヨシモト リョウ
  履歴     : 2026/07/17 新規作成
-             2026/07/17 VAT再生時のTransform上書きを防止
+             2026/07/17 RootScale固定処理を追加
+             2026/07/17 Broken状態検知によるVAT自動再生を追加
 =====================================+
 */
 
 /// <summary>
 /// 壺の通常表示とVAT破壊表示を切り替えます。
+/// PotGimmickがBroken状態になった際、自動でVATを再生します。
 /// </summary>
+[DefaultExecutionOrder(-1000)]
 public class CS_PotVATVisualSwitcher : MonoBehaviour
 {
     [Header("ひびなし通常壺Model")]
@@ -27,42 +30,113 @@ public class CS_PotVATVisualSwitcher : MonoBehaviour
     [SerializeField]
     private CS_EffectVAT cs_PotVATEffect;
 
-    /// <summary>
-    /// VAT Effectの初期LocalScaleです。
-    /// Effect再生時にScaleが上書きされるのを防ぐため保存します。
-    /// </summary>
-    private Vector3 v3_DefaultVATLocalScale = Vector3.one;
+    [Header("Effect再生Facade")]
+    [SerializeField]
+    private CS_EffectPlayer cs_EffectPlayer;
+
+    [Header("Root Scaleを固定するか")]
+    [SerializeField]
+    private bool b_LockRootLocalScale = true;
 
     /// <summary>
-    /// VAT EffectのScaleを保存済みかどうかです。
+    /// この壺のGimmick処理です。
     /// </summary>
-    private bool b_IsVATScaleCached;
+    private PotGimmick cs_PotGimmick;
+
+    /// <summary>
+    /// Prefabに設定されていたRoot LocalScaleです。
+    /// </summary>
+    private Vector3 v3_DefaultRootLocalScale;
+
+    /// <summary>
+    /// VAT Object本来のLocalScaleです。
+    /// </summary>
+    private Vector3 v3_DefaultVATLocalScale;
+
+    /// <summary>
+    /// VATを再生済みかどうかです。
+    /// </summary>
+    private bool b_IsDestructionVATPlayed;
 
     /// <summary>
     /// 初期化処理です。
-    /// VATの元サイズを保存し、通常壺を表示します。
+    /// Instantiate直後のPrefab Scaleを保存します。
     /// </summary>
     private void Awake()
     {
-        CacheVATLocalScale();
+        v3_DefaultRootLocalScale =
+            transform.localScale;
+
+        cs_PotGimmick =
+            GetComponent<PotGimmick>();
+
+        if (cs_EffectPlayer == null)
+        {
+            cs_EffectPlayer =
+                GetComponent<CS_EffectPlayer>();
+        }
+
+        if (cs_PotVATEffect != null)
+        {
+            v3_DefaultVATLocalScale =
+                cs_PotVATEffect.transform.localScale;
+        }
+        else
+        {
+            v3_DefaultVATLocalScale =
+                Vector3.one;
+        }
 
         ShowNormalPot();
     }
 
     /// <summary>
-    /// VAT Effectの初期LocalScaleを保存します。
+    /// GimmickBase.Startより先にRoot Scaleを戻します。
     /// </summary>
-    private void CacheVATLocalScale()
+    private void Start()
     {
-        if (cs_PotVATEffect == null)
+        ApplyDefaultRootLocalScale();
+    }
+
+    /// <summary>
+    /// PotGimmickの状態を確認します。
+    /// Brokenになった瞬間にVATを再生します。
+    /// </summary>
+    private void Update()
+    {
+        if (b_IsDestructionVATPlayed)
         {
             return;
         }
 
-        v3_DefaultVATLocalScale =
-            cs_PotVATEffect.transform.localScale;
+        if (cs_PotGimmick == null)
+        {
+            return;
+        }
 
-        b_IsVATScaleCached = true;
+        if (cs_PotGimmick.gimmickState !=
+            GimmickState.Broken)
+        {
+            return;
+        }
+
+        PlayDestructionVAT();
+    }
+
+    /// <summary>
+    /// 他処理によってRoot Scaleが変更された場合に戻します。
+    /// </summary>
+    private void LateUpdate()
+    {
+        ApplyDefaultRootLocalScale();
+    }
+
+    /// <summary>
+    /// Physics処理時にもRoot Scaleを維持します。
+    /// </summary>
+    private void FixedUpdate()
+    {
+        ApplyDefaultRootLocalScale();
     }
 
     /// <summary>
@@ -70,6 +144,8 @@ public class CS_PotVATVisualSwitcher : MonoBehaviour
     /// </summary>
     public void ShowNormalPot()
     {
+        b_IsDestructionVATPlayed = false;
+
         if (go_NormalPotModel != null)
         {
             go_NormalPotModel.SetActive(true);
@@ -82,11 +158,25 @@ public class CS_PotVATVisualSwitcher : MonoBehaviour
     }
 
     /// <summary>
-    /// 通常壺を隠し、ひびありVATを再生します。
-    /// VAT再生前の位置・回転・サイズを維持します。
+    /// 通常壺を非表示にして破壊VATを再生します。
     /// </summary>
     public void PlayDestructionVAT()
     {
+        if (b_IsDestructionVATPlayed)
+        {
+            return;
+        }
+
+        if (go_VATPotModel == null)
+        {
+            Debug.LogWarning(
+                "[CS_PotVATVisualSwitcher] " +
+                "ひびあり破壊VAT Modelが設定されていません。",
+                this);
+
+            return;
+        }
+
         if (cs_PotVATEffect == null)
         {
             Debug.LogWarning(
@@ -97,28 +187,20 @@ public class CS_PotVATVisualSwitcher : MonoBehaviour
             return;
         }
 
-        if (b_IsVATScaleCached == false)
-        {
-            CacheVATLocalScale();
-        }
+        b_IsDestructionVATPlayed = true;
 
+        // 通常モデルを非表示にします。
         if (go_NormalPotModel != null)
         {
             go_NormalPotModel.SetActive(false);
         }
 
-        if (go_VATPotModel != null)
-        {
-            go_VATPotModel.SetActive(true);
-        }
+        // VATモデルを表示します。
+        go_VATPotModel.SetActive(true);
 
-        // Effect共通処理によってTransformが上書きされないよう、
-        // 現在の位置・回転と、保存した元のLocalScaleを明示的に渡します。
-        Vector3 v3_VATPosition =
-            cs_PotVATEffect.transform.position;
-
-        Quaternion q_VATRotation =
-            cs_PotVATEffect.transform.rotation;
+        // 非アクティブ解除後に本来のScaleを戻します。
+        cs_PotVATEffect.transform.localScale =
+            v3_DefaultVATLocalScale;
 
         CSST_EffectPlayData csst_EffectPlayData =
             new CSST_EffectPlayData();
@@ -126,15 +208,55 @@ public class CS_PotVATVisualSwitcher : MonoBehaviour
         csst_EffectPlayData.CSST_EffectPlayData_Init();
 
         csst_EffectPlayData.SetPosition(
-            v3_VATPosition);
+            cs_PotVATEffect.transform.position);
 
         csst_EffectPlayData.SetRotation(
-            q_VATRotation);
+            cs_PotVATEffect.transform.rotation);
 
         csst_EffectPlayData.SetScale(
             v3_DefaultVATLocalScale);
 
-        cs_PotVATEffect.PlayEffect(
-            csst_EffectPlayData);
+        csst_EffectPlayData.SetLoopFlag(false);
+
+        // 壺本体がBroken処理中なので、
+        // Effect側だけ勝手に非表示にしないようにします。
+        csst_EffectPlayData.SetHideOnEnd(false);
+
+        if (cs_EffectPlayer != null)
+        {
+            // Hierarchy上にある既存のVATをそのまま再生します。
+            cs_EffectPlayer.PlayExistingEffect(
+                cs_PotVATEffect,
+                csst_EffectPlayData);
+        }
+        else
+        {
+            // Facadeが設定されていない場合の予備処理です。
+            cs_PotVATEffect.gameObject.SetActive(true);
+
+            cs_PotVATEffect.PlayEffect(
+                csst_EffectPlayData);
+        }
+
+        ApplyDefaultRootLocalScale();
+
+        Debug.Log(
+            "[CS_PotVATVisualSwitcher] " +
+            "壺破壊VATを再生しました。",
+            this);
+    }
+
+    /// <summary>
+    /// PotVatのRoot LocalScaleをPrefab時の値へ戻します。
+    /// </summary>
+    private void ApplyDefaultRootLocalScale()
+    {
+        if (b_LockRootLocalScale == false)
+        {
+            return;
+        }
+
+        transform.localScale =
+            v3_DefaultRootLocalScale;
     }
 }
