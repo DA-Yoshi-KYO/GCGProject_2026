@@ -30,6 +30,13 @@ public class CS_VisionConeRenderer : MonoBehaviour
     private Mesh mesh;
     private int floorRaycastMask;
 
+    // 床のY座標が1フレームだけ検出できなかった場合に、Coneが一瞬他の高さへ飛ぶのを防ぐためのキャッシュ
+    private float cachedFloorY;
+    private bool hasCachedFloorY;
+
+    // Physics.RaycastNonAllocの結果格納用（毎フレームのGCAllocを避けるため使い回す）
+    private static readonly RaycastHit[] floorHitBuffer = new RaycastHit[16];
+
     CS_ThiefAI thiefAI;
 
     private void Awake()
@@ -116,11 +123,7 @@ public class CS_VisionConeRenderer : MonoBehaviour
 
         // 泥棒が棚の上などにいる場合、transform.positionが必ずしも足元の床の高さとは限らないため、
         // 下方向にレイを飛ばして実際に立っている面の高さを求める
-        float floorY = origin.y;
-        if (Physics.Raycast(origin + Vector3.up * 2f, Vector3.down, out RaycastHit floorHit, 10f, floorRaycastMask))
-        {
-            floorY = floorHit.point.y;
-        }
+        float floorY = FindFloorY(origin);
 
         Vector3 rayOrigin = new Vector3(origin.x, floorY + rayHeight, origin.z);
         floorY += floorOffset;
@@ -169,6 +172,50 @@ public class CS_VisionConeRenderer : MonoBehaviour
         mesh.triangles = triangles;
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
+    }
+
+    /// <summary>
+    /// 泥棒の足元にある床面のY座標を求める
+    /// </summary>
+    /// <remarks>
+    /// ギミック（壺など）はモデルの当たり判定が床と同じDefaultレイヤーに置かれているものがあり、
+    /// floorRaycastMaskだけでは除外しきれない。そのため1回のRaycastで最初に当たった面を
+    /// そのまま床とはせず、複数のヒットを近い順に調べてギミック自身のコライダーは読み飛ばし、
+    /// 純粋な床（階段や2階部分も含む）だけを採用することで、ギミック召喚時にConeの高さが
+    /// 上下にブレるのを防ぐ。
+    /// </remarks>
+    private float FindFloorY(Vector3 origin)
+    {
+        int hitCount = Physics.RaycastNonAlloc(
+            origin + Vector3.up * 2f, Vector3.down, floorHitBuffer, 10f, floorRaycastMask);
+
+        float nearestDistance = float.MaxValue;
+        bool foundFloor = false;
+        float floorY = hasCachedFloorY ? cachedFloorY : origin.y;
+
+        for (int i = 0; i < hitCount; i++)
+        {
+            RaycastHit hit = floorHitBuffer[i];
+
+            // ギミック本体に属するコライダー（Defaultレイヤーに置かれているモデル当たり判定など）は
+            // 床ではないため無視する
+            if (hit.collider.GetComponentInParent<GimmickBase>() != null) continue;
+
+            if (hit.distance < nearestDistance)
+            {
+                nearestDistance = hit.distance;
+                floorY = hit.point.y;
+                foundFloor = true;
+            }
+        }
+
+        if (foundFloor)
+        {
+            cachedFloorY = floorY;
+            hasCachedFloorY = true;
+        }
+
+        return floorY;
     }
 
     /// <summary>
