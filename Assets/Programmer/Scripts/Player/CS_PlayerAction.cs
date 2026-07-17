@@ -103,11 +103,13 @@ public class CS_PlayerAction : MonoBehaviour
 
     [Header("ワープUI表示のオブジェクト格納")] [SerializeField] private GameObject warpUIGameObject;
     [Header("ワープのUI")][SerializeField] private Sprite[] warpUISprite;
-    [HideInInspector]public bool warpUIView;
-    [HideInInspector]public bool doWarp;
+    [HideInInspector]private bool warpUIView;
     private bool isWarpInteract = false; // ワープ確定の押下中に設置/インタラクト判定へ流れないようにするフラグ
 
     private Warning warning;
+    Option option;
+
+    CS_WarpTrigger warpTrigger;
 
     private void OnValidate()
     {
@@ -185,6 +187,8 @@ public class CS_PlayerAction : MonoBehaviour
             }
             warpUIGameObject.SetActive(false);
         }
+
+        option = GameObject.Find("GameOptionManager").GetComponent<Option>();
     }
 
     private void OnDestroy()
@@ -378,7 +382,19 @@ public class CS_PlayerAction : MonoBehaviour
 
     private void OnInteract(InputAction.CallbackContext context)
     {
-        // ワープ中は全てのインタラクトを無効化する
+        if (option.GetIsOptionUIActive()) return;
+
+        // ワープ確定に使われたボタンを離した場合は、ワープ中かどうかに関わらず
+        // ここで消費してフラグを下ろす。ワープ中にcanceledが握り潰されて
+        // isWarpInteractがtrueのまま残ると、次回の正規インタラクトのcanceledが
+        // 誤って消費され、インタラクト状態が解除されず勝手に拡大し続ける。
+        if (context.canceled && isWarpInteract)
+        {
+            isWarpInteract = false;
+            return;
+        }
+
+        // ワープ中は新規のインタラクト操作を無効化する
         if (GetComponent<CS_PlayerMove>().IsWarping) return;
 
         GameObject playerRoomData = playerData.currentRoomData.GetPlayerRoomData();
@@ -413,20 +429,19 @@ public class CS_PlayerAction : MonoBehaviour
             }
             if (warpUIView)
             {
-                doWarp = true;
-                isWarpInteract = true;
-                ResetInteract();
-                return;
+                if (warpTrigger != null)
+                {
+                    warpTrigger.ExecWarp(this.gameObject);
+                    isWarpInteract = true;
+                    ResetInteract();
+                    return;
+                }
             }
         }
         else if (context.canceled)
         {
-            // ワープ確定に使われたボタン操作なので、離した際にギミック設置の判定に流れないようにする
-            if (isWarpInteract)
-            {
-                isWarpInteract = false;
-                return;
-            }
+            // ワープ確定に使われたボタンを離した場合はメソッド先頭で消費済みのため、
+            // ここに到達した時点で通常のインタラクト解除処理を行う
             isInteracting = false;
             ClearGimmickDirectionIndicators();
 
@@ -631,6 +646,8 @@ public class CS_PlayerAction : MonoBehaviour
 
     private void OnCancel(InputAction.CallbackContext context)
     {
+        if (option.GetIsOptionUIActive()) return;
+
         // キャンセル操作があった場合、現在のモードをノーマルに戻す
         playerData.currentMode = CS_PlayerData.PlayerMode.Normal;
     }
@@ -1221,6 +1238,24 @@ public class CS_PlayerAction : MonoBehaviour
         isSelectGimmickActive = isActive;
     }
 
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Warp"))
+        {
+            warpUIView = true;
+            warpTrigger = other.GetComponent<CS_WarpTrigger>();
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if(other.CompareTag("Warp"))
+        {
+            warpUIView = false;
+            warpTrigger = null;
+        }
+    }
+
     //ワープUIの非表示処理
     private void WarpUIView()
     {
@@ -1247,6 +1282,7 @@ public class CS_PlayerAction : MonoBehaviour
     // 部屋移動やワープの祭にインタラクト状態をリセットする
     public void ResetInteract()
     {
+        warpUIView = false;
         interactTime = 0.0f;
         isInteracting = false;
         playerData.currentMode = CS_PlayerData.PlayerMode.Normal;
