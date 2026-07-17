@@ -17,6 +17,7 @@ public enum BackGrondSECueName
     Decision,
     Cancel,
     GimmickChange,
+    GimmickNotOn,
 };
 
 [Serializable]
