@@ -52,10 +52,11 @@ public enum GimmickOutline
 
 public static class GimmickPlacementSurfaceRules
 {
-    private const string FloorsGroupName = "Floors";
-    private const string SecondFloorsGroupName = "SecondFloors";
-    private const string PolesGroupName = "Poles";
-    private const string PartitionGroupNamePart = "Partition";
+    private const string floorsGroupName = "Floors";
+    private const string secondFloorsGroupName = "SecondFloors";
+    private const string polesGroupName = "Poles";
+    private const string partitionGroupNamePart = "Partition";
+    private const string treasureName = "Treasure";
 
     public static bool IsAllowed(
         Gimmick gimmick,
@@ -64,20 +65,16 @@ public static class GimmickPlacementSurfaceRules
         switch (gimmick)
         {
             case Gimmick.Pot:
-                return IsInGroup(
-                    surfaceTransform,
-                    PolesGroupName) ||
-                       IsInGroupContaining(
-                           surfaceTransform,
-                           PartitionGroupNamePart);
+                return IsInGroup(surfaceTransform, polesGroupName) ||
+                       IsInGroupContaining(surfaceTransform, partitionGroupNamePart);
 
             case Gimmick.IronBall:
             case Gimmick.EmptyChest:
             case Gimmick.Pitfall:
                 return IsInGroup(
                     surfaceTransform,
-                    FloorsGroupName,
-                    SecondFloorsGroupName);
+                    floorsGroupName,
+                    secondFloorsGroupName);
 
             default:
                 return true;
