@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
 // 制作者　秋野
 
@@ -19,6 +21,8 @@ public class Option : MonoBehaviour
     [SerializeField] private float _bgmVolume = 100.0f; // BGMの音量
     [SerializeField] private float _seVolume = 100.0f;  // SEの音量
     [SerializeField] private GameObject OptionUI;
+    [SerializeField] private Volume volume;
+    DepthOfField dof;
     private GameObject GameUI;
 
     private bool _isOptionUIActive = false; // OptionUIがアクティブかどうか
@@ -65,6 +69,18 @@ public class Option : MonoBehaviour
         _input.Player.Option.performed += OnOption;
 
         GameUI = FindGameUI();
+
+        if (volume == null)
+        {
+            Debug.LogError("volumeがアタッチされていません");
+            return;
+        }
+        if (!volume.profile.TryGet<DepthOfField>(out dof))
+        {
+            Debug.LogError("volumeにdofがありません");
+            return;
+        }
+        dof.active = false;
     }
 
     private void OnDestroy()
@@ -111,6 +127,7 @@ public class Option : MonoBehaviour
         }
         else
         {
+
             if (_prevOption == null)
             {
                 Debug.LogError("OptionUIが存在しません。");
@@ -131,6 +148,7 @@ public class Option : MonoBehaviour
     /// </summary>
     public void OpenOptionUI()
     {
+        dof.active = true;
         _isOptionUIActive = true;
 
         if (_prevOption == null)
@@ -165,6 +183,8 @@ public class Option : MonoBehaviour
     /// </summary>
     public void CloseOptionUI()
     {
+        dof.active = false;
+
         if (GameUI == null)
         {
             GameUI = FindGameUI();
