@@ -364,6 +364,10 @@ public class CS_PlayerAction : MonoBehaviour
         //キー操作でUIのギミックの選択
         if (contextValue == 1) currentGimmickIndex++;
         else if (contextValue == -1) currentGimmickIndex--;
+
+        if (gimmickManager.GetCurrentGimmick().Count == 0)
+            return;
+
         currentGimmickIndex = (currentGimmickIndex % gimmickManager.GetCurrentGimmick().Count + gimmickManager.GetCurrentGimmick().Count) % gimmickManager.GetCurrentGimmick().Count;
         Debug.Log("ギミックの数：" + gimmickManager.GetCurrentGimmick().Count);
         Debug.Log("現在選択中のギミック：" + gimmickManager.GetCurrentGimmick()[currentGimmickIndex].gimmickPrefab.name);
@@ -386,6 +390,7 @@ public class CS_PlayerAction : MonoBehaviour
         Debug.Log(roomName);
         if (currentRoom == null || isNotSettingRoom)
         {
+            warning?.ShowWarning();
             Debug.Log("この部屋にトラップは配置できません");
             return;    // 設置可能な部屋のみ設置する
         }
@@ -644,6 +649,7 @@ public class CS_PlayerAction : MonoBehaviour
         }
         if (!gimmickManager.IsSetting(gimmick.gimmick))
         {
+            warning?.ShowWarning();
             Debug.Log("ギミックの設置失敗: IsSetting");
             return false;
         }
@@ -659,6 +665,7 @@ public class CS_PlayerAction : MonoBehaviour
         Debug.Log(roomName);
         if (currentRoom == null || isNotSettingRoom)
         {
+            warning?.ShowWarning();
             Debug.Log("この部屋にトラップは配置できません");
             return false;    // 設置可能な部屋のみ設置する
         }
