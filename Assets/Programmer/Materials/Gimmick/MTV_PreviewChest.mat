@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-2564633450512134348
+--- !u!114 &-7694799529802909036
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}
@@ -20,10 +20,10 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: MTV_Wall_B
+  m_Name: MTV_PreviewChest
   m_Shader: {fileID: -6465566751694194690, guid: 4f43b46da54065a42a2f16b0a5c56ffb,
     type: 3}
-  m_Parent: {fileID: 2100000, guid: 6cc41fb1c85ea0b469ad432acdfe9c14, type: 2}
+  m_Parent: {fileID: 2100000, guid: 51605809ae85d7f4da7733de8b7ad874, type: 2}
   m_ModifiedSerializedProperties: 2
   m_ValidKeywords: []
   m_InvalidKeywords: []
@@ -38,23 +38,27 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _ColorMap:
-        m_Texture: {fileID: 2800000, guid: 7c0f67ea87b964c45bc55b0442cd52ae, type: 3}
+        m_Texture: {fileID: 2800000, guid: dc4bb227d80aee64f8abf1b9c68284bc, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _NormalMap:
-        m_Texture: {fileID: 2800000, guid: 4c70a4527a3d28945808d34f73245497, type: 3}
+        m_Texture: {fileID: 2800000, guid: 174f982c471a7f546be94917c475fa8a, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _ORMMap:
-        m_Texture: {fileID: 2800000, guid: 6d4ba7cde70805844a9d5411d8c3b6d2, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _SampleTexture2D_451f5a1722544f009eb0cbe535ac6cd3_Texture_1_Texture2D:
-        m_Texture: {fileID: 2800000, guid: 367d0aecf00d4694eae61198fc63c7b5, type: 3}
+        m_Texture: {fileID: 2800000, guid: 6e2dea49c688f264da929d074a429a3b, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
     - _Alpha: 1
-    m_Colors: []
+    - _UseBaseColor: 0
+    - _UseColorMap: 1
+    - _UseMetallic: 1
+    - _UseNormalMap: 1
+    - _UseOcclusion: 1
+    - _UseSmoothness: 1
+    - _UseToon: 0
+    m_Colors:
+    - _BaseColor: {r: 0, g: 0.2243948, b: 1, a: 1}
   m_BuildTextureStacks: []
