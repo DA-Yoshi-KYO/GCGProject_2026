@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Warning : MonoBehaviour
@@ -33,12 +31,26 @@ public class Warning : MonoBehaviour
 
     public void ShowWarning()
     {
+        if (warningTextObject == null)
+        {
+            Debug.LogWarning("Warning Text Object is not assigned.", this);
+            return;
+        }
+
         warningTextObject.SetActive(true);
-        warningTimer = warningDuration;
+        warningTimer = Mathf.Max(0f, warningDuration);
+
+        if (warningTimer <= 0f)
+        {
+            HideWarning();
+        }
     }
 
     private void HideWarning()
     {
-        warningTextObject.SetActive(false);
+        if (warningTextObject != null)
+        {
+            warningTextObject.SetActive(false);
+        }
     }
 }
