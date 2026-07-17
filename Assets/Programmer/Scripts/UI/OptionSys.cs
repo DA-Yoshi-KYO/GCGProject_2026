@@ -3,11 +3,12 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using static HoudiniEngineUnity.HEU_InputNode;
 
 public class OptionSys : MonoBehaviour
 {
-    [SerializeField] string optionManagerStr = "";
+    private const int BackToGameIndex = 2;
+    private const int BackToTitleIndex = 3;
+
     [SerializeField] GameObject[] optionUI;
     [SerializeField] Sprite[] detailSprite;
     [SerializeField] GameObject detail;
@@ -17,18 +18,15 @@ public class OptionSys : MonoBehaviour
     [SerializeField] Image seSoundBar;
     [SerializeField] Sprite closeImg;
 
-
     struct SelectGameObject
     {
-        public GameObject Object_True;
-        public GameObject Object_False;
+        public GameObject TrueObject;
+        public GameObject FalseObject;
     }
 
     List<SelectGameObject> selectGameObjects = new List<SelectGameObject>();
     [SerializeField] private int selected = 0;
     CustomInputAction inputAction;
-    GameObject optionMangerObj;
-    Option option;
 
     float seSoundValue = 0;
     float bgmSoundValue = 0;
@@ -37,79 +35,54 @@ public class OptionSys : MonoBehaviour
 
     private void Awake()
     {
-        string sceneName = SceneManager.GetActiveScene().name.ToString();
-        if (sceneName == "MainScene")
-        {
-            isInGame = true;
-        }
+        isInGame = SceneManager.GetActiveScene().name == "MainScene";
 
         if (!isInGame && optionUI.Length >= 4)
         {
-            optionUI[2].SetActive(false);
-            Transform textTransform = optionUI[3].transform.Find("Text");
+            optionUI[BackToGameIndex].SetActive(false);
+            Transform textTransform = optionUI[BackToTitleIndex].transform.Find("Text");
             if (textTransform != null)
             {
-                Image textImge = textTransform.GetComponent<Image>();
-                if (textImge != null)
+                Image textImage = textTransform.GetComponent<Image>();
+                if (textImage != null)
                 {
-                    textImge.sprite = closeImg;
+                    textImage.sprite = closeImg;
                 }
             }
         }
 
-        for (int i = 0 ; i < optionUI.Length ; i++)
+        for (int i = 0; i < optionUI.Length; i++)
         {
-            if(!isInGame && i == 2)
+            if (!isInGame && i == BackToGameIndex)
             {
                 continue;
             }
-            SelectGameObject TempSelectObject = new SelectGameObject();
-            TempSelectObject.Object_True = optionUI[i].transform.Find("Select_true").gameObject;
-            TempSelectObject.Object_False = optionUI[i].transform.Find("Select_false").gameObject;
-            selectGameObjects.Add(TempSelectObject);
+
+            selectGameObjects.Add(new SelectGameObject
+            {
+                TrueObject = optionUI[i].transform.Find("Select_true").gameObject,
+                FalseObject = optionUI[i].transform.Find("Select_false").gameObject
+            });
         }
+
         inputAction = CS_CustomInputActionManager.instance.customInputAction;
         inputAction.Option.Up.started += Up;
         inputAction.Option.Down.started += Down;
         inputAction.Option.Decision.started += Enter;
 
-        optionMangerObj = GameObject.Find(optionManagerStr);
-        if (optionMangerObj == null)
+        // OptionSysはOption.OpenOptionUI()自身がInstantiateして生成するため、
+        // この時点でOption.Instanceは必ず存在している
+        if (Option.Instance == null)
         {
-            Debug.Log("OptionManagerが見つかりません");
-            return;
-        }
-        option = optionMangerObj.GetComponent<Option>();
-        if (option == null)
-        {
-            Debug.Log("Optionコンポーネントが見つかりません");
+            Debug.LogError("Optionが見つかりません。");
             return;
         }
 
-        seSoundValue = option.GetSEVolume();
-        bgmSoundValue = option.GetBGMVolume();
+        seSoundValue = Option.Instance.GetSEVolume();
+        bgmSoundValue = Option.Instance.GetBGMVolume();
 
-        Vector3 bgmSoundBarPos = bgmSoundBar.transform.position;
-        Vector2 bgmSoundBarSize = bgmSoundBar.rectTransform.sizeDelta;
-
-        float barLeftX = bgmSoundBarPos.x - (bgmSoundBarSize.x / 2.0f);
-        float tempX = barLeftX + (bgmSoundBarSize.x * bgmSoundBar.fillAmount);
-
-        Vector3 cursor = bgmCursor.transform.position;
-        cursor.x = tempX;
-        bgmCursor.transform.position = cursor;
-
-
-
-        Vector3 seSoundBarPos = seSoundBar.transform.position;
-        Vector2 seSoundBarSize = seSoundBar.rectTransform.sizeDelta;
-
-        float barLeftX2 = seSoundBarPos.x - (seSoundBarSize.x / 2.0f);
-        float tempX2 = barLeftX2 + (seSoundBarSize.x * seSoundBar.fillAmount);
-
-        Vector3 cursor2 = seCursor.transform.position;
-        cursor2.x = tempX2;
-        seCursor.transform.position = cursor2;
+        UpdateSoundCursor(bgmSoundBar, bgmCursor);
+        UpdateSoundCursor(seSoundBar, seCursor);
     }
 
     private void OnDestroy()
@@ -134,7 +107,7 @@ public class OptionSys : MonoBehaviour
         {
             selected = selectGameObjects.Count - 1;
         }
-        else if(selected >= selectGameObjects.Count)
+        else if (selected >= selectGameObjects.Count)
         {
             selected = 0;
         }
@@ -142,46 +115,36 @@ public class OptionSys : MonoBehaviour
         bgmSoundBar.fillAmount = bgmSoundValue / 100f;
         seSoundBar.fillAmount = seSoundValue / 100f;
 
-        Image image = detail.GetComponent<Image>();
         if (selected >= 0 && selected < detailSprite.Length)
         {
-            image.sprite = detailSprite[selected];
+            detail.GetComponent<Image>().sprite = detailSprite[selected];
         }
 
-        // Cursor計算
-        Vector3 bgmSoundBarPos = bgmSoundBar.transform.position;
-        Vector2 bgmSoundBarSize = bgmSoundBar.rectTransform.sizeDelta;
+        UpdateSoundCursor(bgmSoundBar, bgmCursor);
+        UpdateSoundCursor(seSoundBar, seCursor);
 
-        float barLeftX = bgmSoundBarPos.x - (bgmSoundBarSize.x / 2.0f);
-        float tempX = barLeftX + (bgmSoundBarSize.x * bgmSoundBar.fillAmount);
-
-        Vector3 cursor = bgmCursor.transform.position;
-        cursor.x = tempX;
-        bgmCursor.transform.position = cursor;
-
-        Vector3 seSoundBarPos = seSoundBar.transform.position;
-        Vector2 seSoundBarSize = seSoundBar.rectTransform.sizeDelta;
-
-        float barLeftX2 = seSoundBarPos.x - (seSoundBarSize.x / 2.0f);
-        float tempX2 = barLeftX2 + (seSoundBarSize.x * seSoundBar.fillAmount);
-
-        Vector3 cursor2 = seCursor.transform.position;
-        cursor2.x = tempX2;
-        seCursor.transform.position = cursor2;
-
-        for (int i = 0 ; i < selectGameObjects.Count ; i++)
+        for (int i = 0; i < selectGameObjects.Count; i++)
         {
-            if (i == selected)
-            {
-                selectGameObjects[i].Object_True.SetActive(true);
-                selectGameObjects[i].Object_False.SetActive(false);
-            }
-            else
-            {
-                selectGameObjects[i].Object_True.SetActive(false);
-                selectGameObjects[i].Object_False.SetActive(true);
-            }
+            bool isSelected = i == selected;
+            selectGameObjects[i].TrueObject.SetActive(isSelected);
+            selectGameObjects[i].FalseObject.SetActive(!isSelected);
         }
+    }
+
+    /// <summary>
+    /// 音量バーの見た目の値に合わせてカーソル位置を更新
+    /// </summary>
+    private void UpdateSoundCursor(Image soundBar, GameObject cursor)
+    {
+        Vector3 barPos = soundBar.transform.position;
+        Vector2 barSize = soundBar.rectTransform.sizeDelta;
+
+        float barLeftX = barPos.x - (barSize.x / 2.0f);
+        float cursorX = barLeftX + (barSize.x * soundBar.fillAmount);
+
+        Vector3 cursorPos = cursor.transform.position;
+        cursorPos.x = cursorX;
+        cursor.transform.position = cursorPos;
     }
 
     private void Up(InputAction.CallbackContext context)
@@ -193,146 +156,73 @@ public class OptionSys : MonoBehaviour
     {
         selected++;
     }
+
     private void Enter(InputAction.CallbackContext context)
     {
-        string DebugStr = "Enterが押されました。選択中の項目は" + selected + "です。";
-        Debug.Log(DebugStr);
-        switch (selected)
+        if (selected != BackToGameIndex && selected != BackToTitleIndex)
         {
-            case 0:
-                break;
-            case 1:
-                break;
-            case 2:
+            return;
+        }
+
+        if (Option.Instance == null)
+        {
+            Debug.LogError("Optionが見つかりません。");
+            return;
+        }
+
+        Option.Instance.CloseOptionUI();
+
+        if (selected == BackToTitleIndex)
+        {
+            CS_SceneTransition sceneTransition = FindFirstObjectByType<CS_SceneTransition>();
+            if (sceneTransition != null)
             {
-                if (option == null)
-                {
-                    if (optionMangerObj == null)
-                    {
-                        optionMangerObj = GameObject.Find(optionManagerStr);
-                        if (optionMangerObj == null)
-                        {
-                            Debug.Log("OptionManagerが見つかりません");
-                            return;
-                        }
-                    }
-                    option = optionMangerObj.GetComponent<Option>();
-                    if (option == null)
-                    {
-                        Debug.Log("Optionコンポーネントが見つかりません");
-                        return;
-                    }
-                }
-                option.CloseOptionUI();
+                sceneTransition.StartSceneTransition("TitleScene");
             }
-                break;
-            case 3:
-                {
-                    if (option == null)
-                    {
-                        if (optionMangerObj == null)
-                        {
-                            optionMangerObj = GameObject.Find(optionManagerStr);
-                            if (optionMangerObj == null)
-                            {
-                                Debug.Log("OptionManagerが見つかりません");
-                                return;
-                            }
-                        }
-                        option = optionMangerObj.GetComponent<Option>();
-                        if (option == null)
-                        {
-                            Debug.Log("Optionコンポーネントが見つかりません");
-                            return;
-                        }
-                    }
-                    option.CloseOptionUI();
-                    CS_SceneTransition sceneTransition = FindFirstObjectByType<CS_SceneTransition>();
-                    if (sceneTransition != null)
-                    {
-                        sceneTransition.StartSceneTransition("TitleScene");
-                    }
-                    else
-                    {
-                        Debug.LogError("CS_SceneTransitionが見つかりません");
-                    }
-                    break;
-                }
+            else
+            {
+                Debug.LogError("CS_SceneTransitionが見つかりません");
+            }
         }
     }
 
     private void Left()
     {
-        if (option == null)
+        if (Option.Instance == null)
         {
-            if (optionMangerObj == null)
-            {
-                optionMangerObj = GameObject.Find(optionManagerStr);
-                if (optionMangerObj == null)
-                {
-                    Debug.Log("OptionManagerが見つかりません");
-                    return;
-                }
-            }
-            option = optionMangerObj.GetComponent<Option>();
-            if (option == null)
-            {
-                Debug.Log("Optionコンポーネントが見つかりません");
-                return;
-            }
+            Debug.LogError("Optionが見つかりません。");
+            return;
         }
-
 
         if (selected == 0)
         {
-            bgmSoundValue = option.GetBGMVolume();
-            bgmSoundValue -= 0.1f;
-            if (bgmSoundValue < 0) bgmSoundValue = 0;
-            option.SetBGMVolume(bgmSoundValue);
+            bgmSoundValue = Mathf.Max(0f, Option.Instance.GetBGMVolume() - 0.1f);
+            Option.Instance.SetBGMVolume(bgmSoundValue);
         }
         else if (selected == 1)
         {
-            seSoundValue = option.GetSEVolume();
-            seSoundValue -= 0.1f;
-            if (seSoundValue < 0) seSoundValue = 0;
-            option.SetSEVolume(seSoundValue);
+            seSoundValue = Mathf.Max(0f, Option.Instance.GetSEVolume() - 0.1f);
+            Option.Instance.SetSEVolume(seSoundValue);
         }
     }
 
     private void Right()
     {
-        if (option == null)
+        if (Option.Instance == null)
         {
-            if (optionMangerObj == null)
-            {
-                optionMangerObj = GameObject.Find(optionManagerStr);
-                if (optionMangerObj == null)
-                {
-                    Debug.Log("OptionManagerが見つかりません");
-                    return;
-                }
-            }
-            option = optionMangerObj.GetComponent<Option>();
-            if (option == null)
-            {
-                Debug.Log("Optionコンポーネントが見つかりません");
-                return;
-            }
+            Debug.LogError("Optionが見つかりません。");
+            return;
         }
 
         if (selected == 0)
         {
-            bgmSoundValue = option.GetBGMVolume();
-            bgmSoundValue += 0.1f;
-            if (bgmSoundValue > 100) bgmSoundValue = 100;
-            option.SetBGMVolume(bgmSoundValue);
+            bgmSoundValue = Mathf.Min(100f, Option.Instance.GetBGMVolume() + 0.1f);
+            Option.Instance.SetBGMVolume(bgmSoundValue);
         }
         else if (selected == 1)
         {
-            seSoundValue = option.GetSEVolume();
-            seSoundValue += 0.1f;
-            if (seSoundValue > 100) seSoundValue = 100;
-            option.SetSEVolume(seSoundValue);
+            seSoundValue = Mathf.Min(100f, Option.Instance.GetSEVolume() + 0.1f);
+            Option.Instance.SetSEVolume(seSoundValue);
         }
     }
 }
