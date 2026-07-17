@@ -36,7 +36,7 @@ public class CS_ThiefGimmickAction
     public bool UpdateAction()
     {
         if (IronBallUpdate()) return true;
-        if (EmptyChestUpdate()) return true;
+        // if (EmptyChestUpdate()) return true;
 
         return false;
     }
@@ -51,6 +51,8 @@ public class CS_ThiefGimmickAction
         thiefAI?.ChangeStatus(CS_ThiefAI.ThiefState.Stunned);
         // 気絶状態の更新処理を実行しないようにする
         thiefAI?.SetStunnedUpdateFlag(false);
+
+        thiefAI?.read_AnimatorSystem?.SetAnimationState(CS_ThiefAnimation.ThiefAnimationState.Stunned);
 
         // NavMeshAgentを停止させる
         thiefAI?.read_MoveSystem?.read_NavMeshAgent?.ResetPath();
@@ -77,9 +79,9 @@ public class CS_ThiefGimmickAction
         thiefAI.read_MoveSystem.read_SmartNavAgent.enabled = true;
 
         // 移動に関する情報をリセットする
+        thiefAI?.read_MoveSystem?.ResetInfo();
         thiefAI?.read_MoveSystem?.read_NavMeshAgent?.ResetPath();
         thiefAI?.read_MemorySystem?.ClearTarget();
-        thiefAI?.read_AStarSystem?.ClearRoute();
     }
 
     /// <summary>
@@ -108,7 +110,7 @@ public class CS_ThiefGimmickAction
     private bool IronBallUpdate()
     {
         if (targetGimmick == null || targetGimmick.Count == 0) return false;
-        foreach(var g in targetGimmick)
+        foreach (var g in targetGimmick)
         {
             if (g == null) return false;
             if (g.GetGimmickTag() != Gimmick.IronBall) return false;
@@ -235,80 +237,80 @@ public class CS_ThiefGimmickAction
         
     }
 
-    /// <summary>
-    /// 空の宝箱ギミック用行動の開始
-    /// </summary>
-    /// <param name="emptyChest">空の宝箱ギミック</param>
-    public void EmptyChestStart(GimmickBase emptyChest)
-    {
-        if (emptyChest == null) return;
-        // EmptyChest以外のギミックが来たら無視
-        if (emptyChest.GetGimmickTag() != Gimmick.EmptyChest) return;
+    ///// <summary>
+    ///// 空の宝箱ギミック用行動の開始
+    ///// </summary>
+    ///// <param name="emptyChest">空の宝箱ギミック</param>
+    //public void EmptyChestStart(GimmickBase emptyChest)
+    //{
+    //    if (emptyChest == null) return;
+    //    // EmptyChest以外のギミックが来たら無視
+    //    if (emptyChest.GetGimmickTag() != Gimmick.EmptyChest) return;
 
-        if (targetGimmick == null) targetGimmick = new List<GimmickBase>();
-        if (!targetGimmick.Contains(emptyChest))
-        {
-            EmptyChestGimmick emptyChests = null;
-            foreach (var g in targetGimmick)
-            {
-                if (g == null) continue;
-                if (g.GetGimmickTag() != Gimmick.EmptyChest) continue;
-                emptyChests = (EmptyChestGimmick)g;
-            }
+    //    if (targetGimmick == null) targetGimmick = new List<GimmickBase>();
+    //    if (!targetGimmick.Contains(emptyChest))
+    //    {
+    //        EmptyChestGimmick emptyChests = null;
+    //        foreach (var g in targetGimmick)
+    //        {
+    //            if (g == null) continue;
+    //            if (g.GetGimmickTag() != Gimmick.EmptyChest) continue;
+    //            emptyChests = (EmptyChestGimmick)g;
+    //        }
 
+    //        // 距離判定
+    //        float oldDistance = Mathf.Infinity;
 
-            // 距離判定
-            float oldDistance = Mathf.Infinity;
+    //        if (emptyChests != null)
+    //        {
+    //            oldDistance = Vector3.Distance(emptyChests.transform.position, thiefAI.transform.position);
+    //        }
+    //        float newDistance = Vector3.Distance(emptyChest.transform.position, thiefAI.transform.position);
+    //        // より近い空の宝箱が来たら、リストの先頭を入れ替える
+    //        if (newDistance < oldDistance)
+    //        {
+    //            targetGimmick.Remove(emptyChests);
+    //            targetGimmick.Insert(0, emptyChest);
+    //        }
+    //        else
+    //        {
+    //            targetGimmick.Add(emptyChest);
+    //        }
+    //    }
+    //}
 
-            if (emptyChests != null)
-            {
-                oldDistance = Vector3.Distance(emptyChests.transform.position, thiefAI.transform.position);
-            }
-            float newDistance = Vector3.Distance(emptyChest.transform.position, thiefAI.transform.position);
-            // より近い空の宝箱が来たら、リストの先頭を入れ替える
-            if (newDistance < oldDistance)
-            {
-                if (targetGimmick.Count != 0)
-                {
-                    targetGimmick.Remove(emptyChests);
-                }
-                targetGimmick.Add(emptyChest);
-            }
-        }
-    }
+    ///// <summary>
+    ///// 空の宝箱ギミック用行動の更新
+    ///// </summary>
+    ///// <returns>ギミックの影響による移動をしたかどうか</returns>
+    //private bool EmptyChestUpdate()
+    //{
+    //    if (targetGimmick == null || targetGimmick.Count == 0) return false;
 
-    /// <summary>
-    /// 空の宝箱ギミック用行動の更新
-    /// </summary>
-    /// <returns>ギミックの影響による移動をしたかどうか</returns>
-    private bool EmptyChestUpdate()
-    {
-        if (targetGimmick == null || targetGimmick.Count == 0) return false;
+    //    foreach (var g in targetGimmick)
+    //    {
+    //        if (g == null) return false;
+    //        if (g.GetGimmickTag() != Gimmick.EmptyChest) return false;
+    //    }
 
-        foreach (var g in targetGimmick)
-        {
-            if (g == null) return false;
-            if (g.GetGimmickTag() != Gimmick.EmptyChest) return false;
-        }
+    //    return true;
+    //}
 
-        return true;
-    }
+    ///// <summary>
+    ///// 空の宝箱ギミック用行動の終了
+    ///// </summary>
+    ///// <param name="emptyChest">空の宝箱ギミック</param>
+    //public void EmptyChestEnd(GimmickBase emptyChest)
+    //{
+    //    if (targetGimmick != null)
+    //    {
+    //        targetGimmick.Remove(emptyChest);
+    //    }
 
-    /// <summary>
-    /// 空の宝箱ギミック用行動の終了
-    /// </summary>
-    /// <param name="emptyChest">空の宝箱ギミック</param>
-    public void EmptyChestEnd(GimmickBase emptyChest)
-    {
-        if (targetGimmick != null)
-        {
-            targetGimmick.Remove(emptyChest);
-        }
+    //    // アニメーション状態をリセットする
+    //    thiefAI?.read_AnimatorSystem?.ResetAnimationState();
 
-        // アニメーション状態をリセットする
-        thiefAI?.read_AnimatorSystem?.ResetAnimationState();
-
-        // 泥棒の反応状態をChasingCatに変更する
-        thiefAI?.read_ThiefReaction?.ChangeReaction(CS_ThiefReaction.ThiefReactionType.Alert, 2.0f);
-    }
+    //    // 泥棒の反応状態をaLERTに変更する
+    //    thiefAI?.read_ThiefReaction?.ChangeReaction(CS_ThiefReaction.ThiefReactionType.Alert, 2.0f);
+    //}
 }

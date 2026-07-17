@@ -55,7 +55,6 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.UIElements;
 
 /// <summary>
 /// 泥棒の行動を管理するクラスです。
@@ -93,6 +92,10 @@ public class CS_ThiefAI : MonoBehaviour
     }
     [SerializeField, Tooltip("泥棒のカラーバリエーションリスト")]
     private List<ThiefMaterials> thiefMaterialsList = new List<ThiefMaterials>();
+
+    [Tooltip("プレイヤーに接触されたかどうかのフラグ")]
+    private bool isPlayerHit = false;
+    public bool read_IsPlayerHit => isPlayerHit;
 
     [Tooltip("使用したデータベース")]
     private CO_ThiefStatusData thiefStatusData;
@@ -378,7 +381,12 @@ public class CS_ThiefAI : MonoBehaviour
         if (!GetComponent<Collider>().enabled)
         {
             GetComponent<Collider>().enabled = true;
+            GetComponent<Collider>().isTrigger = true;
         }
+
+        read_AnimatorSystem?.AnimationUpdate();
+
+        read_MoveSystem.UpdateMoveSpeed();
 
         // 無敵時間の経過を管理
         // 気絶状態のときは無敵時間の経過を管理しない（気絶状態のときは攻撃を受けない想定のため）
@@ -465,6 +473,17 @@ public class CS_ThiefAI : MonoBehaviour
             // 退場したときにウェーブ数を増加させる
             CS_StageManager stageManager = GameObject.FindObjectOfType<CS_StageManager>();
             if (stageManager != null) stageManager.WaveCountUp();
+        }
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+        isPlayerHit = false;
+
+        // プレイヤーに接触した場合の処理
+        if (other.CompareTag("Player"))
+        {
+            isPlayerHit = true;
         }
     }
 
@@ -742,6 +761,9 @@ public class CS_ThiefAI : MonoBehaviour
             read_AnimatorSystem?.SetAnimationState(CS_ThiefAnimation.ThiefAnimationState.Stunned);
                 break;
         }
+
+        // アニメーションを0.2秒停止する
+        read_AnimatorSystem.StopAnimation(0.5f);
 
         // ギミックの方を向く
         Vector3 directionToGimmick = gimmickPoint - transform.position;

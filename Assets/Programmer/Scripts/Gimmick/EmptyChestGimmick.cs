@@ -42,7 +42,12 @@ public class EmptyChestGimmick : GimmickBase
     {
         foreach (var thiefAI in targetThiefAIList)
         {
-            thiefAI.read_ThiefGimmickAction.EmptyChestEnd(this);
+            thiefAI.read_MemorySystem.ClearTarget();
+            thiefAI.read_MoveSystem.ResetInfo();
+            thiefAI.read_MoveSystem.read_NavMeshAgent.ResetPath();
+            thiefAI.read_AStarSystem.ResetUpdatedFlag();
+            thiefAI.read_AStarSystem.ClearRoute();
+            thiefAI.read_AnimatorSystem.ResetAnimationState();
         }
         targetThiefAIList.Clear();
 
