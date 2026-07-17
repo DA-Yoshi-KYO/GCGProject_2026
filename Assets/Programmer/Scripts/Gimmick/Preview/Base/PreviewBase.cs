@@ -157,7 +157,10 @@ public class PreviewBase : MonoBehaviour
         if (placementGimmick == null)
             return;
 
-        bool canPlace = placementGimmick.GetIsSettingArea(transform.position);
+        bool canPlace =
+            placementGimmick.GetIsSettingArea(transform.position) &&
+            (placementGimmick.roomGrid == null ||
+             !placementGimmick.roomGrid.IsTreasureAtPosition(transform.position));
         Color color = canPlace ? PlaceableColor : UnplaceableColor;
 
         if (outlineTargets != null)

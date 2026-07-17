@@ -702,7 +702,10 @@ public class CS_PlayerAction : MonoBehaviour
         // 設置処理 //
         GimmickBase instance = null;
         if (!roomGrid.SetGimmickInGrid(settingPos, gimmick, out instance))
+        {
+            warning?.ShowWarning();
             return false;
+        }
 
         if (instance == null)
         {

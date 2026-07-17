@@ -16,6 +16,7 @@ using UnityEngine;
 public class RoomGrid : MonoBehaviour
 {
     private const float PlacementBoundsInsetRate = 0.01f;
+    private const float PlacementRayOriginY = 255f;
 
     [SerializeField] private Vector2Int gridDivision;
     public Vector2Int read_GridDivision => gridDivision;   // グリッドの分割数の取得用プロパティ
@@ -247,7 +248,7 @@ public class RoomGrid : MonoBehaviour
 
         Ray ray = new Ray();
         ray.direction = Vector3.down;
-        const float rayOriginY = 255f;
+        const float rayOriginY = PlacementRayOriginY;
         ray.origin = new Vector3(spawnPos.x, rayOriginY, spawnPos.z);
         // 床を確実に取れるようマージンを大きめに取りレイを飛ばす
         RaycastHit[] hits = Physics.RaycastAll(ray, Mathf.Abs(rayOriginY - (gameObject.transform.position.y - 10.0f)), ~0,
@@ -257,23 +258,10 @@ public class RoomGrid : MonoBehaviour
         // レイキャストのヒット情報をリスト化
         List<RaycastHit> hitList = new List<RaycastHit>(hits);
 
-        // 宝物の例外処理：宝物の上には召喚しない
-        List<RaycastHit> hitTreasures = hitList.FindAll(hit => hit.transform.CompareTag("Treasure"));
-        foreach (var hit in hitTreasures)
+        // Treasure に当たる位置にはギミックを設置しない
+        if (hitList.Exists(hit => hit.transform.CompareTag("Treasure")))
         {
-            // 運搬中でもそうでなくとも宝物の上には召喚しない為、必ずリストからは除外する
-            hitList.Remove(hit);
-
-            if (hit.collider != null && hit.collider.gameObject != null)
-            {
-                GameObject treasureObj = hit.collider.gameObject;
-                CS_VisionTarget treasureVisionTarget = treasureObj.GetComponent<CS_VisionTarget>();
-                if (treasureVisionTarget != null && treasureVisionTarget.read_IsStolenMoveing)
-                {
-                    // 運搬中の宝物は召喚しない
-                    return false;
-                }
-            }
+            return false;
         }
 
         // プレイヤー、泥棒の例外処理：プレイヤーと泥棒の上には召喚しない
@@ -321,6 +309,25 @@ public class RoomGrid : MonoBehaviour
         }
 
         return true;
+    }
+
+    public bool IsTreasureAtPosition(Vector3 position)
+    {
+        Ray ray = new Ray(
+            new Vector3(position.x, PlacementRayOriginY, position.z),
+            Vector3.down);
+        float rayLength = Mathf.Abs(
+            PlacementRayOriginY - (transform.position.y - 10.0f));
+
+        RaycastHit[] hits = Physics.RaycastAll(
+            ray,
+            rayLength,
+            ~0,
+            QueryTriggerInteraction.Ignore);
+
+        return Array.Exists(
+            hits,
+            hit => hit.transform.CompareTag("Treasure"));
     }
     private static bool IsInfinityPosition(Vector3 position)
     {
