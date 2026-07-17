@@ -501,6 +501,14 @@ public sealed class CS_GimmickDirectionIndicatorRenderer
     {
         Vector3 origin =
             emitter.Gimmick.transform.position;
+
+        if (emitter.Gimmick.GetGimmickTag() == Gimmick.Pot)
+        {
+            return origin +
+                   emitter.Gimmick.transform.TransformVector(
+                       emitter.PositionOffset);
+        }
+
         float highestPoint =
             origin.y + IndicatorHeightOffset;
         bool hasVisibleRenderer = false;
