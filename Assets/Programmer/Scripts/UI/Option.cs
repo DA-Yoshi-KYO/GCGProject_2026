@@ -72,12 +72,12 @@ public class Option : MonoBehaviour
 
         if (volume == null)
         {
-            Debug.LogError("volumeがアタッチされていません");
+            Debug.LogWarning("volumeがアタッチされていません。TitleScene以外では予期しない挙動が発生します。");
             return;
         }
         if (!volume.profile.TryGet<DepthOfField>(out dof))
         {
-            Debug.LogError("volumeにdofがありません");
+            Debug.LogError("volumeにdofがありません。TitleScene以外では予期しない挙動が発生します。");
             return;
         }
         dof.active = false;
@@ -148,7 +148,7 @@ public class Option : MonoBehaviour
     /// </summary>
     public void OpenOptionUI()
     {
-        dof.active = true;
+        if (dof) dof.active = true;
         _isOptionUIActive = true;
 
         if (_prevOption == null)
@@ -183,7 +183,7 @@ public class Option : MonoBehaviour
     /// </summary>
     public void CloseOptionUI()
     {
-        dof.active = false;
+        if (dof) dof.active = false;
 
         if (GameUI == null)
         {
