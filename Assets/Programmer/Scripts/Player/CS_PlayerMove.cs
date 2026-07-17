@@ -370,10 +370,6 @@ public class CS_PlayerMove : MonoBehaviour
     /// </summary>
     public void CaughtByThief(float holdCatTime, Transform thiefTransform)
     {
-        transform.position = new Vector3(thiefTransform.position.x, thiefTransform.position.y - thiefTransform.localScale.y / 2.0f, thiefTransform.position.z);
-        transform.position += thiefTransform.forward;
-        visualModel.position = transform.position;
-
         // フラグを立てる
         catCaughtTime = holdCatTime;
         invincibleTime = holdCatTime * 2f;
