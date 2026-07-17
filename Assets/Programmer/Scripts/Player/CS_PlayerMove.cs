@@ -42,6 +42,9 @@ public class CS_PlayerMove : MonoBehaviour
     private bool isInvincible = false;  // 無敵状態かどうか
     public bool IsInvincible => isInvincible; // 無敵状態かどうかの取得
 
+    private bool isWarping = false;     // ワープ開始から終了までの間かどうか
+    public bool IsWarping => isWarping; // ワープ中かどうかの取得
+
     private CS_FootPrint footPrint;
     private float createFootPrintTime = 100.0f;
 
@@ -100,9 +103,15 @@ public class CS_PlayerMove : MonoBehaviour
         playerData.customInputAction.Player.Jump.started += OnJump;
 
         // スニーク
-        playerData.customInputAction.Player.Sneak.started += OnSneak;
-        playerData.customInputAction.Player.Sneak.performed += OnSneak;
-        playerData.customInputAction.Player.Sneak.canceled += OnSneak;
+        playerData.customInputAction.Player.Sneak.started += OnDash;
+        playerData.customInputAction.Player.Sneak.performed += OnDash;
+        playerData.customInputAction.Player.Sneak.canceled += OnDash;
+
+        // 入力デバイス切り替え時にダッシュを一旦無効化する
+        if (CS_CustomInputActionManager.instance != null)
+        {
+            CS_CustomInputActionManager.instance.OnInputTypeChanged += OnInputTypeChanged;
+        }
 
         // アニメーターの取得
         animator = GetComponentInChildren<Animator>();
@@ -134,9 +143,14 @@ public class CS_PlayerMove : MonoBehaviour
 
         playerData.customInputAction.Player.Jump.started -= OnJump;
 
-        playerData.customInputAction.Player.Sneak.started -= OnSneak;
-        playerData.customInputAction.Player.Sneak.performed -= OnSneak;
-        playerData.customInputAction.Player.Sneak.canceled -= OnSneak;
+        playerData.customInputAction.Player.Sneak.started -= OnDash;
+        playerData.customInputAction.Player.Sneak.performed -= OnDash;
+        playerData.customInputAction.Player.Sneak.canceled -= OnDash;
+
+        if (CS_CustomInputActionManager.instance != null)
+        {
+            CS_CustomInputActionManager.instance.OnInputTypeChanged -= OnInputTypeChanged;
+        }
     }
 
     void FixedUpdate()
@@ -209,7 +223,8 @@ public class CS_PlayerMove : MonoBehaviour
 
         if (isInvincible)
         {
-            float sineValue = Mathf.Abs(Mathf.Sin(invincibleTime * 180f * Mathf.Deg2Rad));
+            float sineValue = Mathf.Abs(Mathf.Sin(invincibleTime * 720f * Mathf.Deg2Rad));
+            float mappedValue = Mathf.Lerp(0.5f, 1f, sineValue);
             foreach (var material in materials)
             {
                 material.SetFloat("_Alpha", sineValue);
@@ -360,10 +375,16 @@ public class CS_PlayerMove : MonoBehaviour
     // ---InputActionのコールバック関数---
     private void OnMove(InputAction.CallbackContext context)
     {
+        // ワープ中は移動入力を無効化する
+        if (isWarping) return;
+
         inputDirection = context.ReadValue<Vector2>();
     }
     private void OnJump(InputAction.CallbackContext context)
     {
+        // ワープ中はジャンプ入力を無効化する
+        if (isWarping) return;
+
         // 空中にいるときはジャンプできないようにする
         if (controller.isGrounded)
         {
@@ -374,10 +395,27 @@ public class CS_PlayerMove : MonoBehaviour
             return;
         }
     }
-    private void OnSneak(InputAction.CallbackContext context)
+    private void OnDash(InputAction.CallbackContext context)
     {
-        if (context.canceled) isRunning = false;
-        else isRunning = true;
+        // ワープ中はダッシュ入力を無効化する
+        if (isWarping) return;
+
+        switch (CS_CustomInputActionManager.instance?.currentInputType)
+        {
+            case CS_CustomInputActionManager.InputType.Gamepad:
+                if (context.performed) isRunning ^= true;
+                break;
+            case CS_CustomInputActionManager.InputType.KeyboardMouse:
+                if (context.canceled) isRunning = false;
+                else isRunning = true;
+                break;
+        }
+    }
+
+    // 入力デバイスが切り替わった時のコールバック(ダッシュを一旦無効化する)
+    private void OnInputTypeChanged(CS_CustomInputActionManager.InputType newInputType)
+    {
+        isRunning = false;
     }
 
     /// <summary>
@@ -387,6 +425,15 @@ public class CS_PlayerMove : MonoBehaviour
     public void SetInvincibleFlag(bool isFlag)
     {
         isInvincible = isFlag;
+    }
+
+    /// <summary>
+    /// ワープ中かどうかのフラグを設定する
+    /// </summary>
+    /// <param name="isFlag">ワープ開始時はtrue、終了時はfalse</param>
+    public void SetWarpFlag(bool isFlag)
+    {
+        isWarping = isFlag;
     }
 
     // スモークエフェクトを再生する

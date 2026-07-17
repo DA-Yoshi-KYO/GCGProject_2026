@@ -96,6 +96,9 @@ public class CS_MemorySystem
     [Tooltip("移動ポイントを移動した回数")]
     public int movePointCount = 0;
 
+    [Tooltip("デバック用：一フレーム前の探索度")]
+    private float previousExplorationLevel = 0;
+
     /// <summary>
     /// 記憶システムの初期設定を行う処理
     /// </summary>
@@ -700,7 +703,7 @@ public class CS_MemorySystem
     /// <summary>
     /// 部屋の移動ルートに沿って移動するための探索対象を決める処理
     /// </summary>
-    private void DecideTargetMovePoint()
+    public void DecideTargetMovePoint()
     {
         // 部屋の探索度が閾値を超えている場合
         if (IsCurrentRoomExplored())
@@ -837,7 +840,7 @@ public class CS_MemorySystem
         {
             ((CS_VisionTarget)currentTarget).searchThief = null; // 探索対象の探索している人をリセットする)
         }
-
+        previousExplorationLevel = 0.0f; // 探索度をリセットする
         currentTarget = null;
         // 探索対象をリセット
         thiefAI?.read_AnimatorSystem?.read_Animator.SetBool("IsHunting", false);
@@ -865,6 +868,8 @@ public class CS_MemorySystem
         // 現在の探索対象が視認オブジェクト(VisionTarget)でない場合は、falseを返す
         if (!(currentTarget is CS_VisionTarget)) return false;
 
+        if (Time.deltaTime <= 0.0f) return false;
+
         // 探索対象の探索にかかる時間を経過させる
         //　((VisionTarget)currentTarget).explorationProgress　: 対象の探索度(MAX : 100.0f)
         // searchTime : 探索対象の探索にかかる時間
@@ -875,6 +880,13 @@ public class CS_MemorySystem
         }
         visionTargetMemories[((CS_VisionTarget)currentTarget)].explorationProgress += (100.0f / searchTime[targetTypeIndex]) * Time.deltaTime;
 
+        if (visionTargetMemories[((CS_VisionTarget)currentTarget)].explorationProgress== previousExplorationLevel)
+        {
+            Debug.LogError("【泥棒】探索対象の探索度が進行していません。探索対象：" + currentTarget.name + "、探索度：" + visionTargetMemories[((CS_VisionTarget)currentTarget)].explorationProgress);
+        }
+
+        previousExplorationLevel = visionTargetMemories[((CS_VisionTarget)currentTarget)].explorationProgress;
+
         GameObject Thief_Serach = GameObject.Find("Thief_Serach_" + thiefAI.transform.name);
         if (Thief_Serach == null)
             thiefAI?.read_ThiefSound?.PlayOneShotSE("Thief_Serach", thiefAI.transform.position, "Thief_Serach_" + thiefAI.transform.name);
@@ -883,6 +895,7 @@ public class CS_MemorySystem
         if (visionTargetMemories[((CS_VisionTarget)currentTarget)].explorationProgress >= 100.0f)
         {
             thiefAI?.read_ThiefReaction?.ClearReaction(); // 探索が終了したときのリアクションをクリアする
+            previousExplorationLevel = 0.0f; // 探索度をリセットする
 
             // 探索対象が宝物の場合は、そのままtrueを返す
             if (((CS_VisionTarget)currentTarget).targetType == CS_VisionTarget.TargetType.Treasure)

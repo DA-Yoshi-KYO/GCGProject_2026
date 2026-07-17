@@ -310,10 +310,20 @@ public class RockGimmick : GimmickBase
                         );
                     break;
             }
-            Debug.DrawRay(rayPos, rollDir, Color.yellow);
+            Vector3 wallRayDir =
+                Vector3.ProjectOnPlane(rollDir, Vector3.up);
+            if (wallRayDir.sqrMagnitude > 0.0001f)
+            {
+                wallRayDir.Normalize();
+            }
+            else
+            {
+                wallRayDir = moveDir;
+            }
+            Debug.DrawRay(rayPos, wallRayDir, Color.yellow);
             foreach (RaycastHit h in Physics.RaycastAll(
                 rayPos,
-                rollDir,
+                wallRayDir,
                 raySideLength))
             {
                 Transform hitTransform = h.collider.transform;
@@ -341,7 +351,7 @@ public class RockGimmick : GimmickBase
                 //------------------------------------------------
                 // 壁として破壊可能な角度か確認
                 //------------------------------------------------
-                if (!HitBrokeAngle(h, rollDir, 85.0f))
+                if (!HitBrokeAngle(h, wallRayDir, 85.0f))
                     continue;
 
                 Debug.Log(
@@ -429,11 +439,13 @@ public class RockGimmick : GimmickBase
         if (!isBrokenFirst)
         {
             isBrokenFirst = true;
-            DeleteHitChecker();
-            if (GetThiefGimmickAction() != null)
+            CS_ThiefGimmickAction thiefGimmickAction =
+                GetThiefGimmickAction();
+            if (thiefGimmickAction != null)
             {
-                GetThiefGimmickAction().IronBallEnd(this);
+                thiefGimmickAction.IronBallEnd(this);
             }
+            DeleteHitChecker();
             //破壊時に1回だけ生成
             if (!isDangerZoneSpawned)
             {
@@ -487,5 +499,57 @@ public class RockGimmick : GimmickBase
                 gimmickDirection = GimmickDirection.Left;
                 break;
         }
+    }
+
+    protected override bool GetGimmickSettingsArea()
+    {
+        //基本的に地面に置くものとする
+        //もしくは、地面より上に設置する場合
+        //大岩の大きさとなる4マス分が完全に乗らない限り
+        //おけないものとする
+
+        if (roomGrid == null)
+            return false;
+
+        float halfX = roomGrid.gridSize.x * gimmickSize.x * 0.45f;
+        float halfZ = roomGrid.gridSize.y * gimmickSize.y * 0.45f;
+        float rayLength = roomGrid.gridSize.y * 2.0f;
+        Vector3 origin = placementCheckPosition + Vector3.up * 0.1f;
+        Vector3[] offsets =
+        {
+            new Vector3(halfX, 0.0f, halfZ),
+            new Vector3(halfX, 0.0f, -halfZ),
+            new Vector3(-halfX, 0.0f, halfZ),
+            new Vector3(-halfX, 0.0f, -halfZ),
+        };
+
+        float firstHeight = 0.0f;
+        bool hasFirstHeight = false;
+        foreach (Vector3 offset in offsets)
+        {
+            if (!Physics.Raycast(origin + offset, Vector3.down, out RaycastHit hit,
+                    rayLength, ~0, QueryTriggerInteraction.Ignore))
+                return false;
+
+            if (Vector3.Angle(hit.normal, Vector3.up) > 5.0f)
+                return false;
+
+            if (!IsPlacementSurfaceAllowed(hit.transform))
+            {
+                return false;
+            }
+
+            if (!hasFirstHeight)
+            {
+                firstHeight = hit.point.y;
+                hasFirstHeight = true;
+            }
+            else if (Mathf.Abs(hit.point.y - firstHeight) > 0.05f)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

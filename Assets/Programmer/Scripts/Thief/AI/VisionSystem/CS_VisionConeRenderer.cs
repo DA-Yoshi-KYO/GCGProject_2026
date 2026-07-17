@@ -43,7 +43,7 @@ public class CS_VisionConeRenderer : MonoBehaviour
         // 床の高さを調べる際、プレイヤーや泥棒本体など動くキャラクターの当たり判定を
         // 誤って床として拾わないように除外する（例：プレイヤーが泥棒の真上に乗った場合など）
         floorRaycastMask = ~LayerMask.GetMask(
-        "Default", "Player", "Thief", "CommandBlock_Player", "CommandBlock_Enmy", "Gimmick", "VisionTarget", "VisionObstacle", "OutLineModel");
+        "Effect", "Player", "Thief", "CommandBlock_Player", "CommandBlock_Enmy", "Gimmick", "VisionObstacle", "OutLineModel");
 
         meshFilter = gameObject.AddComponent<MeshFilter>();
         meshRenderer = gameObject.AddComponent<MeshRenderer>();
@@ -64,7 +64,7 @@ public class CS_VisionConeRenderer : MonoBehaviour
     private void LateUpdate()
     {
         if (meshRenderer.enabled != isVisible) meshRenderer.enabled = isVisible;
-        if (!isVisible) return;
+        if (!isVisible) return; 
 
         UpdateColor();
         BuildConeMesh();

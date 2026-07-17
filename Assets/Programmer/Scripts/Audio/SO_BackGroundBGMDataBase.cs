@@ -19,6 +19,8 @@ public enum SceneName
     StageSelectScene,
     MainScene,//MainSceneで切り替えて流すBGM
     ThiefEscape,//MainSceneで切り替えて流すBGM
+    WinJingle,//MainSceneで切り替えて流すBGM
+    LoseJingle,//MainSceneで切り替えて流すBGM
     TutorialScene
 }
 
@@ -30,7 +32,9 @@ public enum BackGroundBGMCueName
     SelectBGM,
     ThiefEscapeBGM,
     InGameBGM,
-    TutolialBGM
+    TutorialBGM,
+    WinJingle,
+    LoseJingle,
 };
 
 //ステータス
@@ -38,6 +42,7 @@ public enum BGMStatus
 {
     NONE,
     InGame,
+    Jingle,
 };
 
 

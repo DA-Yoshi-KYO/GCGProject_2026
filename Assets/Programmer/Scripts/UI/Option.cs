@@ -87,7 +87,7 @@ public class Option : MonoBehaviour
     private void OnOption(InputAction.CallbackContext ctx)
     {
         // タイトルシーンではオプションUIを開かない
-        if (SceneManager.GetActiveScene().name.ToString() == "Title") return;
+        if (SceneManager.GetActiveScene().name.ToString() == "TitleScene") return;
         if (!_isOptionUIActive)
         {
             OpenOptionUI();

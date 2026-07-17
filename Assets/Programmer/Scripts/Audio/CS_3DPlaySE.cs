@@ -60,6 +60,7 @@ public class CS_3DPlaySE : MonoBehaviour
         AudioSource audioSource = obj.AddComponent<AudioSource>();
         audioSource.spatialBlend = 1.0f;
         audioSource.volume = currentVolume;
+        audioSource.maxDistance = 30.0f;
 
         ChangeAudioMixerGroup(currentSituation, audioSource, seMode.ToString());
 

@@ -25,7 +25,7 @@ public class CS_GameResult : MonoBehaviour
     [Header("デバッグコマンド　GameClearへのキー")][SerializeField] public KeyCode gameClearKey;
     [Header("デバッグコマンド　GameFailureへのキー")][SerializeField] public KeyCode gameFailureKey;
 
-    private CS_BackGroundPlaySE backGroundPlaySE;
+    private CS_BackGroundPlayBGM backGroundPlayBGM;
     private bool startJingle = false;//ジングルが再生されたかどうか
 
     // Start is called before the first frame update
@@ -34,8 +34,8 @@ public class CS_GameResult : MonoBehaviour
         GameObject endManagerObject = GameObject.Find("EndManager");
         endManager = endManagerObject != null ? endManagerObject.GetComponent<CS_EndManager>() : null;
 
-        GameObject seObject = GameObject.Find("SE");
-        backGroundPlaySE = seObject != null ? seObject.GetComponent<CS_BackGroundPlaySE>() : null;
+        GameObject seObject = GameObject.Find("BGM");
+        backGroundPlayBGM = seObject != null ? seObject.GetComponent<CS_BackGroundPlayBGM>() : null;
 
         gameClear.SetActive(false);
 
@@ -57,7 +57,7 @@ public class CS_GameResult : MonoBehaviour
                     gameClear.SetActive(true);
                     if (!startJingle)
                     {
-                        backGroundPlaySE.PlaySE("WinJingle");
+                        backGroundPlayBGM.InGameCutScene(true);
                         startJingle = true;
                     }
                 }
@@ -66,7 +66,7 @@ public class CS_GameResult : MonoBehaviour
                     if (!startJingle)
                     {
                         GameObject gameObject = Instantiate(gameClearCutScene, gameClearCutScenePos.position, gameClearCutScenePos.rotation);
-                        backGroundPlaySE.PlaySE("WinJingle");
+                        backGroundPlayBGM.InGameCutScene(true);
                         startJingle = true;
                     }
                 }
@@ -80,7 +80,7 @@ public class CS_GameResult : MonoBehaviour
                 gameFailure.SetActive(true);
                 if (!startJingle)
                 {
-                    backGroundPlaySE.PlaySE("LoseJingle");
+                    backGroundPlayBGM.InGameCutScene(false);
                     startJingle = true;
                 }
             }
@@ -89,7 +89,7 @@ public class CS_GameResult : MonoBehaviour
                 if (!startJingle)
                 {
                     GameObject gameObject = Instantiate(gameFailureCutScene, gameFailureCutScenePos.position, gameFailureCutScenePos.rotation);
-                    backGroundPlaySE.PlaySE("LoseJingle");
+                    backGroundPlayBGM.InGameCutScene(false);
                     startJingle = true;
                 }
             }
@@ -105,7 +105,7 @@ public class CS_GameResult : MonoBehaviour
                         gameClear.SetActive(true);
                         if (!startJingle)
                         {
-                            backGroundPlaySE.PlaySE("WinJingle");
+                            backGroundPlayBGM.InGameCutScene(true);
                             startJingle = true;
                         }
                     }
@@ -114,7 +114,7 @@ public class CS_GameResult : MonoBehaviour
                         if (!startJingle)
                         {
                             GameObject gameObject = Instantiate(gameClearCutScene, gameClearCutScenePos.position, gameClearCutScenePos.rotation);
-                            backGroundPlaySE.PlaySE("WinJingle");
+                            backGroundPlayBGM.InGameCutScene(true);
                             startJingle = true;
                         }
                     }
@@ -126,7 +126,7 @@ public class CS_GameResult : MonoBehaviour
                         gameFailure.SetActive(true);
                         if (!startJingle)
                         {
-                            backGroundPlaySE.PlaySE("LoseJingle");
+                            backGroundPlayBGM.InGameCutScene(false);
                             startJingle = true;
                         }
                     }
@@ -135,7 +135,7 @@ public class CS_GameResult : MonoBehaviour
                         if (!startJingle)
                         {
                             GameObject gameObject = Instantiate(gameFailureCutScene, gameFailureCutScenePos.position, gameFailureCutScenePos.rotation);
-                            backGroundPlaySE.PlaySE("LoseJingle");
+                            backGroundPlayBGM.InGameCutScene(false);
                             startJingle = true;
                         }
                     }

@@ -67,12 +67,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 095d1e06bfa3e9c45898bbf5c3981fa9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  PlacementPlaneYOffset: 0.02
+  PlacementPlaneScale: {x: 0.1, y: 0.1, z: 0.1}
   gimmick: 5
-  prevSize: {x: 0, y: 0, z: 0}
+  prevSize: {x: 1, y: 1, z: 1}
   isGimmick: 1
   mesh:
   - {fileID: 0}
-  previewAlpha: 0
+  previewAlpha: 0.5
 --- !u!1 &3903598467168377906
 GameObject:
   m_ObjectHideFlags: 0

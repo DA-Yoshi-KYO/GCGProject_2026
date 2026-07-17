@@ -30,6 +30,14 @@ public class EmptyChestGimmick : GimmickBase
             gimmickState = GimmickState.Idle;
     }
 
+    protected override bool GetGimmickSettingsArea()
+    {
+        if (!TryGetPlacementSurface(out RaycastHit surfaceHit))
+            return false;
+
+        return IsPlacementSurfaceAllowed(surfaceHit.transform);
+    }
+
     protected override void BrokenUpdate()
     {
         foreach (var thiefAI in targetThiefAIList)

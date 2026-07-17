@@ -131,4 +131,41 @@ public class CS_RoomBlockPrefabGenerator : MonoBehaviour
             list_RoomCreatePointGenerateData,
             cs_GeneratedRoomObjectService);
     }
+
+    /// <summary>
+    /// 登録されている全RoomCreatePointからヒエログリフを取得します。
+    /// </summary>
+    public void SetAllRoomHieroglyphObjects()
+    {
+        if (list_RoomCreatePointGenerateData == null)
+        {
+            return;
+        }
+
+        for (int i = 0 ; i < list_RoomCreatePointGenerateData.Count ; i++)
+        {
+            CS_RoomCreatePointGenerateData generateData =
+                list_RoomCreatePointGenerateData[i];
+
+            if (generateData == null)
+            {
+                continue;
+            }
+
+            CS_RoomCreatePoint cs_RoomCreatePoint =
+                generateData.RoomCreatePoint;
+
+            if (cs_RoomCreatePoint == null)
+            {
+                Debug.LogWarning(
+                    "[Hieroglyph取得]"
+                    + " CS_RoomCreatePointが取得できません。"
+                    + " / 登録番号 : " + i);
+
+                continue;
+            }
+
+            cs_RoomCreatePoint.SetHieroglyphObjects();
+        }
+    }
 }

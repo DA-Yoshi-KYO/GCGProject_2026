@@ -16,8 +16,7 @@ public enum BackGrondSECueName
     Cusor,
     Decision,
     Cancel,
-    WinJingle,
-    LoseJingle,
+    GimmickChange,
 };
 
 [Serializable]

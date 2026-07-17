@@ -135,6 +135,13 @@ MonoBehaviour:
   interactMax:
     radius: 5
     height: 3
+  directionTriangleSize: {x: 0.4, y: 0.3}
+  directionTriangleMoveSpeed: 2
+  directionTriangleLifetime: 0.75
+  directionTriangleSpawnInterval: 0.4
+  directionTriangleFadeInSpeed: 2
+  directionTriangleFadeOutSpeed: 2
+  directionTriangleMaxAlpha: 0.4
   warpUIGameObject: {fileID: 6060916649909474629}
   warpUISprite:
   - {fileID: 21300000, guid: 5f9b4e805d6806648b36f2c0ea1a152b, type: 3}
@@ -318,7 +325,7 @@ MonoBehaviour:
   footPrintPrefab: {fileID: 7806390277814883630, guid: 2c5b4b17167ba49428528f2cf2fdb4f0,
     type: 3}
   createFootPrintDuration: 0.1
-  destroyTime: 2
+  destroyTime: 0.5
   footOffsetX: 0.1
   spawnOffsetY: 0.04
 --- !u!65 &291419752903377132

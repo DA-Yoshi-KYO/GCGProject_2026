@@ -24,6 +24,11 @@ using UnityEngine.InputSystem;
 
 public class CS_PlayerAction : MonoBehaviour
 {
+    private const float SearchTargetTriangleMoveSpeedMultiplier =
+        1.5f;
+    private const float SearchTargetTriangleSpawnIntervalMultiplier =
+        0.5f;
+
     [Header("ギミックの軌道に切り替わる為に必要な長押しの時間")][SerializeField] private float switchInteract = 1f;         // ギミックの起動へ切り替わる為に必要な長押しの時間
     [Header("インタラクト範囲用のオブジェクト")][SerializeField] private GameObject interactField = null;   // インタラクトの範囲を示すフィールド
     [Header("ギミックの大きさが最大になるために必要な秒数")][SerializeField] private float interactSpeed = 1f;          // インタラクトの速度(interactSpeed秒で範囲が1になる)
@@ -35,6 +40,23 @@ public class CS_PlayerAction : MonoBehaviour
     }
     [SerializeField] public InteractSyllinder interactMin = new InteractSyllinder { radius = 3f, height = 3f };//インタラクトの範囲の最小値
     [SerializeField] public InteractSyllinder interactMax = new InteractSyllinder { radius = 5f, height = 5f };//インタラクトの範囲の最大値
+
+    [Header("インタラクト準備中のギミック方向表示（三角形は緑固定）")]
+    [SerializeField, Tooltip("三角形の横幅(X)と進行方向の長さ(Y)")]
+    private Vector2 directionTriangleSize;
+    [SerializeField, Tooltip("三角形が方向へ移動する速度"), Min(0.0f)]
+    private float directionTriangleMoveSpeed;
+    [SerializeField, Tooltip("三角形が生成されてから消えるまでの時間"), Min(0.01f)]
+    private float directionTriangleLifetime;
+    [SerializeField, Tooltip("次の三角形を描画するまでの間隔"), Min(0.01f)]
+    private float directionTriangleSpawnInterval;
+    [SerializeField, Tooltip("三角形のフェードイン速度"), Min(0.01f)]
+    private float directionTriangleFadeInSpeed;
+    [SerializeField, Tooltip("三角形のフェードアウト速度"), Min(0.01f)]
+    private float directionTriangleFadeOutSpeed;
+    [SerializeField, Tooltip("三角形の最大アルファ値"), Range(0.0f, 1.0f)]
+    private float directionTriangleMaxAlpha;
+
     [HideInInspector] public int currentGimmickIndex { private set; get; } = 0;//現在選択しているギミック
 
     private GameObject previewBase;
@@ -51,6 +73,17 @@ public class CS_PlayerAction : MonoBehaviour
     private GimmickList gimmickManager;
     private CS_3DPlaySE playSE;
     List<Collider> hitList = new List<Collider>();
+    private readonly Dictionary<GimmickBase, GimmickDirection>
+        preparedGimmickDirections =
+            new Dictionary<GimmickBase, GimmickDirection>();
+    private readonly Dictionary<GimmickBase, bool>
+        preparedGimmickSearchTargetStates =
+            new Dictionary<GimmickBase, bool>();
+    private readonly Dictionary<GimmickBase, Vector3>
+        preparedGimmickDirectionOffsets =
+            new Dictionary<GimmickBase, Vector3>();
+    private CS_GimmickDirectionIndicatorRenderer
+        gimmickDirectionIndicatorRenderer;
 
     // ギミック設置時のEffect再生クラスへの参照
     private CS_GimmickSetEffectPlayer cs_GimmickSetEffectPlayer;
@@ -68,12 +101,31 @@ public class CS_PlayerAction : MonoBehaviour
 
     private bool b_IsPlayingAnkhStandEffect = false;
 
-    private const float PlacementBoundsInsetRate = 0.01f;
     [Header("ワープUI表示のオブジェクト格納")] [SerializeField] private GameObject warpUIGameObject;
     [Header("ワープのUI")][SerializeField] private Sprite[] warpUISprite;
     [HideInInspector]public bool warpUIView;
     [HideInInspector]public bool doWarp;
     private bool isWarpInteract = false; // ワープ確定の押下中に設置/インタラクト判定へ流れないようにするフラグ
+
+    private void OnValidate()
+    {
+        directionTriangleSize.x =
+            Mathf.Max(directionTriangleSize.x, 0.01f);
+        directionTriangleSize.y =
+            Mathf.Max(directionTriangleSize.y, 0.01f);
+        directionTriangleMoveSpeed =
+            Mathf.Max(directionTriangleMoveSpeed, 0.0f);
+        directionTriangleLifetime =
+            Mathf.Max(directionTriangleLifetime, 0.01f);
+        directionTriangleSpawnInterval =
+            Mathf.Max(directionTriangleSpawnInterval, 0.01f);
+        directionTriangleFadeInSpeed =
+            Mathf.Max(directionTriangleFadeInSpeed, 0.01f);
+        directionTriangleFadeOutSpeed =
+            Mathf.Max(directionTriangleFadeOutSpeed, 0.01f);
+        directionTriangleMaxAlpha =
+            Mathf.Clamp01(directionTriangleMaxAlpha);
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -134,6 +186,9 @@ public class CS_PlayerAction : MonoBehaviour
 
     private void OnDestroy()
     {
+        gimmickDirectionIndicatorRenderer?.Dispose();
+        gimmickDirectionIndicatorRenderer = null;
+
         if (playerData == null) return;
 
         playerData.customInputAction.Player.GimmickChange.started -= OnSelect;
@@ -145,10 +200,21 @@ public class CS_PlayerAction : MonoBehaviour
         playerData.customInputAction.Player.InteractCancel.started -= OnCancel;
     }
 
+    private void OnDisable()
+    {
+        ClearGimmickDirectionIndicators();
+    }
+
     // Update is called once per frame
     void Update()
     {
         CalculateGimmickSetPosition();
+
+        if (!isInteracting ||
+            interactTime < switchInteract)
+        {
+            ClearGimmickDirectionIndicators();
+        }
 
         if (playerData.currentMode == CS_PlayerData.PlayerMode.Normal)
         {
@@ -165,12 +231,13 @@ public class CS_PlayerAction : MonoBehaviour
             // インタラクト範囲の拡大
             if (interactTime >= switchInteract)
             {
+                // アンクエフェクトの再生
                 if (IsCurrentGimmickMagicAnkh())
                 {
                     PlayAllAnkhStandEffect();
                 }
 
-
+                // 前フレームのリセット(アウトラインを一度灰色に戻す)
                 if (hitList != null)
                 {
                     foreach (var item in hitList)
@@ -183,7 +250,11 @@ public class CS_PlayerAction : MonoBehaviour
                         }
                     }
                 }
-
+                hitList.Clear();
+                preparedGimmickDirections.Clear();
+                preparedGimmickSearchTargetStates.Clear();
+                
+                // インタラクト中はねこのアウトラインを緑にする
                 outlineTarget.SetOutlineColor(Color.green);
 
                 // インタラクト範囲を拡大
@@ -195,7 +266,6 @@ public class CS_PlayerAction : MonoBehaviour
                 interactScale.z = Mathf.Min(interactScale.z, interactMax.radius);
                 interactField.transform.localScale = interactScale;
                 Vector3 interactPos = transform.position;
-                interactPos.y += interactScale.y * 0.5f; // フィールドが地面に接するように位置を調整
                 interactField.transform.position = interactPos;
 
                 // Effectのサイズを変更
@@ -212,6 +282,11 @@ public class CS_PlayerAction : MonoBehaviour
                     interactScale.x * 0.5f,
                     LayerMask.GetMask("Gimmick", "Thief")
                     );
+                // 宝箱、落とし穴、にゃ気、テレポートはインタラクトを行わないので除外する
+                hitList.RemoveAll(hitList => hitList.GetComponent<GimmickBase>().gimmick == Gimmick.EmptyChest);
+                hitList.RemoveAll(hitList => hitList.GetComponent<GimmickBase>().gimmick == Gimmick.Pitfall);
+                hitList.RemoveAll(hitList => hitList.GetComponent<GimmickBase>().gimmick == Gimmick.Nyaki);
+                hitList.RemoveAll(hitList => hitList.GetComponent<GimmickBase>().gimmick == Gimmick.Teleport);
 
                 float minHeight = -interactScale.y * 0.5f;
                 float maxHeight = interactScale.y * 0.5f;
@@ -241,10 +316,25 @@ public class CS_PlayerAction : MonoBehaviour
                     {
                         if (gimmick.gimmickState != GimmickState.Idle) continue;
                         gimmick.SetOutLineColor(Color.green);
+
+                        if (!preparedGimmickDirections.ContainsKey(gimmick) &&
+                            IsDirectionIndicatorTarget(gimmick) &&
+                            TryCalculatePreparedGimmickDirection(
+                                gimmick,
+                                out GimmickDirection direction,
+                                out bool hasSearchTarget))
+                        {
+                            preparedGimmickDirections[gimmick] =
+                                direction;
+                            preparedGimmickSearchTargetStates[gimmick] =
+                                hasSearchTarget;
+                        }
                     }
 
                     hitList.Add(hits[i]);
                 }
+
+                UpdateGimmickDirectionIndicators();
             }
         }
         if (playerData.currentMode == CS_PlayerData.PlayerMode.Setting && isViewPreview)
@@ -278,115 +368,131 @@ public class CS_PlayerAction : MonoBehaviour
 
     private void OnInteract(InputAction.CallbackContext context)
     {
-        if (warpUIView)
+        // ワープ中は全てのインタラクトを無効化する
+        if (GetComponent<CS_PlayerMove>().IsWarping) return;
+
+        GameObject playerRoomData = playerData.currentRoomData.GetPlayerRoomData();
+        if (playerRoomData == null)
         {
-            doWarp = true;
-            isWarpInteract = true;
+            Debug.Log("現在の部屋データが取得できません");
+            return;
         }
-        else if (isWarpInteract)
+        GameObject currentRoom = playerRoomData.transform.GetChild(0).gameObject;
+        string roomName = currentRoom.name;
+        bool isNotSettingRoom = roomName.Contains("Treasure");
+        Debug.Log(roomName);
+        if (currentRoom == null || isNotSettingRoom)
+        {
+            Debug.Log("この部屋にトラップは配置できません");
+            return;    // 設置可能な部屋のみ設置する
+        }
+
+        if (context.started)
+        {
+            interactTime = 0.0f;
+
+            interactField.GetComponent<Renderer>().enabled = true;
+
+            interactField.transform.localScale = Vector3.zero;
+            isInteracting = true;
+            if (cs_PlayerInteractRangeEffectPlayer != null)
+            {
+                cs_PlayerInteractRangeEffectPlayer.PlayInteractRangeEffect(
+                    interactField.transform);
+            }
+            if (warpUIView)
+            {
+                doWarp = true;
+                isWarpInteract = true;
+                ResetInteract();
+                return;
+            }
+        }
+        else if (context.canceled)
         {
             // ワープ確定に使われたボタン操作なので、離した際にギミック設置の判定に流れないようにする
-            if (context.canceled) isWarpInteract = false;
-        }
-        else
-        {
-            if (context.started)
+            if (isWarpInteract)
             {
-                interactTime = 0.0f;
-                interactField.GetComponent<Renderer>().enabled = true;
+                isWarpInteract = false;
+                return;
+            }
+            isInteracting = false;
+            ClearGimmickDirectionIndicators();
 
-                interactField.transform.localScale = Vector3.zero;
-                isInteracting = true;
-                if (cs_PlayerInteractRangeEffectPlayer != null)
+            EndAllAnkhStandEffect();
+
+            // Effectの停止
+            if (cs_PlayerInteractRangeEffectPlayer != null)
+            {
+                cs_PlayerInteractRangeEffectPlayer.EndInteractRangeEffect();
+            }
+            if (interactTime < switchInteract)
+            {
+                // 短押しは設置の処理を行う
+                switch (playerData.currentMode)
                 {
-                    cs_PlayerInteractRangeEffectPlayer.PlayInteractRangeEffect(
-                        interactField.transform);
+                    case CS_PlayerData.PlayerMode.Normal:
+                        playerData.currentMode = CS_PlayerData.PlayerMode.Setting;
+                        break;
+                    case CS_PlayerData.PlayerMode.Setting:
+                        if (SettingAction())
+                        {
+                            int interactSEIndex = UnityEngine.Random.Range(1, 4);
+                            playSE.PlayOneShotSE("Cat_Interact" + interactSEIndex.ToString(), gameObject.transform.position, "InteractSE");
+                            playerData.currentMode = CS_PlayerData.PlayerMode.Normal;
+                        }
+                        break;
+                    default:
+                        break;
                 }
             }
-            else if (context.canceled)
+            else
             {
-                isInteracting = false;
+                // 長押しはギミックの起動を行う
+                int interactSEIndex = UnityEngine.Random.Range(1, 4);
+                interactField.GetComponent<Renderer>().enabled = false;
+                playSE.PlayOneShotSE("Cat_Interact" + interactSEIndex.ToString(), gameObject.transform.position, "InteractSE");
 
-                EndAllAnkhStandEffect();
-
-                // Effectの停止
-                if (cs_PlayerInteractRangeEffectPlayer != null)
-                {
-                    cs_PlayerInteractRangeEffectPlayer.EndInteractRangeEffect();
-                }
-                if (interactTime < switchInteract)
-                {
-                    // 短押しは設置の処理を行う
-                    switch (playerData.currentMode)
+                //アンク用動作
+                if (gimmickManager.GetCurrentGimmick()[currentGimmickIndex].gimmickTag ==
+                    Gimmick.MagicAnkh)
+                {//カーソルがアンクの時インタラクト発動
+                    foreach (var GM in gimmickManager.GetGimmickList())
                     {
-                        case CS_PlayerData.PlayerMode.Normal:
-                            playerData.currentMode = CS_PlayerData.PlayerMode.Setting;
-                            break;
-                        case CS_PlayerData.PlayerMode.Setting:
-                            if (SettingAction())
-                            {
-                                int interactSEIndex = UnityEngine.Random.Range(1, 4);
-                                playSE.PlayOneShotSE("Cat_Interact" + interactSEIndex.ToString(), gameObject.transform.position, "InteractSE");
-                                playerData.currentMode = CS_PlayerData.PlayerMode.Normal;
-                            }
-                            break;
-                        default:
-                            break;
+                        //タグでアンク判定→アクティブへ
+                        if (GM.gimmick.GetGimmickTag() == Gimmick.MagicAnkh)
+                        {
+                            GM.gimmick.gimmickState = GimmickState.Active;
+                        }
                     }
                 }
-                else
+
+                foreach (Collider hit in hitList)
                 {
-                    // 長押しはギミックの起動を行う
-                    int interactSEIndex = UnityEngine.Random.Range(1, 4);
-                    interactField.GetComponent<Renderer>().enabled = false;
-                    playSE.PlayOneShotSE("Cat_Interact" + interactSEIndex.ToString(), gameObject.transform.position, "InteractSE");
+                    if (hit == null) continue;
 
-                    //アンク用動作
-                    if (gimmickManager.GetCurrentGimmick()[currentGimmickIndex].gimmickTag ==
-                        Gimmick.MagicAnkh)
-                    {//カーソルがアンクの時インタラクト発動
-                        foreach (var GM in gimmickManager.GetGimmickList())
-                        {
-                            //タグでアンク判定→アクティブへ
-                            if (GM.gimmick.GetGimmickTag() == Gimmick.MagicAnkh)
-                            {
-                                GM.gimmick.gimmickState = GimmickState.Active;
-                            }
-                        }
-                    }
-
-                    foreach (Collider hit in hitList)
+                    GimmickBase gimmick = hit.GetComponent<GimmickBase>();
+                    if (gimmick != null)
                     {
-                        var renderers = hit.GetComponentsInChildren<Renderer>();
-                        foreach (var renderer in renderers)
-                        {
-                            if (renderer.materials.Length < 2) continue;
-                            Material material = renderer.materials[1];
-                            if (material != null) material.SetVector("_OutlineColor", Color.gray);
-                        }
+                        if (gimmick.gimmickState != GimmickState.Idle) continue;
 
-                        GimmickBase gimmick = hit.GetComponent<GimmickBase>();
-                        if (gimmick != null)
-                        {
-                            if (gimmick.gimmickState != GimmickState.Idle) continue;
+                        SettingGimmickDirection(gimmick);
 
-                            SettingGimmickDirection(gimmick);
+                        //ギミックをアクティブにする
+                        Debug.Log($"ギミック：" + hit.name + "がアクティブになりました" + gimmick.GetDirectionVec());
+                        gimmick.ActivateGimmick();
 
-                            //ギミックをアクティブにする
-                            Debug.Log($"ギミック：" + hit.name + "がアクティブになりました" + gimmick.GetDirectionVec());
-                            gimmick.ActivateGimmick();
-                            continue;
-                        }
-
-                        CS_ThiefAI thief = hit.GetComponent<CS_ThiefAI>();
-                        if (thief != null)
-                        {
-                            thief.read_HearingSystem.InvestigateSound(gameObject.transform.position, CS_HearingSystem.AttractSoundType.CatVoice);
-                        }
+                        continue;
                     }
 
-                    hitList.Clear();
+                    CS_ThiefAI thief = hit.GetComponent<CS_ThiefAI>();
+                    if (thief != null)
+                    {
+                        thief.read_HearingSystem.InvestigateSound(gameObject.transform.position, CS_HearingSystem.AttractSoundType.CatVoice);
+                    }
                 }
+
+                hitList.Clear();
             }
         }
     }
@@ -568,39 +674,29 @@ public class CS_PlayerAction : MonoBehaviour
 
         if (IsInfinityPosition(settingPos)) return false;
 
+        Vector3 placementValidationPosition = previewBase != null
+            ? previewBase.transform.position
+            : settingPos;
+
+        if (!gimmick.GetIsSettingArea(placementValidationPosition))
+            return false;
+
         gimmick.gimmickState = GimmickState.Spawn;
 
         // 設置処理 //
-        if (!roomGrid.SetGimmickInGrid(settingPos, gimmick))
-            return false;
-
-        // =========================
-        // 実際に生成されたインスタンス取得
-        // =========================
-        Vector3 center = settingPos;          // 中心位置
-        Vector3 halfExtents = new Vector3(roomGrid.gridSize.x * 0.5f, 5f, roomGrid.gridSize.y * 0.5f); // 半径ではなく「半サイズ」
-
-        Collider[] hits = Physics.OverlapBox(center, halfExtents);
         GimmickBase instance = null;
-
-        foreach (var hit in hits)
-        {
-            GimmickBase gimmickBase = hit.GetComponent<GimmickBase>();
-
-            if (gimmickBase == null)
-                continue;
-
-            // 同じ種類のみ
-            if (gimmickBase.GetGimmickTag() != gimmick.GetGimmickTag())
-                continue;
-
-            instance = gimmickBase;
-            break;
-        }
+        if (!roomGrid.SetGimmickInGrid(settingPos, gimmick, out instance))
+            return false;
 
         if (instance == null)
         {
-            Debug.LogError("配置後のGimmick取得失敗");
+            return false;
+        }
+
+        if (IsInfinityPosition(instance.transform.position))
+        {
+            Debug.LogWarning("インフィニティ配置");
+            Destroy(instance.gameObject);
             return false;
         }
 
@@ -632,7 +728,54 @@ public class CS_PlayerAction : MonoBehaviour
 
     public void SettingGimmickDirection(GimmickBase gimmick)
     {
-        // インタラクト方向を設定※ギミックとの位置関係で判定（対角線で四分割：三角形×4）
+        if (!TryCalculatePreparedGimmickDirection(
+                gimmick,
+                out GimmickDirection direction,
+                out _))
+        {
+            return;
+        }
+
+        gimmick.SetGimmickDirection(direction);
+    }
+
+    private bool TryCalculatePreparedGimmickDirection(
+        GimmickBase gimmick,
+        out GimmickDirection direction,
+        out bool hasSearchTarget)
+    {
+        if (gimmick == null)
+        {
+            direction = GimmickDirection.Up;
+            hasSearchTarget = false;
+            return false;
+        }
+
+        GimmickDirection preferredDirection;
+        hasSearchTarget =
+            gimmick.TryGetSearchDirection(
+                out preferredDirection);
+        if (!hasSearchTarget)
+        {
+            preferredDirection =
+                CalculatePreferredGimmickDirection(gimmick);
+        }
+
+        if (gimmick is PotGimmick potGimmick)
+        {
+            return potGimmick.TryGetCorrectedDropDirection(
+                preferredDirection,
+                out direction);
+        }
+
+        direction = preferredDirection;
+        return true;
+    }
+
+    private GimmickDirection CalculatePreferredGimmickDirection(
+        GimmickBase gimmick)
+    {
+        // インタラクト方向を計算※ギミックとの位置関係で判定（対角線で四分割：三角形×4）
         Vector3 toPlayer = transform.position - gimmick.transform.position;
         float dx = toPlayer.x;
         float dz = toPlayer.z;
@@ -645,30 +788,113 @@ public class CS_PlayerAction : MonoBehaviour
         if (dz > adx + eps)
         {
             // プレイヤーがギミックの「前（+Z）側の三角形」：Up
-            gimmick.SetGimmickDirection(GimmickDirection.Up);
+            return GimmickDirection.Up;
         }
-        else if (-dz > adx + eps)
+
+        if (-dz > adx + eps)
         {
             // プレイヤーがギミックの「後（-Z）側の三角形」：Down
-            gimmick.SetGimmickDirection(GimmickDirection.Down);
+            return GimmickDirection.Down;
         }
-        else if (dx > adz + eps)
+
+        if (dx > adz + eps)
         {
             // プレイヤーがギミックの「右（+X）側の三角形」：Right
-            gimmick.SetGimmickDirection(GimmickDirection.Right);
+            return GimmickDirection.Right;
         }
-        else if (-dx > adz + eps)
+
+        if (-dx > adz + eps)
         {
             // プレイヤーがギミックの「左（-X）側の三角形」：Left
-            gimmick.SetGimmickDirection(GimmickDirection.Left);
+            return GimmickDirection.Left;
         }
-        else
+
+        // 厳密な境界上（対角線上）に居る場合のフォールバック：
+        // X/Z の絶対値で優勢側を使う（斜め真正面は Z 優先）
+        if (adz >= adx)
         {
-            // 厳密な境界上（対角線上）に居る場合のフォールバック：
-            // X/Z の絶対値で優勢側を使う（斜め真正面は Z 優先）
-            if (adz >= adx) gimmick.SetGimmickDirection(dz >= 0f ? GimmickDirection.Up : GimmickDirection.Down);
-            else gimmick.SetGimmickDirection(dx >= 0f ? GimmickDirection.Right : GimmickDirection.Left);
+            return dz >= 0f
+                ? GimmickDirection.Up
+                : GimmickDirection.Down;
         }
+
+        return dx >= 0f
+            ? GimmickDirection.Right
+            : GimmickDirection.Left;
+    }
+
+    private static bool IsDirectionIndicatorTarget(
+        GimmickBase gimmick)
+    {
+        return gimmick is PotGimmick ||
+               gimmick is RockGimmick;
+    }
+
+    private void UpdateGimmickDirectionIndicators()
+    {
+        if (preparedGimmickDirections.Count == 0)
+        {
+            gimmickDirectionIndicatorRenderer?.ClearIndicators();
+            return;
+        }
+
+        if (gimmickDirectionIndicatorRenderer == null)
+        {
+            gimmickDirectionIndicatorRenderer =
+                new CS_GimmickDirectionIndicatorRenderer();
+        }
+
+        CSST_GimmickDirectionIndicatorSettings settings =
+            new CSST_GimmickDirectionIndicatorSettings(
+                directionTriangleSize,
+                directionTriangleMoveSpeed,
+                directionTriangleLifetime,
+                directionTriangleSpawnInterval,
+                directionTriangleFadeInSpeed,
+                directionTriangleFadeOutSpeed,
+                directionTriangleMaxAlpha,
+                SearchTargetTriangleMoveSpeedMultiplier,
+                SearchTargetTriangleSpawnIntervalMultiplier);
+
+        preparedGimmickDirectionOffsets.Clear();
+        foreach (KeyValuePair<GimmickBase, GimmickDirection> pair
+                 in preparedGimmickDirections)
+        {
+            Vector3 offset;
+            switch (pair.Key.GetGimmickTag())
+            {
+                case Gimmick.Pot:
+                    // 壺用オフセット（ギミックのローカル座標基準）
+                    offset = new Vector3(0.0f, 0.0f, 0.0f);
+                    break;
+
+                case Gimmick.IronBall:
+                    // Rock用オフセット（ギミックのローカル座標基準）
+                    offset = new Vector3(0.0f, 4f, 0.0f);
+                    break;
+
+                default:
+                    offset = Vector3.zero;
+                    break;
+            }
+
+            preparedGimmickDirectionOffsets[pair.Key] = offset;
+        }
+
+        gimmickDirectionIndicatorRenderer.UpdateIndicators(
+            preparedGimmickDirections,
+            preparedGimmickDirectionOffsets,
+            preparedGimmickSearchTargetStates,
+            settings,
+            Time.deltaTime);
+    }
+
+    private void ClearGimmickDirectionIndicators()
+    {
+        preparedGimmickDirections.Clear();
+        preparedGimmickDirectionOffsets.Clear();
+        preparedGimmickSearchTargetStates.Clear();
+        gimmickDirectionIndicatorRenderer?.ClearIndicators();
     }
 
     //ギミックの設置位置を補正する計算：大瀧
@@ -744,33 +970,7 @@ public class CS_PlayerAction : MonoBehaviour
         Vector2Int size)
     {
         if (roomGrid == null) return false;
-        if (IsInfinityPosition(centerPos)) return false;
-
-        Vector2 gridSize = roomGrid.gridSize;
-        float inset = Mathf.Min(gridSize.x, gridSize.y) * PlacementBoundsInsetRate;
-        float halfX = Mathf.Max(size.x * gridSize.x * 0.5f - inset, 0f);
-        float halfZ = Mathf.Max(size.y * gridSize.y * 0.5f - inset, 0f);
-
-        Vector3[] checkOffsets =
-        {
-            Vector3.zero,
-            new Vector3(halfX, 0f, halfZ),
-            new Vector3(halfX, 0f, -halfZ),
-            new Vector3(-halfX, 0f, halfZ),
-            new Vector3(-halfX, 0f, -halfZ),
-        };
-
-        foreach (Vector3 offset in checkOffsets)
-        {
-            Vector3 checkPos =
-                centerPos + roomGrid.transform.TransformVector(offset);
-            Vector2Int grid = roomGrid.GetGridFromPos(checkPos);
-
-            if (grid.x == -1 || grid.y == -1)
-                return false;
-        }
-
-        return true;
+        return roomGrid.IsAreaInsideGrid(centerPos, size);
     }
 
     private Vector2Int GetPreviewCheckSize(GimmickBase gimmick)
@@ -841,29 +1041,31 @@ public class CS_PlayerAction : MonoBehaviour
         if (gimmick == null)
             return;
 
+        Vector3 previewPos = settingPos;
+
         // 設置位置の計算_______________________________________
-        if (IsInfinityPosition(settingPos))
+        if (IsInfinityPosition(previewPos))
         {
             ClearGimmickPreview();
             return;
         }
 
-        Vector2Int grid = roomGrid.GetGridFromPos(settingPos);
+        Vector2Int grid = roomGrid.GetGridFromPos(previewPos);
         if (grid.x == -1 || grid.y == -1)
         {
             ClearGimmickPreview();
             return;
         }
 
-        settingPos = roomGrid.GetWorldPosFromGrid(grid);
-        if (IsInfinityPosition(settingPos))
+        previewPos = roomGrid.GetWorldPosFromGrid(grid);
+        if (IsInfinityPosition(previewPos))
         {
             ClearGimmickPreview();
             return;
         }
 
-        settingPos = roomGrid.GimmickEvenNumberCorrection(settingPos, gimmick);
-        if (!IsGimmickInsideRoom(roomGrid, settingPos, GetPreviewCheckSize(gimmick)))
+        previewPos = roomGrid.GimmickEvenNumberCorrection(previewPos, gimmick);
+        if (!IsGimmickInsideRoom(roomGrid, previewPos, GetPreviewCheckSize(gimmick)))
         {
             ClearGimmickPreview();
             return;
@@ -873,7 +1075,7 @@ public class CS_PlayerAction : MonoBehaviour
         Ray ray = new Ray();
         ray.direction = Vector3.down;
         const float rayOriginY = 255f;
-        ray.origin = new Vector3(settingPos.x, rayOriginY, settingPos.z);
+        ray.origin = new Vector3(previewPos.x, rayOriginY, previewPos.z);
         // 床を確実に取れるようマージンを大きめに取りレイを飛ばす
         RaycastHit[] rayHits = Physics.RaycastAll(ray, Mathf.Abs(rayOriginY - (gameObject.transform.position.y - 10.0f)), ~0,
             QueryTriggerInteraction.Ignore);
@@ -883,17 +1085,17 @@ public class CS_PlayerAction : MonoBehaviour
             if (hitItem.transform.CompareTag("Player")) continue;
             if (hitItem.transform.CompareTag("Thief")) continue;
 
-            settingPos.y = hitItem.point.y;
+            previewPos.y = hitItem.point.y;
             break;
         }
         // 設置位置補正_______________________________________
-        gimmick.SetGimmickPos(settingPos);
+        gimmick.SetGimmickPos(previewPos);
         MeshFilter meshFilter = gimmick.GetComponentInChildren<MeshFilter>();
         if (meshFilter != null && meshFilter.sharedMesh != null)
             gimmick.AdjustScaleToGrid();
 
         // infinity例外
-        if (IsInfinityPosition(settingPos)) return;
+        if (IsInfinityPosition(previewPos)) return;
 
         //----------------------------------
         // 初回のみ生成
@@ -928,11 +1130,24 @@ public class CS_PlayerAction : MonoBehaviour
 
             previewBase = Instantiate(gimmickManager.GetCurrentGimmick()[currentGimmickIndex].previewPrefab);
             isShowGimmickPreview = true;
+            previewBase.transform.position = previewPos;
+
+            PreviewBase placementPreview = previewBase.GetComponent<PreviewBase>();
+            if (placementPreview != null &&
+                (gimmick is PotGimmick ||
+                 gimmick is RockGimmick ||
+                 gimmick is EmptyChestGimmick ||
+                 gimmick is PitfallGimmick ||
+                 gimmick is MagicAnkhGimmick ||
+                 gimmick is TeleportGimmick))
+            {
+                placementPreview.SetupPlacementPreview(gimmick, roomGrid);
+            }
 
             // =========================
             // 実際に生成されたインスタンス取得
             // =========================
-            Vector3 center = new Vector3(settingPos.x, settingPos.y, settingPos.z);// 中心位置
+            Vector3 center = new Vector3(previewPos.x, previewPos.y, previewPos.z);// 中心位置
             Vector3 halfExtents = new Vector3(2f, 10f, 2f); // 半径ではなく「半サイズ」
 
             Collider[] hits = Physics.OverlapBox(center, halfExtents);
@@ -970,11 +1185,11 @@ public class CS_PlayerAction : MonoBehaviour
                 prevObj = previewBase.gameObject;
                 if (prevObj.GetComponent<PreviewBase>().GetPreviewSize().y % 2 == 0)
                 {
-                    settingPos.y += prevObj.GetComponent<PreviewBase>().GetPreviewSize().y * 0.5f;
+                    previewPos.y += prevObj.GetComponent<PreviewBase>().GetPreviewSize().y * 0.5f;
                 }
 
                 previewBase.transform.position =
-                    settingPos;
+                    previewPos;
                 //プレイヤーとギミックとの位置でギミックの向きを設定
                 //SettingGimmickDirection(previewInstance);
             }
@@ -1011,5 +1226,23 @@ public class CS_PlayerAction : MonoBehaviour
         {
             warpUIGameObject.SetActive(false);
         }
+    }
+
+    // 部屋移動やワープの祭にインタラクト状態をリセットする
+    public void ResetInteract()
+    {
+        interactTime = 0.0f;
+        isInteracting = false;
+        playerData.currentMode = CS_PlayerData.PlayerMode.Normal;
+        // Effectの停止
+        cs_PlayerInteractRangeEffectPlayer?.EndInteractRangeEffect();
+        ClearGimmickDirectionIndicators();
+
+        foreach(var hit in hitList)
+        {
+            GimmickBase gimmick = hit.GetComponent<GimmickBase>();
+            gimmick?.SetOutLineColor(Color.gray);
+        }
+        hitList.Clear();
     }
 }

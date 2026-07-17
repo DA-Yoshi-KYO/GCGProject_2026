@@ -33,6 +33,8 @@ public class CS_SelectBarMove : MonoBehaviour
     [Header("UIアニメーションの最大の大きさ")][SerializeField] private Vector3 maxScale;
     private bool reversibleScale = false;//拡大・縮小を判定
 
+    private bool endSound = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -96,12 +98,15 @@ public class CS_SelectBarMove : MonoBehaviour
         //決定ボタンでシーン遷移
         if (inputActions.SelectBar.Decision.triggered)
         {
-            backGroundPlaySE.PlaySE("Decision");
+            if (!endSound)
+                backGroundPlaySE.PlaySE("Decision");
+            
             string sceneName = "";
             switch (currentButton)
             {
                 case 0:
                     sceneName = pressGameStartToSceneName;
+                    endSound = true;
                     fadeCanvas.GetComponent<CS_SceneTransition>().StartSceneTransition(sceneName);
                     break;
                 case 1:
@@ -133,7 +138,7 @@ public class CS_SelectBarMove : MonoBehaviour
         {
             if (i == currentButton)
             {
-                uiTimer += Time.deltaTime;
+                uiTimer += Time.deltaTime * 2.0f;
                 float t = Easing.EaseInOutSine(uiTimer, uiDuration);
 
                 if (!reversibleScale)
@@ -170,7 +175,8 @@ public class CS_SelectBarMove : MonoBehaviour
             //現在選択しているボタンの移動処理
             if (inputFloat > 0.0f)
             {
-                backGroundPlaySE.PlaySE("Cusor");
+                if (!endSound)
+                    backGroundPlaySE.PlaySE("Cusor");
                 currentButton--;
                 if (currentButton < 0)
                 {
@@ -181,7 +187,8 @@ public class CS_SelectBarMove : MonoBehaviour
             }
             else if (inputFloat < 0.0f)
             {
-                backGroundPlaySE.PlaySE("Cusor");
+                if (!endSound)
+                    backGroundPlaySE.PlaySE("Cusor");
                 currentButton++;
                 if (currentButton >= buttonList.Length)
                 {

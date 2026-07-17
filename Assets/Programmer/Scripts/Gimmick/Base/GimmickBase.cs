@@ -50,6 +50,82 @@ public enum GimmickOutline
     NoOutline,
 }
 
+public static class GimmickPlacementSurfaceRules
+{
+    private const string FloorsGroupName = "Floors";
+    private const string SecondFloorsGroupName = "SecondFloors";
+    private const string PolesGroupName = "Poles";
+    private const string PartitionGroupNamePart = "Partition";
+
+    public static bool IsAllowed(
+        Gimmick gimmick,
+        Transform surfaceTransform)
+    {
+        switch (gimmick)
+        {
+            case Gimmick.Pot:
+                return IsInGroup(
+                    surfaceTransform,
+                    PolesGroupName) ||
+                       IsInGroupContaining(
+                           surfaceTransform,
+                           PartitionGroupNamePart);
+
+            case Gimmick.IronBall:
+            case Gimmick.EmptyChest:
+            case Gimmick.Pitfall:
+                return IsInGroup(
+                    surfaceTransform,
+                    FloorsGroupName,
+                    SecondFloorsGroupName);
+
+            default:
+                return true;
+        }
+    }
+
+    private static bool IsInGroup(
+        Transform surfaceTransform,
+        params string[] groupNames)
+    {
+        if (surfaceTransform == null)
+            return false;
+
+        Transform current = surfaceTransform;
+        while (current != null)
+        {
+            foreach (string groupName in groupNames)
+            {
+                if (current.name == groupName)
+                    return true;
+            }
+
+            current = current.parent;
+        }
+
+        return false;
+    }
+
+    private static bool IsInGroupContaining(
+        Transform surfaceTransform,
+        string groupNamePart)
+    {
+        if (surfaceTransform == null)
+            return false;
+
+        Transform current = surfaceTransform;
+        while (current != null)
+        {
+            if (current.name.Contains(groupNamePart))
+                return true;
+
+            current = current.parent;
+        }
+
+        return false;
+    }
+}
+
 public class GimmickBase : MonoBehaviour
 {
     // -----------------------------------------------------------------
@@ -150,6 +226,15 @@ public class GimmickBase : MonoBehaviour
     //設置プレビュー用
     [Header("Preview")]
     [SerializeField] private float previewAlpha = 0.5f;
+
+    [Header("Effect再生処理")]
+    [SerializeField]
+    private CS_EffectPlayer cs_EffectPlayer;
+    [SerializeField] private Vector3 effectOffsetPosition = Vector3.zero;
+    [SerializeField] private float effectOffsetDirection = 0.0f;
+    [SerializeField] private Quaternion effectOffsetRotation = Quaternion.identity;
+    [SerializeField] private bool effectRotationUseDirection = true;
+    [SerializeField] private Vector3 effectOffsetScale = Vector3.one;
 
     protected Vector2Int gimmickGridPos;
     protected Vector3 targetPoint;
@@ -443,6 +528,140 @@ public class GimmickBase : MonoBehaviour
         searchT.localScale = searchSize;
     }
 
+    //エフェクト
+    protected void PlayEffectPlayer()
+    {
+        PlayEffectPlayer(transform.position);
+    }
+
+    protected void PlayEffectPlayer(Vector3 basePosition)
+    {
+        if (cs_EffectPlayer == null)
+        {
+            cs_EffectPlayer = GetComponent<CS_EffectPlayer>();
+        }
+
+        if (cs_EffectPlayer == null)
+        {
+            Debug.LogWarning(
+                "[CS_EffectTest] CS_EffectPlayerがありません。"
+            );
+            return;
+        }
+
+        Quaternion directionRotation = GetEffectDirectionRotation();
+        Quaternion baseRotation =
+            effectRotationUseDirection ? directionRotation : transform.rotation;
+        Quaternion effectRotation =
+            baseRotation * GetSafeEffectOffsetRotation();
+
+        Vector3 effectPosition =
+            basePosition +
+            directionRotation * effectOffsetPosition +
+            directionRotation * Vector3.forward * effectOffsetDirection;
+
+        CSST_EffectPlayData csst_EffectPlayData =
+            new CSST_EffectPlayData();
+
+        csst_EffectPlayData.CSST_EffectPlayData_Init();
+
+        csst_EffectPlayData.SetPosition(
+            effectPosition
+        );
+
+        csst_EffectPlayData.SetRotation(
+            effectRotation
+        );
+
+        if (effectOffsetScale != Vector3.zero)
+        {
+            csst_EffectPlayData.SetScale(
+                effectOffsetScale
+            );
+        }
+
+        csst_EffectPlayData.SetLoopFlag(false);
+        csst_EffectPlayData.SetHideOnEnd(true);
+
+        CSAD_EffectCommonProcessBase smokeEffect =
+            cs_EffectPlayer.PlayEffect(
+                csst_EffectPlayData
+            );
+
+        if (smokeEffect != null)
+        {
+            smokeEffect.transform.SetParent(null, true);
+        }
+    }
+
+    protected virtual bool GetGimmickSettingsArea()
+    {
+        return true;
+    }
+
+    protected bool TryGetPlacementSurface(out RaycastHit surfaceHit)
+    {
+        const float rayOffset = 0.1f;
+        const float rayLength = 0.2f;
+        Vector3 rayOrigin =
+            placementCheckPosition + Vector3.up * rayOffset;
+
+        return Physics.Raycast(
+            rayOrigin,
+            Vector3.down,
+            out surfaceHit,
+            rayLength,
+            ~0,
+            QueryTriggerInteraction.Ignore);
+    }
+
+    protected bool IsPlacementSurfaceAllowed(
+        Transform surfaceTransform)
+    {
+        return GimmickPlacementSurfaceRules.IsAllowed(
+            gimmick,
+            surfaceTransform);
+    }
+
+    //設置可能位置であるかを判定
+    public bool GetIsSettingArea()
+    {
+        placementCheckPosition = transform.position;
+        return GetGimmickSettingsArea();
+    }
+
+    // プレビューなど、まだギミック本体が生成されていない位置の設置判定用
+    protected Vector3 placementCheckPosition;
+
+    public bool GetIsSettingArea(Vector3 worldPosition)
+    {
+        placementCheckPosition = worldPosition;
+        return GetGimmickSettingsArea();
+    }
+
+    private Quaternion GetEffectDirectionRotation()
+    {
+        if (DirectionRotations.TryGetValue(gimmickDirection, out Quaternion directionRotation))
+        {
+            return directionRotation;
+        }
+
+        return transform.rotation;
+    }
+
+    private Quaternion GetSafeEffectOffsetRotation()
+    {
+        if (Mathf.Approximately(effectOffsetRotation.x, 0.0f) &&
+            Mathf.Approximately(effectOffsetRotation.y, 0.0f) &&
+            Mathf.Approximately(effectOffsetRotation.z, 0.0f) &&
+            Mathf.Approximately(effectOffsetRotation.w, 0.0f))
+        {
+            return Quaternion.identity;
+        }
+
+        return effectOffsetRotation;
+    }
+
     public CS_ThiefGimmickAction GetThiefGimmickAction()
     {
         return hit != null ? hit.GetThiefGA() : null;
@@ -595,6 +814,55 @@ public class GimmickBase : MonoBehaviour
     {
         gimmickState = GimmickState.Active;
 
+        bool hasSearchTarget =
+            TryGetSearchDirection(
+                out GimmickDirection searchDirection,
+                out Transform nearestEnemy,
+                out int detectedEnemyCount,
+                out float nearestDistance);
+
+        Debug.Log(
+            "Detected " +
+            detectedEnemyCount +
+            " enemies in search area.");
+
+        if (!hasSearchTarget)
+            return;
+
+        gimmickDirection = searchDirection;
+
+        Debug.Log(
+            "Nearest enemy: " +
+            nearestEnemy.name +
+            ", Distance: " +
+            nearestDistance);
+        Debug.Log(
+            "Detected enemy: " +
+            nearestEnemy.name +
+            ", Direction: " +
+            gimmickDirection);
+    }
+
+    public bool TryGetSearchDirection(
+        out GimmickDirection direction)
+    {
+        return TryGetSearchDirection(
+            out direction,
+            out _,
+            out _,
+            out _);
+    }
+
+    private bool TryGetSearchDirection(
+        out GimmickDirection direction,
+        out Transform nearestEnemy,
+        out int detectedEnemyCount,
+        out float nearestDistance)
+    {
+        direction = gimmickDirection;
+        nearestEnemy = null;
+        nearestDistance = float.MaxValue;
+
         Collider[] hitsX = OverlapBoxCollider(searchColliderX);
         Collider[] hitsZ = OverlapBoxCollider(searchColliderZ);
 
@@ -602,46 +870,98 @@ public class GimmickBase : MonoBehaviour
         foreach (Collider col in hitsX) searchHitBuffer.Add(col);
         foreach (Collider col in hitsZ) searchHitBuffer.Add(col);
 
-        Debug.Log("Detected " + searchHitBuffer.Count + " enemies in search area.");
+        detectedEnemyCount = searchHitBuffer.Count;
 
         if (searchHitBuffer.Count == 0)
         {
-            return;
+            return false;
         }
-
-        float minDist = float.MaxValue;
-        Transform nearestEnemy = null;
 
         foreach (Collider col in searchHitBuffer)
         {
+            if (col == null)
+                continue;
+
+            if (!CanPrioritizeSearchTarget(col))
+                continue;
+
             float dist = Vector3.Distance(transform.position, col.transform.position);
 
-            if (dist < minDist)
+            if (dist < nearestDistance)
             {
-                minDist = dist;
+                nearestDistance = dist;
                 nearestEnemy = col.transform;
             }
         }
 
-        Debug.Log("Nearest enemy: " + (nearestEnemy != null ? nearestEnemy.name : "None") + ", Distance: " + minDist);
-
         if (nearestEnemy == null)
         {
-            return;
+            return false;
         }
 
         Vector3 diff = nearestEnemy.position - transform.position;
 
         if (Mathf.Abs(diff.x) >= Mathf.Abs(diff.z))
         {
-            gimmickDirection = diff.x >= 0f ? GimmickDirection.Left : GimmickDirection.Right;
+            direction = diff.x >= 0f
+                ? GimmickDirection.Left
+                : GimmickDirection.Right;
         }
         else
         {
-            gimmickDirection = diff.z >= 0f ? GimmickDirection.Down : GimmickDirection.Up;
+            direction = diff.z >= 0f
+                ? GimmickDirection.Down
+                : GimmickDirection.Up;
         }
 
-        Debug.Log("Detected enemy: " + nearestEnemy.name + ", Direction: " + gimmickDirection);
+        return true;
+    }
+
+    private bool CanPrioritizeSearchTarget(
+        Collider targetCollider)
+    {
+        if (targetCollider == null)
+            return false;
+
+        // ギミックごとのサーチ対象優先条件はここへ追加する
+        switch (gimmick)
+        {
+            case Gimmick.IronBall:
+                int rockSearchObstacleLayerMask =
+                    LayerMask.GetMask("VisionObstacle");
+
+                return HasClearHorizontalSearchPath(
+                    targetCollider,
+                    rockSearchObstacleLayerMask);
+
+            default:
+                return true;
+        }
+    }
+
+    private bool HasClearHorizontalSearchPath(
+        Collider targetCollider,
+        int obstacleLayerMask)
+    {
+        Collider gimmickCollider = GetComponent<Collider>();
+        Vector3 origin =
+            gimmickCollider != null
+                ? gimmickCollider.bounds.center
+                : transform.position;
+        Vector3 target = targetCollider.bounds.center;
+        target.y = origin.y;
+        Vector3 toTarget = target - origin;
+        float distance = toTarget.magnitude;
+
+        if (distance <= Mathf.Epsilon)
+            return true;
+
+        return !Physics.Raycast(
+            origin,
+            toTarget / distance,
+            distance,
+            obstacleLayerMask,
+            QueryTriggerInteraction.Ignore);
     }
 
     protected virtual void ActiveUpdate()
