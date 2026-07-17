@@ -337,6 +337,7 @@ public class CS_PlayerAction : MonoBehaviour
                                 direction;
                             preparedGimmickSearchTargetStates[gimmick] =
                                 hasSearchTarget;
+                            gimmick.SetGimmickDirection(direction);
                         }
                     }
 
@@ -758,6 +759,15 @@ public class CS_PlayerAction : MonoBehaviour
 
     public void SettingGimmickDirection(GimmickBase gimmick)
     {
+        if (gimmick != null &&
+            preparedGimmickDirections.TryGetValue(
+                gimmick,
+                out GimmickDirection preparedDirection))
+        {
+            gimmick.SetGimmickDirection(preparedDirection);
+            return;
+        }
+
         if (!TryCalculatePreparedGimmickDirection(
                 gimmick,
                 out GimmickDirection direction,
