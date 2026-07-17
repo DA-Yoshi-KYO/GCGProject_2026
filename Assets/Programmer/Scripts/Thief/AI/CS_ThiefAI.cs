@@ -517,6 +517,8 @@ public class CS_ThiefAI : MonoBehaviour
     // 発見状態の行動
     private void Found()
     {
+        read_AStarSystem.ClearRoute();
+
         // 探索対象が存在しない場合は何もしない
         if (memorySystem.read_CurrentTarget == null)
         {
@@ -554,6 +556,7 @@ public class CS_ThiefAI : MonoBehaviour
         }
         // 探索対象をリセット
         memorySystem.ClearTarget();
+
     }
 
     // 逃走状態の行動
@@ -846,7 +849,9 @@ public class CS_ThiefAI : MonoBehaviour
 
                 if (currentState != ThiefState.Stunned)
                     elapsedTimeAfterStun = 0.0f;
+
                 aStarSystem.ResetUpdatedFlag();
+                moveSystem.ResetInfo();
                 break;
         }
         currentState = newState;

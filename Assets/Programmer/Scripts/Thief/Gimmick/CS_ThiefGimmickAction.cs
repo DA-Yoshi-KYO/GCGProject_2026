@@ -233,84 +233,9 @@ public class CS_ThiefGimmickAction
         {
             targetGimmick.Remove(rockGimmick);
         }
-        thiefAI?.read_MoveSystem?.read_NavMeshAgent?.ResetPath();
+
+        if (thiefAI?.read_MoveSystem?.read_NavMeshAgent.enabled == true)
+            thiefAI?.read_MoveSystem?.read_NavMeshAgent?.ResetPath();
         
     }
-
-    ///// <summary>
-    ///// 空の宝箱ギミック用行動の開始
-    ///// </summary>
-    ///// <param name="emptyChest">空の宝箱ギミック</param>
-    //public void EmptyChestStart(GimmickBase emptyChest)
-    //{
-    //    if (emptyChest == null) return;
-    //    // EmptyChest以外のギミックが来たら無視
-    //    if (emptyChest.GetGimmickTag() != Gimmick.EmptyChest) return;
-
-    //    if (targetGimmick == null) targetGimmick = new List<GimmickBase>();
-    //    if (!targetGimmick.Contains(emptyChest))
-    //    {
-    //        EmptyChestGimmick emptyChests = null;
-    //        foreach (var g in targetGimmick)
-    //        {
-    //            if (g == null) continue;
-    //            if (g.GetGimmickTag() != Gimmick.EmptyChest) continue;
-    //            emptyChests = (EmptyChestGimmick)g;
-    //        }
-
-    //        // 距離判定
-    //        float oldDistance = Mathf.Infinity;
-
-    //        if (emptyChests != null)
-    //        {
-    //            oldDistance = Vector3.Distance(emptyChests.transform.position, thiefAI.transform.position);
-    //        }
-    //        float newDistance = Vector3.Distance(emptyChest.transform.position, thiefAI.transform.position);
-    //        // より近い空の宝箱が来たら、リストの先頭を入れ替える
-    //        if (newDistance < oldDistance)
-    //        {
-    //            targetGimmick.Remove(emptyChests);
-    //            targetGimmick.Insert(0, emptyChest);
-    //        }
-    //        else
-    //        {
-    //            targetGimmick.Add(emptyChest);
-    //        }
-    //    }
-    //}
-
-    ///// <summary>
-    ///// 空の宝箱ギミック用行動の更新
-    ///// </summary>
-    ///// <returns>ギミックの影響による移動をしたかどうか</returns>
-    //private bool EmptyChestUpdate()
-    //{
-    //    if (targetGimmick == null || targetGimmick.Count == 0) return false;
-
-    //    foreach (var g in targetGimmick)
-    //    {
-    //        if (g == null) return false;
-    //        if (g.GetGimmickTag() != Gimmick.EmptyChest) return false;
-    //    }
-
-    //    return true;
-    //}
-
-    ///// <summary>
-    ///// 空の宝箱ギミック用行動の終了
-    ///// </summary>
-    ///// <param name="emptyChest">空の宝箱ギミック</param>
-    //public void EmptyChestEnd(GimmickBase emptyChest)
-    //{
-    //    if (targetGimmick != null)
-    //    {
-    //        targetGimmick.Remove(emptyChest);
-    //    }
-
-    //    // アニメーション状態をリセットする
-    //    thiefAI?.read_AnimatorSystem?.ResetAnimationState();
-
-    //    // 泥棒の反応状態をaLERTに変更する
-    //    thiefAI?.read_ThiefReaction?.ChangeReaction(CS_ThiefReaction.ThiefReactionType.Alert, 2.0f);
-    //}
 }
