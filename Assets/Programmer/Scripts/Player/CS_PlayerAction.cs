@@ -72,6 +72,7 @@ public class CS_PlayerAction : MonoBehaviour
 
     private GimmickList gimmickManager;
     private CS_3DPlaySE playSE;
+    private CS_BackGroundPlaySE backGroundPlaySE;
     List<Collider> hitList = new List<Collider>();
     private readonly Dictionary<GimmickBase, GimmickDirection>
         preparedGimmickDirections =
@@ -164,6 +165,11 @@ public class CS_PlayerAction : MonoBehaviour
 
         GameObject se3DObject = GameObject.Find("3DSE");
         playSE = se3DObject != null ? se3DObject.GetComponent<CS_3DPlaySE>() : null;
+
+        GameObject seObject = GameObject.Find("SE");
+        backGroundPlaySE = seObject != null
+            ? seObject.GetComponent<CS_BackGroundPlaySE>()
+            : null;
 
         cs_GimmickSetEffectPlayer = GetComponent<CS_GimmickSetEffectPlayer>();
 
@@ -331,6 +337,7 @@ public class CS_PlayerAction : MonoBehaviour
                                 direction;
                             preparedGimmickSearchTargetStates[gimmick] =
                                 hasSearchTarget;
+                            gimmick.SetGimmickDirection(direction);
                         }
                     }
 
@@ -393,6 +400,7 @@ public class CS_PlayerAction : MonoBehaviour
         Debug.Log(roomName);
         if (currentRoom == null || isNotSettingRoom)
         {
+            PlayGimmickNotOnSE();
             warning?.ShowWarning();
             Debug.Log("この部屋にトラップは配置できません");
             return;    // 設置可能な部屋のみ設置する
@@ -652,6 +660,7 @@ public class CS_PlayerAction : MonoBehaviour
         }
         if (!gimmickManager.IsSetting(gimmick.gimmick))
         {
+            PlayGimmickNotOnSE();
             warning?.ShowWarning();
             Debug.Log("ギミックの設置失敗: IsSetting");
             return false;
@@ -668,6 +677,7 @@ public class CS_PlayerAction : MonoBehaviour
         Debug.Log(roomName);
         if (currentRoom == null || isNotSettingRoom)
         {
+            PlayGimmickNotOnSE();
             warning?.ShowWarning();
             Debug.Log("この部屋にトラップは配置できません");
             return false;    // 設置可能な部屋のみ設置する
@@ -693,6 +703,7 @@ public class CS_PlayerAction : MonoBehaviour
 
         if (!gimmick.GetIsSettingArea(placementValidationPosition))
         {
+            PlayGimmickNotOnSE();
             warning?.ShowWarning();
             return false;
         }
@@ -703,6 +714,7 @@ public class CS_PlayerAction : MonoBehaviour
         GimmickBase instance = null;
         if (!roomGrid.SetGimmickInGrid(settingPos, gimmick, out instance))
         {
+            PlayGimmickNotOnSE();
             warning?.ShowWarning();
             return false;
         }
@@ -747,6 +759,15 @@ public class CS_PlayerAction : MonoBehaviour
 
     public void SettingGimmickDirection(GimmickBase gimmick)
     {
+        if (gimmick != null &&
+            preparedGimmickDirections.TryGetValue(
+                gimmick,
+                out GimmickDirection preparedDirection))
+        {
+            gimmick.SetGimmickDirection(preparedDirection);
+            return;
+        }
+
         if (!TryCalculatePreparedGimmickDirection(
                 gimmick,
                 out GimmickDirection direction,
@@ -1245,6 +1266,17 @@ public class CS_PlayerAction : MonoBehaviour
         {
             warpUIGameObject.SetActive(false);
         }
+    }
+
+    private void PlayGimmickNotOnSE()
+    {
+        if (backGroundPlaySE == null)
+        {
+            Debug.LogWarning("GimmickNotOn の再生に必要な SE オブジェクトが見つかりません。");
+            return;
+        }
+
+        backGroundPlaySE.PlaySE("GimmickNotOn");
     }
 
     // 部屋移動やワープの祭にインタラクト状態をリセットする
