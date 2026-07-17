@@ -68,6 +68,8 @@ public class CS_MemorySystem
     private float findPlayerGraceTime;
     [Tooltip("プレイヤーを発見する猶予時間の初期値")]
     private float initialFindPlayerGraceTime;
+    [Tooltip("プレイヤーを問答無用で追いかけるフラグ")]
+    private bool isChasePlayer = false;
 
     [Tooltip("泥棒が探索するのにかかる秒数")]
     private List<int> searchTime;
@@ -123,6 +125,8 @@ public class CS_MemorySystem
         // プレイヤーを発見する猶予時間の初期値を設定
         initialFindPlayerGraceTime = data.findPlayerGraceTime;
         findPlayerGraceTime = 0.0f;
+
+        isChasePlayer = typedata.isChasePlayerWithoutQuestion;
 
         // 次の部屋探索に切り替える探索度の閾値を設定
         nextRoomSearchThreshold = typedata.nextRoomSearchThreshold;
@@ -212,10 +216,13 @@ public class CS_MemorySystem
             {
                 // 無敵状態のプレイヤーは探索対象にしない
                 if (entry.transform.GetComponent<CS_PlayerMove>().IsInvincible) continue;
-                // プレイヤーを発見してからの猶予時間が0以下の場合は探索対象にしない
-                if (findPlayerGraceTime <= 0.0f) continue;
-                // プレイヤーの無視フラグが立っている場合は探索対象にしない
-                if (ignorePlayer) continue;
+                if (!isChasePlayer)
+                {
+                    // プレイヤーを発見してからの猶予時間が0以下の場合は探索対象にしない
+                    if (findPlayerGraceTime <= 0.0f) continue;
+                    // プレイヤーの無視フラグが立っている場合は探索対象にしない
+                    if (ignorePlayer) continue;
+                }
 
                 // プレイヤー視認フラグを立てる
                 isPlayerObject = true;
@@ -431,7 +438,7 @@ public class CS_MemorySystem
             }
 
             // 現在の耐久値が1の場合
-            if (thiefAI?.read_Durability == 1)
+            if (thiefAI?.read_Durability == 1 || isChasePlayer)
             {
                 // 探索対象に設定
                 if (CS_ThiefDebugFlags.ChasePlayer)
@@ -609,7 +616,7 @@ public class CS_MemorySystem
                 thiefAI?.transform.LookAt(new Vector3(currentTarget.transform.position.x, thiefAI.transform.position.y, currentTarget.transform.position.z));
 
                 // 現在の耐久値が1より大きい場合
-                if (thiefAI.read_Durability > 1)
+                if (thiefAI.read_Durability > 1 && !isChasePlayer)
                 {
                     remainingIgnorePlayerTime -= Time.deltaTime;
                     if (remainingIgnorePlayerTime <= 0)
@@ -632,7 +639,8 @@ public class CS_MemorySystem
                     {
                         thiefAI.CatchCat();
 
-                        ignorePlayer = true;
+                        if (thiefAI.read_Durability > 1 && !isChasePlayer)
+                            ignorePlayer = true;
 
                         // CS_PlayerMoveに通知
                         ((CS_PlayerTarget)currentTarget).transform.GetComponent<CS_PlayerMove>().CaughtByThief(thiefAI.read_RemainingHoldCatTime, thiefAI.transform);
