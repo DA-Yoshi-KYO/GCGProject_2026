@@ -107,6 +107,8 @@ public class CS_PlayerAction : MonoBehaviour
     [HideInInspector]public bool doWarp;
     private bool isWarpInteract = false; // ワープ確定の押下中に設置/インタラクト判定へ流れないようにするフラグ
 
+    private Warning warning;
+
     private void OnValidate()
     {
         directionTriangleSize.x =
@@ -139,7 +141,8 @@ public class CS_PlayerAction : MonoBehaviour
         }
 
         gimmickManager = GetComponent<GimmickList>();
-
+        // Warning は Player ではなく GameUI 側にアタッチされている。
+        warning = FindObjectOfType<Warning>();
         // インプットアクションの登録
         playerData.customInputAction.Player.GimmickChange.started += OnSelect;
 
@@ -679,7 +682,10 @@ public class CS_PlayerAction : MonoBehaviour
             : settingPos;
 
         if (!gimmick.GetIsSettingArea(placementValidationPosition))
+        {
+            warning?.ShowWarning();
             return false;
+        }
 
         gimmick.gimmickState = GimmickState.Spawn;
 
