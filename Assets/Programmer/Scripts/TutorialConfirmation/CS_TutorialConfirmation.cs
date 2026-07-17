@@ -16,12 +16,20 @@ public class CS_TutorialConfirmation : MonoBehaviour
     [Header("FadeCanvasのPrefab格納")][SerializeField] private GameObject fadeCanvas;
     [Header("MovieCanvasを格納")][SerializeField] private GameObject movieCanvas;
 
+    [Header("背景の画像を格納")][SerializeField] private GameObject[] backGroundImage;
+
     private CustomInputAction inputActions;
     private int currentButton = 0;
 
     private CS_BackGroundPlaySE backGroundPlaySE;
 
     private Canvas tutorialConfirmationCanvas;
+
+    private float uiTimer = 0.0f;
+    [Header("UIアニメーションの時間間隔")][SerializeField] private float uiDuration;
+    [Header("UIアニメーションの最小の大きさ")][SerializeField] private Vector3 minScale;
+    [Header("UIアニメーションの最大の大きさ")][SerializeField] private Vector3 maxScale;
+    private bool reversibleScale = false;//拡大・縮小を判定
 
     private bool endSound = false;
 
@@ -35,8 +43,15 @@ public class CS_TutorialConfirmation : MonoBehaviour
 
         tutorialConfirmationCanvas = GetComponent<Canvas>();
 
+        if (backGroundImage != null && backGroundImage.Length >= 2)
+        {
+            backGroundImage[0].SetActive(true);
+            backGroundImage[1].SetActive(false);
+        }
+
         currentButton = 0;
         UpdateButtonTexture();
+        UpdateButtonScale();
     }
 
     private void OnDestroy()
@@ -52,6 +67,20 @@ public class CS_TutorialConfirmation : MonoBehaviour
             //アクティブを切り替える（不必要なため）
            movieCanvas.SetActive(false);
         }
+
+        switch (CS_CustomInputActionManager.instance.currentInputType)
+        {
+            case CS_CustomInputActionManager.InputType.Gamepad:
+                backGroundImage[0].SetActive(true);
+                backGroundImage[1].SetActive(false);
+                break;
+            case CS_CustomInputActionManager.InputType.KeyboardMouse:
+                backGroundImage[0].SetActive(false);
+                backGroundImage[1].SetActive(true);
+                break;
+        }
+
+        UpdateButtonScale();
 
         //決定ボタンでシーン遷移
         if (inputActions.TutorialConfirmation.Decision.triggered)
@@ -114,6 +143,41 @@ public class CS_TutorialConfirmation : MonoBehaviour
                 }
 
                 UpdateButtonTexture();
+            }
+        }
+    }
+
+    //選択しているボタンの拡縮処理
+    private void UpdateButtonScale()
+    {
+        for (int i = 0 ; i < buttonList.Length ; i++)
+        {
+            if (i == currentButton)
+            {
+                uiTimer += Time.deltaTime * 2.0f;
+                float t = Easing.EaseInOutSine(uiTimer, uiDuration);
+
+                if (!reversibleScale)
+                {
+                    buttonList[i].GetComponent<RectTransform>().localScale = Vector3.Lerp(minScale, maxScale, t);
+                }
+                else
+                {
+                    buttonList[i].GetComponent<RectTransform>().localScale = Vector3.Lerp(maxScale, minScale, t);
+                }
+
+                if (uiTimer > uiDuration)
+                {
+                    uiTimer = 0.0f;
+                    if (!reversibleScale)
+                        reversibleScale = true;
+                    else
+                        reversibleScale = false;
+                }
+            }
+            else
+            {
+                buttonList[i].GetComponent<RectTransform>().localScale = new Vector3(1.0f, 1.0f, 1.0f);
             }
         }
     }
