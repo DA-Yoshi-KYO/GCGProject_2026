@@ -53,6 +53,7 @@ public enum GimmickOutline
 public static class GimmickPlacementSurfaceRules
 {
     private const string floorsGroupName = "Floors";
+    private const string secondFloorGroupName = "SecondFloor";
     private const string secondFloorsGroupName = "SecondFloors";
     private const string polesGroupName = "Poles";
     private const string partitionGroupNamePart = "Partition";
@@ -74,6 +75,7 @@ public static class GimmickPlacementSurfaceRules
                 return IsInGroup(
                     surfaceTransform,
                     floorsGroupName,
+                    secondFloorGroupName,
                     secondFloorsGroupName);
 
             default:
