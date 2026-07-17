@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: MTV_GimmickItem
-  m_Shader: {fileID: -6465566751694194690, guid: 3fbabf8991b020748bbe1130aa7b6184,
+  m_Shader: {fileID: -6465566751694194690, guid: 4f43b46da54065a42a2f16b0a5c56ffb,
     type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -36,6 +36,10 @@ Material:
         m_Texture: {fileID: 2800000, guid: 7c50cff579ac71148aa72fe43b550189, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _Color_Variation_Mask_Texture:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _DetailAlbedoMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -50,6 +54,10 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _EmissionMap:
         m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _IGNCustomFunction_a0970ff423ce455cbf6b298f901b2559_Tex_2_Texture2D:
+        m_Texture: {fileID: 2800000, guid: 8e7b1c2a4f9d4e3b8a1c05f6d2e79b34, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
@@ -76,6 +84,14 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _SSHGTextureSample_b13b631ad5544fa892122dd4606e8278_ColorVariationMaskTexture_955206563_Texture2D:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SampleTexture2D_451f5a1722544f009eb0cbe535ac6cd3_Texture_1_Texture2D:
+        m_Texture: {fileID: 2800000, guid: 367d0aecf00d4694eae61198fc63c7b5, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _SpecGlossMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -94,6 +110,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _Alpha: 1
     - _AlphaClip: 0
     - _AlphaToMask: 0
     - _Birghtness: 0.2
@@ -110,6 +127,7 @@ Material:
     - _DstBlend: 0
     - _DstBlendAlpha: 0
     - _EdgeGain: 0
+    - _Enable_Color_Variation: 0
     - _EnvironmentReflections: 1
     - _GlossMapScale: 0
     - _Glossiness: 0
@@ -130,6 +148,7 @@ Material:
     - _ToonLevel: 12
     - _UseBaseColor: 1
     - _UseColorMap: 1
+    - _UseHole: 0
     - _UseMetallic: 1
     - _UseNormalMap: 1
     - _UseOcclusion: 1
@@ -140,7 +159,10 @@ Material:
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Emission: {r: 0, g: 0, b: 0, a: 0}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _HoleCenter: {r: 0, g: 0, b: 0, a: 0}
+    - _Overlay_Color: {r: 0, g: 0, b: 0, a: 0}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
     - _ToonEdgeColor: {r: 0, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []
