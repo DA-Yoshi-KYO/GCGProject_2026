@@ -10,6 +10,10 @@ using UnityEngine.SceneManagement;
 
 public class Option : MonoBehaviour
 {
+    private const string CanvasesObjectName = "Canvases";
+    private const string GameUICanvasName = "GameUICavas";
+    private const string OptionCanvasObjectName = "OptionCanvas";
+
     private static Option _instance;
 
     [SerializeField] private float _bgmVolume = 100.0f; // BGMの音量
@@ -26,13 +30,7 @@ public class Option : MonoBehaviour
     /// <summary>
     /// インスタンスを取得するプロパティ
     /// </summary>
-    public static Option Instance
-    {
-        get
-        {
-            return _instance;
-        }
-    }
+    public static Option Instance => _instance;
 
     /// <summary>
     /// インスタンスを破棄
@@ -66,19 +64,37 @@ public class Option : MonoBehaviour
         // Option入力のトリガー登録
         _input.Player.Option.performed += OnOption;
 
-        GameObject canvase = GameObject.Find("Canvases");
-        if(canvase == null)
+        GameUI = FindGameUI();
+    }
+
+    private void OnDestroy()
+    {
+        if (_input != null)
         {
-            Debug.Log("Canvasesオブジェクトが見つかりません。");
-            return;
+            _input.Player.Option.performed -= OnOption;
         }
-        Transform gameUITransform = canvase.transform.Find("GameUICavas");
+    }
+
+    /// <summary>
+    /// "Canvases/GameUICavas" を探して取得する
+    /// </summary>
+    private GameObject FindGameUI()
+    {
+        GameObject canvases = GameObject.Find(CanvasesObjectName);
+        if (canvases == null)
+        {
+            Debug.Log($"{CanvasesObjectName}オブジェクトが見つかりません。");
+            return null;
+        }
+
+        Transform gameUITransform = canvases.transform.Find(GameUICanvasName);
         if (gameUITransform == null)
         {
-            Debug.Log("GameUICavasオブジェクトが見つかりません。");
-            return;
+            Debug.Log($"{GameUICanvasName}オブジェクトが見つかりません。");
+            return null;
         }
-        GameUI = gameUITransform.gameObject;
+
+        return gameUITransform.gameObject;
     }
 
     /// <summary>
@@ -87,20 +103,20 @@ public class Option : MonoBehaviour
     private void OnOption(InputAction.CallbackContext ctx)
     {
         // タイトルシーンではオプションUIを開かない
-        if (SceneManager.GetActiveScene().name.ToString() == "TitleScene") return;
+        if (SceneManager.GetActiveScene().name == "TitleScene") return;
+
         if (!_isOptionUIActive)
         {
             OpenOptionUI();
         }
         else
         {
-            if(_prevOption== null)
+            if (_prevOption == null)
             {
                 Debug.LogError("OptionUIが存在しません。");
                 return;
             }
-            OptionSys optionSys = _prevOption.GetComponent<OptionSys>();
-            if (optionSys == null)
+            if (_prevOption.GetComponent<OptionSys>() == null)
             {
                 Debug.LogError("OptionUIにOptionSysコンポーネントがアタッチされていません。");
                 return;
@@ -120,10 +136,10 @@ public class Option : MonoBehaviour
         if (_prevOption == null)
         {
             // Canvasを探してその子オブジェクトとしてOptionUIを生成
-            GameObject canvas = GameObject.Find("OptionCanvas");
+            GameObject canvas = GameObject.Find(OptionCanvasObjectName);
             if (canvas == null)
             {
-                Debug.LogError("OptionCanvasオブジェクトが見つかりません。");
+                Debug.LogError($"{OptionCanvasObjectName}オブジェクトが見つかりません。");
                 return;
             }
             _prevOption = Instantiate(OptionUI, Vector3.zero, Quaternion.identity, canvas.transform);
@@ -131,16 +147,9 @@ public class Option : MonoBehaviour
             rectTransform.anchoredPosition = Vector2.zero;
         }
 
-        if(GameUI == null)
+        if (GameUI == null)
         {
-            GameObject canvase = GameObject.Find("Canvases");
-            if(canvase == null)
-            {
-                Debug.Log("Canvasesオブジェクトが見つかりません。");
-                return;
-            }
-            Transform gameUITransform = canvase.transform.Find("GameUICavas");
-            GameUI = gameUITransform != null ? gameUITransform.gameObject : null;
+            GameUI = FindGameUI();
         }
         if (GameUI != null)
         {
@@ -158,16 +167,7 @@ public class Option : MonoBehaviour
     {
         if (GameUI == null)
         {
-            GameObject canvase = GameObject.Find("Canvases");
-            if (canvase == null)
-            {
-                Debug.Log("Canvasesオブジェクトが見つかりません。");
-            }
-            else
-            {
-                Transform gameUITransform = canvase.transform.Find("GameUICavas");
-                GameUI = gameUITransform != null ? gameUITransform.gameObject : null;
-            }
+            GameUI = FindGameUI();
         }
         if (GameUI != null)
         {
@@ -181,8 +181,6 @@ public class Option : MonoBehaviour
         _isOptionUIActive = false;
         Time.timeScale = 1f;
     }
-
-    
 
     /// <summary>
     /// BGMの音量を設定
