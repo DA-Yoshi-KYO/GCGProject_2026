@@ -67,6 +67,8 @@ public class CS_PlayerMove : MonoBehaviour
     [SerializeField]
     private CS_EffectPlayer cs_EffectPlayer;
 
+    Option option;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -131,6 +133,8 @@ public class CS_PlayerMove : MonoBehaviour
         previousRotation = currentRotation;
 
         materials = GetComponentInChildren<SkinnedMeshRenderer>().materials;
+
+        option = GameObject.Find("GameOptionManager").GetComponent<Option>();
     }
 
     private void OnDestroy()
@@ -207,6 +211,17 @@ public class CS_PlayerMove : MonoBehaviour
     /// </summary>
     private void Move()
     {
+        // ワープ中は座標・回転をワープ処理側で直接制御するため、移動処理を行わない。
+        // ここで処理を続けると、ワープ直前の入力方向で移動・回転してしまい、
+        // ワープの方向を向かなくなったり、ワープ後に入力が残って勝手に歩き始める。
+        if (isWarping)
+        {
+            velocity.x = 0f;
+            velocity.z = 0f;
+            animator.SetBool("IsMoving", false);
+            return;
+        }
+
         if (catCaughtTime > 0f)
         {
             catCaughtTime -= Time.fixedDeltaTime;
@@ -355,10 +370,6 @@ public class CS_PlayerMove : MonoBehaviour
     /// </summary>
     public void CaughtByThief(float holdCatTime, Transform thiefTransform)
     {
-        transform.position = new Vector3(thiefTransform.position.x, thiefTransform.position.y - thiefTransform.localScale.y / 2.0f, thiefTransform.position.z);
-        transform.position += thiefTransform.forward;
-        visualModel.position = transform.position;
-
         // フラグを立てる
         catCaughtTime = holdCatTime;
         invincibleTime = holdCatTime * 2f;
@@ -375,13 +386,16 @@ public class CS_PlayerMove : MonoBehaviour
     // ---InputActionのコールバック関数---
     private void OnMove(InputAction.CallbackContext context)
     {
-        // ワープ中は移動入力を無効化する
-        if (isWarping) return;
+        if (option.GetIsOptionUIActive()) return;
 
+        // ワープ中でも入力状態は常に反映しておく（実際の移動はMove()側で止める）。
+        // ここでreturnすると、ワープ中にキーを離したcanceledが握り潰され、
+        // 古い入力方向が残ってワープ後に勝手に歩き始める。
         inputDirection = context.ReadValue<Vector2>();
     }
     private void OnJump(InputAction.CallbackContext context)
     {
+        if (option.GetIsOptionUIActive()) return;
         // ワープ中はジャンプ入力を無効化する
         if (isWarping) return;
 
@@ -397,6 +411,7 @@ public class CS_PlayerMove : MonoBehaviour
     }
     private void OnDash(InputAction.CallbackContext context)
     {
+        if (option.GetIsOptionUIActive()) return;
         // ワープ中はダッシュ入力を無効化する
         if (isWarping) return;
 
