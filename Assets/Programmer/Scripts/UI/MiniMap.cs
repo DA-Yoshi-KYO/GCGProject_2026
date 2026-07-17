@@ -178,6 +178,7 @@ public class MiniMap : MonoBehaviour
             miniMapInfo[index] = info;
             CS_VisionTarget vt = treasure.GetComponent<CS_VisionTarget>();
             if (vt == null) continue;
+            if (info.mode != TreasureMode.None) continue;
             info.mode = TreasureMode.None;
             if (vt.read_IsStolenMoveing)
             {
