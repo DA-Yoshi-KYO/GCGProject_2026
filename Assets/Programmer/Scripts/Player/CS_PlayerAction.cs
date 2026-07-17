@@ -361,6 +361,9 @@ public class CS_PlayerAction : MonoBehaviour
         if (!isSelectGimmickActive) return;
         float contextValue = context.ReadValue<float>();
 
+        if (gimmickManager.GetCurrentGimmick().Count <= 0)
+            return;
+
         //キー操作でUIのギミックの選択
         if (contextValue == 1) currentGimmickIndex++;
         else if (contextValue == -1) currentGimmickIndex--;
