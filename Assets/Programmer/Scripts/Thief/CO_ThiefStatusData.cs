@@ -69,4 +69,8 @@ public class CO_ThiefStatusData : ScriptableObject
     [Header("次の部屋探索に切り替える探索度")]
     [Tooltip("次の部屋探索に切り替える探索度の閾値"), Range(0, 100)]
     public int nextRoomSearchThreshold;
+
+    [Header("プレイヤーを問答無用でおいかけるかどうか")]
+    [Tooltip("プレイヤーを問答無用でおいかけるかどうか")]
+    public bool isChasePlayerWithoutQuestion;
 }
