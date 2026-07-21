@@ -64,7 +64,10 @@ class OutlineMaskPass : ScriptableRenderPass
     public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData)
     {
         var desc = renderingData.cameraData.cameraTargetDescriptor;
-        desc.colorFormat = RenderTextureFormat.ARGB32;
+        // ARGB32(8bit UNorm)だと1.0を超える色が書き込めず、
+        // _EmissionIntensity を上げても全て 1.0 に丸められて Bloom が反応しない。
+        // アルファ(=太さ)も必要なのでHDRかつアルファ付きの ARGBHalf を使う。
+        desc.colorFormat = RenderTextureFormat.ARGBHalf;
         desc.depthBufferBits = 0;   // 深度はカメラの深度バッファを共有するのでここでは持たない
         // desc.msaaSamples はカメラ設定のまま変更しない。
         // ここを 1 に固定すると、Game View で URP Asset の MSAA が有効な場合に

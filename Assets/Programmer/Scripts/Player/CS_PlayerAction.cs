@@ -1,4 +1,4 @@
-/* ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+﻿/* ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
  *    プレイヤーアクション作成
  * ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
  *    元浪梨緒
@@ -38,7 +38,7 @@ public class CS_PlayerAction : MonoBehaviour
         public float radius;    // 円柱の直径
         public float height;    // 円柱の高さ
     }
-    [SerializeField] public InteractSyllinder interactMin = new InteractSyllinder { radius = 3f, height = 3f };//インタラクトの範囲の最小値
+    [SerializeField] public InteractSyllinder interactMin = new InteractSyllinder { radius = 3f, height = 5f };//インタラクトの範囲の最小値
     [SerializeField] public InteractSyllinder interactMax = new InteractSyllinder { radius = 5f, height = 5f };//インタラクトの範囲の最大値
 
     [Header("インタラクト準備中のギミック方向表示（三角形は緑固定）")]
@@ -66,6 +66,8 @@ public class CS_PlayerAction : MonoBehaviour
     private CS_PlayerData playerData;
     float interactTime = 0.0f;
     Vector3 interactScale = Vector3.zero;
+    // interactFieldの円柱メッシュ本来のサイズ(スケール1のときのワールドサイズ)
+    Vector3 interactFieldMeshSize = Vector3.one;
     bool isInteracting = false;
 
     Vector3 settingPos = Vector3.zero;  // 設置予定場所
@@ -159,6 +161,13 @@ public class CS_PlayerAction : MonoBehaviour
         {
             Renderer interactRenderer = interactField.GetComponent<Renderer>();
             if (interactRenderer != null) interactRenderer.enabled = false;
+
+            // 判定サイズを見た目から求めるため、メッシュ本来のサイズを控えておく
+            MeshFilter interactMeshFilter = interactField.GetComponent<MeshFilter>();
+            if (interactMeshFilter != null && interactMeshFilter.sharedMesh != null)
+            {
+                interactFieldMeshSize = interactMeshFilter.sharedMesh.bounds.size;
+            }
         }
 
         // アウトラインコントローラーの初期化
@@ -277,7 +286,8 @@ public class CS_PlayerAction : MonoBehaviour
                 interactScale.x = Mathf.Min(interactScale.x, interactMax.radius);
                 interactScale.y = Mathf.Min(interactScale.y, interactMax.height);
                 interactScale.z = Mathf.Min(interactScale.z, interactMax.radius);
-                interactField.transform.localScale = interactScale;
+                // interactScaleはワールドでの直径/高さとして扱う
+                ApplyInteractFieldWorldSize(interactScale);
                 Vector3 interactPos = transform.position;
                 interactField.transform.position = interactPos;
 
@@ -288,11 +298,16 @@ public class CS_PlayerAction : MonoBehaviour
                         interactField.transform);
                 }
 
+                // 判定サイズは実際に描かれている円柱のワールドサイズから求める
+                GetInteractFieldWorldSize(
+                    out float fieldWorldRadius,
+                    out float fieldWorldHalfHeight);
+
                 // 円柱で判定を取るために、カプセルでオーバーラップを取った後に上下の半球を除外する
                 Collider[] hits = Physics.OverlapCapsule(
-                    interactField.transform.position + interactField.transform.up * interactScale.y * 0.5f,
-                    interactField.transform.position - interactField.transform.up * interactScale.y * 0.5f,
-                    interactScale.x * 0.5f,
+                    interactField.transform.position + interactField.transform.up * fieldWorldHalfHeight,
+                    interactField.transform.position - interactField.transform.up * fieldWorldHalfHeight,
+                    fieldWorldRadius,
                     LayerMask.GetMask("Gimmick", "Thief")
                     );
                 // 宝箱、落とし穴、にゃ気、テレポートはインタラクトを行わないので除外する
@@ -301,24 +316,18 @@ public class CS_PlayerAction : MonoBehaviour
                 hitList.RemoveAll(hitList => hitList.GetComponent<GimmickBase>().gimmick == Gimmick.Nyaki);
                 hitList.RemoveAll(hitList => hitList.GetComponent<GimmickBase>().gimmick == Gimmick.Teleport);
 
-                float minHeight = -interactScale.y * 0.5f;
-                float maxHeight = interactScale.y * 0.5f;
                 for (int i = 0 ; i < hits.Length ; i++)
                 {
                     if (hits[i] == null) continue;
-                    //ギミックの情報を取得
-                    Vector3 hitPoint = hits[i].ClosestPoint(interactField.transform.position);
 
-                    // interactField基準高さ
-                    float height =
-                        Vector3.Dot(
-                            hitPoint - interactField.transform.position,
-                            interactField.transform.up
-                        );
-
-                    // 高さ制限
-                    if (height < minHeight ||
-                        height > maxHeight)
+                    // カプセルの上下の半球ぶんまで拾ってしまうため、
+                    // 円柱の中に入っているかを判定し直す
+                    if (!IsInsideInteractCylinder(
+                            hits[i],
+                            interactField.transform.position,
+                            interactField.transform.up,
+                            fieldWorldRadius,
+                            fieldWorldHalfHeight))
                     {
                         continue;
                     }
@@ -328,7 +337,8 @@ public class CS_PlayerAction : MonoBehaviour
                     if (gimmick != null)
                     {
                         if (gimmick.gimmickState != GimmickState.Idle) continue;
-                        gimmick.SetOutLineColor(Color.green);
+                        // インタラクト範囲内の間はアウトラインを明滅させる
+                        gimmick.SetOutLineColor(Color.green, true);
 
                         if (!preparedGimmickDirections.ContainsKey(gimmick) &&
                             IsDirectionIndicatorTarget(gimmick) &&
@@ -1331,5 +1341,122 @@ public class CS_PlayerAction : MonoBehaviour
             gimmick?.SetOutLineColor(Color.gray);
         }
         hitList.Clear();
+    }
+
+    // 円柱メッシュ本来のサイズを取得する
+    private Vector3 GetInteractFieldMeshSize()
+    {
+        // 再生中はStartでキャッシュした値を使う
+        if (Application.isPlaying)
+        {
+            return interactFieldMeshSize;
+        }
+
+        if (interactField == null)
+        {
+            return Vector3.one;
+        }
+
+        MeshFilter interactMeshFilter =
+            interactField.GetComponent<MeshFilter>();
+
+        return
+            interactMeshFilter != null &&
+            interactMeshFilter.sharedMesh != null
+                ? interactMeshFilter.sharedMesh.bounds.size
+                : Vector3.one;
+    }
+
+    // ワールドでのサイズがworldSize(直径/高さ)になるようlocalScaleを設定する。
+    // 親(Player)のスケールとメッシュ本来のサイズを打ち消すことで、
+    // インスペクタのinteractMin/Maxの値がそのままワールドの直径/高さになる
+    private void ApplyInteractFieldWorldSize(Vector3 worldSize)
+    {
+        if (interactField == null)
+        {
+            return;
+        }
+
+        Transform fieldTransform = interactField.transform;
+
+        Vector3 meshSize = GetInteractFieldMeshSize();
+        Vector3 parentScale =
+            fieldTransform.parent != null
+                ? fieldTransform.parent.lossyScale
+                : Vector3.one;
+
+        fieldTransform.localScale = new Vector3(
+            DivideScale(worldSize.x, meshSize.x * parentScale.x),
+            DivideScale(worldSize.y, meshSize.y * parentScale.y),
+            DivideScale(worldSize.z, meshSize.z * parentScale.z));
+    }
+
+    private static float DivideScale(float worldSize, float scaleFactor)
+    {
+        return Mathf.Approximately(scaleFactor, 0.0f)
+            ? 0.0f
+            : worldSize / scaleFactor;
+    }
+
+    // 実際に描かれている円柱のワールドサイズから判定サイズを求める
+    private void GetInteractFieldWorldSize(
+        out float worldRadius,
+        out float worldHalfHeight)
+    {
+        worldRadius = 0.0f;
+        worldHalfHeight = 0.0f;
+
+        if (interactField == null)
+        {
+            return;
+        }
+
+        Vector3 worldSize = Vector3.Scale(
+            GetInteractFieldMeshSize(),
+            interactField.transform.lossyScale);
+
+        worldRadius = Mathf.Max(worldSize.x, worldSize.z) * 0.5f;
+        worldHalfHeight = worldSize.y * 0.5f;
+    }
+
+    // コライダーがインタラクト範囲の円柱の中に入っているかを判定する
+    private static bool IsInsideInteractCylinder(
+        Collider target,
+        Vector3 center,
+        Vector3 up,
+        float radius,
+        float halfHeight)
+    {
+        if (target == null)
+        {
+            return false;
+        }
+
+        Vector3 upAxis = up.normalized;
+
+        // 円柱の軸上で、コライダーに一番近い高さを求める
+        float axisHeight = Mathf.Clamp(
+            Vector3.Dot(target.bounds.center - center, upAxis),
+            -halfHeight,
+            halfHeight);
+
+        Vector3 axisPoint = center + upAxis * axisHeight;
+
+        // その高さから見た最近接点で、軸からの水平距離を測る
+        Vector3 closestPoint = target.ClosestPoint(axisPoint);
+        Vector3 offset = closestPoint - axisPoint;
+
+        Vector3 horizontalOffset = Vector3.ProjectOnPlane(offset, upAxis);
+
+        if (horizontalOffset.sqrMagnitude > radius * radius)
+        {
+            return false;
+        }
+
+        // 円柱の上下からはみ出していないか
+        float closestHeight = Vector3.Dot(closestPoint - center, upAxis);
+
+        return closestHeight >= -halfHeight &&
+               closestHeight <= halfHeight;
     }
 }
