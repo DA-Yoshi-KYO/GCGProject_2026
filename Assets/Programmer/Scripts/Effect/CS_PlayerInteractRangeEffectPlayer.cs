@@ -70,7 +70,7 @@ public class CS_PlayerInteractRangeEffectPlayer : MonoBehaviour
             go_InteractRangeEffectPrefab.transform.rotation;
 
         Vector3 v3_EffectScale =
-            GetEffectScale(tr_RangeField.localScale);
+            GetEffectScale(tr_RangeField.lossyScale);
 
         csad_CurrentRangeEffect =
             CS_EffectFactory.CreateEffect(
@@ -122,7 +122,7 @@ public class CS_PlayerInteractRangeEffectPlayer : MonoBehaviour
             tr_RangeField.position + v3_EffectPositionOffset;
 
         csad_CurrentRangeEffect.transform.localScale =
-            GetEffectScale(tr_RangeField.localScale);
+            GetEffectScale(tr_RangeField.lossyScale);
     }
 
     /// <summary>
@@ -141,6 +141,8 @@ public class CS_PlayerInteractRangeEffectPlayer : MonoBehaviour
 
     /// <summary>
     /// interactFieldのScaleからEffect用Scaleを作ります。
+    /// EffectはScale1のRoot配下に生成されるため、
+    /// localScaleではなくワールドスケール(lossyScale)を基準にします。
     /// </summary>
     /// <param name="v3_RangeScale">範囲表示用Scale。</param>
     /// <returns>Effect用Scale。</returns>
