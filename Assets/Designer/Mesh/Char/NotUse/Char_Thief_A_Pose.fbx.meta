@@ -1,9 +1,24 @@
 fileFormatVersion: 2
-guid: 7b832a2463f959e4894fdfa7a8edf043
+guid: e82b00641de3fb9498e9b791058724a8
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: body1
+    second: {fileID: 2100000, guid: a45a0128a237df841969c5a34dbd0850, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: head
+    second: {fileID: 2100000, guid: a49e2af2ff8fd7445b008d0913d4f3c4, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: hoodie
+    second: {fileID: 2100000, guid: 16e2d5266c7a8ab49b47cf7ab4140acb, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
@@ -97,9 +112,9 @@ ModelImporter:
     skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {instanceID: 0}
   autoGenerateAvatarMappingIfUnspecified: 1
-  animationType: 2
+  animationType: 3
   humanoidOversampling: 1
-  avatarSetup: 0
+  avatarSetup: 1
   addHumanoidExtraRootOnlyWhenUsingAvatar: 1
   importBlendShapeDeformPercent: 1
   remapMaterialsIfMaterialImportModeIsNone: 0
