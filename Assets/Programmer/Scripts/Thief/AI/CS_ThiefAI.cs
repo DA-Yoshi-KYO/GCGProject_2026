@@ -1036,13 +1036,94 @@ public class CS_ThiefAI : MonoBehaviour
         direction.Normalize();
 
         // ぶっ飛ばす力を加える
-        Vector3 force = direction * knockbackPower;
         Rigidbody rb = GetComponent<Rigidbody>();
         rb.isKinematic = false; // 物理演算を有効化
         rb.drag = 2f;
-        rb.AddForce(force, ForceMode.Impulse);
+
+        float maxDistance = PredictDistance(knockbackPower, rb.mass, rb.drag);
+
+        int obstacleMask = LayerMask.GetMask("Default");
+        float targetDistance = maxDistance;
+        if (Physics.Raycast(transform.position,
+                    direction,
+                    out RaycastHit hit,
+                    maxDistance,
+                    obstacleMask))
+        {
+            targetDistance = hit.distance - 0.5f;
+        }
+        else
+        {
+            targetDistance = maxDistance;
+        }
+
+        float adjustedForce = CalculateForce(rb, targetDistance, knockbackPower);
+
+        rb.AddForce(direction * adjustedForce, ForceMode.Impulse);
 
         // モデルの位置を地面に付けるために、モデル階層を少し下げる
         transform.GetComponentInChildren<Animator>().transform.localPosition = new Vector3(0, -1.0f, 0);
+    }
+
+    /// <summary>
+    /// ぶっ飛ばされたときの予測距離を計算する処理
+    /// </summary>
+    /// <param name="force"> ぶっ飛ばす力</param>
+    /// <param name="mass"> ぶっ飛ばされる物体の質量</param>
+    /// <param name="drag"> ぶっ飛ばされる物体のDrag</param>
+    /// <returns>予測距離</returns>
+    private float PredictDistance(float force, float mass, float drag)
+    {
+        float velocity = force / mass;
+        float distance = 0f;
+
+        for (int i = 0 ; i < 500 ; i++)
+        {
+            distance += velocity * Time.deltaTime;
+
+            // UnityのDragとほぼ同じ減衰
+            velocity *= 1f / (1f + drag * Time.deltaTime);
+
+            if (velocity < 0.05f)
+                break;
+        }
+
+        return distance;
+    }
+
+    /// <summary>
+    /// 指定された距離に到達するための力を計算する処理
+    /// </summary>
+    /// <param name="targetDistance"> 目標距離</param>
+    /// <param name="knockbackForce"> 通常の吹っ飛び力</param>
+    /// <returns>目標距離に到達するための力</returns>
+    float CalculateForce(Rigidbody rb, float targetDistance, float knockbackForce)
+    {
+        float minForce = 0f;
+        float maxForce = knockbackForce; // 通常の吹っ飛び力
+        const int loopCount = 15;
+
+        for (int i = 0 ; i < loopCount ; i++)
+        {
+            float force = (minForce + maxForce) * 0.5f;
+
+            float distance = PredictDistance(
+                force,
+                rb.mass,
+                rb.drag);
+
+            if (distance < targetDistance)
+            {
+                // もっと強くする
+                minForce = force;
+            }
+            else
+            {
+                // 強すぎるので弱くする
+                maxForce = force;
+            }
+        }
+
+        return maxForce;
     }
 }
