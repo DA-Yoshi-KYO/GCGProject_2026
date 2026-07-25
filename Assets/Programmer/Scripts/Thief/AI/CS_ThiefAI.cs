@@ -615,6 +615,10 @@ public class CS_ThiefAI : MonoBehaviour
                 else
                     ChangeStatus(ThiefState.Escape); // 状態を逃走に戻す
 
+                moveSystem.read_NavMeshAgent.enabled = true;
+                GetComponent<Rigidbody>().isKinematic = true;
+                // 通常時の位置にモデル階層を戻す
+                transform.GetComponentInChildren<Animator>().transform.localPosition = new Vector3(0, -0.6f, 0);
 
                 // アニメーションを歩き状態に設定
                 read_AnimatorSystem?.ResetAnimationState();
@@ -701,6 +705,11 @@ public class CS_ThiefAI : MonoBehaviour
             // 経過時間が退場するまでの時間を超えた場合は、退場する処理を追加する
             if (elapsedTimeAfterStun >= exitAfterStunTime)
             {
+                moveSystem.read_NavMeshAgent.enabled = true;
+                GetComponent<Rigidbody>().isKinematic = true;
+                // 通常時の位置にモデル階層を戻す
+                transform.GetComponentInChildren<Animator>().transform.localPosition = new Vector3(0, -0.6f, 0);
+
                 float fadeAmount = fadeAfterStunTime - (elapsedTimeAfterStun - exitAfterStunTime);
 
                 foreach (Material mat in thiefMaterial)
@@ -756,7 +765,9 @@ public class CS_ThiefAI : MonoBehaviour
         {
             case Gimmick.IronBall:
             case Gimmick.MagicAnkh:
-            read_AnimatorSystem?.SetAnimationState(CS_ThiefAnimation.ThiefAnimationState.Damage);
+                read_AnimatorSystem?.SetAnimationState(CS_ThiefAnimation.ThiefAnimationState.Damage);
+
+                BlowAwayAction(gimmickPoint, 3.0f);
                 break;
             case Gimmick.Pot:
             case Gimmick.Pitfall:
@@ -1008,5 +1019,30 @@ public class CS_ThiefAI : MonoBehaviour
 
         // NavMeshが見つからなければ設置不可
         return false;
+    }
+
+    /// <summary>
+    /// ぶっ飛びアクション
+    /// </summary>
+    /// <param name="gimmickPoint">ギミックの位置</param>
+    /// <param name="knockbackPower">ぶっ飛ばす力の強さ</param>
+    private void BlowAwayAction(Vector3 gimmickPoint, float knockbackPower)
+    {
+        moveSystem.read_NavMeshAgent.enabled = false; // ナビメッシュエージェントを無効化
+
+        // ギミックの位置から泥棒の位置への方向を計算
+        Vector3 direction = transform.position - gimmickPoint;
+        direction.y = 0; // 水平方向のみにする
+        direction.Normalize();
+
+        // ぶっ飛ばす力を加える
+        Vector3 force = direction * knockbackPower;
+        Rigidbody rb = GetComponent<Rigidbody>();
+        rb.isKinematic = false; // 物理演算を有効化
+        rb.drag = 2f;
+        rb.AddForce(force, ForceMode.Impulse);
+
+        // モデルの位置を地面に付けるために、モデル階層を少し下げる
+        transform.GetComponentInChildren<Animator>().transform.localPosition = new Vector3(0, -1.0f, 0);
     }
 }
