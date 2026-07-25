@@ -130,6 +130,9 @@ public class CS_ThiefAI : MonoBehaviour
     [Tooltip("気絶状態の更新処理を実行するかどうか")]
     private bool isUpdatingStunState = true;
 
+    [Tooltip("吹っ飛ばされる場合にかかる力")]
+    private float knockbackForce;
+
     [Tooltip("泥棒のリアクションUIを管理するコンポーネント")]
     private CS_ThiefReactionUI thiefReactionUI;
 
@@ -328,6 +331,8 @@ public class CS_ThiefAI : MonoBehaviour
         damageStunTime = data.stunTime;
         invincibleTime = data.invincibleTime;
         remainingInvincibleTime = 0.0f;
+
+        knockbackForce = data.knockbackPower;
 
         // 猫を捕まえている時間の初期値を設定
         initholdCatTime = typedata.holdCatTime;
@@ -767,7 +772,7 @@ public class CS_ThiefAI : MonoBehaviour
             case Gimmick.MagicAnkh:
                 read_AnimatorSystem?.SetAnimationState(CS_ThiefAnimation.ThiefAnimationState.Damage);
 
-                BlowAwayAction(gimmickPoint, 3.0f);
+                BlowAwayAction(gimmickPoint);
                 break;
             case Gimmick.Pot:
             case Gimmick.Pitfall:
@@ -1025,8 +1030,7 @@ public class CS_ThiefAI : MonoBehaviour
     /// ぶっ飛びアクション
     /// </summary>
     /// <param name="gimmickPoint">ギミックの位置</param>
-    /// <param name="knockbackPower">ぶっ飛ばす力の強さ</param>
-    private void BlowAwayAction(Vector3 gimmickPoint, float knockbackPower)
+    private void BlowAwayAction(Vector3 gimmickPoint)
     {
         moveSystem.read_NavMeshAgent.enabled = false; // ナビメッシュエージェントを無効化
 
@@ -1040,7 +1044,7 @@ public class CS_ThiefAI : MonoBehaviour
         rb.isKinematic = false; // 物理演算を有効化
         rb.drag = 2f;
 
-        float maxDistance = PredictDistance(knockbackPower, rb.mass, rb.drag);
+        float maxDistance = PredictDistance(knockbackForce, rb.mass, rb.drag);
 
         int obstacleMask = LayerMask.GetMask("Default");
         float targetDistance = maxDistance;
@@ -1057,7 +1061,7 @@ public class CS_ThiefAI : MonoBehaviour
             targetDistance = maxDistance;
         }
 
-        float adjustedForce = CalculateForce(rb, targetDistance, knockbackPower);
+        float adjustedForce = CalculateForce(rb, targetDistance);
 
         rb.AddForce(direction * adjustedForce, ForceMode.Impulse);
 
@@ -1095,9 +1099,8 @@ public class CS_ThiefAI : MonoBehaviour
     /// 指定された距離に到達するための力を計算する処理
     /// </summary>
     /// <param name="targetDistance"> 目標距離</param>
-    /// <param name="knockbackForce"> 通常の吹っ飛び力</param>
     /// <returns>目標距離に到達するための力</returns>
-    float CalculateForce(Rigidbody rb, float targetDistance, float knockbackForce)
+    float CalculateForce(Rigidbody rb, float targetDistance)
     {
         float minForce = 0f;
         float maxForce = knockbackForce; // 通常の吹っ飛び力
