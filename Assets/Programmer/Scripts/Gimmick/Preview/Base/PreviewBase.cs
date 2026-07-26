@@ -38,6 +38,7 @@ public class PreviewBase : MonoBehaviour
     private Material[] materials;
     private CS_OutlineTarget[] outlineTargets;
     private GimmickBase placementGimmick;
+    private GimmickList placementGimmickList;
     private Material placementPlaneMaterial;
     private Renderer placementPlaneRenderer;
     private MaterialPropertyBlock placementPlaneProperties;
@@ -101,9 +102,13 @@ public class PreviewBase : MonoBehaviour
         }
     }
 
-    public void SetupPlacementPreview(GimmickBase sourceGimmick, RoomGrid grid)
+    public void SetupPlacementPreview(
+        GimmickBase sourceGimmick,
+        RoomGrid grid,
+        GimmickList gimmickList)
     {
         placementGimmick = sourceGimmick;
+        placementGimmickList = gimmickList;
         placementGimmick.roomGrid = grid;
 
         MeshRenderer[] renderers = GetComponentsInChildren<MeshRenderer>(true);
@@ -157,7 +162,12 @@ public class PreviewBase : MonoBehaviour
         if (placementGimmick == null)
             return;
 
+        bool hasRemainingGimmick =
+            placementGimmickList != null &&
+            placementGimmickList.GetCurrentNum(
+                placementGimmick.GetGimmickTag()) > 0;
         bool canPlace =
+            hasRemainingGimmick &&
             placementGimmick.GetIsSettingArea(transform.position) &&
             (placementGimmick.roomGrid == null ||
              !placementGimmick.roomGrid.IsTreasureAtPosition(transform.position));

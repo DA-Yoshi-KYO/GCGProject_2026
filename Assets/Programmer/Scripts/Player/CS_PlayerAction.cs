@@ -1208,7 +1208,10 @@ public class CS_PlayerAction : MonoBehaviour
                  gimmick is MagicAnkhGimmick ||
                  gimmick is TeleportGimmick))
             {
-                placementPreview.SetupPlacementPreview(gimmick, roomGrid);
+                placementPreview.SetupPlacementPreview(
+                    gimmick,
+                    roomGrid,
+                    gimmickManager);
             }
 
             // =========================
