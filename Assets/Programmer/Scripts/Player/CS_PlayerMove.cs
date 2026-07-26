@@ -7,6 +7,7 @@
  * 2026-05-27 | リファクタリング（吉田）
  * 2026-05-29 | 足跡の生成処理追加
  */
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -66,6 +67,22 @@ public class CS_PlayerMove : MonoBehaviour
     [Header("Effect再生処理")]
     [SerializeField]
     private CS_EffectPlayer cs_EffectPlayer;
+
+    [Header("ジャンプ時の土煙")]
+    [SerializeField]
+    private Vector3 smokeLocalPositionOffset =
+        new Vector3(0.0f, 0.03f, 0.0f);
+
+    [SerializeField]
+    private Vector3 smokeRotationOffset =
+        new Vector3(0.0f, 0.0f, -45.0f);
+
+    [SerializeField]
+    private Vector3 smokeScaleMultiplier =
+        new Vector3(0.65f, 0.5f, 1.0f);
+
+    [SerializeField, Min(0.0f)]
+    private float smokeEndTime = 0.9f;
 
     Option option;
 
@@ -468,16 +485,41 @@ public class CS_PlayerMove : MonoBehaviour
 
         csst_EffectPlayData.CSST_EffectPlayData_Init();
 
+        Vector3 playerForward = transform.forward;
+        Vector3 playerRight = transform.right;
+        Vector3 playerUp = transform.up;
+
+        // 位置はPlayerの各ローカル軸を基準にOffsetを加える。
+        Vector3 smokePosition =
+            transform.position +
+            playerRight * smokeLocalPositionOffset.x +
+            playerUp * smokeLocalPositionOffset.y +
+            playerForward * smokeLocalPositionOffset.z;
+
+        // VolumeMeshの固定ローカル-Z速度がPlayer後方へ向くように、
+        // Effectのローカル+ZをPlayer.Forwardへ合わせる。
+        Quaternion smokeRotation =
+            Quaternion.LookRotation(
+                playerForward,
+                playerUp
+            ) *
+            Quaternion.Euler(
+                smokeRotationOffset
+            );
+
+        // ScaleはPlayerのワールドScaleを基準に倍率を掛ける。
+        Vector3 smokeScale =
+            Vector3.Scale(
+                transform.lossyScale,
+                smokeScaleMultiplier
+            );
+
         csst_EffectPlayData.SetPosition(
-            transform.position - transform.forward * 0.85f
+            smokePosition
         );
 
         csst_EffectPlayData.SetRotation(
-            transform.rotation
-        );
-
-        csst_EffectPlayData.SetScale(
-            new Vector3(0.65f, 0.5f, 1.0f)
+            smokeRotation
         );
 
         csst_EffectPlayData.SetLoopFlag(false);
@@ -491,6 +533,30 @@ public class CS_PlayerMove : MonoBehaviour
         if (smokeEffect != null)
         {
             smokeEffect.transform.SetParent(null, true);
+            smokeEffect.transform.localScale = smokeScale;
+
+            StartCoroutine(
+                EndSmokeEffectAfterDelay(
+                    smokeEffect
+                )
+            );
         }
+    }
+
+    /// <summary>
+    /// 走行用連番の次の煙が始まる前に再生を終了します。
+    /// </summary>
+    private IEnumerator EndSmokeEffectAfterDelay(
+        CSAD_EffectCommonProcessBase smokeEffect)
+    {
+        yield return new WaitForSeconds(smokeEndTime);
+
+        if (smokeEffect == null ||
+            smokeEffect.gameObject.activeSelf == false)
+        {
+            yield break;
+        }
+
+        smokeEffect.EndEffect();
     }
 }
