@@ -15,6 +15,9 @@
 //||
 //|| ――――――――――――――――――――――――――
 
+using System;
+using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering;
 public class NyakiGimmick : GimmickBase
@@ -27,6 +30,9 @@ public class NyakiGimmick : GimmickBase
 
     CSV_CatEye catEye;
     private bool isFirstActive = false;
+
+    float postprocessProgress = 0.0f;
+    [SerializeField] float activatePostprocessSpeed = 1.0f;
 
     protected override void Start()
     {
@@ -51,7 +57,7 @@ public class NyakiGimmick : GimmickBase
             if (catEye != null)
             {
                 catEye.active = true;
-                catEye.isEnabled.value = true;
+                StartCoroutine(ProgressPostprocess(false));
             }
             //当たり判定追加
             SetHitChecker(transform.position);
@@ -71,9 +77,44 @@ public class NyakiGimmick : GimmickBase
         //破壊関数
         if (catEye != null)
         {
-            catEye.isEnabled.value = false;
+            StartCoroutine(ProgressPostprocess(true, BrokenProgress));
+            
         }
+
+    }
+
+    private void BrokenProgress()
+    {
+        catEye.isEnabled.value = false;
         DeleteHitChecker();
         Destroy(gameObject);
+    }
+
+    IEnumerator ProgressPostprocess(bool isInverse, Action onComplete = null)
+    {
+        if (isInverse)
+        {
+            while (postprocessProgress > 0.0f)
+            {
+                postprocessProgress -= Time.deltaTime * activatePostprocessSpeed;
+                postprocessProgress = Mathf.Clamp01(postprocessProgress);
+                catEye.progressFloat.value = postprocessProgress;
+
+                yield return null;
+            }
+        }
+        else
+        {
+            while (postprocessProgress < 1.0f)
+            {
+                catEye.isEnabled.value = true;
+                postprocessProgress += Time.deltaTime * activatePostprocessSpeed;
+                postprocessProgress = Mathf.Clamp01(postprocessProgress);
+                catEye.progressFloat.value = postprocessProgress;
+                yield return null;
+            }
+        }
+
+        onComplete?.Invoke();
     }
 }
