@@ -130,6 +130,9 @@ public class CS_ThiefAI : MonoBehaviour
     [Tooltip("気絶状態の更新処理を実行するかどうか")]
     private bool isUpdatingStunState = true;
 
+    [Tooltip("吹っ飛ばされる場合にかかる力")]
+    private float knockbackForce;
+
     [Tooltip("泥棒のリアクションUIを管理するコンポーネント")]
     private CS_ThiefReactionUI thiefReactionUI;
 
@@ -328,6 +331,8 @@ public class CS_ThiefAI : MonoBehaviour
         damageStunTime = data.stunTime;
         invincibleTime = data.invincibleTime;
         remainingInvincibleTime = 0.0f;
+
+        knockbackForce = data.knockbackPower;
 
         // 猫を捕まえている時間の初期値を設定
         initholdCatTime = typedata.holdCatTime;
@@ -615,6 +620,10 @@ public class CS_ThiefAI : MonoBehaviour
                 else
                     ChangeStatus(ThiefState.Escape); // 状態を逃走に戻す
 
+                moveSystem.read_NavMeshAgent.enabled = true;
+                GetComponent<Rigidbody>().isKinematic = true;
+                // 通常時の位置にモデル階層を戻す
+                transform.GetComponentInChildren<Animator>().transform.localPosition = new Vector3(0, -0.6f, 0);
 
                 // アニメーションを歩き状態に設定
                 read_AnimatorSystem?.ResetAnimationState();
@@ -701,6 +710,11 @@ public class CS_ThiefAI : MonoBehaviour
             // 経過時間が退場するまでの時間を超えた場合は、退場する処理を追加する
             if (elapsedTimeAfterStun >= exitAfterStunTime)
             {
+                moveSystem.read_NavMeshAgent.enabled = true;
+                GetComponent<Rigidbody>().isKinematic = true;
+                // 通常時の位置にモデル階層を戻す
+                transform.GetComponentInChildren<Animator>().transform.localPosition = new Vector3(0, -0.6f, 0);
+
                 float fadeAmount = fadeAfterStunTime - (elapsedTimeAfterStun - exitAfterStunTime);
 
                 foreach (Material mat in thiefMaterial)
@@ -756,7 +770,9 @@ public class CS_ThiefAI : MonoBehaviour
         {
             case Gimmick.IronBall:
             case Gimmick.MagicAnkh:
-            read_AnimatorSystem?.SetAnimationState(CS_ThiefAnimation.ThiefAnimationState.Damage);
+                read_AnimatorSystem?.SetAnimationState(CS_ThiefAnimation.ThiefAnimationState.Damage);
+
+                BlowAwayAction(gimmickPoint);
                 break;
             case Gimmick.Pot:
             case Gimmick.Pitfall:
@@ -1008,5 +1024,109 @@ public class CS_ThiefAI : MonoBehaviour
 
         // NavMeshが見つからなければ設置不可
         return false;
+    }
+
+    /// <summary>
+    /// ぶっ飛びアクション
+    /// </summary>
+    /// <param name="gimmickPoint">ギミックの位置</param>
+    private void BlowAwayAction(Vector3 gimmickPoint)
+    {
+        moveSystem.read_NavMeshAgent.enabled = false; // ナビメッシュエージェントを無効化
+
+        // ギミックの位置から泥棒の位置への方向を計算
+        Vector3 direction = transform.position - gimmickPoint;
+        direction.y = 0; // 水平方向のみにする
+        direction.Normalize();
+
+        // ぶっ飛ばす力を加える
+        Rigidbody rb = GetComponent<Rigidbody>();
+        rb.isKinematic = false; // 物理演算を有効化
+        rb.drag = 2f;
+
+        float maxDistance = PredictDistance(knockbackForce, rb.mass, rb.drag);
+
+        int obstacleMask = LayerMask.GetMask("Default");
+        float targetDistance = maxDistance;
+        if (Physics.Raycast(transform.position,
+                    direction,
+                    out RaycastHit hit,
+                    maxDistance,
+                    obstacleMask))
+        {
+            targetDistance = hit.distance - 0.5f;
+        }
+        else
+        {
+            targetDistance = maxDistance;
+        }
+
+        float adjustedForce = CalculateForce(rb, targetDistance);
+
+        rb.AddForce(direction * adjustedForce, ForceMode.Impulse);
+
+        // モデルの位置を地面に付けるために、モデル階層を少し下げる
+        transform.GetComponentInChildren<Animator>().transform.localPosition = new Vector3(0, -1.0f, 0);
+    }
+
+    /// <summary>
+    /// ぶっ飛ばされたときの予測距離を計算する処理
+    /// </summary>
+    /// <param name="force"> ぶっ飛ばす力</param>
+    /// <param name="mass"> ぶっ飛ばされる物体の質量</param>
+    /// <param name="drag"> ぶっ飛ばされる物体のDrag</param>
+    /// <returns>予測距離</returns>
+    private float PredictDistance(float force, float mass, float drag)
+    {
+        float velocity = force / mass;
+        float distance = 0f;
+
+        for (int i = 0 ; i < 500 ; i++)
+        {
+            distance += velocity * Time.deltaTime;
+
+            // UnityのDragとほぼ同じ減衰
+            velocity *= 1f / (1f + drag * Time.deltaTime);
+
+            if (velocity < 0.05f)
+                break;
+        }
+
+        return distance;
+    }
+
+    /// <summary>
+    /// 指定された距離に到達するための力を計算する処理
+    /// </summary>
+    /// <param name="targetDistance"> 目標距離</param>
+    /// <returns>目標距離に到達するための力</returns>
+    float CalculateForce(Rigidbody rb, float targetDistance)
+    {
+        float minForce = 0f;
+        float maxForce = knockbackForce; // 通常の吹っ飛び力
+        const int loopCount = 15;
+
+        for (int i = 0 ; i < loopCount ; i++)
+        {
+            float force = (minForce + maxForce) * 0.5f;
+
+            float distance = PredictDistance(
+                force,
+                rb.mass,
+                rb.drag);
+
+            if (distance < targetDistance)
+            {
+                // もっと強くする
+                minForce = force;
+            }
+            else
+            {
+                // 強すぎるので弱くする
+                maxForce = force;
+            }
+        }
+
+        return maxForce;
     }
 }
