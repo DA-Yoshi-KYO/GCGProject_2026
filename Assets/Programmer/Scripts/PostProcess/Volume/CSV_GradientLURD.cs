@@ -13,6 +13,7 @@ public class CSV_GradientLURD : CSV_PostProcessVolumeBase
     [Header("デバッグ用パラメータ")]
     [Tooltip("デバッグ用の進行値を使用するか")] public BoolParameter useCustomProgress = new BoolParameter(false);
     [Tooltip("デバッグ用の進行値")] public ClampedFloatParameter customProgress = new ClampedFloatParameter(0f, 0f, 1f);
+    [Tooltip("時間")]public FloatParameter time = new FloatParameter(0.0f);
 
     public override void Apply(MaterialPropertyBlock materialBlock)
     {
@@ -22,5 +23,6 @@ public class CSV_GradientLURD : CSV_PostProcessVolumeBase
         materialBlock.SetFloat("_MaxTimeFloat", maxTime.value);
         materialBlock.SetFloat("_UseCustomProgress", useCustomProgress.value ? 1f : 0f);
         materialBlock.SetFloat("_CustomProgress", customProgress.value);
+        materialBlock.SetFloat("_TimeFloat", time.value);
     }
 }

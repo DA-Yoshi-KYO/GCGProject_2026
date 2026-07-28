@@ -5,8 +5,10 @@
  * ----------------------------------------------------------
  * 2026-05-15 | 初回作成
  */
+using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -17,12 +19,20 @@ public class CS_SceneTransition : MonoBehaviour
     { 
         BlackFade,
         CatFade,
+        PostProcessFade,
     }
 
-    [Header("フェードの種類")][SerializeField] private FadeKind fadeKind;//フェードの種類
+    [Header("フェードの種類（開始）")][SerializeField] private FadeKind fadeKindStart;//フェードの種類
+    [Header("フェードの種類（終了）")][SerializeField] private FadeKind fadeKindEnd;//フェードの種類
+
     [Header("ブラックフェードの画像")][SerializeField]private Image blackFadeImage;//フェードの画像
     [Header("猫フェードの画像")][SerializeField]private Image catInFadeImage;//フェードの画像
     [Header("猫フェードの画像")][SerializeField]private Image catOutFadeImage;//フェードの画像
+
+    [Header("Volume")][SerializeField] private Volume postprocessVolume;
+    private CSV_GradientLURD gradientLURD;
+    private float gradientTime = 0.0f;
+
     [Header("フェードにかける時間")][SerializeField] private float fadeDuration = 1.0f;//フェードにかける時間
 
     [Header("チュートリアル確認キャンバス")] [SerializeField] private GameObject tutorialConfirmationCanvas;
@@ -41,6 +51,12 @@ public class CS_SceneTransition : MonoBehaviour
         if (bgmObject != null)
         {
             backGroundPlayBGM = bgmObject.GetComponent<CS_BackGroundPlayBGM>();
+        }
+
+        if (postprocessVolume != null)
+        {
+            postprocessVolume.profile.TryGet(out gradientLURD);
+            gradientLURD.isEnabled.value = false;
         }
 
         InitSet();
@@ -68,7 +84,7 @@ public class CS_SceneTransition : MonoBehaviour
 
     public void StartSceneTransition(string sceneName, FadeKind kind)
     {
-        fadeKind = kind;
+        fadeKindEnd = kind;
         if (!transition)
         {
             StartCoroutine(SwitchScene(sceneName));
@@ -83,13 +99,18 @@ public class CS_SceneTransition : MonoBehaviour
         //フェードアウト
         fadeOut = true;
 
-        switch (fadeKind)
+        switch (fadeKindEnd)
         {
             case FadeKind.BlackFade:
                 yield return StartCoroutine(BlackFadeProcessing(1.0f));
                 break;
             case FadeKind.CatFade:
                 yield return StartCoroutine(CatFadeProcessing(1.0f, 0.0f, 0.0f, 18.0f));
+                break;
+            case FadeKind.PostProcessFade:
+                gradientLURD.isEnabled.value = true;
+                gradientLURD.time.value = gradientTime;
+                StartCoroutine(ProgressPostprocess());
                 break;
         }
 
@@ -132,7 +153,7 @@ public class CS_SceneTransition : MonoBehaviour
         catInFadeImage.raycastTarget = false;
         catOutFadeImage.raycastTarget = false;
 
-        switch (fadeKind)
+        switch (fadeKindStart)
         {
             case FadeKind.BlackFade:
                 blackFadeImage.color = new Color(blackFadeImage.color.r, blackFadeImage.color.g, blackFadeImage.color.b, 1.0f);
@@ -157,6 +178,20 @@ public class CS_SceneTransition : MonoBehaviour
                 //フェードイン
                 fadeOut = false;
                 StartCoroutine(CatFadeProcessing(0.0f, 18.0f, 1.0f, 0.0f));
+                break;
+
+            case FadeKind.PostProcessFade:
+                blackFadeImage.color = new Color(blackFadeImage.color.r, blackFadeImage.color.g, blackFadeImage.color.b, 0.0f);
+
+                catInFadeImage.material.SetFloat("_AlphaScaleFloat", 1.0f);
+                catInFadeImage.material.SetFloat("_CurrentScaleFloat", 0.0f);
+
+                catOutFadeImage.material.SetFloat("_AlphaScaleFloat", 1.0f);
+                catOutFadeImage.material.SetFloat("_CurrentScaleFloat", 0.0f);
+
+                gradientLURD.isEnabled.value = true;
+                gradientLURD.time.value = gradientTime;
+                StartCoroutine(ProgressPostprocess());
                 break;
         }
     }
@@ -228,5 +263,17 @@ public class CS_SceneTransition : MonoBehaviour
 
         catInFadeImage.material.SetFloat("_AlphaScaleFloat", endAlpha);
         catOutFadeImage.material.SetFloat("_AlphaScaleFloat", endAlpha);
+    }
+
+    IEnumerator ProgressPostprocess()
+    {
+        gradientTime = 0.0f;
+        while(gradientTime < gradientLURD.maxTime.value)
+        {
+            gradientTime += Time.unscaledDeltaTime;
+            gradientLURD.time.value = gradientTime;
+
+            yield return null;
+        }
     }
 }
