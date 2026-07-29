@@ -7,6 +7,7 @@
  * 2026-05-27 | リファクタリング（吉田）
  * 2026-05-29 | 足跡の生成処理追加
  */
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -66,6 +67,24 @@ public class CS_PlayerMove : MonoBehaviour
     [Header("Effect再生処理")]
     [SerializeField]
     private CS_EffectPlayer cs_EffectPlayer;
+
+    [Header("ジャンプ時の土煙")]
+    [SerializeField]
+    private Vector3 smokeLocalPositionOffset =
+        new Vector3(0.0f, 0.03f, 0.0f);
+
+    [SerializeField]
+    private Vector3 smokeRotationOffset =
+        new Vector3(0.0f, 0.0f, -45.0f);
+
+    [SerializeField]
+    private Vector3 smokeScaleMultiplier =
+        new Vector3(0.65f, 0.5f, 1.0f);
+
+    [SerializeField, Min(0.0f)]
+    private float smokeEndTime = 0.9f;
+
+    Option option;
 
     // Start is called before the first frame update
     void Start()
@@ -131,6 +150,8 @@ public class CS_PlayerMove : MonoBehaviour
         previousRotation = currentRotation;
 
         materials = GetComponentInChildren<SkinnedMeshRenderer>().materials;
+
+        option = GameObject.Find("GameOptionManager").GetComponent<Option>();
     }
 
     private void OnDestroy()
@@ -207,6 +228,17 @@ public class CS_PlayerMove : MonoBehaviour
     /// </summary>
     private void Move()
     {
+        // ワープ中は座標・回転をワープ処理側で直接制御するため、移動処理を行わない。
+        // ここで処理を続けると、ワープ直前の入力方向で移動・回転してしまい、
+        // ワープの方向を向かなくなったり、ワープ後に入力が残って勝手に歩き始める。
+        if (isWarping)
+        {
+            velocity.x = 0f;
+            velocity.z = 0f;
+            animator.SetBool("IsMoving", false);
+            return;
+        }
+
         if (catCaughtTime > 0f)
         {
             catCaughtTime -= Time.fixedDeltaTime;
@@ -355,10 +387,6 @@ public class CS_PlayerMove : MonoBehaviour
     /// </summary>
     public void CaughtByThief(float holdCatTime, Transform thiefTransform)
     {
-        transform.position = new Vector3(thiefTransform.position.x, thiefTransform.position.y - thiefTransform.localScale.y / 2.0f, thiefTransform.position.z);
-        transform.position += thiefTransform.forward;
-        visualModel.position = transform.position;
-
         // フラグを立てる
         catCaughtTime = holdCatTime;
         invincibleTime = holdCatTime * 2f;
@@ -375,13 +403,16 @@ public class CS_PlayerMove : MonoBehaviour
     // ---InputActionのコールバック関数---
     private void OnMove(InputAction.CallbackContext context)
     {
-        // ワープ中は移動入力を無効化する
-        if (isWarping) return;
+        if (option.GetIsOptionUIActive()) return;
 
+        // ワープ中でも入力状態は常に反映しておく（実際の移動はMove()側で止める）。
+        // ここでreturnすると、ワープ中にキーを離したcanceledが握り潰され、
+        // 古い入力方向が残ってワープ後に勝手に歩き始める。
         inputDirection = context.ReadValue<Vector2>();
     }
     private void OnJump(InputAction.CallbackContext context)
     {
+        if (option.GetIsOptionUIActive()) return;
         // ワープ中はジャンプ入力を無効化する
         if (isWarping) return;
 
@@ -397,6 +428,7 @@ public class CS_PlayerMove : MonoBehaviour
     }
     private void OnDash(InputAction.CallbackContext context)
     {
+        if (option.GetIsOptionUIActive()) return;
         // ワープ中はダッシュ入力を無効化する
         if (isWarping) return;
 
@@ -453,16 +485,41 @@ public class CS_PlayerMove : MonoBehaviour
 
         csst_EffectPlayData.CSST_EffectPlayData_Init();
 
+        Vector3 playerForward = transform.forward;
+        Vector3 playerRight = transform.right;
+        Vector3 playerUp = transform.up;
+
+        // 位置はPlayerの各ローカル軸を基準にOffsetを加える。
+        Vector3 smokePosition =
+            transform.position +
+            playerRight * smokeLocalPositionOffset.x +
+            playerUp * smokeLocalPositionOffset.y +
+            playerForward * smokeLocalPositionOffset.z;
+
+        // VolumeMeshの固定ローカル-Z速度がPlayer後方へ向くように、
+        // Effectのローカル+ZをPlayer.Forwardへ合わせる。
+        Quaternion smokeRotation =
+            Quaternion.LookRotation(
+                playerForward,
+                playerUp
+            ) *
+            Quaternion.Euler(
+                smokeRotationOffset
+            );
+
+        // ScaleはPlayerのワールドScaleを基準に倍率を掛ける。
+        Vector3 smokeScale =
+            Vector3.Scale(
+                transform.lossyScale,
+                smokeScaleMultiplier
+            );
+
         csst_EffectPlayData.SetPosition(
-            transform.position - transform.forward * 0.85f
+            smokePosition
         );
 
         csst_EffectPlayData.SetRotation(
-            transform.rotation
-        );
-
-        csst_EffectPlayData.SetScale(
-            new Vector3(0.65f, 0.5f, 1.0f)
+            smokeRotation
         );
 
         csst_EffectPlayData.SetLoopFlag(false);
@@ -476,6 +533,30 @@ public class CS_PlayerMove : MonoBehaviour
         if (smokeEffect != null)
         {
             smokeEffect.transform.SetParent(null, true);
+            smokeEffect.transform.localScale = smokeScale;
+
+            StartCoroutine(
+                EndSmokeEffectAfterDelay(
+                    smokeEffect
+                )
+            );
         }
+    }
+
+    /// <summary>
+    /// 走行用連番の次の煙が始まる前に再生を終了します。
+    /// </summary>
+    private IEnumerator EndSmokeEffectAfterDelay(
+        CSAD_EffectCommonProcessBase smokeEffect)
+    {
+        yield return new WaitForSeconds(smokeEndTime);
+
+        if (smokeEffect == null ||
+            smokeEffect.gameObject.activeSelf == false)
+        {
+            yield break;
+        }
+
+        smokeEffect.EndEffect();
     }
 }

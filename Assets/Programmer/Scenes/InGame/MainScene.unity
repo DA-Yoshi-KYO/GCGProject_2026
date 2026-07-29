@@ -1064,7 +1064,8 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 3236306455538854288, guid: 8e1a2530a5fdd8e4ab76018ba7e1e22f, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8e1a2530a5fdd8e4ab76018ba7e1e22f, type: 3}
@@ -1767,6 +1768,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8784038905683024093, guid: b84e1da6339c5304b906a96fff98ccfe,
         type: 3}
+      propertyPath: volume
+      value: 
+      objectReference: {fileID: 551290931739923718}
+    - target: {fileID: -8784038905683024093, guid: b84e1da6339c5304b906a96fff98ccfe,
+        type: 3}
       propertyPath: OptionUI
       value: 
       objectReference: {fileID: 6236320345070655301, guid: 36385dd3d6e460749af9105c7b382787,
@@ -2464,12 +2470,17 @@ PrefabInstance:
         type: 3}
       propertyPath: cs_FrontConnection.cs_TargetCreatePoint
       value: 
-      objectReference: {fileID: 1347509654}
+      objectReference: {fileID: 2133503044}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
       propertyPath: cs_FrontConnection.e_TargetOutDirection
       value: 3
       objectReference: {fileID: 0}
+    - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
+        type: 3}
+      propertyPath: cs_FrontConnection.m_hierograph_material
+      value: 
+      objectReference: {fileID: 2100000, guid: e31d5cf89d4f83344802832b045614f8, type: 2}
     - target: {fileID: -2822709700095580061, guid: 115e0ea21b2d1464fa46799fcc24c27c,
         type: 3}
       propertyPath: cs_BackConnection.cs_RoomEnemyEntryDataSO
@@ -2986,7 +2997,8 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 6871135009046170661, guid: 8e1a2530a5fdd8e4ab76018ba7e1e22f, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8e1a2530a5fdd8e4ab76018ba7e1e22f, type: 3}
@@ -3520,7 +3532,7 @@ Transform:
   m_GameObject: {fileID: 2020262214}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.05, z: 155}
+  m_LocalPosition: {x: 0, y: 0.05, z: 100}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3551,7 +3563,7 @@ Transform:
   m_GameObject: {fileID: 2067910354}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
-  m_LocalPosition: {x: -6, y: 0, z: 155}
+  m_LocalPosition: {x: -1.32, y: 0, z: 105}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4065,6 +4077,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 991451740903014827, guid: 6050fd3af03816d4ebd2d313a81c713d,
         type: 3}
+      propertyPath: list_RoomCreatePointGenerateData.Array.data[5].list_RandomRoomBlockPrefabs.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 991451740903014827, guid: 6050fd3af03816d4ebd2d313a81c713d,
+        type: 3}
       propertyPath: list_RoomCreatePointGenerateData.Array.data[6].list_RandomRoomBlockPrefabs.Array.size
       value: 2
       objectReference: {fileID: 0}
@@ -4112,7 +4129,19 @@ PrefabInstance:
         type: 3}
     - target: {fileID: 991451740903014827, guid: 6050fd3af03816d4ebd2d313a81c713d,
         type: 3}
+      propertyPath: list_RoomCreatePointGenerateData.Array.data[5].list_RandomRoomBlockPrefabs.Array.data[0]
+      value: 
+      objectReference: {fileID: 7823415351353896877, guid: d75006eb3c74e4940a553c1b12138c1b,
+        type: 3}
+    - target: {fileID: 991451740903014827, guid: 6050fd3af03816d4ebd2d313a81c713d,
+        type: 3}
       propertyPath: list_RoomCreatePointGenerateData.Array.data[5].list_RandomRoomBlockPrefabs.Array.data[1]
+      value: 
+      objectReference: {fileID: 5652029755238022159, guid: b82a5a0f060d3d34097f2653320103c7,
+        type: 3}
+    - target: {fileID: 991451740903014827, guid: 6050fd3af03816d4ebd2d313a81c713d,
+        type: 3}
+      propertyPath: list_RoomCreatePointGenerateData.Array.data[5].list_RandomRoomBlockPrefabs.Array.data[2]
       value: 
       objectReference: {fileID: 5646823382267403765, guid: 232f85383a3aaa94d92b4626f6e7e465,
         type: 3}
@@ -4127,6 +4156,12 @@ PrefabInstance:
       propertyPath: list_RoomCreatePointGenerateData.Array.data[6].list_RandomRoomBlockPrefabs.Array.data[1]
       value: 
       objectReference: {fileID: 432796890172666503, guid: e816e97518b5e474880cd268b3f0fb60,
+        type: 3}
+    - target: {fileID: 991451740903014827, guid: 6050fd3af03816d4ebd2d313a81c713d,
+        type: 3}
+      propertyPath: list_RoomCreatePointGenerateData.Array.data[6].list_RandomRoomBlockPrefabs.Array.data[2]
+      value: 
+      objectReference: {fileID: 7823415351353896877, guid: d75006eb3c74e4940a553c1b12138c1b,
         type: 3}
     - target: {fileID: 1595244217030525855, guid: 6050fd3af03816d4ebd2d313a81c713d,
         type: 3}

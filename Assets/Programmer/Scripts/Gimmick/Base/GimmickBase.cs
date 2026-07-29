@@ -53,6 +53,7 @@ public enum GimmickOutline
 public static class GimmickPlacementSurfaceRules
 {
     private const string floorsGroupName = "Floors";
+    private const string secondFloorGroupName = "SecondFloor";
     private const string secondFloorsGroupName = "SecondFloors";
     private const string polesGroupName = "Poles";
     private const string partitionGroupNamePart = "Partition";
@@ -74,6 +75,7 @@ public static class GimmickPlacementSurfaceRules
                 return IsInGroup(
                     surfaceTransform,
                     floorsGroupName,
+                    secondFloorGroupName,
                     secondFloorsGroupName);
 
             default:
@@ -137,6 +139,8 @@ public class GimmickBase : MonoBehaviour
     private const string AudioManagerPath = "AudioManager/3DSE";
     private const string SummonSeName = "Gimmick_Summon";
     private const string SummonSeCategory = "Summon";
+    // OutLineMask.shaderの_EmissionIntensityの上限
+    private const float MaxOutlineEmissionIntensity = 30.0f;
 
     // GimmickDirection -> 回転 / 方向ベクトル の対応表（switch の重複を排除）
     private static readonly Dictionary<GimmickDirection, Quaternion> DirectionRotations = new Dictionary<GimmickDirection, Quaternion>
@@ -249,6 +253,15 @@ public class GimmickBase : MonoBehaviour
     protected CS_OutlineTarget outlineTarget;
     protected float outlineWidth = 6f;
 
+    [Header("アウトラインの明滅")]
+    [Tooltip("明滅の速さ / 秒あたりの周期数"), Min(0)]
+    [SerializeField] private float outlinePulseSpeed = 1f;
+    [Tooltip("発光時の強度倍率(非発光時=通常の発光強度に対する倍率)"), Range(1f, 5f)]
+    [SerializeField] private float outlinePulseIntensityMultiplier = 3.0f;
+
+    private bool isOutlinePulsing;
+    private float defaultOutlineIntensity = 6.0f;
+
     private readonly HashSet<Collider> searchHitBuffer = new HashSet<Collider>();
 
     protected virtual void Start()
@@ -281,7 +294,10 @@ public class GimmickBase : MonoBehaviour
         {
             outlineTarget = GetComponentInChildren<CS_OutlineTarget>();
             if (outlineTarget != null)
+            {
+                defaultOutlineIntensity = outlineTarget.emissionIntensity;
                 outlineTarget.SetOutline(Color.gray, outlineWidth);
+            }
             else
                 Debug.LogWarning("CS_OutlineTargetが見つかりません: " + gameObject.name);
         }
@@ -707,6 +723,10 @@ public class GimmickBase : MonoBehaviour
     {
         roomIndex = index;
     }
+    public GimmickState GetGimmickState()
+    {
+        return gimmickState;
+    }
 
     private Collider[] OverlapBoxCollider(BoxCollider box)
     {
@@ -754,6 +774,37 @@ public class GimmickBase : MonoBehaviour
                 BrokenUpdate();
                 break;
         }
+
+        UpdateOutlinePulse();
+    }
+
+    // インタラクト範囲内(緑アウトライン)の間だけ発光強度を明滅させる。
+    // 非発光時は通常の発光強度のままで、発光時はそこから更に強く光らせる
+    private void UpdateOutlinePulse()
+    {
+        if (outlineTarget == null)
+            return;
+
+        float intensity = defaultOutlineIntensity;
+
+        if (isOutlinePulsing)
+        {
+            float rate =
+                (Mathf.Sin(Time.time * outlinePulseSpeed * Mathf.PI * 2.0f) + 1.0f) * 0.5f;
+
+            // シェーダの_EmissionIntensityの上限を超えないようにする
+            float peakIntensity = Mathf.Min(
+                defaultOutlineIntensity * outlinePulseIntensityMultiplier,
+                MaxOutlineEmissionIntensity);
+
+            intensity = Mathf.Lerp(
+                defaultOutlineIntensity,
+                peakIntensity,
+                rate);
+        }
+
+        if (!Mathf.Approximately(intensity, outlineTarget.emissionIntensity))
+            outlineTarget.SetEmissionIntensity(intensity);
     }
 
     protected virtual void PreviewUpdate()
@@ -983,6 +1034,8 @@ public class GimmickBase : MonoBehaviour
 
         SetMaterialsAlpha(brokenAlpha);
 
+        isOutlinePulsing = false;
+
         if (outlineTarget != null)
             outlineTarget.SetOutlineAlpha(0.0f);
 
@@ -992,8 +1045,10 @@ public class GimmickBase : MonoBehaviour
         }
     }
 
-    public void SetOutLineColor(Color col)
+    public void SetOutLineColor(Color col, bool pulse = false)
     {
+        isOutlinePulsing = pulse;
+
         if (outlineTarget != null)
             outlineTarget.SetOutlineColor(col);
     }

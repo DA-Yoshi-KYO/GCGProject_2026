@@ -89,7 +89,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveAmount: 3
   velocityWalk: 1
-  velocityRun: 1.5
+  velocityRun: 1.8
   jumpAmount: 10
   gravity: -20
   airResistance: 0.97
@@ -131,10 +131,10 @@ MonoBehaviour:
   interactSpeed: 1
   interactMin:
     radius: 3
-    height: 3
+    height: 5
   interactMax:
     radius: 5
-    height: 3
+    height: 5
   directionTriangleSize: {x: 0.4, y: 0.3}
   directionTriangleMoveSpeed: 2
   directionTriangleLifetime: 0.75
@@ -281,7 +281,7 @@ MonoBehaviour:
   - gimmickTag: 5
     gimmickInfo:
       coolTime: 20
-      maxNum: 3
+      maxNum: 1
       currentNum: 0
     itemPrefab: {fileID: 3784575776439470413, guid: 9988d2f929e240744b330f3925377dfb,
       type: 3}

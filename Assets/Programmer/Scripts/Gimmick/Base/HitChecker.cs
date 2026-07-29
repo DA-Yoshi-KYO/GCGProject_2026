@@ -371,7 +371,6 @@ public class HitChecker : MonoBehaviour
                             EnemyDame(enemy, effectDamage, false, effectEnemies[i], effect);
                             break;
                         case Gimmick.EmptyChest:
-                            thiefAI.read_ThiefGimmickAction.EmptyChestStart(gimmickBase);
                             ((EmptyChestGimmick)gimmickBase).AddTargetThiefAI(thiefAI);
                             break;
                         case Gimmick.Nyaki:

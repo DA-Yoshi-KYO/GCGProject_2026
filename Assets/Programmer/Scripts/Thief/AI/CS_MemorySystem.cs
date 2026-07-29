@@ -68,6 +68,8 @@ public class CS_MemorySystem
     private float findPlayerGraceTime;
     [Tooltip("プレイヤーを発見する猶予時間の初期値")]
     private float initialFindPlayerGraceTime;
+    [Tooltip("プレイヤーを問答無用で追いかけるフラグ")]
+    private bool isChasePlayer = false;
 
     [Tooltip("泥棒が探索するのにかかる秒数")]
     private List<int> searchTime;
@@ -114,6 +116,8 @@ public class CS_MemorySystem
         firstEntryPoint = entryPoint;
         firstEntryDirection = doorDir;
 
+        movePointCount = entryRoom.movePoints.Count;
+
         // プレイヤーを追跡する残り時間の初期値を設定
         initialRemainingIgnorePlayerTime = typedata.pursuitTime;
         remainingIgnorePlayerTime = typedata.pursuitTime;
@@ -121,6 +125,8 @@ public class CS_MemorySystem
         // プレイヤーを発見する猶予時間の初期値を設定
         initialFindPlayerGraceTime = data.findPlayerGraceTime;
         findPlayerGraceTime = 0.0f;
+
+        isChasePlayer = typedata.isChasePlayerWithoutQuestion;
 
         // 次の部屋探索に切り替える探索度の閾値を設定
         nextRoomSearchThreshold = typedata.nextRoomSearchThreshold;
@@ -210,10 +216,13 @@ public class CS_MemorySystem
             {
                 // 無敵状態のプレイヤーは探索対象にしない
                 if (entry.transform.GetComponent<CS_PlayerMove>().IsInvincible) continue;
-                // プレイヤーを発見してからの猶予時間が0以下の場合は探索対象にしない
-                if (findPlayerGraceTime <= 0.0f) continue;
-                // プレイヤーの無視フラグが立っている場合は探索対象にしない
-                if (ignorePlayer) continue;
+                if (!isChasePlayer)
+                {
+                    // プレイヤーを発見してからの猶予時間が0以下の場合は探索対象にしない
+                    if (findPlayerGraceTime <= 0.0f) continue;
+                    // プレイヤーの無視フラグが立っている場合は探索対象にしない
+                    if (ignorePlayer) continue;
+                }
 
                 // プレイヤー視認フラグを立てる
                 isPlayerObject = true;
@@ -308,7 +317,8 @@ public class CS_MemorySystem
                 // 空の宝箱罠の場合は、宝物があるフラグを立てる
                 case Gimmick.EmptyChest:
                     {
-                        thiefAI?.read_ThiefGimmickAction?.EmptyChestStart(trap.gimmickScript);
+                        if (trap.gimmickScript.GetGimmickState() == GimmickState.Broken) continue;
+                        //thiefAI?.read_ThiefGimmickAction?.EmptyChestStart(trap.gimmickScript);
                         isTreasureObject = true;
                     }
                     break;
@@ -428,7 +438,7 @@ public class CS_MemorySystem
             }
 
             // 現在の耐久値が1の場合
-            if (thiefAI?.read_Durability == 1)
+            if (thiefAI?.read_Durability == 1 || isChasePlayer)
             {
                 // 探索対象に設定
                 if (CS_ThiefDebugFlags.ChasePlayer)
@@ -606,7 +616,7 @@ public class CS_MemorySystem
                 thiefAI?.transform.LookAt(new Vector3(currentTarget.transform.position.x, thiefAI.transform.position.y, currentTarget.transform.position.z));
 
                 // 現在の耐久値が1より大きい場合
-                if (thiefAI.read_Durability > 1)
+                if (thiefAI.read_Durability > 1 && !isChasePlayer)
                 {
                     remainingIgnorePlayerTime -= Time.deltaTime;
                     if (remainingIgnorePlayerTime <= 0)
@@ -629,7 +639,8 @@ public class CS_MemorySystem
                     {
                         thiefAI.CatchCat();
 
-                        ignorePlayer = true;
+                        if (thiefAI.read_Durability > 1 && !isChasePlayer)
+                            ignorePlayer = true;
 
                         // CS_PlayerMoveに通知
                         ((CS_PlayerTarget)currentTarget).transform.GetComponent<CS_PlayerMove>().CaughtByThief(thiefAI.read_RemainingHoldCatTime, thiefAI.transform);
@@ -648,6 +659,34 @@ public class CS_MemorySystem
                         return;
                     }
                 }
+            }
+            else if (currentTarget is CS_TrapTarget tt && tt.gimmickScript.GetGimmickTag() == Gimmick.EmptyChest)
+            {
+                // 探索対象との距離が、探索済みとする距離の閾値以下になっている場合
+                if (distanceToTarget <= tt.gimmickScript.GetHitRange().x / 1.5f)
+                {
+                    thiefAI?.read_MoveSystem?.Stop();
+
+                    // 探索しているオブジェクトの方を向くように回転させる
+                    thiefAI?.transform.LookAt(new Vector3(currentTarget.transform.position.x, thiefAI.transform.position.y, currentTarget.transform.position.z));
+
+                    // 泥棒のアニメーション状態をHuntingに変更する
+                    thiefAI?.read_AnimatorSystem?.ResetAnimationState();
+                    thiefAI?.read_AnimatorSystem?.SetAnimationState(CS_ThiefAnimation.ThiefAnimationState.Hunting);
+
+                    // 泥棒のリアクションを探索に変更する
+                    thiefAI?.read_ThiefReaction?.ChangeReaction(CS_ThiefReaction.ThiefReactionType.Searching);
+                }
+                else
+                {
+                    // 探索対象の方へ移動する
+                    thiefAI?.read_MoveSystem?.MoveTo(currentTarget.transform.position);
+
+                    thiefAI?.read_AnimatorSystem?.ResetAnimationState();
+
+                    thiefAI?.read_ThiefReaction?.ClearReactionByType(CS_ThiefReaction.ThiefReactionType.Searching);
+                }
+
             }
             // 部屋の移動ポイントの場合
             else if (currentTarget is CS_ThiefTarget)

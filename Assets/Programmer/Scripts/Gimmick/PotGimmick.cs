@@ -15,38 +15,6 @@ using System.Collections;
 
 public static class PotDropRules
 {
-    private static readonly GimmickDirection[] UpCorrectionOrder =
-    {
-        GimmickDirection.Up,
-        GimmickDirection.Left,
-        GimmickDirection.Right,
-        GimmickDirection.Down,
-    };
-
-    private static readonly GimmickDirection[] DownCorrectionOrder =
-    {
-        GimmickDirection.Down,
-        GimmickDirection.Left,
-        GimmickDirection.Right,
-        GimmickDirection.Up,
-    };
-
-    private static readonly GimmickDirection[] LeftCorrectionOrder =
-    {
-        GimmickDirection.Left,
-        GimmickDirection.Up,
-        GimmickDirection.Down,
-        GimmickDirection.Right,
-    };
-
-    private static readonly GimmickDirection[] RightCorrectionOrder =
-    {
-        GimmickDirection.Right,
-        GimmickDirection.Up,
-        GimmickDirection.Down,
-        GimmickDirection.Left,
-    };
-
     public static Vector3 GetMoveOffset(
         GimmickDirection direction,
         Vector2 gridSize)
@@ -91,16 +59,18 @@ public static class PotDropRules
 
     public static bool TryGetCorrectedDirection(
         GimmickDirection preferredDirection,
+        bool isPreferredDirectionInsideRoom,
         bool canDropUp,
         bool canDropDown,
         bool canDropLeft,
         bool canDropRight,
         out GimmickDirection correctedDirection)
     {
-        GimmickDirection[] correctionOrder =
-            GetCorrectionOrder(preferredDirection);
+        GimmickDirection candidate = isPreferredDirectionInsideRoom
+            ? preferredDirection
+            : GetOppositeDirection(preferredDirection);
 
-        foreach (GimmickDirection candidate in correctionOrder)
+        for (int i = 0; i < 4; i++)
         {
             if (CanDrop(
                     candidate,
@@ -112,31 +82,55 @@ public static class PotDropRules
                 correctedDirection = candidate;
                 return true;
             }
+
+            candidate = RotateClockwise(candidate);
         }
 
         correctedDirection = preferredDirection;
         return false;
     }
 
-    private static GimmickDirection[] GetCorrectionOrder(
-        GimmickDirection preferredDirection)
+    private static GimmickDirection GetOppositeDirection(
+        GimmickDirection direction)
     {
-        switch (preferredDirection)
+        switch (direction)
         {
             case GimmickDirection.Up:
-                return UpCorrectionOrder;
+                return GimmickDirection.Down;
 
             case GimmickDirection.Down:
-                return DownCorrectionOrder;
+                return GimmickDirection.Up;
 
             case GimmickDirection.Left:
-                return LeftCorrectionOrder;
+                return GimmickDirection.Right;
 
             case GimmickDirection.Right:
-                return RightCorrectionOrder;
+                return GimmickDirection.Left;
 
             default:
-                return UpCorrectionOrder;
+                return direction;
+        }
+    }
+
+    private static GimmickDirection RotateClockwise(
+        GimmickDirection direction)
+    {
+        switch (direction)
+        {
+            case GimmickDirection.Up:
+                return GimmickDirection.Right;
+
+            case GimmickDirection.Right:
+                return GimmickDirection.Down;
+
+            case GimmickDirection.Down:
+                return GimmickDirection.Left;
+
+            case GimmickDirection.Left:
+                return GimmickDirection.Up;
+
+            default:
+                return direction;
         }
     }
 
@@ -436,6 +430,8 @@ public class PotGimmick : GimmickBase
         GimmickDirection preferredDirection,
         out GimmickDirection correctedDirection)
     {
+        bool isPreferredDirectionInsideRoom =
+            IsDirectionInsideRoom(preferredDirection);
         bool canDropUp =
             CanDropInDirection(GimmickDirection.Up);
         bool canDropDown =
@@ -447,6 +443,7 @@ public class PotGimmick : GimmickBase
 
         return PotDropRules.TryGetCorrectedDirection(
             preferredDirection,
+            isPreferredDirectionInsideRoom,
             canDropUp,
             canDropDown,
             canDropLeft,
@@ -456,7 +453,7 @@ public class PotGimmick : GimmickBase
 
     private bool CanDropInDirection(GimmickDirection direction)
     {
-        if (roomGrid == null)
+        if (!IsDirectionInsideRoom(direction))
             return false;
 
         Vector3 moveOffset =
@@ -511,6 +508,19 @@ public class PotGimmick : GimmickBase
             false);
 
         return canDrop;
+    }
+
+    private bool IsDirectionInsideRoom(GimmickDirection direction)
+    {
+        if (roomGrid == null)
+            return false;
+
+        Vector3 targetPosition =
+            transform.position +
+            PotDropRules.GetMoveOffset(direction, roomGrid.gridSize);
+        Vector2Int targetGrid = roomGrid.GetGridFromPos(targetPosition);
+
+        return targetGrid.x >= 0 && targetGrid.y >= 0;
     }
 
     private bool ShouldIgnoreDropHit(Collider hitCollider)

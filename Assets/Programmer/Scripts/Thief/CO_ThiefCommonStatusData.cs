@@ -59,6 +59,10 @@ public class CO_ThiefCommonStatusData : ScriptableObject
     [Tooltip("泥棒が気絶した後のフェード時間"), Min(0)]
     public int fadeAfterStunTime;
 
+    [Header("泥棒が吹っ飛ばされる力の大きさ")]
+    [Tooltip("泥棒が吹っ飛ばされる力の大きさ"), Min(0.0f)]
+    public float knockbackPower;
+
     [Header("泥棒のリアクションUI用スプライトリスト")]
     [Tooltip("泥棒のリアクションUI用スプライトリスト")]
     public List<Sprite> reactionUISprites;

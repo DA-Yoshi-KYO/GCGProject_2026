@@ -60,94 +60,40 @@ public class CS_WarpTrigger : MonoBehaviour
         }
     }
 
-    private void OnTriggerEnter(Collider other)
+    public void ExecWarp(GameObject player)
     {
-        if (!other.CompareTag("Player"))
-            return;
-
         if (selfWarpPoint.warping)
             return;
 
-        //UI表示
-        CS_PlayerAction playerAction = other.GetComponent<CS_PlayerAction>();
+        CS_PlayerAction playerAction = player.GetComponent<CS_PlayerAction>();
         if (playerAction == null)
         {
             Debug.LogError("ワープさせるプレイヤーのコンポーネントにCS_PlayerActionがありませんでした");
             return;
         }
 
-        playerAction.warpUIView = true;
-
-        //ワープする
-        if (!playerAction.doWarp)
-            return;
-
-        CS_PlayerMove playerMove = other.GetComponent<CS_PlayerMove>();
+        CS_PlayerMove playerMove = player.GetComponent<CS_PlayerMove>();
         if (playerMove == null)
         {
             Debug.LogError("ワープさせるプレイヤーのコンポーネントにCS_PlayerMoveがありませんでした");
             return;
         }
 
+
         // プレイヤーをワープの正面に配置し、ワープの方向へ向かせる
-        PlacePlayerInFrontOfWarp(other, playerMove);
+        PlacePlayerInFrontOfWarp(player, playerMove);
 
         playerMove.animator.SetTrigger("WarpInTrigger");
         playerMove.SetWarpFlag(true);
 
-        StartCoroutine(WarpCoroutine(other, playerMove.animator));
-
-        playerAction.warpUIView = false;
-        playerAction.doWarp = false;
+        StartCoroutine(WarpCoroutine(player, playerMove.animator));
     }
 
-    private void OnTriggerExit(Collider other)
-    {
-        if (!other.CompareTag("Player"))
-            return;
-
-        CS_PlayerAction playerAction = other.GetComponent<CS_PlayerAction>();
-        playerAction.warpUIView = false;
-        playerAction.doWarp = false;
-    }
-
-    private void OnTriggerStay(Collider other)
-    {
-        if (!other.CompareTag("Player"))
-            return;
-
-        if (selfWarpPoint.warping)
-            return;
-
-        CS_PlayerAction playerAction = other.GetComponent<CS_PlayerAction>();
-
-        //ワープする
-        if (!playerAction.doWarp)
-            return;
-
-        CS_PlayerMove playerMove = other.GetComponent<CS_PlayerMove>();
-        if (playerMove == null)
-        {
-            Debug.LogError("ワープさせるプレイヤーのコンポーネントにCS_PlayerMoveがありませんでした");
-            return;
-        }
-
-        // プレイヤーをワープの正面に配置し、ワープの方向へ向かせる
-        PlacePlayerInFrontOfWarp(other, playerMove);
-
-        playerMove.animator.SetTrigger("WarpInTrigger");
-        playerMove.SetWarpFlag(true);
-
-        StartCoroutine(WarpCoroutine(other, playerMove.animator));
-
-        playerAction.warpUIView = false;
-        playerAction.doWarp = false;
-    }
 
     /// <summary>
     /// プレイヤーをワープの正面に配置し、ワープの方向へ向かせる
     /// </summary>
-    private void PlacePlayerInFrontOfWarp(Collider other, CS_PlayerMove playerMove)
+    private void PlacePlayerInFrontOfWarp(GameObject other, CS_PlayerMove playerMove)
     {
         Vector2 dirWarpToPlayer = new Vector2(playerMove.transform.position.x - transform.position.x, playerMove.transform.position.z - transform.position.z).normalized;
 
@@ -155,7 +101,12 @@ public class CS_WarpTrigger : MonoBehaviour
         playerStartPoint.x += dirWarpToPlayer.x;
         playerStartPoint.z += dirWarpToPlayer.y;
 
-        Quaternion playerRotate = Quaternion.LookRotation(Vector3.Normalize(transform.position - playerStartPoint));
+        // ワープの方を向かせる。高さ(Y)の差で上下に傾かないよう水平成分だけを使う
+        Vector3 dirPlayerToWarp = transform.position - playerStartPoint;
+        dirPlayerToWarp.y = 0f;
+        Quaternion playerRotate = dirPlayerToWarp.sqrMagnitude > 0.0001f
+            ? Quaternion.LookRotation(dirPlayerToWarp.normalized)
+            : other.transform.rotation;
 
         // CharacterControllerが有効なまま座標を書き換えると位置がずれるため、一旦無効化してから書き換える
         CharacterController controller = other.GetComponent<CharacterController>();
@@ -169,7 +120,7 @@ public class CS_WarpTrigger : MonoBehaviour
         playerMove.SyncTransform(playerStartPoint, playerRotate);
     }
 
-    IEnumerator WarpCoroutine(Collider other, Animator animator)
+    IEnumerator WarpCoroutine(GameObject other, Animator animator)
     {
         // WarpInアニメーションの再生開始を待つ
         yield return null;
@@ -187,7 +138,7 @@ public class CS_WarpTrigger : MonoBehaviour
         WarpDo(other);
     }
 
-    private void WarpDo(Collider other)
+    private void WarpDo(GameObject other)
     {
         CS_WarpPoint wp = GetComponent<CS_WarpPoint>();
         CharacterController controller = other.GetComponent<CharacterController>();
