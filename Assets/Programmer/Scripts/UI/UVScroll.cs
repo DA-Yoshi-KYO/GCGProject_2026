@@ -19,7 +19,7 @@ public class UVScroller : MonoBehaviour
 
     private void Update()
     {
-        _uvOffset += new Vector2(scrollSpeedX, scrollSpeedY) * Time.deltaTime;
+        _uvOffset += new Vector2(scrollSpeedX, scrollSpeedY) * Time.unscaledDeltaTime;
 
         // 負数でも正しく0〜1にループする
         _uvOffset.x = Mathf.Repeat(_uvOffset.x, 1f);
