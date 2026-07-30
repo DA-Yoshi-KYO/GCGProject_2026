@@ -5,7 +5,6 @@
  * ----------------------------------------------------------
  * 2026-05-15 | 初回作成
  */
-using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -108,6 +107,14 @@ public class CS_SceneTransition : MonoBehaviour
                 yield return StartCoroutine(CatFadeProcessing(1.0f, 0.0f, 0.0f, 18.0f));
                 break;
             case FadeKind.PostProcessFade:
+                blackFadeImage.color = new Color(blackFadeImage.color.r, blackFadeImage.color.g, blackFadeImage.color.b, 0.0f);
+
+                catInFadeImage.material.SetFloat("_AlphaScaleFloat", 1.0f);
+                catInFadeImage.material.SetFloat("_CurrentScaleFloat", 0.0f);
+
+                catOutFadeImage.material.SetFloat("_AlphaScaleFloat", 1.0f);
+                catOutFadeImage.material.SetFloat("_CurrentScaleFloat", 0.0f);
+
                 gradientLURD.isEnabled.value = true;
                 gradientLURD.time.value = gradientTime;
                 StartCoroutine(ProgressPostprocess());
