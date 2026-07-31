@@ -48,13 +48,14 @@ public class CS_EffectOverlapLoopSpriteSheet : CS_EffectSpriteSheet
 
     /// <summary>
     /// 更新処理です。
-    /// 親のUpdateSpriteSheetは通常ループ用なので、ここで重ねループ用に差し替えます。
+    /// 親の通常SpriteSheet処理ではなく、
+    /// 重ねループ用の処理を実行します。
     /// </summary>
     protected override void Update()
     {
         if (b_IsBillboard)
         {
-            UpdateBillboardForOverlapLoop();
+            UpdateBillboard();
         }
 
         if (b_IsPlaying == false)
@@ -482,34 +483,5 @@ public class CS_EffectOverlapLoopSpriteSheet : CS_EffectSpriteSheet
         }
 
         return false;
-    }
-
-    /// <summary>
-    /// Billboard処理です。
-    /// </summary>
-    private void UpdateBillboardForOverlapLoop()
-    {
-        if (tr_BillboardTarget == null)
-        {
-            Camera mainCamera = Camera.main;
-
-            if (mainCamera == null)
-            {
-                return;
-            }
-
-            tr_BillboardTarget = mainCamera.transform;
-        }
-
-        Vector3 v3_DirectionToCamera =
-            transform.position - tr_BillboardTarget.position;
-
-        if (v3_DirectionToCamera.sqrMagnitude <= 0.0001f)
-        {
-            return;
-        }
-
-        transform.rotation =
-            Quaternion.LookRotation(v3_DirectionToCamera.normalized);
     }
 }

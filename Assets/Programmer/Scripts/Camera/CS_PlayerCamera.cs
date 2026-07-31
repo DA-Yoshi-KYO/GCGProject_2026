@@ -334,6 +334,9 @@ public class CS_PlayerCamera : MonoBehaviour
         roomCamera = roomCameraObject.GetComponent<CS_RoomCamera>();
         roomCameraObject.GetComponent<Camera>().enabled = true;
 
+        // カメラのビルボードの更新
+        CS_BillboardCameraCache.RefreshActiveMainCamera();
+
         GetComponent<CS_PlayerAction>().ResetInteract();
     }
 

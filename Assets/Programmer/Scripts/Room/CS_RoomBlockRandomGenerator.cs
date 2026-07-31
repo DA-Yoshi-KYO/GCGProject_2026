@@ -67,6 +67,7 @@ public class CS_RoomBlockRandomGenerator : MonoBehaviour
         {
             cs_RoomBlockPrefabGenerator.RebuildGeneratedRoomLinks();
             ActivateRandomTreasures();
+            CS_BillboardCameraCache.CacheMainCameras();
             cs_RoomBlockPrefabGenerator.CreatePlayerAtFirstRoomStartPoint();
             return;
         }
@@ -177,6 +178,9 @@ public class CS_RoomBlockRandomGenerator : MonoBehaviour
         ActivateRandomTreasures();
 
         yield return null;
+
+        // Room生成後に、Display 1用MainCameraをすべて取得して保存します。
+        CS_BillboardCameraCache.CacheMainCameras();
 
         // 部屋生成完了フラグをtrueに設定します。
         b_IsRuntimeRegenerating = true;

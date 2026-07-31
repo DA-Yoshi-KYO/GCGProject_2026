@@ -88,29 +88,35 @@ public abstract class CS_EffectSpriteSheet : CSAD_EffectCommonProcessBase
     /// <summary>
     /// Billboard処理です。
     /// </summary>
-    private void UpdateBillboard()
+    protected void UpdateBillboard()
     {
-        if (tr_BillboardTarget == null)
+        // 外部から明示的に指定されている場合は、そのTransformを優先します。
+        Transform tr_TargetCamera = tr_BillboardTarget;
+
+        // 外部指定がない場合は、
+        // キャッシュされている現在有効なMainCameraを使用します。
+        if (tr_TargetCamera == null)
         {
-            Camera mainCamera = Camera.main;
+            tr_TargetCamera =
+                CS_BillboardCameraCache.GetActiveMainCameraTransform();
+        }
 
-            if (mainCamera == null)
-            {
-                return;
-            }
-
-            tr_BillboardTarget = mainCamera.transform;
+        if (tr_TargetCamera == null)
+        {
+            return;
         }
 
         Vector3 v3_DirectionToCamera =
-            transform.position - tr_BillboardTarget.position;
+            transform.position - tr_TargetCamera.position;
 
         if (v3_DirectionToCamera.sqrMagnitude <= 0.0001f)
         {
             return;
         }
 
-        transform.rotation = Quaternion.LookRotation(v3_DirectionToCamera.normalized);
+        transform.rotation =
+            Quaternion.LookRotation(
+                v3_DirectionToCamera.normalized);
     }
 
     /// <summary>
