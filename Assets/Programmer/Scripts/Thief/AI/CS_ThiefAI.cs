@@ -794,12 +794,7 @@ public class CS_ThiefAI : MonoBehaviour
         }
 
         // ダメージを受けたときのSEを再生する
-        if (isHit)
-        {
-            // 直接ダメージを受けたときのリアクションに変更
-            thiefReaction.ChangeReaction(CS_ThiefReaction.ThiefReactionType.HitTrap);
-        }
-        else
+        if (!isHit)
         {
             // 間接的にダメージを受けたときのリアクションに変更
             thiefReaction.ChangeReaction(CS_ThiefReaction.ThiefReactionType.NearHitTrap);

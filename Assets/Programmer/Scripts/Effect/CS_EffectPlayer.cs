@@ -63,6 +63,31 @@ public class CS_EffectPlayer : MonoBehaviour
     }
 
     /// <summary>
+    /// 再生するEffectPrefabを設定します。
+    /// </summary>
+    /// <param name="go_NewEffectPrefab">設定するEffectPrefab。</param>
+    public void SetEffectPrefab(GameObject go_NewEffectPrefab)
+    {
+        if (go_EffectPrefab == go_NewEffectPrefab)
+        {
+            return;
+        }
+
+        if (csad_CurrentEffect != null)
+        {
+            csad_CurrentEffect.EndEffect();
+            csad_CurrentEffect = null;
+        }
+
+        go_EffectPrefab = go_NewEffectPrefab;
+
+        // Prefabが変わったためPoolを作り直します。
+        cs_EffectPool = null;
+
+        b_IsPrefabRotationTracking = false;
+    }
+
+    /// <summary>
     /// Prefab側Rotationの変更を確認し、
     /// 現在再生中Effectへ反映します。
     /// </summary>
