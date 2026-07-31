@@ -123,7 +123,7 @@ public class CS_ResultUIAnimationBase : MonoBehaviour
                     data.transitionRotate.target.x * Mathf.Deg2Rad,
                     data.transitionRotate.target.y * Mathf.Deg2Rad,
                     data.transitionRotate.target.z * Mathf.Deg2Rad);
-                rectTransform.Rotate(initRotateRadian +
+                rectTransform.rotation = Quaternion.Euler(initRotateRadian +
                 (targetRotateRadian - initRotateRadian) *
                 Easing.Ease(data.rotateEaseKind, timer, duration));
             }
