@@ -632,7 +632,7 @@ public class CS_MemorySystem
                 thiefAI?.read_ThiefReaction?.ChangeReaction(CS_ThiefReaction.ThiefReactionType.ChasingCat);
 
                 // 探索対象との距離が、探索済みとする距離の閾値以下になっている場合は、探索対象をリセットする
-                if (distanceToTarget <= thiefAI.read_ExploredDistanceThreshold)
+                if (thiefAI.read_IsPlayerHit)
                 {
                     // フラグでプレイヤーを捕まえる挙動を制御
                     if (CS_ThiefDebugFlags.CatchPlayer)
