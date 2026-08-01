@@ -385,6 +385,7 @@ public class CS_PlayerAction : MonoBehaviour
 
     private void OnSelect(InputAction.CallbackContext context)
     {
+        if (option.GetIsOptionUIActive()) return;
         if (!isSelectGimmickActive) return;
         float contextValue = context.ReadValue<float>();
 
