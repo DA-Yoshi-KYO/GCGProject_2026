@@ -59,6 +59,12 @@ public class RockGimmick : GimmickBase
     float slopeAngle;
 
     private float rotateSpeedOffset = 0.5f; //転がる速度(見た目)の調整用
+
+    [SerializeField] GameObject burnTexture;
+    Quaternion burnTextureRotate;
+    float moveAmount = 0.0f;
+    int lastSpawnAmount = -1;
+
     protected override void IdleUpdate()
     {
         //！！デバッグ用応急処置！！//
@@ -109,24 +115,28 @@ public class RockGimmick : GimmickBase
                 moveDir = Vector3.back;
                 rotateAxis = Vector3.right;
                 rotateSign = 1.0f;
+                burnTextureRotate = Quaternion.Euler(0, 180, 0);
                 break;
 
             case GimmickDirection.Down:
                 moveDir = Vector3.forward;
                 rotateAxis = Vector3.right;
                 rotateSign = -1.0f;
+                burnTextureRotate = Quaternion.Euler(0, 0, 0);
                 break;
 
             case GimmickDirection.Left:
                 moveDir = Vector3.right;
                 rotateAxis = Vector3.forward;
                 rotateSign = 1.0f;
+                burnTextureRotate = Quaternion.Euler(0, 90, 0);
                 break;
 
             case GimmickDirection.Right:
                 moveDir = Vector3.left;
                 rotateAxis = Vector3.forward;
                 rotateSign = -1.0f;
+                burnTextureRotate = Quaternion.Euler(0, -90, 0);
                 break;
         }
 
@@ -379,6 +389,23 @@ public class RockGimmick : GimmickBase
         //-----------------------------------------
 
         Hit();
+
+        Vector2 distance = new Vector2(
+            transform.position.x - startPos.x,
+            transform.position.z - startPos.z);
+        moveAmount = distance.magnitude;
+        int moveAmountInt = Mathf.FloorToInt(moveAmount);
+        if (moveAmountInt > lastSpawnAmount)
+        {
+            lastSpawnAmount = moveAmountInt;
+            if (burnTexture != null)
+            {
+                Vector3 spawnPos = transform.position;
+                spawnPos.y = transform.position.y - gimmickSize.y * 0.5f + 0.01f;
+                GameObject burn = Instantiate(burnTexture, spawnPos, burnTextureRotate);
+                burn.transform.SetParent(transform.parent);
+            }
+        }
     }
 
     // =========================
