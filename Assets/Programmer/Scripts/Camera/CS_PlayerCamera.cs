@@ -208,10 +208,19 @@ public class CS_PlayerCamera : MonoBehaviour
         float t = Mathf.Clamp01(transTimer / rotateDuration);
         t = Easing.EaseInOutCubic(t);
         roomCameraObject.transform.position = Vector3.Lerp(prevInfo.position, newInfo.position, t);
-        roomCameraObject.transform.rotation = Quaternion.Slerp(prevInfo.rotation, newInfo.rotation, t);
-    
+
+        Quaternion from = prevInfo.rotation;
+        Quaternion to = newInfo.rotation;
+
+        if (Quaternion.Dot(from, to) < 0f)
+        {
+            to = new Quaternion(-to.x, -to.y, -to.z, -to.w);
+        }
+
+        roomCameraObject.transform.rotation = Quaternion.Slerp(from, to, t);
+
         //回転完了
-        if(transTimer > rotateDuration)
+        if (transTimer > rotateDuration)
         {
             //現在のカメラ情報を保存
             prevInfo = newInfo;
@@ -286,14 +295,23 @@ public class CS_PlayerCamera : MonoBehaviour
 
         //視点がプレイヤーから始まるように補正
         Vector3 moveAmount = roomCenter - transform.position;
-        moveAmount.y = 0.0f;
 
         //カメラの移動に制限をかける
         moveAmount.x = Mathf.Clamp(moveAmount.x, -roomCamera.moveAmountLimit.x, roomCamera.moveAmountLimit.x);
+        moveAmount.y = Mathf.Clamp(moveAmount.y, -roomCamera.moveAmountLimit.y, roomCamera.moveAmountLimit.y);
         moveAmount.z = Mathf.Clamp(moveAmount.z, -roomCamera.moveAmountLimit.z, roomCamera.moveAmountLimit.z);
 
         roomCameraObject.transform.position = Vector3.Lerp(prevInfo.position, newInfo.position - moveAmount, t);
-        roomCameraObject.transform.rotation = Quaternion.Slerp(prevInfo.rotation, newInfo.rotation, t);
+
+        Quaternion from = prevInfo.rotation;
+        Quaternion to = newInfo.rotation;
+
+        if (Quaternion.Dot(from, to) < 0f)
+        {
+            to = new Quaternion(-to.x, -to.y, -to.z, -to.w);
+        }
+
+        roomCameraObject.transform.rotation = Quaternion.Slerp(from, to, t);
 
         //回転完了
         if (transTimer > rotateDuration)
