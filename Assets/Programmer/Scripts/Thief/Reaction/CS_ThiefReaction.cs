@@ -45,6 +45,11 @@ public class CS_ThiefReaction : MonoBehaviour
     [SerializeField]
     private List<GameObject> list_EffectPrefabs = new List<GameObject>();
 
+    [Header("リアクションEffect位置Offset")]
+    [SerializeField]
+    private Vector3 v3_EffectPositionOffset =
+    new Vector3(0.0f, 0.5f, 0.0f);
+
     /// <summary>
     /// EffectPrefabごとに実行時生成するEffectPlayerです。
     /// </summary>
@@ -180,6 +185,14 @@ public class CS_ThiefReaction : MonoBehaviour
             new CSST_EffectPlayData();
 
         csst_EffectPlayData.CSST_EffectPlayData_Init();
+
+        // 泥棒のリアクション位置にOffsetを加えて再生します。
+        Vector3 v3_EffectPosition =
+            transform.position +
+            v3_EffectPositionOffset;
+
+        csst_EffectPlayData.SetPosition(
+            v3_EffectPosition);
 
         cs_TargetEffectPlayer.PlayEffect(
             csst_EffectPlayData);
