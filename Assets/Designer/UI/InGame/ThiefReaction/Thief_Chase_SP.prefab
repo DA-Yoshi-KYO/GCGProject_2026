@@ -30,7 +30,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 5, y: 5, z: 5}
+  m_LocalScale: {x: 4, y: 4, z: 4}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -101,14 +101,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   csst_DefaultEffectPlayData:
     b_UsePlayTime: 1
-    f_InspectorPlayTime: 0.5
+    f_InspectorPlayTime: 1
     b_UseEndTime: 1
     f_InspectorEndTime: 0.5
-    b_UseLoopFlag: 0
-    b_InspectorLoopFlag: 0
+    b_UseLoopFlag: 1
+    b_InspectorLoopFlag: 1
     b_UseHideOnEnd: 1
     b_InspectorHideOnEnd: 1
-    b_UsePlayEndTime: 1
+    b_UsePlayEndTime: 0
     f_InspectorPlayEndTime: 0
   sp_EffectSprites:
   - {fileID: 121293995, guid: b25e7c3bb8adda145a8cea50a8aab57b, type: 3}
