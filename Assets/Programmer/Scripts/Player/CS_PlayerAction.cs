@@ -1,4 +1,4 @@
-﻿/* ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+/* ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
  *    プレイヤーアクション作成
  * ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
  *    元浪梨緒
@@ -190,7 +190,7 @@ public class CS_PlayerAction : MonoBehaviour
         {
             Debug.LogWarning("warpUIGameObjectが設定されていません。");
         }
-        else 
+        else
         {
             if (CS_CustomInputActionManager.instance.currentInputType == CS_CustomInputActionManager.InputType.Gamepad)
             {
@@ -201,6 +201,12 @@ public class CS_PlayerAction : MonoBehaviour
                 warpUIGameObject.GetComponent<SpriteRenderer>().sprite = warpUISprite[1];
             }
             warpUIGameObject.SetActive(false);
+        }
+
+        // 入力デバイス切り替え時にダッシュを一旦無効化する
+        if (CS_CustomInputActionManager.instance != null)
+        {
+            CS_CustomInputActionManager.instance.OnInputTypeChanged += OnInputTypeChanged;
         }
 
         option = GameObject.Find("GameOptionManager").GetComponent<Option>();
@@ -379,6 +385,7 @@ public class CS_PlayerAction : MonoBehaviour
 
     private void OnSelect(InputAction.CallbackContext context)
     {
+        if (option.GetIsOptionUIActive()) return;
         if (!isSelectGimmickActive) return;
         float contextValue = context.ReadValue<float>();
 
@@ -1299,7 +1306,7 @@ public class CS_PlayerAction : MonoBehaviour
         if (warpUIGameObject == null)
             return;
 
-        if(warpUIView)
+        if (warpUIView)
         {
             warpUIGameObject.SetActive(true);
             Vector3 camPos = GetComponent<CS_PlayerCamera>().roomCamera.transform.position;
@@ -1461,5 +1468,26 @@ public class CS_PlayerAction : MonoBehaviour
 
         return closestHeight >= -halfHeight &&
                closestHeight <= halfHeight;
+    }
+
+    // 入力デバイスが切り替わった時のコールバック(ダッシュを一旦無効化する)
+    private void OnInputTypeChanged(CS_CustomInputActionManager.InputType newInputType)
+    {
+        if (warpUIGameObject == null)
+        {
+            Debug.LogWarning("warpUIGameObjectが設定されていません。");
+        }
+        else
+        {
+            if (CS_CustomInputActionManager.instance.currentInputType == CS_CustomInputActionManager.InputType.Gamepad)
+            {
+                warpUIGameObject.GetComponent<SpriteRenderer>().sprite = warpUISprite[0];
+            }
+            else
+            {
+                warpUIGameObject.GetComponent<SpriteRenderer>().sprite = warpUISprite[1];
+            }
+            warpUIGameObject.SetActive(false);
+        }
     }
 }
