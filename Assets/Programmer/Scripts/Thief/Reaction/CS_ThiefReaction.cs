@@ -11,16 +11,13 @@ using UnityEngine;
 
 public class CS_ThiefReaction : MonoBehaviour
 {
-    [SerializeField, Header("リアクションに使用するスプライトリスト"), Tooltip("リアクションに使用するスプライトリスト")]
-    private List<Sprite> reactionSprites = new List<Sprite>();
+    CS_EffectPlayer effectPlayer ;
 
     [Tooltip("リアクションの種類")]
     public enum ThiefReactionType
     {
         [Tooltip("ネコを追跡中")]
         ChasingCat,
-        [Tooltip("ギミックに直接被弾")]
-        HitTrap,
         [Tooltip("ギミックが間近で被弾")]
         NearHitTrap,
         [Tooltip("警戒")]
@@ -44,18 +41,92 @@ public class CS_ThiefReaction : MonoBehaviour
     [Tooltip("リアクションが変化しない時間を計測するタイマー")]
     public float notChangeTimer = 0.0f;
 
+    [Header("リアクションEffectPrefab")]
+    [SerializeField]
+    private List<GameObject> list_EffectPrefabs = new List<GameObject>();
+
+    [Header("リアクションEffect位置Offset")]
+    [SerializeField]
+    private Vector3 v3_EffectPositionOffset =
+    new Vector3(0.0f, 0.5f, 0.0f);
+
+    /// <summary>
+    /// EffectPrefabごとに実行時生成するEffectPlayerです。
+    /// </summary>
+    private List<CS_EffectPlayer> list_EffectPlayers = new List<CS_EffectPlayer>();
+
+    private void Awake()
+    {
+        InitializeEffectPlayers();
+    }
 
     private void Start()
     {
-        // SpriteRendererを取得
         reactionSpriteRenderer = GetComponent<SpriteRenderer>();
+
         if (reactionSpriteRenderer == null)
         {
-            Debug.LogError("SpriteRendererが見つかりませんでした。");
+            Debug.LogError(
+                "SpriteRendererが見つかりませんでした。",
+                this);
         }
 
-        memorySystem = transform.parent.GetComponent<CS_ThiefAI>().read_MemorySystem;
+        CS_ThiefAI cs_ThiefAI =
+            transform.parent.GetComponent<CS_ThiefAI>();
+
+        if (cs_ThiefAI != null)
+        {
+            memorySystem = cs_ThiefAI.read_MemorySystem;
+        }
+
     }
+
+    /// <summary>
+    /// 登録されたEffectPrefabごとに、
+    /// 専用のCS_EffectPlayerを生成します。
+    /// </summary>
+    private void InitializeEffectPlayers()
+    {
+        list_EffectPlayers.Clear();
+
+        if (list_EffectPrefabs == null)
+        {
+            return;
+        }
+
+        for (int i = 0 ; i < list_EffectPrefabs.Count ; i++)
+        {
+            GameObject go_EffectPrefab =
+                list_EffectPrefabs[i];
+
+            if (go_EffectPrefab == null)
+            {
+                list_EffectPlayers.Add(null);
+                continue;
+            }
+
+            GameObject go_EffectPlayerObject =
+                new GameObject(
+                    "EffectPlayer_" +
+                    i.ToString("00") +
+                    "_" +
+                    go_EffectPrefab.name);
+
+            go_EffectPlayerObject.transform.SetParent(
+                transform,
+                false);
+
+            CS_EffectPlayer cs_EffectPlayer =
+                go_EffectPlayerObject.AddComponent<CS_EffectPlayer>();
+
+            cs_EffectPlayer.SetEffectPrefab(
+                go_EffectPrefab);
+
+            list_EffectPlayers.Add(
+                cs_EffectPlayer);
+        }
+    }
+
 
     private void Update()
     {
@@ -83,64 +154,133 @@ public class CS_ThiefReaction : MonoBehaviour
     }
 
     /// <summary>
-    /// リアクションの種類に応じてスプライトを変更するメソッド
+    /// 指定したリアクションEffectを再生します。
     /// </summary>
-    /// <param name="reactionType">変更するリアクションの種類</param>
-    public void ChangeReaction(ThiefReactionType reactionType, float setNotChangeTimer = 0.0f)
+    public void ChangeReaction(
+        ThiefReactionType reactionType,
+        float setNotChangeTimer = 0.0f)
     {
-        if (notChangeTimer > 0.0f) return;
-
-        if (reactionSpriteRenderer == null)
+        if (list_EffectPlayers == null ||
+             list_EffectPlayers.Count != list_EffectPrefabs.Count)
         {
-            Debug.LogError("SpriteRendererが見つかりませんでした。");
+            InitializeEffectPlayers();
+        }
+
+        if (notChangeTimer > 0.0f)
+        {
             return;
         }
-        // リアクションの種類に応じてスプライトを変更
-        if ((int)reactionType < 0 || (int)reactionType >= reactionSprites.Count)
+
+        if (!TryGetEffectPlayer(
+            reactionType,
+            out CS_EffectPlayer cs_TargetEffectPlayer))
         {
-            Debug.LogError("reactionSpritesの要素数がThiefReactionTypeに対して不足しています。");
             return;
         }
-        reactionSpriteRenderer.sprite = reactionSprites[(int)reactionType];
 
-        notChangeTimer = setNotChangeTimer;
+        // 以前のリアクションをすべて停止
+        ClearReaction();
+
+        CSST_EffectPlayData csst_EffectPlayData =
+            new CSST_EffectPlayData();
+
+        csst_EffectPlayData.CSST_EffectPlayData_Init();
+
+        // 泥棒のリアクション位置にOffsetを加えて再生します。
+        Vector3 v3_EffectPosition =
+            transform.position +
+            v3_EffectPositionOffset;
+
+        csst_EffectPlayData.SetPosition(
+            v3_EffectPosition);
+
+        cs_TargetEffectPlayer.PlayEffect(
+            csst_EffectPlayData);
+
+        notChangeTimer =
+            Mathf.Max(0.0f, setNotChangeTimer);
     }
 
     /// <summary>
-    /// リアクションをクリアするメソッド
+    /// リアクションの種類を問わず、すべて停止します。
     /// </summary>
     public void ClearReaction()
     {
-        if (notChangeTimer > 0.0f) return;
-
-        if (reactionSpriteRenderer == null)
+        if (list_EffectPlayers == null)
         {
-            Debug.LogError("SpriteRendererが見つかりませんでした。");
             return;
         }
-        // スプライトをクリア
-        reactionSpriteRenderer.sprite = null;
+
+        for (int i = 0 ; i < list_EffectPlayers.Count ; i++)
+        {
+            CS_EffectPlayer cs_EffectPlayer =
+                list_EffectPlayers[i];
+
+            if (cs_EffectPlayer == null)
+            {
+                continue;
+            }
+
+            cs_EffectPlayer.EndCurrentEffect();
+        }
+
+        notChangeTimer = 0.0f;
     }
 
     /// <summary>
-    /// 指定したリアクションのスプライトが表示されている場合にのみクリアするメソッド
+    /// 指定した種類のリアクションだけを停止します。
     /// </summary>
-    /// <param name="reactionType">クリアするリアクションの種類</param>
-    public void ClearReactionByType(ThiefReactionType reactionType)
+    public void ClearReactionByType(
+        ThiefReactionType reactionType)
     {
-        if (reactionSpriteRenderer == null)
-        {
-            Debug.LogError("SpriteRendererが見つかりませんでした。");
-            return;
-        }
-        // 現在のスプライトが指定されたリアクションのスプライトと一致する場合にクリア
-        if ((int)reactionType < 0 || (int)reactionType >= reactionSprites.Count)
+        if (!TryGetEffectPlayer(
+            reactionType,
+            out CS_EffectPlayer cs_TargetEffectPlayer))
         {
             return;
         }
-        if (reactionSpriteRenderer.sprite == reactionSprites[(int)reactionType])
+
+        cs_TargetEffectPlayer.EndCurrentEffect();
+    }
+
+    /// <summary>
+    /// リアクションの種類に対応するEffectPlayerを取得します。
+    /// </summary>
+    private bool TryGetEffectPlayer(
+        ThiefReactionType reactionType,
+        out CS_EffectPlayer cs_TargetEffectPlayer)
+    {
+        cs_TargetEffectPlayer = null;
+
+        int n_EffectIndex =
+            (int)reactionType;
+
+        if (list_EffectPlayers == null ||
+            n_EffectIndex < 0 ||
+            n_EffectIndex >= list_EffectPlayers.Count)
         {
-            reactionSpriteRenderer.sprite = null;
+            Debug.LogWarning(
+                "[CS_ThiefReaction] 対応するEffectPrefabがありません。" +
+                " Reaction : " + reactionType +
+                " / Index : " + n_EffectIndex,
+                this);
+
+            return false;
         }
+
+        cs_TargetEffectPlayer =
+            list_EffectPlayers[n_EffectIndex];
+
+        if (cs_TargetEffectPlayer == null)
+        {
+            Debug.LogWarning(
+                "[CS_ThiefReaction] EffectPrefabが設定されていません。" +
+                " Reaction : " + reactionType,
+                this);
+
+            return false;
+        }
+
+        return true;
     }
 }
