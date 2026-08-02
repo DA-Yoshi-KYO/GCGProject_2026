@@ -55,6 +55,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using static CS_ThiefReaction;
 
 /// <summary>
 /// 泥棒の行動を管理するクラスです。
@@ -495,7 +496,6 @@ public class CS_ThiefAI : MonoBehaviour
     // 探索状態の行動
     private void Explore()
     {
-        thiefReaction.ClearReaction();
 
         if (thiefGimmickAction == null)
         {

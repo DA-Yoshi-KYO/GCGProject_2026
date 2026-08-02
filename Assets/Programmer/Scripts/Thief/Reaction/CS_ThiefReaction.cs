@@ -51,6 +51,11 @@ public class CS_ThiefReaction : MonoBehaviour
     new Vector3(0.0f, 0.5f, 0.0f);
 
     /// <summary>
+    /// 現在再生しているリアクションです。
+    /// </summary>
+    private ThiefReactionType? currentReactionType = null;
+
+    /// <summary>
     /// EffectPrefabごとに実行時生成するEffectPlayerです。
     /// </summary>
     private List<CS_EffectPlayer> list_EffectPlayers = new List<CS_EffectPlayer>();
@@ -161,12 +166,19 @@ public class CS_ThiefReaction : MonoBehaviour
         float setNotChangeTimer = 0.0f)
     {
         if (list_EffectPlayers == null ||
-             list_EffectPlayers.Count != list_EffectPrefabs.Count)
+            list_EffectPlayers.Count != list_EffectPrefabs.Count)
         {
             InitializeEffectPlayers();
         }
 
         if (notChangeTimer > 0.0f)
+        {
+            return;
+        }
+
+        // 同じリアクションが再生中なら、再生し直しません。
+        if (currentReactionType.HasValue &&
+            currentReactionType.Value == reactionType)
         {
             return;
         }
@@ -178,7 +190,7 @@ public class CS_ThiefReaction : MonoBehaviour
             return;
         }
 
-        // 以前のリアクションをすべて停止
+        // 別のリアクションを停止します。
         ClearReaction();
 
         CSST_EffectPlayData csst_EffectPlayData =
@@ -186,16 +198,21 @@ public class CS_ThiefReaction : MonoBehaviour
 
         csst_EffectPlayData.CSST_EffectPlayData_Init();
 
-        // 泥棒のリアクション位置にOffsetを加えて再生します。
-        Vector3 v3_EffectPosition =
-            transform.position +
-            v3_EffectPositionOffset;
-
+        // 以前追加した位置Offsetを使用します。
         csst_EffectPlayData.SetPosition(
-            v3_EffectPosition);
+            transform.position +
+            v3_EffectPositionOffset);
 
-        cs_TargetEffectPlayer.PlayEffect(
-            csst_EffectPlayData);
+        CSAD_EffectCommonProcessBase csad_PlayedEffect =
+            cs_TargetEffectPlayer.PlayEffect(
+                csst_EffectPlayData);
+
+        if (csad_PlayedEffect == null)
+        {
+            return;
+        }
+
+        currentReactionType = reactionType;
 
         notChangeTimer =
             Mathf.Max(0.0f, setNotChangeTimer);
@@ -224,6 +241,7 @@ public class CS_ThiefReaction : MonoBehaviour
             cs_EffectPlayer.EndCurrentEffect();
         }
 
+        currentReactionType = null;
         notChangeTimer = 0.0f;
     }
 
@@ -233,6 +251,13 @@ public class CS_ThiefReaction : MonoBehaviour
     public void ClearReactionByType(
         ThiefReactionType reactionType)
     {
+        // 指定された種類が現在再生中でなければ終了しません。
+        if (!currentReactionType.HasValue ||
+            currentReactionType.Value != reactionType)
+        {
+            return;
+        }
+
         if (!TryGetEffectPlayer(
             reactionType,
             out CS_EffectPlayer cs_TargetEffectPlayer))
@@ -241,6 +266,9 @@ public class CS_ThiefReaction : MonoBehaviour
         }
 
         cs_TargetEffectPlayer.EndCurrentEffect();
+
+        currentReactionType = null;
+        notChangeTimer = 0.0f;
     }
 
     /// <summary>
