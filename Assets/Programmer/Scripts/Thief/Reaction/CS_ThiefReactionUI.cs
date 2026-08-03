@@ -73,6 +73,11 @@ public class CS_ThiefReactionUI : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 現在実際に再生しているEffectです。
+    /// </summary>
+    private CSAD_EffectCommonProcessBase csad_CurrentReactionEffect;
+
     [Tooltip("作成したリアクションオブジェクトを格納するリスト")]// リアクションオブジェクトと表示タイマーを格納する辞書
     private List<ReactionObject> reactionObjects = new List<ReactionObject>();
 

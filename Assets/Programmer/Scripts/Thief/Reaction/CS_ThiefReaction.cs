@@ -56,6 +56,11 @@ public class CS_ThiefReaction : MonoBehaviour
     private ThiefReactionType? currentReactionType = null;
 
     /// <summary>
+    /// 現在実際に再生しているEffectです。
+    /// </summary>
+    private CSAD_EffectCommonProcessBase csad_CurrentReactionEffect;
+
+    /// <summary>
     /// EffectPrefabごとに実行時生成するEffectPlayerです。
     /// </summary>
     private List<CS_EffectPlayer> list_EffectPlayers = new List<CS_EffectPlayer>();
@@ -135,22 +140,17 @@ public class CS_ThiefReaction : MonoBehaviour
 
     private void Update()
     {
-        CS_RoomNode currentRoom = memorySystem.read_CurrentRoom;
-
-        if (currentRoom != prevRoom)
-            roomCamera = currentRoom.GetComponentInChildren<Camera>();
-
-        if (roomCamera != null && roomCamera.enabled)
+        // Effectが自然終了した場合、再生中情報を解除します。
+        if (currentReactionType.HasValue &&
+            !IsCurrentReactionEffectAlive())
         {
-            transform.LookAt(roomCamera.transform.position);
-            transform.Rotate(0, 180, 0);
+            ClearCurrentReactionReferences();
         }
-        prevRoom = currentRoom;
 
-        // タイマーの更新
         if (notChangeTimer > 0.0f)
         {
             notChangeTimer -= Time.deltaTime;
+
             if (notChangeTimer < 0.0f)
             {
                 notChangeTimer = 0.0f;
@@ -171,14 +171,21 @@ public class CS_ThiefReaction : MonoBehaviour
             InitializeEffectPlayers();
         }
 
-        if (notChangeTimer > 0.0f)
+        // 同じEffectが本当に再生中の場合だけ無視します。
+        if (currentReactionType.HasValue &&
+            currentReactionType.Value == reactionType &&
+            IsCurrentReactionEffectAlive())
         {
             return;
         }
 
-        // 同じリアクションが再生中なら、再生し直しません。
-        if (currentReactionType.HasValue &&
-            currentReactionType.Value == reactionType)
+        // 自然終了・Pool返却済みなら保存情報を解除します。
+        if (!IsCurrentReactionEffectAlive())
+        {
+            ClearCurrentReactionReferences();
+        }
+
+        if (notChangeTimer > 0.0f)
         {
             return;
         }
@@ -190,7 +197,6 @@ public class CS_ThiefReaction : MonoBehaviour
             return;
         }
 
-        // 別のリアクションを停止します。
         ClearReaction();
 
         CSST_EffectPlayData csst_EffectPlayData =
@@ -198,21 +204,29 @@ public class CS_ThiefReaction : MonoBehaviour
 
         csst_EffectPlayData.CSST_EffectPlayData_Init();
 
-        // 以前追加した位置Offsetを使用します。
         csst_EffectPlayData.SetPosition(
             transform.position +
             v3_EffectPositionOffset);
 
-        CSAD_EffectCommonProcessBase csad_PlayedEffect =
+        csad_CurrentReactionEffect =
             cs_TargetEffectPlayer.PlayEffect(
                 csst_EffectPlayData);
 
-        if (csad_PlayedEffect == null)
+        if (csad_CurrentReactionEffect == null)
         {
+            Debug.LogWarning(
+                "[CS_ThiefReaction] Effectを再生できませんでした。" +
+                " Reaction : " + reactionType,
+                this);
+
+            ClearCurrentReactionReferences();
             return;
         }
 
         currentReactionType = reactionType;
+
+        ApplyBillboardTarget(
+            csad_CurrentReactionEffect);
 
         notChangeTimer =
             Mathf.Max(0.0f, setNotChangeTimer);
@@ -241,7 +255,7 @@ public class CS_ThiefReaction : MonoBehaviour
             cs_EffectPlayer.EndCurrentEffect();
         }
 
-        currentReactionType = null;
+        ClearCurrentReactionReferences();
         notChangeTimer = 0.0f;
     }
 
@@ -251,23 +265,25 @@ public class CS_ThiefReaction : MonoBehaviour
     public void ClearReactionByType(
         ThiefReactionType reactionType)
     {
-        // 指定された種類が現在再生中でなければ終了しません。
         if (!currentReactionType.HasValue ||
             currentReactionType.Value != reactionType)
         {
             return;
         }
 
-        if (!TryGetEffectPlayer(
+        if (csad_CurrentReactionEffect != null)
+        {
+            csad_CurrentReactionEffect.EndEffect();
+        }
+
+        if (TryGetEffectPlayer(
             reactionType,
             out CS_EffectPlayer cs_TargetEffectPlayer))
         {
-            return;
+            cs_TargetEffectPlayer.EndCurrentEffect();
         }
 
-        cs_TargetEffectPlayer.EndCurrentEffect();
-
-        currentReactionType = null;
+        ClearCurrentReactionReferences();
         notChangeTimer = 0.0f;
     }
 
@@ -310,5 +326,120 @@ public class CS_ThiefReaction : MonoBehaviour
         }
 
         return true;
+    }
+
+    private void LateUpdate()
+    {
+        UpdateReactionBillboard();
+    }
+
+    /// <summary>
+    /// 現在のEffectが実際に再生中か確認します。
+    /// </summary>
+    private bool IsCurrentReactionEffectAlive()
+    {
+        if (csad_CurrentReactionEffect == null)
+        {
+            return false;
+        }
+
+        if (!csad_CurrentReactionEffect.gameObject.activeInHierarchy)
+        {
+            return false;
+        }
+
+        return !csad_CurrentReactionEffect.IsEndFinished();
+    }
+
+    /// <summary>
+    /// 現在のカメラに向けてBillboardを更新します。
+    /// </summary>
+    private void UpdateReactionBillboard()
+    {
+        Camera cam_ActiveCamera =
+            CS_BillboardCameraCache.GetActiveMainCamera();
+
+        if (cam_ActiveCamera != null)
+        {
+            roomCamera = cam_ActiveCamera;
+        }
+        else if (memorySystem != null)
+        {
+            CS_RoomNode currentRoom =
+                memorySystem.read_CurrentRoom;
+
+            if (currentRoom != null &&
+                (currentRoom != prevRoom || roomCamera == null))
+            {
+                roomCamera =
+                    currentRoom.GetComponentInChildren<Camera>(true);
+
+                prevRoom = currentRoom;
+            }
+        }
+
+        if (roomCamera == null ||
+            !roomCamera.isActiveAndEnabled)
+        {
+            return;
+        }
+
+        // SpriteSheet本体にも現在のCameraを渡します。
+        ApplyBillboardTarget(
+            csad_CurrentReactionEffect);
+
+        Vector3 v3_Direction =
+            transform.position -
+            roomCamera.transform.position;
+
+        if (v3_Direction.sqrMagnitude <= 0.0001f)
+        {
+            return;
+        }
+
+        transform.rotation =
+            Quaternion.LookRotation(
+                v3_Direction.normalized);
+    }
+
+    /// <summary>
+    /// SpriteSheetへBillboard対象Cameraを設定します。
+    /// </summary>
+    private void ApplyBillboardTarget(
+        CSAD_EffectCommonProcessBase csad_Effect)
+    {
+        if (csad_Effect == null)
+        {
+            return;
+        }
+
+        CS_EffectSpriteSheet cs_SpriteSheetEffect =
+            csad_Effect as CS_EffectSpriteSheet;
+
+        if (cs_SpriteSheetEffect == null)
+        {
+            return;
+        }
+
+        Transform tr_CameraTransform = null;
+
+        if (roomCamera != null &&
+            roomCamera.isActiveAndEnabled)
+        {
+            tr_CameraTransform =
+                roomCamera.transform;
+        }
+
+        cs_SpriteSheetEffect.SetBillboardTarget(
+            tr_CameraTransform);
+    }
+
+    /// <summary>
+    /// 保存している再生中情報を解除します。
+    /// </summary>
+    private void ClearCurrentReactionReferences()
+    {
+        currentReactionType = null;
+        csad_CurrentReactionEffect = null;
     }
 }

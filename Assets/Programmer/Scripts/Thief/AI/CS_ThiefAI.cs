@@ -615,6 +615,10 @@ public class CS_ThiefAI : MonoBehaviour
             // 経過時間が気絶時間を超えた場合は、状態を戻す
             if (elapsedTimeAfterStun >= damageStunTime)
             {
+                // 気絶終了時にFearだけ停止します。
+                thiefReaction.ClearReactionByType(
+                    CS_ThiefReaction.ThiefReactionType.NearHitTrap);
+
                 if (holdTreasure == null)
                     ChangeStatus(ThiefState.Explore); // 状態を探索に戻す
                 else
@@ -793,11 +797,11 @@ public class CS_ThiefAI : MonoBehaviour
             transform.rotation = targetRotation;
         }
 
-        // ダメージを受けたときのSEを再生する
-        if (!isHit)
+        // HPが残っている場合だけFearを再生します。
+        if (durability > 0)
         {
-            // 間接的にダメージを受けたときのリアクションに変更
-            thiefReaction.ChangeReaction(CS_ThiefReaction.ThiefReactionType.NearHitTrap);
+            thiefReaction.ChangeReaction(
+                CS_ThiefReaction.ThiefReactionType.NearHitTrap);
         }
 
         // プレイヤーの追跡情報をリセットする

@@ -40,6 +40,8 @@ public static class CS_BillboardCameraCache
     /// </summary>
     private static Transform tr_ActiveMainCameraRoot;
 
+    private static int n_LastRefreshFrame = -1;
+
     /// <summary>
     /// Play開始時にStaticデータを初期化します。
     /// </summary>
@@ -51,6 +53,7 @@ public static class CS_BillboardCameraCache
 
         cam_ActiveMainCamera = null;
         tr_ActiveMainCameraRoot = null;
+        n_LastRefreshFrame = -1;
     }
 
     /// <summary>
@@ -113,6 +116,7 @@ public static class CS_BillboardCameraCache
     /// </summary>
     public static void RefreshActiveMainCamera()
     {
+        n_LastRefreshFrame = Time.frameCount;
         cam_ActiveMainCamera = null;
         tr_ActiveMainCameraRoot = null;
 
@@ -149,7 +153,8 @@ public static class CS_BillboardCameraCache
 
             // GameObjectのActive状態は確認しません。
             // Cameraコンポーネントのenabledだけを確認します。
-            if (!cam_TargetCamera.enabled)
+            // 非アクティブな部屋のCameraを除外します。
+            if (!cam_TargetCamera.isActiveAndEnabled)
             {
                 continue;
             }
@@ -169,10 +174,28 @@ public static class CS_BillboardCameraCache
     }
 
     /// <summary>
-    /// 現在有効なMainCameraのTransformを取得します。
+    /// 1フレームに1回、有効なMainCameraを更新します。
     /// </summary>
+    private static void RefreshActiveMainCameraIfNeeded()
+    {
+        if (n_LastRefreshFrame == Time.frameCount)
+        {
+            return;
+        }
+
+        if (list_MainCameraCache.Count <= 0)
+        {
+            CacheMainCameras();
+            return;
+        }
+
+        RefreshActiveMainCamera();
+    }
+
     public static Transform GetActiveMainCameraTransform()
     {
+        RefreshActiveMainCameraIfNeeded();
+
         if (cam_ActiveMainCamera == null)
         {
             return null;
@@ -181,19 +204,15 @@ public static class CS_BillboardCameraCache
         return cam_ActiveMainCamera.transform;
     }
 
-    /// <summary>
-    /// 現在有効なMainCameraのRootを取得します。
-    /// </summary>
     public static Transform GetActiveMainCameraRoot()
     {
+        RefreshActiveMainCameraIfNeeded();
         return tr_ActiveMainCameraRoot;
     }
 
-    /// <summary>
-    /// 現在有効なMainCameraを取得します。
-    /// </summary>
     public static Camera GetActiveMainCamera()
     {
+        RefreshActiveMainCameraIfNeeded();
         return cam_ActiveMainCamera;
     }
 }

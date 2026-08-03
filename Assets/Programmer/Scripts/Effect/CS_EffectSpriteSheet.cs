@@ -276,12 +276,19 @@ public abstract class CS_EffectSpriteSheet : CSAD_EffectCommonProcessBase
     }
 
     /// <summary>
-    /// SpriteSheetが最後まで再生された時の処理です。
-    /// 必要な場合だけ継承先で上書きします。
+    /// SpriteSheetを最後まで再生したときの処理です。
+    /// 自動終了時間が設定されていない場合は、その場で終了します。
     /// </summary>
     protected virtual void OnSpriteSheetPlayComplete()
     {
+        // 自動終了が設定されている場合は、
+        // CSAD_EffectCommonProcessBase側のTimerに任せます。
+        if (csst_EffectPlayData.f_PlayEndTime.HasValue)
+        {
+            return;
+        }
 
+        EndEffect();
     }
 
     /// <summary>
