@@ -875,14 +875,30 @@ public class CS_MemorySystem
     /// </summary>
     public void ClearTarget()
     {
+        // 対象をnullにする前に、対応するリアクションを停止します。
+        if (currentTarget is CS_PlayerTarget)
+        {
+            thiefAI?.read_ThiefReaction?.ClearReactionByType(
+                CS_ThiefReaction.ThiefReactionType.ChasingCat);
+        }
+        else if (currentTarget is CS_VisionTarget ||
+                 currentTarget is CS_TrapTarget)
+        {
+            thiefAI?.read_ThiefReaction?.ClearReactionByType(
+                CS_ThiefReaction.ThiefReactionType.Searching);
+        }
+
         if (currentTarget is CS_VisionTarget)
         {
-            ((CS_VisionTarget)currentTarget).searchThief = null; // 探索対象の探索している人をリセットする)
+            ((CS_VisionTarget)currentTarget).searchThief = null;
         }
-        previousExplorationLevel = 0.0f; // 探索度をリセットする
+
+        previousExplorationLevel = 0.0f;
         currentTarget = null;
-        // 探索対象をリセット
-        thiefAI?.read_AnimatorSystem?.read_Animator.SetBool("IsHunting", false);
+
+        thiefAI?.read_AnimatorSystem?.read_Animator.SetBool(
+            "IsHunting",
+            false);
     }
 
     /// <summary>
