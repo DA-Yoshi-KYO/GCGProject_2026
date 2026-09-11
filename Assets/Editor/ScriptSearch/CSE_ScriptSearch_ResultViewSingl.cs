@@ -1,11 +1,11 @@
 /*
 +=====================================
- ƒtƒ@ƒCƒ‹–¼ : CSE_ScriptSearch_ResultViewSingle.cs
- ŠT—v     : ScriptSearchƒc[ƒ‹‚ÌuŒŸõŒ‹‰Ê•\¦i‘I‘ğ’†‚Ì‚İ•`‰æjv’S“–
-           - •\¦‚ÍHierarchy/Assets‚Ì‚Ç‚¿‚ç‚©•Ğ•û‚¾‚¯
-           - ‚½‚¾‚µ—¼•û‚Ìƒf[ƒ^‚Í•Û‚·‚éiÁ‚³‚È‚¢j
- ìÒ     : ƒˆƒVƒ‚ƒg ƒŠƒ‡ƒE
- —š—ğ     : 2026/02/15 V‹Kì¬
+ ãƒ•ã‚¡ã‚¤ãƒ«å : CSE_ScriptSearch_ResultViewSingle.cs
+ æ¦‚è¦     : ScriptSearchãƒ„ãƒ¼ãƒ«ã®ã€Œæ¤œç´¢çµæœè¡¨ç¤ºï¼ˆé¸æŠä¸­ã®ã¿æç”»ï¼‰ã€æ‹…å½“
+           - è¡¨ç¤ºã¯Hierarchy/Assetsã®ã©ã¡ã‚‰ã‹ç‰‡æ–¹ã ã‘
+           - ãŸã ã—ä¸¡æ–¹ã®ãƒ‡ãƒ¼ã‚¿ã¯ä¿æŒã™ã‚‹ï¼ˆæ¶ˆã•ãªã„ï¼‰
+ ä½œè€…     : ãƒ¨ã‚·ãƒ¢ãƒˆ ãƒªãƒ§ã‚¦
+ å±¥æ­´     : 2026/02/15 æ–°è¦ä½œæˆ
 =====================================+
 */
 
@@ -16,24 +16,24 @@ using UnityEngine;
 public partial class CSE_ScriptSearch
 {
     /// <summary>
-    /// ŒŸõŒ‹‰Ê•\¦i‘I‘ğ’†‚Ì‚İ•`‰æj
+    /// æ¤œç´¢çµæœè¡¨ç¤ºï¼ˆé¸æŠä¸­ã®ã¿æç”»ï¼‰
     /// </summary>
     private void DrawResultView_SelectedOnly()
     {
-        // ƒf[ƒ^‚Í•Û‚µ‚Ä‚¢‚é‚±‚Æ‚ª•ª‚©‚é‚æ‚¤‚ÉŒ”‚¾‚¯‚Í—¼•ûo‚·i•`‰æ‚Í•Ğ•ûj
+        // ãƒ‡ãƒ¼ã‚¿ã¯ä¿æŒã—ã¦ã„ã‚‹ã“ã¨ãŒåˆ†ã‹ã‚‹ã‚ˆã†ã«ä»¶æ•°ã ã‘ã¯ä¸¡æ–¹å‡ºã™ï¼ˆæç”»ã¯ç‰‡æ–¹ï¼‰
         int hierarchyCount = (_hierarchyHitPaths != null) ? _hierarchyHitPaths.Count : 0;
         int assetsCount = (_assetsHitPrefabPaths != null) ? _assetsHitPrefabPaths.Count : 0;
 
         using (new GUILayout.HorizontalScope())
         {
-            EditorGUILayout.LabelField($"Hierarchy: {hierarchyCount} Œ", EditorStyles.miniLabel);
+            EditorGUILayout.LabelField($"Hierarchy: {hierarchyCount} ä»¶", EditorStyles.miniLabel);
             GUILayout.FlexibleSpace();
-            EditorGUILayout.LabelField($"Assets: {assetsCount} Œ", EditorStyles.miniLabel);
+            EditorGUILayout.LabelField($"Assets: {assetsCount} ä»¶", EditorStyles.miniLabel);
         }
 
         GUILayout.Space(6.0f);
 
-        // •`‰æ‚Í‘I‘ğ’†‚¾‚¯
+        // æç”»ã¯é¸æŠä¸­ã ã‘
         if (GetResultTarget() == ResultTarget.Hierarchy)
         {
             DrawHierarchyResultsView();
